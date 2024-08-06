@@ -1,4 +1,4 @@
-// perfect working but the edit functionality will not wrork
+// perfect working but the edit functionality will not wrork is
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
