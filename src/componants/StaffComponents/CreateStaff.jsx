@@ -1,4 +1,4 @@
-// The
+// The create staff component
 import React, { useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
