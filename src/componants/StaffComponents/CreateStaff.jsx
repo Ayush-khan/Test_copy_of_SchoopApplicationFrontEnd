@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import ImageUploadAndCrop from "../common/ImageUploadAndCrop.jsx";
@@ -780,6 +780,7 @@ function CreateStaff() {
           </div>
         </form>
       </div>
+      <Outlet />
     </div>
   );
 }

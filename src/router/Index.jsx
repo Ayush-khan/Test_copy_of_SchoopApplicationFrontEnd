@@ -120,6 +120,7 @@ import ShowRolesWithMenu from "../componants/RoleMangement/ShowRolesWithMenu.jsx
 import Roles from "../componants/RoleMangement/Roles.jsx";
 import ManageRoleAccess from "../componants/RoleMangement/ManageRoleAccess.jsx";
 import Menus from "../componants/RoleMangement/Menus.jsx";
+import DivisionList from "../componants/Division/DivisionLIst.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -188,6 +189,13 @@ function Index() {
           path="/classlist"
           element={<PrivateRoute element={ClassList} />}
         />
+
+        {/* Division module */}
+        <Route
+          path="/divisionlist"
+          element={<PrivateRoute element={DivisionList} />}
+        />
+
         <Route path="/sections" element={<PrivateRoute element={Sections} />} />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />
