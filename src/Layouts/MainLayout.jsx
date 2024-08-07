@@ -17,7 +17,7 @@ function MainLayout() {
       >
         <Outlet className=" " />
       </div>{" "}
-      <div className=" bg-black ">
+      <div className="">
         <Footer />
       </div>
     </div>

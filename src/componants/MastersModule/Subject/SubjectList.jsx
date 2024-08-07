@@ -7,7 +7,7 @@ import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function DivisionList() {
+function SubjectList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -618,4 +618,4 @@ function DivisionList() {
   );
 }
 
-export default DivisionList;
+export default SubjectList;

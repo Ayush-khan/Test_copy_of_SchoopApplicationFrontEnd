@@ -16,7 +16,6 @@ const ImageCropper = ({ onImageCropped, photoPreview }) => {
   console.log("the vlaue of the image inside imagecrop ", croppedImage);
   const cropperRef = useRef(null);
   const fileInputRef = useRef(null);
-
   useEffect(() => {
     // Update croppedImage when photoPreview changes
     setCroppedImage(photoPreview || null);

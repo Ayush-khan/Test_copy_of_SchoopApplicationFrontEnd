@@ -1046,7 +1046,7 @@ const AdminNavBar = () => {
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
-          to="#"
+          to="/subjectlist"
           className="text-[.9em] font-bold hover:text-black"
         >
           Subjects

@@ -407,7 +407,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
-import NavBar from "../../Layouts/NavBar";
+import NavBar from "../../../Layouts/NavBar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";

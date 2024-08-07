@@ -103,8 +103,8 @@ import NoticeBord from "../componants/Dashbord/NoticeBord";
 
 import StudentsChart from "../componants/Dashbord/Charts/StudentsChart";
 import PrivateRoute from "../utils/PrivateRoute";
-import ClassList from "../componants/TableComponentsNikhilbhai/ClassList";
-import Sections from "../componants/TableComponentsNikhilbhai/Sections";
+import ClassList from "../componants/MastersModule/ClassList/ClassList.jsx";
+import Sections from "../componants/MastersModule/Section/Sections.jsx";
 import NotificationPage from "../componants/NotificationPage";
 import StaffBirthdayTabList from "../componants/AllTableList/StaffBirthdayTabList";
 import TickitingCountList from "../componants/AllTableList/TickitingCountList";
@@ -120,7 +120,8 @@ import ShowRolesWithMenu from "../componants/RoleMangement/ShowRolesWithMenu.jsx
 import Roles from "../componants/RoleMangement/Roles.jsx";
 import ManageRoleAccess from "../componants/RoleMangement/ManageRoleAccess.jsx";
 import Menus from "../componants/RoleMangement/Menus.jsx";
-import DivisionList from "../componants/Division/DivisionLIst.jsx";
+import DivisionList from "../componants/MastersModule/TableComponentsNikhilbhai/Division/DivisionLIst.jsx";
+import SubjectList from "../componants/MastersModule/Subject/SubjectList.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -194,6 +195,11 @@ function Index() {
         <Route
           path="/divisionlist"
           element={<PrivateRoute element={DivisionList} />}
+        />
+        {/* Division module */}
+        <Route
+          path="/subjectlist"
+          element={<PrivateRoute element={SubjectList} />}
         />
 
         <Route path="/sections" element={<PrivateRoute element={Sections} />} />
