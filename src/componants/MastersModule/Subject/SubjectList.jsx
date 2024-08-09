@@ -55,7 +55,7 @@ function SubjectList() {
       const response = await axios.get(`${API_URL}/api/getDivision`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "X-Academic-Year": academicYr,
+          // "X-Academic-Year": academicYr,
         },
         withCredentials: true,
       });
@@ -301,7 +301,7 @@ function SubjectList() {
         <div className="card mx-auto lg:w-3/4 shadow-lg">
           <div className="card-header flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Division
+              Subject
             </h3>{" "}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -333,10 +333,10 @@ function SubjectList() {
                         S.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Divisions
+                        Subject
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Class
+                        Type
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Edit

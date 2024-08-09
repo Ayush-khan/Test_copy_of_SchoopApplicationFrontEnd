@@ -143,8 +143,10 @@ function DivisionList() {
   const handleEdit = (section) => {
     setCurrentSection(section);
     setNewSectionName(section.name);
-    setClassName(section.get_class.name);
-    setNewDepartmentId(section.section_id);
+    setClassName(section.get_class.class_id); // Assuming section.get_class.class_id contains the ID
+    // setClassName(section.get_class.name);
+    setNewDepartmentId(section.get_class.class_id); // Set department ID correctly
+    // setNewDepartmentId(section.section_id);
     setShowEditModal(true);
   };
 
@@ -220,9 +222,8 @@ function DivisionList() {
     try {
       const token = localStorage.getItem("authToken");
       const academicYr = localStorage.getItem("academicYear");
-
-      if (!token) {
-        throw new Error("No authentication token or academic year found");
+      if (!token || !currentSection || !currentSection.section_id) {
+        throw new Error("No authentication token or section ID found");
       }
       console.log("This is edit Form");
       console.log("This is post data Name:", currentSection.section_id);
@@ -231,7 +232,7 @@ function DivisionList() {
       console.log("This is Edit data class_id:", newDepartmentId);
       await axios.put(
         `${API_URL}/api/getDivision/${currentSection.section_id}`,
-        { name: newSectionName, class_id: currentSection.class_id },
+        { name: newSectionName, class_id: newDepartmentId },
         {
           headers: {
             Authorization: `Bearer ${token}`,
