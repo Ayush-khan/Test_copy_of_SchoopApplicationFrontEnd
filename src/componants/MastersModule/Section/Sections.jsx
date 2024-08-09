@@ -803,6 +803,7 @@ function Sections() {
                     </label>
                     <input
                       type="text"
+                      maxLength={30}
                       className="form-control"
                       id="sectionName"
                       value={newSectionName}
@@ -821,7 +822,7 @@ function Sections() {
                     style={{}}
                     onClick={handleSubmitAdd}
                   >
-                    Add
+                    Save
                   </button>
                 </div>
               </div>
@@ -853,6 +854,7 @@ function Sections() {
                   </label>
                   <input
                     type="text"
+                    maxLength={30}
                     className="form-control"
                     id="editSectionName"
                     value={newSectionName}

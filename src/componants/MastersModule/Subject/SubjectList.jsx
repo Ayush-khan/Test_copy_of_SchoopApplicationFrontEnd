@@ -24,21 +24,12 @@ function SubjectList() {
   const [newDepartmentId, setNewDepartmentId] = useState("");
   const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
   const [classes, setClasses] = useState([
-    "Nursery",
-    "LKG",
-    "UKG",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
+    "Scholastic",
+    "Co-Scholastic",
+    "Social",
+    "Compulsory",
+    "optional",
+    "Co-Scholastic_hsc",
   ]);
 
   const pageSize = 10;
@@ -52,13 +43,17 @@ function SubjectList() {
         throw new Error("No authentication token found");
       }
 
-      const response = await axios.get(`${API_URL}/api/getDivision`, {
+      const response = await axios.get(`${API_URL}/api/subject`, {
         headers: {
           Authorization: `Bearer ${token}`,
           // "X-Academic-Year": academicYr,
         },
         withCredentials: true,
       });
+      console.log(
+        "the data of subject api inside the subjectlis component",
+        response.data
+      );
 
       setSections(response.data);
     } catch (error) {
@@ -89,12 +84,12 @@ function SubjectList() {
   const validateSectionName = (name, departmentId) => {
     const errors = {};
     if (!name || name.trim() === "") {
-      errors.name = "The name field is required.";
+      errors.name = "The name field can not be empty.";
     } else if (name.length > 255) {
-      errors.name = "The name field must not exceed 255 characters.";
+      errors.name = "The name field must not exceed 50 characters.";
     }
     if (!departmentId) {
-      errors.department_id = "The class is required.";
+      errors.department_id = "Please select Subject type feild.";
     }
     return errors;
   };
@@ -105,9 +100,11 @@ function SubjectList() {
 
   const handleEdit = (section) => {
     setCurrentSection(section);
+    console.log("this is edit ", section.name);
+    console.log("sectionsID for subject", section.sm_id);
     setNewSectionName(section.name);
-    setClassName(section.get_class.name);
-    setNewDepartmentId(section.section_id);
+    setClassName(section.name);
+    setNewDepartmentId(section.sm_id);
     setShowEditModal(true);
   };
 
@@ -145,8 +142,8 @@ function SubjectList() {
       console.log("This is post data Name:", newSectionName);
       console.log("This is post data class_id:", newDepartmentId);
       await axios.post(
-        `${API_URL}/api/store_division`,
-        { name: newSectionName, class_id: newDepartmentId },
+        `${API_URL}/api/subject`,
+        { name: newSectionName, subject_type: newDepartmentId },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -183,23 +180,23 @@ function SubjectList() {
 
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
+      // const academicYr = localStorage.getItem("academicYear");
 
       if (!token) {
         throw new Error("No authentication token or academic year found");
       }
-      console.log("This is edit Form");
-      console.log("This is post data Name:", currentSection.section_id);
+      console.log("This is edit Form******");
+      console.log("This is Edit data ID:", currentSection.sm_id);
 
-      console.log("This is post data Name:", newSectionName);
-      console.log("This is post data class_id:", newDepartmentId);
+      console.log("This is Edit data Name:", newSectionName);
+      console.log("This is Edit data class_id:", newDepartmentId);
       await axios.put(
-        `${API_URL}/api/getDivision/${currentSection.section_id}`,
-        { name: newSectionName, class_id: currentSection.class_id },
+        `${API_URL}/api/subject/${currentSection.sm_id}`,
+        { name: newSectionName, subject_type: currentSection.sm_id },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
+            // "X-Academic-Year": academicYr,
           },
           withCredentials: true,
         }
@@ -221,7 +218,8 @@ function SubjectList() {
   };
 
   const handleDelete = (id) => {
-    const sectionToDelete = sections.find((sec) => sec.section_id === id);
+    console.log("the deleted subject id", id);
+    const sectionToDelete = sections.find((sec) => sec.sm_id === id);
     setCurrentSection(sectionToDelete);
     setShowDeleteModal(true);
   };
@@ -231,12 +229,12 @@ function SubjectList() {
       const token = localStorage.getItem("authToken");
       const academicYr = localStorage.getItem("academicYear");
 
-      if (!token || !currentSection || !currentSection.section_id) {
+      if (!token || !currentSection || !currentSection.sm_id) {
         throw new Error("Section ID is missing");
       }
 
       const response = await axios.delete(
-        `${API_URL}/api/getDivision/${currentSection.section_id}`,
+        `${API_URL}/api/subject/${currentSection.sm_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -362,12 +360,12 @@ function SubjectList() {
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section.name}
+                              {section?.name}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.get_class?.name}
+                              {section?.subject_type}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
@@ -381,7 +379,7 @@ function SubjectList() {
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <button
                               className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                              onClick={() => handleDelete(section.section_id)}
+                              onClick={() => handleDelete(section.sm_id)}
                             >
                               <FontAwesomeIcon icon={faTrash} />
                             </button>
@@ -436,7 +434,7 @@ function SubjectList() {
               <div className="modal-dialog modal-dialog-centered ">
                 <div className="modal-content">
                   <div className="modal-header">
-                    <h5 className="modal-title">Create New Section</h5>
+                    <h5 className="modal-title">Create New Subject</h5>
                     <button
                       type="button"
                       className="btn-close"
@@ -446,11 +444,11 @@ function SubjectList() {
                   <div className="modal-body">
                     <div className="mb-3">
                       <label htmlFor="sectionName" className="form-label">
-                        Section Name <span className="text-red-500">*</span>
+                        Subject Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        maxLength={1}
+                        maxLength={50}
                         className="form-control"
                         id="sectionName"
                         value={newSectionName}
@@ -464,7 +462,9 @@ function SubjectList() {
                       )}
                     </div>
                     <div className="form-group">
-                      <label htmlFor="departmentId">Class</label>
+                      <label htmlFor="departmentId">
+                        Subject Type <span className="text-red-500">*</span>
+                      </label>
                       <select
                         id="departmentId"
                         className="form-control"
@@ -511,7 +511,7 @@ function SubjectList() {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">Edit Section</h5>
+                  <h5 className="modal-title">Edit Subject</h5>
                   <button
                     type="button"
                     className="btn-close"
@@ -521,11 +521,11 @@ function SubjectList() {
                 <div className="modal-body">
                   <div className="mb-3">
                     <label htmlFor="editSectionName" className="form-label">
-                      Division Name <span className="text-red-500">*</span>
+                      Subject Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      maxLength={1}
+                      maxLength={50}
                       className="form-control"
                       id="editSectionName"
                       placeholder="e.g A, B, C, D"
@@ -538,7 +538,7 @@ function SubjectList() {
                   </div>
                   <div className="form-group">
                     <label htmlFor="editDepartmentId">
-                      Class <span className="text-red-500">*</span>
+                      Subject Type <span className="text-red-500">*</span>
                     </label>
                     <select
                       id="editDepartmentId"
@@ -594,7 +594,7 @@ function SubjectList() {
                 </div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to delete Division:{" "}
+                    Are you sure you want to delete Subject:{" "}
                     <strong>{currentSection.name}</strong>?
                   </p>
                 </div>

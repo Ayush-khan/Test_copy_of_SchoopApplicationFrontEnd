@@ -360,6 +360,8 @@ function UserProfile() {
                 Address <span className="text-red-500">*</span>
               </label>
               <textarea
+                type="text"
+                maxLength={240}
                 id="address"
                 name="address"
                 value={formData.address}
@@ -377,6 +379,7 @@ function UserProfile() {
               </label>
               <input
                 type="text"
+                maxLength={60}
                 id="name"
                 name="name"
                 pattern="^[^\d].*"
@@ -433,7 +436,7 @@ function UserProfile() {
                   id="phone"
                   name="phone"
                   pattern="\d{10}"
-                  maxLength="10"
+                  maxLength="12"
                   title="Please enter only 10 digit number "
                   value={formData.phone}
                   onChange={handleChange}
@@ -477,7 +480,7 @@ function UserProfile() {
               </label>
               <input
                 type="number"
-                maxLength={3}
+                maxLength={2}
                 id="experience"
                 name="experience"
                 value={formData.experience}
@@ -494,6 +497,7 @@ function UserProfile() {
               </label>
               <input
                 type="email"
+                maxLength={51}
                 id="email"
                 name="email"
                 value={formData.email}
@@ -607,6 +611,7 @@ function UserProfile() {
               </label>
               <input
                 type="text"
+                maxLength={30}
                 id="designation"
                 name="designation"
                 value={formData.designation}
@@ -653,6 +658,7 @@ function UserProfile() {
               </label>
               <input
                 type="text"
+                maxLength={12}
                 id="aadhar_card_no"
                 name="aadhar_card_no"
                 value={formData.aadhar_card_no}
@@ -769,6 +775,7 @@ function UserProfile() {
               </label>
               <input
                 type="text"
+                maxLength={30}
                 id="special_sub"
                 name="special_sub"
                 value={formData.special_sub}

@@ -501,7 +501,9 @@ function DivisionList() {
                       )}
                     </div>
                     <div className="form-group">
-                      <label htmlFor="departmentId">Class</label>
+                      <label htmlFor="departmentId">
+                        Class <span className="text-red-500">*</span>
+                      </label>
                       <select
                         id="departmentId"
                         className="form-control"

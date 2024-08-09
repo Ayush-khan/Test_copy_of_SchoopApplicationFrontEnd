@@ -4119,6 +4119,7 @@ function ClassList() {
                     </label>
                     <input
                       type="text"
+                      maxLength={30}
                       className="form-control"
                       placeholder="e.g 1,2"
                       id="newClassName"
@@ -4162,7 +4163,7 @@ function ClassList() {
                     className="btn btn-primary"
                     onClick={handleSubmitAdd}
                   >
-                    Add
+                    Save
                   </button>
                 </div>
               </div>
@@ -4192,6 +4193,7 @@ function ClassList() {
                     </label>
                     <input
                       type="text"
+                      maxLength={30}
                       className="form-control"
                       id="newClassName"
                       value={newClassName}
@@ -4242,7 +4244,7 @@ function ClassList() {
                     className="btn btn-primary"
                     onClick={handleSubmitEdit}
                   >
-                    Save Changes
+                    Update
                   </button>
                 </div>
               </div>
