@@ -606,6 +606,7 @@ function EditStaff() {
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                 required
               >
+              // this changes
                 <option className="bg-gray-300" value="">
                   Select
                 </option>
