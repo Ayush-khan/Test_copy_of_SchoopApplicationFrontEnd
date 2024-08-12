@@ -1,4 +1,4 @@
-// The create staff component is and it's working without validations of onchange
+// // The create staff component is and it's working without validations of onchange
 // import React, { useState } from "react";
 // import { FaUserCircle } from "react-icons/fa";
 // import { RxCross1 } from "react-icons/rx";
@@ -793,17 +793,17 @@
 
 // export default CreateStaff;
 
-// Validations checks are:
+// // Validations checks are:
 
-// The create staff component is
+// // The create staff component is
 import React, { useState } from "react";
-// import { FaUserCircle } from "react-icons/fa";
+import { FaUserCircle } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import ImageUploadAndCrop from "../common/ImageUploadAndCrop.jsx";
 import ImageCropper from "../common/ImageUploadAndCrop.jsx";
+
 function CreateStaff() {
   const API_URL = import.meta.env.VITE_API_URL;
   const [formData, setFormData] = useState({
@@ -825,107 +825,74 @@ function CreateStaff() {
     role: "",
     employeeId: "",
     teacher_image_name: null,
-
     special_sub: "",
   });
   const [errors, setErrors] = useState({});
   const [photoPreview, setPhotoPreview] = useState(null);
   const navigate = useNavigate();
 
-  // const validate = () => {
-  //   const newErrors = {};
-  //   if (!formData.name) newErrors.name = "Name is required";
-  //   if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
-  //   if (!formData.date_of_joining)
-  //     newErrors.date_of_joining = "Date of Joining is required";
-  //   if (!formData.sex) newErrors.sex = "sex is required";
-  //   if (!formData.address) newErrors.address = "Address is required";
-  //   if (!formData.phone) newErrors.phone = "Phone number is required";
-  //   if (!/^\d{10}$/.test(formData.phone))
-  //     newErrors.phone = "Phone number must be 10 digits";
-  //   if (!formData.email) newErrors.email = "Email is required";
-  //   if (!/\S+@\S+\.\S+/.test(formData.email))
-  //     newErrors.email = "Email address is invalid";
-  //   if (!formData.role) newErrors.role = "Role is required";
-  //   if (!formData.employeeId) newErrors.employeeId = "Employee ID is required";
-  //   if (formData.academic_qual.length === 0)
-  //     newErrors.academic_qual =
-  //       "Please select at least one academic qualification";
-  //   return newErrors;
-  // };
+  const validate = () => {
+    const newErrors = {};
 
-  const validate = (name, value) => {
-    const newErrors = { ...errors };
+    // Validate name
+    if (!formData.name) newErrors.name = "Name is required";
+    else if (!/^[^\d].*/.test(formData.name))
+      newErrors.name = "Name should not start with a number";
 
-    switch (name) {
-      case "name":
-        if (!value) newErrors.name = "Name is required";
-        else delete newErrors.name;
-        break;
-      case "birthday":
-        if (!value) newErrors.birthday = "Date of Birth is required";
-        else delete newErrors.birthday;
-        break;
-      case "date_of_joining":
-        if (!value) newErrors.date_of_joining = "Date of Joining is required";
-        else delete newErrors.date_of_joining;
-        break;
-      case "sex":
-        if (!value) newErrors.sex = "Sex is required";
-        else delete newErrors.sex;
-        break;
-      case "address":
-        if (!value) newErrors.address = "Address is required";
-        else delete newErrors.address;
-        break;
-      case "phone":
-        if (!value) newErrors.phone = "Phone number is required";
-        else if (!/^\d{10}$/.test(value))
-          newErrors.phone = "Phone number must be 10 digits";
-        else delete newErrors.phone;
-        break;
-      case "email":
-        if (!value) newErrors.email = "Email is required";
-        else if (!/\S+@\S+\.\S+/.test(value))
-          newErrors.email = "Email address is invalid";
-        else delete newErrors.email;
-        break;
-      case "role":
-        if (!value) newErrors.role = "Role is required";
-        else delete newErrors.role;
-        break;
-      case "employeeId":
-        if (!value) newErrors.employeeId = "Employee ID is required";
-        else delete newErrors.employeeId;
-        break;
-      case "experience":
-        if (!value) newErrors.experience = "Experience is required";
-        else if (!/^\d+$/.test(value))
-          newErrors.experience = "Experience must be a whole number";
-        else delete newErrors.experience;
-        break;
-      case "aadhar_card_no":
-        if (!value) newErrors.aadhar_card_no = "Aadhar card number is required";
-        else if (!/^\d{14}$/.test(value.replace(/\s+/g, "")))
-          newErrors.aadhar_card_no = "Aadhar card number must be 12 digits";
-        else delete newErrors.aadhar_card_no;
-        break;
-      case "academic_qual":
-        if (formData.academic_qual.length === 0)
-          newErrors.academic_qual =
-            "Please select at least one academic qualification";
-        else delete newErrors.academic_qual;
-        break;
-      default:
-        break;
-    }
+    // Validate birthday
+    if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
+
+    // Validate date of joining
+    if (!formData.date_of_joining)
+      newErrors.date_of_joining = "Date of Joining is required";
+
+    // Validate sex
+    if (!formData.sex) newErrors.sex = "Sex is required";
+
+    // Validate address
+    if (!formData.address) newErrors.address = "Address is required";
+
+    // Validate phone number
+    if (!formData.phone) newErrors.phone = "Phone number is required";
+    else if (!/^\d{10}$/.test(formData.phone))
+      newErrors.phone = "Phone number must be 10 digits";
+
+    // Validate email
+    if (!formData.email) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(formData.email))
+      newErrors.email = "Email address is invalid";
+
+    // Validate role
+    if (!formData.role) newErrors.role = "Role is required";
+
+    // Validate employee ID
+    if (!formData.employeeId) newErrors.employeeId = "Employee ID is required";
+
+    // Validate experience
+    if (!formData.experience) newErrors.experience = "Experience is required";
+    else if (!/^\d+$/.test(formData.experience))
+      newErrors.experience = "Experience must be a whole number";
+
+    // Validate aadhar card number
+    if (!formData.aadhar_card_no)
+      newErrors.aadhar_card_no = "Aadhar card number is required";
+    else if (!/^\d{12}$/.test(formData.aadhar_card_no.replace(/\s+/g, "")))
+      newErrors.aadhar_card_no = "Aadhar card number must be 12 digits";
+
+    // Validate academic qualifications
+    if (formData.academic_qual.length === 0)
+      newErrors.academic_qual =
+        "Please select at least one academic qualification";
 
     setErrors(newErrors);
+
+    return newErrors;
   };
 
   const handleChange = (event) => {
     const { name, value, checked } = event.target;
     let newValue = value;
+
     if (name === "experience") {
       newValue = newValue.replace(/[^0-9]/g, "");
     } else if (name === "aadhar_card_no") {
@@ -941,15 +908,15 @@ function CreateStaff() {
           : prevData.academic_qual.filter(
               (qualification) => qualification !== value
             );
-        validate(name, newAcademicQual);
         return { ...prevData, academic_qual: newAcademicQual };
       });
     } else {
-      setFormData((prevData) => {
-        validate(name, newValue);
-        return { ...prevData, [name]: newValue };
-      });
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: newValue,
+      }));
     }
+    validate(); // Call validate on each change to show real-time errors
   };
 
   const handleFileChange = (event) => {
@@ -967,7 +934,6 @@ function CreateStaff() {
     return `${year}-${month}-${day}`;
   };
 
-  // Image Croping funtionlity
   const handleImageCropped = (croppedImageData) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -975,62 +941,6 @@ function CreateStaff() {
     }));
   };
 
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   const validationErrors = validate();
-  //   if (Object.keys(validationErrors).length > 0) {
-  //     setErrors(validationErrors);
-  //     Object.values(validationErrors).forEach((error) => {
-  //       toast.error(error);
-  //     });
-  //     return;
-  //   }
-  //   const formattedFormData = {
-  //     ...formData,
-  //     birthday: formatDateString(formData.birthday),
-  //     date_of_joining: formatDateString(formData.date_of_joining),
-  //   };
-  //   // api calling
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       throw new Error("No authentication token is found");
-  //     }
-  //     console.log("formata", formattedFormData);
-  //     const response = await axios.post(
-  //       `${API_URL}/api/store_staff`,
-  //       formattedFormData,
-  //       {
-  //         headers: {
-  //           "Content-Type": "multipart/form-data",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     console.log("Response:", response.data);
-
-  //     if (response.status === 201) {
-  //       toast.success("Teacher created successfully!");
-  //       setTimeout(() => {
-  //         navigate("/StaffList");
-  //       }, 3000); // 3000 milliseconds = 3 seconds
-  //       // navigate("/StaffList");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error.message);
-  //     toast.error("An error occurred while creating the teacher.");
-  //     console.log("the erro", error.response.data);
-  //     toast.error(error.response?.data || error.message);
-  //   }
-  //   // // Format dates before submitting
-  //   // const formattedFormData = {
-  //   //   ...formData,
-  //   //   birthday: formatDateString(formData.birthday),
-  //   //   date_of_joining: formatDateString(formData.date_of_joining),
-  //   // };
-  //   // console.log(formattedFormData);
-  // };
   const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = validate();
@@ -1050,14 +960,12 @@ function CreateStaff() {
       birthday: formatDateString(formData.birthday),
       date_of_joining: formatDateString(formData.date_of_joining),
     };
-    console.log("Response of create staff form:", formattedFormData);
 
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("No authentication token is found");
       }
-      console.log("form data", formattedFormData);
       const response = await axios.post(
         `${API_URL}/api/store_staff`,
         formattedFormData,
@@ -1069,8 +977,6 @@ function CreateStaff() {
         }
       );
 
-      console.log("Response of create staff form:", formattedFormData);
-
       if (response.status === 201) {
         toast.success("Teacher created successfully!");
         setTimeout(() => {
@@ -1080,16 +986,13 @@ function CreateStaff() {
     } catch (error) {
       console.error("Error:", error.message);
       toast.error("An error occurred while creating the teacher.");
-
       if (error.response && error.response.data && error.response.data.errors) {
-        // setErrors(error.response.data.errors);
         setErrors(error.response.data.errors || {});
       } else {
         toast.error(error.message);
       }
     }
   };
-
   return (
     <div className="container mx-auto p-4 ">
       <ToastContainer />
@@ -1284,15 +1187,13 @@ function CreateStaff() {
                   className="input-field block w-full border border-gray-300 outline-none  rounded-r-md py-1 px-3 bg-white shadow-inner "
                   required
                 />
+                {errors.phone && (
+                  <span className="error">{errors.phone[0]}</span>
+                )}
+                {errors.phone && (
+                  <span className="text-red-500 text-xs">{errors.phone}</span>
+                )}
               </div>
-              {errors.phone && (
-                <span className="error text-red-500 text-xs">
-                  {errors.phone[0]}
-                </span>
-              )}
-              {errors.phone && (
-                <span className="text-red-500 text-xs">{errors.phone}</span>
-              )}
             </div>
 
             <div>
