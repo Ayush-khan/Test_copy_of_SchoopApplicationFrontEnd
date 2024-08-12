@@ -849,7 +849,7 @@ function CreateStaff() {
       newErrors.date_of_joining = "Date of Joining is required";
 
     // Validate sex
-    if (!formData.sex) newErrors.sex = "Sex is required";
+    if (!formData.sex) newErrors.sex = "Gender is required";
 
     // Validate address
     if (!formData.address) newErrors.address = "Address is required";
@@ -876,7 +876,7 @@ function CreateStaff() {
       newErrors.experience = "Experience must be a whole number";
 
     // Validate aadhar card number
-    if (!formData.aadhar_card_no)
+    if (formData.aadhar_card_no.length === 0)
       newErrors.aadhar_card_no = "Aadhar card number is required";
     else if (!/^\d{12}$/.test(formData.aadhar_card_no.replace(/\s+/g, "")))
       newErrors.aadhar_card_no = "Aadhar card number must be 12 digits";

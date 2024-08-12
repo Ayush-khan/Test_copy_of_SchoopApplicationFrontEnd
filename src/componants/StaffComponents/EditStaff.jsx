@@ -43,6 +43,8 @@ function EditStaff() {
   // console.log("the formdata set", formData);
   const [errors, setErrors] = useState({});
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [backendErrors, setBackendErrors] = useState({});
+
   console.log("employeeID", staff.employeeId);
   useEffect(() => {
     if (staff) {
@@ -84,7 +86,8 @@ function EditStaff() {
   const validate = () => {
     const newErrors = {};
     if (!formData.name) newErrors.name = "Name is required";
-    if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
+    else if (!/^[^\d].*/.test(formData.name))
+      if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
     if (!formData.date_of_joining)
       newErrors.date_of_joining = "Date of Joining is required";
     if (!formData.sex) newErrors.sex = "Gender is required";
@@ -92,6 +95,21 @@ function EditStaff() {
     if (!formData.phone) newErrors.phone = "Phone number is required";
     if (!/^\d{10}$/.test(formData.phone))
       newErrors.phone = "Phone number must be 10 digits";
+
+    if (!formData.aadhar_card_no)
+      newErrors.aadhar_card_no = "Aadhar card number is required";
+    else if (!/^\d{12}$/.test(formData.aadhar_card_no.replace(/\s+/g, "")))
+      newErrors.aadhar_card_no = "Aadhar card number must be 12 digits";
+    // Validate aadhar card number
+    if (formData.aadhar_card_no.length === 0)
+      newErrors.aadhar_card_no = "Aadhar card number is required";
+    else if (!/^\d{12}$/.test(formData.aadhar_card_no.replace(/\s+/g, "")))
+      newErrors.aadhar_card_no = "Aadhar card number must be 12 digits";
+
+    // / Validate experience
+    if (!formData.experience) newErrors.experience = "Experience is required";
+    else if (!/^\d+$/.test(formData.experience))
+      newErrors.experience = "Experience must be a whole number";
     if (!formData.email) newErrors.email = "Email is required";
     if (!/\S+@\S+\.\S+/.test(formData.email))
       newErrors.email = "Email address is invalid";
@@ -107,29 +125,32 @@ function EditStaff() {
 
   const handleChange = (event) => {
     const { name, value, checked } = event.target;
+    let newValue = value;
 
+    if (name === "experience") {
+      newValue = newValue.replace(/[^0-9]/g, "");
+    } else if (name === "aadhar_card_no") {
+      newValue = newValue.replace(/\s+/g, "");
+    }
+    if (name === "phone" || name === "aadhar_card_no") {
+      newValue = newValue.replace(/[^\d]/g, "");
+    }
     if (name === "academic_qual") {
       setFormData((prevData) => {
-        if (checked) {
-          return {
-            ...prevData,
-            academic_qual: [...prevData.academic_qual, value],
-          };
-        } else {
-          return {
-            ...prevData,
-            academic_qual: prevData.academic_qual.filter(
+        const newAcademicQual = checked
+          ? [...prevData.academic_qual, value]
+          : prevData.academic_qual.filter(
               (qualification) => qualification !== value
-            ),
-          };
-        }
+            );
+        return { ...prevData, academic_qual: newAcademicQual };
       });
     } else {
       setFormData((prevData) => ({
         ...prevData,
-        [name]: value,
+        [name]: newValue,
       }));
     }
+    validate(); // Call validate on each change to show real-time errors
   };
 
   const handleFileChange = (event) => {
@@ -162,8 +183,14 @@ function EditStaff() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+    const errorsToCheck = validationErrors || {};
+    // Check if there are any errors
+
+    if (Object.keys(errorsToCheck).length > 0) {
+      setErrors(errorsToCheck);
+      Object.values(errorsToCheck).forEach((error) => {
+        toast.error(error);
+      });
       return;
     }
 
@@ -203,7 +230,7 @@ function EditStaff() {
       console.error("Error:", error.response?.data || error.message);
       if (error.response && error.response.data && error.response.data.errors) {
         // setErrors(error.response.data.errors);
-        setErrors(error.response.data.errors || {});
+        setBackendErrors(error.response.data.errors || {});
       } else {
         toast.error(error.message);
       }
@@ -426,20 +453,20 @@ function EditStaff() {
                   id="phone"
                   name="phone"
                   pattern="\d{10}"
-                  maxLength="12"
+                  maxLength="10"
                   title="Please enter only 10 digit number "
                   value={formData.phone}
                   onChange={handleChange}
                   className="input-field block w-full border border-gray-300 outline-none  rounded-r-md py-1 px-3 bg-white shadow-inner "
                   required
                 />
-                {errors.phone && (
-                  <span className="error">{errors.phone[0]}</span>
-                )}
-                {errors.phone && (
-                  <span className="text-red-500 text-xs">{errors.phone}</span>
-                )}
               </div>
+              {backendErrors.phone && (
+                <span className="error">{backendErrors.phone[0]}</span>
+              )}
+              {errors.phone && (
+                <span className="text-red-500 text-xs">{errors.phone}</span>
+              )}
             </div>
             <div className="col-span-1">
               <label
@@ -496,9 +523,14 @@ function EditStaff() {
                 title="Please enter a valid email address that ends with @gmail.com"
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
+              {backendErrors.email && (
+                <span className="error text-red-500 text-xs">
+                  {backendErrors.email[0]}
+                </span>
+              )}
               {errors.email && (
                 <span className="error text-red-500 text-xs">
-                  {errors.email[0]}
+                  {errors.email}
                 </span>
               )}
             </div>
@@ -648,7 +680,7 @@ function EditStaff() {
                 htmlFor="aadhar_card_no"
                 className="block font-bold  text-xs mb-2"
               >
-                Aadhaar Card No.
+                Aadhaar Card No. <span className="text-red-500">*</span>
               </label>
               <input
                 type="tel"
@@ -661,9 +693,14 @@ function EditStaff() {
                 onChange={handleChange}
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
+              {backendErrors.aadhar_card_no && (
+                <span className="text-red-500 text-xs">
+                  {backendErrors.aadhar_card_no[0]}
+                </span>
+              )}
               {errors.aadhar_card_no && (
                 <span className="text-red-500 text-xs">
-                  {errors.aadhar_card_no[0]}
+                  {errors.aadhar_card_no}
                 </span>
               )}
             </div>
