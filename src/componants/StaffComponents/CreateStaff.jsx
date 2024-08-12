@@ -32,6 +32,7 @@
 //     special_sub: "",
 //   });
 //   const [errors, setErrors] = useState({});
+//   const [backendErrors, setBackendErrors] = useState({});
 //   const [photoPreview, setPhotoPreview] = useState(null);
 //   const navigate = useNavigate();
 
@@ -210,7 +211,7 @@
 
 //       if (error.response && error.response.data && error.response.data.errors) {
 //         // setErrors(error.response.data.errors);
-//         setErrors(error.response.data.errors || {});
+//         setBackendErrors(error.response.data.errors || {});
 //       } else {
 //         toast.error(error.message);
 //       }
@@ -411,8 +412,8 @@
 //                   className="input-field block w-full border border-gray-300 outline-none  rounded-r-md py-1 px-3 bg-white shadow-inner "
 //                   required
 //                 />
-//                 {errors.phone && (
-//                   <span className="error">{errors.phone[0]}</span>
+//                 {backendErrors.phone && (
+//                   <span className="error">{backendErrors.phone[0]}</span>
 //                 )}
 //                 {errors.phone && (
 //                   <span className="text-red-500 text-xs">{errors.phone}</span>
@@ -502,9 +503,9 @@
 //                 title="Please enter a valid email address that ends with @gmail.com"
 //               />
 
-//               {errors.email && (
+//               {backendErrors.email && (
 //                 <span className="error text-red-500 text-xs">
-//                   {errors.email[0]}
+//                   {backendErrors.email[0]}
 //                 </span>
 //               )}
 //             </div>
@@ -572,9 +573,9 @@
 //                 onChange={handleChange}
 //                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
 //               />{" "}
-//               {errors.aadhar_card_no && (
+//               {backendErrors.aadhar_card_no && (
 //                 <span className="text-red-500 text-xs">
-//                   {errors.aadhar_card_no[0]}
+//                   {backendErrors.aadhar_card_no[0]}
 //                 </span>
 //               )}
 //             </div>
@@ -793,17 +794,16 @@
 
 // export default CreateStaff;
 
-// // Validations checks are:
-
-// // The create staff component is
+// try
+// The create staff component is and it's working without validations of onchange
 import React, { useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import ImageUploadAndCrop from "../common/ImageUploadAndCrop.jsx";
 import ImageCropper from "../common/ImageUploadAndCrop.jsx";
-
 function CreateStaff() {
   const API_URL = import.meta.env.VITE_API_URL;
   const [formData, setFormData] = useState({
@@ -825,9 +825,11 @@ function CreateStaff() {
     role: "",
     employeeId: "",
     teacher_image_name: null,
+
     special_sub: "",
   });
   const [errors, setErrors] = useState({});
+  const [backendErrors, setBackendErrors] = useState({});
   const [photoPreview, setPhotoPreview] = useState(null);
   const navigate = useNavigate();
 
@@ -880,7 +882,7 @@ function CreateStaff() {
       newErrors.aadhar_card_no = "Aadhar card number must be 12 digits";
 
     // Validate academic qualifications
-    if (formData.academic_qual.length === 0)
+    if (!formData.academic_qual.length)
       newErrors.academic_qual =
         "Please select at least one academic qualification";
 
@@ -934,6 +936,7 @@ function CreateStaff() {
     return `${year}-${month}-${day}`;
   };
 
+  // Image Croping funtionlity
   const handleImageCropped = (croppedImageData) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -941,6 +944,62 @@ function CreateStaff() {
     }));
   };
 
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   const validationErrors = validate();
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setErrors(validationErrors);
+  //     Object.values(validationErrors).forEach((error) => {
+  //       toast.error(error);
+  //     });
+  //     return;
+  //   }
+  //   const formattedFormData = {
+  //     ...formData,
+  //     birthday: formatDateString(formData.birthday),
+  //     date_of_joining: formatDateString(formData.date_of_joining),
+  //   };
+  //   // api calling
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token is found");
+  //     }
+  //     console.log("formata", formattedFormData);
+  //     const response = await axios.post(
+  //       `${API_URL}/api/store_staff`,
+  //       formattedFormData,
+  //       {
+  //         headers: {
+  //           "Content-Type": "multipart/form-data",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     console.log("Response:", response.data);
+
+  //     if (response.status === 201) {
+  //       toast.success("Teacher created successfully!");
+  //       setTimeout(() => {
+  //         navigate("/StaffList");
+  //       }, 3000); // 3000 milliseconds = 3 seconds
+  //       // navigate("/StaffList");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error.message);
+  //     toast.error("An error occurred while creating the teacher.");
+  //     console.log("the erro", error.response.data);
+  //     toast.error(error.response?.data || error.message);
+  //   }
+  //   // // Format dates before submitting
+  //   // const formattedFormData = {
+  //   //   ...formData,
+  //   //   birthday: formatDateString(formData.birthday),
+  //   //   date_of_joining: formatDateString(formData.date_of_joining),
+  //   // };
+  //   // console.log(formattedFormData);
+  // };
   const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = validate();
@@ -954,12 +1013,12 @@ function CreateStaff() {
       });
       return;
     }
-
     const formattedFormData = {
       ...formData,
       birthday: formatDateString(formData.birthday),
       date_of_joining: formatDateString(formData.date_of_joining),
     };
+    console.log("Response of create staff form:", formattedFormData);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -977,6 +1036,8 @@ function CreateStaff() {
         }
       );
 
+      console.log("Response of create staff form:", formattedFormData);
+
       if (response.status === 201) {
         toast.success("Teacher created successfully!");
         setTimeout(() => {
@@ -986,13 +1047,16 @@ function CreateStaff() {
     } catch (error) {
       console.error("Error:", error.message);
       toast.error("An error occurred while creating the teacher.");
+
       if (error.response && error.response.data && error.response.data.errors) {
-        setErrors(error.response.data.errors || {});
+        // setErrors(error.response.data.errors);
+        setBackendErrors(error.response.data.errors || {});
       } else {
         toast.error(error.message);
       }
     }
   };
+
   return (
     <div className="container mx-auto p-4 ">
       <ToastContainer />
@@ -1176,24 +1240,24 @@ function CreateStaff() {
                   +91
                 </span>
                 <input
-                  type="tel"
+                  type="text"
                   id="phone"
                   name="phone"
                   pattern="\d{10}"
-                  maxLength="12"
+                  maxLength="10"
                   title="Please enter only 10 digit number "
                   value={formData.phone}
                   onChange={handleChange}
                   className="input-field block w-full border border-gray-300 outline-none  rounded-r-md py-1 px-3 bg-white shadow-inner "
                   required
                 />
-                {errors.phone && (
-                  <span className="error">{errors.phone[0]}</span>
-                )}
-                {errors.phone && (
-                  <span className="text-red-500 text-xs">{errors.phone}</span>
-                )}
               </div>
+              {backendErrors.phone && (
+                <span className="error">{backendErrors.phone[0]}</span>
+              )}
+              {errors.phone && (
+                <span className="text-red-500 text-xs">{errors.phone}</span>
+              )}
             </div>
 
             <div>
@@ -1249,7 +1313,7 @@ function CreateStaff() {
                 experience <span className="text-red-500">*</span>
               </label>
               <input
-                type="number"
+                type="text"
                 maxLength={2}
                 id="experience"
                 name="experience"
@@ -1278,9 +1342,14 @@ function CreateStaff() {
                 title="Please enter a valid email address that ends with @gmail.com"
               />
 
+              {backendErrors.email && (
+                <span className="error text-red-500 text-xs">
+                  {backendErrors.email[0]}
+                </span>
+              )}
               {errors.email && (
                 <span className="error text-red-500 text-xs">
-                  {errors.email[0]}
+                  {errors.email}
                 </span>
               )}
             </div>
@@ -1335,7 +1404,7 @@ function CreateStaff() {
                 htmlFor="aadhar_card_no"
                 className="block font-bold  text-xs mb-2"
               >
-                Aadhaar Card No.
+                Aadhaar Card No. <span className="text-red-500">*</span>
               </label>
               <input
                 type="tel"
@@ -1348,9 +1417,14 @@ function CreateStaff() {
                 onChange={handleChange}
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />{" "}
+              {backendErrors.aadhar_card_no && (
+                <span className="text-red-500 text-xs">
+                  {backendErrors.aadhar_card_no[0]}
+                </span>
+              )}
               {errors.aadhar_card_no && (
                 <span className="text-red-500 text-xs">
-                  {errors.aadhar_card_no[0]}
+                  {errors.aadhar_card_no}
                 </span>
               )}
             </div>
