@@ -1,4 +1,4 @@
-// // The create staff component is
+// The create staff component is and it's working without validations of onchange
 // import React, { useState } from "react";
 // import { FaUserCircle } from "react-icons/fa";
 // import { RxCross1 } from "react-icons/rx";
