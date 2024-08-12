@@ -329,7 +329,7 @@ function CreateStaff() {
               </label>
               <textarea
                 type="text"
-                maxLength={240}
+                maxLength={200}
                 id="address"
                 name="address"
                 value={formData.address}
