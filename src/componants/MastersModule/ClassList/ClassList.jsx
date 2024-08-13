@@ -3781,13 +3781,20 @@ function ClassList() {
     const errors = {};
     if (!name || name.trim() === "") {
       errors.name = "The name field is required.";
-    } else if (name.length > 255) {
+    } else if (name.length > 30) {
       errors.name = "The name field must not exceed 255 characters.";
     }
     if (!departmentId || isNaN(departmentId)) {
       errors.department_id = "The department ID is required.";
     }
     return errors;
+  };
+
+  const handleInputChange = (setter, validator) => (e) => {
+    const { value } = e.target;
+    setter(value);
+    const errors = validateClassData(newClassName, newDepartmentId);
+    setValidationErrors(errors);
   };
 
   const handleEdit = (classItem) => {

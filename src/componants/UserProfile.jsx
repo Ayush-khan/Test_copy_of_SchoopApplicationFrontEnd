@@ -928,41 +928,65 @@ function UserProfile() {
     fetchData();
   }, [API_URL]);
 
+  // Validation functions
+  const validatePhone = (phone) => {
+    if (!phone) return "Phone number is required";
+    if (!/^\d{10}$/.test(phone)) return "Phone number must be 10 digits";
+    return null;
+  };
+
+  const validateAadhar = (aadhar) => {
+    if (!aadhar) return "Aadhar card number is required";
+    if (!/^\d{12}$/.test(aadhar.replace(/\s+/g, "")))
+      return "Aadhar card number must be 12 digits";
+    return null;
+  };
+
+  const validateEmail = (email) => {
+    if (!email) return "Email is required";
+    if (!/\S+@\S+\.\S+/.test(email)) return "Email address is invalid";
+    return null;
+  };
+
+  const validateExperience = (experience) => {
+    if (!experience) return "Experience is required";
+    if (!/^\d+$/.test(experience)) return "Experience must be a whole number";
+    return null;
+  };
+
   const validate = () => {
     const newErrors = {};
+    // Validate name
     if (!formData.name) newErrors.name = "Name is required";
     else if (!/^[^\d].*/.test(formData.name))
       newErrors.name = "Name should not start with a number";
+    // newErrors.name = "Name should not start with a number";
     if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
     if (!formData.date_of_joining)
       newErrors.date_of_joining = "Date of Joining is required";
     if (!formData.sex) newErrors.sex = "Gender is required";
     if (!formData.address) newErrors.address = "Address is required";
-    if (!formData.phone) newErrors.phone = "Phone number is required";
-    if (!/^\d{10}$/.test(formData.phone))
-      newErrors.phone = "Phone number must be 10 digits";
-    if (!formData.email) newErrors.email = "Email is required";
-    if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = "Email address is invalid";
+    // Validate phone number
+    const phoneError = validatePhone(formData.phone);
+    if (phoneError) newErrors.phone = phoneError;
+
+    // Validate email
+    const emailError = validateEmail(formData.email);
+    if (emailError) newErrors.email = emailError;
+
+    // Validate experience
+    const experienceError = validateExperience(formData.experience);
+    if (experienceError) newErrors.experience = experienceError;
+
+    // Validate aadhar card number
+    const aadharError = validateAadhar(formData.aadhar_card_no);
+    if (aadharError) newErrors.aadhar_card_no = aadharError;
     if (!formData.designation)
       newErrors.designation = "Designation is required";
     if (!formData.employee_id)
       newErrors.employee_id = "Employee ID is required";
     // Validate aadhar card number
-    if (!formData.aadhar_card_no)
-      newErrors.aadhar_card_no = "Aadhar card number is required";
-    else if (!/^\d{12}$/.test(formData.aadhar_card_no.replace(/\s+/g, "")))
-      newErrors.aadhar_card_no = "Aadhar card number must be 12 digits";
-    // Validate aadhar card number
-    if (formData.aadhar_card_no.length === 0)
-      newErrors.aadhar_card_no = "Aadhar card number is required";
-    else if (!/^\d{12}$/.test(formData.aadhar_card_no.replace(/\s+/g, "")))
-      newErrors.aadhar_card_no = "Aadhar card number must be 12 digits";
 
-    // / Validate experience
-    if (!formData.experience) newErrors.experience = "Experience is required";
-    else if (!/^\d+$/.test(formData.experience))
-      newErrors.experience = "Experience must be a whole number";
     if (formData.academic_qual.length === 0)
       newErrors.academic_qual =
         "Please select at least one academic qualification";
@@ -997,7 +1021,23 @@ function UserProfile() {
         [name]: newValue,
       }));
     }
-    validate(); // Call validate on each change to show real-time errors
+    // Validate field based on name
+    let fieldErrors = {};
+    if (name === "phone") {
+      fieldErrors.phone = validatePhone(newValue);
+    } else if (name === "aadhar_card_no") {
+      fieldErrors.aadhar_card_no = validateAadhar(newValue);
+    } else if (name === "email") {
+      fieldErrors.email = validateEmail(newValue);
+    } else if (name === "experience") {
+      fieldErrors.experience = validateExperience(newValue);
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      ...fieldErrors,
+    }));
+    // validate(); // Call validate on each change to show real-time errors
   };
 
   // Image Croping funtionlity

@@ -82,37 +82,58 @@ function EditStaff() {
       }
     }
   }, [staff, API_URL]);
+  // Validation functions
+  const validatePhone = (phone) => {
+    if (!phone) return "Phone number is required";
+    if (!/^\d{10}$/.test(phone)) return "Phone number must be 10 digits";
+    return null;
+  };
 
+  const validateAadhar = (aadhar) => {
+    if (!aadhar) return "Aadhar card number is required";
+    if (!/^\d{12}$/.test(aadhar.replace(/\s+/g, "")))
+      return "Aadhar card number must be 12 digits";
+    return null;
+  };
+
+  const validateEmail = (email) => {
+    if (!email) return "Email is required";
+    if (!/\S+@\S+\.\S+/.test(email)) return "Email address is invalid";
+    return null;
+  };
+
+  const validateExperience = (experience) => {
+    if (!experience) return "Experience is required";
+    if (!/^\d+$/.test(experience)) return "Experience must be a whole number";
+    return null;
+  };
   const validate = () => {
     const newErrors = {};
+    // Validate name
     if (!formData.name) newErrors.name = "Name is required";
     else if (!/^[^\d].*/.test(formData.name))
-      if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
+      newErrors.name = "Name should not start with a number";
+    if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
     if (!formData.date_of_joining)
       newErrors.date_of_joining = "Date of Joining is required";
     if (!formData.sex) newErrors.sex = "Gender is required";
     if (!formData.address) newErrors.address = "Address is required";
-    if (!formData.phone) newErrors.phone = "Phone number is required";
-    if (!/^\d{10}$/.test(formData.phone))
-      newErrors.phone = "Phone number must be 10 digits";
+    // / Validate phone number
+    const phoneError = validatePhone(formData.phone);
+    if (phoneError) newErrors.phone = phoneError;
 
-    if (!formData.aadhar_card_no)
-      newErrors.aadhar_card_no = "Aadhar card number is required";
-    else if (!/^\d{12}$/.test(formData.aadhar_card_no.replace(/\s+/g, "")))
-      newErrors.aadhar_card_no = "Aadhar card number must be 12 digits";
+    // Validate email
+    const emailError = validateEmail(formData.email);
+    if (emailError) newErrors.email = emailError;
+
+    // Validate experience
+    const experienceError = validateExperience(formData.experience);
+    if (experienceError) newErrors.experience = experienceError;
+
     // Validate aadhar card number
-    if (formData.aadhar_card_no.length === 0)
-      newErrors.aadhar_card_no = "Aadhar card number is required";
-    else if (!/^\d{12}$/.test(formData.aadhar_card_no.replace(/\s+/g, "")))
-      newErrors.aadhar_card_no = "Aadhar card number must be 12 digits";
+    const aadharError = validateAadhar(formData.aadhar_card_no);
+    if (aadharError) newErrors.aadhar_card_no = aadharError;
 
-    // / Validate experience
-    if (!formData.experience) newErrors.experience = "Experience is required";
-    else if (!/^\d+$/.test(formData.experience))
-      newErrors.experience = "Experience must be a whole number";
-    if (!formData.email) newErrors.email = "Email is required";
-    if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = "Email address is invalid";
     if (!formData.designation)
       newErrors.designation = "Designation is required";
     if (!formData.employee_id)
@@ -123,6 +144,35 @@ function EditStaff() {
     return newErrors;
   };
 
+  // const handleChange = (event) => {
+  //   const { name, value, checked } = event.target;
+  //   let newValue = value;
+
+  //   if (name === "experience") {
+  //     newValue = newValue.replace(/[^0-9]/g, "");
+  //   } else if (name === "aadhar_card_no") {
+  //     newValue = newValue.replace(/\s+/g, "");
+  //   }
+  //   if (name === "phone" || name === "aadhar_card_no") {
+  //     newValue = newValue.replace(/[^\d]/g, "");
+  //   }
+  //   if (name === "academic_qual") {
+  //     setFormData((prevData) => {
+  //       const newAcademicQual = checked
+  //         ? [...prevData.academic_qual, value]
+  //         : prevData.academic_qual.filter(
+  //             (qualification) => qualification !== value
+  //           );
+  //       return { ...prevData, academic_qual: newAcademicQual };
+  //     });
+  //   } else {
+  //     setFormData((prevData) => ({
+  //       ...prevData,
+  //       [name]: newValue,
+  //     }));
+  //   }
+  //   validate(); // Call validate on each change to show real-time errors
+  // };
   const handleChange = (event) => {
     const { name, value, checked } = event.target;
     let newValue = value;
@@ -150,9 +200,24 @@ function EditStaff() {
         [name]: newValue,
       }));
     }
-    validate(); // Call validate on each change to show real-time errors
-  };
+    // Validate field based on name
+    let fieldErrors = {};
+    if (name === "phone") {
+      fieldErrors.phone = validatePhone(newValue);
+    } else if (name === "aadhar_card_no") {
+      fieldErrors.aadhar_card_no = validateAadhar(newValue);
+    } else if (name === "email") {
+      fieldErrors.email = validateEmail(newValue);
+    } else if (name === "experience") {
+      fieldErrors.experience = validateExperience(newValue);
+    }
 
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      ...fieldErrors,
+    }));
+    // validate(); // Call validate on each change to show real-time errors
+  };
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
