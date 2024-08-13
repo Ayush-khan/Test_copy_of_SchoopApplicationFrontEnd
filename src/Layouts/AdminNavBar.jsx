@@ -1044,13 +1044,13 @@ const AdminNavBar = () => {
         >
           Division
         </NavDropdown.Item>
-        {/* <NavDropdown.Item
+        <NavDropdown.Item
           as={Link}
           to="/subjectlist"
           className="text-[.9em] font-bold hover:text-black"
         >
           Subjects
-        </NavDropdown.Item> */}
+        </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"

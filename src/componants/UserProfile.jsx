@@ -867,7 +867,8 @@ function UserProfile() {
   const [backendErrors, setBackendErrors] = useState({});
 
   const [photoPreview, setPhotoPreview] = useState(null);
-
+  // Maximum date for date_of_birth
+  const MAX_DATE = "2006-12-31";
   // Fetch data from the API when the component mounts
   useEffect(() => {
     const fetchData = async () => {
@@ -1355,6 +1356,7 @@ function UserProfile() {
               <input
                 type="date"
                 id="birthday"
+                max={MAX_DATE}
                 name="birthday"
                 value={formData.birthday}
                 onChange={handleChange}

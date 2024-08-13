@@ -155,10 +155,14 @@ function Divisions() {
       if (!token) {
         throw new Error("No authentication token found");
       }
-
+      console.log(
+        "This is the post of the division",
+        newClassName,
+        newDepartmentId
+      );
       await axios.post(
-        `${API_URL}/api/classes`,
-        { name: newClassName, department_id: newDepartmentId },
+        `${API_URL}/api/store_division`,
+        { name: newClassName, class_id: newDepartmentId },
         {
           headers: {
             Authorization: `Bearer ${token}`,

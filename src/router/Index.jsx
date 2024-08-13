@@ -120,9 +120,8 @@ import ShowRolesWithMenu from "../componants/RoleMangement/ShowRolesWithMenu.jsx
 import Roles from "../componants/RoleMangement/Roles.jsx";
 import ManageRoleAccess from "../componants/RoleMangement/ManageRoleAccess.jsx";
 import Menus from "../componants/RoleMangement/Menus.jsx";
-// import DivisionList from "../componants/MastersModule/TableComponentsNikhilbhai/Division/DivisionLIst.jsx";
-import DivisionList from "../componants/MastersModule/ClassList/Divisions.jsx";
-// import SubjectList from "../componants/MastersModule/Subject/SubjectList.jsx";
+import DivisionList from "../componants/MastersModule/TableComponentsNikhilbhai/Division/DivisionLIst.jsx";
+import SubjectList from "../componants/MastersModule/Subject/SubjectList.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -198,10 +197,10 @@ function Index() {
           element={<PrivateRoute element={DivisionList} />}
         />
         {/* Division module */}
-        {/* <Route
+        <Route
           path="/subjectlist"
           element={<PrivateRoute element={SubjectList} />}
-        /> */}
+        />
 
         <Route path="/sections" element={<PrivateRoute element={Sections} />} />
         <Route path="/notification" element={<NotificationPage />} />

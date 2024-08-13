@@ -1678,7 +1678,8 @@ function CreateStaff() {
   const [backendErrors, setBackendErrors] = useState({});
   const [photoPreview, setPhotoPreview] = useState(null);
   const navigate = useNavigate();
-
+  // Maximum date for date_of_birth
+  const MAX_DATE = "2006-12-31";
   // Validation functions
   const validatePhone = (phone) => {
     if (!phone) return "Phone number is required";
@@ -2087,6 +2088,7 @@ function CreateStaff() {
               <input
                 type="date"
                 id="birthday"
+                max={MAX_DATE}
                 name="birthday"
                 value={formData.birthday}
                 onChange={handleChange}
