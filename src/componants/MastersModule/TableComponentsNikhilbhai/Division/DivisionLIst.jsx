@@ -128,8 +128,8 @@ function DivisionList() {
     const errors = {};
     if (!name || name.trim() === "") {
       errors.name = "The name field is required.";
-    } else if (name.length > 255) {
-      errors.name = "The name field must not exceed 255 characters.";
+    } else if (name.length > 1) {
+      errors.name = "The name field must not exceed 1 characters.";
     }
     if (!departmentId) {
       errors.department_id = "The class is required.";

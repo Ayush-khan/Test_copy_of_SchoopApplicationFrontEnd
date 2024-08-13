@@ -869,6 +869,9 @@ function UserProfile() {
   const [photoPreview, setPhotoPreview] = useState(null);
   // Maximum date for date_of_birth
   const MAX_DATE = "2006-12-31";
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split("T")[0];
+
   // Fetch data from the API when the component mounts
   useEffect(() => {
     const fetchData = async () => {
@@ -1421,6 +1424,7 @@ function UserProfile() {
               <input
                 type="date"
                 id="date_of_joining"
+                max={today}
                 name="date_of_joining"
                 value={formData.date_of_joining}
                 onChange={handleChange}

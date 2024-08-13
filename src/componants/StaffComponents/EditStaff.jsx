@@ -44,6 +44,10 @@ function EditStaff() {
   const [errors, setErrors] = useState({});
   const [photoPreview, setPhotoPreview] = useState(null);
   const [backendErrors, setBackendErrors] = useState({});
+  // Maximum date for date_of_birth
+  const MAX_DATE = "2006-12-31";
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split("T")[0];
 
   console.log("employeeID", staff.employeeId);
   useEffect(() => {
@@ -543,6 +547,7 @@ function EditStaff() {
               <input
                 type="date"
                 id="birthday"
+                max={MAX_DATE}
                 name="birthday"
                 value={formData.birthday}
                 onChange={handleChange}
@@ -609,6 +614,7 @@ function EditStaff() {
               <input
                 type="date"
                 id="date_of_joining"
+                max={today}
                 name="date_of_joining"
                 value={formData.date_of_joining}
                 onChange={handleChange}

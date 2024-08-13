@@ -3718,7 +3718,9 @@ function ClassList() {
   const [pageCount, setPageCount] = useState(0);
   const pageSize = 10;
   const [validationErrors, setValidationErrors] = useState({});
-
+  // validations state for unique name
+  const [nameAvailable, setNameAvailable] = useState(true);
+  const [nameError, setNameError] = useState("");
   const fetchClasses = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -3782,7 +3784,7 @@ function ClassList() {
     if (!name || name.trim() === "") {
       errors.name = "The name field is required.";
     } else if (name.length > 30) {
-      errors.name = "The name field must not exceed 255 characters.";
+      errors.name = "The name field must not exceed 30 characters.";
     }
     if (!departmentId || isNaN(departmentId)) {
       errors.department_id = "The department ID is required.";
@@ -3793,6 +3795,7 @@ function ClassList() {
   const handleInputChange = (setter, validator) => (e) => {
     const { value } = e.target;
     setter(value);
+    // Perform validation based on the field that triggered the change
     const errors = validateClassData(newClassName, newDepartmentId);
     setValidationErrors(errors);
   };
@@ -3936,7 +3939,39 @@ function ClassList() {
       // setError(error.message);
     }
   };
+  // Handle focus event
+  const handleNameFocus = async () => {
+    if (validateName(name)) {
+      try {
+        const token = localStorage.getItem("authToken");
+        const academicYr = localStorage.getItem("academicYear");
 
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
+        const response = await axios.post(
+          `${API_URL}/api/check_class_name`,
+          { name },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "X-Academic-Year": academicYr,
+            },
+            withCredentials: true,
+          }
+        );
+        if (response.data === true) {
+          setNameError("Name is already taken. Please select another name.");
+          setNameAvailable(false);
+        } else {
+          setNameError("");
+          setNameAvailable(true);
+        }
+      } catch (error) {
+        console.error("Error checking class name:", error);
+      }
+    }
+  };
   const filteredClasses = classes.filter((cls) =>
     cls.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -4131,7 +4166,9 @@ function ClassList() {
                       placeholder="e.g 1,2"
                       id="newClassName"
                       value={newClassName}
-                      onChange={(e) => setNewClassName(e.target.value)}
+                      onChange={handleInputChange(setNewClassName)}
+
+                      // onChange={(e) => setNewClassName(e.target.value)}
                     />{" "}
                     {validationErrors.name && (
                       <div className="text-danger">{validationErrors.name}</div>
@@ -4145,6 +4182,8 @@ function ClassList() {
                       className="form-control"
                       id="newDepartmentId"
                       value={newDepartmentId}
+                      // onChange={handleInputChange(setNewDepartmentId)}
+
                       onChange={(e) => setNewDepartmentId(e.target.value)}
                     >
                       <option value="">Select</option>
@@ -4205,8 +4244,12 @@ function ClassList() {
                       id="newClassName"
                       value={newClassName}
                       placeholder="e.g 1,2"
-                      onChange={(e) => setNewClassName(e.target.value)}
+                      onFocus={handleNameFocus}
+                      onChange={handleInputChange(setNewClassName)}
+
+                      // onChange={(e) => setNewClassName(e.target.value)}
                     />
+                    {nameError && <p style={{ color: "red" }}>{nameError}</p>}
                     {validationErrors.name && (
                       <div className="text-danger">{validationErrors.name}</div>
                     )}
