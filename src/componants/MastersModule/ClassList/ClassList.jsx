@@ -3792,12 +3792,51 @@ function ClassList() {
     return errors;
   };
 
-  const handleInputChange = (setter, validator) => (e) => {
+  // const handleInputChange = (setter, validator) => (e) => {
+  //   const { value } = e.target;
+  //   setter(value);
+  //   // Perform validation based on the field that triggered the change
+  //   const errors = validateClassData(newClassName, newDepartmentId);
+  //   setValidationErrors(errors);
+  // };
+  const handleInputChange = (setter) => (e) => {
     const { value } = e.target;
     setter(value);
-    // Perform validation based on the field that triggered the change
     const errors = validateClassData(newClassName, newDepartmentId);
     setValidationErrors(errors);
+  };
+
+  // APi calling for check unique name
+  const handleBlur = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      console.log("the response of the namechack api____");
+
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/check_class_name`,
+        { name: newClassName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+      console.log("the response of the namechack api", response.data);
+      if (response.data?.exists === true) {
+        setNameError("Name is already taken. Please select another name.");
+        setNameAvailable(false);
+      } else {
+        setNameError("");
+        setNameAvailable(true);
+      }
+    } catch (error) {
+      console.error("Error checking class name:", error);
+    }
   };
 
   const handleEdit = (classItem) => {
@@ -3819,19 +3858,25 @@ function ClassList() {
     setNewDepartmentId("");
     setCurrentClass(null);
     setValidationErrors({});
+    setNameError("");
   };
 
   const handleSubmitAdd = async () => {
     const errors = validateClassData(newClassName, newDepartmentId);
     setValidationErrors(errors);
+    console.log("inside the add funciton of the classlist", !nameAvailable);
+    if (Object.keys(errors).length > 0 || !nameAvailable) {
+      console.log(
+        "-------inside the add funciton of the classlist",
+        nameAvailable
+      );
 
-    if (Object.keys(errors).length > 0) {
       return; // Don't submit if there are validation errors
     }
 
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
+      // const academicYr = localStorage.getItem("academicYear");
 
       if (!token) {
         throw new Error("No authentication token found");
@@ -3843,7 +3888,6 @@ function ClassList() {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
           withCredentials: true,
         }
@@ -3865,13 +3909,12 @@ function ClassList() {
   const handleSubmitEdit = async () => {
     const errors = validateClassData(newClassName, newDepartmentId);
     setValidationErrors(errors);
-    if (Object.keys(errors).length > 0) {
+    if (Object.keys(errors).length > 0 || !nameAvailable) {
       return; // Don't submit if there are validation errors
     }
 
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
       if (!token || !currentClass || !currentClass.class_id) {
         throw new Error("Class ID is missing");
@@ -3883,7 +3926,6 @@ function ClassList() {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
           withCredentials: true,
         }
@@ -3940,38 +3982,7 @@ function ClassList() {
     }
   };
   // Handle focus event
-  const handleNameFocus = async () => {
-    if (validateName(name)) {
-      try {
-        const token = localStorage.getItem("authToken");
-        const academicYr = localStorage.getItem("academicYear");
 
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
-        const response = await axios.post(
-          `${API_URL}/api/check_class_name`,
-          { name },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "X-Academic-Year": academicYr,
-            },
-            withCredentials: true,
-          }
-        );
-        if (response.data === true) {
-          setNameError("Name is already taken. Please select another name.");
-          setNameAvailable(false);
-        } else {
-          setNameError("");
-          setNameAvailable(true);
-        }
-      } catch (error) {
-        console.error("Error checking class name:", error);
-      }
-    }
-  };
   const filteredClasses = classes.filter((cls) =>
     cls.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -4167,11 +4178,19 @@ function ClassList() {
                       id="newClassName"
                       value={newClassName}
                       onChange={handleInputChange(setNewClassName)}
+                      onBlur={handleBlur}
 
                       // onChange={(e) => setNewClassName(e.target.value)}
                     />{" "}
+                    {!nameAvailable && (
+                      <span className="block text-red-500 text-xs">
+                        {nameError}
+                      </span>
+                    )}
                     {validationErrors.name && (
-                      <div className="text-danger">{validationErrors.name}</div>
+                      <span className="text-red-500 text-xs">
+                        {validationErrors.name}
+                      </span>
                     )}
                   </div>
                   <div className="form-group">
@@ -4197,9 +4216,9 @@ function ClassList() {
                       ))}
                     </select>
                     {validationErrors.department_id && (
-                      <div className="text-danger">
+                      <span className="text-danger text-xs">
                         {validationErrors.department_id}
-                      </div>
+                      </span>
                     )}
                   </div>
                 </div>
@@ -4244,14 +4263,25 @@ function ClassList() {
                       id="newClassName"
                       value={newClassName}
                       placeholder="e.g 1,2"
-                      onFocus={handleNameFocus}
                       onChange={handleInputChange(setNewClassName)}
+                      onBlur={handleBlur}
 
                       // onChange={(e) => setNewClassName(e.target.value)}
                     />
-                    {nameError && <p style={{ color: "red" }}>{nameError}</p>}
+                    {!nameAvailable && (
+                      <span className=" block text-red-500 text-xs">
+                        {nameError}
+                      </span>
+                    )}
+                    {/* {nameError && (
+                      <span className="text-xs" style={{ color: "red" }}>
+                        {nameError}
+                      </span>
+                    )} */}
                     {validationErrors.name && (
-                      <div className="text-danger">{validationErrors.name}</div>
+                      <span className="text-danger text-xs">
+                        {validationErrors.name}
+                      </span>
                     )}
                   </div>
                   <div className="form-group">
@@ -4275,9 +4305,9 @@ function ClassList() {
                       ))}
                     </select>
                     {validationErrors.department_id && (
-                      <div className="text-danger">
+                      <span className="text-danger text-xs">
                         {validationErrors.department_id}
-                      </div>
+                      </span>
                     )}
                   </div>
                 </div>

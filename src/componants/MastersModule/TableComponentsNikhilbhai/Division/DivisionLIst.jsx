@@ -24,6 +24,10 @@ function DivisionList() {
   const [pageCount, setPageCount] = useState(0);
   const [newDepartmentId, setNewDepartmentId] = useState("");
   const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
+  // validations state for unique name
+  const [nameAvailable, setNameAvailable] = useState(true);
+  const [nameError, setNameError] = useState("");
+
   // const [classes, setClasses] = useState([
   //   "Nursery",
   //   "LKG",
@@ -141,6 +145,40 @@ function DivisionList() {
     setCurrentPage(data.selected);
   };
 
+  // APi calling for check unique name
+  const handleBlur = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      console.log("the response of the namechack api____", newSectionName);
+
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/check_division_name`,
+        { name: newSectionName, class_id: className },
+
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+      console.log("the response of the namechack api", response.data);
+      if (response.data?.exists === true) {
+        setNameError("Name is already taken. Please select another name.");
+        setNameAvailable(false);
+      } else {
+        setNameError("");
+        setNameAvailable(true);
+      }
+    } catch (error) {
+      console.error("Error checking class name:", error);
+    }
+  };
+
   const handleEdit = (section) => {
     setCurrentSection(section);
     setNewSectionName(section.name);
@@ -163,6 +201,7 @@ function DivisionList() {
     setNewDepartmentId("");
     setCurrentSection(null);
     setFieldErrors({});
+    setNameError("");
   };
 
   const handleSubmitAdd = async () => {
@@ -170,13 +209,13 @@ function DivisionList() {
       newSectionName,
       newDepartmentId
     );
-    if (Object.keys(validationErrors).length) {
+    if (Object.keys(validationErrors).length > 0 || !nameAvailable) {
       setFieldErrors(validationErrors);
       return;
     }
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
+      // const academicYr = localStorage.getItem("academicYear");
 
       if (!token) {
         throw new Error("No authentication token or academic year found");
@@ -215,7 +254,8 @@ function DivisionList() {
       newSectionName,
       newDepartmentId
     );
-    if (Object.keys(validationErrors).length) {
+
+    if (Object.keys(validationErrors).length > 0 || !nameAvailable) {
       setFieldErrors(validationErrors);
       return;
     }
@@ -310,8 +350,11 @@ function DivisionList() {
   };
 
   const handleChangeSectionName = (e) => {
+    // handleBlur();
     const { value } = e.target;
+
     setNewSectionName(value);
+
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
       name: validateSectionName(value, newDepartmentId).name,
@@ -494,11 +537,18 @@ function DivisionList() {
                         value={newSectionName}
                         placeholder="e.g A, B, C, D"
                         onChange={handleChangeSectionName}
+                        // onChange={}
+                        onBlur={handleBlur}
                       />
+                      {!nameAvailable && (
+                        <span className=" block text-red-500 text-xs">
+                          {nameError}
+                        </span>
+                      )}
                       {fieldErrors.name && (
-                        <small className="text-danger">
+                        <span className="text-danger text-xs">
                           {fieldErrors.name}
-                        </small>
+                        </span>
                       )}
                     </div>
                     <div className="form-group">
@@ -528,9 +578,9 @@ function DivisionList() {
                         )}
                       </select>
                       {fieldErrors.department_id && (
-                        <div className="text-danger">
+                        <span className="text-danger text-xs">
                           {fieldErrors.department_id}
-                        </div>
+                        </span>
                       )}
                     </div>
                   </div>
@@ -580,9 +630,17 @@ function DivisionList() {
                       placeholder="e.g A, B, C, D"
                       value={newSectionName}
                       onChange={handleChangeSectionName}
+                      // onBlur={handleBlur}
                     />
+                    {!nameAvailable && (
+                      <span className=" block text-red-500 text-xs">
+                        {nameError}
+                      </span>
+                    )}
                     {fieldErrors.name && (
-                      <small className="text-danger">{fieldErrors.name}</small>
+                      <span className="text-danger text-xs">
+                        {fieldErrors.name}
+                      </span>
                     )}
                   </div>
                   <div className="form-group">
@@ -613,7 +671,7 @@ function DivisionList() {
                       )}
                     </select>
                     {fieldErrors.department_id && (
-                      <span className="text-danger">
+                      <span className="text-danger text-xs">
                         {fieldErrors.department_id}
                       </span>
                     )}

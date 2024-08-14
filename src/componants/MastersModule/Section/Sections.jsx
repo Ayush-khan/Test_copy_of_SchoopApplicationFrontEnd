@@ -428,7 +428,9 @@ function Sections() {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
-
+  // validations state for unique name
+  const [nameAvailable, setNameAvailable] = useState(true);
+  const [nameError, setNameError] = useState("");
   const pageSize = 10;
 
   const fetchSections = async () => {
@@ -476,6 +478,38 @@ function Sections() {
     setCurrentPage(data.selected);
   };
 
+  // APi calling for check unique name
+  const handleBlur = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      console.log("the response of the namechack api____", newSectionName);
+
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/check_section_name`,
+        { name: newSectionName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+      console.log("the response of the namechack api", response.data);
+      if (response.data?.exists === true) {
+        setNameError("Name is already taken. Please select another name.");
+        setNameAvailable(false);
+      } else {
+        setNameError("");
+        setNameAvailable(true);
+      }
+    } catch (error) {
+      console.error("Error checking class name:", error);
+    }
+  };
   const handleEdit = (section) => {
     setCurrentSection(section);
     setNewSectionName(section.name);
@@ -493,11 +527,12 @@ function Sections() {
     setNewSectionName("");
     setCurrentSection(null);
     setFieldErrors({}); // Clear field-specific errors when closing the modal
+    setNameError("");
   };
 
   const handleSubmitAdd = async () => {
     const validationErrors = validateSectionName(newSectionName);
-    if (Object.keys(validationErrors).length) {
+    if (Object.keys(validationErrors).length > 0 || !nameAvailable) {
       setFieldErrors(validationErrors);
       return;
     }
@@ -538,7 +573,7 @@ function Sections() {
 
   const handleSubmitEdit = async () => {
     const validationErrors = validateSectionName(newSectionName);
-    if (Object.keys(validationErrors).length) {
+    if (Object.keys(validationErrors).length > 0 || !nameAvailable) {
       setFieldErrors(validationErrors);
       return;
     }
@@ -587,7 +622,6 @@ function Sections() {
   const handleSubmitDelete = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
       if (!token || !currentSection || !currentSection.department_id) {
         throw new Error("Section ID is missing");
@@ -598,7 +632,6 @@ function Sections() {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
           withCredentials: true,
         }
@@ -808,7 +841,13 @@ function Sections() {
                       id="sectionName"
                       value={newSectionName}
                       onChange={(e) => setNewSectionName(e.target.value)}
+                      onBlur={handleBlur}
                     />
+                    {!nameAvailable && (
+                      <span className=" block text-red-500 text-xs">
+                        {nameError}
+                      </span>
+                    )}
                     {fieldErrors.name && (
                       <small className="text-danger">{fieldErrors.name}</small>
                     )}
@@ -859,7 +898,13 @@ function Sections() {
                     id="editSectionName"
                     value={newSectionName}
                     onChange={(e) => setNewSectionName(e.target.value)}
+                    onBlur={handleBlur}
                   />
+                  {!nameAvailable && (
+                    <span className=" block text-red-500 text-xs">
+                      {nameError}
+                    </span>
+                  )}
                   {fieldErrors.name && (
                     <small className="text-danger">{fieldErrors.name}</small>
                   )}
