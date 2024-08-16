@@ -3783,6 +3783,8 @@ function ClassList() {
     const errors = {};
     if (!name || name.trim() === "") {
       errors.name = "The name field is required.";
+    } else if (!/^[A-Za-z0-9]+$/.test(name)) {
+      errors.name = "The name field should contain only alphabets and numbers.";
     } else if (name.length > 30) {
       errors.name = "The name field must not exceed 30 characters.";
     }
@@ -3919,7 +3921,9 @@ function ClassList() {
       if (!token || !currentClass || !currentClass.class_id) {
         throw new Error("Class ID is missing");
       }
-
+      if (!nameAvailable) {
+        return;
+      }
       await axios.put(
         `${API_URL}/api/classes/${currentClass.class_id}`,
         { name: newClassName, department_id: newDepartmentId },
@@ -4380,3 +4384,7 @@ function ClassList() {
 }
 
 export default ClassList;
+
+// For correct seaching
+
+//

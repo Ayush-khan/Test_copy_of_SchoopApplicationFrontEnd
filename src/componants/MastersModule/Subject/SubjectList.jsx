@@ -292,6 +292,7 @@ function SubjectList() {
   if (error) return <p>Error: {error}</p>;
 
   return (
+    // <h1 className="text-center text-white mt-[15%]">This is coming soon...</h1>
     <>
       <ToastContainer />
 

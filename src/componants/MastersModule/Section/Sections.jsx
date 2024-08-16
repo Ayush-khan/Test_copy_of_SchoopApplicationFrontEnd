@@ -532,25 +532,41 @@ function Sections() {
 
   const handleSubmitAdd = async () => {
     const validationErrors = validateSectionName(newSectionName);
-    if (Object.keys(validationErrors).length > 0 || !nameAvailable) {
+    if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       return;
     }
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
       if (!token) {
         throw new Error("No authentication token or academic year found");
       }
       console.log("Name is:", newSectionName);
+
+      const checkNameResponse = await axios.post(
+        `${API_URL}/api/check_section_name`,
+        { name: newSectionName },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
+
+      if (checkNameResponse.data?.exists === true) {
+        setNameError("Name is already taken. Please enter other one.");
+        setNameAvailable(false);
+        return;
+      } else {
+        setNameError("");
+        setNameAvailable(true);
+      }
       await axios.post(
         `${API_URL}/api/sections`,
         { name: newSectionName },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
           withCredentials: true,
         }
@@ -573,26 +589,40 @@ function Sections() {
 
   const handleSubmitEdit = async () => {
     const validationErrors = validateSectionName(newSectionName);
-    if (Object.keys(validationErrors).length > 0 || !nameAvailable) {
+    if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       return;
     }
 
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
       if (!token) {
         throw new Error("No authentication token or academic year found");
       }
+      const nameCheckResponse = await axios.post(
+        `${API_URL}/api/check_section_name`,
+        { name: newSectionName },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
 
+      if (nameCheckResponse.data?.exists === true) {
+        setNameError("Name already taken. Please enter other one.");
+        setNameAvailable(false);
+        return;
+      } else {
+        setNameError("");
+        setNameAvailable(true);
+      }
       await axios.put(
         `${API_URL}/api/sections/${currentSection.department_id}`,
         { name: newSectionName },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
           withCredentials: true,
         }
@@ -841,7 +871,7 @@ function Sections() {
                       id="sectionName"
                       value={newSectionName}
                       onChange={(e) => setNewSectionName(e.target.value)}
-                      onBlur={handleBlur}
+                      // onBlur={handleBlur}
                     />
                     {!nameAvailable && (
                       <span className=" block text-red-500 text-xs">
@@ -898,7 +928,7 @@ function Sections() {
                     id="editSectionName"
                     value={newSectionName}
                     onChange={(e) => setNewSectionName(e.target.value)}
-                    onBlur={handleBlur}
+                    // onBlur={handleBlur}
                   />
                   {!nameAvailable && (
                     <span className=" block text-red-500 text-xs">
