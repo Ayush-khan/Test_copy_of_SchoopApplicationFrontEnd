@@ -30,7 +30,7 @@ const LoginForm = () => {
         }
       );
       console.log("the message of the response of the login", response);
-      // hfg jkbhj
+      // hfg
       //  {"message": "Login successfully",
       //     "token": "390|8ICSKML4LjrZ7lv0AgPZArTRuBzVzUZKnsEWxld0302755c6",
       //     "success": true,
