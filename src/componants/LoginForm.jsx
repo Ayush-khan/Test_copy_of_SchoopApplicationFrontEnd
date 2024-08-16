@@ -54,11 +54,10 @@ const LoginForm = () => {
         } else if (error.response.status === 401) {
           newErrors.password = "Invalid password";
         } else {
-          newErrors.api =
-            "An unexpected error occurred. Please try again later.";
+          newErrors.api = "An unexpected error. Please try again later.";
         }
       } else {
-        newErrors.api = "An unexpected error occurred. Please try again later.";
+        newErrors.api = "An unexpected error. Please try again later.";
       }
       setErrors(newErrors);
     } finally {
@@ -107,7 +106,15 @@ const LoginForm = () => {
             <span className={styles.error}>{errors.password}</span>
           )}
         </div>
-        {errors.api && <span className={styles.error}>{errors.api}</span>}
+
+        {errors.api && (
+          <small
+            className={`${styles.error} text-center relative -left-3  text-nowrap text-xs`}
+          >
+            {errors.api}
+          </small>
+        )}
+
         <button
           type="submit"
           className={`${styles.loginButton} flex place-items-center justify-center`}
