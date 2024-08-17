@@ -1144,7 +1144,7 @@ function UserProfile() {
         >
           <div className=" flex flex-col gap-4 md:grid  md:grid-cols-3 md:gap-x-14 md:mx-10 gap-y-1">
             {/* privious code */}
-            {/* gf fdg */}
+            {/* gf fdg ghf */}
             {/* <div className=" mx-auto      ">
               <label
                 htmlFor="teacher_image_name"
