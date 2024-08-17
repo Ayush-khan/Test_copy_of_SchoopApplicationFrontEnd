@@ -920,7 +920,8 @@ function UserProfile() {
 
         if (staff.teacher_image_name) {
           setPhotoPreview(
-            `${API_URL}/path/to/images/${staff.teacher_image_name}`
+            // `${API_URL}/path/to/images/${staff.teacher_image_name}`
+            `${staff.teacher_image_name}`
           );
         }
       } catch (error) {
