@@ -292,330 +292,330 @@ function SubjectList() {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <h1 className="text-center text-white mt-[15%]">This is coming soon...</h1>
-    // <>
-    //   <ToastContainer />
+    // <h1 className="text-center text-white mt-[15%]">This is coming soon...</h1>
+    <>
+      <ToastContainer />
 
-    //   <div className="container mt-4">
-    //     <div className="card mx-auto lg:w-3/4 shadow-lg">
-    //       <div className="card-header flex justify-between items-center">
-    //         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-    //           Subject
-    //         </h3>{" "}
-    //         <div className="box-border flex md:gap-x-2 justify-end md:h-10">
-    //           <div className=" w-1/2 md:w-fit mr-1">
-    //             <input
-    //               type="text"
-    //               className="form-control"
-    //               placeholder="Search "
-    //               value={searchTerm}
-    //               onChange={(e) => setSearchTerm(e.target.value)}
-    //             />
-    //           </div>
-    //           <button
-    //             className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-    //             onClick={handleAdd}
-    //           >
-    //             <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
-    //             Add
-    //           </button>
-    //         </div>
-    //       </div>
+      <div className="container mt-4">
+        <div className="card mx-auto lg:w-3/4 shadow-lg">
+          <div className="card-header flex justify-between items-center">
+            <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+              Subject
+            </h3>{" "}
+            <div className="box-border flex md:gap-x-2 justify-end md:h-10">
+              <div className=" w-1/2 md:w-fit mr-1">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search "
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <button
+                className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
+                onClick={handleAdd}
+              >
+                <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
+                Add
+              </button>
+            </div>
+          </div>
 
-    //       <div className="card-body w-full">
-    //         <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-    //           <div className="bg-white rounded-lg shadow-xs">
-    //             <table className="min-w-full leading-normal table-auto">
-    //               <thead>
-    //                 <tr className="bg-gray-100">
-    //                   <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-    //                     S.No
-    //                   </th>
-    //                   <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-    //                     Subject
-    //                   </th>
-    //                   <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-    //                     Type
-    //                   </th>
-    //                   <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-    //                     Edit
-    //                   </th>
-    //                   <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-    //                     Delete
-    //                   </th>
-    //                 </tr>
-    //               </thead>
-    //               <tbody>
-    //                 {displayedSections.length ? (
-    //                   displayedSections.map((section, index) => (
-    //                     <tr
-    //                       key={section.section_id}
-    //                       className={`${
-    //                         index % 2 === 0 ? "bg-white" : "bg-gray-100"
-    //                       } hover:bg-gray-50`}
-    //                     >
-    //                       <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-    //                         <p className="text-gray-900 whitespace-no-wrap relative top-2">
-    //                           {index + 1}
-    //                         </p>
-    //                       </td>
-    //                       <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-    //                         <p className="text-gray-900 whitespace-no-wrap relative top-2">
-    //                           {section?.name}
-    //                         </p>
-    //                       </td>
-    //                       <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-    //                         <p className="text-gray-900 whitespace-no-wrap relative top-2">
-    //                           {section?.subject_type}
-    //                         </p>
-    //                       </td>
-    //                       <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-    //                         <button
-    //                           className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-    //                           onClick={() => handleEdit(section)}
-    //                         >
-    //                           <FontAwesomeIcon icon={faEdit} />
-    //                         </button>{" "}
-    //                       </td>
-    //                       <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-    //                         <button
-    //                           className="text-red-600 hover:text-red-800 hover:bg-transparent "
-    //                           onClick={() => handleDelete(section.sm_id)}
-    //                         >
-    //                           <FontAwesomeIcon icon={faTrash} />
-    //                         </button>
-    //                       </td>
-    //                     </tr>
-    //                   ))
-    //                 ) : (
-    //                   <tr>
-    //                     <td colSpan="5" className="text-center">
-    //                       No sections found
-    //                     </td>
-    //                   </tr>
-    //                 )}
-    //               </tbody>
-    //             </table>
-    //           </div>
-    //         </div>
-    //         {filteredSections.length > pageSize && (
-    //           <ReactPaginate
-    //             previousLabel={"previous"}
-    //             nextLabel={"next"}
-    //             breakLabel={"..."}
-    //             pageCount={pageCount}
-    //             marginPagesDisplayed={2}
-    //             pageRangeDisplayed={5}
-    //             onPageChange={handlePageClick}
-    //             containerClassName={"pagination justify-content-center"}
-    //             pageClassName={"page-item"}
-    //             pageLinkClassName={"page-link"}
-    //             previousClassName={"page-item"}
-    //             previousLinkClassName={"page-link"}
-    //             nextClassName={"page-item"}
-    //             nextLinkClassName={"page-link"}
-    //             breakClassName={"page-item"}
-    //             breakLinkClassName={"page-link"}
-    //             activeClassName={"active"}
-    //           />
-    //         )}
-    //       </div>
-    //     </div>
+          <div className="card-body w-full">
+            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+              <div className="bg-white rounded-lg shadow-xs">
+                <table className="min-w-full leading-normal table-auto">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        S.No
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Subject
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Edit
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Delete
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayedSections.length ? (
+                      displayedSections.map((section, index) => (
+                        <tr
+                          key={section.section_id}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50`}
+                        >
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {index + 1}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {section?.name}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {section?.subject_type}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleEdit(section)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>{" "}
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                              onClick={() => handleDelete(section.sm_id)}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="text-center">
+                          No sections found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            {filteredSections.length > pageSize && (
+              <ReactPaginate
+                previousLabel={"previous"}
+                nextLabel={"next"}
+                breakLabel={"..."}
+                pageCount={pageCount}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={5}
+                onPageChange={handlePageClick}
+                containerClassName={"pagination justify-content-center"}
+                pageClassName={"page-item"}
+                pageLinkClassName={"page-link"}
+                previousClassName={"page-item"}
+                previousLinkClassName={"page-link"}
+                nextClassName={"page-item"}
+                nextLinkClassName={"page-link"}
+                breakClassName={"page-item"}
+                breakLinkClassName={"page-link"}
+                activeClassName={"active"}
+              />
+            )}
+          </div>
+        </div>
 
-    //     {/* Modal for adding a new section */}
-    //     {showAddModal && (
-    //       <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
-    //         <div
-    //           className="modal"
-    //           style={{
-    //             display: "block",
-    //             backgroundColor: "rgba(0, 0, 0, 0.5)",
-    //           }}
-    //         >
-    //           <div className="modal-dialog modal-dialog-centered ">
-    //             <div className="modal-content">
-    //               <div className="modal-header">
-    //                 <h5 className="modal-title">Create New Subject</h5>
-    //                 <button
-    //                   type="button"
-    //                   className="btn-close"
-    //                   onClick={handleCloseModal}
-    //                 ></button>
-    //               </div>
-    //               <div className="modal-body">
-    //                 <div className="mb-3">
-    //                   <label htmlFor="sectionName" className="form-label">
-    //                     Subject Name <span className="text-red-500">*</span>
-    //                   </label>
-    //                   <input
-    //                     type="text"
-    //                     maxLength={50}
-    //                     className="form-control"
-    //                     id="sectionName"
-    //                     value={newSectionName}
-    //                     placeholder="e.g A, B, C, D"
-    //                     onChange={handleChangeSectionName}
-    //                   />
-    //                   {fieldErrors.name && (
-    //                     <small className="text-danger">
-    //                       {fieldErrors.name}
-    //                     </small>
-    //                   )}
-    //                 </div>
-    //                 <div className="form-group">
-    //                   <label htmlFor="departmentId">
-    //                     Subject Type <span className="text-red-500">*</span>
-    //                   </label>
-    //                   <select
-    //                     id="departmentId"
-    //                     className="form-control"
-    //                     value={newDepartmentId}
-    //                     onChange={handleChangeDepartmentId}
-    //                   >
-    //                     <option value="">Select Class</option>
-    //                     {classes.map((cls, index) => (
-    //                       <option key={index} value={cls}>
-    //                         {cls}
-    //                       </option>
-    //                     ))}
-    //                   </select>
-    //                   {fieldErrors.department_id && (
-    //                     <div className="text-danger">
-    //                       {fieldErrors.department_id}
-    //                     </div>
-    //                   )}
-    //                 </div>
-    //               </div>
-    //               <div className="modal-footer d-flex justify-content-end">
-    //                 {/* <button type="button" className="btn btn-secondary me-2" onClick={handleCloseModal}>Cancel</button> */}
-    //                 <button
-    //                   type="button"
-    //                   className="btn btn-primary"
-    //                   style={{}}
-    //                   onClick={handleSubmitAdd}
-    //                 >
-    //                   Add
-    //                 </button>
-    //               </div>
-    //             </div>
-    //           </div>
-    //         </div>
-    //       </div>
-    //     )}
+        {/* Modal for adding a new section */}
+        {showAddModal && (
+          <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+            <div
+              className="modal"
+              style={{
+                display: "block",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+              }}
+            >
+              <div className="modal-dialog modal-dialog-centered ">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Create New Subject</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={handleCloseModal}
+                    ></button>
+                  </div>
+                  <div className="modal-body">
+                    <div className="mb-3">
+                      <label htmlFor="sectionName" className="form-label">
+                        Subject Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={50}
+                        className="form-control"
+                        id="sectionName"
+                        value={newSectionName}
+                        placeholder="e.g A, B, C, D"
+                        onChange={handleChangeSectionName}
+                      />
+                      {fieldErrors.name && (
+                        <small className="text-danger">
+                          {fieldErrors.name}
+                        </small>
+                      )}
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="departmentId">
+                        Subject Type <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        id="departmentId"
+                        className="form-control"
+                        value={newDepartmentId}
+                        onChange={handleChangeDepartmentId}
+                      >
+                        <option value="">Select Class</option>
+                        {classes.map((cls, index) => (
+                          <option key={index} value={cls}>
+                            {cls}
+                          </option>
+                        ))}
+                      </select>
+                      {fieldErrors.department_id && (
+                        <div className="text-danger">
+                          {fieldErrors.department_id}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="modal-footer d-flex justify-content-end">
+                    {/* <button type="button" className="btn btn-secondary me-2" onClick={handleCloseModal}>Cancel</button> */}
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      style={{}}
+                      onClick={handleSubmitAdd}
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-    //     {/* Modal for editing a section */}
-    //     {showEditModal && (
-    //       <div
-    //         className="modal"
-    //         style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-    //       >
-    //         <div className="modal-dialog modal-dialog-centered">
-    //           <div className="modal-content">
-    //             <div className="modal-header">
-    //               <h5 className="modal-title">Edit Subject</h5>
-    //               <button
-    //                 type="button"
-    //                 className="btn-close"
-    //                 onClick={handleCloseModal}
-    //               ></button>
-    //             </div>
-    //             <div className="modal-body">
-    //               <div className="mb-3">
-    //                 <label htmlFor="editSectionName" className="form-label">
-    //                   Subject Name <span className="text-red-500">*</span>
-    //                 </label>
-    //                 <input
-    //                   type="text"
-    //                   maxLength={50}
-    //                   className="form-control"
-    //                   id="editSectionName"
-    //                   placeholder="e.g A, B, C, D"
-    //                   value={newSectionName}
-    //                   onChange={handleChangeSectionName}
-    //                 />
-    //                 {fieldErrors.name && (
-    //                   <small className="text-danger">{fieldErrors.name}</small>
-    //                 )}
-    //               </div>
-    //               <div className="form-group">
-    //                 <label htmlFor="editDepartmentId">
-    //                   Subject Type <span className="text-red-500">*</span>
-    //                 </label>
-    //                 <select
-    //                   id="editDepartmentId"
-    //                   className="form-control"
-    //                   value={className}
-    //                   onChange={handleChangeDepartmentId}
-    //                 >
-    //                   <option value="">Select Class</option>
-    //                   {classes.map((cls, index) => (
-    //                     <option key={index} value={cls}>
-    //                       {cls}
-    //                     </option>
-    //                   ))}
-    //                 </select>
-    //                 {fieldErrors.department_id && (
-    //                   <span className="text-danger">
-    //                     {fieldErrors.department_id}
-    //                   </span>
-    //                 )}
-    //               </div>
-    //             </div>
-    //             <div className="modal-footer">
-    //               {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
-    //               <button
-    //                 type="button"
-    //                 className="btn btn-primary"
-    //                 style={{}}
-    //                 onClick={handleSubmitEdit}
-    //               >
-    //                 Update
-    //               </button>
-    //             </div>
-    //           </div>
-    //         </div>
-    //       </div>
-    //     )}
+        {/* Modal for editing a section */}
+        {showEditModal && (
+          <div
+            className="modal"
+            style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Edit Subject</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={handleCloseModal}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label htmlFor="editSectionName" className="form-label">
+                      Subject Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={50}
+                      className="form-control"
+                      id="editSectionName"
+                      placeholder="e.g A, B, C, D"
+                      value={newSectionName}
+                      onChange={handleChangeSectionName}
+                    />
+                    {fieldErrors.name && (
+                      <small className="text-danger">{fieldErrors.name}</small>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="editDepartmentId">
+                      Subject Type <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="editDepartmentId"
+                      className="form-control"
+                      value={className}
+                      onChange={handleChangeDepartmentId}
+                    >
+                      <option value="">Select Class</option>
+                      {classes.map((cls, index) => (
+                        <option key={index} value={cls}>
+                          {cls}
+                        </option>
+                      ))}
+                    </select>
+                    {fieldErrors.department_id && (
+                      <span className="text-danger">
+                        {fieldErrors.department_id}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{}}
+                    onClick={handleSubmitEdit}
+                  >
+                    Update
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-    //     {/* Modal for confirming deletion */}
-    //     {showDeleteModal && (
-    //       <div
-    //         className="modal"
-    //         style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-    //       >
-    //         <div className="modal-dialog modal-dialog-centered">
-    //           <div className="modal-content">
-    //             <div className="modal-header">
-    //               <h5 className="modal-title">Confirm Deletion</h5>
-    //               <button
-    //                 type="button"
-    //                 className="btn-close"
-    //                 onClick={handleCloseModal}
-    //               ></button>
-    //             </div>
-    //             <div className="modal-body">
-    //               <p>
-    //                 Are you sure you want to delete Subject:{" "}
-    //                 <strong>{currentSection.name}</strong>?
-    //               </p>
-    //             </div>
-    //             <div className="modal-footer">
-    //               {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
-    //               <button
-    //                 type="button"
-    //                 className="btn btn-danger"
-    //                 style={{}}
-    //                 onClick={handleSubmitDelete}
-    //               >
-    //                 Delete
-    //               </button>
-    //             </div>
-    //           </div>
-    //         </div>
-    //       </div>
-    //     )}
-    //   </div>
-    // </>
+        {/* Modal for confirming deletion */}
+        {showDeleteModal && (
+          <div
+            className="modal"
+            style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Confirm Deletion</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={handleCloseModal}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <p>
+                    Are you sure you want to delete Subject:{" "}
+                    <strong>{currentSection.name}</strong>?
+                  </p>
+                </div>
+                <div className="modal-footer">
+                  {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    style={{}}
+                    onClick={handleSubmitDelete}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
