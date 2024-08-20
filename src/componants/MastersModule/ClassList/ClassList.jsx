@@ -3996,8 +3996,8 @@ function ClassList() {
     (currentPage + 1) * pageSize
   );
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>Error: {error}</p>;
 
   return (
     <>
@@ -4076,56 +4076,65 @@ function ClassList() {
                   </thead>
                   <tbody>
                     {console.log("classLIst module api", displayedClasses)}
-                    {displayedClasses.map((classItem, index) => (
-                      <tr
-                        key={classItem.class_id}
-                        className={`${
-                          index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                        } hover:bg-gray-50`}
-                      >
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {index + 1}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {classItem.name}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {classItem.students_count}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {
-                              departments.find(
-                                (dep) =>
-                                  dep.department_id === classItem.department_id
-                              )?.name
-                            }
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                            onClick={() => handleEdit(classItem)}
-                          >
-                            <FontAwesomeIcon icon={faEdit} />
-                          </button>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                            onClick={() => handleDelete(classItem.class_id)}
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                          </button>
+                    {displayedClasses.length ? (
+                      displayedClasses.map((classItem, index) => (
+                        <tr
+                          key={classItem.class_id}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50`}
+                        >
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {index + 1}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {classItem.name}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {classItem.students_count}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {
+                                departments.find(
+                                  (dep) =>
+                                    dep.department_id ===
+                                    classItem.department_id
+                                )?.name
+                              }
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleEdit(classItem)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                              onClick={() => handleDelete(classItem.class_id)}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="text-center">
+                          No class found
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>

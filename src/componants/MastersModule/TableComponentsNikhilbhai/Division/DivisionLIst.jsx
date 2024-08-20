@@ -920,7 +920,6 @@ function DivisionList() {
   const fetchSections = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
       if (!token) {
         throw new Error("No authentication token found");
@@ -929,7 +928,6 @@ function DivisionList() {
       const response = await axios.get(`${API_URL}/api/getDivision`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "X-Academic-Year": academicYr,
         },
         withCredentials: true,
       });
@@ -959,16 +957,36 @@ function DivisionList() {
     setPageCount(Math.ceil(filteredSections.length / pageSize));
   }, [filteredSections]);
 
+  // const validateSectionName = (name, departmentId) => {
+  //   const errors = {};
+  //   if (!name || name.trim() === "") {
+  //     errors.name = "The name field is required.";
+  //   } else if (name.length > 1) {
+  //     errors.name = "The name field must not exceed 1 character.";
+  //   }
+  //   if (!departmentId) {
+  //     errors.department_id = "The class is required.";
+  //   }
+  //   return errors;
+  // };
   const validateSectionName = (name, departmentId) => {
     const errors = {};
+
+    // Regular expression to match only alphabets
+    const alphabetRegex = /^[A-Za-z]+$/;
+
     if (!name || name.trim() === "") {
       errors.name = "The name field is required.";
+    } else if (!alphabetRegex.test(name)) {
+      errors.name = "The name field must only contain alphabets.";
     } else if (name.length > 1) {
       errors.name = "The name field must not exceed 1 character.";
     }
+
     if (!departmentId) {
-      errors.department_id = "The class is required.";
+      errors.department_id = "The department is required.";
     }
+
     return errors;
   };
 
@@ -1044,9 +1062,9 @@ function DivisionList() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Section added successfully!");
+      toast.success("Division added successfully!");
     } catch (error) {
-      console.error("Error adding section:", error);
+      console.error("Error adding Division:", error);
       if (error.response && error.response.data && error.response.data.errors) {
         Object.values(error.response.data.errors).forEach((err) =>
           toast.error(err)
@@ -1102,9 +1120,9 @@ function DivisionList() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Section updated successfully!");
+      toast.success("Division updated successfully!");
     } catch (error) {
-      console.error("Error editing section:", error);
+      console.error("Error editing Division:", error);
       if (error.response && error.response.data && error.response.data.errors) {
         Object.values(error.response.data.errors).forEach((err) =>
           toast.error(err)
@@ -1127,7 +1145,7 @@ function DivisionList() {
       const academicYr = localStorage.getItem("academicYear");
 
       if (!token || !currentSection || !currentSection.section_id) {
-        throw new Error("Section ID is missing");
+        throw new Error("Division ID is missing");
       }
 
       const response = await axios.delete(
@@ -1214,18 +1232,18 @@ function DivisionList() {
           </div>
 
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-              <div className="bg-white rounded-lg shadow-xs">
-                <table className="min-w-full leading-normal table-auto">
+            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden ">
+              <div className="bg-white rounded-lg shadow-xs ">
+                <table className="min-w-full leading-normal table-auto ">
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         S.No
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className=" -px-2  text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Divisions
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Class
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -1250,12 +1268,12 @@ function DivisionList() {
                               {index + 1}
                             </p>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section.name}
                             </p>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section?.get_class?.name}
                             </p>
@@ -1281,7 +1299,7 @@ function DivisionList() {
                     ) : (
                       <tr>
                         <td colSpan="5" className="text-center">
-                          No sections found
+                          No Division found
                         </td>
                       </tr>
                     )}
@@ -1326,7 +1344,7 @@ function DivisionList() {
               <div className="modal-dialog modal-dialog-centered ">
                 <div className="modal-content">
                   <div className="modal-header">
-                    <h5 className="modal-title">Create New Section</h5>
+                    <h5 className="modal-title">Create New Division</h5>
                     <button
                       type="button"
                       className="btn-close"
@@ -1419,7 +1437,7 @@ function DivisionList() {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">Edit Section</h5>
+                  <h5 className="modal-title">Edit Division</h5>
                   <button
                     type="button"
                     className="btn-close"

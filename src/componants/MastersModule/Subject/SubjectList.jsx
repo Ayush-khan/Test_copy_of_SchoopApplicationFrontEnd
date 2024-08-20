@@ -23,6 +23,8 @@ function SubjectList() {
   const [pageCount, setPageCount] = useState(0);
   const [newDepartmentId, setNewDepartmentId] = useState("");
   const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
+  const [nameError, setNameError] = useState("");
+  const [nameAvailable, setNameAvailable] = useState(true);
   const [classes, setClasses] = useState([
     "Scholastic",
     "Co-Scholastic",
@@ -104,7 +106,8 @@ function SubjectList() {
     console.log("sectionsID for subject", section.sm_id);
     setNewSectionName(section.name);
     setClassName(section.name);
-    setNewDepartmentId(section.sm_id);
+    setNewDepartmentId(section.subject_type);
+    // console.log("the nw3eef", section.subject_type);
     setShowEditModal(true);
   };
 
@@ -120,6 +123,7 @@ function SubjectList() {
     setNewDepartmentId("");
     setCurrentSection(null);
     setFieldErrors({});
+    setNameError("");
   };
 
   const handleSubmitAdd = async () => {
@@ -127,16 +131,34 @@ function SubjectList() {
       newSectionName,
       newDepartmentId
     );
-    if (Object.keys(validationErrors).length) {
+    if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       return;
     }
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
       if (!token) {
         throw new Error("No authentication token or academic year found");
+      }
+      const checkNameResponse = await axios.post(
+        `${API_URL}/api/check_subject_name`,
+        { name: newSectionName, subject_type: newDepartmentId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
+
+      if (checkNameResponse.data?.exists === true) {
+        setNameError(
+          "Name and Subject Type is already taken. Please select other."
+        );
+        setNameAvailable(false);
+        return;
+      } else {
+        setNameError("");
+        setNameAvailable(true);
       }
       console.log("This is post Form");
       console.log("This is post data Name:", newSectionName);
@@ -147,7 +169,6 @@ function SubjectList() {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
           withCredentials: true,
         }
@@ -155,9 +176,9 @@ function SubjectList() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Section added successfully!");
+      toast.success("subject added successfully!");
     } catch (error) {
-      console.error("Error adding section:", error);
+      console.error("Error adding subject:", error);
       if (error.response && error.response.data && error.response.data.errors) {
         Object.values(error.response.data.errors).forEach((err) =>
           toast.error(err)
@@ -190,9 +211,29 @@ function SubjectList() {
 
       console.log("This is Edit data Name:", newSectionName);
       console.log("This is Edit data class_id:", newDepartmentId);
+
+      const nameCheckResponse = await axios.post(
+        `${API_URL}/api/check_subject_name`,
+        { name: newSectionName, subject_type: newDepartmentId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
+
+      if (nameCheckResponse.data?.exists === true) {
+        setNameError(
+          "Name and subject type is already taken. Please select other."
+        );
+        setNameAvailable(false);
+        return;
+      } else {
+        setNameError("");
+        setNameAvailable(true);
+      }
       await axios.put(
         `${API_URL}/api/subject/${currentSection.sm_id}`,
-        { name: newSectionName, subject_type: currentSection.sm_id },
+        { name: newSectionName, subject_type: newDepartmentId },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -204,9 +245,9 @@ function SubjectList() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Section updated successfully!");
+      toast.success("Subject updated successfully!");
     } catch (error) {
-      console.error("Error editing section:", error);
+      console.error("Error editing subject:", error);
       if (error.response && error.response.data && error.response.data.errors) {
         Object.values(error.response.data.errors).forEach((err) =>
           toast.error(err)
@@ -230,7 +271,7 @@ function SubjectList() {
       const academicYr = localStorage.getItem("academicYear");
 
       if (!token || !currentSection || !currentSection.sm_id) {
-        throw new Error("Section ID is missing");
+        throw new Error("subject ID is missing");
       }
 
       const response = await axios.delete(
@@ -251,12 +292,12 @@ function SubjectList() {
         fetchSections();
         setShowDeleteModal(false);
         setCurrentSection(null);
-        toast.success("Division deleted successfully!");
+        toast.success("subject deleted successfully!");
       } else {
         toast.error(response.data.message || "Failed to delete Division");
       }
     } catch (error) {
-      console.error("Error deleting Division:", error);
+      console.error("Error deleting Subject:", error);
       if (
         error.response &&
         error.response.data &&
@@ -288,8 +329,8 @@ function SubjectList() {
     }));
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>Error: {error}</p>;
 
   return (
     // <h1 className="text-center text-white mt-[15%]">This is coming soon...</h1>
@@ -390,7 +431,7 @@ function SubjectList() {
                     ) : (
                       <tr>
                         <td colSpan="5" className="text-center">
-                          No sections found
+                          No subject found
                         </td>
                       </tr>
                     )}
@@ -453,11 +494,15 @@ function SubjectList() {
                         className="form-control"
                         id="sectionName"
                         value={newSectionName}
-                        placeholder="e.g A, B, C, D"
                         onChange={handleChangeSectionName}
-                      />
+                      />{" "}
+                      {!nameAvailable && (
+                        <span className=" block text-red-500 text-xs">
+                          {nameError}
+                        </span>
+                      )}
                       {fieldErrors.name && (
-                        <small className="text-danger">
+                        <small className="text-danger text-xs">
                           {fieldErrors.name}
                         </small>
                       )}
@@ -480,7 +525,7 @@ function SubjectList() {
                         ))}
                       </select>
                       {fieldErrors.department_id && (
-                        <div className="text-danger">
+                        <div className="text-danger text-xs">
                           {fieldErrors.department_id}
                         </div>
                       )}
@@ -529,12 +574,18 @@ function SubjectList() {
                       maxLength={50}
                       className="form-control"
                       id="editSectionName"
-                      placeholder="e.g A, B, C, D"
                       value={newSectionName}
                       onChange={handleChangeSectionName}
                     />
+                    {!nameAvailable && (
+                      <span className=" block text-red-500 text-xs">
+                        {nameError}
+                      </span>
+                    )}
                     {fieldErrors.name && (
-                      <small className="text-danger">{fieldErrors.name}</small>
+                      <small className="text-danger text-xs">
+                        {fieldErrors.name}
+                      </small>
                     )}
                   </div>
                   <div className="form-group">
@@ -544,18 +595,20 @@ function SubjectList() {
                     <select
                       id="editDepartmentId"
                       className="form-control"
-                      value={className}
+                      value={newDepartmentId}
                       onChange={handleChangeDepartmentId}
                     >
+                      {console.log("the vlause of the class", className)}
                       <option value="">Select Class</option>
                       {classes.map((cls, index) => (
                         <option key={index} value={cls}>
+                          {" "}
                           {cls}
                         </option>
                       ))}
                     </select>
                     {fieldErrors.department_id && (
-                      <span className="text-danger">
+                      <span className="text-danger text-xs">
                         {fieldErrors.department_id}
                       </span>
                     )}
