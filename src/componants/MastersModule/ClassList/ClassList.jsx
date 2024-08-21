@@ -3759,7 +3759,6 @@ function ClassList() {
       const response = await axios.get(`${API_URL}/api/sections`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "X-Academic-Year": academicYr,
         },
         withCredentials: true,
       });
