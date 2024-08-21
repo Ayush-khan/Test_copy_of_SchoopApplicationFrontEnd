@@ -1053,7 +1053,7 @@ const AdminNavBar = () => {
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
-          to="#"
+          to="/managesubject"
           className="text-[.9em] font-bold hover:text-black"
         >
           Subjects Allotment

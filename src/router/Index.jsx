@@ -122,6 +122,7 @@ import ManageRoleAccess from "../componants/RoleMangement/ManageRoleAccess.jsx";
 import Menus from "../componants/RoleMangement/Menus.jsx";
 import DivisionList from "../componants/MastersModule/TableComponentsNikhilbhai/Division/DivisionLIst.jsx";
 import SubjectList from "../componants/MastersModule/Subject/SubjectList.jsx";
+import ManageSubjectList from "../componants/MastersModule/SubjectAllotment/ManageSubjectList.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -200,6 +201,11 @@ function Index() {
         <Route
           path="/subjectlist"
           element={<PrivateRoute element={SubjectList} />}
+        />
+        {/* SubjectAllotment module */}
+        <Route
+          path="/managesubject"
+          element={<PrivateRoute element={ManageSubjectList} />}
         />
 
         <Route path="/sections" element={<PrivateRoute element={Sections} />} />

@@ -1354,7 +1354,7 @@ function DivisionList() {
                   <div className="modal-body">
                     <div className="mb-3">
                       <label htmlFor="sectionName" className="form-label">
-                        Section Name <span className="text-red-500">*</span>
+                        Division Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
