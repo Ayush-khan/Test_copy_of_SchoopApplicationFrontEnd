@@ -619,7 +619,7 @@
 
 // export default ManageSubjectList;
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { IoSettingsSharp } from "react-icons/io5";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -638,7 +638,7 @@ function ManageSubjectList() {
   const [loading, setLoading] = useState(true);
 
   const [classSection, setClassSection] = useState("");
-  const [activeTab, setActiveTab] = useState("manage");
+  const [activeTab, setActiveTab] = useState("Manage");
   const [classes, setClasses] = useState([]);
   const [classesforsubjectallot, setclassesforsubjectallot] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -652,6 +652,7 @@ function ManageSubjectList() {
   const [newclassnames, setnewclassnames] = useState("");
   const [newTeacherAssign, setnewTeacherAssign] = useState("");
   const [ClassNameDropdown, setClassNameDropdown] = useState("");
+  const [classId, setclassId] = useState("");
   // This is hold the allot subjet api response
   //   This is for the subject id in the dropdown
   const [newDepartmentId, setNewDepartmentId] = useState("");
@@ -663,10 +664,51 @@ function ManageSubjectList() {
   const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
   // validations state for unique name
   const [nameAvailable, setNameAvailable] = useState(true);
-
+  //   variable to store the respone of the allot subject tab
+  const [allotSubjectTabData, setAllotSubjectTabData] = useState([]); //
   const [nameError, setNameError] = useState("");
-  const pageSize = 10;
+  //   for dropdown seletect
+  //   const [newDepartmentId, setNewDepartmentId] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const [countSN, setCountSN0] = useState(0);
+  //   for allot subject checkboxes
+  const [selectedDivisions, setSelectedDivisions] = useState([]);
+  const [selectedSubjects, setSelectedSubjects] = useState([]);
 
+  //   Sorting logic state
+
+  const pageSize = 10;
+  const handleInputChange = (e) => {
+    setNewDepartmentId(e.target.value);
+    setIsDropdownOpen(true); // Open the dropdown when typing
+  };
+
+  const handleOptionSelect = (value) => {
+    setNewDepartmentId(value);
+    setIsDropdownOpen(false); // Close the dropdown when an option is selected
+  };
+
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsDropdownOpen(false); // Close the dropdown if clicked outside
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+  //   FOr serial number
+  const generateSerialNumbers = (data) => {
+    const sortedData = [...data].sort((a, b) => a.section_id - b.section_id); // Optional: sort based on section_id or any other criteria
+    return sortedData.map((item, index) => ({
+      ...item,
+      serialNumber: index + 1,
+    }));
+  };
   const fetchClassNames = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -692,6 +734,10 @@ function ManageSubjectList() {
       });
       if (Array.isArray(response.data)) {
         setclassesforsubjectallot(response.data);
+        console.log(
+          "this is the dropdown of the allot subject tab for class",
+          response.data
+        );
       } else {
         setError("Unexpected data format");
       }
@@ -760,24 +806,20 @@ function ManageSubjectList() {
     try {
       console.log(
         "for this sectiong id in seaching inside subjectallotment",
-        classSection
+        classId
       );
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/get_divisions_and_subjects/${classSection}`,
+        `${API_URL}/api/get_divisions_and_subjects/${classId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           // params: { section_id: classSection },
-          params: { classId: classSection },
         }
       );
-      if (response.data.length > 0) {
-        setAllotSubjects(response.data);
-        console.log("the subject and division", response.data);
-        setPageCount(Math.ceil(response.data.length / 10)); // Example pagination logic
+      if (Array.isArray(response.data)) {
+        setAllotSubjectTabData(response.data);
       } else {
-        setSubjects([]);
-        setError("No subjects found for the selected class and division.");
+        setError("Unexpected data format");
       }
     } catch (error) {
       console.error("Error fetching subjects:", error);
@@ -788,8 +830,45 @@ function ManageSubjectList() {
     setActiveTab(tab);
   };
 
+  //   Logic for ALlot subject tab
+  // Extract unique divisions
+  const uniqueDivisions = Array.from(
+    new Set(allotSubjectTabData.map((item) => item.get_division.name))
+  );
+
+  // Extract unique subjects
+  const uniqueSubjects = Array.from(
+    new Set(
+      allotSubjectTabData
+        .map((item) => item.get_subject)
+        .filter((subject) => subject !== null)
+        .map((subject) => subject.name)
+    )
+  );
+
+  // Handle division checkbox change
+  const handleDivisionChange = (event) => {
+    const value = event.target.value;
+    setSelectedDivisions((prevSelected) =>
+      prevSelected.includes(value)
+        ? prevSelected.filter((division) => division !== value)
+        : [...prevSelected, value]
+    );
+  };
+
+  // Handle subject checkbox change
+  const handleSubjectChange = (event) => {
+    const value = event.target.value;
+    setSelectedSubjects((prevSelected) =>
+      prevSelected.includes(value)
+        ? prevSelected.filter((subject) => subject !== value)
+        : [...prevSelected, value]
+    );
+  };
+
   const handleChangeClassSectionForAllotSubjectTab = (e) => {
     setClassNameDropdown(e.target.value);
+    setclassId(e.target.value);
     handleSearchForsubjectAllot();
   };
 
@@ -806,7 +885,7 @@ function ManageSubjectList() {
   const handleEdit = (section) => {
     setCurrentSection(section);
     console.log("fdsfsdsd handleEdit", section);
-    setnewclassnames(section.get_class?.name);
+    setnewclassnames(section?.get_class?.name);
     setnewSectionName(section?.get_division?.name);
     setnewSubjectnName(section?.get_subject?.name);
     // It's used for the dropdown of the tachers
@@ -916,6 +995,22 @@ function ManageSubjectList() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
+
+  //   sorting logic
+  const sortedSubjects = () => {
+    const { key, direction } = sortConfig;
+    const sortedData = [...subjects].sort((a, b) => {
+      if (a[key] < b[key]) {
+        return direction === "asc" ? -1 : 1;
+      }
+      if (a[key] > b[key]) {
+        return direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+    return sortedData;
+  };
+
   return (
     <>
       <ToastContainer />
@@ -1044,49 +1139,47 @@ function ManageSubjectList() {
                             </thead>
                             <tbody>
                               {displayedSections.map((subject, index) => (
-                                <tr
-                                  key={subject.section_id}
-                                  className="text-gray-700 text-sm font-light"
-                                >
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {index + 1}
-                                  </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.get_class?.name}
-                                  </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.get_division?.name}
-                                  </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.get_subject
-                                      ? subject?.get_subject?.name
-                                      : "N/A"}
-                                  </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.get_teacher
-                                      ? subject?.get_teacher?.name
-                                      : "N/A"}
-                                  </td>
+                                <>
+                                  <tr
+                                    key={subject.section_id}
+                                    className="text-gray-700 text-sm font-light"
+                                  >
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {index + 1}
+                                    </td>
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {subject?.get_class?.name}
+                                    </td>
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {subject?.get_division?.name}
+                                    </td>
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {subject?.get_subject?.name}
+                                    </td>
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {subject?.get_teacher?.name}
+                                    </td>
 
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    <button
-                                      onClick={() => handleEdit(subject)}
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                    >
-                                      <FontAwesomeIcon icon={faEdit} />
-                                    </button>
-                                  </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    <button
-                                      onClick={() =>
-                                        handleDelete(subject.section_id)
-                                      }
-                                      className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                    >
-                                      <FontAwesomeIcon icon={faTrash} />
-                                    </button>
-                                  </td>
-                                </tr>
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      <button
+                                        onClick={() => handleEdit(subject)}
+                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                      >
+                                        <FontAwesomeIcon icon={faEdit} />
+                                      </button>
+                                    </td>
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      <button
+                                        onClick={() =>
+                                          handleDelete(subject.section_id)
+                                        }
+                                        className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                      >
+                                        <FontAwesomeIcon icon={faTrash} />
+                                      </button>
+                                    </td>
+                                  </tr>
+                                </>
                               ))}
                             </tbody>
                           </table>
@@ -1125,15 +1218,86 @@ function ManageSubjectList() {
           )}
 
           {/* Other tabs content */}
+
           {activeTab === "AllotSubject" && (
+            <div className="container mt-4">
+              <div className="card mx-auto lg:w-full shadow-lg">
+                <div className="card-header flex justify-between items-center">
+                  <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                    Allot Subject
+                  </h3>
+                </div>
+                <div className="md:w-[80%] mx-auto">
+                  <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
+                    <label
+                      htmlFor="classSection"
+                      className="w-1/4 pt-2 items-center text-center"
+                    >
+                      Select Class <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="classSection"
+                      className="border w-[50%] h-10 md:h-auto rounded-md px-3 py-2 md:w-full mr-2"
+                      value={ClassNameDropdown}
+                      onChange={handleChangeClassSectionForAllotSubjectTab}
+                    >
+                      <option value="">Select Class</option>
+                      {classesforsubjectallot.length === 0 ? (
+                        <option value="">No classes available</option>
+                      ) : (
+                        classesforsubjectallot.map((cls) => (
+                          <option key={cls.classId} value={cls.class_id}>
+                            {` ${cls?.name}`}
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="mb-4">
+                <h3>Divisions</h3>
+                {uniqueDivisions.map((division) => (
+                  <div key={division}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        value={division}
+                        checked={selectedDivisions.includes(division)}
+                        onChange={handleDivisionChange}
+                      />
+                      {division}
+                    </label>
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <h3>Subjects</h3>
+                {uniqueSubjects.map((subject) => (
+                  <div key={subject}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        value={subject}
+                        checked={selectedSubjects.includes(subject)}
+                        onChange={handleSubjectChange}
+                      />
+                      {subject}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* {activeTab === "AllotSubject" && (
             <div>
               <div className="mb-4">
                 <h2
                   className="text-gray-400 mt-1 text-[1.2em] md:text-sm text-nowrap"
                   style={{ color: "#D22B73" }}
                 >
-                  {/* <IoMdAdd /> */}
-                  {/* <FaRegSquarePlus /> */}
                   <FaRegSquarePlus className="inline mr-1 -mt-1 " />
                   Allot Subjects
                 </h2>
@@ -1156,24 +1320,18 @@ function ManageSubjectList() {
                         <option value="">No classes available</option>
                       ) : (
                         classesforsubjectallot.map((cls) => (
-                          <option key={cls.classId} value={cls.classId}>
+                          <option key={cls.classId} value={cls.class_id}>
                             {` ${cls?.name}`}
                           </option>
                         ))
                       )}
                     </select>
-                    {/* <button
-                      onClick={handleSearchForsubjectAllot}
-                      type="button"
-                      className="btn h-10 md:h-auto w-18 md:w-auto btn-primary"
-                    >
-                      Search
-                    </button> */}
                   </div>
                 </div>
               </div>
+              {allotSubjectTabData.length > 0 && <h1> omsdof </h1>}
             </div>
-          )}
+          )} */}
           {activeTab === "AllotTeachersForClass" && (
             <div>Allot Teachers For Class Tab Content</div>
           )}
@@ -1202,7 +1360,9 @@ function ManageSubjectList() {
                   <div className="form-group mb-2">
                     <label htmlFor="newSectionName">
                       Class :{" "}
-                      <span className="font-semibold ml-1">{newClassName}</span>
+                      <span className="font-semibold ml-1">
+                        {newclassnames}
+                      </span>
                     </label>
                     {/* <input
                       type="text"
@@ -1242,7 +1402,48 @@ function ManageSubjectList() {
                     /> */}
                   </div>
                   <div className="form-group">
-                    <label htmlFor="newDepartmentId">
+                    <div ref={dropdownRef} className="relative w-full">
+                      <label
+                        htmlFor="newDepartmentId"
+                        className="w-1/4 pt-2 items-center text-center"
+                      >
+                        Teacher assigned <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="newDepartmentId"
+                        value={newDepartmentId}
+                        onChange={handleInputChange}
+                        onFocus={() => setIsDropdownOpen(true)} // Open dropdown on input focus
+                        placeholder="Search or select"
+                        className="border w-[50%] h-10 rounded-md px-3 py-2 md:w-full mr-2"
+                      />
+                      {isDropdownOpen && (
+                        <select
+                          size={5}
+                          className="absolute top-full left-0 w-[50%] border rounded-md mt-1 bg-white z-10 max-h-48 overflow-auto"
+                          onChange={(e) => handleOptionSelect(e.target.value)}
+                          onBlur={() => setIsDropdownOpen(false)} // Close dropdown on blur
+                          value={newDepartmentId}
+                        >
+                          {departments
+                            .filter((department) =>
+                              department.name
+                                .toLowerCase()
+                                .includes(newDepartmentId.toLowerCase())
+                            )
+                            .map((department) => (
+                              <option
+                                key={department.department_id}
+                                value={department.department_id}
+                              >
+                                {department.name}
+                              </option>
+                            ))}
+                        </select>
+                      )}
+                    </div>
+                    {/* <label htmlFor="newDepartmentId">
                       Teacher assigned <span className="text-red-500">*</span>
                     </label>
                     <select
@@ -1260,7 +1461,7 @@ function ManageSubjectList() {
                           {department.name}
                         </option>
                       ))}
-                    </select>
+                    </select> */}
                     {/* {validationErrors.department_id && (
                       <span className="text-danger text-xs">
                         {validationErrors.department_id}

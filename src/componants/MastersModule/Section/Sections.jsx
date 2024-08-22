@@ -413,6 +413,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { RxCross1 } from "react-icons/rx";
 
 function Sections() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -445,7 +446,6 @@ function Sections() {
       const response = await axios.get(`${API_URL}/api/sections`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "X-Academic-Year": academicYr,
         },
         withCredentials: true,
       });
@@ -466,12 +466,11 @@ function Sections() {
   const validateSectionName = (name) => {
     const regex = /^[a-zA-Z]+$/;
     let errors = {};
-    if (!name) errors.name = "The name field is required.";
+    if (!name) errors.name = "Please enter section name.";
     if (name.length > 255)
       errors.name = "The name field must not exceed 255 characters.";
     if (!regex.test(name))
-      errors.name =
-        "The name field must contain only alphabetic characters without spaces.";
+      errors.name = "Please enter alphabets without space.";
     return errors;
   };
   const handlePageClick = (data) => {
@@ -500,7 +499,7 @@ function Sections() {
       );
       console.log("the response of the namechack api", response.data);
       if (response.data?.exists === true) {
-        setNameError("Name is already taken. Please select another name.");
+        setNameError("Name is already taken.");
         setNameAvailable(false);
       } else {
         setNameError("");
@@ -554,7 +553,7 @@ function Sections() {
       );
 
       if (checkNameResponse.data?.exists === true) {
-        setNameError("Name is already taken. Please enter other one.");
+        setNameError("Name is already taken.");
         setNameAvailable(false);
         return;
       } else {
@@ -610,7 +609,7 @@ function Sections() {
       );
 
       if (nameCheckResponse.data?.exists === true) {
-        setNameError("Name already taken. Please enter other one.");
+        setNameError("Name already taken.");
         setNameAvailable(false);
         return;
       } else {
@@ -686,6 +685,14 @@ function Sections() {
         toast.error("Server error. Please try again later.");
       }
     }
+  };
+  const handleChangeSectionName = (e) => {
+    const { value } = e.target;
+    setNewSectionName(value);
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      name: validateSectionName(value).name,
+    }));
   };
 
   const filteredSections = sections.filter((section) =>
@@ -829,8 +836,8 @@ function Sections() {
             </div>
             <div className=" flex justify-center  pt-2 -mb-3">
               <ReactPaginate
-                previousLabel={"previous"}
-                nextLabel={"next"}
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
                 breakLabel={"..."}
                 breakClassName={"page-item"}
                 breakLinkClassName={"page-link"}
@@ -861,47 +868,59 @@ function Sections() {
           >
             <div className="modal-dialog modal-dialog-centered ">
               <div className="modal-content">
-                <div className="modal-header">
+                <div className="flex justify-between p-3">
                   <h5 className="modal-title">Create New Section</h5>
-                  <button
+                  <RxCross1
+                    className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
-                    className="btn-close"
+                    // className="btn-close text-red-600"
                     onClick={handleCloseModal}
-                  ></button>
+                  />
                 </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
                 <div className="modal-body">
-                  <div className="mb-3">
-                    <label htmlFor="sectionName" className="form-label">
+                  <div className=" relative mb-3 flex justify-center  mx-4">
+                    <label htmlFor="sectionName" className="w-1/2 mt-2">
                       Section Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       maxLength={30}
-                      className="form-control"
+                      className="form-control shadow-md mb-2"
                       id="sectionName"
                       value={newSectionName}
-                      onChange={(e) => setNewSectionName(e.target.value)}
+                      onChange={handleChangeSectionName}
+                      // onChange={(e) => setNewSectionName(e.target.value)}
                       // onBlur={handleBlur}
                     />
-                    {!nameAvailable && (
-                      <span className=" block text-red-500 text-xs">
-                        {nameError}
-                      </span>
-                    )}
-                    {fieldErrors.name && (
-                      <small className="text-danger">{fieldErrors.name}</small>
-                    )}
+                    <div className="absolute top-9 left-1/3">
+                      {!nameAvailable && (
+                        <small className=" block text-danger text-xs ">
+                          {nameError}
+                        </small>
+                      )}
+                      {fieldErrors.name && (
+                        <small className="text-danger text-xs">
+                          {fieldErrors.name}
+                        </small>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="modal-footer d-flex justify-content-end">
+                <div className=" flex justify-end p-3">
                   {/* <button type="button" className="btn btn-secondary me-2" onClick={handleCloseModal}>Cancel</button> */}
                   <button
                     type="button"
-                    className="btn btn-primary"
+                    className="btn btn-primary  px-3 mb-2"
                     style={{}}
                     onClick={handleSubmitAdd}
                   >
-                    Save
+                    Add
                   </button>
                 </div>
               </div>
@@ -918,43 +937,55 @@ function Sections() {
         >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
-              <div className="modal-header">
+              <div className="flex justify-between p-3">
                 <h5 className="modal-title">Edit Section</h5>
-                <button
+                <RxCross1
+                  className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                   type="button"
-                  className="btn-close"
+                  // className="btn-close text-red-600"
                   onClick={handleCloseModal}
-                ></button>
+                />
               </div>
+              <div
+                className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                style={{
+                  backgroundColor: "#C03078",
+                }}
+              ></div>
               <div className="modal-body">
-                <div className="mb-3">
-                  <label htmlFor="editSectionName" className="form-label">
-                    New Section Name <span className="text-red-500">*</span>
+                <div className=" relative mb-3 flex justify-center  mx-4">
+                  <label htmlFor="editSectionName" className="w-1/2 mt-2">
+                    Section Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     maxLength={30}
-                    className="form-control"
+                    className="form-control shadow-md mb-2"
                     id="editSectionName"
                     value={newSectionName}
-                    onChange={(e) => setNewSectionName(e.target.value)}
+                    onChange={handleChangeSectionName}
+                    // onChange={(e) => setNewSectionName(e.target.value)}
                     // onBlur={handleBlur}
                   />
-                  {!nameAvailable && (
-                    <span className=" block text-red-500 text-xs">
-                      {nameError}
-                    </span>
-                  )}
-                  {fieldErrors.name && (
-                    <small className="text-danger">{fieldErrors.name}</small>
-                  )}
+                  <div className="absolute top-9 left-1/3 ">
+                    {!nameAvailable && (
+                      <small className=" block text-danger text-xs">
+                        {nameError}
+                      </small>
+                    )}
+                    {fieldErrors.name && (
+                      <small className="text-danger text-xs">
+                        {fieldErrors.name}
+                      </small>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="modal-footer">
+              <div className=" flex justify-end p-3">
                 {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
                 <button
                   type="button"
-                  className="btn btn-primary"
+                  className="btn btn-primary px-3 mb-2 "
                   style={{}}
                   onClick={handleSubmitEdit}
                 >
@@ -974,25 +1005,32 @@ function Sections() {
         >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
-              <div className="modal-header">
+              <div className="flex justify-between p-3">
                 <h5 className="modal-title">Confirm Deletion</h5>
-                <button
+                <RxCross1
+                  className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                   type="button"
-                  className="btn-close"
+                  // className="btn-close text-red-600"
                   onClick={handleCloseModal}
-                ></button>
+                />
               </div>
+              <div
+                className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                style={{
+                  backgroundColor: "#C03078",
+                }}
+              ></div>
               <div className="modal-body">
                 <p>
-                  Are you sure you want to delete section:{" "}
-                  <strong>{currentSection.name}</strong>?
+                  Are you sure you want to delete section: {currentSection.name}
+                  ?
                 </p>
               </div>
-              <div className="modal-footer">
+              <div className=" flex justify-end p-3">
                 {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
                 <button
                   type="button"
-                  className="btn btn-danger"
+                  className="btn btn-danger px-3 mb-2"
                   style={{}}
                   onClick={handleSubmitDelete}
                 >

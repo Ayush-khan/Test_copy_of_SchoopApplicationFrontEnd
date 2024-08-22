@@ -869,6 +869,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { RxCross1 } from "react-icons/rx";
 
 // The is the divisionlist module
 function DivisionList() {
@@ -976,15 +977,15 @@ function DivisionList() {
     const alphabetRegex = /^[A-Za-z]+$/;
 
     if (!name || name.trim() === "") {
-      errors.name = "The name field is required.";
+      errors.name = "Please enter division name.";
     } else if (!alphabetRegex.test(name)) {
-      errors.name = "The name field must only contain alphabets.";
+      errors.name = "The name field only contain alphabets.";
     } else if (name.length > 1) {
       errors.name = "The name field must not exceed 1 character.";
     }
 
     if (!departmentId) {
-      errors.department_id = "The department is required.";
+      errors.department_id = "Please Select class.";
     }
 
     return errors;
@@ -1043,7 +1044,7 @@ function DivisionList() {
       );
 
       if (checkNameResponse.data?.exists === true) {
-        setNameError("Name and class is already taken. Please select other.");
+        setNameError("Name and class is already taken.");
         setNameAvailable(false);
         return;
       } else {
@@ -1101,7 +1102,7 @@ function DivisionList() {
       );
 
       if (nameCheckResponse.data?.exists === true) {
-        setNameError("Name and class is already taken. Please select other.");
+        setNameError("Name and class is already taken.");
         setNameAvailable(false);
         return;
       } else {
@@ -1309,8 +1310,8 @@ function DivisionList() {
             </div>
             {filteredSections.length > pageSize && (
               <ReactPaginate
-                previousLabel={"previous"}
-                nextLabel={"next"}
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
                 breakLabel={"..."}
                 pageCount={pageCount}
                 marginPagesDisplayed={2}
@@ -1343,52 +1344,65 @@ function DivisionList() {
             >
               <div className="modal-dialog modal-dialog-centered ">
                 <div className="modal-content">
-                  <div className="modal-header">
+                  <div className="flex justify-between p-3">
                     <h5 className="modal-title">Create New Division</h5>
-                    <button
+
+                    <RxCross1
+                      className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                       type="button"
-                      className="btn-close"
+                      // className="btn-close text-red-600"
                       onClick={handleCloseModal}
-                    ></button>
+                    />
                   </div>
+                  <div
+                    className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                    style={{
+                      backgroundColor: "#C03078",
+                    }}
+                  ></div>
+                  {/* <hr className="font-bold"></hr> */}
                   <div className="modal-body">
-                    <div className="mb-3">
-                      <label htmlFor="sectionName" className="form-label">
+                    <div className=" relative mb-3 flex justify-center  mx-4">
+                      <label htmlFor="sectionName" className="w-1/2 mt-2">
                         Division Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         maxLength={1}
-                        className="form-control"
+                        className="form-control shadow-md mb-2"
+                        // style={{ background: "#F8F8F8" }}
                         id="sectionName"
                         value={newSectionName}
-                        placeholder="e.g A, B, C, D"
+                        // placeholder="e.g A, B, C, D"
                         onChange={handleChangeSectionName}
                         // onChange={}
                         // onBlur={handleBlur}
                       />
-                      {!nameAvailable && (
-                        <span className=" block text-red-500 text-xs">
-                          {nameError}
-                        </span>
-                      )}
-                      {fieldErrors.name && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.name}
-                        </span>
-                      )}
+                      <div className="absolute top-9 left-1/3">
+                        {!nameAvailable && (
+                          <span className=" block text-red-500 text-xs">
+                            {nameError}
+                          </span>
+                        )}
+                        {fieldErrors.name && (
+                          <span className="text-danger text-xs">
+                            {fieldErrors.name}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="form-group">
-                      <label htmlFor="departmentId">
+                    {/* <div className="form-group"> */}
+                    <div className=" relative mb-3 flex justify-center  mx-4">
+                      <label htmlFor="departmentId" className="w-1/2 mt-2">
                         Class <span className="text-red-500">*</span>
                       </label>
                       <select
                         id="departmentId"
-                        className="form-control"
+                        className="form-control shadow-md"
                         value={newDepartmentId}
                         onChange={handleChangeDepartmentId}
                       >
-                        <option value="">Select Class</option>
+                        <option value="">Select </option>
                         {/* {classes.map((cls, index) => (
                           <option key={index} value={cls}>
                             {cls}
@@ -1398,24 +1412,32 @@ function DivisionList() {
                           <option value="">No classes available</option>
                         ) : (
                           classes.map((cls) => (
-                            <option key={cls.class_id} value={cls.class_id}>
+                            <option
+                              key={cls.class_id}
+                              value={cls.class_id}
+                              className="max-h-20 overflow-y-scroll "
+                            >
                               {cls.name}
                             </option>
                           ))
                         )}
                       </select>
-                      {fieldErrors.department_id && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.department_id}
-                        </span>
-                      )}
+                      <div className="absolute top-9 left-1/3">
+                        {fieldErrors.department_id && (
+                          <span className="text-danger text-xs">
+                            {fieldErrors.department_id}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="modal-footer d-flex justify-content-end">
+                  {/* <div className="modal-footer d-flex justify-content-end"> */}
+                  {/* modified code by divyani mam guidance */}
+                  <div className=" flex justify-end p-3">
                     {/* <button type="button" className="btn btn-secondary me-2" onClick={handleCloseModal}>Cancel</button> */}
                     <button
                       type="button"
-                      className="btn btn-primary"
+                      className="btn btn-primary px-3 mb-2 "
                       style={{}}
                       onClick={handleSubmitAdd}
                     >
@@ -1436,52 +1458,60 @@ function DivisionList() {
           >
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
-                <div className="modal-header">
+                <div className="flex justify-between p-3">
                   <h5 className="modal-title">Edit Division</h5>
-                  <button
+                  <RxCross1
+                    className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
-                    className="btn-close"
+                    // className="btn-close text-red-600"
                     onClick={handleCloseModal}
-                  ></button>
+                  />
                 </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
                 <div className="modal-body">
-                  <div className="mb-3">
-                    <label htmlFor="editSectionName" className="form-label">
+                  <div className=" relative mb-3 flex justify-center  mx-4">
+                    <label htmlFor="editSectionName" className="w-1/2 mt-2">
                       Division Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       maxLength={1}
-                      className="form-control"
+                      className="form-control shadow-md mb-2"
                       id="editSectionName"
-                      placeholder="e.g A, B, C, D"
                       value={newSectionName}
                       onChange={handleChangeSectionName}
                       // onBlur={handleBlur}
                     />
-                    {!nameAvailable && (
-                      <span className=" block text-red-500 text-xs">
-                        {nameError}
-                      </span>
-                    )}
+                    <div className="absolute top-9 left-1/3 ">
+                      {!nameAvailable && (
+                        <span className=" block text-red-500 text-xs">
+                          {nameError}
+                        </span>
+                      )}
 
-                    {fieldErrors.name && (
-                      <span className="text-danger text-xs">
-                        {fieldErrors.name}
-                      </span>
-                    )}
+                      {fieldErrors.name && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.name}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="editDepartmentId">
+                  <div className=" relative mb-3 flex justify-center  mx-4">
+                    <label htmlFor="editDepartmentId" className="w-1/2 mt-2">
                       Class <span className="text-red-500">*</span>
                     </label>
                     <select
                       id="editDepartmentId"
-                      className="form-control"
+                      className="form-control shadow-md"
                       value={className}
                       onChange={handleChangeDepartmentId}
                     >
-                      <option value="">Select Class</option>
+                      <option value="">Select</option>
                       {/* {classes.map((cls, index) => (
                         <option key={index} value={cls}>
                           {cls}
@@ -1499,18 +1529,21 @@ function DivisionList() {
                         ))
                       )}
                     </select>
-                    {fieldErrors.department_id && (
-                      <span className="text-danger text-xs">
-                        {fieldErrors.department_id}
-                      </span>
-                    )}
+                    <div className="absolute top-9 left-1/3">
+                      {fieldErrors.department_id && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.department_id}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="modal-footer">
+                <div className=" flex justify-end p-3">
                   {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
                   <button
                     type="button"
-                    className="btn btn-primary"
+                    // className="btn btn-primary"
+                    className="btn btn-primary px-3 mb-2 "
                     style={{}}
                     onClick={handleSubmitEdit}
                   >
@@ -1530,25 +1563,32 @@ function DivisionList() {
           >
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
-                <div className="modal-header">
+                <div className="flex justify-between p-3">
                   <h5 className="modal-title">Confirm Deletion</h5>
-                  <button
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
-                    className="btn-close"
+                    // className="btn-close text-red-600"
                     onClick={handleCloseModal}
-                  ></button>
+                  />
                 </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
                 <div className="modal-body">
                   <p>
                     Are you sure you want to delete Division:{" "}
-                    <strong>{currentSection.name}</strong>?
+                    {currentSection.name}?
                   </p>
                 </div>
-                <div className="modal-footer">
+                <div className=" flex justify-end p-3">
                   {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
                   <button
                     type="button"
-                    className="btn btn-danger"
+                    className="btn btn-danger px-3 mb-2"
                     style={{}}
                     onClick={handleSubmitDelete}
                   >
