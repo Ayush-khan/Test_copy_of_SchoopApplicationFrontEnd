@@ -3956,7 +3956,6 @@ function ClassList() {
   const handleSubmitDelete = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
       if (!token || !currentClass || !currentClass.class_id) {
         throw new Error("Class ID is missing");
@@ -3965,7 +3964,6 @@ function ClassList() {
       await axios.delete(`${API_URL}/api/classes/${currentClass.class_id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "X-Academic-Year": academicYr,
         },
         withCredentials: true,
       });
