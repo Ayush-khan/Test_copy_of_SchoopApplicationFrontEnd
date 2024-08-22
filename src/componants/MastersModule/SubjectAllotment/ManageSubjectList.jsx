@@ -1227,39 +1227,67 @@ function ManageSubjectList() {
                     Allot Subject
                   </h3>
                 </div>
-                <div className="mb-4">
-                  <h3>Divisions</h3>
-                  {uniqueDivisions.map((division) => (
-                    <div key={division}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          value={division}
-                          checked={selectedDivisions.includes(division)}
-                          onChange={handleDivisionChange}
-                        />
-                        {division}
-                      </label>
-                    </div>
-                  ))}
-                </div>
 
-                <div>
-                  <h3>Subjects</h3>
-                  {uniqueSubjects.map((subject) => (
-                    <div key={subject}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          value={subject}
-                          checked={selectedSubjects.includes(subject)}
-                          onChange={handleSubjectChange}
-                        />
-                        {subject}
-                      </label>
-                    </div>
-                  ))}
+                <div className="md:w-[80%] mx-auto">
+                  <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
+                    <label
+                      htmlFor="classSection"
+                      className="w-1/4 pt-2 items-center text-center"
+                    >
+                      Select Class <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="classSection"
+                      className="border w-[50%] h-10 md:h-auto rounded-md px-3 py-2 md:w-full mr-2"
+                      value={ClassNameDropdown}
+                      onChange={handleChangeClassSectionForAllotSubjectTab}
+                    >
+                      <option value="">Select Class</option>
+                      {classesforsubjectallot.length === 0 ? (
+                        <option value="">No classes available</option>
+                      ) : (
+                        classesforsubjectallot.map((cls) => (
+                          <option key={cls.classId} value={cls.class_id}>
+                            {` ${cls?.name}`}
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </div>
                 </div>
+              </div>
+              <div className="mb-4">
+                <h3>Divisions</h3>
+                {uniqueDivisions.map((division) => (
+                  <div key={division}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        value={division}
+                        checked={selectedDivisions.includes(division)}
+                        onChange={handleDivisionChange}
+                      />
+                      {division}
+                    </label>
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <h3>Subjects</h3>
+                {uniqueSubjects.map((subject) => (
+                  <div key={subject}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        value={subject}
+                        checked={selectedSubjects.includes(subject)}
+                        onChange={handleSubjectChange}
+                      />
+                      {subject}
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
           )}
