@@ -631,6 +631,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { IoMdAdd } from "react-icons/io";
 import { CgAddR } from "react-icons/cg";
 import { FaRegSquarePlus } from "react-icons/fa6";
+import { RxCross1 } from "react-icons/rx";
 
 function ManageSubjectList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -788,7 +789,7 @@ function ManageSubjectList() {
       const response = await axios.get(`${API_URL}/api/get_subject_Alloted`, {
         headers: { Authorization: `Bearer ${token}` },
         // params: { section_id: classSection },
-        params: { section_id: classSection },
+        params: { section_id: 400 },
       });
       if (response.data.length > 0) {
         setSubjects(response.data);
@@ -816,11 +817,16 @@ function ManageSubjectList() {
           // params: { section_id: classSection },
         }
       );
-      if (Array.isArray(response.data)) {
-        setAllotSubjectTabData(response.data);
+      if (Array.isArray(response.data.subjectAllotments)) {
+        setAllotSubjectTabData(response.data.subjectAllotments);
+        console.log("the data is allotsubject tab", allotSubjectTabData);
       } else {
-        setError("Unexpected data format");
+        console.log("the data formate", response.data.subjectAllotments);
+
+        setAllotSubjectTabData(response.data.subjectAllotments);
+        toast("Unexpected data format");
       }
+      console.log("the data is allotsubjectjfdskf", allotSubjectTabData);
     } catch (error) {
       console.error("Error fetching subjects:", error);
       setError("Error fetching subjects");
@@ -833,9 +839,9 @@ function ManageSubjectList() {
   //   Logic for ALlot subject tab
   // Extract unique divisions
   const uniqueDivisions = Array.from(
-    new Set(allotSubjectTabData.map((item) => item.get_division.name))
+    new Set(allotSubjectTabData.map((item) => item?.get_division?.name))
   );
-
+  console.log("Thje unique division name data", uniqueDivisions);
   // Extract unique subjects
   const uniqueSubjects = Array.from(
     new Set(
@@ -845,6 +851,7 @@ function ManageSubjectList() {
         .map((subject) => subject.name)
     )
   );
+  console.log("Thje unique subject name data", uniqueSubjects);
 
   // Handle division checkbox change
   const handleDivisionChange = (event) => {
@@ -869,8 +876,11 @@ function ManageSubjectList() {
   const handleChangeClassSectionForAllotSubjectTab = (e) => {
     setClassNameDropdown(e.target.value);
     setclassId(e.target.value);
-    handleSearchForsubjectAllot();
+    // handleSearchForsubjectAllot();
   };
+  useEffect(() => {
+    handleSearchForsubjectAllot();
+  }, [ClassNameDropdown]);
 
   const handleChangeClassSection = (e) => {
     setClassSection(e.target.value);
@@ -987,7 +997,7 @@ function ManageSubjectList() {
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
-  console.log("the name", subjects);
+  // console.log("the name", subjects);
   const filteredSections = subjects.filter((section) =>
     section?.get_subject?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -1069,7 +1079,7 @@ function ManageSubjectList() {
                       value={classSection}
                       onChange={handleChangeClassSection}
                     >
-                      <option value="">Select Class</option>
+                      <option value="">Select </option>
                       {classes.length === 0 ? (
                         <option value="">No classes available</option>
                       ) : (
@@ -1220,21 +1230,24 @@ function ManageSubjectList() {
           {/* Other tabs content */}
 
           {activeTab === "AllotSubject" && (
-            <div className="container mt-4">
-              <div className="card mx-auto lg:w-full shadow-lg">
+            <div>
+              <div className="mb-4">
                 <div className="card-header flex justify-between items-center">
-                  <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                  {/* <h2
+                    className="text-gray-400 mt-1 text-[1.2em] md:text-sm text-nowrap"
+                    style={{ color: "#D22B73" }}
+                  >
+                    <FaRegSquarePlus className="inline mr-1 -mt-1 " />
                     Allot Subject
-                  </h3>
+                  </h2> */}
                 </div>
-
                 <div className="md:w-[80%] mx-auto">
                   <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
                     <label
                       htmlFor="classSection"
                       className="w-1/4 pt-2 items-center text-center"
                     >
-                      Select Class <span className="text-red-500">*</span>
+                      Select class <span className="text-red-500">*</span>
                     </label>
                     <select
                       id="classSection"
@@ -1242,7 +1255,7 @@ function ManageSubjectList() {
                       value={ClassNameDropdown}
                       onChange={handleChangeClassSectionForAllotSubjectTab}
                     >
-                      <option value="">Select Class</option>
+                      <option value="">Select </option>
                       {classesforsubjectallot.length === 0 ? (
                         <option value="">No classes available</option>
                       ) : (
@@ -1254,40 +1267,49 @@ function ManageSubjectList() {
                       )}
                     </select>
                   </div>
+                  {allotSubjectTabData.length > 0 && (
+                    <div className="container mt-4">
+                      <div className="mb-4">
+                        <h5>Divisions</h5>
+                        {uniqueDivisions.length > 0 && (
+                          <>
+                            {uniqueDivisions.map((division) => (
+                              <div key={division}>
+                                <label>
+                                  <input
+                                    type="checkbox"
+                                    value={division}
+                                    checked={selectedDivisions.includes(
+                                      division
+                                    )}
+                                    onChange={handleDivisionChange}
+                                  />
+                                  {division}
+                                </label>
+                              </div>
+                            ))}
+                          </>
+                        )}
+                      </div>
+                      <div>
+                        <h5>Subjects</h5>
+                        {uniqueSubjects.map((subject) => (
+                          <div key={subject}>
+                            <label>
+                              <input
+                                type="checkbox"
+                                value={subject}
+                                checked={selectedSubjects.includes(subject)}
+                                onChange={handleSubjectChange}
+                              />
+                              {subject}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div className="mb-4">
-                <h3>Divisions</h3>
-                {uniqueDivisions.map((division) => (
-                  <div key={division}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        value={division}
-                        checked={selectedDivisions.includes(division)}
-                        onChange={handleDivisionChange}
-                      />
-                      {division}
-                    </label>
-                  </div>
-                ))}
-              </div>
-
-              <div>
-                <h3>Subjects</h3>
-                {uniqueSubjects.map((subject) => (
-                  <div key={subject}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        value={subject}
-                        checked={selectedSubjects.includes(subject)}
-                        onChange={handleSubjectChange}
-                      />
-                      {subject}
-                    </label>
-                  </div>
-                ))}
               </div>
             </div>
           )}
@@ -1348,23 +1370,33 @@ function ManageSubjectList() {
           <div className="modal show " style={{ display: "block" }}>
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
-                <div className="modal-header">
+                <div className="flex justify-between p-3">
                   <h5 className="modal-title">Edit Allotment</h5>
-                  <button
+                  <RxCross1
+                    className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
-                    className="btn-close"
+                    // className="btn-close text-red-600"
                     onClick={handleCloseModal}
-                  ></button>
+                  />
                 </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
                 <div className="modal-body">
                   {/* Modal content for editing */}
-                  <div className="form-group mb-2">
-                    <label htmlFor="newSectionName">
+                  <div className=" relative mb-3 flex justify-center  mx-4 gap-x-7">
+                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
                       Class :{" "}
-                      <span className="font-semibold ml-1">
-                        {newclassnames}
-                      </span>
                     </label>
+                    <div className="font-bold form-control  shadow-md  mb-2">
+                      {newclassnames}
+                    </div>
+                    {/* <div className="font-semibol w-1/2 mt-1 relative right-1/4  shadow-md mb-2">
+                      {newclassnames}
+                    </div> */}
                     {/* <input
                       type="text"
                       className="form-control"
@@ -1374,11 +1406,13 @@ function ManageSubjectList() {
                       onChange={(e) => setNewSectionName(e.target.value)}
                     /> */}
                   </div>
-                  <div className="form-group mb-2">
-                    <label htmlFor="newSectionName">
+                  <div className=" relative mb-3 flex justify-center  mx-4 gap-x-7">
+                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
                       Section:{" "}
-                      <span className="font-semibold ml-1">{newSection}</span>
                     </label>
+                    <span className="font-semibold form-control shadow-md mb-2">
+                      {newSection}
+                    </span>
                     {/* <input
                       type="text"
                       className="form-control"
@@ -1388,11 +1422,13 @@ function ManageSubjectList() {
                       onChange={(e) => setNewSectionName(e.target.value)}
                     /> */}
                   </div>
-                  <div className="form-group mb-2">
-                    <label htmlFor="newSectionName">
+                  <div className=" relative  flex justify-start  mx-4 gap-x-7">
+                    <label htmlFor="newSectionName" className="w-1/2 mt-2 ">
                       Subject:{" "}
-                      <span className="font-semibold ml-1">{newSubject}</span>
-                    </label>
+                    </label>{" "}
+                    <span className="font-semibold form-control shadow-md mb-2 ">
+                      {newSubject}
+                    </span>
                     {/* <input
                       type="text"
                       className="form-control"
@@ -1402,11 +1438,14 @@ function ManageSubjectList() {
                       onChange={(e) => setNewSectionName(e.target.value)}
                     /> */}
                   </div>
-                  <div className="form-group">
-                    <div ref={dropdownRef} className="relative w-full">
+                  <div className=" modal-body">
+                    <div
+                      ref={dropdownRef}
+                      className=" relative mb-3 flex justify-center mx-2 gap-4 "
+                    >
                       <label
                         htmlFor="newDepartmentId"
-                        className="w-1/4 pt-2 items-center text-center"
+                        className="w-1/2 mt-2 text-nowrap "
                       >
                         Teacher assigned <span className="text-red-500">*</span>
                       </label>
@@ -1416,13 +1455,16 @@ function ManageSubjectList() {
                         value={newDepartmentId}
                         onChange={handleInputChange}
                         onFocus={() => setIsDropdownOpen(true)} // Open dropdown on input focus
-                        placeholder="Search or select"
-                        className="border w-[50%] h-10 rounded-md px-3 py-2 md:w-full mr-2"
+                        // placeholder="Search or select"
+                        className="form-control shadow-md "
+
+                        // className="border w-[50%] h-10 rounded-md px-3 py-2 md:w-full mr-2 shadow-md"
                       />
+
                       {isDropdownOpen && (
                         <select
-                          size={5}
-                          className="absolute top-full left-0 w-[50%] border rounded-md mt-1 bg-white z-10 max-h-48 overflow-auto"
+                          size={10}
+                          className="  absolute -top-5 left-[44%]  w-[50%] text-xs md:text-sm p-1 px-1 md:px-4 md:absolute md:top-[80%] md:left-[36%] md:w-[65%] border rounded-md mt-1 bg-white z-10 max-h-48 overflow-auto"
                           onChange={(e) => handleOptionSelect(e.target.value)}
                           onBlur={() => setIsDropdownOpen(false)} // Close dropdown on blur
                           value={newDepartmentId}
@@ -1470,10 +1512,10 @@ function ManageSubjectList() {
                     )} */}
                   </div>
                 </div>
-                <div className="modal-footer">
+                <div className=" flex justify-end p-3">
                   <button
                     type="button"
-                    className="btn btn-primary"
+                    className="btn btn-primary px-3 mb-2"
                     onClick={handleSubmitEdit}
                   >
                     Update

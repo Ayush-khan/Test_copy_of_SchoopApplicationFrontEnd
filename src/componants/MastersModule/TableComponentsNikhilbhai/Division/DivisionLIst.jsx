@@ -1380,7 +1380,7 @@ function DivisionList() {
                       />
                       <div className="absolute top-9 left-1/3">
                         {!nameAvailable && (
-                          <span className=" block text-red-500 text-xs">
+                          <span className=" block text-danger text-xs">
                             {nameError}
                           </span>
                         )}
