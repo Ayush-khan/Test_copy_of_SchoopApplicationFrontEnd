@@ -256,7 +256,11 @@ function ClassList() {
   };
 
   const handleDelete = (id) => {
+    // console.log("inside delete of subjectallotmenbt", id);
+    // console.log("inside delete of subjectallotmenbt", classes);
+
     const classToDelete = classes.find((cls) => cls.class_id === id);
+    console.log("the classto didlete", classToDelete);
     setCurrentClass(classToDelete);
     setShowDeleteModal(true);
   };

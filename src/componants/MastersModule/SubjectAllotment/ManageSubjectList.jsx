@@ -789,7 +789,7 @@ function ManageSubjectList() {
       const response = await axios.get(`${API_URL}/api/get_subject_Alloted`, {
         headers: { Authorization: `Bearer ${token}` },
         // params: { section_id: classSection },
-        params: { section_id: 400 },
+        params: { section_id: classSection },
       });
       if (response.data.length > 0) {
         setSubjects(response.data);
@@ -894,6 +894,8 @@ function ManageSubjectList() {
 
   const handleEdit = (section) => {
     setCurrentSection(section);
+    // console.log("the currecne t section", currentSection);
+
     console.log("fdsfsdsd handleEdit", section);
     setnewclassnames(section?.get_class?.name);
     setnewSectionName(section?.get_division?.name);
@@ -905,9 +907,12 @@ function ManageSubjectList() {
 
   const handleDelete = (sectionId) => {
     console.log("inside delete of subjectallotmenbt", sectionId);
-    const classToDelete = classes.find((cls) => cls.class_id === sectionId);
+    console.log("inside delete of subjectallotmenbt", classes);
+    const classToDelete = classes.find((cls) => cls.section_id === sectionId);
     // setCurrentClass(classToDelete);
     setCurrentSection({ classToDelete });
+    console.log("the currecne t section", currentSection);
+
     setShowDeleteModal(true);
   };
 
@@ -924,8 +929,8 @@ function ManageSubjectList() {
     try {
       const token = localStorage.getItem("authToken");
 
-      if (!token || !currentSection || !currentSection.class_id) {
-        throw new Error("Class ID is missing");
+      if (!token || !currentSection || !currentSection.section_id) {
+        throw new Error("Section ID is missing");
       }
       if (!nameAvailable) {
         return;
@@ -962,9 +967,17 @@ function ManageSubjectList() {
     try {
       const token = localStorage.getItem("authToken");
       console.log("the currecnt section", currentSection);
-      console.log("the classes inside the delete", classes?.subject_id);
-      if (!token || !currentSection || !currentSection.subject_id) {
-        throw new Error("Class ID is missing");
+      console.log("the classes inside the delete", classes);
+      console.log(
+        "the current section insde the handlesbmitdelete",
+        currentSection.classToDelete
+      );
+      if (
+        !token ||
+        !currentSection ||
+        !currentSection?.classToDelete?.section_id
+      ) {
+        throw new Error("Section ID is missing");
       }
 
       await axios.delete(
@@ -1005,7 +1018,50 @@ function ManageSubjectList() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
+  // handle allot subject close model
+  const handleAllotSubjectCloseModal = () => {
+    setAllotSubjectTabData([]);
+    // setClassSection("");
+  };
+  // Post the allot subject api
 
+  const handleSubmitAllotment = async () => {
+    if (
+      ClassNameDropdown &&
+      selectedDivisions.length > 0 &&
+      selectedSubjects.length > 0
+    ) {
+      try {
+        const token = localStorage.getItem("authToken");
+
+        const response = await axios.post(
+          `${API_URL}/api/store_subject_allotment`,
+          // "/store_subject_allotment",
+          {
+            class_id: ClassNameDropdown,
+            section_ids: selectedDivisions,
+            subject_ids: selectedSubjects,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        alert("Subject allotment details stored successfully");
+      } catch (error) {
+        if (error.response && error.response.data) {
+          toast.error(`Error deleting class: ${error.response.data.message}`);
+        } else {
+          toast.error(`Error deleting class: ${error.message}`);
+        }
+        console.error("Error deleting class:", error);
+        // setError(error.message);
+      }
+      console.error("Error storing subject allotment:", error);
+      alert("Failed to store subject allotment details");
+    }
+  };
   //   sorting logic
   const sortedSubjects = () => {
     const { key, direction } = sortConfig;
@@ -1085,7 +1141,7 @@ function ManageSubjectList() {
                       ) : (
                         classes.map((cls) => (
                           <option key={cls.section_id} value={cls.section_id}>
-                            {`${cls?.class_name} ${cls?.name}`}
+                            {`${cls?.get_class?.name} ${cls?.name}`}
                           </option>
                         ))
                       )}
@@ -1231,7 +1287,7 @@ function ManageSubjectList() {
 
           {activeTab === "AllotSubject" && (
             <div>
-              <div className="mb-4">
+              <div className="container mb-4">
                 <div className="card-header flex justify-between items-center">
                   {/* <h2
                     className="text-gray-400 mt-1 text-[1.2em] md:text-sm text-nowrap"
@@ -1241,7 +1297,7 @@ function ManageSubjectList() {
                     Allot Subject
                   </h2> */}
                 </div>
-                <div className="md:w-[80%] mx-auto">
+                <div className="w-full mx-auto">
                   <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
                     <label
                       htmlFor="classSection"
@@ -1269,43 +1325,88 @@ function ManageSubjectList() {
                   </div>
                   {allotSubjectTabData.length > 0 && (
                     <div className="container mt-4">
-                      <div className="mb-4">
-                        <h5>Divisions</h5>
-                        {uniqueDivisions.length > 0 && (
-                          <>
-                            {uniqueDivisions.map((division) => (
-                              <div key={division}>
-                                <label>
-                                  <input
-                                    type="checkbox"
-                                    value={division}
-                                    checked={selectedDivisions.includes(
-                                      division
-                                    )}
-                                    onChange={handleDivisionChange}
-                                  />
-                                  {division}
-                                </label>
+                      <div className="card mx-auto relative left-1 lg:w-full shadow-lg ">
+                        <div className="card-header flex justify-between items-center">
+                          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                            Allot Subjects
+                          </h3>
+                          <RxCross1
+                            className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                            type="button"
+                            // className="btn-close text-red-600"
+                            onClick={handleAllotSubjectCloseModal}
+                          />
+                        </div>
+                        <div className="card-body  w-full">
+                          <div className="  lg:overflow-x-hidden">
+                            <div className="mb-4 flex gap-x-4">
+                              {/* <h5 className="px-2  lg:px-3 py-2  text-lg font-semibold text-gray-900 "> */}
+                              <h5 className="px-2 mt-2 lg:px-3 py-2  text-[1em]  text-gray-700 ">
+                                Select divisions{" "}
+                                <span className="text-red-500">*</span>
+                              </h5>
+                              {uniqueDivisions.length > 0 && (
+                                <>
+                                  {uniqueDivisions.map((division) => (
+                                    <div key={division} className=" pt-3">
+                                      <label>
+                                        <input
+                                          type="checkbox"
+                                          className="mr-0.5 shadow-lg "
+                                          value={division}
+                                          checked={selectedDivisions.includes(
+                                            division
+                                          )}
+                                          onChange={handleDivisionChange}
+                                        />
+                                        <span className="font-semibold  text-gray-600">
+                                          {" "}
+                                          {division}
+                                        </span>
+                                      </label>
+                                    </div>
+                                  ))}
+                                </>
+                              )}
+                            </div>
+                            <div className="flex ">
+                              <h5 className="px-2 relative -top-2 lg:px-3 py-2  text-[1em]  text-gray-700 ">
+                                Select subjects{" "}
+                                <span className="text-red-500">*</span>
+                              </h5>
+                              <div className="mb-4 grid grid-cols-5 mx-4 w-[75%]">
+                                {uniqueSubjects.map((subject) => (
+                                  <div key={subject}>
+                                    <label>
+                                      <input
+                                        type="checkbox"
+                                        className="mr-0.5 shadow-lg "
+                                        value={subject}
+                                        checked={selectedSubjects.includes(
+                                          subject
+                                        )}
+                                        onChange={handleSubjectChange}
+                                      />
+                                      <span className="font-semibold text-gray-600">
+                                        {" "}
+                                        {subject}
+                                      </span>
+                                    </label>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </>
-                        )}
-                      </div>
-                      <div>
-                        <h5>Subjects</h5>
-                        {uniqueSubjects.map((subject) => (
-                          <div key={subject}>
-                            <label>
-                              <input
-                                type="checkbox"
-                                value={subject}
-                                checked={selectedSubjects.includes(subject)}
-                                onChange={handleSubjectChange}
-                              />
-                              {subject}
-                            </label>
+                            </div>
                           </div>
-                        ))}
+                        </div>
+                        <div className=" flex justify-end p-3">
+                          <button
+                            type="button"
+                            className="btn btn-primary px-3 mb-2 "
+                            onClick={handleSubmitAllotment}
+                          >
+                            Save
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
