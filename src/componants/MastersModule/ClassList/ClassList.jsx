@@ -100,7 +100,7 @@ function ClassList() {
     }
     return errors;
   };
-  //
+
   // const handleInputChange = (setter, validator) => (e) => {
   //   const { value } = e.target;
   //   setter(value);
