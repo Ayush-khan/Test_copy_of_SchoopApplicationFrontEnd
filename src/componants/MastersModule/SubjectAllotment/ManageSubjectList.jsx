@@ -1,7 +1,7 @@
 // import { useState, useEffect } from "react";
 // import { IoSettingsSharp } from "react-icons/io5";
 // import axios from "axios";
-
+//dfr
 // function ManageSubjectList() {
 //   const API_URL = import.meta.env.VITE_API_URL; // URL for host
 //   const [error, setError] = useState(null);
