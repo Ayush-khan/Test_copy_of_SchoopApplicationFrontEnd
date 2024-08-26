@@ -1344,7 +1344,7 @@ function ManageSubjectList() {
   const subjectMap = new Map();
   allotSubjectTabData.forEach((item) => {
     if (item?.get_subject?.name) {
-      subjectMap.set(item?.get_subject?.name, item?.subject_id);
+      subjectMap.set(item?.get_subject?.name, item?.sm_id);
     }
   });
   const uniqueSubjects = Array.from(subjectMap.entries()).map(
