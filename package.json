@@ -37,6 +37,7 @@
     "react-paginate": "^8.2.0",
     "react-pagination": "^1.0.0",
     "react-router-dom": "^6.23.1",
+    "react-select": "^5.8.0",
     "react-toastify": "^10.0.5",
     "recharts": "^2.12.7",
     "rsuite": "^5.68.0",

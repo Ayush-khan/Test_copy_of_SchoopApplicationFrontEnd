@@ -1095,7 +1095,7 @@ import { FaRegSquarePlus } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import AllotSubjectTab from "./AllotSubjectTab"; // Import the new component
 import ManageSubjectsTab from "./ManageSubjectsTab.jsx";
-
+import AllotTeachersForCLass from "./AllotTeachersForCLass.jsx";
 function ManageSubjectList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [error, setError] = useState(null);
@@ -1225,6 +1225,7 @@ function ManageSubjectList() {
       setError("Error fetching class names");
     }
   };
+  // THis is for the ALlotTeacherFOrACLaSS tAB FECTH class
   //   This is the api for get teacher list in the manage tab edit
   const fetchDepartments = async () => {
     try {
@@ -1256,7 +1257,7 @@ function ManageSubjectList() {
     fetchDepartments();
     fetchClassNamesForAllotSubject();
   }, []);
-
+  // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
     try {
       console.log(
@@ -1317,6 +1318,7 @@ function ManageSubjectList() {
       setError("Error fetching subjects");
     }
   };
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
@@ -1355,10 +1357,68 @@ function ManageSubjectList() {
   );
 
   console.log("Unique subject data with IDs:", uniqueSubjects);
+  // Fetch the checked checkboxes according to the divisions
+  // const fetchSubjectDataForAllotSubjectTab = async (sectionId) => {
+  //   try {
+  //     console.log(
+  //       "for this sectiong id in seaching inside subjectallotment",
+  //       sectionId
+  //     );
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_subjects/${sectionId}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         // params: { section_id: classSection },
+  //       }
+  //     );
+  //     console.log(
+  //       "****|||*******the data is Subject tab",
+  //       response.data.subjects
+  //     );
+  //     // if (Array.isArray(response.data)) {
+  //     //   setAllotSubjectTabData(response.data.divisions);
+  //     //   console.log(
+  //     //     "***********the data is allotsubject tab",
+  //     //     allotSubjectTabData
+  //     //   );
+  //     // } else {
+  //     //   console.log("the data formate", response.data);
 
+  //     //   setAllotSubjectTabData(response.data.divisions);
+  //     //   toast("Unexpected data format");
+  //     // }
+  //     // console.log("the data is allotsubjectjfdskf", allotSubjectTabData);
+  //   } catch (error) {
+  //     console.error("Error fetching subjects:", error);
+  //     setError("Error fetching subjects");
+  //   }
+  // };
+  // Function to fetch subjects based on selected division
+  const fetchSubjectDataForAllotSubjectTab = async (divisionId) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${API_URL}/api/get_subjects/${divisionId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log("this is the subjectlist data", response.data.subjects);
+      const subjectIds = response.data.subjects.map((subject) => subject.sm_id);
+      setSelectedSubjects(subjectIds); // Update selected subjects based on API response
+      console.log(
+        "this is subjectlist checkboxes on the bases of division checkbox--->",
+        selectedSubjects
+      );
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
+    }
+  };
   // Handle division checkbox change
   const handleDivisionChange = (event) => {
     const sectionId = Number(event.target.value);
+    fetchSubjectDataForAllotSubjectTab(sectionId);
     // const value = event.target.value;
     console.log("the event=====", sectionId);
     setSelectedDivisions((prevSelected) =>
@@ -1455,8 +1515,9 @@ function ManageSubjectList() {
           withCredentials: true,
         }
       );
-
-      fetchClassNames();
+      setSubjects([]);
+      handleSearch();
+      // fetchClassNames();
       handleCloseModal();
       toast.success("Subject Record updated successfully!");
     } catch (error) {
@@ -1503,9 +1564,11 @@ function ManageSubjectList() {
         }
       );
 
-      fetchClassNames();
+      // fetchClassNames();
+      handleSearch();
+
       setShowDeleteModal(false);
-      setClasses(null);
+      setSubjects([]);
       toast.success("subject deleted successfully!");
     } catch (error) {
       if (error.response && error.response.data) {
@@ -1577,6 +1640,10 @@ function ManageSubjectList() {
         // Handle successful response
         if (response.status === 201) {
           toast.success("Subject allotment details stored successfully");
+
+          // setClassNameDropdown("");
+          setAllotSubjectTabData([]);
+          setActiveTab("Manage");
         } else {
           toast.error("Unexpected response from the server");
         }
@@ -1870,7 +1937,7 @@ function ManageSubjectList() {
                     </label>
                     <select
                       id="classSection"
-                      className="border w-[50%] h-10 md:h-auto rounded-md px-3 py-2 md:w-full mr-2"
+                      className="border md:w-[50%] h-10 md:h-auto rounded-md px-3 py-2 w-full mr-2"
                       value={ClassNameDropdown}
                       onChange={handleChangeClassSectionForAllotSubjectTab}
                     >
@@ -2029,7 +2096,10 @@ function ManageSubjectList() {
             </div>
           )} */}
           {activeTab === "AllotTeachersForClass" && (
-            <div>Allot Teachers For Class Tab Content</div>
+            <div>
+              {/* classSection, handleChangeClassSection, classes, */}
+              <AllotTeachersForCLass />
+            </div>
           )}
           {activeTab === "AllotTeachers" && (
             <div>Allot Teachers Tab Content</div>
