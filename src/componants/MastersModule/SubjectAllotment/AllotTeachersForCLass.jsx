@@ -431,7 +431,7 @@
 //   );
 // };
 
-// export default AllotTeachersForClass; gfh
+// export default AllotTeachersForClass;
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
