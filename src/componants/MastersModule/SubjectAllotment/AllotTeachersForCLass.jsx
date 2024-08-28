@@ -1,5 +1,3 @@
-// import React, { useState, useEffect, useRef } from "react";
-
 // for multiseleted drop down
 // import React, { useState, useEffect } from "react";
 // import axios from "axios";
