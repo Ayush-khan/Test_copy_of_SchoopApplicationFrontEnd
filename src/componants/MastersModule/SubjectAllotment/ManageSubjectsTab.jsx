@@ -5,6 +5,7 @@ import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 const ManageSubjectsTab = ({
   classSection,
+  nameError,
   handleChangeClassSection,
   handleSearch,
   classes,
@@ -27,23 +28,30 @@ const ManageSubjectsTab = ({
             >
               Select Class <span className="text-red-500">*</span>
             </label>
-            <select
-              id="classSection"
-              className="border w-[50%] h-10 md:h-auto rounded-md px-3 py-2 md:w-full mr-2"
-              value={classSection}
-              onChange={handleChangeClassSection}
-            >
-              <option value="">Select </option>
-              {classes.map((cls) => (
-                <option key={cls.section_id} value={cls.section_id}>
-                  {`${cls?.get_class?.name} ${cls?.name}`}
-                </option>
-              ))}
-            </select>
+            <div className="w-full">
+              <select
+                id="classSection"
+                className="border w-[50%] h-10 md:h-auto rounded-md px-3 py-2 md:w-full mr-2"
+                value={classSection}
+                onChange={handleChangeClassSection}
+              >
+                <option value="">Select </option>
+                {classes.map((cls) => (
+                  <option key={cls.section_id} value={cls.section_id}>
+                    {`${cls?.get_class?.name} ${cls?.name}`}
+                  </option>
+                ))}
+              </select>
+              {nameError && (
+                <div className=" relative top-0.5 ml-1 text-danger text-xs">
+                  {nameError}
+                </div>
+              )}{" "}
+            </div>
             <button
               onClick={handleSearch}
               type="button"
-              className="btn h-10 md:h-auto w-18 md:w-auto btn-primary"
+              className="btn h-10  w-18 md:w-auto btn-primary"
             >
               Search
             </button>

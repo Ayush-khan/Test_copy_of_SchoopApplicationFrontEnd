@@ -1098,7 +1098,7 @@ import ManageSubjectsTab from "./ManageSubjectsTab.jsx";
 import AllotTeachersForCLass from "./AllotTeachersForCLass.jsx";
 function ManageSubjectList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [classSection, setClassSection] = useState("");
@@ -1131,7 +1131,7 @@ function ManageSubjectList() {
   const [nameAvailable, setNameAvailable] = useState(true);
   //   variable to store the respone of the allot subject tab
   const [allotSubjectTabData, setAllotSubjectTabData] = useState([]); //
-  const [nameError, setNameError] = useState("");
+  // const [nameError, setNameError] = useState("");
   //   for dropdown seletect
   //   const [newDepartmentId, setNewDepartmentId] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -1140,6 +1140,8 @@ function ManageSubjectList() {
   //   for allot subject checkboxes
   const [selectedDivisions, setSelectedDivisions] = useState([]);
   const [selectedSubjects, setSelectedSubjects] = useState([]);
+  const [error, setError] = useState(null);
+  const [nameError, setNameError] = useState(null);
 
   //   Sorting logic state
 
@@ -1259,6 +1261,10 @@ function ManageSubjectList() {
   }, []);
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
+    if (!classSection) {
+      setNameError("Please select the class.");
+      return;
+    }
     try {
       console.log(
         "for this sectiong id in seaching inside subjectallotment",
@@ -1279,7 +1285,7 @@ function ManageSubjectList() {
         setPageCount(Math.ceil(response.data.length / 10)); // Example pagination logic
       } else {
         setSubjects([]);
-        setError("No subjects found for the selected class and division.");
+        toast.error("No subjects found for the selected class and division.");
       }
     } catch (error) {
       console.error("Error fetching subjects:", error);
@@ -1449,6 +1455,8 @@ function ManageSubjectList() {
   }, [ClassNameDropdown]);
 
   const handleChangeClassSection = (e) => {
+    setNameError(null); // Reset error when user selects a class
+
     setClassSection(e.target.value);
     // handleSearchForsubjectAllot();
   };
@@ -1639,11 +1647,13 @@ function ManageSubjectList() {
 
         // Handle successful response
         if (response.status === 201) {
-          toast.success("Subject allotment details stored successfully");
+          toast.success("Subject allotment details updated successfully");
+          // toast.success("Subject allotment updated successfully!");
 
-          // setClassNameDropdown("");
-          setAllotSubjectTabData([]);
-          setActiveTab("Manage");
+          setTimeout(() => {
+            setAllotSubjectTabData([]); // Clear the form or reset state
+            setActiveTab("Manage"); // Set the active tab to "Manage" after 2 seconds
+          }, 3000); // Wait for 2 seconds
         } else {
           toast.error("Unexpected response from the server");
         }
@@ -1715,6 +1725,7 @@ function ManageSubjectList() {
           {activeTab === "Manage" && (
             <ManageSubjectsTab
               classSection={classSection}
+              nameError={nameError}
               handleChangeClassSection={handleChangeClassSection}
               handleSearch={handleSearch}
               classes={classes}
@@ -1917,6 +1928,8 @@ function ManageSubjectList() {
             //   handleAllotSubjectCloseModal={handleAllotSubjectCloseModal}
             // />
             <div>
+              <ToastContainer />
+
               <div className="container mb-4">
                 <div className="card-header flex justify-between items-center">
                   {/* <h2
