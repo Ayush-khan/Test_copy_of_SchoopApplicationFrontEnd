@@ -1408,7 +1408,7 @@ function ManageSubjectList() {
       const subjectIds = response.data.subjects.map((subject) => subject.sm_id);
       setSelectedSubjects(subjectIds); // Update selected subjects based on API response
       console.log(
-        "this is subjectlist checkboxes on the bases of division checkbox--->",
+        "------->this is subjectlist checkboxes on the bases of division checkbox--->",
         selectedSubjects
       );
     } catch (error) {

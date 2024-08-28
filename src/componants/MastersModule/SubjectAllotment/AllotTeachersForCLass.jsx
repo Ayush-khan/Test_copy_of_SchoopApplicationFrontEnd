@@ -444,6 +444,9 @@ const AllotTeachersForClass = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [classes, setClasses] = useState([]);
   const [classSection, setClassSection] = useState("");
+  const [sectionId, setSectionId] = useState("");
+  const [classId, setClassId] = useState("");
+
   const [subjects, setSubjects] = useState([]);
   const [error, setError] = useState(null);
   const [departments, setDepartments] = useState([]);
@@ -500,14 +503,22 @@ const AllotTeachersForClass = () => {
   };
 
   const handleClassSectionChange = (e) => {
+    const [classSection, sectionId] = e.target.value.split(" "); // Split the value by space
     setClassSection(e.target.value);
-  };
+    setClassId(classSection); // Store the first value in setClassSection
 
+    setSectionId(sectionId); // Store the second value in setSectionId
+    console.log("The class_id", classId);
+    console.log("The sectionId ", sectionId);
+
+    // console.log("The sectionId and class_id", e.target.value);
+  };
+  // heavy code take time more
   const handleSearchForAllotTea = async () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/subject-allotment/section/${classSection}`,
+        `${API_URL}/api/subject-allotment/section/${classId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -518,13 +529,15 @@ const AllotTeachersForClass = () => {
           ([sm_id, subject]) => ({
             sm_id, // Store the sm_id for PUT request later
             subject_name: subject.subject_name,
-            selectedTeachers: subject.details.map((detail) => ({
-              value: detail.teacher_id,
-              label: detail.teacher?.name || "Select a teacher",
-            })),
+            selectedTeachers: subject.details
+              .filter((detail) => detail.teacher_id) // Only include non-null teacher IDs
+              .map((detail) => ({
+                value: detail.teacher_id,
+                label: detail.teacher?.name,
+              })),
             details: subject.details.map((detail) => ({
               subject_id: detail.subject_id,
-              teacher_id: detail.teacher_id,
+              teacher_id: detail.teacher_id || null, // Store the teacher_id or null if not selected
             })), // Store original details for later reference
           })
         );
@@ -532,12 +545,51 @@ const AllotTeachersForClass = () => {
       } else {
         setError("Unexpected data format");
       }
-      console.log("Subjects data:", response.data.data);
+      console.log("Subjects data from GET API by classId:", subjects);
     } catch (error) {
       console.error("Error fetching subjects:", error);
       setError("Error fetching subjects");
     }
   };
+
+  //  Light code
+  //   const handleSearchForAllotTea = async () => {
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+  //       const response = await axios.get(
+  //         `${API_URL}/api/subject-allotment/section/${classId}`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+
+  //       if (response.data.status === "success" && response.data.data) {
+  //         const subjectData = Object.entries(response.data.data).map(
+  //           ([sm_id, subject]) => ({
+  //             sm_id, // Store the sm_id for PUT request later
+  //             subject_name: subject.subject_name,
+  //             selectedTeachers: subject.details
+  //               .filter((detail) => detail.teacher_id) // Only include non-null teacher IDs
+  //               .map((detail) => ({
+  //                 value: detail.teacher_id,
+  //                 label: detail.teacher?.name,
+  //               })),
+  //             details: subject.details.map((detail) => ({
+  //               subject_id: detail.subject_id,
+  //               teacher_id: detail.teacher_id || null, // Store the teacher_id or null if not selected
+  //             })), // Store original details for later reference
+  //           })
+  //         );
+  //         setSubjects(subjectData);
+  //       } else {
+  //         setError("Unexpected data format");
+  //       }
+  //       console.log("Subjects data from GET API by classId:", subjects);
+  //     } catch (error) {
+  //       console.error("Error fetching subjects:", error);
+  //       setError("Error fetching subjects");
+  //     }
+  //   };
 
   const handleTeacherSelect = (selectedOptions, subjectIndex) => {
     const newSubjects = [...subjects];
@@ -551,28 +603,56 @@ const AllotTeachersForClass = () => {
 
     setSubjects(newSubjects);
   };
-
+  console.log("The setSubject if teacher id is unselected", subjects);
+  // heavy code here
   const handleSubmitForAllotTeacherTab = async () => {
     try {
       const token = localStorage.getItem("authToken");
 
       const formattedData = {
         subjects: subjects.reduce((acc, subject) => {
+          const existingTeacherIds = new Set(
+            subject.details.map((detail) => detail.teacher_id)
+          );
+
+          // Combine existing teachers and selected teachers, handling additions and removals
+          const updatedDetails = subject.selectedTeachers.map(
+            (selectedTeacher) => {
+              return {
+                subject_id: subject.sm_id,
+                teacher_id: selectedTeacher.value,
+              };
+            }
+          );
+
+          // Handle removals: if a teacher is no longer selected, set their teacher_id to null
+          //   subject.details.forEach((detail) => {
+          //     if (
+          //       detail.teacher_id &&
+          //       !subject.selectedTeachers.some(
+          //         (t) => t.value === detail.teacher_id
+          //       )
+          //     ) {
+          //       updatedDetails.push({
+          //         subject_id: detail.subject_id,
+          //         teacher_id: null,
+          //       });
+          //     }
+          //   });
+
           acc[subject.sm_id] = {
-            details: subject.details.map((detail) => ({
-              subject_id: detail.subject_id,
-              teacher_id: detail.teacher_id || null, // Use `null` if the teacher is not selected
-            })),
+            details: updatedDetails,
           };
+
           return acc;
         }, {}),
       };
 
-      console.log("Final subject data", subjects);
-      console.log("Formatted data for PUT request", formattedData);
+      console.log("Final subject data for PUT request:", subjects);
+      console.log("Formatted data for PUT request:", formattedData);
 
       const response = await axios.put(
-        `${API_URL}/api/subject-allotments/102/400`, // Replace with actual classId and sectionId
+        `${API_URL}/api/subject-allotments/${sectionId}/${classId}`, // Replace with actual classId and sectionId
         formattedData,
         {
           headers: {
@@ -588,6 +668,43 @@ const AllotTeachersForClass = () => {
       setError("Error updating teacher allotment");
     }
   };
+  // light code is here
+  //   const handleSubmitForAllotTeacherTab = async () => {
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+
+  //       const formattedData = {
+  //         subjects: subjects.reduce((acc, subject) => {
+  //           acc[subject.sm_id] = {
+  //             details: subject.details.map((detail) => ({
+  //               subject_id: detail.subject_id || null,
+  //               teacher_id: detail.teacher_id || null,
+  //             })),
+  //           };
+  //           return acc;
+  //         }, {}),
+  //       };
+
+  //       console.log("Final subject data for PUT request:", subjects);
+  //       console.log("Formatted data for PUT request:", formattedData);
+
+  //       const response = await axios.put(
+  //         `${API_URL}/api/subject-allotments/${sectionId}/${classId}`, // Replace with actual classId and sectionId
+  //         formattedData,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
+
+  //       console.log("Update response:", response.data);
+  //       alert("Teacher allotment updated successfully!");
+  //     } catch (error) {
+  //       console.error("Error updating teacher allotment:", error);
+  //       setError("Error updating teacher allotment");
+  //     }
+  //   };
 
   return (
     <div>
@@ -608,7 +725,10 @@ const AllotTeachersForClass = () => {
             >
               <option value="">Select</option>
               {classes.map((cls) => (
-                <option key={cls.section_id} value={cls.section_id}>
+                <option
+                  key={cls.section_id}
+                  value={`${cls.section_id} ${cls.class_id}`}
+                >
                   {`${cls?.get_class?.name} ${cls?.name}`}
                 </option>
               ))}
