@@ -1,4 +1,4 @@
-// // for multiseleted drop down fg df fdg
+// // for multiseleted drop down fg df
 // import React, { useState, useEffect } from "react";
 // import axios from "axios";
 // import Select from "react-select";
