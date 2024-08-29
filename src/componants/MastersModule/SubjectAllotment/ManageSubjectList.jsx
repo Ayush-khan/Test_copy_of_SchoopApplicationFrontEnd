@@ -1096,6 +1096,7 @@ import { RxCross1 } from "react-icons/rx";
 import AllotSubjectTab from "./AllotSubjectTab"; // Import the new component
 import ManageSubjectsTab from "./ManageSubjectsTab.jsx";
 import AllotTeachersForCLass from "./AllotTeachersForCLass.jsx";
+import AllotTeachersTab from "./AllotTeachersTab.jsx";
 function ManageSubjectList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
@@ -2115,7 +2116,9 @@ function ManageSubjectList() {
             </div>
           )}
           {activeTab === "AllotTeachers" && (
-            <div>Allot Teachers Tab Content</div>
+            <div>
+              <AllotTeachersTab />
+            </div>
           )}
         </div>
       </div>
