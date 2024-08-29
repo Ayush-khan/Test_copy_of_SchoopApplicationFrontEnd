@@ -522,7 +522,271 @@
 // };
 
 // export default TeacherSubjectAllotment;
+//working but want to call one more api on the bases of teacher return subjects
+// import React, { useState, useEffect } from "react";
+// import axios from "axios";
+// import Select from "react-select";
+// import { toast, ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
 
+// const AllotTeachersTab = () => {
+//   const API_URL = import.meta.env.VITE_API_URL;
+//   const [classes, setClasses] = useState([]);
+//   const [divisions, setDivisions] = useState([]);
+//   const [subjects, setSubjects] = useState([]);
+//   const [teachers, setTeachers] = useState([]);
+//   const [selectedClass, setSelectedClass] = useState(null);
+//   const [selectedDivision, setSelectedDivision] = useState(null);
+//   const [selectedSubjects, setSelectedSubjects] = useState([]);
+//   const [selectedTeacher, setSelectedTeacher] = useState(null);
+
+//   useEffect(() => {
+//     fetchClassNames();
+//     fetchTeachers();
+//   }, []);
+//   // Define custom styles for react-select
+//   const customSelectStyles = {
+//     control: (provided) => ({
+//       ...provided,
+//       minHeight: "40px", // Set a minimum height for the select box
+//     }),
+//     valueContainer: (provided) => ({
+//       ...provided,
+//       height: "40px", // Set the height for the value container
+//       display: "flex",
+
+//       alignItems: "center",
+//     }),
+//     input: (provided) => ({
+//       ...provided,
+
+//       height: "40px", // Set the height for the input box
+//     }),
+//     dropdownIndicator: (provided) => ({
+//       ...provided,
+//       // backgroundColor: "black",
+//       height: "40px", // Set the height for the dropdown indicator
+//     }),
+//   };
+//   const fetchClassNames = async () => {
+//     try {
+//       const token = localStorage.getItem("authToken");
+//       const response = await axios.get(`${API_URL}/api/getClassList`, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       });
+//       setClasses(response.data);
+//       console.log("inside the ALLot_teaceher tab:CLASSESS", classes);
+//     } catch (error) {
+//       toast.error("Error fetching class names");
+//     }
+//   };
+
+//   const fetchTeachers = async () => {
+//     try {
+//       const token = localStorage.getItem("authToken");
+//       const response = await axios.get(`${API_URL}/api/get_teacher_list`, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       });
+//       setTeachers(
+//         response.data.map((teacher) => ({
+//           value: teacher.reg_id,
+//           label: teacher.name,
+//         }))
+//       );
+//       console.log("inside the ALLot_teaceher tab:Teachers", teachers);
+//     } catch (error) {
+//       toast.error("Error fetching teachers");
+//     }
+//   };
+
+//   const handleClassChange = async (selectedOption) => {
+//     setSelectedClass(selectedOption);
+//     setSelectedDivision(null);
+//     setDivisions([]);
+//     setSubjects([]);
+
+//     try {
+//       const token = localStorage.getItem("authToken");
+//       const response = await axios.get(
+//         `${API_URL}/api/get_divisions/${selectedOption.value}`,
+//         {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }
+//       );
+//       setDivisions(response?.data?.divisions);
+//       console.log("inside the ALLot_teaceher tab:Divisions", response.data);
+//     } catch (error) {
+//       toast.error("Error fetching divisions");
+//     }
+//   };
+
+//   const handleDivisionChange = async (selectedOption) => {
+//     setSelectedDivision(selectedOption);
+//     setSubjects([]);
+
+//     try {
+//       const token = localStorage.getItem("authToken");
+//       const response = await axios.get(
+//         `${API_URL}/api/get_subjects/${selectedOption.value}`,
+//         {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }
+//       );
+//       setSubjects(response?.data?.subjects);
+//       console.log(
+//         "inside the ALLot_teaceher tab:Subjects",
+//         response.data?.subjects
+//       );
+//     } catch (error) {
+//       toast.error("Error fetching subjects");
+//     }
+//   };
+
+//   const handleSubjectChange = (subjectId) => {
+//     if (selectedSubjects.includes(subjectId)) {
+//       setSelectedSubjects(selectedSubjects.filter((id) => id !== subjectId));
+//     } else {
+//       setSelectedSubjects([...selectedSubjects, subjectId]);
+//     }
+//   };
+
+//   const handleSave = async () => {
+//     if (
+//       !selectedClass ||
+//       !selectedDivision ||
+//       selectedSubjects.length === 0 ||
+//       !selectedTeacher
+//     ) {
+//       toast.error("Please fill all fields before saving");
+//       return;
+//     }
+
+//     try {
+//       const token = localStorage.getItem("authToken");
+//       const response = await axios.post(
+//         `${API_URL}/api/allot-teacher-for-subject/${selectedClass.value}/${selectedDivision.value}`,
+//         {
+//           subjects: selectedSubjects,
+//           teacher_id: selectedTeacher.value,
+//         },
+//         {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }
+//       );
+//       toast.success("Teacher allotted successfully");
+//     } catch (error) {
+//       toast.error("Error saving allotment");
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <ToastContainer />
+//       <div className="container mt-4">
+//         <div className="card mx-auto lg:w-full shadow-lg">
+//           <div className="card-header flex justify-between items-center">
+//             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+//               Allot Teachers
+//             </h3>
+//           </div>
+//           <div className="card-body w-full md:w-[85%] mx-auto">
+//             <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
+//               <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
+//                 Select Class <span className="text-red-500">*</span>
+//               </label>
+//               <div className="w-full">
+//                 <Select
+//                   options={classes.map((cls) => ({
+//                     value: cls.class_id,
+//                     label: cls.name,
+//                   }))}
+//                   value={selectedClass}
+//                   onChange={handleClassChange}
+//                   placeholder="Select"
+//                   styles={customSelectStyles} // Apply custom styles
+//                 />
+//               </div>
+//             </div>
+//             <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
+//               <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
+//                 Select Division <span className="text-red-500">*</span>
+//               </label>
+//               <div className="w-full">
+//                 <select
+//                   className="form-control"
+//                   value={selectedDivision ? selectedDivision.value : ""}
+//                   onChange={(e) =>
+//                     handleDivisionChange({
+//                       value: e.target.value,
+//                       label: divisions.find(
+//                         (div) => div.section_id == e.target.value
+//                       )?.name,
+//                     })
+//                   }
+//                   disabled={!selectedClass}
+//                 >
+//                   <option value="">Select </option>
+//                   {divisions.map((div) => (
+//                     <option key={div.section_id} value={div.section_id}>
+//                       {div.name}
+//                     </option>
+//                   ))}
+//                 </select>
+//               </div>
+//             </div>
+//             <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
+//               <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
+//                 Assign Teacher <span className="text-red-500">*</span>
+//               </label>
+//               <div className="w-full">
+//                 <Select
+//                   options={teachers}
+//                   value={selectedTeacher}
+//                   onChange={setSelectedTeacher}
+//                   placeholder="Select"
+//                   styles={customSelectStyles} // Apply custom styles
+//                 />
+//               </div>
+//             </div>
+//             <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
+//               <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
+//                 Select Subjects <span className="text-red-500">*</span>
+//               </label>
+//               <div className="w-full">
+//                 {subjects.map((subject) => (
+//                   <div key={subject.sm_id}>
+//                     <label>
+//                       <input
+//                         type="checkbox"
+//                         value={subject.sm_id}
+//                         checked={selectedSubjects.includes(subject.sm_id)}
+//                         onChange={() => handleSubjectChange(subject.sm_id)}
+//                       />
+//                       {subject.name}
+//                     </label>
+//                   </div>
+//                 ))}
+//               </div>
+//             </div>
+
+//             <div className="flex justify-end p-3 mr-5 mt-4">
+//               <button
+//                 onClick={handleSave}
+//                 type="button"
+//                 className="btn h-10 md:h-auto w-18 md:w-auto btn-primary"
+//               >
+//                 Save
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default AllotTeachersTab;
+// Logic on the bases of teacher return subjet checkedbox checs
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Select from "react-select";
@@ -537,37 +801,43 @@ const AllotTeachersTab = () => {
   const [teachers, setTeachers] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedDivision, setSelectedDivision] = useState(null);
-  const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [preSubjects, setPreSubjects] = useState([]);
 
   useEffect(() => {
     fetchClassNames();
     fetchTeachers();
   }, []);
-  // Define custom styles for react-select
+
+  useEffect(() => {
+    if (selectedTeacher) {
+      fetchPreSubjectsForTeacher();
+    } else {
+      setPreSubjects([]);
+    }
+  }, [selectedTeacher]);
+
   const customSelectStyles = {
     control: (provided) => ({
       ...provided,
-      minHeight: "40px", // Set a minimum height for the select box
+      minHeight: "40px",
     }),
     valueContainer: (provided) => ({
       ...provided,
-      height: "40px", // Set the height for the value container
+      height: "40px",
       display: "flex",
-
       alignItems: "center",
     }),
     input: (provided) => ({
       ...provided,
-
-      height: "40px", // Set the height for the input box
+      height: "40px",
     }),
     dropdownIndicator: (provided) => ({
       ...provided,
-      // backgroundColor: "black",
-      height: "40px", // Set the height for the dropdown indicator
+      height: "40px",
     }),
   };
+
   const fetchClassNames = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -575,7 +845,6 @@ const AllotTeachersTab = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setClasses(response.data);
-      console.log("inside the ALLot_teaceher tab:CLASSESS", classes);
     } catch (error) {
       toast.error("Error fetching class names");
     }
@@ -593,9 +862,27 @@ const AllotTeachersTab = () => {
           label: teacher.name,
         }))
       );
-      console.log("inside the ALLot_teaceher tab:Teachers", teachers);
     } catch (error) {
       toast.error("Error fetching teachers");
+    }
+  };
+
+  const fetchPreSubjectsForTeacher = async () => {
+    if (!selectedTeacher) return;
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${API_URL}/api/get_presubjects/${selectedTeacher.value}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const fetchedPreSubjects = response.data.pre_subjects || [];
+      setPreSubjects(fetchedPreSubjects);
+    } catch (error) {
+      toast.error("Error fetching pre-subjects");
     }
   };
 
@@ -604,6 +891,7 @@ const AllotTeachersTab = () => {
     setSelectedDivision(null);
     setDivisions([]);
     setSubjects([]);
+    setPreSubjects([]);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -613,8 +901,7 @@ const AllotTeachersTab = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setDivisions(response?.data?.divisions);
-      console.log("inside the ALLot_teaceher tab:Divisions", response.data);
+      setDivisions(response.data.divisions);
     } catch (error) {
       toast.error("Error fetching divisions");
     }
@@ -623,6 +910,7 @@ const AllotTeachersTab = () => {
   const handleDivisionChange = async (selectedOption) => {
     setSelectedDivision(selectedOption);
     setSubjects([]);
+    setPreSubjects([]);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -632,43 +920,40 @@ const AllotTeachersTab = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setSubjects(response?.data?.subjects);
-      console.log(
-        "inside the ALLot_teaceher tab:Subjects",
-        response.data?.subjects
-      );
+      setSubjects(response.data.subjects);
     } catch (error) {
       toast.error("Error fetching subjects");
     }
   };
 
   const handleSubjectChange = (subjectId) => {
-    if (selectedSubjects.includes(subjectId)) {
-      setSelectedSubjects(selectedSubjects.filter((id) => id !== subjectId));
+    if (preSubjects.find((item) => item.subject_id === subjectId)) {
+      setPreSubjects(
+        preSubjects.filter((item) => item.subject_id !== subjectId)
+      );
     } else {
-      setSelectedSubjects([...selectedSubjects, subjectId]);
+      setPreSubjects([
+        ...preSubjects,
+        {
+          sm_id: subjectId, // subject ID from the subject table
+
+          teacher_id: selectedTeacher ? selectedTeacher.value : null,
+        },
+      ]);
     }
   };
 
   const handleSave = async () => {
-    if (
-      !selectedClass ||
-      !selectedDivision ||
-      selectedSubjects.length === 0 ||
-      !selectedTeacher
-    ) {
+    if (!selectedClass || !selectedDivision || !selectedTeacher) {
       toast.error("Please fill all fields before saving");
       return;
     }
-
+    console.log(" { subjects: preSubjects },", { subjects: preSubjects });
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.post(
+      await axios.post(
         `${API_URL}/api/allot-teacher-for-subject/${selectedClass.value}/${selectedDivision.value}`,
-        {
-          subjects: selectedSubjects,
-          teacher_id: selectedTeacher.value,
-        },
+        { subjects: preSubjects },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -703,7 +988,7 @@ const AllotTeachersTab = () => {
                   value={selectedClass}
                   onChange={handleClassChange}
                   placeholder="Select"
-                  styles={customSelectStyles} // Apply custom styles
+                  styles={customSelectStyles}
                 />
               </div>
             </div>
@@ -725,7 +1010,7 @@ const AllotTeachersTab = () => {
                   }
                   disabled={!selectedClass}
                 >
-                  <option value="">Select </option>
+                  <option value="">Select</option>
                   {divisions.map((div) => (
                     <option key={div.section_id} value={div.section_id}>
                       {div.name}
@@ -744,7 +1029,7 @@ const AllotTeachersTab = () => {
                   value={selectedTeacher}
                   onChange={setSelectedTeacher}
                   placeholder="Select"
-                  styles={customSelectStyles} // Apply custom styles
+                  styles={customSelectStyles}
                 />
               </div>
             </div>
@@ -753,27 +1038,37 @@ const AllotTeachersTab = () => {
                 Select Subjects <span className="text-red-500">*</span>
               </label>
               <div className="w-full">
-                {subjects.map((subject) => (
-                  <div key={subject.sm_id}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        value={subject.sm_id}
-                        checked={selectedSubjects.includes(subject.sm_id)}
-                        onChange={() => handleSubjectChange(subject.sm_id)}
-                      />
-                      {subject.name}
-                    </label>
-                  </div>
-                ))}
+                <div className="flex flex-wrap gap-2">
+                  {subjects.length > 0 ? (
+                    subjects.map((subject) => (
+                      <div key={subject.sm_id} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={`subject-${subject.sm_id}`}
+                          checked={preSubjects.some(
+                            (item) => item.sm_id === subject.sm_id
+                          )}
+                          onChange={() => handleSubjectChange(subject.sm_id)}
+                        />
+                        <label
+                          htmlFor={`subject-${subject.sm_id}`}
+                          className="ml-2"
+                        >
+                          {subject.name}
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No subjects available</p>
+                  )}
+                </div>
               </div>
             </div>
-
-            <div className="flex justify-end p-3 mr-5 mt-4">
+            <div className="form-group flex justify-center mt-4">
               <button
-                onClick={handleSave}
                 type="button"
-                className="btn h-10 md:h-auto w-18 md:w-auto btn-primary"
+                onClick={handleSave}
+                className="btn btn-primary"
               >
                 Save
               </button>
