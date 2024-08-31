@@ -469,6 +469,7 @@ const AllotTeachersForClass = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate(); // Initialize useNavigate
   const [nameError, setNameError] = useState("");
+
   //   const [nameAvailable, setNameAvailable] = useState(true);
 
   useEffect(() => {
