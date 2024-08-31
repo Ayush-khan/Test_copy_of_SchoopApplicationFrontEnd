@@ -1318,6 +1318,10 @@ function ManageSubjectList() {
   const [error, setError] = useState(null);
   const [nameError, setNameError] = useState(null);
   const [division, setDivisions] = useState([]);
+  // errors messages for allot subject tab
+  const [classError, setClassError] = useState("");
+  const [divisionError, setDivisionError] = useState("");
+  const [subjectError, setSubjectError] = useState("");
 
   //   Sorting logic state
 
@@ -1502,6 +1506,10 @@ function ManageSubjectList() {
   // };
 
   const handleSearchForsubjectAllot = async () => {
+    if (!classId) {
+      // toast.error("Please select the class.");
+      return;
+    }
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
@@ -1535,7 +1543,9 @@ function ManageSubjectList() {
         toast.error("Unexpected data format");
       }
     } catch (error) {
-      toast.error("Failed to fetch data. Please try again.");
+      toast.error(
+        "Failed to fetch data for Allot Subjected tab. Please try again."
+      );
       console.error("Error fetching divisions and subjects:", error);
     }
   };
@@ -1580,42 +1590,58 @@ function ManageSubjectList() {
   // console.log("Unique subject data with IDs:", uniqueSubjects);
 
   // Function to fetch subjects based on selected division
-  const fetchSubjectDataForAllotSubjectTab = async (divisionId) => {
+  // Function to fetch subjects based on selected divisions
+  const fetchSubjectDataForAllotSubjectTab = async (divisionIds) => {
     try {
       const token = localStorage.getItem("authToken");
+
+      // Construct the query parameters with section_id[] for each divisionId
+      const params = new URLSearchParams();
+      divisionIds.forEach((id) => params.append("section_id[]", id));
+
       const response = await axios.get(
-        `${API_URL}/api/get_presubjects/${divisionId}`,
+        `${API_URL}/api/get_presubjects/${classId}?${params.toString()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("this is the subjectlist data", response.data);
+
+      console.log("This is the subject list data", response.data);
       const subjectIds = response.data.subjects.map((subject) => subject.sm_id);
       setSelectedSubjects(subjectIds); // Update selected subjects based on API response
       console.log(
-        "------->this is subjectlist checkboxes on the bases of division checkbox--->",
+        "------->This is subject list checkboxes on the basis of division checkbox--->",
         selectedSubjects
       );
     } catch (error) {
       console.error("Error fetching subjects:", error);
     }
   };
+
+  // Handle division checkbox change
   // Handle division checkbox change
   const handleDivisionChange = (event) => {
     const sectionId = Number(event.target.value);
-    fetchSubjectDataForAllotSubjectTab(sectionId);
-    // const value = event.target.value;
-    console.log("the event=====", sectionId);
-    setSelectedDivisions((prevSelected) =>
-      prevSelected.includes(sectionId)
+    setDivisionError("");
+
+    setSelectedDivisions((prevSelected) => {
+      const updatedDivisions = prevSelected.includes(sectionId)
         ? prevSelected.filter((id) => id !== sectionId)
-        : [...prevSelected, sectionId]
-    );
+        : [...prevSelected, sectionId];
+
+      // Fetch subjects for the updated list of selected divisions
+      fetchSubjectDataForAllotSubjectTab(updatedDivisions);
+
+      return updatedDivisions;
+    });
+
+    console.log("The event section ID:", sectionId);
   };
 
   // Handle subject checkbox change
   const handleSubjectChange = (event) => {
     const subjectId = Number(event.target.value);
+    setSubjectError("");
     console.log("the event=====", subjectId);
     setSelectedSubjects((prevSelected) =>
       prevSelected.includes(subjectId)
@@ -1787,68 +1813,162 @@ function ManageSubjectList() {
     // setClassSection("");
   };
   // Post the allot subject api
+  // it's workilng properly but validations messages not present
+  // const handleSubmitAllotment = async () => {
+  //   // Validate required fields
+  //   console.log('psot start')
+  //   if (
+  //     ClassNameDropdown &&
+  //     selectedDivisions.length > 0 &&
+  //     selectedSubjects.length > 0
+  //   )
+  //   {
+  //     try {
+  //       const token = localStorage.getItem("authToken");
 
+  //       // Check if token exists
+  //       if (!token) {
+  //         throw new Error("No authentication token found");
+  //       }
+  //       console.log(
+  //         "[",
+  //         ClassNameDropdown,
+  //         "]",
+  //         selectedDivisions,
+  //         selectedSubjects
+  //       );
+  //       const response = await axios.post(
+  //         `${API_URL}/api/store_subject_allotment`,
+  //         {
+  //           class_id: ClassNameDropdown,
+  //           section_ids: selectedDivisions,
+  //           subject_ids: selectedSubjects,
+  //         },
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //             "Content-Type": "application/json", // Ensure content type is specified
+  //           },
+  //         }
+  //       );
+
+  //       // Handle successful response
+  //       if (response.status === 201) {
+  //         toast.success("Subject allotment details updated successfully");
+  //         // toast.success("Subject allotment updated successfully!");
+
+  //         setTimeout(() => {
+  //           setAllotSubjectTabData([]); // Clear the form or reset state
+  //           setActiveTab("Manage"); // Set the active tab to "Manage" after 2 seconds
+  //         }, 3000); // Wait for 2 seconds
+  //       } else {
+  //         toast.error("Unexpected response from the server");
+  //       }
+  //     } catch (error) {
+  //       // Handle errors
+  //       if (error.response && error.response.data) {
+  //         toast.error(
+  //           `Error storing subject allotment: ${error.response.data.message}`
+  //         );
+  //       } else {
+  //         toast.error(`Error storing subject allotment: ${error.message}`);
+  //       }
+  //       console.error("Error storing subject allotment:", error);
+  //     }
+  //   } else {
+  //     toast.error("Please select a class, divisions, and subjects");
+  //   }
+  // };
   const handleSubmitAllotment = async () => {
+    console.log("post start");
+
     // Validate required fields
-    if (
-      ClassNameDropdown &&
-      selectedDivisions.length > 0 &&
-      selectedSubjects.length > 0
-    ) {
-      try {
-        const token = localStorage.getItem("authToken");
+    console.log("ClassNameDropdown", ClassNameDropdown);
+    let hasError = false;
+    if (!ClassNameDropdown) {
+      setClassError("Please select a class");
+      hasError = true;
 
-        // Check if token exists
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
-        console.log(
-          "[",
-          ClassNameDropdown,
-          "]",
-          selectedDivisions,
-          selectedSubjects
-        );
-        const response = await axios.post(
-          `${API_URL}/api/store_subject_allotment`,
-          {
-            class_id: ClassNameDropdown,
-            section_ids: selectedDivisions,
-            subject_ids: selectedSubjects,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json", // Ensure content type is specified
-            },
-          }
-        );
+      // return; // Exit early if validation fails
+    }
+    console.log("selectedDivisions", selectedDivisions);
+    if (selectedDivisions.length === 0) {
+      setDivisionError("Please select at least one division");
+      hasError = true;
 
-        // Handle successful response
-        if (response.status === 201) {
-          toast.success("Subject allotment details updated successfully");
-          // toast.success("Subject allotment updated successfully!");
+      // return; // Exit early if validation fails
+    }
+    console.log("selectedSubjects", selectedSubjects);
 
-          setTimeout(() => {
-            setAllotSubjectTabData([]); // Clear the form or reset state
-            setActiveTab("Manage"); // Set the active tab to "Manage" after 2 seconds
-          }, 3000); // Wait for 2 seconds
-        } else {
-          toast.error("Unexpected response from the server");
-        }
-      } catch (error) {
-        // Handle errors
-        if (error.response && error.response.data) {
-          toast.error(
-            `Error storing subject allotment: ${error.response.data.message}`
-          );
-        } else {
-          toast.error(`Error storing subject allotment: ${error.message}`);
-        }
-        console.error("Error storing subject allotment:", error);
+    if (selectedSubjects.length === 0) {
+      setSubjectError("Please select at least one subject");
+      hasError = true;
+
+      // return; // Exit early if validation fails
+    }
+    if (hasError) {
+      return;
+    }
+    try {
+      const token = localStorage.getItem("authToken");
+
+      // Check if token exists
+      if (!token) {
+        throw new Error("No authentication token found");
       }
-    } else {
-      toast.error("Please select a class, divisions, and subjects");
+      console.log(
+        "This is the post formate of the data of allot subject ",
+        "Class_id",
+        ClassNameDropdown,
+        "Division_selected",
+        selectedDivisions,
+        "Selected_subjects",
+        selectedSubjects
+      );
+      // console.log(
+      //   "[",
+      //   ClassNameDropdown,
+      //   "]",
+      //   selectedDivisions,
+      //   selectedSubjects
+      // );
+
+      const response = await axios.post(
+        `${API_URL}/api/store_subject_allotment`,
+        {
+          class_id: ClassNameDropdown,
+          section_ids: selectedDivisions,
+          subject_ids: selectedSubjects,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json", // Ensure content type is specified
+          },
+        }
+      );
+
+      // Handle successful response
+      if (response.status === 201) {
+        toast.success("Subject allotment details updated successfully");
+
+        setTimeout(() => {
+          setAllotSubjectTabData([]); // Clear the form or reset state
+          setActiveTab("Manage"); // Set the active tab to "Manage" after 2 seconds
+        }, 3000); // Wait for 2 seconds
+      } else {
+        toast.error("Unexpected response from the server");
+      }
+    } catch (error) {
+      // Handle errors
+      if (error.response && error.response.data) {
+        toast.error(
+          `Error storing subject allotment: ${error.response.data.message}`
+        );
+      } else {
+        toast.error(`Error storing subject allotment: ${error.message}`);
+      }
+      console.error("Error storing subject allotment:", error);
     }
   };
 
@@ -1874,7 +1994,13 @@ function ManageSubjectList() {
         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
           Subject Allotment
         </h3>
-        <hr className="relative -top-3" />
+        <div
+          className=" relative  mb-8   h-1  mx-auto bg-red-700"
+          style={{
+            backgroundColor: "#C03078",
+          }}
+        ></div>
+        {/* <hr className="relative -top-3" /> */}
 
         <ul className="grid grid-cols-2 gap-x-10 relative -left-6 md:left-0 md:flex md:flex-row relative -top-4">
           {/* Tab Navigation */}
@@ -1955,20 +2081,26 @@ function ManageSubjectList() {
                   {allotSubjectTabData.length > 0 && (
                     <div className="container mt-4">
                       <div className="card mx-auto relative left-1 lg:w-full shadow-lg ">
-                        <div className="card-header flex justify-between items-center">
+                        <div className="p-2 border-none flex justify-between items-center">
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                             Allot Subjects
                           </h3>
                           <RxCross1
-                            className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                            className="float-end relative  right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                             type="button"
                             // className="btn-close text-red-600"
                             onClick={handleAllotSubjectCloseModal}
                           />
                         </div>
+                        <div
+                          className=" relative -top-2 mb-3 h-1 w-full mx-auto bg-red-700"
+                          style={{
+                            backgroundColor: "#C03078",
+                          }}
+                        ></div>
                         <div className="card-body  w-full">
-                          <div className="  lg:overflow-x-hidden">
-                            <div className="mb-4 flex gap-x-4">
+                          <div className=" relative lg:overflow-x-hidden">
+                            <div className=" relative mb-4 flex gap-x-4">
                               <h5 className="px-2 mt-2 lg:px-3 py-2 text-[1em] text-gray-700">
                                 Select divisions{" "}
                                 <span className="text-red-500">*</span>
@@ -1980,22 +2112,14 @@ function ManageSubjectList() {
                                       key={division.section_id}
                                       className="pt-3"
                                     >
-                                      {console.log("division is", division)}
                                       <label>
                                         <input
                                           type="checkbox"
                                           className="mr-0.5 shadow-lg"
-                                          value={
-                                            division.section_id || division.name
-                                          }
-                                          checked={
-                                            selectedDivisions.includes(
-                                              division.name
-                                            ) ||
-                                            selectedDivisions.includes(
-                                              division.section_id
-                                            )
-                                          }
+                                          value={division.section_id}
+                                          checked={selectedDivisions.includes(
+                                            division.section_id
+                                          )}
                                           onChange={handleDivisionChange}
                                         />
                                         <span className="font-semibold text-gray-600">
@@ -2006,6 +2130,12 @@ function ManageSubjectList() {
                                   ))}
                                 </>
                               )}
+
+                              {divisionError && (
+                                <p className="  md:absolute md:top-9 md:left-[17%] text-red-500 text-xs">
+                                  {divisionError}
+                                </p>
+                              )}
                             </div>
 
                             <div className="flex">
@@ -2013,7 +2143,7 @@ function ManageSubjectList() {
                                 Select subjects{" "}
                                 <span className="text-red-500">*</span>
                               </h5>
-                              <div className="mb-4 grid grid-cols-5 mx-4 w-[75%]">
+                              <div className=" grid grid-cols-5 mx-4 w-[75%]">
                                 {subjects.map((subject) => (
                                   <div key={subject.subject_id}>
                                     <label>
@@ -2034,6 +2164,11 @@ function ManageSubjectList() {
                                 ))}
                               </div>
                             </div>
+                            {subjectError && (
+                              <p className="absolute  left-[18%]  text-red-500 text-xs ">
+                                {subjectError}
+                              </p>
+                            )}
                           </div>
                         </div>
                         <div className=" flex justify-end p-3">

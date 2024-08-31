@@ -2,6 +2,7 @@ import React from "react";
 import ReactPaginate from "react-paginate";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { toast, ToastContainer } from "react-toastify";
 
 const ManageSubjectsTab = ({
   classSection,
@@ -19,6 +20,7 @@ const ManageSubjectsTab = ({
 }) => {
   return (
     <div>
+      <ToastContainer />
       <div className="mb-4">
         <div className="md:w-[80%] mx-auto">
           <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
@@ -58,11 +60,10 @@ const ManageSubjectsTab = ({
           </div>
         </div>
       </div>
-
       {subjects.length > 0 && (
         <div className="container mt-4">
           <div className="card mx-auto lg:w-full shadow-lg">
-            <div className="card-header flex justify-between items-center">
+            <div className="card-header border-none flex justify-between items-center">
               <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                 Manage Subjects List
               </h3>
@@ -75,6 +76,12 @@ const ManageSubjectsTab = ({
                 />
               </div>
             </div>
+            <div
+              className=" relative  mb-3 h-1 w-full mx-auto bg-red-700"
+              style={{
+                backgroundColor: "#C03078",
+              }}
+            ></div>
 
             <div className="card-body w-full">
               <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">

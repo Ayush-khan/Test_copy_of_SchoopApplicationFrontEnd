@@ -452,6 +452,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "../../../componants/common/Loader"; // Add this dependency
 import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { RxCross1 } from "react-icons/rx";
 
 const animatedComponents = makeAnimated();
 
@@ -525,7 +526,11 @@ const AllotTeachersForClass = () => {
       setLoading(false);
     }
   };
+  const handleAllotTeacherForAClassClose = () => {
+    setSubjects([]);
 
+    // setClassId("");
+  };
   const handleClassSectionChange = (e) => {
     setNameError(null); // Reset error when user selects a class
     const [classSection, sectionId] = e.target.value.split(" "); // Split the value by space
@@ -845,11 +850,24 @@ const AllotTeachersForClass = () => {
       {subjects.length > 0 && (
         <div className="container mt-4">
           <div className="card mx-auto lg:w-full shadow-lg">
-            <div className="card-header flex justify-between items-center">
+            <div className="p-2 flex justify-between items-center">
               <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                Manage Subjects List
-              </h3>
+                Allot Teachers for a class
+              </h3>{" "}
+              <RxCross1
+                className="float-end relative  right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                type="button"
+                // className="btn-close text-red-600"
+                onClick={handleAllotTeacherForAClassClose}
+              />
             </div>
+
+            <div
+              className=" relative -top-3 mb-3 h-1 w-full mx-auto bg-red-700"
+              style={{
+                backgroundColor: "#C03078",
+              }}
+            ></div>
 
             <div className="card-body w-full md:w-[85%] mx-auto ">
               <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">

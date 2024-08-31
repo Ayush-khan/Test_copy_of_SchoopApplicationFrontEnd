@@ -1108,6 +1108,7 @@ import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { RxCross1 } from "react-icons/rx";
 
 const AllotTeachersTab = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -1217,6 +1218,7 @@ const AllotTeachersTab = () => {
     setSelectedDivision(null);
     setSelectedTeacher(null); // Clear teacher when class changes
     setTeacherError("");
+    setSubjectError("");
     setDivisions([]);
     setSubjects([]);
     setPreSubjects([]);
@@ -1290,7 +1292,7 @@ const AllotTeachersTab = () => {
       hasError = true;
     }
     if (preSubjects.length === 0) {
-      toast.error("Please select at least one subject.");
+      setSubjectError("Please select at least one subject.");
       hasError = true;
     }
 
@@ -1330,11 +1332,23 @@ const AllotTeachersTab = () => {
       <ToastContainer />
       <div className="container mt-4">
         <div className="card mx-auto lg:w-full shadow-lg">
-          <div className="card-header flex justify-between items-center">
+          <div className="p-2 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Allot Teachers
             </h3>
+            {/* <RxCross1
+              className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+              type="button"
+              // className="btn-close text-red-600"
+              onClick={handleCloseModalForAllotTeacher}
+            /> */}
           </div>
+          <div
+            className=" relative -top-2 mb-3 h-1 w-full mx-auto bg-red-700"
+            style={{
+              backgroundColor: "#C03078",
+            }}
+          ></div>
           <div className="card-body w-full md:w-[85%] mx-auto">
             <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
               <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
@@ -1413,29 +1427,31 @@ const AllotTeachersTab = () => {
                 Select Subjects <span className="text-red-500">*</span>
               </label>
               <div className="w-full">
-                <div className="flex flex-wrap gap-2">
+                <div className="relative -left-5  grid grid-cols-5 mx-4 w-full">
                   {subjects.map((subject) => (
                     <label
                       key={subject.sm_id}
-                      className="flex items-center cursor-pointer"
+                      // className="flex items-center cursor-pointer"
                     >
                       <input
                         type="checkbox"
-                        className="form-checkbox h-3 w-3 text-blue-600"
+                        className="mr-0.5 shadow-lg"
                         checked={preSubjects.some(
                           (item) => item.sm_id === subject.sm_id
                         )}
                         onChange={() => handleSubjectChange(subject.sm_id)}
                       />
-                      <span className="ml-2 text-gray-700">{subject.name}</span>
+                      <span className="font-normal text-gray-600">
+                        {subject.name}
+                      </span>
                     </label>
                   ))}
-                  {subjectError && (
-                    <p className="absolute text-red-500 text-xs ">
-                      {subjectError}
-                    </p>
-                  )}
                 </div>
+                {subjectError && (
+                  <p className="relative  text-red-500 text-xs ">
+                    {subjectError}
+                  </p>
+                )}
               </div>
             </div>{" "}
             <div className="form-group flex justify-end mt-4">
