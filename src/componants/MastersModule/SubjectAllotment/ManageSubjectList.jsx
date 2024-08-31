@@ -1588,7 +1588,7 @@ function ManageSubjectList() {
   // );
 
   // console.log("Unique subject data with IDs:", uniqueSubjects);
-  // df def
+  // df def klj
   // Function to fetch subjects based on selected division
   // Function to fetch subjects based on selected divisions
   const fetchSubjectDataForAllotSubjectTab = async (divisionIds) => {
