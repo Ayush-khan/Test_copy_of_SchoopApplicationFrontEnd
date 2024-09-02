@@ -1332,7 +1332,7 @@ const AllotTeachersTab = () => {
       <ToastContainer />
       <div className="container mt-4">
         <div className="card mx-auto lg:w-full shadow-lg">
-          <div className="p-2 flex justify-between items-center">
+          <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Allot Teachers
             </h3>
@@ -1344,7 +1344,7 @@ const AllotTeachersTab = () => {
             /> */}
           </div>
           <div
-            className=" relative -top-2 mb-3 h-1 w-full mx-auto bg-red-700"
+            className=" relative -top-2 mb-3 h-1 w-[97%] mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
@@ -1427,7 +1427,7 @@ const AllotTeachersTab = () => {
                 Select Subjects <span className="text-red-500">*</span>
               </label>
               <div className="w-full">
-                <div className="relative -left-5  grid grid-cols-5 mx-4 w-full">
+                <div className="relative gap-x-10 top-2   grid grid-cols-3  w-full">
                   {subjects.map((subject) => (
                     <label
                       key={subject.sm_id}

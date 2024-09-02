@@ -1857,9 +1857,20 @@ function ManageSubjectList() {
     setShowDeleteModal(false);
   };
   // console.log("the name", subjects);
-  const filteredSections = subjects.filter((section) =>
-    section?.get_subject?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredSections = subjects.filter((section) =>
+  //   section?.get_subject?.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+  const filteredSections = subjects.filter((section) => {
+    // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
+    const teacherName = section?.get_teacher?.name?.toLowerCase() || "";
+    const subjectName = section?.get_subject?.name?.toLowerCase() || "";
+
+    // Check if the search term is present in either the teacher's name or the subject's name
+    return (
+      teacherName.includes(searchTerm.toLowerCase()) ||
+      subjectName.includes(searchTerm.toLowerCase())
+    );
+  });
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -2146,7 +2157,7 @@ function ManageSubjectList() {
               {subjects.length > 0 && (
                 <div className="container mt-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="card-header border-none flex justify-between items-center">
+                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                         Manage Subjects List
                       </h3>
@@ -2160,7 +2171,7 @@ function ManageSubjectList() {
                       </div>
                     </div>
                     <div
-                      className=" relative  mb-3 h-1 w-full mx-auto bg-red-700"
+                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
                       style={{
                         backgroundColor: "#C03078",
                       }}
@@ -2301,7 +2312,7 @@ function ManageSubjectList() {
                   {allotSubjectTabData.length > 0 && (
                     <div className="container mt-4">
                       <div className="card mx-auto relative left-1 lg:w-full shadow-lg ">
-                        <div className="p-2 border-none flex justify-between items-center">
+                        <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                             Allot Subjects
                           </h3>
@@ -2313,7 +2324,7 @@ function ManageSubjectList() {
                           />
                         </div>
                         <div
-                          className=" relative -top-2 mb-3 h-1 w-full mx-auto bg-red-700"
+                          className=" relative  -top-2 mb-3 h-1 w-[97%] mx-auto bg-red-700"
                           style={{
                             backgroundColor: "#C03078",
                           }}
@@ -2355,7 +2366,9 @@ function ManageSubjectList() {
                                 Select subjects{" "}
                                 <span className="text-red-500">*</span>
                               </h5>
-                              <div className=" grid grid-cols-5 mx-4 w-[75%]">
+                              {/* <div className="relative gap-x-10 top-2 border-2 border-black  grid grid-cols-3  w-full"> */}
+
+                              <div className=" grid grid-cols-3 mx-4 w-[78%]">
                                 {subjectsForAllotSubject.map((subject) => (
                                   <div key={subject.sm_id}>
                                     <label>
