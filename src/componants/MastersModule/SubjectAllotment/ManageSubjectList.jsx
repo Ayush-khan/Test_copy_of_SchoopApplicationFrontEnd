@@ -1258,11 +1258,12 @@ import { useState, useEffect, useRef } from "react";
 import { IoSettingsSharp } from "react-icons/io5";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "react-toastify/dist/ReactToastify.css";
+
 import { IoMdAdd } from "react-icons/io";
 import { CgAddR } from "react-icons/cg";
 import { FaRegSquarePlus } from "react-icons/fa6";
@@ -1271,6 +1272,7 @@ import AllotSubjectTab from "./AllotSubjectTab"; // Import the new component
 import ManageSubjectsTab from "./ManageSubjectsTab.jsx";
 import AllotTeachersForCLass from "./AllotTeachersForCLass.jsx";
 import AllotTeachersTab from "./AllotTeachersTab.jsx";
+import Select from "react-select";
 function ManageSubjectList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
@@ -1281,18 +1283,26 @@ function ManageSubjectList() {
   const [classes, setClasses] = useState([]);
   const [classesforsubjectallot, setclassesforsubjectallot] = useState([]);
   const [subjects, setSubjects] = useState([]);
+  // for allot subject tab
+  const [subjectsForAllotSubject, setSubjectsForAllotSubject] = useState([]);
+
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
+  const [currestSubjectNameForDelete, setCurrestSubjectNameForDelete] =
+    useState("");
   const [newSectionName, setNewSectionName] = useState("");
   const [newClassName, setNewClassName] = useState("");
   const [newSection, setnewSectionName] = useState("");
   const [newSubject, setnewSubjectnName] = useState("");
   const [newclassnames, setnewclassnames] = useState("");
+  const [teacherIdIs, setteacherIdIs] = useState("");
+  const [teacherNameIs, setTeacherNameIs] = useState("");
   const [newTeacherAssign, setnewTeacherAssign] = useState("");
   const [ClassNameDropdown, setClassNameDropdown] = useState("");
   const [classId, setclassId] = useState("");
   // This is hold the allot subjet api response
+  const [classIdForManage, setclassIdForManage] = useState("");
   //   This is for the subject id in the dropdown
   const [newDepartmentId, setNewDepartmentId] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
@@ -1322,6 +1332,30 @@ function ManageSubjectList() {
   const [classError, setClassError] = useState("");
   const [divisionError, setDivisionError] = useState("");
   const [subjectError, setSubjectError] = useState("");
+  // for react-search of manage tab teacher Edit and select class
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [selectedClass, setSelectedClass] = useState(null);
+  const handleTeacherSelect = (selectedOption) => {
+    setSelectedTeacher(selectedOption);
+    console.log("selectedTeacher", selectedTeacher);
+    setNewDepartmentId(selectedOption.value); // Assuming value is the teacher's ID
+    console.log("setNewDepartmentId", newDepartmentId);
+  };
+
+  const handleClassSelect = (selectedOption) => {
+    setSelectedClass(selectedOption);
+    setclassIdForManage(selectedOption.value); // Assuming value is the class ID
+  };
+
+  const teacherOptions = departments.map((dept) => ({
+    value: dept.reg_id,
+    label: dept.name,
+  }));
+  console.log("teacherOptions", teacherOptions);
+  const classOptions = classes.map((cls) => ({
+    value: cls.section_id,
+    label: `${cls?.get_class?.name}  ${cls.name}`,
+  }));
 
   //   Sorting logic state
 
@@ -1337,31 +1371,31 @@ function ManageSubjectList() {
   //   setTeacherId(value);
   //   setIsDropdownOpen(false); // Close the dropdown when an option is selected
   // };
-  const handleOptionSelect = (regId) => {
-    const selectedDept = departments.find((dept) => dept.reg_id === regId);
-    if (selectedDept) {
-      setNewDepartmentId(selectedDept.name);
-      setSelectedDepartment(regId);
-    }
-    setIsDropdownOpen(false);
-  };
+  // const handleOptionSelect = (regId) => {
+  //   const selectedDept = departments.find((dept) => dept.reg_id === regId);
+  //   if (selectedDept) {
+  //     setNewDepartmentId(selectedDept.name);
+  //     setSelectedDepartment(regId);
+  //   }
+  //   setIsDropdownOpen(false);
+  // };
 
-  const filteredDepartments = departments.filter((department) =>
-    department.name.toLowerCase().includes(newDepartmentId.toLowerCase())
-  );
+  // const filteredDepartments = departments.filter((department) =>
+  //   department.name.toLowerCase().includes(newDepartmentId.toLowerCase())
+  // );
 
-  const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setIsDropdownOpen(false); // Close the dropdown if clicked outside
-    }
-  };
+  // const handleClickOutside = (event) => {
+  //   if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+  //     setIsDropdownOpen(false); // Close the dropdown if clicked outside
+  //   }
+  // };
 
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  // useEffect(() => {
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
   //   FOr serial number
   const generateSerialNumbers = (data) => {
     const sortedData = [...data].sort((a, b) => a.section_id - b.section_id); // Optional: sort based on section_id or any other criteria
@@ -1441,20 +1475,20 @@ function ManageSubjectList() {
   }, []);
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
-    if (!classSection) {
+    if (!classIdForManage) {
       setNameError("Please select the class.");
       return;
     }
     try {
       console.log(
         "for this sectiong id in seaching inside subjectallotment",
-        classSection
+        classIdForManage
       );
       const token = localStorage.getItem("authToken");
       const response = await axios.get(`${API_URL}/api/get_subject_Alloted`, {
         headers: { Authorization: `Bearer ${token}` },
         // params: { section_id: classSection },
-        params: { section_id: classSection },
+        params: { section_id: classIdForManage },
       });
       console.log(
         "the response of the subjectallotment is *******",
@@ -1507,7 +1541,6 @@ function ManageSubjectList() {
 
   const handleSearchForsubjectAllot = async () => {
     if (!classId) {
-      // toast.error("Please select the class.");
       return;
     }
     try {
@@ -1518,26 +1551,18 @@ function ManageSubjectList() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log(
-        "this is response on the bases of selected class",
-        response.data
-      );
-      // Check if the response contains the expected data structure
       if (response.data && response.data.divisions && response.data.subjects) {
-        // Set the divisions and subjects data in state
         setDivisions(response.data.divisions);
-        setSubjects(response.data.subjects);
-
-        // Assuming you need to map or process these before using them in the UI
-        const formattedAllotments = response.data.divisions.map((division) => {
-          return {
-            section_id: division.section_id,
-            name: division.name,
-            subjects: response.data.subjects,
-          };
-        });
-        console.log("formattedAllotments", formattedAllotments);
-        // Set the formatted data in the allotSubjectTabData state
+        setSubjectsForAllotSubject(response.data.subjects);
+        console.log(
+          "this is get for api get_divisions_and_subjects ",
+          subjectsForAllotSubject
+        );
+        const formattedAllotments = response.data.divisions.map((division) => ({
+          section_id: division.section_id,
+          name: division.name,
+          subjects: response.data.subjects,
+        }));
         setAllotSubjectTabData(formattedAllotments);
       } else {
         toast.error("Unexpected data format");
@@ -1546,10 +1571,8 @@ function ManageSubjectList() {
       toast.error(
         "Failed to fetch data for Allot Subjected tab. Please try again."
       );
-      console.error("Error fetching divisions and subjects:", error);
     }
   };
-
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
@@ -1594,8 +1617,6 @@ function ManageSubjectList() {
   const fetchSubjectDataForAllotSubjectTab = async (divisionIds) => {
     try {
       const token = localStorage.getItem("authToken");
-
-      // Construct the query parameters with section_id[] for each divisionId
       const params = new URLSearchParams();
       divisionIds.forEach((id) => params.append("section_id[]", id));
 
@@ -1606,13 +1627,8 @@ function ManageSubjectList() {
         }
       );
 
-      console.log("This is the subject list data", response.data);
       const subjectIds = response.data.subjects.map((subject) => subject.sm_id);
-      setSelectedSubjects(subjectIds); // Update selected subjects based on API response
-      console.log(
-        "------->This is subject list checkboxes on the basis of division checkbox--->",
-        selectedSubjects
-      );
+      setSelectedSubjects(subjectIds);
     } catch (error) {
       console.error("Error fetching subjects:", error);
     }
@@ -1620,27 +1636,46 @@ function ManageSubjectList() {
 
   // Handle division checkbox change
   // Handle division checkbox change
-  const handleDivisionChange = (event) => {
-    const sectionId = Number(event.target.value);
+  const handleDivisionChange = (divisionId) => {
+    let updatedDivisions;
     setDivisionError("");
+    if (selectedDivisions.includes(divisionId)) {
+      updatedDivisions = selectedDivisions.filter((id) => id !== divisionId);
+    } else {
+      updatedDivisions = [...selectedDivisions, divisionId];
+    }
+    setSelectedDivisions(updatedDivisions);
 
-    setSelectedDivisions((prevSelected) => {
-      const updatedDivisions = prevSelected.includes(sectionId)
-        ? prevSelected.filter((id) => id !== sectionId)
-        : [...prevSelected, sectionId];
-
-      // Fetch subjects for the updated list of selected divisions
+    // Fetch and update subject checkboxes based on selected divisions
+    if (updatedDivisions.length > 0) {
       fetchSubjectDataForAllotSubjectTab(updatedDivisions);
-
-      return updatedDivisions;
-    });
-
-    console.log("The event section ID:", sectionId);
+    } else {
+      setSelectedSubjects([]);
+    }
   };
+  // const handleClassChange = (e) => {
+  //   const selectedClassId = e.target.value;
+  //   setclassId(selectedClassId);
+  //   setSelectedDivisions([]);
+  //   setSelectedSubjects([]);
+  //   setDivisions([]);
+  //   handleSearchForsubjectAllot(); // Fetch data based on selected class
+  // };
+  // const handleFormSubmit = async () => {
+  //   // Add your form submission logic here
+
+  //   // Clear form after successful submission
+  //   setClassSection("");
+  //   setClassNameDropdown("");
+  //   setclassId("");
+  //   setSelectedDivisions([]);
+  //   setSelectedSubjects([]);
+  //   setDivisions([]);
+  // };
 
   // Handle subject checkbox change
-  const handleSubjectChange = (event) => {
-    const subjectId = Number(event.target.value);
+  const handleSubjectChange = (subjectid) => {
+    const subjectId = Number(subjectid);
     setSubjectError("");
     console.log("the event=====", subjectId);
     setSelectedSubjects((prevSelected) =>
@@ -1651,13 +1686,19 @@ function ManageSubjectList() {
   };
 
   const handleChangeClassSectionForAllotSubjectTab = (e) => {
-    setClassNameDropdown(e.target.value);
-    setclassId(e.target.value);
+    const selectedClassId = e.target.value;
+    console.log("dfsjfds", selectedClassId);
+    setclassId(selectedClassId);
+    setSelectedDivisions([]);
+    setSelectedSubjects([]);
+    setDivisions([]);
+    // handleSearchForsubjectAllot(); // Fetch data based on selected classsetClassNameDropdown(e.target.value);
+    // setclassId(e.target.value);
     // handleSearchForsubjectAllot();
   };
   useEffect(() => {
     handleSearchForsubjectAllot();
-  }, [ClassNameDropdown]);
+  }, [classId]);
 
   const handleChangeClassSection = (e) => {
     setNameError(null); // Reset error when user selects a class
@@ -1679,8 +1720,15 @@ function ManageSubjectList() {
     setnewclassnames(section?.get_class?.name);
     setnewSectionName(section?.get_division?.name);
     setnewSubjectnName(section?.get_subject?.name);
+    setTeacherNameIs(section?.get_teacher?.name);
+    setteacherIdIs(section?.get_teacher?.teacher_id);
+    console.log("teacerId and name is", teacherIdIs, teacherNameIs);
     // It's used for the dropdown of the tachers
     // setnewTeacherAssign()
+    const selectedOption = departments.find(
+      (option) => option.value === section?.get_teacher?.teacher_id
+    );
+    setSelectedTeacher(selectedOption);
     setShowEditModal(true);
   };
 
@@ -1691,12 +1739,18 @@ function ManageSubjectList() {
     // setCurrentClass(classToDelete);
     setCurrentSection({ classToDelete });
     console.log("the currecne t section", currentSection);
-
+    setCurrestSubjectNameForDelete(
+      currentSection?.classToDelete?.get_subject?.name
+    );
+    console.log(
+      "cureendtsungjeg",
+      currentSection?.classToDelete?.get_subject?.name
+    );
+    console.log("currestSubjectNameForDelete", currestSubjectNameForDelete);
     setShowDeleteModal(true);
   };
 
   const handleSubmitEdit = async () => {
-    // Handle edit submission logic
     console.log(
       "inside the edit model of the subjectallotment",
       currentSection.subject_id
@@ -1715,12 +1769,13 @@ function ManageSubjectList() {
       if (!nameAvailable) {
         return;
       }
+
       console.log("the Subject ID***", currentSection.subject_id);
       console.log("the teacher ID***", selectedDepartment);
 
       await axios.put(
         `${API_URL}/api/update_subject_Alloted/${currentSection.subject_id}`,
-        { teacher_id: selectedDepartment },
+        { teacher_id: newDepartmentId },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -1728,11 +1783,12 @@ function ManageSubjectList() {
           withCredentials: true,
         }
       );
-      setSubjects([]);
+
       handleSearch();
-      // fetchClassNames();
       handleCloseModal();
       toast.success("Subject Record updated successfully!");
+
+      // setSubjects([]);
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
@@ -1742,8 +1798,9 @@ function ManageSubjectList() {
         toast.error(`Error updating subject Record: ${error.message}`);
       }
       console.error("Error editing subject Record:", error);
+    } finally {
+      setShowEditModal(false);
     }
-    setShowEditModal(false);
   };
 
   const handleSubmitDelete = async () => {
@@ -1880,12 +1937,12 @@ function ManageSubjectList() {
   //   }
   // };
   const handleSubmitAllotment = async () => {
-    console.log("post start");
+    console.log("post start fdgh");
 
     // Validate required fields
-    console.log("ClassNameDropdown", ClassNameDropdown);
+    console.log("ClassNameDropdown", classId);
     let hasError = false;
-    if (!ClassNameDropdown) {
+    if (!classId) {
       setClassError("Please select a class");
       hasError = true;
 
@@ -1894,6 +1951,7 @@ function ManageSubjectList() {
     console.log("selectedDivisions", selectedDivisions);
     if (selectedDivisions.length === 0) {
       setDivisionError("Please select at least one division");
+      console.log("division not select");
       hasError = true;
 
       // return; // Exit early if validation fails
@@ -1902,6 +1960,8 @@ function ManageSubjectList() {
 
     if (selectedSubjects.length === 0) {
       setSubjectError("Please select at least one subject");
+      console.log("subject not select");
+
       hasError = true;
 
       // return; // Exit early if validation fails
@@ -1932,11 +1992,11 @@ function ManageSubjectList() {
       //   selectedDivisions,
       //   selectedSubjects
       // );
-
+      console.log("fdhsh post api allot subject");
       const response = await axios.post(
         `${API_URL}/api/store_subject_allotment`,
         {
-          class_id: ClassNameDropdown,
+          class_id: classId,
           section_ids: selectedDivisions,
           subject_ids: selectedSubjects,
         },
@@ -1953,6 +2013,12 @@ function ManageSubjectList() {
         toast.success("Subject allotment details updated successfully");
 
         setTimeout(() => {
+          setClassSection("");
+          setClassNameDropdown("");
+          setclassId("");
+          setSelectedDivisions([]);
+          setSelectedSubjects([]);
+          setDivisions([]);
           setAllotSubjectTabData([]); // Clear the form or reset state
           setActiveTab("Manage"); // Set the active tab to "Manage" after 2 seconds
         }, 3000); // Wait for 2 seconds
@@ -1989,7 +2055,7 @@ function ManageSubjectList() {
 
   return (
     <>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
       <div className="md:mx-auto md:w-3/4 p-4 bg-white ">
         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
           Subject Allotment
@@ -2028,20 +2094,174 @@ function ManageSubjectList() {
 
         <div className="bg-white  rounded-md -mt-5">
           {activeTab === "Manage" && (
-            <ManageSubjectsTab
-              classSection={classSection}
-              nameError={nameError}
-              handleChangeClassSection={handleChangeClassSection}
-              handleSearch={handleSearch}
-              classes={classes}
-              subjects={subjects}
-              displayedSections={displayedSections}
-              setSearchTerm={setSearchTerm}
-              handleEdit={handleEdit}
-              handleDelete={handleDelete}
-              pageCount={pageCount}
-              handlePageClick={handlePageClick}
-            />
+            // <ManageSubjectsTab
+            //   classSection={classSection}
+            //   nameError={nameError}
+            //   handleChangeClassSection={handleChangeClassSection}
+            //   handleSearch={handleSearch}
+            //   classes={classes}
+            //   subjects={subjects}
+            //   displayedSections={displayedSections}
+            //   setSearchTerm={setSearchTerm}
+            //   handleEdit={handleEdit}
+            //   handleDelete={handleDelete}
+            //   pageCount={pageCount}
+            //   handlePageClick={handlePageClick}
+            // />
+            <div>
+              <ToastContainer />
+              <div className="mb-4">
+                <div className="md:w-[80%] mx-auto">
+                  <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
+                    <label
+                      htmlFor="classSection"
+                      className="w-1/4 pt-2 items-center text-center"
+                    >
+                      Select Class <span className="text-red-500">*</span>
+                    </label>
+                    <div className="w-full">
+                      <Select
+                        value={selectedClass}
+                        onChange={handleClassSelect}
+                        options={classOptions}
+                        placeholder="Select Class"
+                        isSearchable
+                      />
+                      {nameError && (
+                        <div className=" relative top-0.5 ml-1 text-danger text-xs">
+                          {nameError}
+                        </div>
+                      )}{" "}
+                    </div>
+                    <button
+                      onClick={handleSearch}
+                      type="button"
+                      className="btn h-10  w-18 md:w-auto btn-primary"
+                    >
+                      Search
+                    </button>
+                  </div>
+                </div>
+              </div>
+              {subjects.length > 0 && (
+                <div className="container mt-4">
+                  <div className="card mx-auto lg:w-full shadow-lg">
+                    <div className="card-header border-none flex justify-between items-center">
+                      <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                        Manage Subjects List
+                      </h3>
+                      <div className="w-1/2 md:w-fit mr-1 ">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Search "
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div
+                      className=" relative  mb-3 h-1 w-full mx-auto bg-red-700"
+                      style={{
+                        backgroundColor: "#C03078",
+                      }}
+                    ></div>
+
+                    <div className="card-body w-full">
+                      <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+                        <table className="min-w-full leading-normal table-auto">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                S.No
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Class
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Division
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Subject
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Teacher
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Edit
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Delete
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {displayedSections.map((subject, index) => (
+                              <tr
+                                key={subject.section_id}
+                                className="text-gray-700 text-sm font-light"
+                              >
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {index + 1}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.get_class?.name}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.get_division?.name}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.get_subject?.name}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.get_teacher?.name}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  <button
+                                    onClick={() => handleEdit(subject)}
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                  >
+                                    <FontAwesomeIcon icon={faEdit} />
+                                  </button>
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  <button
+                                    onClick={() =>
+                                      handleDelete(subject?.subject_id)
+                                    }
+                                    className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                  >
+                                    <FontAwesomeIcon icon={faTrash} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className=" flex justify-center pt-2 -mb-3">
+                        <ReactPaginate
+                          previousLabel={"Previous"}
+                          nextLabel={"Next"}
+                          breakLabel={"..."}
+                          pageCount={pageCount}
+                          onPageChange={handlePageClick}
+                          containerClassName={"pagination"}
+                          pageClassName={"page-item"}
+                          pageLinkClassName={"page-link"}
+                          previousClassName={"page-item"}
+                          previousLinkClassName={"page-link"}
+                          nextClassName={"page-item"}
+                          nextLinkClassName={"page-link"}
+                          breakClassName={"page-item"}
+                          breakLinkClassName={"page-link"}
+                          activeClassName={"active"}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Other tabs content */}
@@ -2063,7 +2283,7 @@ function ManageSubjectList() {
                     <select
                       id="classSection"
                       className="border md:w-[50%] h-10 md:h-auto rounded-md px-3 py-2 w-full mr-2"
-                      value={ClassNameDropdown}
+                      value={classId}
                       onChange={handleChangeClassSectionForAllotSubjectTab}
                     >
                       <option value="">Select </option>
@@ -2071,7 +2291,7 @@ function ManageSubjectList() {
                         <option value="">No classes available</option>
                       ) : (
                         classesforsubjectallot.map((cls) => (
-                          <option key={cls.classId} value={cls.class_id}>
+                          <option key={cls.class_id} value={cls.class_id}>
                             {` ${cls?.name}`}
                           </option>
                         ))
@@ -2105,31 +2325,23 @@ function ManageSubjectList() {
                                 Select divisions{" "}
                                 <span className="text-red-500">*</span>
                               </h5>
-                              {division.length > 0 && (
-                                <>
-                                  {division.map((division) => (
-                                    <div
-                                      key={division.section_id}
-                                      className="pt-3"
-                                    >
-                                      <label>
-                                        <input
-                                          type="checkbox"
-                                          className="mr-0.5 shadow-lg"
-                                          value={division.section_id}
-                                          checked={selectedDivisions.includes(
-                                            division.section_id
-                                          )}
-                                          onChange={handleDivisionChange}
-                                        />
-                                        <span className="font-semibold text-gray-600">
-                                          {division.name}
-                                        </span>
-                                      </label>
-                                    </div>
-                                  ))}
-                                </>
-                              )}
+                              {division.map((div) => (
+                                <div key={div.section_id} className="pt-3">
+                                  <input
+                                    type="checkbox"
+                                    className="mr-0.5 shadow-lg "
+                                    checked={selectedDivisions.includes(
+                                      div.section_id
+                                    )}
+                                    onChange={() =>
+                                      handleDivisionChange(div.section_id)
+                                    }
+                                  />
+                                  <span className="  font-semibold text-gray-600 ">
+                                    {div.name}
+                                  </span>
+                                </div>
+                              ))}
 
                               {divisionError && (
                                 <p className="  md:absolute md:top-9 md:left-[17%] text-red-500 text-xs">
@@ -2144,8 +2356,8 @@ function ManageSubjectList() {
                                 <span className="text-red-500">*</span>
                               </h5>
                               <div className=" grid grid-cols-5 mx-4 w-[75%]">
-                                {subjects.map((subject) => (
-                                  <div key={subject.subject_id}>
+                                {subjectsForAllotSubject.map((subject) => (
+                                  <div key={subject.sm_id}>
                                     <label>
                                       <input
                                         type="checkbox"
@@ -2154,7 +2366,10 @@ function ManageSubjectList() {
                                         checked={selectedSubjects.includes(
                                           subject.sm_id
                                         )}
-                                        onChange={handleSubjectChange}
+                                        onChange={() =>
+                                          handleSubjectChange(subject.sm_id)
+                                        }
+                                        disabled={!selectedDivisions.length} // Disable if no division is selected
                                       />
                                       <span className="font-semibold text-gray-600">
                                         {subject.name}
@@ -2162,6 +2377,23 @@ function ManageSubjectList() {
                                     </label>
                                   </div>
                                 ))}
+                                {/* {subjects.map((subject) => (
+                                  <div key={subject.sm_id}>
+                                    <input
+                                      type="checkbox"
+                                      className="mr-0.5 shadow-lg"
+                                      value={subject.sm_id}
+                                      checked={selectedSubjects.includes(
+                                        subject.sm_id
+                                      )}
+                                      onChange={() =>
+                                        handleSubjectChange(subject.sm_id)
+                                      }
+                                      disabled={!selectedDivisions.length} // Disable if no division is selected
+                                    />
+                                    {subject.name}
+                                  </div>
+                                ))} */}
                               </div>
                             </div>
                             {subjectError && (
@@ -2260,7 +2492,16 @@ function ManageSubjectList() {
                       >
                         Teacher assigned <span className="text-red-500">*</span>
                       </label>
-                      <input
+                      <Select
+                        // className="border w-[50%] h-10 rounded-md px-3 py-2 md:w-full mr-2 shadow-md"
+                        className="w-full shadow-md"
+                        value={selectedTeacher}
+                        onChange={handleTeacherSelect}
+                        options={teacherOptions}
+                        placeholder="Select "
+                        isSearchable
+                      />
+                      {/* <input
                         type="text"
                         id="newDepartmentId"
                         value={newDepartmentId}
@@ -2275,7 +2516,7 @@ function ManageSubjectList() {
                       {isDropdownOpen && (
                         <div className="  absolute -top-5 left-[44%]  w-[50%] text-xs md:text-sm p-1 px-1 md:px-4 md:absolute md:top-[80%] md:left-[36%] md:w-[65%] border rounded-md mt-1 bg-white z-10 max-h-48 overflow-auto">
                           {/* // <div className="absolute mt-1 w-full border rounded-md bg-white z-10 max-h-48 overflow-auto"> */}
-                          {filteredDepartments.length === 0 && (
+                      {/* {filteredDepartments.length === 0 && (
                             <div className="p-2 text-gray-500">
                               No departments found
                             </div>
@@ -2292,7 +2533,7 @@ function ManageSubjectList() {
                             </div>
                           ))}
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </div>
                 </div>
@@ -2337,8 +2578,8 @@ function ManageSubjectList() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to delete this subject
-                  {currentSection?.get_subject?.name}?
+                  Are you sure you want to delete this subject{" "}
+                  {` ${currestSubjectNameForDelete} `} ?
                 </div>
                 <div className=" flex justify-end p-3">
                   <button

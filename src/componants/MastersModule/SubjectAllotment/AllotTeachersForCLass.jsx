@@ -462,7 +462,7 @@ const AllotTeachersForClass = () => {
   const [classSection, setClassSection] = useState("");
   const [sectionId, setSectionId] = useState("");
   const [classId, setClassId] = useState("");
-
+  const [selectedClass, setSelectedClass] = useState(null);
   const [subjects, setSubjects] = useState([]);
   const [error, setError] = useState(null);
   const [departments, setDepartments] = useState([]);
@@ -514,7 +514,14 @@ const AllotTeachersForClass = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (Array.isArray(response.data)) {
-        setClasses(response.data);
+        // Convert the class data to the format required by react-select
+        const classOptions = response.data.map((cls) => ({
+          value: cls.section_id, // Use section_id as the value
+          label: `${cls?.get_class?.name} ${cls?.name}`,
+          classId: cls.class_id,
+          sectionId: cls.section_id,
+        }));
+        setClasses(classOptions);
         console.log("Class and section data:", response.data);
       } else {
         setError("Unexpected data format");
@@ -532,21 +539,19 @@ const AllotTeachersForClass = () => {
 
     // setClassId("");
   };
-  const handleClassSectionChange = (e) => {
+  const handleClassSectionChange = (selectedOption) => {
     setNameError(null); // Reset error when user selects a class
-    const [classSection, sectionId] = e.target.value.split(" "); // Split the value by space
-    setClassSection(e.target.value);
-    setClassId(classSection); // Store the first value in setClassSection
-
-    setSectionId(sectionId); // Store the second value in setSectionId
-    console.log("The class_id", classId);
-    console.log("The sectionId ", sectionId);
-
-    // console.log("The sectionId and class_id", e.target.value);
+    console.log("selectedOption", selectedOption);
+    setSelectedClass(selectedOption);
+    setClassId(selectedOption.classId); // Store the class_id
+    setSectionId(selectedOption.value); // Store the section_id
+    console.log("Selected class_id:", selectedOption.classId);
+    console.log("Selected section_id:", selectedOption.value);
   };
   // heavy code take time more
   const handleSearchForAllotTea = async () => {
-    if (!classSection) {
+    console.log("hfdskjlhjf", classId);
+    if (!classId) {
       setNameError("Please select the class.");
       return;
     }
@@ -554,12 +559,12 @@ const AllotTeachersForClass = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/subject-allotment/section/${classId}`,
+        `${API_URL}/api/subject-allotment/section/${sectionId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
+      console.log("fdslkjfsdlrun");
       if (response.data.status === "success" && response.data.data) {
         const subjectData = Object.entries(response.data.data).map(
           ([sm_id, subject]) => ({
@@ -727,9 +732,9 @@ const AllotTeachersForClass = () => {
 
       console.log("Final subject data for PUT request:", subjects);
       console.log("Formatted data for PUT request:", formattedData);
-
+      // just convet the logic sectionId is become classId and classId is become sectionID
       const response = await axios.put(
-        `${API_URL}/api/subject-allotments/${sectionId}/${classId}`, // Replace with actual classId and sectionId
+        `${API_URL}/api/subject-allotments/${classId}/${sectionId}`, // Replace with actual classId and sectionId
         formattedData,
         {
           headers: {
@@ -807,7 +812,7 @@ const AllotTeachersForClass = () => {
               Select Class <span className="text-red-500">*</span>
             </label>
             <div className="w-full">
-              <select
+              {/* <select
                 id="classSection"
                 className="border w-[50%] h-10 md:h-auto rounded-md px-3 py-2 md:w-full mr-2"
                 value={classSection}
@@ -822,7 +827,15 @@ const AllotTeachersForClass = () => {
                     {`${cls?.get_class?.name} ${cls?.name}`}
                   </option>
                 ))}
-              </select>
+              </select> */}
+              <Select
+                id="classSection"
+                components={animatedComponents}
+                options={classes}
+                value={selectedClass}
+                onChange={handleClassSectionChange}
+                placeholder="Select Class"
+              />
               {nameError && (
                 <div className=" relative top-0.5 ml-1 text-danger text-xs">
                   {nameError}
