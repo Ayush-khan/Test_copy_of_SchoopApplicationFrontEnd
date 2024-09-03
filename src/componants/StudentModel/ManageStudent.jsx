@@ -12,9 +12,10 @@ import Select from "react-select";
 function ManageSubjectList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const [classes, setClasses] = useState([]);
+  const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [classesforsubjectallot, setclassesforsubjectallot] = useState([]);
   const [subjects, setSubjects] = useState([]);
   // for allot subject tab
@@ -55,6 +56,9 @@ function ManageSubjectList() {
   // for react-search of manage tab teacher Edit and select class
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
+  //   For students
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
   const handleTeacherSelect = (selectedOption) => {
     setSelectedTeacher(selectedOption);
     console.log("selectedTeacher", selectedTeacher);
@@ -63,8 +67,21 @@ function ManageSubjectList() {
   };
 
   const handleClassSelect = (selectedOption) => {
+    setNameError("");
     setSelectedClass(selectedOption);
     setclassIdForManage(selectedOption.value); // Assuming value is the class ID
+    // Set loading state for student dropdown
+    // setLoading(false);
+    fetchStudentNameWithClassId(selectedOption.value);
+    // Fetch student list based on selected class and section
+    // fetchStudentNameWithClassId(selectedOption.value).finally(() => {
+    //   setLoading(true); // Stop loading once the API call is complete
+    // });
+  };
+  const handleStudentSelect = (selectedOption) => {
+    setNameError("");
+    setSelectedStudent(selectedOption);
+    setSelectedStudentId(selectedOption.value);
   };
 
   const teacherOptions = departments.map((dept) => ({
@@ -76,13 +93,17 @@ function ManageSubjectList() {
     value: cls.section_id,
     label: `${cls?.get_class?.name}  ${cls.name} (${cls.students_count})`,
   }));
+  const studentOptions = studentNameWithClassId.map((stu) => ({
+    value: stu.student_id,
+    label: `${stu?.first_name}  ${stu?.mid_name} ${stu.last_name}`,
+  }));
 
   //   Sorting logic state
 
   const pageSize = 10;
 
   //   FOr serial number
-
+  // fetch className with division and student count
   const fetchClassNames = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -106,6 +127,40 @@ function ManageSubjectList() {
       setError("Error fetching class, section with student count");
     }
   };
+  const fetchStudentNameWithClassId = async (section_id = null) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const params = section_id ? { section_id } : {};
+
+      const response = await axios.get(
+        `${API_URL}/api/getStudentListBySection`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params, // Pass section_id as a query parameter if available
+        }
+      );
+
+      if (Array.isArray(response?.data?.students)) {
+        setStudentNameWithClassId(response?.data?.students);
+        console.log("Student data is", response?.data?.students);
+      } else {
+        setError("Unexpected data format");
+      }
+    } catch (error) {
+      console.error("Error fetching class, section with student count:", error);
+      setError("Error fetching class, section with student count");
+    }
+  };
+
+  useEffect(() => {
+    fetchClassNames();
+    fetchStudentNameWithClassId(); // Initial call without section_id
+    fetchDepartments();
+    fetchClassNamesForAllotSubject();
+  }, []);
+
+  // Example usage within useEffect
+
   const fetchClassNamesForAllotSubject = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -155,35 +210,37 @@ function ManageSubjectList() {
 
   useEffect(() => {
     fetchClassNames();
+    fetchStudentNameWithClassId(classOptions.value);
     fetchDepartments();
     fetchClassNamesForAllotSubject();
   }, []);
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
-    if (!classIdForManage) {
-      setNameError("Please select the class.");
+    if (!classIdForManage && !selectedStudentId) {
+      setNameError("Please select atleast one of them.");
       return;
     }
     try {
       console.log(
         "for this sectiong id in seaching inside subjectallotment",
-        classIdForManage
+        selectedStudentId
       );
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_subject_Alloted`, {
-        headers: { Authorization: `Bearer ${token}` },
-        // params: { section_id: classSection },
-        params: { section_id: classIdForManage },
-      });
-      console.log(
-        "the response of the subjectallotment is *******",
-        response.data
+      const response = await axios.get(
+        `${API_URL}/api/students/${selectedStudentId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          //   params: { section_id: classSection },
+          //   params: { studentId: selectedStudentId },
+        }
       );
+      console.log("the response of the stdent list is *******", response.data);
       if (response.data.length > 0) {
+        console.log("inside this getStudentLIstpai");
         setSubjects(response.data);
         setPageCount(Math.ceil(response.data.length / 10)); // Example pagination logic
       } else {
-        setSubjects([]);
+        setSubjects(response.data);
         toast.error("No subjects found for the selected class and division.");
       }
     } catch (error) {
@@ -395,19 +452,19 @@ function ManageSubjectList() {
               <div className="mb-4 ">
                 <div className="md:w-[90%] mx-auto ">
                   <div className=" w-full  flex justify-center flex-col md:flex-row gap-x-1 md:gap-x-8">
-                    <div className="w-1/2  flex  md:flex-row  ">
+                    <div className="w-full  gap-x-3 md:justify-start justify-between md:w-1/2 my-1 md:my-4 flex  md:flex-row  ">
                       <label
                         htmlFor="classSection"
                         className=" mr-2 pt-2 items-center text-center"
                       >
                         Class <span className="text-red-500">*</span>
                       </label>
-                      <div className="w-3/4">
+                      <div className="w-[60%] md:w-[65%] ">
                         <Select
                           value={selectedClass}
                           onChange={handleClassSelect}
                           options={classOptions}
-                          placeholder="Select Class"
+                          placeholder="Select "
                           isSearchable
                         />
                         {nameError && (
@@ -417,19 +474,19 @@ function ManageSubjectList() {
                         )}
                       </div>
                     </div>
-                    <div className="w-1/2  flex  md:flex-row gap-x-2">
+                    <div className="w-full  justify-between  md:w-1/2 my-1 md:my-4 flex  md:flex-row  ">
                       <label
                         htmlFor="classSection"
                         className="md:text-nowrap pt-2 items-center text-center"
                       >
                         Student Name <span className="text-red-500">*</span>
                       </label>
-                      <div className="w-3/4">
+                      <div className="w-[60%] md:w-[65%] ">
                         <Select
-                          value={selectedClass}
-                          onChange={handleClassSelect}
-                          options={classOptions}
-                          placeholder="Select Class"
+                          value={selectedStudent}
+                          onChange={handleStudentSelect}
+                          options={studentOptions}
+                          placeholder="Select "
                           isSearchable
                         />
                         {nameError && (
@@ -443,7 +500,7 @@ function ManageSubjectList() {
                     <button
                       onClick={handleSearch}
                       type="button"
-                      className="btn h-10  w-18 md:w-auto btn-primary"
+                      className=" my-1 md:my-4 btn h-10  w-18 md:w-auto btn-primary"
                     >
                       Search
                     </button>
@@ -455,7 +512,7 @@ function ManageSubjectList() {
                   <div className="card mx-auto lg:w-full shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                        Manage Subjects List
+                        Manage Student List
                       </h3>
                       <div className="w-1/2 md:w-fit mr-1 ">
                         <input
