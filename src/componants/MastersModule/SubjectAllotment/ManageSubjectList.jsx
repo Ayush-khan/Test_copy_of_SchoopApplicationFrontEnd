@@ -2256,6 +2256,8 @@ function ManageSubjectList() {
                           breakLabel={"..."}
                           pageCount={pageCount}
                           onPageChange={handlePageClick}
+                          marginPagesDisplayed={1}
+                          pageRangeDisplayed={1}
                           containerClassName={"pagination"}
                           pageClassName={"page-item"}
                           pageLinkClassName={"page-link"}

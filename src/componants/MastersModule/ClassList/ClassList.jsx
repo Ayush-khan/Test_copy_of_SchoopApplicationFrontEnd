@@ -462,8 +462,8 @@ function ClassList() {
                 breakClassName={"page-item"}
                 breakLinkClassName={"page-link"}
                 pageCount={pageCount}
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={5}
+                marginPagesDisplayed={1}
+                pageRangeDisplayed={1}
                 onPageChange={handlePageClick}
                 containerClassName={"pagination"}
                 pageClassName={"page-item"}

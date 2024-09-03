@@ -1320,8 +1320,8 @@ function DivisionList() {
                 nextLabel={"Next"}
                 breakLabel={"..."}
                 pageCount={pageCount}
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={5}
+                marginPagesDisplayed={1}
+                pageRangeDisplayed={1}
                 onPageChange={handlePageClick}
                 containerClassName={"pagination justify-content-center"}
                 pageClassName={"page-item"}

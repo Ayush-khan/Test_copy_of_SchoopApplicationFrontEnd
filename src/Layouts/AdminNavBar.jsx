@@ -695,7 +695,7 @@ const AdminNavBar = () => {
           <NavDropdown.Item
             className="text-[.9em] font-bold hover:text-black"
             as={Link}
-            to="#"
+            to="/manageStudent"
           >
             Manage Students
           </NavDropdown.Item>
