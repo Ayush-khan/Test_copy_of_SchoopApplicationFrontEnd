@@ -235,13 +235,17 @@ function ManageSubjectList() {
         }
       );
       console.log("the response of the stdent list is *******", response.data);
-      if (response.data.length > 0) {
+      // Convert the response object to an array of values
+      const responseArray = Object.values(response.data);
+      //   if (response.data.length > 0) {
+      if (responseArray.length > 0) {
         console.log("inside this getStudentLIstpai");
-        setSubjects(response.data);
+        // setSubjects(response.data);
+        setSubjects(responseArray);
         setPageCount(Math.ceil(response.data.length / 10)); // Example pagination logic
       } else {
         setSubjects([]);
-        toast.error("No subjects found for the selected class and division.");
+        toast.error("No student found.");
       }
     } catch (error) {
       console.error("Error fetching subjects:", error);
