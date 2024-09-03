@@ -2067,7 +2067,7 @@ function ManageSubjectList() {
   return (
     <>
       {/* <ToastContainer /> */}
-      <div className="md:mx-auto md:w-3/4 p-4 bg-white ">
+      <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
           Subject Allotment
         </h3>
