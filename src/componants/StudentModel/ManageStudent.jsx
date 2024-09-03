@@ -159,7 +159,7 @@ function ManageSubjectList() {
     fetchClassNamesForAllotSubject();
   }, []);
 
-  // Example usage within useEffect
+  // Example usage within useEffect fg
 
   const fetchClassNamesForAllotSubject = async () => {
     try {
@@ -240,7 +240,7 @@ function ManageSubjectList() {
         setSubjects(response.data);
         setPageCount(Math.ceil(response.data.length / 10)); // Example pagination logic
       } else {
-        setSubjects(response.data);
+        setSubjects([]);
         toast.error("No subjects found for the selected class and division.");
       }
     } catch (error) {
