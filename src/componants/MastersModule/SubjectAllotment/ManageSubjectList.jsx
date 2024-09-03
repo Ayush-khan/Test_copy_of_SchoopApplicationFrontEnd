@@ -1838,7 +1838,7 @@ function ManageSubjectList() {
       handleSearch();
 
       setShowDeleteModal(false);
-      setSubjects([]);
+      // setSubjects([]);
       toast.success("subject deleted successfully!");
     } catch (error) {
       if (error.response && error.response.data) {
