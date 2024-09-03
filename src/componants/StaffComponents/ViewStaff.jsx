@@ -108,6 +108,12 @@ function ViewStaff() {
             }}
           />
         </div>
+        <div
+          className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+          style={{
+            backgroundColor: "#C03078",
+          }}
+        ></div>
         <div className="md:mx-5 overflow-x-hidden shadow-md p-2 bg-gray-50">
           <div className="flex flex-col md:grid md:grid-cols-3 md:gap-x-14 md:mx-10 ">
             <div className="mx-auto">

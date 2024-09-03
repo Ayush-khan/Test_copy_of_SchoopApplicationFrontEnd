@@ -714,7 +714,7 @@ function Sections() {
 
       <div className="container mt-4">
         <div className="card mx-auto lg:w-3/4 shadow-lg">
-          <div className="card-header flex justify-between items-center">
+          <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Section
             </h3>
@@ -736,7 +736,13 @@ function Sections() {
                 Add
               </button>
             </div>
-          </div>
+          </div>{" "}
+          <div
+            className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+            style={{
+              backgroundColor: "#C03078",
+            }}
+          ></div>
           {/* <div className="card-header flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-md lg:text-xl">
               Department
@@ -760,7 +766,6 @@ function Sections() {
               </button>
             </div>
           </div> */}
-
           <div className="card-body w-full">
             <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
               <div className="bg-white rounded-lg shadow-xs">
@@ -842,8 +847,8 @@ function Sections() {
                 breakClassName={"page-item"}
                 breakLinkClassName={"page-link"}
                 pageCount={pageCount}
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={5}
+                marginPagesDisplayed={1}
+                pageRangeDisplayed={1}
                 onPageChange={handlePageClick}
                 containerClassName={"pagination justify-content-center"}
                 pageClassName={"page-item"}

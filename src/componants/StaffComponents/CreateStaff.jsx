@@ -1895,6 +1895,12 @@ function CreateStaff() {
             }}
           />
         </div>
+        <div
+          className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+          style={{
+            backgroundColor: "#C03078",
+          }}
+        ></div>
         <p className="  md:absolute md:right-10  md:top-[10%]   text-gray-500 ">
           <span className="text-red-500">*</span>indicates mandatory information
         </p>

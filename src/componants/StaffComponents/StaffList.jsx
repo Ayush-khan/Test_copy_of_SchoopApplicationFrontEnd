@@ -20,6 +20,8 @@ function StaffList() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentStaff, setCurrentStaff] = useState(null);
+  const [currentStaffName, setCurrentStaffName] = useState(null);
+
   const [newStaffName, setNewStaffName] = useState("");
   const [newDesignation, setNewDesignation] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -218,11 +220,12 @@ function StaffList() {
   //   }
   // };
 
-  const handleDelete = (teacher_id) => {
+  const handleDelete = (staffCurrent) => {
     console.log("insise detelt");
     // const staffToDelete = staffs.find((staff) => staff.user_id === id);
-    console.log("this is staffUersid", teacher_id);
-    setCurrentStaff(teacher_id);
+    console.log("this is staffUersid", staffCurrent.teacher_id);
+    setCurrentStaff(staffCurrent.teacher_id);
+    setCurrentStaffName(staffCurrent.name);
     setShowDeleteModal(true);
   };
   const handleView = async (staffItem) => {
@@ -284,7 +287,7 @@ function StaffList() {
       <ToastContainer />
       <div className="container md:mt-4">
         <div className="card mx-auto lg:w-full shadow-lg">
-          <div className="card-header flex justify-between items-center">
+          <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Staff List
             </h3>
@@ -306,6 +309,12 @@ function StaffList() {
               </button>
             </div>
           </div>
+          <div
+            className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+            style={{
+              backgroundColor: "#C03078",
+            }}
+          ></div>
 
           <div className="card-body w-full box-border">
             <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
@@ -415,7 +424,7 @@ function StaffList() {
                         <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                           <button
                             className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                            onClick={() => handleDelete(staffItem.teacher_id)}
+                            onClick={() => handleDelete(staffItem)}
                           >
                             <FontAwesomeIcon icon={faTrash} />
                           </button>
@@ -496,22 +505,16 @@ function StaffList() {
                 breakClassName={"page-item"}
                 breakLinkClassName={"page-link"}
                 pageCount={pageCount}
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={5}
+                marginPagesDisplayed={1}
+                pageRangeDisplayed={1}
                 onPageChange={handlePageClick}
-                containerClassName={"pagination"}
+                containerClassName={"pagination justify-content-center"}
                 pageClassName={"page-item"}
-                pageLinkClassName={
-                  "page-link px-1 md:px-3 py-1 text-blue-500 border border-gray-300 rounded-md hover:bg-blue-500 hover:text-white"
-                }
+                pageLinkClassName={"page-link"}
                 previousClassName={"page-item"}
-                previousLinkClassName={
-                  "page-link  px-1 md:px-3 py-1 text-blue-500 border border-gray-300 rounded-md hover:bg-blue-500 hover:text-white"
-                }
+                previousLinkClassName={"page-link"}
                 nextClassName={"page-item"}
-                nextLinkClassName={
-                  "page-link px-1 md:px-3 py-1 text-blue-500 border border-gray-300 rounded-md hover:bg-blue-500 hover:text-white"
-                }
+                nextLinkClassName={"page-link"}
                 activeClassName={"active"}
               />
             </div>
@@ -634,26 +637,28 @@ function StaffList() {
           <div className="modal show " style={{ display: "block" }}>
             <div className="modal-dialog  modal-dialog-centered">
               <div className="modal-content">
-                <div className="modal-header flex justify-between items-center">
+                <div className="flex justify-between p-3">
                   <h5 className="modal-title  ">Delete Staff</h5>
 
                   <RxCross1
-                    className=" float-right  text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     onClick={handleCloseModal}
                   />
                 </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
                 <div className="modal-body">
-                  <p>
-                    Are you sure you want to delete{" "}
-                    <span className="font-md text-red-500">
-                      {currentStaff && currentStaff?.name}?
-                    </span>
-                  </p>
+                  <p>Are you sure you want to delete: {currentStaffName}?</p>
+                  {console.log("currestStaffDelete", currentStaff)}
                 </div>
-                <div className="modal-footer">
+                <div className=" flex justify-end p-3">
                   <button
                     type="button"
-                    className="btn btn-danger"
+                    className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
                   >
                     Delete

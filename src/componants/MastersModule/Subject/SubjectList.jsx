@@ -336,7 +336,7 @@ function SubjectList() {
 
       <div className="container mt-4">
         <div className="card mx-auto lg:w-3/4 shadow-lg">
-          <div className="card-header flex justify-between items-center">
+          <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Subject
             </h3>{" "}
@@ -359,6 +359,12 @@ function SubjectList() {
               </button>
             </div>
           </div>
+          <div
+            className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+            style={{
+              backgroundColor: "#C03078",
+            }}
+          ></div>
 
           <div className="card-body w-full">
             <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
