@@ -159,7 +159,7 @@ function ManageSubjectList() {
     fetchClassNamesForAllotSubject();
   }, []);
 
-  // Example usage within useEffect fg fgd
+  // Example usage within useEffect fg fgd rtdhg hfbrdh
 
   const fetchClassNamesForAllotSubject = async () => {
     try {
