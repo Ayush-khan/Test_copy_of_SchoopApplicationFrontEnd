@@ -195,8 +195,8 @@ function ManageSubjectList() {
     }
   };
   // THis is for the ALlotTeacherFOrACLaSS tAB FECTH class
-  // dfs fdg
-  //   This is the api for  get teacher list in the manage tab edit
+  // dfs
+  //   This is the api for get teacher list in the manage tab edit
   const fetchDepartments = async () => {
     try {
       const token = localStorage.getItem("authToken");
