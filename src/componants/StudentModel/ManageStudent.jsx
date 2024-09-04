@@ -195,7 +195,6 @@ function ManageSubjectList() {
     }
   };
   // THis is for the ALlotTeacherFOrACLaSS tAB FECTH class
-  //
   //   This is the api for get teacher list in the manage tab edit
   const fetchDepartments = async () => {
     try {
