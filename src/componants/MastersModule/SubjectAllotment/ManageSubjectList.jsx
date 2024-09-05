@@ -2123,7 +2123,7 @@ function ManageSubjectList() {
               <ToastContainer />
               <div className="mb-4">
                 <div className="md:w-[80%] mx-auto">
-                  <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
+                  <div className="form-group mt-4 w-full md:w-[80%] flex justify-start gap-x-1 md:gap-x-6">
                     <label
                       htmlFor="classSection"
                       className="w-1/4 pt-2 items-center text-center"
@@ -2137,6 +2137,8 @@ function ManageSubjectList() {
                         options={classOptions}
                         placeholder="Select Class"
                         isSearchable
+                        isClearable
+                        className=" text-sm w-full md:w-[60%] item-center relative left-0 md:left-4"
                       />
                       {nameError && (
                         <div className=" relative top-0.5 ml-1 text-danger text-xs">
@@ -2147,7 +2149,7 @@ function ManageSubjectList() {
                     <button
                       onClick={handleSearch}
                       type="button"
-                      className="btn h-10  w-18 md:w-auto btn-primary"
+                      className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
                     >
                       Search
                     </button>
@@ -2188,9 +2190,9 @@ function ManageSubjectList() {
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Class
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Division
-                              </th>
+                              </th> */}
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Subject
                               </th>
@@ -2215,11 +2217,11 @@ function ManageSubjectList() {
                                   {index + 1}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_class?.name}
+                                  {`${subject?.get_class?.name} ${subject?.get_division?.name}`}
                                 </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.get_division?.name}
-                                </td>
+                                </td> */}
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.get_subject?.name}
                                 </td>
@@ -2286,7 +2288,7 @@ function ManageSubjectList() {
               <div className="container mb-4">
                 <div className="card-header flex justify-between items-center"></div>
                 <div className="w-full mx-auto">
-                  <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
+                  <div className="form-group  w-full  md:w-[80%] mt-2 flex justify-start gap-x-1 ml-0 md:ml-10 md:gap-x-4">
                     <label
                       htmlFor="classSection"
                       className="w-1/4 pt-2 items-center text-center"
@@ -2295,7 +2297,7 @@ function ManageSubjectList() {
                     </label>
                     <select
                       id="classSection"
-                      className="border md:w-[50%] h-10 md:h-auto rounded-md px-3 py-2 w-full mr-2"
+                      className="border md:w-[35%] h-10 md:h-auto rounded-md px-3 py-2 w-full mr-2"
                       value={classId}
                       onChange={handleChangeClassSectionForAllotSubjectTab}
                     >
@@ -2509,7 +2511,7 @@ function ManageSubjectList() {
                       </label>
                       <Select
                         // className="border w-[50%] h-10 rounded-md px-3 py-2 md:w-full mr-2 shadow-md"
-                        className="w-full shadow-md"
+                        className="w-full text-sm shadow-md"
                         value={selectedTeacher}
                         onChange={handleTeacherSelect}
                         options={teacherOptions}

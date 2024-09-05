@@ -11,6 +11,7 @@ import { TbFileCertificate } from "react-icons/tb";
 import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
 import { MdLockReset, MdOutlineRemoveRedEye } from "react-icons/md";
+import { FaCheck } from "react-icons/fa";
 function ManageSubjectList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
@@ -24,6 +25,10 @@ function ManageSubjectList() {
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDActiveModal, setShowDActiveModal] = useState(false);
+  const [currentStudentDataForActivate, setCurrentStudentDataForActivate] =
+    useState(null);
+
   const [currentSection, setCurrentSection] = useState(null);
   const [currestSubjectNameForDelete, setCurrestSubjectNameForDelete] =
     useState("");
@@ -62,6 +67,16 @@ function ManageSubjectList() {
   //   For students
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
+
+  // Custom styles for the close button
+  const closeButtonStyle = {
+    background: "transparent",
+    border: "none",
+    fontSize: "16px",
+    cursor: "pointer",
+    color: "red", // White color for the cross icon
+    marginRight: "8px", // Adjust the position of the cross icon
+  };
   const handleTeacherSelect = (selectedOption) => {
     setSelectedTeacher(selectedOption);
     console.log("selectedTeacher", selectedTeacher);
@@ -87,6 +102,7 @@ function ManageSubjectList() {
   };
   const handleStudentSelect = (selectedOption) => {
     setNameError("");
+    setGrNumber("");
     setSelectedStudent(selectedOption);
     setSelectedStudentId(selectedOption.value);
   };
@@ -330,7 +346,18 @@ function ManageSubjectList() {
   // };
   const handleSearch = async () => {
     if (!classIdForManage && !selectedStudentId && !grNumber) {
-      setNameError("Please select at least one of them.");
+      // setNameError("Please select at least one of them.");
+      // aleart("Please select at least one of them!");
+      toast("Please select at least one of them!", {
+        autoClose: 100000, // Toast will disappear after 3 seconds
+        closeButton: ({ closeToast }) => (
+          <button onClick={closeToast} style={closeButtonStyle}>
+            &#10005; {/* Cross Icon (HTML Entity for "×") */}
+          </button>
+        ),
+      });
+      // alert("Please select at least one of them.");
+
       return;
     }
     try {
@@ -348,7 +375,7 @@ function ManageSubjectList() {
           response.data.students.length > 0
         ) {
           setSubjects(response.data.students);
-          setPageCount(Math.ceil(response.data.students.length / 10)); // Example pagination logic
+          setPageCount([]); // Example pagination logic
         } else {
           setSubjects([]);
           toast.error("No student found.");
@@ -360,10 +387,14 @@ function ManageSubjectList() {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        if (Array.isArray(response?.data?.students)) {
+        if (Array.isArray(response?.data?.student)) {
           setSubjects([]);
-          setSubjects(response.data.students);
-          // setPageCount(Math.ceil(response.data.students.length / 10)); // Example pagination logic
+          console.log(
+            "------>This is the data of the response of the student GrNumber based.....",
+            response?.data?.student
+          );
+          setSubjects(response.data.student);
+          setPageCount([]); // Example pagination logic
         } else {
           setSubjects([]);
           toast.error("No student found.");
@@ -375,6 +406,7 @@ function ManageSubjectList() {
         } else {
           setSubjects([]);
           setSubjects(studentNameWithClassId);
+          setPageCount(Math.ceil(subjects.length / 10));
         }
       }
     } catch (error) {
@@ -420,26 +452,115 @@ function ManageSubjectList() {
     setShowEditModal(true);
   };
 
-  const handleDelete = (sectionId) => {
-    console.log("inside delete of subjectallotmenbt____", sectionId);
-    console.log("inside delete of subjectallotmenbt", classes);
-    const classToDelete = subjects.find((cls) => cls.subject_id === sectionId);
+  const handleDelete = (subject) => {
+    console.log("inside delete of subjectallotmenbt____", subject);
+    console.log("inside delete of subjectallotmenbt", subject.student_id);
+    const sectionId = subject.student_id;
+    const classToDelete = subjects.find((cls) => cls.student_id === sectionId);
     // setCurrentClass(classToDelete);
     setCurrentSection({ classToDelete });
     console.log("the currecne t section", currentSection);
-    setCurrestSubjectNameForDelete(
-      currentSection?.classToDelete?.get_subject?.name
-    );
-    console.log(
-      "cureendtsungjeg",
-      currentSection?.classToDelete?.get_subject?.name
-    );
+    setCurrestSubjectNameForDelete(currentSection?.classToDelete?.student_name);
+    console.log("cureendtsungjeg", currentSection?.classToDelete?.student_name);
     console.log("currestSubjectNameForDelete", currestSubjectNameForDelete);
     setShowDeleteModal(true);
   };
   const handleActiveAndInactive = (subjectIsPass) => {
-    console.log("handleActiveAndInactive-->", subjectIsPass);
+    console.log("handleActiveAndInactive-->", subjectIsPass.student_id);
+    const studentToActiveOrDeactive = subjects.find(
+      (cls) => cls.student_id === subjectIsPass.student_id
+    );
+    setCurrentStudentDataForActivate({ studentToActiveOrDeactive });
+    console.log("studentToActiveOrDeactive", studentToActiveOrDeactive);
+    setShowDActiveModal(true);
   };
+  // const handleActivateOrNot = async () => {
+  //   // Handle delete submission logic
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     console.log(
+  //       "the classes inside the delete",
+  //       currentStudentDataForActivate?.studentToActiveOrDeactive?.student_id
+  //     );
+
+  //     if (
+  //       !token ||
+  //       !currentStudentDataForActivate ||
+  //       !currentStudentDataForActivate?.studentToActiveOrDeactive?.student_id
+  //     ) {
+  //       throw new Error("Student ID is missing");
+  //     }
+
+  //     const response = await axios.patch(
+  //       `${API_URL}/api/students/${currentStudentDataForActivate?.studentToActiveOrDeactive?.student_id}/deactivate`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     // fetchClassNames();
+  //     handleSearch();
+
+  //     setShowDActiveModal(false);
+  //     // setSubjects([]);
+  //     toast.success(response?.data?.message);
+  //   } catch (error) {
+  //     if (error.response && error.response.data) {
+  //       toast.error(`Error : ${error.response.data.message}`);
+  //     } else {
+  //       toast.error(`Error activate or deactivate Student: ${error.message}`);
+  //     }
+  //     console.error("Error activate or deactivate Student:", error);
+  //     // setError(error.message);
+  //   }
+  //   setShowDActiveModal(false);
+  // };
+
+  const handleActivateOrNot = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      console.log(
+        "the classes inside the delete",
+        currentStudentDataForActivate?.studentToActiveOrDeactive?.student_id
+      );
+
+      if (
+        !token ||
+        !currentStudentDataForActivate ||
+        !currentStudentDataForActivate?.studentToActiveOrDeactive?.student_id
+      ) {
+        throw new Error("Student ID is missing");
+      }
+
+      const response = await axios.patch(
+        `${API_URL}/api/students/${currentStudentDataForActivate?.studentToActiveOrDeactive?.student_id}/deactivate`,
+        {}, // Empty data object
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      handleSearch();
+
+      setShowDActiveModal(false);
+      toast.success(response?.data?.message);
+    } catch (error) {
+      if (error.response && error.response.data) {
+        toast.error(`Error: ${error.response.data.message}`);
+      } else {
+        toast.error(`Error activate or deactivate Student: ${error.message}`);
+      }
+      console.error("Error activate or deactivate Student:", error);
+    }
+    setShowDActiveModal(false);
+  };
+
   const handleView = (subjectIsPass) => {
     console.log("HandleView-->", subjectIsPass);
   };
@@ -509,7 +630,7 @@ function ManageSubjectList() {
       const token = localStorage.getItem("authToken");
       console.log(
         "the currecnt section inside the delte___",
-        currentSection?.classToDelete?.subject_id
+        currentSection?.classToDelete?.student_id
       );
       console.log("the classes inside the delete", classes);
       console.log(
@@ -519,13 +640,13 @@ function ManageSubjectList() {
       if (
         !token ||
         !currentSection ||
-        !currentSection?.classToDelete?.subject_id
+        !currentSection?.classToDelete?.student_id
       ) {
-        throw new Error("Subject ID is missing");
+        throw new Error("Student ID is missing");
       }
 
       await axios.delete(
-        `${API_URL}/api/delete_subject_Alloted/${currentSection?.classToDelete?.subject_id}`,
+        `${API_URL}/api/students/${currentSection?.classToDelete?.student_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -539,14 +660,14 @@ function ManageSubjectList() {
 
       setShowDeleteModal(false);
       // setSubjects([]);
-      toast.success("subject deleted successfully!");
+      toast.success("Student deleted successfully!");
     } catch (error) {
       if (error.response && error.response.data) {
-        toast.error(`Error deleting subject: ${error.response.data.message}`);
+        toast.error(`Error deleting Student: ${error.response.data.message}`);
       } else {
-        toast.error(`Error deleting subject: ${error.message}`);
+        toast.error(`Error deleting Student: ${error.message}`);
       }
-      console.error("Error deleting subject:", error);
+      console.error("Error deleting Student:", error);
       // setError(error.message);
     }
     setShowDeleteModal(false);
@@ -555,6 +676,7 @@ function ManageSubjectList() {
   const handleCloseModal = () => {
     setShowEditModal(false);
     setShowDeleteModal(false);
+    setShowDActiveModal(false);
   };
 
   const filteredSections = subjects.filter((section) => {
@@ -579,9 +701,10 @@ function ManageSubjectList() {
   return (
     <>
       {/* <ToastContainer /> */}
-      <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
+      {/* <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 "> */}
+      <div className="md:mx-auto md:w-[95%] p-4 bg-white mt-4 ">
         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-          Student
+          Manage Student
         </h3>
         <div
           className=" relative  mb-8   h-1  mx-auto bg-red-700"
@@ -591,7 +714,7 @@ function ManageSubjectList() {
         ></div>
         {/* <hr className="relative -top-3" /> */}
 
-        <div className="bg-white  rounded-md ">
+        <div className="bg-white w-full md:w-[95%] mx-auto rounded-md ">
           {/* <ManageSubjectsTab
                classSection={classSection}
                nameError={nameError}
@@ -606,25 +729,27 @@ function ManageSubjectList() {
                pageCount={pageCount}
                handlePageClick={handlePageClick}
              /> */}
-          <div>
+          <div className="w-full  mx-auto">
             <ToastContainer />
-            <div className="mb-4 ">
-              <div className="md:w-[95%] mx-auto ">
+            <div className="mb-4  ">
+              <div className="  w-[90%]  mx-auto ">
                 <div className=" w-full flex justify-center flex-col md:flex-row gap-x-1 md:gap-x-8">
-                  <div className="w-full  gap-x-3 md:justify-start justify-between md:w-1/2 my-1 md:my-4 flex  md:flex-row  ">
+                  <div className="w-full  gap-x-3 md:justify-start justify-between  my-1 md:my-4 flex  md:flex-row  ">
                     <label
                       htmlFor="classSection"
                       className=" mr-2 pt-2 items-center text-center"
                     >
                       Class
                     </label>
-                    <div className="w-[60%] md:w-[65%] ">
+                    <div className="w-[60%] md:w-[50%] ">
                       <Select
                         value={selectedClass}
                         onChange={handleClassSelect}
                         options={classOptions}
                         placeholder="Select "
                         isSearchable
+                        isClearable
+                        className="text-sm"
                       />
                       {nameError && (
                         <div className=" relative top-0.5 ml-1 text-danger text-xs">
@@ -633,20 +758,25 @@ function ManageSubjectList() {
                       )}
                     </div>
                   </div>
-                  <div className="w-full  justify-between  md:w-1/2 my-1 md:my-4 flex  md:flex-row  ">
+                  <div className="w-full  relative left-0 md:-left-[7%] justify-between  md:w-[90%] my-1 md:my-4 flex  md:flex-row  ">
                     <label
                       htmlFor="classSection"
                       className="relative left-0 md:-left-3  md:text-nowrap pt-2 items-center text-center"
                     >
                       Student Name
                     </label>
-                    <div className="w-[60%] md:w-[65%] ">
+                    <div className="w-[60%] md:w-[85%] ">
                       <Select
                         value={selectedStudent}
                         onChange={handleStudentSelect}
                         options={studentOptions}
                         placeholder="Select "
                         isSearchable
+                        isClearable
+                        className="text-sm"
+                        // isClearable={() => {
+                        //   setSelectedStudentId("");
+                        // }}
                       />
                       {nameError && (
                         <div className=" relative top-0.5 ml-1 text-danger text-xs">
@@ -655,8 +785,11 @@ function ManageSubjectList() {
                       )}{" "}
                     </div>
                   </div>
-                  <div className=" relative w-full  justify-between  md:w-[25%] my-1 md:my-4 flex  md:flex-row  ">
-                    <label htmlFor="GRnumber" className=" mt-2 ml-0 md:ml-4">
+                  <div className=" relative w-full  justify-between  md:w-[45%] my-1 md:my-4 flex  md:flex-row  ">
+                    <label
+                      htmlFor="GRnumber"
+                      className=" mt-2 ml-0 md:ml-4 text-nowrap"
+                    >
                       {" "}
                       GR No.
                     </label>
@@ -685,11 +818,11 @@ function ManageSubjectList() {
               </div>
             </div>
             {subjects.length > 0 && (
-              <div className="container mt-4">
+              <div className="w-full  mt-4">
                 <div className="card mx-auto lg:w-full shadow-lg">
                   <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                     <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                      Manage Student List
+                      Student List
                     </h3>
                     <div className="w-1/2 md:w-fit mr-1 ">
                       <input
@@ -727,9 +860,9 @@ function ManageSubjectList() {
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Class
                             </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Division
-                            </th>
+                            </th> */}
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               UserId
                             </th>
@@ -756,7 +889,7 @@ function ManageSubjectList() {
                         <tbody>
                           {displayedSections.map((subject, index) => (
                             <tr
-                              key={subject.section_id}
+                              key={subject.student_id}
                               className="text-gray-700 text-sm font-light"
                             >
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
@@ -771,14 +904,16 @@ function ManageSubjectList() {
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {`${subject?.first_name} ${subject?.mid_name} ${subject?.last_name}`}
                               </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.get_class?.name}
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
+                                {`${subject?.get_class?.name}${" "}${
+                                  subject?.get_division?.name
+                                }`}
                               </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {subject?.get_division?.name}
-                              </td>
+                              </td> */}
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.user?.user_id}
+                                {subject?.parents?.user?.user_id}
                               </td>
 
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
@@ -791,24 +926,50 @@ function ManageSubjectList() {
                               </td>
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 <button
-                                  onClick={() =>
-                                    handleDelete(subject?.subject_id)
-                                  }
+                                  onClick={() => handleDelete(subject)}
                                   className="text-red-600 hover:text-red-800 hover:bg-transparent "
                                 >
                                   <FontAwesomeIcon icon={faTrash} />
                                 </button>
                               </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 <button
                                   onClick={() =>
                                     handleActiveAndInactive(subject)
                                   }
-                                  className="text-red-700 hover:text-red-900 font-bold text-xl hover:bg-transparent "
                                 >
-                                  <FontAwesomeIcon icon={faXmark} />{" "}
+                                  {subject.isActive === "Y" ? (
+                                    <FontAwesomeIcon
+                                      icon={faXmark}
+                                      className="text-red-700 hover:text-red-900 font-bold text-xl hover:bg-transparent "
+                                    />
+                                  ) : (
+                                    <FaCheck className="text-green-600 hover:text-green-800 hover:bg-transparent" />
+                                  )}
+                                </button>
+                              </td> */}
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
+                                <button
+                                  onClick={() =>
+                                    handleActiveAndInactive(subject)
+                                  }
+                                  className={`  font-bold hover:bg-none ${
+                                    subject.isActive === "Y"
+                                      ? "text-green-600 hover:text-green-800 hover:bg-transparent"
+                                      : "text-red-700 hover:text-red-900  hover:bg-transparent"
+                                  }`}
+                                >
+                                  {subject.isActive === "Y" ? (
+                                    <FaCheck className="text-xl" />
+                                  ) : (
+                                    <FontAwesomeIcon
+                                      icon={faXmark}
+                                      className="text-xl"
+                                    />
+                                  )}
                                 </button>
                               </td>
+
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 <button
                                   onClick={() => handleView(subject)}
@@ -839,7 +1000,7 @@ function ManageSubjectList() {
                       </table>
                     </div>
                     <div className=" flex justify-center pt-2 -mb-3">
-                      <ReactPaginate
+                      {/* <ReactPaginate
                         previousLabel={"Previous"}
                         nextLabel={"Next"}
                         breakLabel={"..."}
@@ -856,6 +1017,25 @@ function ManageSubjectList() {
                         nextLinkClassName={"page-link"}
                         breakClassName={"page-item"}
                         breakLinkClassName={"page-link"}
+                        activeClassName={"active"}
+                      /> */}
+                      <ReactPaginate
+                        previousLabel={"Previous"}
+                        nextLabel={"Next"}
+                        breakLabel={"..."}
+                        breakClassName={"page-item"}
+                        breakLinkClassName={"page-link"}
+                        pageCount={pageCount}
+                        marginPagesDisplayed={1}
+                        pageRangeDisplayed={1}
+                        onPageChange={handlePageClick}
+                        containerClassName={"pagination"}
+                        pageClassName={"page-item"}
+                        pageLinkClassName={"page-link"}
+                        previousClassName={"page-item"}
+                        previousLinkClassName={"page-link"}
+                        nextClassName={"page-item"}
+                        nextLinkClassName={"page-link"}
                         activeClassName={"active"}
                       />
                     </div>
@@ -988,6 +1168,50 @@ function ManageSubjectList() {
                     onClick={handleSubmitDelete}
                   >
                     Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showDActiveModal && (
+        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">
+                    Confirm Activate or Deactivate
+                  </h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    // className="btn-close text-red-600"
+                    onClick={handleCloseModal}
+                  />
+                  {console.log(
+                    "the currecnt section inside delete of the managesubjhect",
+                    currentSection
+                  )}
+                </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="modal-body">
+                  Are you sure you want to Activate or Deactivate this student{" "}
+                  {` ${currestSubjectNameForDelete} `} ?
+                </div>
+                <div className=" flex justify-end p-3">
+                  <button
+                    type="button"
+                    className="btn btn-primary px-3 mb-2"
+                    onClick={handleActivateOrNot}
+                  >
+                    Active
                   </button>
                 </div>
               </div>

@@ -1364,19 +1364,21 @@ const AllotTeachersTab = () => {
                   onChange={handleClassChange}
                   placeholder="Select"
                   styles={customSelectStyles}
+                  className="w-full md:w-[50%]"
+                  // isClearable
                 />
                 {classError && (
                   <p className=" absolute text-red-500 text-xs">{classError}</p>
                 )}
               </div>
             </div>
-            <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
-              <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
+            <div className="form-group relative left-0 md:-left-4 flex justify-start  mt-4">
+              <label className="w-1/4 pt-2 items-center text-center   py-2 font-semibold text-[1em] text-gray-700">
                 Select Division <span className="text-red-500">*</span>
               </label>
-              <div className="w-full">
+              <div className="w-full  md:w-[39%]  ">
                 <select
-                  className="form-control"
+                  className="form-control "
                   value={selectedDivision ? selectedDivision.value : ""}
                   onChange={(e) =>
                     handleDivisionChange({
@@ -1414,6 +1416,8 @@ const AllotTeachersTab = () => {
                   placeholder="Select"
                   styles={customSelectStyles}
                   isDisabled={!selectedDivision}
+                  isClearable
+                  className="w-full md:w-[50%]"
                 />
                 {teacherError && (
                   <p className="absolute text-red-500 text-xs">

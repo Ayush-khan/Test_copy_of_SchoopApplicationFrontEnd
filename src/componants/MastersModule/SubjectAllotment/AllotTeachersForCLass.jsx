@@ -804,7 +804,7 @@ const AllotTeachersForClass = () => {
 
       <div className="mb-4">
         <div className="md:w-[80%] mx-auto">
-          <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
+          <div className="form-group mt-4 w-full  md:w-[80%] flex justify-start gap-x-1 md:gap-x-6">
             <label
               htmlFor="classSection"
               className="w-1/4 pt-2 items-center text-center"
@@ -835,6 +835,8 @@ const AllotTeachersForClass = () => {
                 value={selectedClass}
                 onChange={handleClassSectionChange}
                 placeholder="Select Class"
+                className=" w-full md:w-[60%] item-center relative left-0 md:left-4"
+                isClearable
               />
               {nameError && (
                 <div className=" relative top-0.5 ml-1 text-danger text-xs">
@@ -846,7 +848,7 @@ const AllotTeachersForClass = () => {
             <button
               onClick={handleSearchForAllotTea}
               type="button"
-              className="btn h-10  w-18 md:w-auto btn-primary"
+              className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
               //   disabled={loading}
             >
               Browse
