@@ -797,6 +797,7 @@ const AllotTeachersForClass = () => {
   //       setError("Error updating teacher allotment");
   //     }
   //   };
+  // jdfgkl fgdrge yjhr thrr trhjt
 
   return (
     <div>
