@@ -89,10 +89,10 @@
 // // second outlet used try
 
 import { Route, Router, Routes } from "react-router-dom";
-import CreateStudent from "../componants/CreateStudent";
+import CreateStudent from "../componants/StudentModel/CreateStudent.jsx";
 import StudentList from "../componants/StudentList";
 import DemoTable from "../componants/DemoTable";
-import StudentEdit from "../componants/StudentEdit";
+import StudentEdit from "../componants/StudentEdit.jsx";
 import Login from "../componants/LoginForm";
 import NavBar from "../Layouts/NavBar";
 import UserProfile from "../componants/UserProfile";
@@ -212,6 +212,14 @@ function Index() {
         <Route
           path="/manageStudent"
           element={<PrivateRoute element={ManageStudent} />}
+        />
+        {/* <Route
+          path="/student-create"
+          element={<PrivateRoute element={CreateStudent} />}
+        /> */}
+        <Route
+          path="/student/edit/:id"
+          element={<PrivateRoute element={CreateStudent} />}
         />
 
         <Route path="/sections" element={<PrivateRoute element={Sections} />} />

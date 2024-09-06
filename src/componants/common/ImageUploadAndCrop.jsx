@@ -106,7 +106,7 @@ const ImageCropper = ({ onImageCropped, photoPreview }) => {
         accept="image/*"
         onChange={handleImageChange}
         ref={fileInputRef}
-        className="input-field text-xs box-border mt-2 bg-black text-white  "
+        className=" md:w-[95%] input-field text-xs box-border mt-2 bg-black text-white  "
       />
       {modalOpen && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">

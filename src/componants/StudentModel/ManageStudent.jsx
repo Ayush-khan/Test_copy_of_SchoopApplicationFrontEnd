@@ -12,6 +12,8 @@ import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
 import { MdLockReset, MdOutlineRemoveRedEye } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+
 function ManageSubjectList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
@@ -67,7 +69,7 @@ function ManageSubjectList() {
   //   For students
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
-
+  const navigate = useNavigate();
   // Custom styles for the close button
   const closeButtonStyle = {
     background: "transparent",
@@ -346,10 +348,11 @@ function ManageSubjectList() {
   // };
   const handleSearch = async () => {
     if (!classIdForManage && !selectedStudentId && !grNumber) {
-      // setNameError("Please select at least one of them.");
+      setNameError("Please select at least one of them.");
       // aleart("Please select at least one of them!");
       toast("Please select at least one of them!", {
-        autoClose: 100000, // Toast will disappear after 3 seconds
+        autoClose: 100000,
+        className: "black-background", // Toast will disappear after 3 seconds
         closeButton: ({ closeToast }) => (
           <button onClick={closeToast} style={closeButtonStyle}>
             &#10005; {/* Cross Icon (HTML Entity for "×") */}
@@ -434,22 +437,14 @@ function ManageSubjectList() {
 
   const handleEdit = (section) => {
     setCurrentSection(section);
-    // console.log("the currecne t section", currentSection);
+    navigate(
+      `/student/edit/${section.student_id}`,
 
-    console.log("fdsfsdsd handleEdit", section);
-    setnewclassnames(section?.get_class?.name);
-    setnewSectionName(section?.get_division?.name);
-    setnewSubjectnName(section?.get_subject?.name);
-    setTeacherNameIs(section?.get_teacher?.name);
-    setteacherIdIs(section?.get_teacher?.teacher_id);
-    console.log("teacerId and name is", teacherIdIs, teacherNameIs);
-    // It's used for the dropdown of the tachers
-    // setnewTeacherAssign()
-    const selectedOption = departments.find(
-      (option) => option.value === section?.get_teacher?.teacher_id
+      {
+        state: { student: section },
+      }
     );
-    setSelectedTeacher(selectedOption);
-    setShowEditModal(true);
+    // console.log("the currecne t section", currentSection);
   };
 
   const handleDelete = (subject) => {
@@ -576,52 +571,6 @@ function ManageSubjectList() {
       "inside the edit model of the subjectallotment",
       currentSection.subject_id
     );
-    console.log(
-      "inside the edit model of the subjectallotment",
-      currentSection
-    );
-
-    try {
-      const token = localStorage.getItem("authToken");
-
-      if (!token || !currentSection || !currentSection.subject_id) {
-        throw new Error("Subject ID is missing");
-      }
-      if (!nameAvailable) {
-        return;
-      }
-
-      console.log("the Subject ID***", currentSection.subject_id);
-      console.log("the teacher ID***", selectedDepartment);
-
-      await axios.put(
-        `${API_URL}/api/update_subject_Alloted/${currentSection.subject_id}`,
-        { teacher_id: newDepartmentId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
-
-      handleSearch();
-      handleCloseModal();
-      toast.success("Subject Record updated successfully!");
-
-      // setSubjects([]);
-    } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error updating subject Record: ${error.response.data.message}`
-        );
-      } else {
-        toast.error(`Error updating subject Record: ${error.message}`);
-      }
-      console.error("Error editing subject Record:", error);
-    } finally {
-      setShowEditModal(false);
-    }
   };
 
   const handleSubmitDelete = async () => {
@@ -751,11 +700,11 @@ function ManageSubjectList() {
                         isClearable
                         className="text-sm"
                       />
-                      {nameError && (
+                      {/* {nameError && (
                         <div className=" relative top-0.5 ml-1 text-danger text-xs">
                           {nameError}
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </div>
                   <div className="w-full  relative left-0 md:-left-[7%] justify-between  md:w-[90%] my-1 md:my-4 flex  md:flex-row  ">
@@ -779,7 +728,7 @@ function ManageSubjectList() {
                         // }}
                       />
                       {nameError && (
-                        <div className=" relative top-0.5 ml-1 text-danger text-xs">
+                        <div className=" relative top-0.5 md:top-[50%] ml-1 text-danger text-md">
                           {nameError}
                         </div>
                       )}{" "}
@@ -876,7 +825,7 @@ function ManageSubjectList() {
                               Inactive
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              VIew
+                              View
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               RC & Certificates
@@ -1046,91 +995,6 @@ function ManageSubjectList() {
           </div>
         </div>
       </div>
-
-      {/* Edit Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
-          <div className="modal show " style={{ display: "block" }}>
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Edit Student</h5>
-                  <RxCross1
-                    className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                    type="button"
-                    // className="btn-close text-red-600"
-                    onClick={handleCloseModal}
-                  />
-                </div>
-                <div
-                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                  style={{
-                    backgroundColor: "#C03078",
-                  }}
-                ></div>
-                <div className="modal-body">
-                  {/* Modal content for editing */}
-                  <div className=" relative mb-3 flex justify-center  mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Class :{" "}
-                    </label>
-                    <div className="font-bold form-control  shadow-md  mb-2">
-                      {newclassnames}
-                    </div>
-                  </div>
-                  <div className=" relative mb-3 flex justify-center  mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Section:{" "}
-                    </label>
-                    <span className="font-semibold form-control shadow-md mb-2">
-                      {newSection}
-                    </span>
-                  </div>
-                  <div className=" relative  flex justify-start  mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2 ">
-                      Subject:{" "}
-                    </label>{" "}
-                    <span className="font-semibold form-control shadow-md mb-2 ">
-                      {newSubject}
-                    </span>
-                  </div>
-                  <div className=" modal-body">
-                    <div
-                      ref={dropdownRef}
-                      className=" relative mb-3 flex justify-center mx-2 gap-4 "
-                    >
-                      <label
-                        htmlFor="newDepartmentId"
-                        className="w-1/2 mt-2 text-nowrap "
-                      >
-                        Teacher assigned <span className="text-red-500">*</span>
-                      </label>
-                      <Select
-                        // className="border w-[50%] h-10 rounded-md px-3 py-2 md:w-full mr-2 shadow-md"
-                        className="w-full shadow-md"
-                        value={selectedTeacher}
-                        onChange={handleTeacherSelect}
-                        options={teacherOptions}
-                        placeholder="Select "
-                        isSearchable
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className=" flex justify-end p-3">
-                  <button
-                    type="button"
-                    className="btn btn-primary px-3 mb-2"
-                    onClick={handleSubmitEdit}
-                  >
-                    Update
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Modal */}
       {showDeleteModal && (
