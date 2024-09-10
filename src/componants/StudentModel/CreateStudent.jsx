@@ -405,7 +405,7 @@
 
 //             {/* name */}
 //             <div className="">
-//               <label htmlFor="name" className="block font-bold  text-xs mb-2">
+//               <label htmlFor="name" className="block font-bold  text-xs mb-0.5">
 //                 First Name <span className="text-red-500">*</span>
 //               </label>
 //               <input
@@ -520,7 +520,7 @@
 //             <div className="">
 //               <label
 //                 htmlFor="dataOfAdmission"
-//                 className="block font-bold text-xs mb-2"
+//                 className="block font-bold text-xs mb-0.5"
 //               >
 //                 Date of Admission
 //               </label>
@@ -578,7 +578,7 @@
 //             <div className="">
 //               <label
 //                 htmlFor="studentAadharNumber"
-//                 className="block font-bold text-xs mb-2"
+//                 className="block font-bold text-xs mb-0.5"
 //               >
 //                 Student Aadhar No.
 //               </label>
@@ -601,7 +601,7 @@
 //             <div className="">
 //               <label
 //                 htmlFor="studentClass"
-//                 className="block font-bold text-xs mb-2"
+//                 className="block font-bold text-xs mb-0.5"
 //               >
 //                 Class
 //               </label>
@@ -703,7 +703,7 @@
 //             <div className="">
 //               <label
 //                 htmlFor="admittedInClass"
-//                 className="block font-bold text-xs mb-2"
+//                 className="block font-bold text-xs mb-0.5"
 //               >
 //                 Admitted In Class
 //               </label>
@@ -967,7 +967,7 @@
 //             <div className="">
 //               <label
 //                 htmlFor="motherTongue"
-//                 className="block font-bold text-xs mb-2"
+//                 className="block font-bold text-xs mb-0.5"
 //               >
 //                 Mother Tongue
 //               </label>
@@ -1590,7 +1590,7 @@ function Form() {
         formattedFormData.append(key, formData[key]);
       }
     });
-    console.log(" formattedFormData,", formattedFormData);
+    console.log(" formattedFormData,", formData);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -1600,7 +1600,7 @@ function Form() {
       console.log(" formattedFormData,", formattedFormData);
       const response = await axios.put(
         `${API_URL}/api/students/${student.student_id}`,
-        formattedFormData,
+        formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -1654,7 +1654,10 @@ function Form() {
           className="md:mx-2 overflow-x-hidden shadow-md py-6 md:py-10  bg-gray-50"
         >
           <div className="flex flex-col gap-4 md:grid md:grid-cols-4 md:gap-x-14 md:mx-10 gap-y-1">
-            <h5 className="col-span-4 text-gray-500"> Personal Information</h5>
+            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+              {" "}
+              Personal Information
+            </h5>
             <div className=" row-span-2">
               <ImageCropper
                 photoPreview={photoPreview}
@@ -1664,7 +1667,7 @@ function Form() {
             <div>
               <label
                 htmlFor="first_name"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 First Name <span className="text-red-500">*</span>
               </label>
@@ -1688,7 +1691,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="mid_name"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Middle Name
               </label>
@@ -1706,7 +1709,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="lastName"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Last Name
               </label>
@@ -1724,7 +1727,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="dateOfBirth"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Date of Birth <span className="text-red-500">*</span>
               </label>
@@ -1744,7 +1747,10 @@ function Form() {
               )}
             </div>
             <div className="">
-              <label htmlFor="gender" className="block font-bold text-xs mb-2">
+              <label
+                htmlFor="gender"
+                className="block font-bold text-xs mb-0.5"
+              >
                 Gender <span className="text-red-500">*</span>
               </label>
               <select
@@ -1767,7 +1773,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="bloodGroup"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Blood group
               </label>
@@ -1793,7 +1799,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="religion"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Religion <span className="text-red-500">*</span>
               </label>
@@ -1820,7 +1826,7 @@ function Form() {
               )}
             </div>
             <div className="">
-              <label htmlFor="caste" className="block font-bold text-xs mb-2">
+              <label htmlFor="caste" className="block font-bold text-xs mb-0.5">
                 Caste
               </label>
               <input
@@ -1837,7 +1843,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="category"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Category <span className="text-red-500">*</span>
               </label>
@@ -1868,7 +1874,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="birthPlace"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Birth Place
               </label>
@@ -1886,7 +1892,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="nationality"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Nationality <span className="text-red-500">*</span>
               </label>
@@ -1909,7 +1915,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="motherTongue"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Mother Tongue <span className="text-red-500">*</span>
               </label>
@@ -1931,11 +1937,14 @@ function Form() {
             </div>
             {/* Student Details */}
             {/* <div className="w-[120%] mx-auto h-2 bg-white col-span-4"></div> */}
-            <h5 className="col-span-4 text-gray-500"> Student Details</h5>
+            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+              {" "}
+              Student Details
+            </h5>
             <div className="">
               <label
                 htmlFor="studentName"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Student Name <span className="text-red-500">*</span>
               </label>
@@ -1958,7 +1967,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="grnNumber"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 GRN No. <span className="text-red-500">*</span>
               </label>
@@ -1981,7 +1990,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="studentIdNumber"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Student ID No.
               </label>
@@ -1999,7 +2008,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="studentAadharNumber"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Student Aadhar No. <span className="text-red-500">*</span>
               </label>
@@ -2022,7 +2031,7 @@ function Form() {
             <div className="mb-6">
               <label
                 htmlFor="studentClass"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Class <span className="text-red-500">*</span>
               </label>
@@ -2050,7 +2059,7 @@ function Form() {
             <div className="mb-6">
               <label
                 htmlFor="division"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Division <span className="text-red-500">*</span>
               </label>
@@ -2078,7 +2087,7 @@ function Form() {
             {/* <div className="">
               <label
                 htmlFor="studentClass"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Class <span className="text-red-500">*</span>
               </label>
@@ -2116,7 +2125,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="division"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Division <span className="text-red-500">*</span>
               </label>
@@ -2143,7 +2152,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="rollNumber"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Roll No.
               </label>
@@ -2159,7 +2168,7 @@ function Form() {
               />
             </div>
             <div className="">
-              <label htmlFor="house" className="block font-bold text-xs mb-2">
+              <label htmlFor="house" className="block font-bold text-xs mb-0.5">
                 House
               </label>
               <select
@@ -2180,7 +2189,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="admittedInClass"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Admitted In Class <span className="text-red-500">*</span>
               </label>
@@ -2218,7 +2227,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="dataOfAdmission"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Date of Admission <span className="text-red-500">*</span>
               </label>
@@ -2238,9 +2247,15 @@ function Form() {
               )}
             </div>
             {/* Address Information */}
-            <h5 className="col-span-4 text-gray-500"> Address Information</h5>
+            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+              {" "}
+              Address Information
+            </h5>
             <div className="">
-              <label htmlFor="address" className="block font-bold text-xs mb-2">
+              <label
+                htmlFor="address"
+                className="block font-bold text-xs mb-0.5"
+              >
                 Address <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -2260,7 +2275,7 @@ function Form() {
               )}
             </div>
             <div className="">
-              <label htmlFor="city" className="block font-bold text-xs mb-2">
+              <label htmlFor="city" className="block font-bold text-xs mb-0.5">
                 City <span className="text-red-500">*</span>
               </label>
               <input
@@ -2278,7 +2293,7 @@ function Form() {
               )}
             </div>
             <div className="">
-              <label htmlFor="state" className="block font-bold text-xs mb-2">
+              <label htmlFor="state" className="block font-bold text-xs mb-0.5">
                 State <span className="text-red-500">*</span>
               </label>
               <input
@@ -2296,7 +2311,10 @@ function Form() {
               )}
             </div>
             <div className="">
-              <label htmlFor="pincode" className="block font-bold text-xs mb-2">
+              <label
+                htmlFor="pincode"
+                className="block font-bold text-xs mb-0.5"
+              >
                 Pincode
               </label>
               <input
@@ -2314,11 +2332,14 @@ function Form() {
             {/*  */}
             {/* <div className="w-full sm:max-w-[30%]"> */}
             {/* Emergency Contact */}
-            <h5 className="col-span-4 text-gray-500"> Emergency Contact</h5>
+            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+              {" "}
+              Emergency Contact
+            </h5>
             <div className="">
               <label
                 htmlFor="emergencyName"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Emergency Name
               </label>
@@ -2336,7 +2357,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="emergencyAddress"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Emergency Address
               </label>
@@ -2373,7 +2394,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="emergencyContact"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Emergency Contact
               </label>
@@ -2395,11 +2416,11 @@ function Form() {
               </div>
             </div>
             {/* Transport Information */}
-            {/* <h5 className="col-span-4 text-gray-500"> Transport Information</h5> */}
+            {/* <h5 className="col-span-4 text-gray-500 mt-2 relative top-2"> Transport Information</h5> */}
             <div className="">
               <label
                 htmlFor="transportMode"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Transport Mode
               </label>
@@ -2429,11 +2450,14 @@ function Form() {
               />
             </div>
             {/* Health Information */}
-            <h5 className="col-span-4 text-gray-500"> Health Information</h5>
+            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+              {" "}
+              Health Information
+            </h5>
             <div className="">
               <label
                 htmlFor="allergies"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Allergies(if any)
               </label>
@@ -2449,7 +2473,10 @@ function Form() {
               />
             </div>
             <div className="">
-              <label htmlFor="height" className="block font-bold text-xs mb-2">
+              <label
+                htmlFor="height"
+                className="block font-bold text-xs mb-0.5"
+              >
                 Height
               </label>
               <input
@@ -2464,7 +2491,10 @@ function Form() {
               />
             </div>
             <div className="">
-              <label htmlFor="weight" className="block font-bold text-xs mb-2">
+              <label
+                htmlFor="weight"
+                className="block font-bold text-xs mb-0.5"
+              >
                 Weight
               </label>
               <input
@@ -2480,7 +2510,7 @@ function Form() {
               <div className="  flex gap-4 pt-[7px]">
                 <div
                   htmlFor="weight"
-                  className="block font-bold text-[.7em] mt-1 mb-2"
+                  className="block font-bold text-[.7em] mt-1 mb-0.5"
                 >
                   Has Spectacles
                 </div>
@@ -2528,8 +2558,12 @@ function Form() {
                 </h3>
               </div>
             </div>
+            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+              {" "}
+              Father Details
+            </h5>
             <div className="">
-              <label htmlFor="email" className="block font-bold text-xs mb-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Father Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -2548,7 +2582,7 @@ function Form() {
               )}
             </div>
             <div className="">
-              <label htmlFor="email" className="block font-bold text-xs mb-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Occupation
               </label>
               <input
@@ -2562,7 +2596,7 @@ function Form() {
               />
             </div>
             <div className="">
-              <label htmlFor="email" className="block font-bold text-xs mb-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Office Address
               </label>
               <textarea
@@ -2576,7 +2610,7 @@ function Form() {
               />
             </div>
             <div className="">
-              <label htmlFor="email" className="block font-bold text-xs mb-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Father Aadhaar Card No. <span className="text-red-500">*</span>
               </label>
               <input
@@ -2597,7 +2631,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="bloodGroup"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Blood group
               </label>
@@ -2621,7 +2655,7 @@ function Form() {
               </select>
             </div>
             <div className="">
-              <label htmlFor="email" className="block font-bold text-xs mb-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Teliphone
               </label>
               <input
@@ -2635,7 +2669,10 @@ function Form() {
               />
             </div>
             <div>
-              <label htmlFor="phone" className="block font-bold  text-xs mb-2">
+              <label
+                htmlFor="phone"
+                className="block font-bold  text-xs mb-0.5"
+              >
                 Mobile Number <span className="text-red-500">*</span>
               </label>
               <div className="flex ">
@@ -2692,7 +2729,7 @@ function Form() {
               </div>
             </div>
             <div className="">
-              <label htmlFor="email" className="block font-bold text-xs mb-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Email Id <span className="text-red-500">*</span>
               </label>
               <input
@@ -2711,7 +2748,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="dataOfAdmission"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Date of Admission
               </label>
@@ -2726,8 +2763,12 @@ function Form() {
               />
             </div>
             {/* Mother information */}
+            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+              {" "}
+              Mother Details
+            </h5>
             <div className="">
-              <label htmlFor="email" className="block font-bold text-xs mb-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Mother Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -2746,7 +2787,7 @@ function Form() {
               )}
             </div>
             <div className="">
-              <label htmlFor="email" className="block font-bold text-xs mb-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Occupation
               </label>
               <input
@@ -2760,7 +2801,7 @@ function Form() {
               />
             </div>
             <div className="">
-              <label htmlFor="email" className="block font-bold text-xs mb-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Office Address
               </label>
               <textarea
@@ -2774,7 +2815,7 @@ function Form() {
               />
             </div>
             <div className="">
-              <label htmlFor="email" className="block font-bold text-xs mb-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Mother Aadhaar Card No. <span className="text-red-500">*</span>
               </label>
               <input
@@ -2795,7 +2836,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="bloodGroup"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Blood group
               </label>
@@ -2819,7 +2860,7 @@ function Form() {
               </select>
             </div>
             <div className="">
-              <label htmlFor="email" className="block font-bold text-xs mb-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Teliphone
               </label>
               <input
@@ -2833,7 +2874,10 @@ function Form() {
               />
             </div>
             <div>
-              <label htmlFor="phone" className="block font-bold  text-xs mb-2">
+              <label
+                htmlFor="phone"
+                className="block font-bold  text-xs mb-0.5"
+              >
                 Mobile Number <span className="text-red-500">*</span>
               </label>
               <div className="flex ">
@@ -2890,7 +2934,7 @@ function Form() {
               </div>
             </div>
             <div className="">
-              <label htmlFor="email" className="block font-bold text-xs mb-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Email Id <span className="text-red-500">*</span>
               </label>
               <input
@@ -2923,7 +2967,7 @@ function Form() {
             <div className="">
               <label
                 htmlFor="dataOfAdmission"
-                className="block font-bold text-xs mb-2"
+                className="block font-bold text-xs mb-0.5"
               >
                 Date of Admission
               </label>
