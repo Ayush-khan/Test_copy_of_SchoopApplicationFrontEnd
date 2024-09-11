@@ -16,24 +16,6 @@ const ImageCropper = ({ onImageCropped, photoPreview }) => {
   console.log("the vlaue of the image inside imagecrop ", croppedImage);
   const cropperRef = useRef(null);
   const fileInputRef = useRef(null);
-
-  const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-  const imageUrl = photoPreview;
-  useEffect(() => {
-    const fetchImage = async () => {
-      try {
-        const response = await fetch(proxyUrl + imageUrl);
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        setImage(url);
-      } catch (error) {
-        console.error("Failed to load image", error);
-      }
-    };
-
-    fetchImage();
-  }, [proxyUrl, imageUrl]);
-
   useEffect(() => {
     // Update croppedImage when photoPreview changes
     setCroppedImage(photoPreview || null);
