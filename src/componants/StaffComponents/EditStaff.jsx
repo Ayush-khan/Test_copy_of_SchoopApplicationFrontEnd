@@ -49,7 +49,7 @@ function EditStaff() {
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
 
-  console.log("employeeID", staff.employeeId);
+  console.log("employeeID", staff);
   useEffect(() => {
     if (staff) {
       setFormData({
@@ -79,10 +79,10 @@ function EditStaff() {
         isDelete: staff.isDelete || "N",
         role_id: staff.role_id || "", // Ensure it's a string or empty
       });
-      if (staff.teacher_image_name) {
+      if (staff?.teacher_image_name) {
         setPhotoPreview(
           // `${API_URL}/path/to/images/${staff.teacher_image_name}`
-          `${staff.teacher_image_name}`
+          `${API_URL}${staff.teacher_image_name}`
         );
       }
     }

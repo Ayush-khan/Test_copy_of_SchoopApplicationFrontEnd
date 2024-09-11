@@ -404,7 +404,7 @@
 //             {/* personal information */}
 
 //             {/* name */}
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="name" className="block font-bold  text-xs mb-0.5">
 //                 First Name <span className="text-red-500">*</span>
 //               </label>
@@ -447,7 +447,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="middleName" className="customLabelCss">
 //                 Middle Name
 //               </label>
@@ -462,7 +462,7 @@
 //               />
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="lastName" className="customLabelCss">
 //                 Last Name
 //               </label>
@@ -477,7 +477,7 @@
 //               />
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="studentName" className="customLabelCss mandatory">
 //                 Student Name
 //               </label>
@@ -497,7 +497,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="dateOfBirth" className="customLabelCss mandatory">
 //                 Date of Birth
 //               </label>
@@ -517,7 +517,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label
 //                 htmlFor="dataOfAdmission"
 //                 className="block font-bold text-xs mb-0.5"
@@ -540,7 +540,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="grnNumber" className="customLabelCss mandatory">
 //                 GRN No.
 //               </label>
@@ -560,7 +560,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="studentIdNumber" className="customLabelCss">
 //                 Student ID No.
 //               </label>
@@ -575,7 +575,7 @@
 //               />
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label
 //                 htmlFor="studentAadharNumber"
 //                 className="block font-bold text-xs mb-0.5"
@@ -598,7 +598,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label
 //                 htmlFor="studentClass"
 //                 className="block font-bold text-xs mb-0.5"
@@ -637,7 +637,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="division" className="customLabelCss mandatory">
 //                 Division
 //               </label>
@@ -662,7 +662,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="rollNumber" className="customLabelCss">
 //                 Roll No.
 //               </label>
@@ -680,7 +680,7 @@
 
 //             {/*  */}
 //             {/* <div className="w-full sm:max-w-[30%]"> */}
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="house" className="customLabelCss">
 //                 House
 //               </label>
@@ -700,7 +700,7 @@
 //               </select>
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label
 //                 htmlFor="admittedInClass"
 //                 className="block font-bold text-xs mb-0.5"
@@ -739,7 +739,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="gender" className="customLabelCss mandatory">
 //                 Gender
 //               </label>
@@ -760,7 +760,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="bloodGroup" className="customLabelCss">
 //                 Blood Group
 //               </label>
@@ -784,7 +784,7 @@
 //               </select>
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="address" className="customLabelCss mandatory">
 //                 Address
 //               </label>
@@ -804,7 +804,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="city" className="customLabelCss mandatory">
 //                 City
 //               </label>
@@ -822,7 +822,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="state" className="customLabelCss mandatory">
 //                 State
 //               </label>
@@ -840,7 +840,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="pincode" className="customLabelCss">
 //                 Pincode
 //               </label>
@@ -855,7 +855,7 @@
 //               />
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="religion" className="customLabelCss mandatory">
 //                 Religion
 //               </label>
@@ -882,7 +882,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="caste" className="customLabelCss">
 //                 Caste
 //               </label>
@@ -897,7 +897,7 @@
 //               />
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="category" className="customLabelCss mandatory">
 //                 Category
 //               </label>
@@ -929,7 +929,7 @@
 
 //             {/*  */}
 //             {/* <div className="w-full sm:max-w-[30%]"> */}
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="nationality" className="customLabelCss mandatory">
 //                 Nationality
 //               </label>
@@ -949,7 +949,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="birthPlace" className="customLabelCss">
 //                 Birth Place
 //               </label>
@@ -964,7 +964,7 @@
 //               />
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label
 //                 htmlFor="motherTongue"
 //                 className="block font-bold text-xs mb-0.5"
@@ -987,7 +987,7 @@
 //               ) : null}
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="emergencyName" className="customLabelCss">
 //                 Emergency Name
 //               </label>
@@ -1002,7 +1002,7 @@
 //               />
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="emergencyAddress" className="customLabelCss">
 //                 Emergency Address
 //               </label>
@@ -1034,7 +1034,7 @@
 //               </div>
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="emergencyContact" className="customLabelCss">
 //                 Emergency Contact
 //               </label>
@@ -1056,7 +1056,7 @@
 //               </div>
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="transportMode" className="customLabelCss">
 //                 Transport Mode
 //               </label>
@@ -1085,7 +1085,7 @@
 //               />
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="allergies" className="customLabelCss">
 //                 Allergies(if any)
 //               </label>
@@ -1100,7 +1100,7 @@
 //               />
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="height" className="customLabelCss">
 //                 Height
 //               </label>
@@ -1115,7 +1115,7 @@
 //               />
 //             </div>
 
-//             <div className="">
+//             <div className="mt-2">
 //               <label htmlFor="weight" className="customLabelCss">
 //                 Weight
 //               </label>
@@ -1215,6 +1215,7 @@ function Form() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setClasses(response.data);
+        console.log("claases are", classes);
       } catch (error) {
         toast.error("Error fetching class names");
       }
@@ -1316,6 +1317,17 @@ function Form() {
   const [backendErrors, setBackendErrors] = useState({});
 
   console.log("employeeID", student.employeeId);
+
+  const [fatherMobileSelected, setFatherMobileSelected] = useState({
+    setUsername: false,
+    receiveSms: false,
+  });
+
+  const [motherMobileSelected, setMotherMobileSelected] = useState({
+    setUsername: false,
+    receiveSms: false,
+  });
+
   useEffect(() => {
     if (student) {
       setFormData({
@@ -1373,6 +1385,18 @@ function Form() {
         // Base64 Image (optional)
         // student_image: student.student_image || "",
       });
+
+      // Set the initial state for father's and mother's mobile preferences based on prefilled data
+      setFatherMobileSelected({
+        setUsername: student.SetEmailIDAsUsername === "father" || false,
+        receiveSms: student.SetToReceiveSMS === "father" || false,
+      });
+
+      setMotherMobileSelected({
+        setUsername: student.SetEmailIDAsUsername === "mother" || false,
+        receiveSms: student.SetToReceiveSMS === "mother" || false,
+      });
+
       setSelectedClass(student.class_id || ""); // Set the selected class
       setSelectedDivision(student.section_id || ""); // Set the selected division
 
@@ -1405,6 +1429,68 @@ function Form() {
       fetchDivisions();
     }
   }, [selectedClass, API_URL]);
+
+  // for togle radio button and logic
+
+  // Handle father's mobile selection
+  const handleFatherSelection = (e) => {
+    const { name } = e.target;
+
+    // Toggle father's selection
+    setFatherMobileSelected((prevState) => ({
+      ...prevState,
+      [name]: !prevState[name],
+    }));
+
+    // If same button is selected for mother, deselect it
+    if (motherMobileSelected[name]) {
+      setMotherMobileSelected((prevState) => ({
+        ...prevState,
+        [name]: false,
+      }));
+    }
+  };
+
+  // Handle mother's mobile selection
+  const handleMotherSelection = (e) => {
+    const { name } = e.target;
+
+    // Toggle mother's selection
+    setMotherMobileSelected((prevState) => ({
+      ...prevState,
+      [name]: !prevState[name],
+    }));
+    // for removing the email username
+    setFormData({
+      ...formData,
+      SetEmailIDAsUsername: false, // Directly update existing field
+    });
+    // If same button is selected for father, deselect it
+    if (fatherMobileSelected[name]) {
+      setFatherMobileSelected((prevState) => ({
+        ...prevState,
+        [name]: false,
+      }));
+    }
+  };
+
+  // email togle button readio logic
+
+  // const handleChange = (e) => {
+  //     setFormData({
+  //       ...formData,
+  //       [e.target.name]: e.target.value,
+  //     });
+  //   };
+
+  const handleEmailSelection = (e) => {
+    setFormData({
+      ...formData,
+      SetEmailIDAsUsername: e.target.value, // Directly update existing field
+    });
+    setMotherMobileSelected({ setUsername: false });
+    setFatherMobileSelected({ setUsername: false });
+  };
 
   // Validation Functions
   const validatePhone = (phone) => {
@@ -1651,20 +1737,20 @@ function Form() {
         </p>
         <form
           onSubmit={handleSubmit}
-          className="md:mx-2 overflow-x-hidden shadow-md py-6 md:py-10  bg-gray-50"
+          className="md:mx-2 overflow-x-hidden shadow-md py-1 bg-gray-50"
         >
-          <div className="flex flex-col gap-4 md:grid md:grid-cols-4 md:gap-x-14 md:mx-10 gap-y-1">
+          <div className="flex flex-col gap-y-3 p-2 md:grid md:grid-cols-4 md:gap-x-14 md:mx-10 ">
             <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
               {" "}
               Personal Information
             </h5>
-            <div className=" row-span-2">
+            <div className=" row-span-2  ">
               <ImageCropper
                 photoPreview={photoPreview}
                 onImageCropped={handleImageCropped}
               />
             </div>
-            <div>
+            <div className="mt-2">
               <label
                 htmlFor="first_name"
                 className="block font-bold text-xs mb-0.5"
@@ -1688,7 +1774,7 @@ function Form() {
               )}
             </div>
             {/* Add other form fields similarly */}
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="mid_name"
                 className="block font-bold text-xs mb-0.5"
@@ -1706,7 +1792,7 @@ function Form() {
                 // onBlur={handleBlur}
               />
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="lastName"
                 className="block font-bold text-xs mb-0.5"
@@ -1724,7 +1810,7 @@ function Form() {
                 // onBlur={handleBlur}
               />
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="dateOfBirth"
                 className="block font-bold text-xs mb-0.5"
@@ -1746,7 +1832,7 @@ function Form() {
                 </p>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="gender"
                 className="block font-bold text-xs mb-0.5"
@@ -1770,7 +1856,7 @@ function Form() {
                 <p className="text-[12px] text-red-500 mb-1">{errors.gender}</p>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="bloodGroup"
                 className="block font-bold text-xs mb-0.5"
@@ -1796,7 +1882,7 @@ function Form() {
                 <option value="O-">O-</option>
               </select>
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="religion"
                 className="block font-bold text-xs mb-0.5"
@@ -1825,7 +1911,7 @@ function Form() {
                 </p>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="caste" className="block font-bold text-xs mb-0.5">
                 Caste
               </label>
@@ -1840,7 +1926,7 @@ function Form() {
                 // onBlur={handleBlur}
               />
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="category"
                 className="block font-bold text-xs mb-0.5"
@@ -1871,7 +1957,7 @@ function Form() {
                 </p>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="birthPlace"
                 className="block font-bold text-xs mb-0.5"
@@ -1889,7 +1975,7 @@ function Form() {
                 // onBlur={handleBlur}
               />
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="nationality"
                 className="block font-bold text-xs mb-0.5"
@@ -1912,7 +1998,7 @@ function Form() {
                 </p>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="motherTongue"
                 className="block font-bold text-xs mb-0.5"
@@ -1941,7 +2027,7 @@ function Form() {
               {" "}
               Student Details
             </h5>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="studentName"
                 className="block font-bold text-xs mb-0.5"
@@ -1964,71 +2050,7 @@ function Form() {
                 </p>
               )}
             </div>
-            <div className="">
-              <label
-                htmlFor="grnNumber"
-                className="block font-bold text-xs mb-0.5"
-              >
-                GRN No. <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="grnNumber"
-                name="gr_no"
-                maxLength={10}
-                value={formData.gr_no}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-                onChange={handleChange}
-                // onBlur={handleBlur}
-              />
-              {errors.grnNumber && (
-                <p className="text-[12px] text-red-500 mb-1">
-                  {errors.grnNumber}
-                </p>
-              )}
-            </div>{" "}
-            <div className="">
-              <label
-                htmlFor="studentIdNumber"
-                className="block font-bold text-xs mb-0.5"
-              >
-                Student ID No.
-              </label>
-              <input
-                type="text"
-                id="studentIdNumber"
-                name="stud_id_no"
-                maxLength={25}
-                value={formData.stud_id_no}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-                onChange={handleChange}
-                // onBlur={handleBlur}
-              />
-            </div>
-            <div className="">
-              <label
-                htmlFor="studentAadharNumber"
-                className="block font-bold text-xs mb-0.5"
-              >
-                Student Aadhar No. <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="studentAadharNumber"
-                name="stu_aadhaar_no"
-                maxLength={14}
-                value={formData.stu_aadhaar_no}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-                onChange={handleChange}
-                // onBlur={handleBlur}
-              />
-              {errors.studentAadharNumber && (
-                <p className="text-[12px] text-red-500 mb-1">
-                  {errors.studentAadharNumber}
-                </p>
-              )}
-            </div>{" "}
-            <div className="mb-6">
+            <div className="mt-2">
               <label
                 htmlFor="studentClass"
                 className="block font-bold text-xs mb-0.5"
@@ -2056,7 +2078,7 @@ function Form() {
               )}
             </div>
             {/* Division Dropdown */}
-            <div className="mb-6">
+            <div className="mt-2">
               <label
                 htmlFor="division"
                 className="block font-bold text-xs mb-0.5"
@@ -2084,72 +2106,7 @@ function Form() {
                 </p>
               )}
             </div>
-            {/* <div className="">
-              <label
-                htmlFor="studentClass"
-                className="block font-bold text-xs mb-0.5"
-              >
-                Class <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="studentClass"
-                name="class_id"
-                value={formData.class_id}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-                onChange={handleChange}
-                // onBlur={handleBlur}
-              >
-                <option>Select</option>
-                <option value="Nursery">Nursery</option>
-                <option value="LKG">LKG</option>
-                <option value="UKG">UKG</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
-              </select>
-              {errors.studentClass && (
-                <p className="text-[12px] text-red-500 mb-1">
-                  {errors.studentClass}
-                </p>
-              )}
-            </div>
-            <div className="">
-              <label
-                htmlFor="division"
-                className="block font-bold text-xs mb-0.5"
-              >
-                Division <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="division"
-                name="section_id"
-                value={formData.section_id}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-                onChange={handleChange}
-                // onBlur={handleBlur}
-              >
-                <option>Select</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-              </select>
-              {errors.division && (
-                <p className="text-[12px] text-red-500 mb-1">
-                  {errors.division}
-                </p>
-              )}
-            </div> */}
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="rollNumber"
                 className="block font-bold text-xs mb-0.5"
@@ -2167,7 +2124,30 @@ function Form() {
                 // onBlur={handleBlur}
               />
             </div>
-            <div className="">
+            <div className="mt-2">
+              <label
+                htmlFor="grnNumber"
+                className="block font-bold text-xs mb-0.5"
+              >
+                GRN No. <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="grnNumber"
+                name="gr_no"
+                maxLength={10}
+                value={formData.gr_no}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                onChange={handleChange}
+                // onBlur={handleBlur}
+              />
+              {errors.grnNumber && (
+                <p className="text-[12px] text-red-500 mb-1">
+                  {errors.grnNumber}
+                </p>
+              )}
+            </div>{" "}
+            <div className="mt-2">
               <label htmlFor="house" className="block font-bold text-xs mb-0.5">
                 House
               </label>
@@ -2185,8 +2165,8 @@ function Form() {
                 <option value="Ruby">Ruby</option>
                 <option value="Sapphire">Sapphire</option>
               </select>
-            </div>{" "}
-            <div className="">
+            </div>
+            <div className="mt-2">
               <label
                 htmlFor="admittedInClass"
                 className="block font-bold text-xs mb-0.5"
@@ -2224,7 +2204,7 @@ function Form() {
                 </p>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="dataOfAdmission"
                 className="block font-bold text-xs mb-0.5"
@@ -2246,12 +2226,73 @@ function Form() {
                 </p>
               )}
             </div>
+            <div className="mt-2">
+              <label
+                htmlFor="studentIdNumber"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Student ID No.
+              </label>
+              <input
+                type="text"
+                id="studentIdNumber"
+                name="stud_id_no"
+                maxLength={25}
+                value={formData.stud_id_no}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                onChange={handleChange}
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="studentAadharNumber"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Student Aadhar No. <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="studentAadharNumber"
+                name="stu_aadhaar_no"
+                maxLength={14}
+                value={formData.stu_aadhaar_no}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                onChange={handleChange}
+                // onBlur={handleBlur}
+              />
+              {errors.studentAadharNumber && (
+                <p className="text-[12px] text-red-500 mb-1">
+                  {errors.studentAadharNumber}
+                </p>
+              )}
+            </div>{" "}
+            {selectedClass > 99 && (
+              <div className="mt-2">
+                <label
+                  htmlFor="studentAadharNumber"
+                  className="block font-bold text-xs mb-0.5"
+                >
+                  Udise Pen No.
+                </label>
+                <input
+                  type="text"
+                  id="Udise_no"
+                  name="Udise_no"
+                  maxLength={14}
+                  value={formData.Udise_no}
+                  className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                  onChange={handleChange}
+                  // onBlur={handleBlur}
+                />
+              </div>
+            )}
             {/* Address Information */}
             <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
               {" "}
               Address Information
             </h5>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="address"
                 className="block font-bold text-xs mb-0.5"
@@ -2274,7 +2315,7 @@ function Form() {
                 </p>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="city" className="block font-bold text-xs mb-0.5">
                 City <span className="text-red-500">*</span>
               </label>
@@ -2292,7 +2333,7 @@ function Form() {
                 <p className="text-[12px] text-red-500 mb-1">{errors.city}</p>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="state" className="block font-bold text-xs mb-0.5">
                 State <span className="text-red-500">*</span>
               </label>
@@ -2310,7 +2351,7 @@ function Form() {
                 <p className="text-[12px] text-red-500 mb-1">{errors.state}</p>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="pincode"
                 className="block font-bold text-xs mb-0.5"
@@ -2336,7 +2377,7 @@ function Form() {
               {" "}
               Emergency Contact
             </h5>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="emergencyName"
                 className="block font-bold text-xs mb-0.5"
@@ -2354,7 +2395,7 @@ function Form() {
                 // onBlur={handleBlur}
               />
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="emergencyAddress"
                 className="block font-bold text-xs mb-0.5"
@@ -2391,7 +2432,7 @@ function Form() {
                 </label>
               </div>
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="emergencyContact"
                 className="block font-bold text-xs mb-0.5"
@@ -2417,7 +2458,7 @@ function Form() {
             </div>
             {/* Transport Information */}
             {/* <h5 className="col-span-4 text-gray-500 mt-2 relative top-2"> Transport Information</h5> */}
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="transportMode"
                 className="block font-bold text-xs mb-0.5"
@@ -2454,7 +2495,7 @@ function Form() {
               {" "}
               Health Information
             </h5>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="allergies"
                 className="block font-bold text-xs mb-0.5"
@@ -2472,7 +2513,7 @@ function Form() {
                 // onBlur={handleBlur}
               />
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="height"
                 className="block font-bold text-xs mb-0.5"
@@ -2490,7 +2531,7 @@ function Form() {
                 // onBlur={handleBlur}
               />
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="weight"
                 className="block font-bold text-xs mb-0.5"
@@ -2507,49 +2548,49 @@ function Form() {
                 onChange={handleChange}
                 // onBlur={handleBlur}
               />
-              <div className="  flex gap-4 pt-[7px]">
-                <div
-                  htmlFor="weight"
-                  className="block font-bold text-[.7em] mt-1 mb-0.5"
-                >
-                  Has Spectacles
+            </div>
+            <div className="  flex gap-4 pt-[7px]">
+              <div
+                htmlFor="weight"
+                className="block font-bold text-[.9em] mt-4 "
+              >
+                Has Spectacles
+              </div>
+              <div className="flex items-center gap-6 mt-3">
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="yes"
+                    name="hasSpectacles"
+                    checked={formData.hasSpectacles === "Yes"}
+                    value="Yes"
+                    onChange={handleChange}
+                    // onBlur={handleBlur}
+                  />
+                  <label htmlFor="yes" className="ml-1">
+                    Yes
+                  </label>
                 </div>
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center">
-                    <input
-                      type="radio"
-                      id="yes"
-                      name="hasSpectacles"
-                      checked={formData.hasSpectacles === "Yes"}
-                      value="Yes"
-                      onChange={handleChange}
-                      // onBlur={handleBlur}
-                    />
-                    <label htmlFor="yes" className="ml-1">
-                      Yes
-                    </label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="radio"
-                      id="no"
-                      name="hasSpectacles"
-                      checked={formData.hasSpectacles === "No"}
-                      value="No"
-                      onChange={handleChange}
-                      // onBlur={handleBlur}
-                    />
-                    <label htmlFor="no" className="ml-1">
-                      No
-                    </label>
-                  </div>
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="no"
+                    name="hasSpectacles"
+                    checked={formData.hasSpectacles === "No"}
+                    value="No"
+                    onChange={handleChange}
+                    // onBlur={handleBlur}
+                  />
+                  <label htmlFor="no" className="ml-1">
+                    No
+                  </label>
                 </div>
               </div>
             </div>
             {/* ... */}
             {/* Add other form fields similarly */}
             {/* ... */}
-            <div className="w-full col-span-4">
+            <div className="w-full col-span-4 mt-4">
               <div className="w-full mx-auto">
                 <h3 className="text-blue-500 w-full mx-auto text-center py-2 md:text-[1.2em] text-nowrap font-bold">
                   {" "}
@@ -2562,7 +2603,7 @@ function Form() {
               {" "}
               Father Details
             </h5>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Father Name <span className="text-red-500">*</span>
               </label>
@@ -2581,7 +2622,7 @@ function Form() {
                 </span>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Occupation
               </label>
@@ -2595,7 +2636,7 @@ function Form() {
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
               />
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Office Address
               </label>
@@ -2609,7 +2650,7 @@ function Form() {
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
               />
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Father Aadhaar Card No. <span className="text-red-500">*</span>
               </label>
@@ -2628,7 +2669,7 @@ function Form() {
                 </span>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="bloodGroup"
                 className="block font-bold text-xs mb-0.5"
@@ -2654,9 +2695,9 @@ function Form() {
                 <option value="O-">O-</option>
               </select>
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
-                Teliphone
+                Telephone
               </label>
               <input
                 type="text"
@@ -2698,8 +2739,29 @@ function Form() {
               {errors.phone && (
                 <span className="text-red-500 text-xs">{errors.phone}</span>
               )}
-
-              <div className="flex items-center">
+              <div>
+                <label>
+                  <input
+                    type="radio"
+                    name="setUsername"
+                    checked={fatherMobileSelected.setUsername}
+                    onChange={handleFatherSelection}
+                  />
+                  Set this as username
+                </label>
+              </div>
+              <div>
+                <label>
+                  <input
+                    type="radio"
+                    name="receiveSms"
+                    checked={fatherMobileSelected.receiveSms}
+                    onChange={handleFatherSelection}
+                  />
+                  Set to receive SMS at this number
+                </label>
+              </div>
+              {/* <div className="flex items-center">
                 <input
                   type="radio"
                   id="yes"
@@ -2726,9 +2788,9 @@ function Form() {
                 <label htmlFor="yes" className="ml-1 text-xs">
                   Set this as username.
                 </label>
-              </div>
+              </div> */}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Email Id <span className="text-red-500">*</span>
               </label>
@@ -2744,13 +2806,27 @@ function Form() {
               {errors.email && (
                 <span className="text-red-500 text-xs">{errors.email}</span>
               )}
+
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="fatherEmail"
+                  name="SetEmailIDAsUsername"
+                  value="father"
+                  checked={formData.SetEmailIDAsUsername === "father"}
+                  onChange={handleEmailSelection}
+                />
+                <label htmlFor="fatherEmail" className="ml-2">
+                  Set this as username.
+                </label>
+              </div>
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="dataOfAdmission"
                 className="block font-bold text-xs mb-0.5"
               >
-                Date of Admission
+                Father Date Of Birth
               </label>
               <input
                 type="date"
@@ -2767,7 +2843,7 @@ function Form() {
               {" "}
               Mother Details
             </h5>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Mother Name <span className="text-red-500">*</span>
               </label>
@@ -2786,7 +2862,7 @@ function Form() {
                 </span>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Occupation
               </label>
@@ -2800,7 +2876,7 @@ function Form() {
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
               />
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Office Address
               </label>
@@ -2814,7 +2890,7 @@ function Form() {
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
               />
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Mother Aadhaar Card No. <span className="text-red-500">*</span>
               </label>
@@ -2833,7 +2909,7 @@ function Form() {
                 </span>
               )}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="bloodGroup"
                 className="block font-bold text-xs mb-0.5"
@@ -2859,9 +2935,9 @@ function Form() {
                 <option value="O-">O-</option>
               </select>
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
-                Teliphone
+                Telephone
               </label>
               <input
                 type="text"
@@ -2903,8 +2979,29 @@ function Form() {
               {errors.phone && (
                 <span className="text-red-500 text-xs">{errors.phone}</span>
               )}
-
-              <div className="flex items-center">
+              <div>
+                <label>
+                  <input
+                    type="radio"
+                    name="setUsername"
+                    checked={motherMobileSelected.setUsername}
+                    onChange={handleMotherSelection}
+                  />
+                  Set this as username
+                </label>
+              </div>
+              <div>
+                <label>
+                  <input
+                    type="radio"
+                    name="receiveSms"
+                    checked={motherMobileSelected.receiveSms}
+                    onChange={handleMotherSelection}
+                  />
+                  Set to receive SMS at this number
+                </label>
+              </div>
+              {/* <div className="flex items-center">
                 <input
                   type="radio"
                   id="yes"
@@ -2931,9 +3028,9 @@ function Form() {
                 <label htmlFor="yes" className="ml-1 text-xs">
                   Set this as username.
                 </label>
-              </div>
+              </div> */}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Email Id <span className="text-red-500">*</span>
               </label>
@@ -2949,7 +3046,21 @@ function Form() {
               {errors.email && (
                 <span className="text-red-500 text-xs">{errors.email}</span>
               )}
+
               <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="motherEmail"
+                  name="SetEmailIDAsUsername"
+                  value="mother"
+                  checked={formData.SetEmailIDAsUsername === "mother"}
+                  onChange={handleEmailSelection}
+                />
+                <label htmlFor="motherEmail" className="ml-2">
+                  Set this as username.
+                </label>
+              </div>
+              {/* <div className="flex items-center">
                 <input
                   type="radio"
                   id="yes"
@@ -2962,19 +3073,19 @@ function Form() {
                 <label htmlFor="yes" className="ml-1 text-xs">
                   Set this as username.
                 </label>
-              </div>
+              </div> */}
             </div>
-            <div className="">
+            <div className="mt-2">
               <label
                 htmlFor="dataOfAdmission"
                 className="block font-bold text-xs mb-0.5"
               >
-                Date of Admission
+                Mother Date Of Birth
               </label>
               <input
                 type="date"
                 id="dataOfAdmission"
-                name="f_dob"
+                name="m_dob"
                 value={formData.f_dob}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
