@@ -124,6 +124,7 @@ import DivisionList from "../componants/MastersModule/TableComponentsNikhilbhai/
 import SubjectList from "../componants/MastersModule/Subject/SubjectList.jsx";
 import ManageSubjectList from "../componants/MastersModule/SubjectAllotment/ManageSubjectList.jsx";
 import ManageStudent from "../componants/StudentModel/ManageStudent.jsx";
+import ViewStudent from "../componants/StudentModel/ViewStudent.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -221,7 +222,10 @@ function Index() {
           path="/student/edit/:id"
           element={<PrivateRoute element={CreateStudent} />}
         />
-
+        <Route
+          path="/student/view/:id"
+          element={<PrivateRoute element={ViewStudent} />}
+        />
         <Route path="/sections" element={<PrivateRoute element={Sections} />} />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />

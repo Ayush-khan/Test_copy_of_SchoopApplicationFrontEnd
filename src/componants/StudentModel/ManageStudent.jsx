@@ -556,8 +556,16 @@ function ManageSubjectList() {
     setShowDActiveModal(false);
   };
 
-  const handleView = (subjectIsPass) => {
-    console.log("HandleView-->", subjectIsPass);
+  const handleView = (subjectIsPassForView) => {
+    console.log("HandleView-->", subjectIsPassForView);
+    setCurrentSection(subjectIsPassForView);
+    navigate(
+      `/student/view/${subjectIsPassForView.student_id}`,
+
+      {
+        state: { student: subjectIsPassForView },
+      }
+    );
   };
   const handleCertificateView = (subjectIsPass) => {
     console.log("handleCertificateView-->", subjectIsPass);
