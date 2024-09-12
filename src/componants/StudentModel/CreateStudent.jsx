@@ -2195,7 +2195,14 @@ function Form() {
   // console.log("studentId",studentId)
   const checkUserId = async (studentId, userId) => {
     try {
-      const response = await axios.get(`/check-user-id/${studentId}/${userId}`);
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(
+        `${API_URL}/api/check-user-id/${studentId}/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       return response.data; // API returns true or false
     } catch (error) {
       console.error("Error checking username uniqueness:", error);

@@ -1072,6 +1072,27 @@ const AdminNavBar = () => {
         >
           Subject for Report Card
         </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="/managesubjectforreportcard"
+          className="text-[.9em] font-bold hover:text-black"
+        >
+          Subject allotment for report card
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-[.9em] font-bold hover:text-black"
+        >
+          Exams
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-[.9em] font-bold hover:text-black"
+        >
+          Grades
+        </NavDropdown.Item>
       </NavDropdown>
 
       {/* Help */}
