@@ -1643,94 +1643,46 @@
 
 // export default CreateStaff;
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import ImageCropper from "../common/ImageUploadAndCrop";
+import ImageCropper from "../common/ImageUploadAndCrop.jsx";
 
-function Form() {
+function CreateStaff() {
   const API_URL = import.meta.env.VITE_API_URL;
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { staff } = location.state || {};
-  console.log("Staff is in edit form***", staff);
-
   const [formData, setFormData] = useState({
-    employee_id: "",
     name: "",
-    father_spouse_name: "",
     birthday: "",
     date_of_joining: "",
-    sex: "",
-    religion: "",
-    blood_group: "",
-    address: "",
-    phone: "",
-    email: "",
     designation: "",
     academic_qual: [],
     professional_qual: "",
-    class_teacher_of: "",
     trained: "",
     experience: "",
+    sex: "",
+    blood_group: "",
+    religion: "",
+    address: "",
+    phone: "",
+    email: "",
     aadhar_card_no: "",
+    role: "",
+    employeeId: "",
     teacher_image_name: null,
-    class_id: "",
-    section_id: "",
-    isDelete: "N",
-    role_id: "", // Ensure it's a string or empty
+    special_sub: "",
   });
-  // console.log("the formdata set", formData);
   const [errors, setErrors] = useState({});
-  const [photoPreview, setPhotoPreview] = useState(null);
   const [backendErrors, setBackendErrors] = useState({});
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const navigate = useNavigate();
   // Maximum date for date_of_birth
   const MAX_DATE = "2006-12-31";
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
 
-  console.log("employeeID", staff.employeeId);
-  useEffect(() => {
-    if (staff) {
-      setFormData({
-        employee_id: staff.employee_id || "NAf",
-        name: staff.name || "",
-        father_spouse_name: staff.father_spouse_name || "",
-        birthday: staff.birthday || "",
-        date_of_joining: staff.date_of_joining || "",
-        sex: staff.sex || "",
-        religion: staff.religion || "",
-        blood_group: staff.blood_group || "",
-        address: staff.address || "",
-        phone: staff.phone || "",
-        email: staff.email || "",
-        designation: staff.designation || "",
-        academic_qual: staff.academic_qual
-          ? staff.academic_qual.split(",")
-          : [],
-        professional_qual: staff.professional_qual || "",
-        special_sub: staff.special_sub || "",
-        trained: staff.trained || "",
-        experience: staff.experience || "",
-        aadhar_card_no: staff.aadhar_card_no || "",
-        teacher_image_name: staff.teacher_image_name || null,
-        class_id: staff.class_id || "",
-        section_id: staff.section_id || "",
-        isDelete: staff.isDelete || "N",
-        role_id: staff.role_id || "", // Ensure it's a string or empty
-      });
-      if (staff.teacher_image_name) {
-        setPhotoPreview(
-          // `${API_URL}/path/to/images/${staff.teacher_image_name}`
-          `${staff.teacher_image_name}`
-        );
-      }
-    }
-  }, [staff, API_URL]);
   // Validation functions
   const validatePhone = (phone) => {
     if (!phone) return "Phone number is required";
@@ -1756,18 +1708,29 @@ function Form() {
     if (!/^\d+$/.test(experience)) return "Experience must be a whole number";
     return null;
   };
+
   const validate = () => {
     const newErrors = {};
+
     // Validate name
     if (!formData.name) newErrors.name = "Name is required";
     else if (!/^[^\d].*/.test(formData.name))
       newErrors.name = "Name should not start with a number";
+
+    // Validate birthday
     if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
+
+    // Validate date of joining
     if (!formData.date_of_joining)
       newErrors.date_of_joining = "Date of Joining is required";
+
+    // Validate sex
     if (!formData.sex) newErrors.sex = "Gender is required";
+
+    // Validate address
     if (!formData.address) newErrors.address = "Address is required";
-    // / Validate phone number
+
+    // Validate phone number
     const phoneError = validatePhone(formData.phone);
     if (phoneError) newErrors.phone = phoneError;
 
@@ -1783,45 +1746,15 @@ function Form() {
     const aadharError = validateAadhar(formData.aadhar_card_no);
     if (aadharError) newErrors.aadhar_card_no = aadharError;
 
-    if (!formData.designation)
-      newErrors.designation = "Designation is required";
-    if (!formData.employee_id)
-      newErrors.employee_id = "Employee ID is required";
-    if (formData.academic_qual.length === 0)
+    // Validate academic qualifications
+    if (!formData.academic_qual.length)
       newErrors.academic_qual =
         "Please select at least one academic qualification";
+
+    setErrors(newErrors);
     return newErrors;
   };
 
-  // const handleChange = (event) => {
-  //   const { name, value, checked } = event.target;
-  //   let newValue = value;
-
-  //   if (name === "experience") {
-  //     newValue = newValue.replace(/[^0-9]/g, "");
-  //   } else if (name === "aadhar_card_no") {
-  //     newValue = newValue.replace(/\s+/g, "");
-  //   }
-  //   if (name === "phone" || name === "aadhar_card_no") {
-  //     newValue = newValue.replace(/[^\d]/g, "");
-  //   }
-  //   if (name === "academic_qual") {
-  //     setFormData((prevData) => {
-  //       const newAcademicQual = checked
-  //         ? [...prevData.academic_qual, value]
-  //         : prevData.academic_qual.filter(
-  //             (qualification) => qualification !== value
-  //           );
-  //       return { ...prevData, academic_qual: newAcademicQual };
-  //     });
-  //   } else {
-  //     setFormData((prevData) => ({
-  //       ...prevData,
-  //       [name]: newValue,
-  //     }));
-  //   }
-  //   validate(); // Call validate on each change to show real-time errors
-  // };
   const handleChange = (event) => {
     const { name, value, checked } = event.target;
     let newValue = value;
@@ -1834,6 +1767,7 @@ function Form() {
     if (name === "phone" || name === "aadhar_card_no") {
       newValue = newValue.replace(/[^\d]/g, "");
     }
+
     if (name === "academic_qual") {
       setFormData((prevData) => {
         const newAcademicQual = checked
@@ -1849,6 +1783,7 @@ function Form() {
         [name]: newValue,
       }));
     }
+
     // Validate field based on name
     let fieldErrors = {};
     if (name === "phone") {
@@ -1865,28 +1800,23 @@ function Form() {
       ...prevErrors,
       ...fieldErrors,
     }));
-    // validate(); // Call validate on each change to show real-time errors
   };
+
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      setFormData((prevState) => ({
-        ...prevState,
-        teacher_image_name: file,
-      }));
-      setPhotoPreview(URL.createObjectURL(file));
-    }
+    setFormData((prevState) => ({
+      ...prevState,
+      teacher_image_name: file,
+    }));
+    setPhotoPreview(URL.createObjectURL(file));
   };
-  // const handleFileChange = (event) => {
-  //   const file = event.target.files[0];
-  //   setFormData((prevState) => ({
-  //     ...prevState,
-  //     teacher_image_name: file,
-  //   }));
-  //   setPhotoPreview(URL.createObjectURL(file));
-  // };
 
-  // Image Croping funtionlity
+  const formatDateString = (dateString) => {
+    if (!dateString) return "";
+    const [year, month, day] = dateString.split("-");
+    return `${year}-${month}-${day}`;
+  };
+
   const handleImageCropped = (croppedImageData) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -1898,7 +1828,6 @@ function Form() {
     event.preventDefault();
     const validationErrors = validate();
     const errorsToCheck = validationErrors || {};
-    // Check if there are any errors
 
     if (Object.keys(errorsToCheck).length > 0) {
       setErrors(errorsToCheck);
@@ -1908,11 +1837,10 @@ function Form() {
       return;
     }
 
-    // Convert formData to the format expected by the API
     const formattedFormData = {
       ...formData,
-      academic_qual: formData.academic_qual, // Ensure this is an array
-      experience: String(formData.experience), // Ensure this is a string
+      birthday: formatDateString(formData.birthday),
+      date_of_joining: formatDateString(formData.date_of_joining),
       teacher_image_name: String(formData.teacher_image_name),
     };
 
@@ -1921,29 +1849,28 @@ function Form() {
       if (!token) {
         throw new Error("No authentication token is found");
       }
-      console.log("the inseid edata of edit staff", formattedFormData);
-      const response = await axios.put(
-        `${API_URL}/api/teachers/${staff.teacher_id}`,
+      const response = await axios.post(
+        `${API_URL}/api/store_staff`,
         formattedFormData,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      if (response.status === 200) {
-        toast.success("Teacher updated successfully!");
+      if (response.status === 201) {
+        toast.success("Teacher created successfully!");
         setTimeout(() => {
           navigate("/StaffList");
         }, 3000);
       }
     } catch (error) {
-      toast.error("An error occurred while updating the teacher.");
-      console.error("Error:", error.response?.data || error.message);
+      console.error("Error:", error.message);
+      toast.error("An error occurred while creating the teacher.");
+
       if (error.response && error.response.data && error.response.data.errors) {
-        // setErrors(error.response.data.errors);
         setBackendErrors(error.response.data.errors || {});
       } else {
         toast.error(error.message);
@@ -1957,12 +1884,13 @@ function Form() {
       <div className="card p-4 rounded-md ">
         <div className=" card-header mb-4 flex justify-between items-center ">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-            Edit Staff information
+            Create a New Staff
           </h5>
 
           <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
+              setErrors({});
               navigate("/StaffList");
             }}
           />
@@ -1981,38 +1909,8 @@ function Form() {
           className="  md:mx-5 overflow-x-hidden shadow-md p-2 bg-gray-50"
         >
           <div className=" flex flex-col gap-4 md:grid  md:grid-cols-3 md:gap-x-14 md:mx-10 gap-y-1">
-            {/* Previous image code */}
-            {/* <div className=" mx-auto      ">
-              <label
-                htmlFor="teacher_image_name"
-                className="block font-bold  text-xs mb-2"
-              >
-                Photo{" "}
-                {photoPreview ? (
-                  <img
-                    src={photoPreview}
-                    alt="Photo Preview"
-                    className="   h-20 w-20 rounded-[50%] mx-auto border-1  border-black object-cover"
-                  />
-                ) : (
-                  <FaUserCircle className="mt-2 h-20 w-20 object-cover mx-auto text-gray-300" />
-                )}
-              </label>
-              <input
-                type="file"
-                id="teacher_image_name"
-                name="teacher_image_name"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="input-field text-xs box-border mt-2 bg-black text-white  "
-              />
-            </div> */}
             <div className=" mx-auto      ">
-              {/* {console.log("imagepreview",photoPreview)} */}
-              <ImageCropper
-                photoPreview={photoPreview}
-                onImageCropped={handleImageCropped}
-              />
+              <ImageCropper onImageCropped={handleImageCropped} />
 
               {/* <label htmlFor="photo" className="block font-bold  text-xs mb-2">
                 Photo
@@ -2076,8 +1974,7 @@ function Form() {
                       value={qualification}
                       checked={formData.academic_qual.includes(qualification)}
                       onChange={handleChange}
-                      className="mr-2"
-                      title="please check atleast one box to move futher"
+                      className="mr-1 "
                     />
                     {qualification}
                   </label>
@@ -2089,7 +1986,8 @@ function Form() {
                 </span>
               )}
             </div>
-            <div className="col-span-1">
+
+            <div>
               <label
                 htmlFor="address"
                 className="block font-bold  text-xs mb-2"
@@ -2098,39 +1996,39 @@ function Form() {
               </label>
               <textarea
                 type="text"
-                maxLength={240}
+                maxLength={200}
                 id="address"
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
+                className="input-field resize block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                rows="4"
                 required
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
-              {errors.address && (
-                <span className="text-red-500 text-xs">{errors.address}</span>
-              )}
             </div>
-            <div className="col-span-1">
-              <label htmlFor="name" className="block font-bold  text-xs mb-2">
-                Name <span className="text-red-500">*</span>
+
+            <div className=" ">
+              <label
+                htmlFor="staffName"
+                className="block font-bold  text-xs mb-2"
+              >
+                Staff Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                maxLength={60}
-                id="name"
+                maxLength={100}
+                id="staffName"
                 name="name"
                 pattern="^[^\d].*"
                 title="Name should not start with a number"
                 required
                 value={formData.name}
-                placeholder="Name"
                 onChange={handleChange}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                placeholder="Name"
+                className="block  border w-full border-gray-300 rounded-md py-1 px-3  bg-white shadow-inner"
               />
-              {errors.name && (
-                <span className="text-red-500 text-xs">{errors.name}</span>
-              )}
             </div>
+
             <div>
               <label
                 htmlFor="trained"
@@ -2169,7 +2067,7 @@ function Form() {
                   +91
                 </span>
                 <input
-                  type="tel"
+                  type="text"
                   id="phone"
                   name="phone"
                   pattern="\d{10}"
@@ -2188,10 +2086,11 @@ function Form() {
                 <span className="text-red-500 text-xs">{errors.phone}</span>
               )}
             </div>
-            <div className="col-span-1">
+
+            <div>
               <label
                 htmlFor="birthday"
-                className="block font-bold  text-xs mb-2"
+                className="block font-bold text-xs mb-2"
               >
                 Date of Birth <span className="text-red-500">*</span>
               </label>
@@ -2202,34 +2101,59 @@ function Form() {
                 name="birthday"
                 value={formData.birthday}
                 onChange={handleChange}
+                className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                 required
+              />
+              {errors.birthday && (
+                <div className="text-red-500 text-xs mt-1">
+                  {errors.birthday}
+                </div>
+              )}
+            </div>
+
+            {/* <div>
+              <label
+                htmlFor=" birthday"
+                className="block font-bold  text-xs mb-2"
+              >
+                Date Of Birth <span className="text-red-500">*</span>
+              </label>
+              <input
+                // type="date"
+                type="date"
+                id=" birthday"
+                name=" birthday"
+                value={formData.birthday}
+                // placeholder="dd/MM/yyyy"
+                onChange={handleChange}
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                // required
               />
               {errors.birthday && (
                 <span className="text-red-500 text-xs">{errors.birthday}</span>
               )}
-            </div>
-            <div className="col-span-1">
+            </div> */}
+            <div>
               <label
                 htmlFor="experience"
                 className="block font-bold  text-xs mb-2"
               >
-                Experience <span className="text-red-500">*</span>
+                experience <span className="text-red-500">*</span>
               </label>
               <input
-                type="number"
+                type="text"
                 maxLength={2}
                 id="experience"
                 name="experience"
                 value={formData.experience}
-                placeholder="in year"
+                placeholder="In year"
                 onChange={handleChange}
                 required
                 title="Only enter digits in year like 1 or 5"
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
             </div>
-            <div className="col-span-1">
+            <div>
               <label htmlFor="email" className="block font-bold  text-xs mb-2">
                 Email <span className="text-red-500">*</span>
               </label>
@@ -2240,10 +2164,12 @@ function Form() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                required
-                title="Please enter a valid email address that ends with @gmail.com"
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                required
+                placeholder="example@email.com"
+                title="Please enter a valid email address that ends with @gmail.com"
               />
+
               {backendErrors.email && (
                 <span className="error text-red-500 text-xs">
                   {backendErrors.email[0]}
@@ -2255,12 +2181,12 @@ function Form() {
                 </span>
               )}
             </div>
-            <div className="col-span-1">
+            <div>
               <label
                 htmlFor="date_of_joining"
                 className="block font-bold  text-xs mb-2"
               >
-                Date of Joining <span className="text-red-500">*</span>
+                Date Of Joining <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
@@ -2269,8 +2195,8 @@ function Form() {
                 name="date_of_joining"
                 value={formData.date_of_joining}
                 onChange={handleChange}
-                required
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                required
               />
               {errors.date_of_joining && (
                 <span className="text-red-500 text-xs">
@@ -2278,83 +2204,66 @@ function Form() {
                 </span>
               )}
             </div>
-            <div className="col-span-1">
+            <div className="">
               <label htmlFor="sex" className="block font-bold  text-xs mb-2">
                 Gender <span className="text-red-500">*</span>
               </label>
               <select
                 id="sex"
                 name="sex"
+                // maxLength="6"
                 value={formData.sex}
                 onChange={handleChange}
-                required
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                required
               >
-                <option value="">Select Gender</option>
-                <option value="M">Male</option>
-                <option value="F">Female</option>
-                <option value="O">Other</option>
+                <option className=" bg-gray-300" value="">
+                  Select
+                </option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
               </select>
               {errors.sex && (
                 <span className="text-red-500 text-xs">{errors.sex}</span>
               )}
             </div>
-            <div className="col-span-1">
+            <div>
               <label
-                htmlFor="class_teacher_of"
+                htmlFor="aadhar_card_no"
                 className="block font-bold  text-xs mb-2"
               >
-                Class teacher of
+                Aadhaar Card No. <span className="text-red-500">*</span>
               </label>
               <input
-                type="text"
-                id="class_teacher_of"
-                name="class_teacher_of"
-                readOnly
-                value={formData.class_teacher_of}
+                type="tel"
+                maxLength={12}
+                id="aadhar_card_no"
+                name="aadhar_card_no"
+                value={formData.aadhar_card_no}
+                pattern="\d{12}"
+                title="Aadhaar Card Number must be exactly 12 digits Number"
                 onChange={handleChange}
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-            </div>
-            {/* <div>
-              <label htmlFor="role" className="block font-bold  text-xs mb-2">
-                Role <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-                required
-              >
-              
-                <option className="bg-gray-300" value="">
-                  Select
-                </option>
-                <option value="A">Admin</option>
-                <option value="B">Bus</option>
-                <option value="E">Data Entry</option>
-                <option value="F">Finance</option>
-                <option value="L">Librarian</option>
-                <option value="M">Management</option>
-                <option value="N">Printer</option>
-                <option value="O">owner</option>
-                <option value="R">Support</option>
-                <option value="T">Teacher</option>
-                <option value="X">Support Staff</option>
-                <option value="Y">Security</option>
-              </select>
-              {errors.role && (
-                <p className="text-red-500 text-xs">{errors.role}</p>
+              />{" "}
+              {backendErrors.aadhar_card_no && (
+                <span className="text-red-500 text-xs">
+                  {backendErrors.aadhar_card_no[0]}
+                </span>
               )}
-            </div> */}
-            <div className="col-span-1">
+              {errors.aadhar_card_no && (
+                <span className="text-red-500 text-xs">
+                  {errors.aadhar_card_no}
+                </span>
+              )}
+            </div>
+
+            <div>
               <label
                 htmlFor="designation"
                 className="block font-bold  text-xs mb-2"
               >
-                Designation
+                designation
               </label>
               <input
                 type="text"
@@ -2363,13 +2272,9 @@ function Form() {
                 name="designation"
                 value={formData.designation}
                 onChange={handleChange}
+                // required
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
-              {errors.designation && (
-                <span className="text-red-500 text-xs">
-                  {errors.designation}
-                </span>
-              )}
             </div>
             <div>
               <label
@@ -2399,32 +2304,35 @@ function Form() {
               </select>
             </div>
             <div>
-              <label
-                htmlFor="aadhar_card_no"
-                className="block font-bold  text-xs mb-2"
-              >
-                Aadhaar Card No. <span className="text-red-500">*</span>
+              <label htmlFor="role" className="block font-bold  text-xs mb-2">
+                Role <span className="text-red-500">*</span>
               </label>
-              <input
-                type="tel"
-                maxLength={12}
-                id="aadhar_card_no"
-                name="aadhar_card_no"
-                value={formData.aadhar_card_no}
-                pattern="\d{12}"
-                title="Aadhaar Card Number must be exactly 12 digits number "
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
                 onChange={handleChange}
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-              {backendErrors.aadhar_card_no && (
-                <span className="text-red-500 text-xs">
-                  {backendErrors.aadhar_card_no[0]}
-                </span>
-              )}
-              {errors.aadhar_card_no && (
-                <span className="text-red-500 text-xs">
-                  {errors.aadhar_card_no}
-                </span>
+                required
+              >
+                <option className="bg-gray-300" value="">
+                  Select
+                </option>
+                <option value="A">Admin</option>
+                <option value="B">Bus</option>
+                <option value="E">Data Entry</option>
+                <option value="F">Finance</option>
+                <option value="L">Librarian</option>
+                <option value="M">Management</option>
+                <option value="N">Printer</option>
+                <option value="O">owner</option>
+                <option value="R">Support</option>
+                <option value="T">Teacher</option>
+                <option value="X">Support Staff</option>
+                <option value="Y">Security</option>
+              </select>
+              {errors.role && (
+                <span className="text-red-500 text-xs">{errors.role}</span>
               )}
             </div>
             <div>
@@ -2455,6 +2363,7 @@ function Form() {
                 </select>
               </div>
             </div>
+
             <div>
               <label
                 htmlFor="religion"
@@ -2482,7 +2391,7 @@ function Form() {
                 {/* Add training status options here */}
               </select>
             </div>
-            {/* <div className="col-span-1">
+            {/* <div>
               <label
                 htmlFor="religion"
                 className="block font-bold  text-xs mb-2"
@@ -2493,16 +2402,18 @@ function Form() {
                 type="text"
                 id="religion"
                 name="religion"
+                pattern="^[^\d].*"
+                title="Religion should not start with a number"
+                // required
                 placeholder="Christian"
                 value={formData.religion}
                 onChange={handleChange}
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
             </div> */}
-
-            <div className="col-span-1">
+            <div>
               <label
-                htmlFor="employee_id"
+                htmlFor="employeeId"
                 className="block font-bold  text-xs mb-2"
               >
                 Employee ID <span className="text-red-500">*</span>
@@ -2510,19 +2421,20 @@ function Form() {
               <input
                 type="tel"
                 maxLength={5}
-                id="employee_id"
-                name="employee_id"
-                value={formData.employee_id}
+                id="employeeId"
+                name="employeeId"
+                value={formData.employeeId}
                 onChange={handleChange}
-                required
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                required
               />
-              {errors.employee_id && (
+              {errors.employeeId && (
                 <span className="text-red-500 text-xs">
-                  {errors.employee_id}
+                  {errors.employeeId}
                 </span>
               )}
             </div>
+
             <div>
               <label
                 htmlFor="special_sub"
@@ -2535,21 +2447,22 @@ function Form() {
                 maxLength={30}
                 id="special_sub"
                 name="special_sub"
-                // value={formData.special_sub}
+                value={formData.special_sub}
                 onChange={handleChange}
                 placeholder="Special Subject for D.Ed/B.Ed"
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
             </div>
-          </div>
-          <div className="col-span-3 md:mr-9 my-2 text-right">
-            <button
-              type="submit"
-              style={{ backgroundColor: "#2196F3" }}
-              className=" text-white font-bold py-1 border-1 border-blue-500 px-4 rounded"
-            >
-              Update
-            </button>
+
+            <div className="col-span-3  text-right">
+              <button
+                type="submit"
+                style={{ backgroundColor: "#2196F3" }}
+                className=" text-white font-bold py-1 border-1 border-blue-500 px-4 rounded"
+              >
+                Create Staff
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -2557,4 +2470,4 @@ function Form() {
   );
 }
 
-export default Form;
+export default CreateStaff;
