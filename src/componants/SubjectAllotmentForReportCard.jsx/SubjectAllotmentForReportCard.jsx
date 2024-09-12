@@ -7,42 +7,29 @@ import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
-
-// import { IoMdAdd } from "react-icons/io";
-// import { CgAddR } from "react-icons/cg";
-// import { FaRegSquarePlus } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
-// import AllotSubjectTab from "./AllotSubjectTab"; // Import the new component
-// import ManageSubjectsTab from "./ManageSubjectsTab.jsx";
-// import AllotTeachersForCLass from "../MastersModule/SubjectAllotment/AllotTeachersForCLass";
-import AllotTeachersTab from "../MastersModule/SubjectAllotment/AllotTeachersTab.jsx";
+import AllotSubjectTab from "./AllotSubjectTab.jsx";
 import Select from "react-select";
 function SubjectAllotmentForReportCard() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
-  // const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-
   const [classSection, setClassSection] = useState("");
   const [activeTab, setActiveTab] = useState("Manage");
   const [classes, setClasses] = useState([]);
   const [classesforsubjectallot, setclassesforsubjectallot] = useState([]);
   const [subjects, setSubjects] = useState([]);
   // for allot subject tab
-  const [subjectsForAllotSubject, setSubjectsForAllotSubject] = useState([]);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
   const [currestSubjectNameForDelete, setCurrestSubjectNameForDelete] =
     useState("");
-  const [newSectionName, setNewSectionName] = useState("");
-  const [newClassName, setNewClassName] = useState("");
   const [newSection, setnewSectionName] = useState("");
   const [newSubject, setnewSubjectnName] = useState("");
   const [newclassnames, setnewclassnames] = useState("");
   const [teacherIdIs, setteacherIdIs] = useState("");
   const [teacherNameIs, setTeacherNameIs] = useState("");
-  const [newTeacherAssign, setnewTeacherAssign] = useState("");
   const [ClassNameDropdown, setClassNameDropdown] = useState("");
   const [classId, setclassId] = useState("");
   // This is hold the allot subjet api response
@@ -63,7 +50,7 @@ function SubjectAllotmentForReportCard() {
   // const [nameError, setNameError] = useState("");
   //   for dropdown seletect
   //   const [newDepartmentId, setNewDepartmentId] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const dropdownRef = useRef(null);
   const [countSN, setCountSN0] = useState(0);
   //   for allot subject checkboxes
@@ -87,6 +74,7 @@ function SubjectAllotmentForReportCard() {
   };
 
   const handleClassSelect = (selectedOption) => {
+    setNameError("");
     setSelectedClass(selectedOption);
     setclassIdForManage(selectedOption.value); // Assuming value is the class ID
   };
@@ -97,61 +85,18 @@ function SubjectAllotmentForReportCard() {
   }));
   console.log("teacherOptions", teacherOptions);
   const classOptions = classes.map((cls) => ({
-    value: cls.section_id,
-    label: `${cls?.get_class?.name}  ${cls.name}`,
+    value: cls.class_id,
+    label: `${cls?.name}  `,
   }));
 
   //   Sorting logic state
 
   const pageSize = 10;
-  const handleInputChange = (e) => {
-    setNewDepartmentId(e.target.value);
-    setIsDropdownOpen(true); // Open the dropdown when typing
-  };
 
-  // const handleOptionSelect = (value) => {
-  //   console.log("45555555555", value);
-  //   setNewDepartmentId(value);
-  //   setTeacherId(value);
-  //   setIsDropdownOpen(false); // Close the dropdown when an option is selected
-  // };
-  // const handleOptionSelect = (regId) => {
-  //   const selectedDept = departments.find((dept) => dept.reg_id === regId);
-  //   if (selectedDept) {
-  //     setNewDepartmentId(selectedDept.name);
-  //     setSelectedDepartment(regId);
-  //   }
-  //   setIsDropdownOpen(false);
-  // };
-
-  // const filteredDepartments = departments.filter((department) =>
-  //   department.name.toLowerCase().includes(newDepartmentId.toLowerCase())
-  // );
-
-  // const handleClickOutside = (event) => {
-  //   if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-  //     setIsDropdownOpen(false); // Close the dropdown if clicked outside
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, []);
-  //   FOr serial number
-  const generateSerialNumbers = (data) => {
-    const sortedData = [...data].sort((a, b) => a.section_id - b.section_id); // Optional: sort based on section_id or any other criteria
-    return sortedData.map((item, index) => ({
-      ...item,
-      serialNumber: index + 1,
-    }));
-  };
   const fetchClassNames = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_class_section`, {
+      const response = await axios.get(`${API_URL}/api/getClassList`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (Array.isArray(response.data)) {
@@ -185,7 +130,7 @@ function SubjectAllotmentForReportCard() {
       setError("Error fetching class names");
     }
   };
-  // THis is for the ALlotTeacherFOrACLaSS tAB FECTH class
+
   //   This is the api for get teacher list in the manage tab edit
   const fetchDepartments = async () => {
     try {
@@ -215,7 +160,7 @@ function SubjectAllotmentForReportCard() {
   useEffect(() => {
     fetchClassNames();
     fetchDepartments();
-    fetchClassNamesForAllotSubject();
+    // fetchClassNamesForAllotSubject();
   }, []);
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
@@ -229,227 +174,32 @@ function SubjectAllotmentForReportCard() {
         classIdForManage
       );
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_subject_Alloted`, {
-        headers: { Authorization: `Bearer ${token}` },
-        // params: { section_id: classSection },
-        params: { section_id: classIdForManage },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_subject_Alloted_for_report_card/${classIdForManage}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          // params: { section_id: classSection },
+          //   params: { class_id: classIdForManage },
+        }
+      );
       console.log(
         "the response of the subjectallotment is *******",
-        response.data
+        response.data?.subjectAllotments
       );
-      if (response.data.length > 0) {
-        setSubjects(response.data);
-        setPageCount(Math.ceil(response.data.length / 10)); // Example pagination logic
+      if (response?.data?.subjectAllotments.length > 0) {
+        setSubjects(response.data?.subjectAllotments);
+        setPageCount(Math.ceil(response?.data?.subjectAllotments.length / 10)); // Example pagination logic
       } else {
         setSubjects([]);
-        toast.error("No subjects found for the selected class and division.");
+        toast.error("No subjects found for the selected class.");
       }
     } catch (error) {
       console.error("Error fetching subjects:", error);
       setError("Error fetching subjects");
     }
   };
-  // const handleSearchForsubjectAllot = async () => {
-  //   try {
-  //     console.log(
-  //       "for this sectiong id in seaching inside subjectallotment",
-  //       classId
-  //     );
-  //     const token = localStorage.getItem("authToken");
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_divisions_and_subjects/${classId}`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         // params: { section_id: classSection },
-  //       }
-  //     );
-  //     if (Array.isArray(response.data.subjectAllotments)) {
-  //       setAllotSubjectTabData(response.data.subjectAllotments);
-  //       console.log(
-  //         "***********the data is allotsubject tab",
-  //         allotSubjectTabData
-  //       );
-  //     } else {
-  //       console.log("the data formate", response.data.subjectAllotments);
-
-  //       setAllotSubjectTabData(response.data.subjectAllotments);
-  //       toast("Unexpected data format");
-  //     }
-  //     console.log("the data is allotsubjectjfdskf", allotSubjectTabData);
-  //   } catch (error) {
-  //     console.error("Error fetching subjects:", error);
-  //     setError("Error fetching subjects");
-  //   }
-  // };
-
-  const handleSearchForsubjectAllot = async () => {
-    if (!classId) {
-      return;
-    }
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(
-        `${API_URL}/api/get_divisions_and_subjects/${classId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (response.data && response.data.divisions && response.data.subjects) {
-        setDivisions(response.data.divisions);
-        setSubjectsForAllotSubject(response.data.subjects);
-        console.log(
-          "this is get for api get_divisions_and_subjects ",
-          subjectsForAllotSubject
-        );
-        const formattedAllotments = response.data.divisions.map((division) => ({
-          section_id: division.section_id,
-          name: division.name,
-          subjects: response.data.subjects,
-        }));
-        setAllotSubjectTabData(formattedAllotments);
-      } else {
-        toast.error("Unexpected data format");
-      }
-    } catch (error) {
-      toast.error(
-        "Failed to fetch data for Allot Subjected tab. Please try again."
-      );
-    }
-  };
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-  };
-
-  //   Logic for ALlot subject tab
-  // Extract unique divisions
-  // Extract unique divisions with their IDs
-  // Extract unique divisions with their IDs using a Map
-  // const divisionMap = new Map();
-  // allotSubjectTabData.forEach((item) => {
-  //   if (item?.get_division?.name) {
-  //     divisionMap.set(item?.get_division?.name, item?.get_division?.section_id);
-  //   }
-  // });
-  // const uniqueDivisions = Array.from(divisionMap.entries()).map(
-  //   ([name, section_id]) => ({
-  //     name,
-  //     section_id,
-  //   })
-  // );
-
-  // console.log("Unique division data with IDs:", uniqueDivisions);
-
-  // Extract unique subjects with their IDs using a Map
-  // const subjectMap = new Map();
-  // allotSubjectTabData.forEach((item) => {
-  //   if (item?.get_subject?.name) {
-  //     subjectMap.set(item?.get_subject?.name, item?.sm_id);
-  //   }
-  // });
-  // const uniqueSubjects = Array.from(subjectMap.entries()).map(
-  //   ([name, subject_id]) => ({
-  //     name,
-  //     subject_id,
-  //   })
-  // );
-
-  // console.log("Unique subject data with IDs:", uniqueSubjects);
-
-  // Function to fetch subjects based on selected division
-  // Function to fetch subjects based on selected divisions
-  const fetchSubjectDataForAllotSubjectTab = async (divisionIds) => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const params = new URLSearchParams();
-      divisionIds.forEach((id) => params.append("section_id[]", id));
-
-      const response = await axios.get(
-        `${API_URL}/api/get_presubjects/${classId}?${params.toString()}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const subjectIds = response.data.subjects.map((subject) => subject.sm_id);
-      setSelectedSubjects(subjectIds);
-    } catch (error) {
-      console.error("Error fetching subjects:", error);
-    }
-  };
 
   // Handle division checkbox change
-  // Handle division checkbox change
-  const handleDivisionChange = (divisionId) => {
-    let updatedDivisions;
-    setDivisionError("");
-    if (selectedDivisions.includes(divisionId)) {
-      updatedDivisions = selectedDivisions.filter((id) => id !== divisionId);
-    } else {
-      updatedDivisions = [...selectedDivisions, divisionId];
-    }
-    setSelectedDivisions(updatedDivisions);
-
-    // Fetch and update subject checkboxes based on selected divisions
-    if (updatedDivisions.length > 0) {
-      fetchSubjectDataForAllotSubjectTab(updatedDivisions);
-    } else {
-      setSelectedSubjects([]);
-    }
-  };
-  // const handleClassChange = (e) => {
-  //   const selectedClassId = e.target.value;
-  //   setclassId(selectedClassId);
-  //   setSelectedDivisions([]);
-  //   setSelectedSubjects([]);
-  //   setDivisions([]);
-  //   handleSearchForsubjectAllot(); // Fetch data based on selected class
-  // };
-  // const handleFormSubmit = async () => {
-  //   // Add your form submission logic here
-
-  //   // Clear form after successful submission
-  //   setClassSection("");
-  //   setClassNameDropdown("");
-  //   setclassId("");
-  //   setSelectedDivisions([]);
-  //   setSelectedSubjects([]);
-  //   setDivisions([]);
-  // };
-
-  // Handle subject checkbox change
-  const handleSubjectChange = (subjectid) => {
-    const subjectId = Number(subjectid);
-    setSubjectError("");
-    console.log("the event=====", subjectId);
-    setSelectedSubjects((prevSelected) =>
-      prevSelected.includes(subjectId)
-        ? prevSelected.filter((id) => id !== subjectId)
-        : [...prevSelected, subjectId]
-    );
-  };
-
-  const handleChangeClassSectionForAllotSubjectTab = (e) => {
-    const selectedClassId = e.target.value;
-    console.log("dfsjfds", selectedClassId);
-    setclassId(selectedClassId);
-    setSelectedDivisions([]);
-    setSelectedSubjects([]);
-    setDivisions([]);
-    // handleSearchForsubjectAllot(); // Fetch data based on selected classsetClassNameDropdown(e.target.value);
-    // setclassId(e.target.value);
-    // handleSearchForsubjectAllot();
-  };
-  useEffect(() => {
-    handleSearchForsubjectAllot();
-  }, [classId]);
-
-  const handleChangeClassSection = (e) => {
-    setNameError(null); // Reset error when user selects a class
-
-    setClassSection(e.target.value);
-    // handleSearchForsubjectAllot();
-  };
 
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
@@ -600,14 +350,12 @@ function SubjectAllotmentForReportCard() {
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
-  // console.log("the name", subjects);
-  // const filteredSections = subjects.filter((section) =>
-  //   section?.get_subject?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
+
   const filteredSections = subjects.filter((section) => {
     // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
-    const teacherName = section?.get_teacher?.name?.toLowerCase() || "";
-    const subjectName = section?.get_subject?.name?.toLowerCase() || "";
+    const teacherName = section?.subject_type?.toLowerCase() || "";
+    const subjectName =
+      section?.get_subjects_for_report_card?.name?.toLowerCase() || "";
 
     // Check if the search term is present in either the teacher's name or the subject's name
     return (
@@ -619,201 +367,16 @@ function SubjectAllotmentForReportCard() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
-  // handle allot subject close model
-  const handleAllotSubjectCloseModal = () => {
-    setAllotSubjectTabData([]);
-    // setClassSection("");
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
   };
-  // Post the allot subject api
-  // it's workilng properly but validations messages not present
-  // const handleSubmitAllotment = async () => {
-  //   // Validate required fields
-  //   console.log('psot start')
-  //   if (
-  //     ClassNameDropdown &&
-  //     selectedDivisions.length > 0 &&
-  //     selectedSubjects.length > 0
-  //   )
-  //   {
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-
-  //       // Check if token exists
-  //       if (!token) {
-  //         throw new Error("No authentication token found");
-  //       }
-  //       console.log(
-  //         "[",
-  //         ClassNameDropdown,
-  //         "]",
-  //         selectedDivisions,
-  //         selectedSubjects
-  //       );
-  //       const response = await axios.post(
-  //         `${API_URL}/api/store_subject_allotment`,
-  //         {
-  //           class_id: ClassNameDropdown,
-  //           section_ids: selectedDivisions,
-  //           subject_ids: selectedSubjects,
-  //         },
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //             "Content-Type": "application/json", // Ensure content type is specified
-  //           },
-  //         }
-  //       );
-
-  //       // Handle successful response
-  //       if (response.status === 201) {
-  //         toast.success("Subject allotment details updated successfully");
-  //         // toast.success("Subject allotment updated successfully!");
-
-  //         setTimeout(() => {
-  //           setAllotSubjectTabData([]); // Clear the form or reset state
-  //           setActiveTab("Manage"); // Set the active tab to "Manage" after 2 seconds
-  //         }, 3000); // Wait for 2 seconds
-  //       } else {
-  //         toast.error("Unexpected response from the server");
-  //       }
-  //     } catch (error) {
-  //       // Handle errors
-  //       if (error.response && error.response.data) {
-  //         toast.error(
-  //           `Error storing subject allotment: ${error.response.data.message}`
-  //         );
-  //       } else {
-  //         toast.error(`Error storing subject allotment: ${error.message}`);
-  //       }
-  //       console.error("Error storing subject allotment:", error);
-  //     }
-  //   } else {
-  //     toast.error("Please select a class, divisions, and subjects");
-  //   }
-  // };
-  const handleSubmitAllotment = async () => {
-    console.log("post start fdgh");
-
-    // Validate required fields
-    console.log("ClassNameDropdown", classId);
-    let hasError = false;
-    if (!classId) {
-      setClassError("Please select a class");
-      hasError = true;
-
-      // return; // Exit early if validation fails
-    }
-    console.log("selectedDivisions", selectedDivisions);
-    if (selectedDivisions.length === 0) {
-      setDivisionError("Please select at least one division");
-      console.log("division not select");
-      hasError = true;
-
-      // return; // Exit early if validation fails
-    }
-    console.log("selectedSubjects", selectedSubjects);
-
-    if (selectedSubjects.length === 0) {
-      setSubjectError("Please select at least one subject");
-      console.log("subject not select");
-
-      hasError = true;
-
-      // return; // Exit early if validation fails
-    }
-    if (hasError) {
-      return;
-    }
-    try {
-      const token = localStorage.getItem("authToken");
-
-      // Check if token exists
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-      console.log(
-        "This is the post formate of the data of allot subject ",
-        "Class_id",
-        ClassNameDropdown,
-        "Division_selected",
-        selectedDivisions,
-        "Selected_subjects",
-        selectedSubjects
-      );
-      // console.log(
-      //   "[",
-      //   ClassNameDropdown,
-      //   "]",
-      //   selectedDivisions,
-      //   selectedSubjects
-      // );
-      console.log("fdhsh post api allot subject");
-      const response = await axios.post(
-        `${API_URL}/api/store_subject_allotment`,
-        {
-          class_id: classId,
-          section_ids: selectedDivisions,
-          subject_ids: selectedSubjects,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json", // Ensure content type is specified
-          },
-        }
-      );
-
-      // Handle successful response
-      if (response.status === 201) {
-        toast.success("Subject allotment details updated successfully");
-
-        setTimeout(() => {
-          setClassSection("");
-          setClassNameDropdown("");
-          setclassId("");
-          setSelectedDivisions([]);
-          setSelectedSubjects([]);
-          setDivisions([]);
-          setAllotSubjectTabData([]); // Clear the form or reset state
-          setActiveTab("Manage"); // Set the active tab to "Manage" after 2 seconds
-        }, 3000); // Wait for 2 seconds
-      } else {
-        toast.error("Unexpected response from the server");
-      }
-    } catch (error) {
-      // Handle errors
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error storing subject allotment: ${error.response.data.message}`
-        );
-      } else {
-        toast.error(`Error storing subject allotment: ${error.message}`);
-      }
-      console.error("Error storing subject allotment:", error);
-    }
-  };
-
-  //   sorting logic
-  const sortedSubjects = () => {
-    const { key, direction } = sortConfig;
-    const sortedData = [...subjects].sort((a, b) => {
-      if (a[key] < b[key]) {
-        return direction === "asc" ? -1 : 1;
-      }
-      if (a[key] > b[key]) {
-        return direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-    return sortedData;
-  };
-
   return (
     <>
       {/* <ToastContainer /> */}
       <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-          Subject Allotment
+          Subject Allotment For Report Card
         </h3>
         <div
           className=" relative  mb-8   h-1  mx-auto bg-red-700"
@@ -821,16 +384,9 @@ function SubjectAllotmentForReportCard() {
             backgroundColor: "#C03078",
           }}
         ></div>
-        {/* <hr className="relative -top-3" /> */}
-
         <ul className="grid grid-cols-2 gap-x-10 relative -left-6 md:left-0 md:flex md:flex-row relative -top-4">
           {/* Tab Navigation */}
-          {[
-            "Manage",
-            "AllotSubject",
-            "AllotTeachersForClass",
-            "AllotTeachers",
-          ].map((tab) => (
+          {["Manage", "AllotSubject"].map((tab) => (
             <li
               key={tab}
               className={`md:-ml-7 shadow-md ${
@@ -849,20 +405,6 @@ function SubjectAllotmentForReportCard() {
 
         <div className="bg-white  rounded-md -mt-5">
           {activeTab === "Manage" && (
-            // <ManageSubjectsTab
-            //   classSection={classSection}
-            //   nameError={nameError}
-            //   handleChangeClassSection={handleChangeClassSection}
-            //   handleSearch={handleSearch}
-            //   classes={classes}
-            //   subjects={subjects}
-            //   displayedSections={displayedSections}
-            //   setSearchTerm={setSearchTerm}
-            //   handleEdit={handleEdit}
-            //   handleDelete={handleDelete}
-            //   pageCount={pageCount}
-            //   handlePageClick={handlePageClick}
-            // />
             <div>
               <ToastContainer />
               <div className="mb-4">
@@ -885,7 +427,7 @@ function SubjectAllotmentForReportCard() {
                         className=" text-sm w-full md:w-[60%] item-center relative left-0 md:left-4"
                       />
                       {nameError && (
-                        <div className=" relative top-0.5 ml-1 text-danger text-xs">
+                        <div className=" relative top-0.5 left-3 ml-1 text-danger text-xs">
                           {nameError}
                         </div>
                       )}{" "}
@@ -905,7 +447,7 @@ function SubjectAllotmentForReportCard() {
                   <div className="card mx-auto lg:w-full shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                        Manage Subjects List
+                        Manage Subjects Allotment List
                       </h3>
                       <div className="w-1/2 md:w-fit mr-1 ">
                         <input
@@ -941,7 +483,7 @@ function SubjectAllotmentForReportCard() {
                                 Subject
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Teacher
+                                Subject Type
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Edit
@@ -954,23 +496,23 @@ function SubjectAllotmentForReportCard() {
                           <tbody>
                             {displayedSections.map((subject, index) => (
                               <tr
-                                key={subject.section_id}
+                                key={subject.sub_rc_master_id}
                                 className="text-gray-700 text-sm font-light"
                               >
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {index + 1}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {`${subject?.get_class?.name} ${subject?.get_division?.name}`}
+                                  ${subject?.get_class?.name}
                                 </td>
                                 {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.get_division?.name}
                                 </td> */}
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_subject?.name}
+                                  {subject?.get_subjects_for_report_card?.name}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_teacher?.name}
+                                  {subject?.subject_type}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
@@ -1022,174 +564,9 @@ function SubjectAllotmentForReportCard() {
               )}
             </div>
           )}
-
-          {/* Other tabs content */}
-
           {activeTab === "AllotSubject" && (
             <div>
-              <ToastContainer />
-
-              <div className="container mb-4">
-                <div className="card-header flex justify-between items-center"></div>
-                <div className="w-full mx-auto">
-                  <div className="form-group  w-full  md:w-[80%] mt-2 flex justify-start gap-x-1 ml-0 md:ml-10 md:gap-x-4">
-                    <label
-                      htmlFor="classSection"
-                      className="w-1/4 pt-2 items-center text-center"
-                    >
-                      Select class <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      id="classSection"
-                      className="border md:w-[35%] h-10 md:h-auto rounded-md px-3 py-2 w-full mr-2"
-                      value={classId}
-                      onChange={handleChangeClassSectionForAllotSubjectTab}
-                    >
-                      <option value="">Select </option>
-                      {classesforsubjectallot.length === 0 ? (
-                        <option value="">No classes available</option>
-                      ) : (
-                        classesforsubjectallot.map((cls) => (
-                          <option key={cls.class_id} value={cls.class_id}>
-                            {` ${cls?.name}`}
-                          </option>
-                        ))
-                      )}
-                    </select>
-                  </div>
-                  {allotSubjectTabData.length > 0 && (
-                    <div className="container mt-4">
-                      <div className="card mx-auto relative left-1 lg:w-full shadow-lg ">
-                        <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                            Allot Subjects
-                          </h3>
-                          <RxCross1
-                            className="float-end relative  right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                            type="button"
-                            // className="btn-close text-red-600"
-                            onClick={handleAllotSubjectCloseModal}
-                          />
-                        </div>
-                        <div
-                          className=" relative  -top-2 mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                          style={{
-                            backgroundColor: "#C03078",
-                          }}
-                        ></div>
-                        <div className="card-body  w-full">
-                          <div className=" relative lg:overflow-x-hidden">
-                            <div className=" relative mb-4 flex gap-x-4">
-                              <h5 className="px-2 mt-2 lg:px-3 py-2 text-[1em] text-gray-700">
-                                Select divisions{" "}
-                                <span className="text-red-500">*</span>
-                              </h5>
-                              {division.map((div) => (
-                                <div key={div.section_id} className="pt-3">
-                                  <input
-                                    type="checkbox"
-                                    className="mr-0.5 shadow-lg "
-                                    checked={selectedDivisions.includes(
-                                      div.section_id
-                                    )}
-                                    onChange={() =>
-                                      handleDivisionChange(div.section_id)
-                                    }
-                                  />
-                                  <span className="  font-semibold text-gray-600 ">
-                                    {div.name}
-                                  </span>
-                                </div>
-                              ))}
-
-                              {divisionError && (
-                                <p className="  md:absolute md:top-9 md:left-[17%] text-red-500 text-xs">
-                                  {divisionError}
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="flex">
-                              <h5 className="px-2 relative -top-2 lg:px-3 py-2 text-[1em] text-gray-700">
-                                Select subjects{" "}
-                                <span className="text-red-500">*</span>
-                              </h5>
-                              {/* <div className="relative gap-x-10 top-2 border-2 border-black  grid grid-cols-3  w-full"> */}
-
-                              <div className=" grid grid-cols-3 mx-4 w-[78%]">
-                                {subjectsForAllotSubject.map((subject) => (
-                                  <div key={subject.sm_id}>
-                                    <label>
-                                      <input
-                                        type="checkbox"
-                                        className="mr-0.5 shadow-lg"
-                                        value={subject.sm_id}
-                                        checked={selectedSubjects.includes(
-                                          subject.sm_id
-                                        )}
-                                        onChange={() =>
-                                          handleSubjectChange(subject.sm_id)
-                                        }
-                                        disabled={!selectedDivisions.length} // Disable if no division is selected
-                                      />
-                                      <span className="font-semibold text-gray-600">
-                                        {subject.name}
-                                      </span>
-                                    </label>
-                                  </div>
-                                ))}
-                                {/* {subjects.map((subject) => (
-                                  <div key={subject.sm_id}>
-                                    <input
-                                      type="checkbox"
-                                      className="mr-0.5 shadow-lg"
-                                      value={subject.sm_id}
-                                      checked={selectedSubjects.includes(
-                                        subject.sm_id
-                                      )}
-                                      onChange={() =>
-                                        handleSubjectChange(subject.sm_id)
-                                      }
-                                      disabled={!selectedDivisions.length} // Disable if no division is selected
-                                    />
-                                    {subject.name}
-                                  </div>
-                                ))} */}
-                              </div>
-                            </div>
-                            {subjectError && (
-                              <p className="absolute  left-[18%]  text-red-500 text-xs ">
-                                {subjectError}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className=" flex justify-end p-3">
-                          <button
-                            type="button"
-                            className="btn btn-primary px-3 mb-2 "
-                            onClick={handleSubmitAllotment}
-                          >
-                            Save
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "AllotTeachersForClass" && (
-            <div>
-              {/* classSection, handleChangeClassSection, classes, */}
-              {/* <AllotTeachersForCLass /> */}
-            </div>
-          )}
-          {activeTab === "AllotTeachers" && (
-            <div>
-              <AllotTeachersTab />
+              <AllotSubjectTab />
             </div>
           )}
         </div>
@@ -1262,39 +639,6 @@ function SubjectAllotmentForReportCard() {
                         placeholder="Select "
                         isSearchable
                       />
-                      {/* <input
-                        type="text"
-                        id="newDepartmentId"
-                        value={newDepartmentId}
-                        onChange={handleInputChange}
-                        onFocus={() => setIsDropdownOpen(true)} // Open dropdown on input focus
-                        // placeholder="Search or select"
-                        className="form-control shadow-md "
-
-                        // className="border w-[50%] h-10 rounded-md px-3 py-2 md:w-full mr-2 shadow-md"
-                      />
-
-                      {isDropdownOpen && (
-                        <div className="  absolute -top-5 left-[44%]  w-[50%] text-xs md:text-sm p-1 px-1 md:px-4 md:absolute md:top-[80%] md:left-[36%] md:w-[65%] border rounded-md mt-1 bg-white z-10 max-h-48 overflow-auto">
-                          {/* // <div className="absolute mt-1 w-full border rounded-md bg-white z-10 max-h-48 overflow-auto"> */}
-                      {/* {filteredDepartments.length === 0 && (
-                            <div className="p-2 text-gray-500">
-                              No departments found
-                            </div>
-                          )}
-                          {filteredDepartments.map((department) => (
-                            <div
-                              key={department.reg_id}
-                              className="p-2 cursor-pointer hover:bg-blue-600 hover:text-white"
-                              onClick={() =>
-                                handleOptionSelect(department.reg_id)
-                              }
-                            >
-                              {department.name}
-                            </div>
-                          ))}
-                        </div>
-                      )} */}
                     </div>
                   </div>
                 </div>
