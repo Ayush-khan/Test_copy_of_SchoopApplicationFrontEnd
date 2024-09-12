@@ -1318,14 +1318,26 @@ function Form() {
 
   console.log("employeeID", student.employeeId);
 
+  // State for father's mobile selection
   const [fatherMobileSelected, setFatherMobileSelected] = useState({
-    setUsername: false,
-    receiveSms: false,
+    setUsername: false, // If father's mobile is set as username
+    receiveSms: false, // If SMS is received on father's mobile
   });
 
+  // State for mother's mobile selection
   const [motherMobileSelected, setMotherMobileSelected] = useState({
-    setUsername: false,
-    receiveSms: false,
+    setUsername: false, // If mother's mobile is set as username
+    receiveSms: false, // If SMS is received on mother's mobile
+  });
+
+  // State for father's email selection
+  const [fatherEmailSelected, setFatherEmailSelected] = useState({
+    setUsername: false, // If father's email is set as username
+  });
+
+  // State for mother's email selection
+  const [motherEmailSelected, setMotherEmailSelected] = useState({
+    setUsername: false, // If mother's email is set as username
   });
 
   useEffect(() => {
@@ -1387,14 +1399,20 @@ function Form() {
       });
 
       // Set the initial state for father's and mother's mobile preferences based on prefilled data
+      // Update the state for username and SMS based on the prefilled data
       setFatherMobileSelected({
-        setUsername: student.SetEmailIDAsUsername === "father" || false,
-        receiveSms: student.SetToReceiveSMS === "father" || false,
+        setUsername: student.SetEmailIDAsUsername === "FatherMob",
+        receiveSms: student.SetToReceiveSMS === "FatherMob",
       });
-
       setMotherMobileSelected({
-        setUsername: student.SetEmailIDAsUsername === "mother" || false,
-        receiveSms: student.SetToReceiveSMS === "mother" || false,
+        setUsername: student.SetEmailIDAsUsername === "MotherMob",
+        receiveSms: student.SetToReceiveSMS === "MotherMob",
+      });
+      setFatherEmailSelected({
+        setUsername: student.SetEmailIDAsUsername === "Father",
+      });
+      setMotherEmailSelected({
+        setUsername: student.SetEmailIDAsUsername === "Mother",
       });
 
       setSelectedClass(student.class_id || ""); // Set the selected class
@@ -1431,48 +1449,42 @@ function Form() {
   }, [selectedClass, API_URL]);
 
   // for togle radio button and logic
-
-  // Father Mobile Selection
-  const handleFatherSelection = (e) => {
-    const { name, value } = e.target;
-
-    // Update formData to reflect username based on selection
+  // Handle selection for "Set as Username"
+  const handleSetUsernameSelection = (value) => {
     setFormData((prevData) => ({
       ...prevData,
-      SetEmailIDAsUsername: value === "father" ? "FatherMob" : "Father", // Username for Father
+      SetEmailIDAsUsername: value, // One of 'FatherMob', 'MotherMob', 'Father', 'Mother'
     }));
 
-    // Deselect other options (mother email, mother phone)
-    setMotherMobileSelected({ setUsername: false });
-    setFatherMobileSelected({ setUsername: true }); // Only father option selected
+    // Reset all username selections and set the selected one
+    setFatherMobileSelected((prev) => ({
+      ...prev,
+      setUsername: value === "FatherMob",
+    }));
+    setMotherMobileSelected((prev) => ({
+      ...prev,
+      setUsername: value === "MotherMob",
+    }));
+    setFatherEmailSelected((prev) => ({ setUsername: value === "Father" }));
+    setMotherEmailSelected((prev) => ({ setUsername: value === "Mother" }));
   };
 
-  // Mother Mobile Selection
-  const handleMotherSelection = (e) => {
-    const { name, value } = e.target;
-
+  // Handle selection for "Receive SMS"
+  const handleReceiveSmsSelection = (value) => {
     setFormData((prevData) => ({
       ...prevData,
-      SetEmailIDAsUsername: value === "mother" ? "MotherMob" : "Mother", // Username for Mother
+      SetToReceiveSMS: value, // One of 'FatherMob', 'MotherMob'
     }));
 
-    // Deselect other options (father email, father phone)
-    setFatherMobileSelected({ setUsername: false });
-    setMotherMobileSelected({ setUsername: true }); // Only mother option selected
-  };
-
-  // Email Selection for Username (for both mother and father)
-  const handleEmailSelection = (e) => {
-    const { value } = e.target;
-
-    setFormData({
-      ...formData,
-      SetEmailIDAsUsername: value === "father" ? "Father" : "Mother", // Father or Mother email as username
-    });
-
-    // Deselect the phone options
-    setFatherMobileSelected({ setUsername: false });
-    setMotherMobileSelected({ setUsername: false });
+    // Reset SMS selections and set the selected one
+    setFatherMobileSelected((prev) => ({
+      ...prev,
+      receiveSms: value === "FatherMob",
+    }));
+    setMotherMobileSelected((prev) => ({
+      ...prev,
+      receiveSms: value === "MotherMob",
+    }));
   };
 
   // Validation Functions
@@ -2727,8 +2739,8 @@ function Form() {
                   type="radio"
                   name="setUsername"
                   value="FatherMob"
-                  checked={fatherMobileSelected.setUsername}
-                  onChange={handleFatherSelection}
+                  checked={formData.SetEmailIDAsUsername === "FatherMob"}
+                  onChange={() => handleSetUsernameSelection("FatherMob")}
                 />
                 <label>Set this as username</label>
               </div>
@@ -2737,8 +2749,9 @@ function Form() {
                   <input
                     type="radio"
                     name="receiveSms"
-                    checked={fatherMobileSelected.receiveSms}
-                    onChange={handleFatherSelection}
+                    value="FatherMob"
+                    checked={formData.SetToReceiveSMS === "FatherMob"}
+                    onChange={() => handleReceiveSmsSelection("FatherMob")}
                   />
                   Set to receive SMS at this number
                 </label>
@@ -2792,11 +2805,10 @@ function Form() {
               <div className="flex items-center">
                 <input
                   type="radio"
-                  id="fatherEmail"
-                  name="SetEmailIDAsUsername"
-                  value="father"
+                  name="setUsername"
+                  value="Father"
                   checked={formData.SetEmailIDAsUsername === "Father"}
-                  onChange={handleEmailSelection}
+                  onChange={() => handleSetUsernameSelection("Father")}
                 />
                 <label htmlFor="fatherEmail" className="ml-2">
                   Set this as username.
@@ -2966,8 +2978,8 @@ function Form() {
                   type="radio"
                   name="setUsername"
                   value="MotherMob"
-                  checked={motherMobileSelected.setUsername}
-                  onChange={handleMotherSelection}
+                  checked={formData.SetEmailIDAsUsername === "MotherMob"}
+                  onChange={() => handleSetUsernameSelection("MotherMob")}
                 />
                 <label>Set this as username</label>
               </div>
@@ -2976,8 +2988,9 @@ function Form() {
                   <input
                     type="radio"
                     name="receiveSms"
-                    checked={motherMobileSelected.receiveSms}
-                    onChange={handleMotherSelection}
+                    value="MotherMob"
+                    checked={formData.SetToReceiveSMS === "MotherMob"}
+                    onChange={() => handleReceiveSmsSelection("MotherMob")}
                   />
                   Set to receive SMS at this number
                 </label>
@@ -3031,11 +3044,10 @@ function Form() {
               <div className="flex items-center">
                 <input
                   type="radio"
-                  id="motherEmail"
-                  name="SetEmailIDAsUsername"
-                  value="mother"
+                  name="setUsername"
+                  value="Mother"
                   checked={formData.SetEmailIDAsUsername === "Mother"}
-                  onChange={handleEmailSelection}
+                  onChange={() => handleSetUsernameSelection("Mother")}
                 />
                 <label htmlFor="motherEmail" className="ml-2">
                   Set this as username.
