@@ -126,6 +126,7 @@ import ManageSubjectList from "../componants/MastersModule/SubjectAllotment/Mana
 import ManageStudent from "../componants/StudentModel/ManageStudent.jsx";
 import ViewStudent from "../componants/StudentModel/ViewStudent.jsx";
 import SubjectAllotmentForReportCard from "../componants/SubjectAllotmentForReportCard.jsx/SubjectAllotmentForReportCard.jsx";
+import SubjectForRc from "../componants/SubjectForRCard/SubjectForRc.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -209,6 +210,11 @@ function Index() {
         <Route
           path="/managesubject"
           element={<PrivateRoute element={ManageSubjectList} />}
+        />
+        {/* SubjectForReportCard module */}
+        <Route
+          path="/subjectforReportcard"
+          element={<PrivateRoute element={SubjectForRc} />}
         />
         {/* SubjectAllotmentForReportCard module */}
         <Route

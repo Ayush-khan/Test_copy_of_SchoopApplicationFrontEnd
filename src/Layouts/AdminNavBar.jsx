@@ -1088,7 +1088,7 @@ const AdminNavBar = () => {
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
-          to="#"
+          to="/subjectforReportcard"
           className="text-sm font-bold hover:text-black"
         >
           Subject for Report Card
