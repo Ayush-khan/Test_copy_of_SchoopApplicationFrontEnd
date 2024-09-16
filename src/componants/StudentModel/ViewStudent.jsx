@@ -10,6 +10,9 @@ import { FaUserGroup } from "react-icons/fa6";
 
 function ViewStudent() {
   const API_URL = import.meta.env.VITE_API_URL;
+  // for unique user name
+  const [usernameError, setUsernameError] = useState(""); // To store the error message
+
   const navigate = useNavigate();
   const location = useLocation();
   const { student } = location.state || {};
@@ -70,7 +73,63 @@ function ViewStudent() {
     setFormData((prev) => ({ ...prev, section_id: selectedDivisionId }));
   };
 
+  // const [formData, setFormData] = useState({
+  //   first_name: "",
+  //   mid_name: "",
+  //   last_name: "",
+  //   house: "",
+  //   student_name: "",
+  //   dob: "",
+  //   admission_date: "",
+  //   stud_id_no: "",
+  //   stu_aadhaar_no: "",
+  //   gender: "",
+  //   mother_tongue: "",
+  //   birth_place: "",
+  //   admission_class: " ",
+  //   city: " ",
+  //   state: "",
+  //   roll_no: "",
+  //   class_id: "",
+  //   section_id: "",
+  //   religion: "",
+  //   caste: "",
+  //   subcaste: "",
+  //   vehicle_no: "",
+  //   emergency_name: " ",
+  //   emergency_contact: "",
+  //   emergency_add: "",
+  //   height: "",
+  //   weight: "",
+  //   allergies: "",
+  //   nationality: "",
+  //   pincode: "",
+  //   image_name: "",
+  //   // Parent information
+  //   father_name: "  .",
+  //   father_occupation: "",
+  //   f_office_add: "  ",
+  //   f_office_tel: "",
+  //   f_mobile: "",
+  //   f_email: "",
+  //   father_adhar_card: "",
+  //   mother_name: " ",
+  //   mother_occupation: "",
+  //   m_office_add: " ",
+  //   m_office_tel: "",
+  //   m_mobile: "",
+  //   m_emailid: "",
+  //   mother_adhar_card: "",
+
+  //   // Preferences
+  //   SetToReceiveSMS: "",
+  //   SetEmailIDAsUsername: "",
+
+  //   // Base64 Image (optional)
+  //   student_image: "",
+  // });
   const [formData, setFormData] = useState({
+    // Student fields
     first_name: "",
     mid_name: "",
     last_name: "",
@@ -81,10 +140,13 @@ function ViewStudent() {
     stud_id_no: "",
     stu_aadhaar_no: "",
     gender: "",
+    category: " ",
+    blood_group: " ",
     mother_tongue: "",
+    permant_add: " ",
     birth_place: "",
-    admission_class: " ",
-    city: " ",
+    admission_class: "",
+    city: "",
     state: "",
     roll_no: "",
     class_id: "",
@@ -93,55 +155,66 @@ function ViewStudent() {
     caste: "",
     subcaste: "",
     vehicle_no: "",
-    emergency_name: " ",
+    emergency_name: "",
     emergency_contact: "",
     emergency_add: "",
+    transport_mode: " ",
     height: "",
     weight: "",
     allergies: "",
     nationality: "",
     pincode: "",
     image_name: "",
-    // Parent information
-    father_name: "  .",
+    student_id: "",
+    reg_id: " ",
+    // Parent fields
+    father_name: "",
     father_occupation: "",
-    f_office_add: "  ",
+    f_office_add: "",
     f_office_tel: "",
     f_mobile: "",
     f_email: "",
     father_adhar_card: "",
-    mother_name: " ",
+    mother_name: "",
     mother_occupation: "",
-    m_office_add: " ",
+    m_office_add: "",
     m_office_tel: "",
     m_mobile: "",
     m_emailid: "",
     mother_adhar_card: "",
-
+    udise_pen_no: "",
     // Preferences
     SetToReceiveSMS: "",
     SetEmailIDAsUsername: "",
-
-    // Base64 Image (optional)
-    student_image: "",
   });
-
   const [errors, setErrors] = useState({});
   const [photoPreview, setPhotoPreview] = useState(null);
   const [backendErrors, setBackendErrors] = useState({});
 
   console.log("employeeID", student.employeeId);
 
+  // State for father's mobile selection
   const [fatherMobileSelected, setFatherMobileSelected] = useState({
-    setUsername: false,
-    receiveSms: false,
+    setUsername: false, // If father's mobile is set as username
+    receiveSms: false, // If SMS is received on father's mobile
   });
 
+  // State for mother's mobile selection
   const [motherMobileSelected, setMotherMobileSelected] = useState({
-    setUsername: false,
-    receiveSms: false,
+    setUsername: false, // If mother's mobile is set as username
+    receiveSms: false, // If SMS is received on mother's mobile
   });
 
+  // State for father's email selection
+  const [fatherEmailSelected, setFatherEmailSelected] = useState({
+    setUsername: false, // If father's email is set as username
+  });
+
+  // State for mother's email selection
+  const [motherEmailSelected, setMotherEmailSelected] = useState({
+    setUsername: false, // If mother's email is set as username
+  });
+  console.log("student", student);
   useEffect(() => {
     if (student) {
       setFormData({
@@ -155,17 +228,23 @@ function ViewStudent() {
         stud_id_no: student.stud_id_no || "",
         stu_aadhaar_no: student.stu_aadhaar_no || "",
         gender: student.gender || "",
+        permant_add: student.permant_add || " ",
         mother_tongue: student.mother_tongue || "",
         birth_place: student.birth_place || "",
         admission_class: student.admission_class || " ",
         city: student.city || " ",
         state: student.state || "",
         roll_no: student.roll_no || "",
+        student_id: student.student_id || " ",
+        reg_id: student.reg_id || " ",
+        blood_group: student.blood_group || " ",
+        category: student.category || " ",
         class_id: student.class_id || "",
         section_id: student.section_id || "",
         religion: student.religion || "",
         caste: student.caste || "",
         subcaste: student.subcaste || "",
+        transport_mode: student.transport_mode || " ",
         vehicle_no: student.vehicle_no || "",
         emergency_name: student.emergency_name || " ",
         emergency_contact: student.emergency_contact || "",
@@ -177,21 +256,21 @@ function ViewStudent() {
         pincode: student.pincode || "",
         image_name: student.image_name || "",
         // Parent information
-        father_name: student.father_name || " ",
-        father_occupation: student.father_occupation || "",
-        f_office_add: student.f_office_add || "  ",
-        f_office_tel: student.f_office_tel || "",
-        f_mobile: student.f_mobile || "",
-        f_email: student.f_email || "",
-        father_adhar_card: student.father_adhar_card || "",
-        mother_name: student.mother_name || " ",
-        mother_occupation: student.mother_occupation || "",
-        m_office_add: student.m_office_add || " ",
-        m_office_tel: student.m_office_tel || "",
-        m_mobile: student.m_mobile || "",
-        m_emailid: student.m_emailid || "",
-        mother_adhar_card: student.mother_adhar_card || "",
-
+        father_name: student?.parents?.father_name || " ",
+        father_occupation: student?.parents?.father_occupation || "",
+        f_office_add: student?.parents?.f_office_add || "  ",
+        f_office_tel: student?.parents?.f_office_tel || "",
+        f_mobile: student?.parents?.f_mobile || "",
+        f_email: student?.parents?.f_email || "",
+        father_adhar_card: student?.parents?.father_adhar_card || "",
+        mother_name: student?.parents?.mother_name || " ",
+        mother_occupation: student?.parents?.mother_occupation || "",
+        m_office_add: student?.parents?.m_office_add || " ",
+        m_office_tel: student?.parents?.m_office_tel || "",
+        m_mobile: student?.parents?.m_mobile || "",
+        m_emailid: student?.parents?.m_emailid || "",
+        mother_adhar_card: student?.parents?.mother_adhar_card || "",
+        udise_pen_no: student.udise_pen_no || " ",
         // Preferences
         SetToReceiveSMS: student.SetToReceiveSMS || "",
         SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
@@ -201,14 +280,20 @@ function ViewStudent() {
       });
 
       // Set the initial state for father's and mother's mobile preferences based on prefilled data
+      // Update the state for username and SMS based on the prefilled data
       setFatherMobileSelected({
-        setUsername: student.SetEmailIDAsUsername === "father" || false,
-        receiveSms: student.SetToReceiveSMS === "father" || false,
+        setUsername: student.SetEmailIDAsUsername === "FatherMob",
+        receiveSms: student.SetToReceiveSMS === "FatherMob",
       });
-
       setMotherMobileSelected({
-        setUsername: student.SetEmailIDAsUsername === "mother" || false,
-        receiveSms: student.SetToReceiveSMS === "mother" || false,
+        setUsername: student.SetEmailIDAsUsername === "MotherMob",
+        receiveSms: student.SetToReceiveSMS === "MotherMob",
+      });
+      setFatherEmailSelected({
+        setUsername: student.SetEmailIDAsUsername === "Father",
+      });
+      setMotherEmailSelected({
+        setUsername: student.SetEmailIDAsUsername === "Mother",
       });
 
       setSelectedClass(student.class_id || ""); // Set the selected class
@@ -244,66 +329,94 @@ function ViewStudent() {
     }
   }, [selectedClass, API_URL]);
 
+  // Function to check username uniqueness
+  // Function to check username uniqueness
+  // const studentId=student.student_id
+  // console.log("studentId",studentId)
+  const checkUserId = async (studentId, userId) => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(
+        `${API_URL}/api/check-user-id/${studentId}/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return response.data; // API returns true or false
+    } catch (error) {
+      console.error("Error checking username uniqueness:", error);
+      return false;
+    }
+  };
+  const handleSetUsernameSelection = async (value, userId) => {
+    const isUnique = await checkUserId(student.student_id, userId); // Check if username is unique
+
+    if (!isUnique) {
+      setUsernameError(`Username "${userId}" is already taken.`);
+    } else {
+      setUsernameError(""); // Clear error if the username is unique
+      setFormData((prevData) => ({
+        ...prevData,
+        SetEmailIDAsUsername: value, // Set the selected username in formData
+      }));
+    }
+  };
+
+  // Father's Mobile Selection for Username
+  const handleFatherMobileSelection = async () => {
+    await handleSetUsernameSelection("FatherMob", formData.f_mobile); // Father's mobile
+    if (!usernameError) {
+      setFatherMobileSelected({ setUsername: true });
+      setMotherMobileSelected({ setUsername: false });
+    }
+  };
+
+  // Mother's Mobile Selection for Username
+  const handleMotherMobileSelection = async () => {
+    await handleSetUsernameSelection("MotherMob", formData.m_mobile); // Mother's mobile
+    if (!usernameError) {
+      setMotherMobileSelected({ setUsername: true });
+      setFatherMobileSelected({ setUsername: false });
+    }
+  };
+
+  // Father's Email Selection for Username
+  const handleFatherEmailSelection = async () => {
+    await handleSetUsernameSelection("Father", formData.f_email); // Father's email
+    if (!usernameError) {
+      setFatherMobileSelected({ setUsername: false });
+      setMotherMobileSelected({ setUsername: false });
+    }
+  };
+
+  // Mother's Email Selection for Username
+  const handleMotherEmailSelection = async () => {
+    await handleSetUsernameSelection("Mother", formData.m_emailid); // Mother's email
+    if (!usernameError) {
+      setFatherMobileSelected({ setUsername: false });
+      setMotherMobileSelected({ setUsername: false });
+    }
+  };
+
   // for togle radio button and logic
 
-  // Handle father's mobile selection
-  const handleFatherSelection = (e) => {
-    const { name } = e.target;
-
-    // Toggle father's selection
-    setFatherMobileSelected((prevState) => ({
-      ...prevState,
-      [name]: !prevState[name],
+  // Handle selection for "Receive SMS"
+  const handleReceiveSmsSelection = (value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      SetToReceiveSMS: value, // One of 'FatherMob', 'MotherMob'
     }));
 
-    // If same button is selected for mother, deselect it
-    if (motherMobileSelected[name]) {
-      setMotherMobileSelected((prevState) => ({
-        ...prevState,
-        [name]: false,
-      }));
-    }
-  };
-
-  // Handle mother's mobile selection
-  const handleMotherSelection = (e) => {
-    const { name } = e.target;
-
-    // Toggle mother's selection
-    setMotherMobileSelected((prevState) => ({
-      ...prevState,
-      [name]: !prevState[name],
+    // Reset SMS selections and set the selected one
+    setFatherMobileSelected((prev) => ({
+      ...prev,
+      receiveSms: value === "FatherMob",
     }));
-    // for removing the email username
-    setFormData({
-      ...formData,
-      SetEmailIDAsUsername: false, // Directly update existing field
-    });
-    // If same button is selected for father, deselect it
-    if (fatherMobileSelected[name]) {
-      setFatherMobileSelected((prevState) => ({
-        ...prevState,
-        [name]: false,
-      }));
-    }
-  };
-
-  // email togle button readio logic
-
-  // const handleChange = (e) => {
-  //     setFormData({
-  //       ...formData,
-  //       [e.target.name]: e.target.value,
-  //     });
-  //   };
-
-  const handleEmailSelection = (e) => {
-    setFormData({
-      ...formData,
-      SetEmailIDAsUsername: e.target.value, // Directly update existing field
-    });
-    setMotherMobileSelected({ setUsername: false });
-    setFatherMobileSelected({ setUsername: false });
+    setMotherMobileSelected((prev) => ({
+      ...prev,
+      receiveSms: value === "MotherMob",
+    }));
   };
 
   // Validation Functions
@@ -469,6 +582,62 @@ function ViewStudent() {
     }));
   };
 
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   const validationErrors = validate();
+
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setErrors(validationErrors);
+  //     Object.values(validationErrors).forEach((error) => {
+  //       toast.error(error);
+  //     });
+  //     return;
+  //   }
+
+  //   // Prepare the data for API submission
+  //   const formattedFormData = new FormData();
+  //   Object.keys(formData).forEach((key) => {
+  //     if (formData[key] instanceof File) {
+  //       formattedFormData.append(key, formData[key]);
+  //     } else {
+  //       formattedFormData.append(key, formData[key]);
+  //     }
+  //   });
+  //   console.log(" formattedFormData is,", formData);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token is found");
+  //     }
+  //     console.log(" formattedFormData,", formattedFormData);
+  //     const response = await axios.put(
+  //       `${API_URL}/api/students/${student.student_id}`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           "Content-Type": "multipart/form-data",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       toast.success("Student updated successfully!");
+  //       setTimeout(() => {
+  //         navigate("/StudentList");
+  //       }, 3000);
+  //     }
+  //   } catch (error) {
+  //     toast.error("An error occurred while updating the student.");
+  //     console.error("Error:", error.response?.data || error.message);
+  //     if (error.response && error.response.data && error.response.data.errors) {
+  //       setBackendErrors(error.response.data.errors || {});
+  //     } else {
+  //       toast.error(error.message);
+  //     }
+  //   }
+  // };
   const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = validate();
@@ -481,26 +650,22 @@ function ViewStudent() {
       return;
     }
 
-    // Prepare the data for API submission
+    // Create FormData object
     const formattedFormData = new FormData();
     Object.keys(formData).forEach((key) => {
-      if (formData[key] instanceof File) {
-        formattedFormData.append(key, formData[key]);
-      } else {
-        formattedFormData.append(key, formData[key]);
-      }
+      formattedFormData.append(key, formData[key]);
     });
-    console.log(" formattedFormData,", formData);
 
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error("No authentication token is found");
+        throw new Error("No authentication token found");
       }
-      console.log(" formattedFormData,", formattedFormData);
+      console.log("formattedFormData", formattedFormData);
+      console.log("formData", formData);
       const response = await axios.put(
         `${API_URL}/api/students/${student.student_id}`,
-        formData,
+        formData, // Send the FormData object
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -534,7 +699,7 @@ function ViewStudent() {
       <div className="card p-3  rounded-md">
         <div className="card-header mb-4 flex justify-between items-center">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-            View Student Information
+            Edit Student Information
           </h5>
           <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -545,7 +710,7 @@ function ViewStudent() {
           className="relative w-full -top-6 h-1 mx-auto bg-red-700"
           style={{ backgroundColor: "#C03078" }}
         ></div>
-        <p className=" md:absolute md:right-10 md:top-[6%] text-gray-500">
+        <p className=" md:absolute md:right-8 md:top-[5%] text-gray-500">
           <span className="text-red-500">*</span> indicates mandatory
           information
         </p>
@@ -554,7 +719,7 @@ function ViewStudent() {
           className="md:mx-2 overflow-x-hidden shadow-md py-1 bg-gray-50"
         >
           <div className="flex flex-col gap-y-3 p-2 md:grid md:grid-cols-4 md:gap-x-14 md:mx-10 ">
-            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+            <h5 className="col-span-4 text-blue-400  relative top-2">
               {" "}
               Personal Information
             </h5>
@@ -573,7 +738,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="first_name"
                 name="first_name"
                 maxLength={100}
@@ -598,7 +762,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="mid_name"
                 name="mid_name"
                 maxLength={100}
@@ -617,7 +780,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="lastName"
                 name="last_name"
                 maxLength={100}
@@ -636,7 +798,6 @@ function ViewStudent() {
               </label>
               <input
                 type="date"
-                readOnly
                 id="dateOfBirth"
                 name="dob"
                 value={formData.dob}
@@ -666,9 +827,9 @@ function ViewStudent() {
                 // onBlur={handleBlur}
               >
                 <option>Select</option>
-                <option defaultValue="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="O">Other</option>
               </select>
               {errors.gender && (
                 <p className="text-[12px] text-red-500 mb-1">{errors.gender}</p>
@@ -683,8 +844,8 @@ function ViewStudent() {
               </label>
               <select
                 id="bloodGroup"
-                name="bloodGroup"
-                value={formData.bloodGroup}
+                name="blood_group"
+                value={formData.blood_group}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -735,7 +896,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="caste"
                 maxLength={100}
                 name="caste"
@@ -785,11 +945,10 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="birthPlace"
-                name="birthPlace"
+                name="birth_place"
                 maxLength={50}
-                value={formData.birthPlace}
+                value={formData.birth_place}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -804,7 +963,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="nationality"
                 maxLength={100}
                 name="nationality"
@@ -828,11 +986,10 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="motherTongue"
-                name="motherTongue"
+                name="mother_tongue"
                 maxLength={20}
-                value={formData.motherTongue}
+                value={formData.mother_tongue}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -845,7 +1002,7 @@ function ViewStudent() {
             </div>
             {/* Student Details */}
             {/* <div className="w-[120%] mx-auto h-2 bg-white col-span-4"></div> */}
-            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+            <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
               {" "}
               Student Details
             </h5>
@@ -858,7 +1015,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="studentName"
                 maxLength={100}
                 name="student_name"
@@ -887,12 +1043,12 @@ function ViewStudent() {
                 onChange={handleClassChange}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
               >
-                {/* <option value="">Select</option>
+                <option value="">Select</option>
                 {classes.map((cls) => (
                   <option key={cls.class_id} value={cls.class_id}>
                     {cls.name}
                   </option>
-                ))} */}
+                ))}
               </select>
               {errors.studentClass && (
                 <p className="text-[12px] text-red-500 mb-1">
@@ -938,7 +1094,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="rollNumber"
                 maxLength={11}
                 name="roll_no"
@@ -957,11 +1112,10 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="grnNumber"
-                name="gr_no"
+                name="reg_id"
                 maxLength={10}
-                value={formData.gr_no}
+                value={formData.reg_id}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -1038,7 +1192,6 @@ function ViewStudent() {
               </label>
               <input
                 type="date"
-                readOnly
                 id="dataOfAdmission"
                 name="admission_date"
                 value={formData.admission_date}
@@ -1061,11 +1214,10 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="studentIdNumber"
-                name="stud_id_no"
+                name="student_id"
                 maxLength={25}
-                value={formData.stud_id_no}
+                value={formData.student_id}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -1080,7 +1232,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="studentAadharNumber"
                 name="stu_aadhaar_no"
                 maxLength={14}
@@ -1105,11 +1256,10 @@ function ViewStudent() {
                 </label>
                 <input
                   type="text"
-                  readOnly
                   id="Udise_no"
-                  name="Udise_no"
+                  name="udise_pen_no"
                   maxLength={14}
-                  value={formData.Udise_no}
+                  value={formData.udise_pen_no}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
                   // onBlur={handleBlur}
@@ -1117,7 +1267,7 @@ function ViewStudent() {
               </div>
             )}
             {/* Address Information */}
-            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+            <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
               {" "}
               Address Information
             </h5>
@@ -1130,10 +1280,10 @@ function ViewStudent() {
               </label>
               <textarea
                 id="address"
-                name="address"
+                name="permant_add"
                 maxLength={200}
                 rows={2}
-                value={formData.address}
+                value={formData.permant_add}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -1150,7 +1300,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="city"
                 name="city"
                 maxLength={100}
@@ -1169,7 +1318,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="state"
                 maxLength={100}
                 name="state"
@@ -1191,7 +1339,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="pincode"
                 maxLength={11}
                 name="pincode"
@@ -1205,7 +1352,7 @@ function ViewStudent() {
             {/*  */}
             {/* <div className="w-full sm:max-w-[30%]"> */}
             {/* Emergency Contact */}
-            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+            <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
               {" "}
               Emergency Contact
             </h5>
@@ -1218,11 +1365,10 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="emergencyName"
                 maxLength={100}
-                name="emergencyName"
-                value={formData.emergencyName}
+                name="emergency_name"
+                value={formData.emergency_name}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -1237,10 +1383,10 @@ function ViewStudent() {
               </label>
               <textarea
                 id="emergencyAddress"
-                name="emergencyAddress"
+                name="emergency_add"
                 rows={2}
                 maxLength={200}
-                value={formData.emergencyAddress}
+                value={formData.emergency_add}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -1248,7 +1394,6 @@ function ViewStudent() {
               <div className="flex flex-row items-center gap-2 -mt-1 w-full">
                 <input
                   type="checkbox"
-                  readOnly
                   id="sameAs"
                   name="emergencyAddress"
                   rows={2}
@@ -1279,12 +1424,11 @@ function ViewStudent() {
                 </span>
                 <input
                   type="text"
-                  readOnly
                   inputMode="numeric"
                   id="emergencyContact"
-                  name="emergencyContact"
+                  name="emergency_contact"
                   maxLength={10}
-                  value={formData.emergencyContact}
+                  value={formData.emergency_contact}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
                   // onBlur={handleBlur}
@@ -1302,8 +1446,8 @@ function ViewStudent() {
               </label>
               <select
                 id="transportMode"
-                name="transportMode"
-                value={formData.transportMode}
+                name="transport_mode"
+                value={formData.transport_mode}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -1315,19 +1459,18 @@ function ViewStudent() {
               </select>
               <input
                 type="text"
-                readOnly
                 id="vehicleNumber"
-                name="vehicleNumber"
+                name="vehicle_no"
                 maxLength={13}
                 placeholder="Vehicle No."
-                value={formData.vehicleNumber}
+                value={formData.vehicle_no}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
               />
             </div>
             {/* Health Information */}
-            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+            <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
               {" "}
               Health Information
             </h5>
@@ -1340,7 +1483,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="allergies"
                 name="allergies"
                 maxLength={200}
@@ -1359,7 +1501,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="height"
                 maxLength={4.1}
                 name="height"
@@ -1378,7 +1519,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="weight"
                 name="weight"
                 maxLength={4.1}
@@ -1399,7 +1539,6 @@ function ViewStudent() {
                 <div className="flex items-center">
                   <input
                     type="radio"
-                    readOnly
                     id="yes"
                     name="hasSpectacles"
                     checked={formData.hasSpectacles === "Yes"}
@@ -1414,7 +1553,6 @@ function ViewStudent() {
                 <div className="flex items-center">
                   <input
                     type="radio"
-                    readOnly
                     id="no"
                     name="hasSpectacles"
                     checked={formData.hasSpectacles === "No"}
@@ -1431,26 +1569,25 @@ function ViewStudent() {
             {/* ... */}
             {/* Add other form fields similarly */}
             {/* ... */}
-            <div className="w-full col-span-4 mt-4">
+            <div className="w-full col-span-4 relative top-4">
               <div className="w-full mx-auto">
-                <h3 className="text-blue-500 w-full mx-auto text-center py-2 md:text-[1.2em] text-nowrap font-bold">
+                <h3 className="text-blue-500 w-full mx-auto text-center  md:text-[1.2em] text-nowrap font-bold">
                   {" "}
-                  <FaUserGroup className="text-[1em] text-blue-500 inline" />{" "}
+                  <FaUserGroup className="text-[1.4em] text-blue-700 inline" />{" "}
                   Parent's Information :{" "}
                 </h3>
               </div>
             </div>
-            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+            <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
               {" "}
               Father Details
             </h5>
             <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
-                Father Name <span className="text-red-500">*</span>
+                Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                readOnly
                 id="email"
                 name="father_name"
                 maxLength={100}
@@ -1470,7 +1607,6 @@ function ViewStudent() {
               </label>
               <input
                 type="text"
-                readOnly
                 id="email"
                 maxLength={100}
                 name="father_occupation"
@@ -1478,40 +1614,6 @@ function ViewStudent() {
                 onChange={handleChange}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
               />
-            </div>
-            <div className="mt-2">
-              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
-                Office Address
-              </label>
-              <textarea
-                id="email"
-                rows={2}
-                maxLength={200}
-                name="f_office_add"
-                value={formData.f_office_add}
-                onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-            </div>
-            <div className="mt-2">
-              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
-                Father Aadhaar Card No. <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                readOnly
-                id="email"
-                name="father_adhar_card"
-                maxLength={12}
-                value={formData.father_adhar_card}
-                onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-              {errors.father_adhar_card && (
-                <span className="text-red-500 text-xs">
-                  {errors.father_adhar_card}
-                </span>
-              )}
             </div>
             <div className="mt-2">
               <label
@@ -1522,8 +1624,8 @@ function ViewStudent() {
               </label>
               <select
                 id="bloodGroup"
-                name="bloodGroup"
-                value={formData.bloodGroup}
+                name="blood_group"
+                value={formData.blood_group}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -1541,11 +1643,43 @@ function ViewStudent() {
             </div>
             <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Father Aadhaar Card No. <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="email"
+                name="father_adhar_card"
+                maxLength={12}
+                value={formData.father_adhar_card}
+                onChange={handleChange}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+              {errors.father_adhar_card && (
+                <span className="text-red-500 text-xs">
+                  {errors.father_adhar_card}
+                </span>
+              )}
+            </div>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Office Address
+              </label>
+              <textarea
+                id="email"
+                rows={2}
+                maxLength={200}
+                name="f_office_add"
+                value={formData.f_office_add}
+                onChange={handleChange}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Telephone
               </label>
               <input
                 type="text"
-                readOnly
                 maxLength={11}
                 id="email"
                 name="f_office_tel"
@@ -1567,7 +1701,6 @@ function ViewStudent() {
                 </span>
                 <input
                   type="tel"
-                  readOnly
                   id="phone"
                   name="f_mobile"
                   pattern="\d{10}"
@@ -1585,36 +1718,40 @@ function ViewStudent() {
               {errors.phone && (
                 <span className="text-red-500 text-xs">{errors.phone}</span>
               )}
-              <div>
-                <label>
-                  <input
-                    type="radio"
-                    readOnly
-                    name="setUsername"
-                    checked={fatherMobileSelected.setUsername}
-                    onChange={handleFatherSelection}
-                  />
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  id="setusernameFatherMob"
+                  name="setUsernameFatherMob"
+                  onChange={handleFatherMobileSelection} // Call the function on selection
+                  checked={fatherMobileSelected.setUsername}
+                />
+                <label htmlFor="setusernameFatherMob">
                   Set this as username
                 </label>
+                {usernameError &&
+                  formData.SetEmailIDAsUsername === "FatherMob" && (
+                    <span className="error">{usernameError}</span>
+                  )}
               </div>
-              <div>
-                <label>
-                  <input
-                    type="radio"
-                    readOnly
-                    name="receiveSms"
-                    checked={fatherMobileSelected.receiveSms}
-                    onChange={handleFatherSelection}
-                  />
-                  Set to receive SMS at this number
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="receiveSms"
+                  value="FatherMob"
+                  id="receiveSmsmob"
+                  checked={formData.SetToReceiveSMS === "FatherMob"}
+                  onChange={() => handleReceiveSmsSelection("FatherMob")}
+                />
+                <label htmlFor="receiveSmsmob">
+                  {" "}
+                  Set to receive sms at this no.
                 </label>
               </div>
               {/* <div className="flex items-center">
                 <input
-                
                   type="radio"
-
-readOnly                  id="yes"
+                  id="yes"
                   name="hasRecievedSms"
                   checked={formData.hasRecievedSms === "Yes"}
                   value="Yes"
@@ -1627,10 +1764,8 @@ readOnly                  id="yes"
               </div>
               <div className="flex items-center">
                 <input
-                
                   type="radio"
-
-readOnly                  id="yes"
+                  id="yes"
                   name="hasUserName"
                   checked={formData.hasUserName === "Yes"}
                   value="Yes"
@@ -1648,7 +1783,6 @@ readOnly                  id="yes"
               </label>
               <input
                 type="email"
-                readOnly
                 id="email"
                 name="f_email"
                 maxLength={50}
@@ -1660,19 +1794,19 @@ readOnly                  id="yes"
                 <span className="text-red-500 text-xs">{errors.email}</span>
               )}
 
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
                 <input
                   type="radio"
-                  readOnly
-                  id="fatherEmail"
-                  name="SetEmailIDAsUsername"
-                  value="father"
-                  checked={formData.SetEmailIDAsUsername === "father"}
-                  onChange={handleEmailSelection}
+                  id="setUserNameFather"
+                  name="setUsernameFatherEmail"
+                  onChange={handleFatherEmailSelection}
+                  checked={formData.SetEmailIDAsUsername === "Father"}
                 />
-                <label htmlFor="fatherEmail" className="ml-2">
-                  Set this as username.
-                </label>
+                <label htmlFor="setUserNameFather">Set this as username</label>
+                {usernameError &&
+                  formData.SetEmailIDAsUsername === "Father" && (
+                    <span className="error">{usernameError}</span>
+                  )}
               </div>
             </div>
             <div className="mt-2">
@@ -1684,7 +1818,6 @@ readOnly                  id="yes"
               </label>
               <input
                 type="date"
-                readOnly
                 id="dataOfAdmission"
                 name="f_dob"
                 value={formData.f_dob}
@@ -1694,17 +1827,16 @@ readOnly                  id="yes"
               />
             </div>
             {/* Mother information */}
-            <h5 className="col-span-4 text-gray-500 mt-2 relative top-2">
+            <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
               {" "}
               Mother Details
             </h5>
             <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
-                Mother Name <span className="text-red-500">*</span>
+                Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                readOnly
                 id="email"
                 maxLength={100}
                 name="mother_name"
@@ -1724,7 +1856,6 @@ readOnly                  id="yes"
               </label>
               <input
                 type="text"
-                readOnly
                 id="email"
                 maxLength={100}
                 name="mother_occupation"
@@ -1732,40 +1863,6 @@ readOnly                  id="yes"
                 onChange={handleChange}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
               />
-            </div>
-            <div className="mt-2">
-              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
-                Office Address
-              </label>
-              <textarea
-                id="email"
-                rows={2}
-                maxLength={200}
-                name="m_office_add"
-                value={formData.m_office_add}
-                onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-            </div>
-            <div className="mt-2">
-              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
-                Mother Aadhaar Card No. <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                readOnly
-                id="email"
-                name="mother_adhar_card"
-                maxLength={12}
-                value={formData.mother_adhar_card}
-                onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-              {errors.mother_adhar_card && (
-                <span className="text-red-500 text-xs">
-                  {errors.mother_adhar_card}
-                </span>
-              )}
             </div>
             <div className="mt-2">
               <label
@@ -1795,11 +1892,43 @@ readOnly                  id="yes"
             </div>
             <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Mother Aadhaar Card No. <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="email"
+                name="mother_adhar_card"
+                maxLength={12}
+                value={formData.mother_adhar_card}
+                onChange={handleChange}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+              {errors.mother_adhar_card && (
+                <span className="text-red-500 text-xs">
+                  {errors.mother_adhar_card}
+                </span>
+              )}
+            </div>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Office Address
+              </label>
+              <textarea
+                id="email"
+                rows={2}
+                maxLength={200}
+                name="m_office_add"
+                value={formData.m_office_add}
+                onChange={handleChange}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Telephone
               </label>
               <input
                 type="text"
-                readOnly
                 maxLength={11}
                 id="email"
                 name="m_office_tel"
@@ -1821,7 +1950,6 @@ readOnly                  id="yes"
                 </span>
                 <input
                   type="tel"
-                  readOnly
                   id="phone"
                   name="m_mobile"
                   pattern="\d{10}"
@@ -1839,36 +1967,40 @@ readOnly                  id="yes"
               {errors.phone && (
                 <span className="text-red-500 text-xs">{errors.phone}</span>
               )}
-              <div>
-                <label>
-                  <input
-                    type="radio"
-                    readOnly
-                    name="setUsername"
-                    checked={motherMobileSelected.setUsername}
-                    onChange={handleMotherSelection}
-                  />
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  id="setUsernameMotherMob"
+                  name="setUsernameMotherMob"
+                  onChange={handleMotherMobileSelection}
+                  checked={motherMobileSelected.setUsername}
+                />
+                <label htmlFor="setUsernameMotherMob">
+                  {" "}
                   Set this as username
                 </label>
+                {usernameError &&
+                  formData.SetEmailIDAsUsername === "MotherMob" && (
+                    <span className="error">{usernameError}</span>
+                  )}
               </div>
-              <div>
-                <label>
-                  <input
-                    type="radio"
-                    readOnly
-                    name="receiveSms"
-                    checked={motherMobileSelected.receiveSms}
-                    onChange={handleMotherSelection}
-                  />
-                  Set to receive SMS at this number
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="receiveSms"
+                  id="receiveSms"
+                  value="MotherMob"
+                  checked={formData.SetToReceiveSMS === "MotherMob"}
+                  onChange={() => handleReceiveSmsSelection("MotherMob")}
+                />{" "}
+                <label htmlFor="receiveSms">
+                  Set to receive sms at this no.
                 </label>
               </div>
               {/* <div className="flex items-center">
                 <input
-                
                   type="radio"
-
-readOnly                  id="yes"
+                  id="yes"
                   name="hasRecievedSmsForMother"
                   checked={formData.hasRecievedSmsForMother === "Yes"}
                   value="Yes"
@@ -1881,10 +2013,8 @@ readOnly                  id="yes"
               </div>
               <div className="flex items-center">
                 <input
-                
                   type="radio"
-
-readOnly                  id="yes"
+                  id="yes"
                   name="hasUserNameForMother"
                   checked={formData.hasUserNameForMother === "Yes"}
                   value="Yes"
@@ -1902,7 +2032,6 @@ readOnly                  id="yes"
               </label>
               <input
                 type="email"
-                readOnly
                 id="email"
                 name="m_emailid"
                 maxLength={50}
@@ -1914,26 +2043,24 @@ readOnly                  id="yes"
                 <span className="text-red-500 text-xs">{errors.email}</span>
               )}
 
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
                 <input
                   type="radio"
-                  readOnly
-                  id="motherEmail"
-                  name="SetEmailIDAsUsername"
-                  value="mother"
-                  checked={formData.SetEmailIDAsUsername === "mother"}
-                  onChange={handleEmailSelection}
+                  id="emailuser"
+                  name="setUsernameMotherEmail"
+                  onChange={handleMotherEmailSelection}
+                  checked={formData.SetEmailIDAsUsername === "Mother"}
                 />
-                <label htmlFor="motherEmail" className="ml-2">
-                  Set this as username.
-                </label>
+                <label htmlFor="emailuser">Set this as username</label>
+                {usernameError &&
+                  formData.SetEmailIDAsUsername === "Mother" && (
+                    <span className="error">{usernameError}</span>
+                  )}
               </div>
               {/* <div className="flex items-center">
                 <input
-                
                   type="radio"
-
-readOnly                  id="yes"
+                  id="yes"
                   name="SetEmailIDAsUsername"
                   checked={formData.SetEmailIDAsUsername === "Yes"}
                   value="Yes"
@@ -1954,7 +2081,6 @@ readOnly                  id="yes"
               </label>
               <input
                 type="date"
-                readOnly
                 id="dataOfAdmission"
                 name="m_dob"
                 value={formData.f_dob}
