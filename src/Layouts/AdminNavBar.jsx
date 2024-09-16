@@ -231,56 +231,56 @@
 //           // className="pr-0 mr-0 w-fit"
 //         >
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="/student-create"
 //           >
 //             Add Student
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="/student-list"
 //           >
 //             New Student List
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
 //             Manage Students
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
 //             LC Students
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
 //             Deleted Student Lists
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
 //             Promote Students
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
 //             Send User Id to Parents
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
@@ -289,7 +289,7 @@
 //           <NavDropdown.Item>Edit Student</NavDropdown.Item>
 //           <NavDropdown.Item>Delete Student</NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="/myprofile"
 //           >
@@ -306,32 +306,32 @@
 //             fontWeight: "700",
 //           }}
 //         >
-//           <NavDropdown.Item as={Link} to="#" className="text-[.9em] font-bold">
+//           <NavDropdown.Item as={Link} to="#" className="text-sm font-bold">
 //             Bonafide Certificate
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
 //             Caste Certificate
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
 //             Character Certificate
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
 //             Percentage Certificate
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
@@ -351,19 +351,19 @@
 //           <NavDropdown.Item
 //             as={Link}
 //             to="/StaffList"
-//             className="text-[.9em] font-bold"
+//             className="text-sm font-bold"
 //           >
 //             Staff List
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
 //             Manage Caretaker
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
@@ -380,11 +380,11 @@
 //             fontWeight: "700",
 //           }}
 //         >
-//           <NavDropdown.Item as={Link} to="#" className="text-[.9em] font-bold">
+//           <NavDropdown.Item as={Link} to="#" className="text-sm font-bold">
 //             Generate LC
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
@@ -401,18 +401,18 @@
 //             fontWeight: "700",
 //           }}
 //         >
-//           <NavDropdown.Item as={Link} to="#" className="text-[.9em] font-bold">
+//           <NavDropdown.Item as={Link} to="#" className="text-sm font-bold">
 //             Leave Allocation
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
 //             Leave Allocation to All Staff
 //           </NavDropdown.Item>
 //           <NavDropdown.Item
-//             className="text-[.9em] font-bold hover:text-black"
+//             className="text-sm font-bold hover:text-black"
 //             as={Link}
 //             to="#"
 //           >
@@ -420,35 +420,35 @@
 //           </NavDropdown.Item>
 //         </NavDropdown>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Notice/SMS
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Event
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Holiday List
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Allot Class teachers
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
@@ -460,21 +460,21 @@
 //         style={{ color: "black", fontWeight: "700" }}
 //       >
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Student ID Card
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Teacher ID Card
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
@@ -483,21 +483,21 @@
 //       </NavDropdown>
 //       <NavDropdown title="View" style={{ color: "black", fontWeight: "700" }}>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Leaving Certificate
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Notices/SMS for staff
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
@@ -509,28 +509,28 @@
 //         style={{ color: "black", fontWeight: "700" }}
 //       >
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Balance Leave
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Consolidated Leave
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Student Report
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
@@ -539,28 +539,28 @@
 //       </NavDropdown>
 //       <NavDropdown title="Ticket" style={{ color: "black", fontWeight: "700" }}>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           T1
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           T2
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           T3
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
@@ -572,49 +572,49 @@
 //         style={{ color: "black", fontWeight: "700" }}
 //       >
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="/sections"
 //         >
 //           Section
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="/classlist"
 //         >
 //           Class
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Division
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Subjects
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           Subjects Allotment
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
 //           StudentWise Subject Allotement for HSC
 //         </NavDropdown.Item>
 //         <NavDropdown.Item
-//           className="text-[.9em] font-bold hover:text-black"
+//           className="text-sm font-bold hover:text-black"
 //           as={Link}
 //           to="#"
 //         >
@@ -644,13 +644,15 @@ import React from "react";
 import { NavDropdown, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { IoIosHelpCircleOutline } from "react-icons/io";
+import "./styles.css";
 
 const AdminNavBar = () => {
   return (
     <>
       {/* Role Dropdown */}
       <NavDropdown
-        title="Role"
+        title={<span className="nav-dropdown-title">Role</span>}
+        // title="Role"
         style={{ color: "black", fontWeight: "700" }}
         className="pr-0 mr-0 w-fit"
       >
@@ -667,7 +669,8 @@ const AdminNavBar = () => {
 
       {/* My Actions Dropdown */}
       <NavDropdown
-        title="My Actions"
+        title={<span className="nav-dropdown-title">My Actions</span>}
+        // title="My Actions"
         style={{ color: "black", fontWeight: "700" }}
         className="pr-0 mr-0 w-fit"
       >
@@ -675,60 +678,61 @@ const AdminNavBar = () => {
         <NavDropdown
           className="dropend"
           id="students-dropdown"
-          title="Students"
+          title={<span className="nav-dropdown-title">Students</span>}
+          // title="Students"
           style={{ color: "black", fontWeight: "700" }}
         >
           <NavDropdown.Item
             as={Link}
             to="/student-create"
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
           >
             Add Student
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
             to="/student-list"
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
           >
             New Student List
           </NavDropdown.Item>
           <NavDropdown.Item
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
             as={Link}
             to="/manageStudent"
           >
             Manage Students
           </NavDropdown.Item>
           <NavDropdown.Item
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
             as={Link}
             to="#"
           >
             LC Students
           </NavDropdown.Item>
           <NavDropdown.Item
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
             as={Link}
             to="#"
           >
             Deleted Student Lists
           </NavDropdown.Item>
           <NavDropdown.Item
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
             as={Link}
             to="#"
           >
             Promote Students
           </NavDropdown.Item>
           <NavDropdown.Item
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
             as={Link}
             to="#"
           >
             Send User Id to Parents
           </NavDropdown.Item>
           <NavDropdown.Item
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
             as={Link}
             to="#"
           >
@@ -739,7 +743,7 @@ const AdminNavBar = () => {
           <NavDropdown.Item
             as={Link}
             to="/myprofile"
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
           >
             User Profile
           </NavDropdown.Item>
@@ -749,37 +753,38 @@ const AdminNavBar = () => {
         <NavDropdown
           className="dropend pr-0 mr-0"
           id="certificate-dropdown"
-          title="Certificate"
+          // title="Certificate"
+          title={<span className="nav-dropdown-title">Certificate</span>}
           style={{ color: "black", fontWeight: "700" }}
         >
-          <NavDropdown.Item as={Link} to="#" className="text-[.9em] font-bold">
+          <NavDropdown.Item as={Link} to="#" className="text-sm font-bold">
             Bonafide Certificate
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
             to="#"
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
           >
             Caste Certificate
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
             to="#"
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
           >
             Character Certificate
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
             to="#"
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
           >
             Percentage Certificate
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
             to="#"
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
           >
             Simple Bonafide Certificate
           </NavDropdown.Item>
@@ -789,27 +794,28 @@ const AdminNavBar = () => {
         <NavDropdown
           className="dropend pr-0 mr-0"
           id="staff-dropdown"
-          title="Staff"
+          title={<span className="nav-dropdown-title">Staff</span>}
+          // title=""
           style={{ color: "black", fontWeight: "700" }}
         >
           <NavDropdown.Item
             as={Link}
             to="/StaffList"
-            className="text-[.9em] font-bold"
+            className="text-sm font-bold"
           >
             Staff List
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
             to="#"
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
           >
             Manage Caretaker
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
             to="#"
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
           >
             Substitute Teacher
           </NavDropdown.Item>
@@ -819,16 +825,19 @@ const AdminNavBar = () => {
         <NavDropdown
           className="dropend pr-0 mr-0"
           id="leaving-certificate-dropdown"
-          title="Leaving Certificate"
+          // title=""
+          title={
+            <span className="nav-dropdown-title">Leaving Certificate</span>
+          }
           style={{ color: "black", fontWeight: "700" }}
         >
-          <NavDropdown.Item as={Link} to="#" className="text-[.9em] font-bold">
+          <NavDropdown.Item as={Link} to="#" className="text-sm font-bold">
             Generate LC
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
             to="#"
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
           >
             Manage LC
           </NavDropdown.Item>
@@ -838,23 +847,24 @@ const AdminNavBar = () => {
         <NavDropdown
           className="dropend pr-0 mr-0"
           id="leave-dropdown"
-          title="Leave"
+          title={<span className="nav-dropdown-title">Leave</span>}
+          // title=""
           style={{ color: "black", fontWeight: "700" }}
         >
-          <NavDropdown.Item as={Link} to="#" className="text-[.9em] font-bold">
+          <NavDropdown.Item as={Link} to="#" className="text-sm font-bold">
             Leave Allocation
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
             to="#"
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
           >
             Leave Allocation to All Staff
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
             to="#"
-            className="text-[.9em] font-bold hover:text-black"
+            className="text-sm font-bold hover:text-black"
           >
             Leave Application
           </NavDropdown.Item>
@@ -864,35 +874,35 @@ const AdminNavBar = () => {
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Notice/SMS
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Event
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Holiday List
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Allot Class Teachers
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Allot Department Coordinator
         </NavDropdown.Item>
@@ -900,52 +910,57 @@ const AdminNavBar = () => {
 
       {/* ID Card Dropdown */}
       <NavDropdown
-        title="ID Card"
+        title={<span className="nav-dropdown-title">ID Card</span>}
+        // title=""
         style={{ color: "black", fontWeight: "700" }}
       >
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Student ID Card
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Teacher ID Card
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Pending Student ID Card
         </NavDropdown.Item>
       </NavDropdown>
 
       {/* View Dropdown */}
-      <NavDropdown title="View" style={{ color: "black", fontWeight: "700" }}>
+      <NavDropdown
+        // title=""
+        title={<span className="nav-dropdown-title">View</span>}
+        style={{ color: "black", fontWeight: "700" }}
+      >
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Leaving Certificate
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Notices/SMS for Staff
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Book Availability
         </NavDropdown.Item>
@@ -953,66 +968,71 @@ const AdminNavBar = () => {
 
       {/* Reports Dropdown */}
       <NavDropdown
-        title="Reports"
+        // title=""
+        title={<span className="nav-dropdown-title">Reports</span>}
         style={{ color: "black", fontWeight: "700" }}
       >
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Balance Leave
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Consolidated Leave
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Student Report
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Student Contact Details Report
         </NavDropdown.Item>
       </NavDropdown>
 
       {/* Ticket Dropdown */}
-      <NavDropdown title="Ticket" style={{ color: "black", fontWeight: "700" }}>
+      <NavDropdown
+        // title=""
+        title={<span className="nav-dropdown-title">Ticket</span>}
+        style={{ color: "black", fontWeight: "700" }}
+      >
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           T1
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           T2
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           T3
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           T4
         </NavDropdown.Item>
@@ -1020,76 +1040,77 @@ const AdminNavBar = () => {
 
       {/* Masters Dropdown */}
       <NavDropdown
-        title="Masters"
+        // title=""
+        title={<span className="nav-dropdown-title">Masters</span>}
         style={{ color: "black", fontWeight: "700" }}
       >
         <NavDropdown.Item
           as={Link}
           to="/sections"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Section
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="/classlist"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Class
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="/divisionlist"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Division
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="/subjectlist"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Subjects
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="/managesubject"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Subjects Allotment
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           StudentWise Subject Allotment for HSC
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Subject for Report Card
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="/managesubjectforreportcard"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Subject allotment for report card
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Exams
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
           to="#"
-          className="text-[.9em] font-bold hover:text-black"
+          className="text-sm font-bold hover:text-black"
         >
           Grades
         </NavDropdown.Item>
@@ -1100,10 +1121,10 @@ const AdminNavBar = () => {
         onClick={() => {
           /* navigate(""); */
         }}
-        style={{ fontWeight: "700" }}
+        style={{ fontWeight: "700", fontSize: "1rem", color: "black" }}
         className="my-auto text-gray-600 cursor-pointer hover:text-gray-900 md:relative left-2"
       >
-        <IoIosHelpCircleOutline className="inline mr-1 relative bottom-0.5 hover:text-black" />
+        <IoIosHelpCircleOutline className="inline mr-1 relative bottom-0.5 hover:text-black " />
         Help
       </div>
     </>

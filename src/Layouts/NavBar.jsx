@@ -511,7 +511,7 @@ import { Translate } from "react-bootstrap-icons";
 import { IoIosHelpCircleOutline } from "react-icons/io";
 import AdminNavBar from "./AdminNavBar";
 import { toast } from "react-toastify";
-
+import "./styles.css";
 function NavBar() {
   const API_URL = import.meta.env.VITE_API_URL; //thsis is test url
   const navigate = useNavigate();
@@ -748,14 +748,18 @@ function NavBar() {
         item.sub_menus && item.sub_menus.length > 0 ? (
           <NavDropdown
             key={item.menu_id}
-            title={item.name}
+            title={<span className="nav-dropdown-title">{item.name}</span>}
+            // title={item.name}
             className="text-[.9em] font-bold"
           >
             {item.sub_menus.map((subItem) =>
               subItem.sub_menus && subItem.sub_menus.length > 0 ? (
                 <NavDropdown
                   key={subItem.menu_id}
-                  title={subItem.name}
+                  title={
+                    <span className="nav-dropdown-title">{subItem.name}</span>
+                  }
+                  // title={subItem.name}
                   id="sub-view-dropdown"
                   className=" font-bold dropend"
                 >
@@ -764,7 +768,12 @@ function NavBar() {
                       <NavDropdown
                         key={childItem.menu_id}
                         id="sub-view-dropdown"
-                        title={childItem.name}
+                        title={
+                          <span className="nav-dropdown-title">
+                            {childItem.name}
+                          </span>
+                        }
+                        // title=
                         className=" font-bold dropend"
                       >
                         {childItem.sub_menus.map((grandChildItem) => (
@@ -849,16 +858,31 @@ function NavBar() {
           <div className="flex items-center ">
             <NavDropdown
               title={
-                <FaUserCircle
-                  className="text-white"
-                  style={{
-                    fontSize: "1.5rem",
-                    display: "inline",
-                    marginLeft: "4px",
-                    paddingRight: "4px",
-                  }}
-                />
+                <span className="nav-dropdown-title">
+                  {
+                    <FaUserCircle
+                      className="text-white"
+                      style={{
+                        fontSize: "1.5rem",
+                        display: "inline",
+                        marginLeft: "4px",
+                        paddingRight: "4px",
+                      }}
+                    />
+                  }
+                </span>
               }
+              // title={
+              //   <FaUserCircle
+              //     className="text-white"
+              //     style={{
+              //       fontSize: "1.5rem",
+              //       display: "inline",
+              //       marginLeft: "4px",
+              //       paddingRight: "4px",
+              //     }}
+              //   />
+              // }
               className="  w-18 border-2 rounded-full border-white px-2 lg:px-4 ml-2 hover:rounded-lg "
               menuAlign="left"
             >
@@ -942,7 +966,7 @@ function NavBar() {
                         navigate("/dashboard");
                       }}
                       style={{ fontWeight: "700" }}
-                      className={`DashbordText  md:pt-0 my-auto  text-gray-600 cursor-pointer hover:text-gray-900  md:relative right-2  `}
+                      className={`DashbordText text-[1rem] md:pt-0 my-auto  text-black  md:relative right-2  `}
                     >
                       <FaHome className="inline mr-1 relative bottom-0.5  hover:text-black" />
                       Dashboard
@@ -984,7 +1008,15 @@ function NavBar() {
 
               <NavDropdown
                 // title={selectedYear}
-                title={selectedYear ? selectedYear : "Academic Year "}
+                title={
+                  <span
+                    className="nav-dropdown-title"
+                    style={{ fontSize: "1em" }}
+                  >
+                    {selectedYear ? selectedYear : "Academic Year "}
+                  </span>
+                }
+                // title={selectedYear ? selectedYear : "Academic Year "}
                 className={`${styles.dropNaveBarAcademic} academic-dropdown outline-none border-1 border-gray-400 px-1 rounded-md py-0.5 text-xs lg:text-sm   `}
                 style={{
                   boxSizing: "border-box",

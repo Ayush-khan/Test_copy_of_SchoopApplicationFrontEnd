@@ -208,68 +208,71 @@ function SubjectAllotmentForReportCard() {
 
   const handleEdit = (section) => {
     setCurrentSection(section);
-    // console.log("the currecne t section", currentSection);
+    console.log("curentedit", section);
+    setnewclassnames(section?.get_clases?.name);
+    setnewSubjectnName(section?.get_subjects_for_report_card?.name);
+    setTeacherNameIs(section?.subject_type || ""); // Ensure subject_type is set
 
-    console.log("fdsfsdsd handleEdit", section);
-    setnewclassnames(section?.get_class?.name);
-    setnewSectionName(section?.get_division?.name);
-    setnewSubjectnName(section?.get_subject?.name);
-    setTeacherNameIs(section?.get_teacher?.name);
-    setteacherIdIs(section?.get_teacher?.teacher_id);
-    console.log("teacerId and name is", teacherIdIs, teacherNameIs);
-    // It's used for the dropdown of the tachers
-    // setnewTeacherAssign()
-    const selectedOption = departments.find(
-      (option) => option.value === section?.get_teacher?.teacher_id
-    );
-    setSelectedTeacher(selectedOption);
     setShowEditModal(true);
   };
 
   const handleDelete = (sectionId) => {
-    console.log("inside delete of subjectallotmenbt____", sectionId);
-    console.log("inside delete of subjectallotmenbt", classes);
-    const classToDelete = subjects.find((cls) => cls.subject_id === sectionId);
-    // setCurrentClass(classToDelete);
-    setCurrentSection({ classToDelete });
-    console.log("the currecne t section", currentSection);
-    setCurrestSubjectNameForDelete(
-      currentSection?.classToDelete?.get_subject?.name
+    const classToDelete = subjects.find(
+      (cls) => cls.sub_reportcard_id === sectionId
     );
-    console.log(
-      "cureendtsungjeg",
-      currentSection?.classToDelete?.get_subject?.name
-    );
-    console.log("currestSubjectNameForDelete", currestSubjectNameForDelete);
-    setShowDeleteModal(true);
+
+    // Set the current section and subject name for deletion
+    if (classToDelete) {
+      setCurrentSection(classToDelete); // Set the current section directly
+      setCurrestSubjectNameForDelete(
+        classToDelete.get_subjects_for_report_card?.name
+      ); // Set subject name for display
+      setShowDeleteModal(true); // Show the delete modal
+    } else {
+      console.error("Section not found for deletion");
+    }
   };
 
-  const handleSubmitEdit = async () => {
-    console.log(
-      "inside the edit model of the subjectallotment",
-      currentSection.subject_id
-    );
-    console.log(
-      "inside the edit model of the subjectallotment",
-      currentSection
-    );
+  //   const handleDelete = (sectionId) => {
+  //     // const sectionId = section.sub_reportcard_id;
+  //     console.log("currest section", sectionId);
+  //     console.log("inside delete of subjectallotmenbt____", sectionId);
+  //     // console.log("inside delete of subjectallotmenbt", classes);
+  //     const classToDelete = subjects.find(
+  //       (cls) => cls.sub_reportcard_id === sectionId
+  //     );
+  //     // setCurrentClass(classToDelete);
+  //     setCurrentSection({ classToDelete });
+  //     console.log("the currecnet section", currentSection);
+  //     setCurrestSubjectNameForDelete(
+  //       currentSection?.classToDelete?.get_subjects_for_report_card?.name
+  //     );
+  //     console.log(
+  //       "cureendtsungjeg",
+  //       currentSection?.classToDelete?.get_subjects_for_report_card?.name
+  //     );
+  //     console.log("currestSubjectNameForDelete", currestSubjectNameForDelete);
+  //     setShowDeleteModal(true);
+  //   };
 
+  const handleSubmitEdit = async () => {
     try {
       const token = localStorage.getItem("authToken");
 
-      if (!token || !currentSection || !currentSection.subject_id) {
+      if (!token || !currentSection || !currentSection.sub_reportcard_id) {
         throw new Error("Subject ID is missing");
       }
-      if (!nameAvailable) {
+
+      // Ensure that the subject type is not empty
+      if (!teacherNameIs) {
+        toast.error("Please select a subject type.");
         return;
       }
 
-      console.log("the Subject ID***", currentSection.subject_id);
-      console.log("the teacher ID***", selectedDepartment);
-
+      // Make the PUT request to update the subject type
       await axios.put(
-        `${API_URL}/api/update_subject_Alloted/${currentSection.subject_id}`,
-        { teacher_id: newDepartmentId },
+        `${API_URL}/api/get_sub_report_allotted/${currentSection.sub_reportcard_id}`,
+        { subject_type: teacherNameIs }, // Send the selected subject type
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -278,48 +281,35 @@ function SubjectAllotmentForReportCard() {
         }
       );
 
-      handleSearch();
-      handleCloseModal();
-      toast.success("Subject Record updated successfully!");
-
-      // setSubjects([]);
+      handleSearch(); // Refresh the list or data
+      handleCloseModal(); // Close the modal
+      toast.success("Subject record updated successfully!");
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error updating subject Record: ${error.response.data.message}`
+          `Error updating subject record: ${error.response.data.error}`
         );
       } else {
-        toast.error(`Error updating subject Record: ${error.message}`);
+        toast.error(`Error updating subject record: ${error.message}`);
       }
-      console.error("Error editing subject Record:", error);
+      console.error("Error editing subject record:", error);
     } finally {
       setShowEditModal(false);
     }
   };
 
   const handleSubmitDelete = async () => {
-    // Handle delete submission logic
     try {
       const token = localStorage.getItem("authToken");
-      console.log(
-        "the currecnt section inside the delte___",
-        currentSection?.classToDelete?.subject_id
-      );
-      console.log("the classes inside the delete", classes);
-      console.log(
-        "the current section insde the handlesbmitdelete",
-        currentSection.classToDelete
-      );
-      if (
-        !token ||
-        !currentSection ||
-        !currentSection?.classToDelete?.subject_id
-      ) {
-        throw new Error("Subject ID is missing");
+      const subReportCardId = currentSection?.sub_reportcard_id; // Get the correct ID
+
+      if (!token || !subReportCardId) {
+        throw new Error("Subject Allotment ID is missing");
       }
 
+      // Send the delete request to the backend
       await axios.delete(
-        `${API_URL}/api/delete_subject_Alloted/${currentSection?.classToDelete?.subject_id}`,
+        `${API_URL}/api/get_sub_report_allotted/${subReportCardId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -328,12 +318,9 @@ function SubjectAllotmentForReportCard() {
         }
       );
 
-      // fetchClassNames();
-      handleSearch();
-
-      setShowDeleteModal(false);
-      // setSubjects([]);
-      toast.success("subject deleted successfully!");
+      handleSearch(); // Refresh the data (this seems like the method to refetch data)
+      setShowDeleteModal(false); // Close the modal
+      toast.success("Subject deleted successfully!");
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(`Error deleting subject: ${error.response.data.message}`);
@@ -341,10 +328,57 @@ function SubjectAllotmentForReportCard() {
         toast.error(`Error deleting subject: ${error.message}`);
       }
       console.error("Error deleting subject:", error);
-      // setError(error.message);
     }
-    setShowDeleteModal(false);
   };
+
+  //   const handleSubmitDelete = async () => {
+  //     // Handle delete submission logic
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+  //       console.log(
+  //         "the currecnt section inside the delte___",
+  //         currentSection?.classToDelete?.subject_id
+  //       );
+  //       console.log("the classes inside the delete", classes);
+  //       console.log(
+  //         "the current section insde the handlesbmitdelete",
+  //         currentSection.classToDelete
+  //       );
+  //       if (
+  //         !token ||
+  //         !currentSection ||
+  //         !currentSection?.classToDelete?.sub_reportcard_id
+  //       ) {
+  //         throw new Error("Subject ID is missing");
+  //       }
+
+  //       await axios.delete(
+  //         `${API_URL}/api/get_sub_report_allotted/${currentSection?.classToDelete?.sub_reportcard_id}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //           withCredentials: true,
+  //         }
+  //       );
+
+  //       // fetchClassNames();
+  //       handleSearch();
+
+  //       setShowDeleteModal(false);
+  //       // setSubjects([]);
+  //       toast.success("subject deleted successfully!");
+  //     } catch (error) {
+  //       if (error.response && error.response.data) {
+  //         toast.error(`Error deleting subject: ${error.response.data.message}`);
+  //       } else {
+  //         toast.error(`Error deleting subject: ${error.message}`);
+  //       }
+  //       console.error("Error deleting subject:", error);
+  //       // setError(error.message);
+  //     }
+  //     setShowDeleteModal(false);
+  //   };
 
   const handleCloseModal = () => {
     setShowEditModal(false);
@@ -503,7 +537,7 @@ function SubjectAllotmentForReportCard() {
                                   {index + 1}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  ${subject?.get_class?.name}
+                                  {subject?.get_clases?.name}
                                 </td>
                                 {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.get_division?.name}
@@ -525,7 +559,7 @@ function SubjectAllotmentForReportCard() {
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
                                     onClick={() =>
-                                      handleDelete(subject?.subject_id)
+                                      handleDelete(subject?.sub_reportcard_id)
                                     }
                                     className="text-red-600 hover:text-red-800 hover:bg-transparent "
                                   >
@@ -574,75 +608,70 @@ function SubjectAllotmentForReportCard() {
 
       {/* Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
-          <div className="modal show " style={{ display: "block" }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal show" style={{ display: "block" }}>
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
                   <h5 className="modal-title">Edit Allotment</h5>
                   <RxCross1
-                    className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
-                    // className="btn-close text-red-600"
                     onClick={handleCloseModal}
                   />
                 </div>
                 <div
-                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
                   style={{
                     backgroundColor: "#C03078",
                   }}
                 ></div>
                 <div className="modal-body">
                   {/* Modal content for editing */}
-                  <div className=" relative mb-3 flex justify-center  mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Class :{" "}
+                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
+                    <label htmlFor="newClassName" className="w-1/2 mt-2">
+                      Class:
                     </label>
-                    <div className="font-bold form-control  shadow-md  mb-2">
+                    <div className="font-bold form-control shadow-md mb-2">
                       {newclassnames}
                     </div>
                   </div>
-                  <div className=" relative mb-3 flex justify-center  mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Section:{" "}
+
+                  <div className="relative flex justify-start mx-4 gap-x-7">
+                    <label htmlFor="newSubjectName" className="w-1/2 mt-2">
+                      Subject:
                     </label>
                     <span className="font-semibold form-control shadow-md mb-2">
-                      {newSection}
-                    </span>
-                  </div>
-                  <div className=" relative  flex justify-start  mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2 ">
-                      Subject:{" "}
-                    </label>{" "}
-                    <span className="font-semibold form-control shadow-md mb-2 ">
                       {newSubject}
                     </span>
                   </div>
-                  <div className=" modal-body">
+
+                  <div className="modal-body">
                     <div
                       ref={dropdownRef}
-                      className=" relative mb-3 flex justify-center mx-2 gap-4 "
+                      className="relative mb-3 flex justify-center mx-2 gap-4"
                     >
                       <label
-                        htmlFor="newDepartmentId"
-                        className="w-1/2 mt-2 text-nowrap "
+                        htmlFor="subjectType"
+                        className="w-1/2 mt-2 text-nowrap"
                       >
-                        Teacher assigned <span className="text-red-500">*</span>
+                        Subject Type <span className="text-red-500">*</span>
                       </label>
-                      <Select
-                        // className="border w-[50%] h-10 rounded-md px-3 py-2 md:w-full mr-2 shadow-md"
-                        className="w-full text-sm shadow-md"
-                        value={selectedTeacher}
-                        onChange={handleTeacherSelect}
-                        options={teacherOptions}
-                        placeholder="Select "
-                        isSearchable
-                      />
+                      <select
+                        className=" rounded-md border-1  text-black w-full text-[1em] shadow-md p-2 "
+                        value={teacherNameIs} // Prefilled value from state
+                        onChange={(e) => setTeacherNameIs(e.target.value)} // Update state on change
+                      >
+                        <option value="" disabled>
+                          Select
+                        </option>
+                        <option value="Scholastic">Scholastic</option>
+                        <option value="Co-Scholastic">Co-Scholastic</option>
+                      </select>
                     </div>
                   </div>
                 </div>
-                <div className=" flex justify-end p-3">
+                <div className="flex justify-end p-3">
                   <button
                     type="button"
                     className="btn btn-primary px-3 mb-2"

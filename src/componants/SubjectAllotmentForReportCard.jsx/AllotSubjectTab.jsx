@@ -359,7 +359,9 @@ const AllotSubjectTab = () => {
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedSubjectType, setSelectedSubjectType] = useState("");
   const [subjectTypeError, setSubjectTypeError] = useState(null);
-  const [subjects, setSubjects] = useState([]); // All subjects
+  const [subjectsIs, setSubjectsIs] = useState([]); // All subjects
+  const [initialsubjectsIs, setInitialSubjectsIs] = useState([]); // All subjects
+
   const [preCheckedSubjects, setPreCheckedSubjects] = useState([]); // Pre-selected subjects
 
   // Error state variables
@@ -370,8 +372,6 @@ const AllotSubjectTab = () => {
   useEffect(() => {
     fetchClassNames();
   }, []);
-
-  // Fetch all subjects initially
   useEffect(() => {
     fetchAllSubjects();
   }, []);
@@ -392,10 +392,20 @@ const AllotSubjectTab = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/get_subject_Alloted_for_report_card`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API_URL}/api/subject_for_reportcard`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
-      setSubjects(response?.data?.subjectAllotments);
+
+      // Assuming response.data.subjects is the correct structure
+      const subjects = response?.data?.subjects;
+
+      setSubjectsIs(subjects);
+      setInitialSubjectsIs(subjects);
+
+      console.log("setSubjectsIs", subjects);
+      console.log("setInitialSubjectsIs", subjects);
     } catch (error) {
       toast.error("Error fetching subjects");
     }
@@ -411,13 +421,15 @@ const AllotSubjectTab = () => {
         `${API_URL}/api/get_sub_report_allotted/${classId}/${subjectType.value}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const fetchedPreCheckedSubjects = response.data.subjectAllotments.map(
+      const fetchedPreCheckedSubjects = response?.data?.subjectAllotments.map(
         (subject) => subject.get_subjects_for_report_card.sub_rc_master_id
       );
+
       setPreCheckedSubjects(fetchedPreCheckedSubjects);
-      console.log("setPreCheckedSubjects", response.data.subjectAllotments);
+      console.log("setPreCheckedSubjects", response?.data?.subjectAllotments);
     } catch (error) {
-      toast.error("Error fetching pre-selected subjects");
+      toast.error(error?.response?.data?.error);
+      console.log("error", error);
     }
   };
 
@@ -441,6 +453,7 @@ const AllotSubjectTab = () => {
   };
 
   const handleCheckboxChange = (subjectId) => {
+    setSubjectError("");
     if (preCheckedSubjects.includes(subjectId)) {
       setPreCheckedSubjects(
         preCheckedSubjects.filter((id) => id !== subjectId)
@@ -459,7 +472,7 @@ const AllotSubjectTab = () => {
       hasError = true;
     }
     if (!selectedSubjectType) {
-      setSubjectTypeError("Please select subject type.");
+      setSubjectTypeError("Please select a subject type.");
       hasError = true;
     }
     if (preCheckedSubjects.length === 0) {
@@ -471,21 +484,51 @@ const AllotSubjectTab = () => {
 
     try {
       const token = localStorage.getItem("authToken");
-      await axios.post(
-        `${API_URL}/api/get_sub_report_allotted/${selectedClass.value}`,
-        { subjects: preCheckedSubjects, subject_type: selectedSubjectType },
+      console.log(
+        "subjects",
+        preCheckedSubjects,
+        "subject_type",
+        selectedSubjectType.value
+      );
+
+      // Make the API request to save the subject allotment
+      const response = await axios.post(
+        `${API_URL}/api/subject-allotments-reportcard/${selectedClass.value}`,
+        {
+          subject_ids: preCheckedSubjects, // Array of subject IDs (like [1, 2, 3])
+          subject_type: selectedSubjectType.value, // e.g., 'core' or 'optional'
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast.success("Subjects allotted successfully");
 
-      // Clear fields after successful submission
-      setSelectedClass(null);
-      setSelectedSubjectType("");
-      setPreCheckedSubjects([]);
+      // Handle the response from the backend
+      if (response.status === 200) {
+        toast.success("Subjects allotted successfully");
+        console.log("API Response:", response.data); // Log the response for debugging
+
+        // Clear fields after successful submission
+        setSelectedClass(null);
+        setSelectedSubjectType("");
+        setPreCheckedSubjects([]);
+      } else {
+        toast.error("Unexpected response status from the server.");
+        console.error("Response status:", response.status);
+      }
     } catch (error) {
-      toast.error("Error saving allotment");
+      if (error.response) {
+        // If the server responded with a status other than 200 range
+        console.error(
+          "Error response from server:",
+          error?.response?.data?.message
+        );
+        toast.error(error?.response?.data?.message);
+      } else {
+        // If there was a problem with the request (e.g., network error)
+        console.error("Error with request:", error.message);
+        toast.error("Error saving allotment");
+      }
     }
   };
 
@@ -561,33 +604,34 @@ const AllotSubjectTab = () => {
                 Select Subjects <span className="text-red-500">*</span>
               </label>
               <div className="w-full">
-                <div className="relative gap-x-10 top-2   grid grid-cols-3  w-full"></div>
-                {subjects.length > 0 ? (
-                  subjects.map((subject) => (
-                    <div key={subject.sub_reportcard_id}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={preCheckedSubjects.includes(
-                            subject.get_subjects_for_report_card
-                              .sub_rc_master_id
-                          )}
-                          onChange={() =>
-                            handleCheckboxChange(
-                              subject.get_subjects_for_report_card
-                                .sub_rc_master_id
-                            )
-                          }
-                        />
-                        {subject.get_subjects_for_report_card.name}
-                      </label>
-                    </div>
-                  ))
-                ) : (
-                  <p className="mt-2">No subjects available</p>
-                )}
+                <div className="relative gap-x-10 top-2 grid grid-cols-3 w-full">
+                  {subjectsIs.length > 0 ? (
+                    subjectsIs.map((subject) => (
+                      <div
+                        key={subject.sub_rc_master_id}
+                        className="flex items-center gap-x-2"
+                      >
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={preCheckedSubjects.includes(
+                              subject.sub_rc_master_id
+                            )}
+                            onChange={() =>
+                              handleCheckboxChange(subject.sub_rc_master_id)
+                            }
+                            className="mr-2"
+                          />
+                          {subject.name}
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="mt-2">No subjects available</p>
+                  )}
+                </div>
                 {subjectError && (
-                  <p className=" absolute text-red-500 text-sm">
+                  <p className="absolute text-red-500 text-sm">
                     {subjectError}
                   </p>
                 )}

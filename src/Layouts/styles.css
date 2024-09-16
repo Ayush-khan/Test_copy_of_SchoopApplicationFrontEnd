@@ -1,0 +1,16 @@
+/* styles.css */
+.nav-dropdown-title {
+  color: black;
+  font-weight: 700;
+  font-size: 1rem; /* Adjust title font size as needed */
+}
+
+.nav-dropdown-item {
+  font-size: 1rem; /* Adjust item font size */
+  /* font-weight: bold; */
+  color: darkgray; /* Change color on hover if needed */
+}
+
+.nav-dropdown-item:hover {
+  color: black; /* Change color on hover */
+}

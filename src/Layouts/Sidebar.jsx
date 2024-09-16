@@ -226,7 +226,7 @@ export default function Sidebar({ isSidebar, setIsSidebar }) {
             <li key={index} className="text-sm text-center underline-none">
               <Link
                 to={tab}
-                className=" relative -left-2 block  py-2 rounded-md bg-blue-500 text-white hover:bg-blue-700 transition duration-300"
+                className=" overflow-hidden relative -left-2 block  py-2 rounded-md bg-blue-500 text-white hover:bg-blue-700 transition duration-300"
               >
                 {tab}
               </Link>

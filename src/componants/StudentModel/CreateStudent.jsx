@@ -2465,7 +2465,7 @@ function Form() {
         formattedFormData.append(key, formData[key]);
       }
     });
-    console.log(" formattedFormData,", formData);
+    console.log(" formattedFormData is,", formData);
 
     try {
       const token = localStorage.getItem("authToken");
