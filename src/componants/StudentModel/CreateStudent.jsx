@@ -1997,7 +1997,63 @@ function Form() {
     setFormData((prev) => ({ ...prev, section_id: selectedDivisionId }));
   };
 
+  // const [formData, setFormData] = useState({
+  //   first_name: "",
+  //   mid_name: "",
+  //   last_name: "",
+  //   house: "",
+  //   student_name: "",
+  //   dob: "",
+  //   admission_date: "",
+  //   stud_id_no: "",
+  //   stu_aadhaar_no: "",
+  //   gender: "",
+  //   mother_tongue: "",
+  //   birth_place: "",
+  //   admission_class: " ",
+  //   city: " ",
+  //   state: "",
+  //   roll_no: "",
+  //   class_id: "",
+  //   section_id: "",
+  //   religion: "",
+  //   caste: "",
+  //   subcaste: "",
+  //   vehicle_no: "",
+  //   emergency_name: " ",
+  //   emergency_contact: "",
+  //   emergency_add: "",
+  //   height: "",
+  //   weight: "",
+  //   allergies: "",
+  //   nationality: "",
+  //   pincode: "",
+  //   image_name: "",
+  //   // Parent information
+  //   father_name: "  .",
+  //   father_occupation: "",
+  //   f_office_add: "  ",
+  //   f_office_tel: "",
+  //   f_mobile: "",
+  //   f_email: "",
+  //   father_adhar_card: "",
+  //   mother_name: " ",
+  //   mother_occupation: "",
+  //   m_office_add: " ",
+  //   m_office_tel: "",
+  //   m_mobile: "",
+  //   m_emailid: "",
+  //   mother_adhar_card: "",
+
+  //   // Preferences
+  //   SetToReceiveSMS: "",
+  //   SetEmailIDAsUsername: "",
+
+  //   // Base64 Image (optional)
+  //   student_image: "",
+  // });
   const [formData, setFormData] = useState({
+    // Student fields
     first_name: "",
     mid_name: "",
     last_name: "",
@@ -2008,10 +2064,13 @@ function Form() {
     stud_id_no: "",
     stu_aadhaar_no: "",
     gender: "",
+    category: " ",
+    blood_group: " ",
     mother_tongue: "",
+    permant_add: " ",
     birth_place: "",
-    admission_class: " ",
-    city: " ",
+    admission_class: "",
+    city: "",
     state: "",
     roll_no: "",
     class_id: "",
@@ -2020,39 +2079,38 @@ function Form() {
     caste: "",
     subcaste: "",
     vehicle_no: "",
-    emergency_name: " ",
+    emergency_name: "",
     emergency_contact: "",
     emergency_add: "",
+    transport_mode: " ",
     height: "",
     weight: "",
     allergies: "",
     nationality: "",
     pincode: "",
     image_name: "",
-    // Parent information
-    father_name: "  .",
+    student_id: "",
+    reg_id: " ",
+    // Parent fields
+    father_name: "",
     father_occupation: "",
-    f_office_add: "  ",
+    f_office_add: "",
     f_office_tel: "",
     f_mobile: "",
     f_email: "",
     father_adhar_card: "",
-    mother_name: " ",
+    mother_name: "",
     mother_occupation: "",
-    m_office_add: " ",
+    m_office_add: "",
     m_office_tel: "",
     m_mobile: "",
     m_emailid: "",
     mother_adhar_card: "",
-
+    udise_pen_no: "",
     // Preferences
     SetToReceiveSMS: "",
     SetEmailIDAsUsername: "",
-
-    // Base64 Image (optional)
-    student_image: "",
   });
-
   const [errors, setErrors] = useState({});
   const [photoPreview, setPhotoPreview] = useState(null);
   const [backendErrors, setBackendErrors] = useState({});
@@ -2080,7 +2138,7 @@ function Form() {
   const [motherEmailSelected, setMotherEmailSelected] = useState({
     setUsername: false, // If mother's email is set as username
   });
-
+  console.log("student", student);
   useEffect(() => {
     if (student) {
       setFormData({
@@ -2094,17 +2152,23 @@ function Form() {
         stud_id_no: student.stud_id_no || "",
         stu_aadhaar_no: student.stu_aadhaar_no || "",
         gender: student.gender || "",
+        permant_add: student.permant_add || " ",
         mother_tongue: student.mother_tongue || "",
         birth_place: student.birth_place || "",
         admission_class: student.admission_class || " ",
         city: student.city || " ",
         state: student.state || "",
         roll_no: student.roll_no || "",
+        student_id: student.student_id || " ",
+        reg_id: student.reg_id || " ",
+        blood_group: student.blood_group || " ",
+        category: student.category || " ",
         class_id: student.class_id || "",
         section_id: student.section_id || "",
         religion: student.religion || "",
         caste: student.caste || "",
         subcaste: student.subcaste || "",
+        transport_mode: student.transport_mode || " ",
         vehicle_no: student.vehicle_no || "",
         emergency_name: student.emergency_name || " ",
         emergency_contact: student.emergency_contact || "",
@@ -2116,21 +2180,21 @@ function Form() {
         pincode: student.pincode || "",
         image_name: student.image_name || "",
         // Parent information
-        father_name: student.father_name || " ",
-        father_occupation: student.father_occupation || "",
-        f_office_add: student.f_office_add || "  ",
-        f_office_tel: student.f_office_tel || "",
-        f_mobile: student.f_mobile || "",
-        f_email: student.f_email || "",
-        father_adhar_card: student.father_adhar_card || "",
-        mother_name: student.mother_name || " ",
-        mother_occupation: student.mother_occupation || "",
-        m_office_add: student.m_office_add || " ",
-        m_office_tel: student.m_office_tel || "",
-        m_mobile: student.m_mobile || "",
-        m_emailid: student.m_emailid || "",
-        mother_adhar_card: student.mother_adhar_card || "",
-
+        father_name: student?.parents?.father_name || " ",
+        father_occupation: student?.parents?.father_occupation || "",
+        f_office_add: student?.parents?.f_office_add || "  ",
+        f_office_tel: student?.parents?.f_office_tel || "",
+        f_mobile: student?.parents?.f_mobile || "",
+        f_email: student?.parents?.f_email || "",
+        father_adhar_card: student?.parents?.father_adhar_card || "",
+        mother_name: student?.parents?.mother_name || " ",
+        mother_occupation: student?.parents?.mother_occupation || "",
+        m_office_add: student?.parents?.m_office_add || " ",
+        m_office_tel: student?.parents?.m_office_tel || "",
+        m_mobile: student?.parents?.m_mobile || "",
+        m_emailid: student?.parents?.m_emailid || "",
+        mother_adhar_card: student?.parents?.mother_adhar_card || "",
+        udise_pen_no: student.udise_pen_no || " ",
         // Preferences
         SetToReceiveSMS: student.SetToReceiveSMS || "",
         SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
@@ -2213,9 +2277,7 @@ function Form() {
     const isUnique = await checkUserId(student.student_id, userId); // Check if username is unique
 
     if (!isUnique) {
-      setUsernameError(
-        `Username "${userId}" is already taken. Please choose another.`
-      );
+      setUsernameError(`Username "${userId}" is already taken.`);
     } else {
       setUsernameError(""); // Clear error if the username is unique
       setFormData((prevData) => ({
@@ -2444,6 +2506,62 @@ function Form() {
     }));
   };
 
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   const validationErrors = validate();
+
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setErrors(validationErrors);
+  //     Object.values(validationErrors).forEach((error) => {
+  //       toast.error(error);
+  //     });
+  //     return;
+  //   }
+
+  //   // Prepare the data for API submission
+  //   const formattedFormData = new FormData();
+  //   Object.keys(formData).forEach((key) => {
+  //     if (formData[key] instanceof File) {
+  //       formattedFormData.append(key, formData[key]);
+  //     } else {
+  //       formattedFormData.append(key, formData[key]);
+  //     }
+  //   });
+  //   console.log(" formattedFormData is,", formData);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token is found");
+  //     }
+  //     console.log(" formattedFormData,", formattedFormData);
+  //     const response = await axios.put(
+  //       `${API_URL}/api/students/${student.student_id}`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           "Content-Type": "multipart/form-data",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       toast.success("Student updated successfully!");
+  //       setTimeout(() => {
+  //         navigate("/StudentList");
+  //       }, 3000);
+  //     }
+  //   } catch (error) {
+  //     toast.error("An error occurred while updating the student.");
+  //     console.error("Error:", error.response?.data || error.message);
+  //     if (error.response && error.response.data && error.response.data.errors) {
+  //       setBackendErrors(error.response.data.errors || {});
+  //     } else {
+  //       toast.error(error.message);
+  //     }
+  //   }
+  // };
   const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = validate();
@@ -2456,26 +2574,22 @@ function Form() {
       return;
     }
 
-    // Prepare the data for API submission
+    // Create FormData object
     const formattedFormData = new FormData();
     Object.keys(formData).forEach((key) => {
-      if (formData[key] instanceof File) {
-        formattedFormData.append(key, formData[key]);
-      } else {
-        formattedFormData.append(key, formData[key]);
-      }
+      formattedFormData.append(key, formData[key]);
     });
-    console.log(" formattedFormData is,", formData);
 
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error("No authentication token is found");
+        throw new Error("No authentication token found");
       }
-      console.log(" formattedFormData,", formattedFormData);
+      console.log("formattedFormData", formattedFormData);
+      console.log("formData", formData);
       const response = await axios.put(
         `${API_URL}/api/students/${student.student_id}`,
-        formData,
+        formData, // Send the FormData object
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -2637,9 +2751,9 @@ function Form() {
                 // onBlur={handleBlur}
               >
                 <option>Select</option>
-                <option defaultValue="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="O">Other</option>
               </select>
               {errors.gender && (
                 <p className="text-[12px] text-red-500 mb-1">{errors.gender}</p>
@@ -2654,8 +2768,8 @@ function Form() {
               </label>
               <select
                 id="bloodGroup"
-                name="bloodGroup"
-                value={formData.bloodGroup}
+                name="blood_group"
+                value={formData.blood_group}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -2756,9 +2870,9 @@ function Form() {
               <input
                 type="text"
                 id="birthPlace"
-                name="birthPlace"
+                name="birth_place"
                 maxLength={50}
-                value={formData.birthPlace}
+                value={formData.birth_place}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -2797,9 +2911,9 @@ function Form() {
               <input
                 type="text"
                 id="motherTongue"
-                name="motherTongue"
+                name="mother_tongue"
                 maxLength={20}
-                value={formData.motherTongue}
+                value={formData.mother_tongue}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -2923,9 +3037,9 @@ function Form() {
               <input
                 type="text"
                 id="grnNumber"
-                name="gr_no"
+                name="reg_id"
                 maxLength={10}
-                value={formData.gr_no}
+                value={formData.reg_id}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -3025,9 +3139,9 @@ function Form() {
               <input
                 type="text"
                 id="studentIdNumber"
-                name="stud_id_no"
+                name="student_id"
                 maxLength={25}
-                value={formData.stud_id_no}
+                value={formData.student_id}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -3067,9 +3181,9 @@ function Form() {
                 <input
                   type="text"
                   id="Udise_no"
-                  name="Udise_no"
+                  name="udise_pen_no"
                   maxLength={14}
-                  value={formData.Udise_no}
+                  value={formData.udise_pen_no}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
                   // onBlur={handleBlur}
@@ -3090,10 +3204,10 @@ function Form() {
               </label>
               <textarea
                 id="address"
-                name="address"
+                name="permant_add"
                 maxLength={200}
                 rows={2}
-                value={formData.address}
+                value={formData.permant_add}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -3177,8 +3291,8 @@ function Form() {
                 type="text"
                 id="emergencyName"
                 maxLength={100}
-                name="emergencyName"
-                value={formData.emergencyName}
+                name="emergency_name"
+                value={formData.emergency_name}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -3193,10 +3307,10 @@ function Form() {
               </label>
               <textarea
                 id="emergencyAddress"
-                name="emergencyAddress"
+                name="emergency_add"
                 rows={2}
                 maxLength={200}
-                value={formData.emergencyAddress}
+                value={formData.emergency_add}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -3236,9 +3350,9 @@ function Form() {
                   type="text"
                   inputMode="numeric"
                   id="emergencyContact"
-                  name="emergencyContact"
+                  name="emergency_contact"
                   maxLength={10}
-                  value={formData.emergencyContact}
+                  value={formData.emergency_contact}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
                   // onBlur={handleBlur}
@@ -3256,8 +3370,8 @@ function Form() {
               </label>
               <select
                 id="transportMode"
-                name="transportMode"
-                value={formData.transportMode}
+                name="transport_mode"
+                value={formData.transport_mode}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -3270,10 +3384,10 @@ function Form() {
               <input
                 type="text"
                 id="vehicleNumber"
-                name="vehicleNumber"
+                name="vehicle_no"
                 maxLength={13}
                 placeholder="Vehicle No."
-                value={formData.vehicleNumber}
+                value={formData.vehicle_no}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -3434,8 +3548,8 @@ function Form() {
               </label>
               <select
                 id="bloodGroup"
-                name="bloodGroup"
-                value={formData.bloodGroup}
+                name="blood_group"
+                value={formData.blood_group}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
