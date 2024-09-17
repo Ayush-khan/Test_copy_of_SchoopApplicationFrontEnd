@@ -1687,7 +1687,7 @@ function ManageSubjectList() {
                                   subject?.get_division?.name
                                 }`}
                               </td>
-                              {/* dfsfg  dfs*/}
+
                               {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {subject?.get_division?.name}
                               </td> */}
