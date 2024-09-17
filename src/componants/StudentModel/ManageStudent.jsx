@@ -1691,7 +1691,7 @@ function ManageSubjectList() {
                                 {subject?.get_division?.name}
                               </td> */}
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.parents?.user?.user_id}
+                                {subject?.user_master?.user_id}
                               </td>
 
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
