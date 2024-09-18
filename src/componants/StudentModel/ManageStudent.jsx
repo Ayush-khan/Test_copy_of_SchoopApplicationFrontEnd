@@ -1168,6 +1168,11 @@ function ManageSubjectList() {
   //   For students
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
+  // for showing the buttons delete and edit controls
+  const [showDeleteButton, setShowDeleteButton] = useState("");
+  const [showAllButton, setShowAllButton] = useState("");
+  const [showEditeButton, setShowEditButton] = useState("");
+  const [roleId, setRoleId] = useState("");
   const navigate = useNavigate();
   // Custom styles for the close button
   const closeButtonStyle = {
@@ -1290,11 +1295,36 @@ function ManageSubjectList() {
       setLoading(false);
     }
   };
+  // for role_id
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
 
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      // Fetch session data
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRoleId(sessionResponse.data.user.role_id); // Store role_id
+      // setRoleId("A"); // Store role_id
+      console.log("roleIDis:", roleId);
+      // Fetch academic year data
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   useEffect(() => {
     fetchInitialData(); // Fetch classes once when the component mounts
     fetchStudentNameWithClassId(classOptions.value);
+    fetchDataRoleId();
   }, []);
+
   // Handle pagination
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
@@ -1644,15 +1674,20 @@ function ManageSubjectList() {
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               UserId
                             </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Edit
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Delete
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Inactive
-                            </th>
+                            {(roleId === "A" || roleId === "M") && (
+                              <>
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Edit
+                                </th>
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Delete
+                                </th>
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Inactive
+                                </th>
+                              </>
+                            )}
+
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               View
                             </th>
@@ -1694,23 +1729,58 @@ function ManageSubjectList() {
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {subject?.user_master?.user_id}
                               </td>
-
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                <button
-                                  onClick={() => handleEdit(subject)}
-                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                >
-                                  <FontAwesomeIcon icon={faEdit} />
-                                </button>
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                <button
-                                  onClick={() => handleDelete(subject)}
-                                  className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                >
-                                  <FontAwesomeIcon icon={faTrash} />
-                                </button>
-                              </td>
+                              {(roleId === "A" || roleId === "M") && (
+                                <>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    <button
+                                      onClick={() => handleEdit(subject)}
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                    >
+                                      <FontAwesomeIcon icon={faEdit} />
+                                    </button>
+                                  </td>
+                                  {subject.isPromoted !== "Y" ? (
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      <button
+                                        onClick={() => handleDelete(subject)}
+                                        className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                      >
+                                        <FontAwesomeIcon icon={faTrash} />
+                                      </button>
+                                    </td>
+                                  ) : (
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      <button
+                                        // onClick={() => ()}
+                                        className="text-green-500-600 hover:text-green-800 hover:bg-transparent "
+                                      >
+                                        <FontAwesomeIcon icon={faTrash} />
+                                      </button>
+                                    </td>
+                                  )}
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
+                                    <button
+                                      onClick={() =>
+                                        handleActiveAndInactive(subject)
+                                      }
+                                      className={`  font-bold hover:bg-none ${
+                                        subject.isActive === "Y"
+                                          ? "text-green-600 hover:text-green-800 hover:bg-transparent"
+                                          : "text-red-700 hover:text-red-900  hover:bg-transparent"
+                                      }`}
+                                    >
+                                      {subject.isActive === "Y" ? (
+                                        <FaCheck className="text-xl" />
+                                      ) : (
+                                        <FontAwesomeIcon
+                                          icon={faXmark}
+                                          className="text-xl"
+                                        />
+                                      )}
+                                    </button>
+                                  </td>
+                                </>
+                              )}
                               {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 <button
                                   onClick={() =>
@@ -1727,27 +1797,6 @@ function ManageSubjectList() {
                                   )}
                                 </button>
                               </td> */}
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
-                                <button
-                                  onClick={() =>
-                                    handleActiveAndInactive(subject)
-                                  }
-                                  className={`  font-bold hover:bg-none ${
-                                    subject.isActive === "Y"
-                                      ? "text-green-600 hover:text-green-800 hover:bg-transparent"
-                                      : "text-red-700 hover:text-red-900  hover:bg-transparent"
-                                  }`}
-                                >
-                                  {subject.isActive === "Y" ? (
-                                    <FaCheck className="text-xl" />
-                                  ) : (
-                                    <FontAwesomeIcon
-                                      icon={faXmark}
-                                      className="text-xl"
-                                    />
-                                  )}
-                                </button>
-                              </td>
 
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 <button
