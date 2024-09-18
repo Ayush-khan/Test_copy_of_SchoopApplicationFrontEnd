@@ -1940,7 +1940,7 @@ function ViewStudent() {
   const [divisions, setDivisions] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedDivision, setSelectedDivision] = useState(null);
-
+  console.log("student data for view", student);
   // Fetch class names
   useEffect(() => {
     const fetchClassNames = async () => {
@@ -2018,9 +2018,9 @@ function ViewStudent() {
   });
   const [photoPreview, setPhotoPreview] = useState(null);
 
-  // Convert class change and division change to non-functional
-  const handleClassChange = async (e) => {}; // Disable handler
-  const handleDivisionChange = (e) => {}; // Disable handler
+  // // Convert class change and division change to non-functional
+  // const handleClassChange = async (e) => {}; // Disable handler
+  // const handleDivisionChange = (e) => {}; // Disable handler
 
   useEffect(() => {
     if (student) {
@@ -2046,8 +2046,8 @@ function ViewStudent() {
         reg_id: student.reg_id || " ",
         blood_group: student.blood_group || " ",
         category: student.category || " ",
-        class_id: student.class_id || "",
-        section_id: student.section_id || "",
+        class_id: student?.get_class?.name || "",
+        section_id: student?.get_division?.name || "",
         religion: student.religion || "",
         caste: student.caste || "",
         subcaste: student.subcaste || "",
@@ -2225,19 +2225,14 @@ function ViewStudent() {
               >
                 Gender <span className="text-red-500">*</span>
               </label>
-              <select
-                id="gender"
+              <input
+                type="text"
                 disabled
                 value={formData.gender}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
 
                 // onBlur={handleBlur}
-              >
-                <option>Select</option>
-                <option value="M">Male</option>
-                <option value="F">Female</option>
-                <option value="O">Other</option>
-              </select>
+              ></input>
             </div>
             <div className="mt-2">
               <label
@@ -2246,24 +2241,14 @@ function ViewStudent() {
               >
                 Blood group
               </label>
-              <select
-                id="bloodGroup"
+              <input
+                type="text"
                 disabled
                 value={formData.blood_group}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
 
                 // onBlur={handleBlur}
-              >
-                <option>Select</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
+              ></input>
             </div>
             <div className="mt-2">
               <label
@@ -2272,22 +2257,14 @@ function ViewStudent() {
               >
                 Religion <span className="text-red-500">*</span>
               </label>
-              <select
-                id="religion"
+              <input
+                type="text"
                 disabled
                 value={formData.religion}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
 
                 // onBlur={handleBlur}
-              >
-                <option>Select</option>
-                <option value="Hindu">Hindu</option>
-                <option value="Christian">Christian</option>
-                <option value="Muslim">Muslim</option>
-                <option value="Sikh">Sikh</option>
-                <option value="Jain">Jain</option>
-                <option value="Buddhist">Buddhist</option>
-              </select>
+              ></input>
             </div>
             <div className="mt-2">
               <label htmlFor="caste" className="block font-bold text-xs mb-0.5">
@@ -2309,24 +2286,14 @@ function ViewStudent() {
               >
                 Category <span className="text-red-500">*</span>
               </label>
-              <select
-                id="category"
+              <input
+                type="text"
                 disabled
                 value={formData.category}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
 
                 // onBlur={handleBlur}
-              >
-                <option>Select</option>
-                <option value="General">General</option>
-                <option value="SC">SC</option>
-                <option value="ST">ST</option>
-                <option value="OBC">OBC</option>
-                <option value="SBC">SBC</option>
-                <option value="NT">NT</option>
-                <option value="VJNT">VJNT</option>
-                <option value="Minority">Minority</option>
-              </select>
+              ></input>
             </div>
             <div className="mt-2">
               <label
@@ -2405,19 +2372,12 @@ function ViewStudent() {
               >
                 Class <span className="text-red-500">*</span>
               </label>
-              <select
-                id="studentClass"
+              <input
+                type="text"
                 disabled
-                value={selectedClass}
+                value={formData.class_id}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-              >
-                <option value="">Select</option>
-                {classes.map((cls) => (
-                  <option key={cls.class_id} value={cls.class_id}>
-                    {cls.name}
-                  </option>
-                ))}
-              </select>
+              ></input>
             </div>
             {/* Division Dropdown */}
             <div className="mt-2">
@@ -2427,20 +2387,13 @@ function ViewStudent() {
               >
                 Division <span className="text-red-500">*</span>
               </label>
-              <select
-                id="division"
+              <input
+                type="text"
                 disabled
-                value={selectedDivision}
+                value={formData.section_id}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 // Disable division until class is selected
-              >
-                <option value="">Select</option>
-                {divisions.map((div) => (
-                  <option key={div.section_id} value={div.section_id}>
-                    {div.name}
-                  </option>
-                ))}
-              </select>
+              ></input>
             </div>
             <div className="mt-2">
               <label
@@ -2478,20 +2431,14 @@ function ViewStudent() {
               <label htmlFor="house" className="block font-bold text-xs mb-0.5">
                 House
               </label>
-              <select
-                id="house"
+              <input
+                type="text"
                 disabled
                 value={formData.house}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
 
                 // onBlur={handleBlur}
-              >
-                <option>Select</option>
-                <option value="D">Diamond</option>
-                <option value="E">Emerald</option>
-                <option value="R">Ruby</option>
-                <option value="S">Sapphire</option>
-              </select>
+              ></input>
             </div>
             <div className="mt-2">
               <label
@@ -2500,31 +2447,14 @@ function ViewStudent() {
               >
                 Admitted In Class <span className="text-red-500">*</span>
               </label>
-              <select
-                id="admittedInClass"
+              <input
+                type="text"
                 disabled
                 value={formData.admission_class}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
 
                 // onBlur={handleBlur}
-              >
-                <option>Select</option>
-                <option value="Nursery">Nursery</option>
-                <option value="LKG">LKG</option>
-                <option value="UKG">UKG</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
-              </select>
+              ></input>
             </div>
             <div className="mt-2">
               <label
@@ -2752,19 +2682,19 @@ function ViewStudent() {
               >
                 Transport Mode
               </label>
-              <select
-                id="transportMode"
+              <input
+                type="text"
                 disabled
                 value={formData.transport_mode}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 // onChange={handleChange}
                 // onBlur={handleBlur}
               >
-                <option>Select</option>
+                {/* <option>Select</option>
                 <option value="School Bus">School Bus</option>
                 <option value="Private Van">Private Van</option>
-                <option value="Self">Self</option>
-              </select>
+                <option value="Self">Self</option> */}
+              </input>
               <input
                 type="text"
                 id="vehicleNumber"
@@ -2921,24 +2851,14 @@ function ViewStudent() {
               >
                 Blood group
               </label>
-              <select
-                id="bloodGroup"
+              <input
+                type="text"
                 disabled
                 value={formData.blood_group}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
 
                 // onBlur={handleBlur}
-              >
-                <option>Select</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
+              ></input>
             </div>
             <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
@@ -3007,7 +2927,7 @@ function ViewStudent() {
                   type="radio"
                   id="setusernameFatherMob"
                   name="setUsername"
-                  // checked={formData.selectedUsername === "FatherMob"}
+                  checked={formData.SetEmailIDAsUsername === "FatherMob"}
                 />
                 <label htmlFor="setusernameFatherMob">
                   Set this as username
@@ -3018,7 +2938,7 @@ function ViewStudent() {
                   type="radio"
                   value="FatherMob"
                   id="receiveSmsmob"
-                  checked={formData.SetToReceiveSMS === "FatherMob"}
+                  checked={formData.SetToReceiveSMS === "Father"}
                 />
                 <label htmlFor="receiveSmsmob">
                   Set to receive SMS at this no.
@@ -3030,10 +2950,8 @@ function ViewStudent() {
                 Email Id <span className="text-red-500">*</span>
               </label>
               <input
-                type="email"
-                id="email"
+                type="text"
                 disabled
-                maxLength={50}
                 value={formData.f_email}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
               />
@@ -3042,7 +2960,7 @@ function ViewStudent() {
                 <input
                   type="radio"
                   id="setUserNameFather"
-                  // checked={selectedUsername === "Father"}
+                  checked={formData.SetEmailIDAsUsername === "Father"}
                 />
                 <label htmlFor="setUserNameFather">Set this as username</label>
               </div>
@@ -3099,23 +3017,13 @@ function ViewStudent() {
               >
                 Blood group
               </label>
-              <select
-                id="bloodGroup"
+              <input
+                type="text"
                 disabled
                 value={formData.m_blood}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 // onBlur={handleBlur}
-              >
-                <option>Select</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
+              ></input>
             </div>
             <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
@@ -3194,7 +3102,7 @@ function ViewStudent() {
                   type="radio"
                   id="setusernameMotherMob"
                   name="setUsername"
-                  // checked={selectedUsername === "MotherMob"}
+                  checked={formData.SetEmailIDAsUsername === "MotherMob"}
                 />
                 <label htmlFor="setusernameMotherMob">
                   Set this as username
@@ -3206,7 +3114,7 @@ function ViewStudent() {
                   disabled
                   value="MotherMob"
                   id="receiveSmsmobMother"
-                  checked={formData.SetToReceiveSMS === "MotherMob"}
+                  checked={formData.SetToReceiveSMS === "Mother"}
                 />
                 <label htmlFor="receiveSmsmobMother">
                   Set to receive SMS at this no.
@@ -3230,7 +3138,8 @@ function ViewStudent() {
                 <input
                   type="radio"
                   id="emailuser"
-                  disabled // checked={selectedUsername === "Mother"}
+                  disabled
+                  checked={formData.SetEmailIDAsUsername === "Mother"}
                 />
                 <label htmlFor="emailuser">Set this as username</label>
               </div>
