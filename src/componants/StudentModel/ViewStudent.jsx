@@ -2016,6 +2016,7 @@ function ViewStudent() {
     SetToReceiveSMS: "",
     SetEmailIDAsUsername: "",
   });
+  const [photoPreview, setPhotoPreview] = useState(null);
 
   // Convert class change and division change to non-functional
   const handleClassChange = async (e) => {}; // Disable handler
@@ -2080,27 +2081,1180 @@ function ViewStudent() {
         SetToReceiveSMS: student.SetToReceiveSMS || "",
         SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
       });
+      if (student.student_image) {
+        setPhotoPreview(
+          // `${API_URL}/path/to/images/${student.teacher_image_name}`
+          `${student.student_image}`
+        );
+      }
     }
   }, [student]);
 
   return (
-    <div>
-      <h2>View Student</h2>
-      <form>
-        <div>
-          <label>First Name:</label>
-          <input type="text" value={formData.first_name} disabled />
+    // <div>
+    //   <h2>View Student</h2>
+    //   <form>
+    //     <div>
+    //       <label>First Name:</label>
+    //       <input type="text" value={formData.first_name} disabled />
+    //     </div>
+    //     <div>
+    //       <label>Middle Name:</label>
+    //       <input type="text" value={formData.mid_name} disabled />
+    //     </div>
+    //     <div>
+    //       <label>Last Name:</label>
+    //       <input type="text" value={formData.last_name} disabled />
+    //     </div>
+    //     {/* Add the rest of the form fields in a similar way */}
+    //   </form>
+    // </div>
+    <div className=" w-[95%] mx-auto p-4">
+      <ToastContainer />
+      <div className="card p-3  rounded-md">
+        <div className="card-header mb-4 flex justify-between items-center">
+          <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+            View Student Information
+          </h5>
+          <RxCross1
+            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() => navigate("/manageStudent")}
+          />
         </div>
-        <div>
-          <label>Middle Name:</label>
-          <input type="text" value={formData.mid_name} disabled />
-        </div>
-        <div>
-          <label>Last Name:</label>
-          <input type="text" value={formData.last_name} disabled />
-        </div>
-        {/* Add the rest of the form fields in a similar way */}
-      </form>
+        <div
+          className="relative w-full -top-6 h-1 mx-auto bg-red-700"
+          style={{ backgroundColor: "#C03078" }}
+        ></div>
+
+        <form className="md:mx-2 overflow-x-hidden shadow-md py-1 bg-gray-50">
+          <div className="flex flex-col gap-y-3 p-2 md:grid md:grid-cols-4 md:gap-x-14 md:mx-10 ">
+            <h5 className="col-span-4 text-blue-400  relative top-2">
+              {" "}
+              Personal Information
+            </h5>
+            <div className="mx-auto">
+              <label
+                htmlFor="teacher_image_name"
+                className="block font-bold text-xs mb-2"
+              >
+                Photo
+                {photoPreview ? (
+                  <img
+                    src={photoPreview}
+                    alt="Photo Preview"
+                    className="h-20 w-20 rounded-[50%] mx-auto border-1 border-black object-cover"
+                  />
+                ) : (
+                  <FaUserCircle className="mt-2 h-20 w-20 object-cover mx-auto text-gray-300" />
+                )}
+              </label>
+            </div>
+            {/* <div className=" row-span-2  ">
+              <ImageCropper
+                photoPreview={photoPreview}
+                onImageCropped={handleImageCropped}
+              />
+            </div> */}
+            <div className="mt-2">
+              <label
+                htmlFor="first_name"
+                className="block font-bold text-xs mb-0.5"
+              >
+                First Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.first_name}
+                className=" input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            {/* Add other form fields similarly */}
+            <div className="mt-2">
+              <label
+                htmlFor="mid_name"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Middle Name
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.mid_name}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="lastName"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Last Name
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.last_name}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="dateOfBirth"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Date of Birth <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                disabled
+                value={formData.dob}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="gender"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Gender <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="gender"
+                disabled
+                value={formData.gender}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              >
+                <option>Select</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="O">Other</option>
+              </select>
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="bloodGroup"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Blood group
+              </label>
+              <select
+                id="bloodGroup"
+                disabled
+                value={formData.blood_group}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              >
+                <option>Select</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="religion"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Religion <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="religion"
+                disabled
+                value={formData.religion}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              >
+                <option>Select</option>
+                <option value="Hindu">Hindu</option>
+                <option value="Christian">Christian</option>
+                <option value="Muslim">Muslim</option>
+                <option value="Sikh">Sikh</option>
+                <option value="Jain">Jain</option>
+                <option value="Buddhist">Buddhist</option>
+              </select>
+            </div>
+            <div className="mt-2">
+              <label htmlFor="caste" className="block font-bold text-xs mb-0.5">
+                Caste
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.caste}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="category"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Category <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="category"
+                disabled
+                value={formData.category}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              >
+                <option>Select</option>
+                <option value="General">General</option>
+                <option value="SC">SC</option>
+                <option value="ST">ST</option>
+                <option value="OBC">OBC</option>
+                <option value="SBC">SBC</option>
+                <option value="NT">NT</option>
+                <option value="VJNT">VJNT</option>
+                <option value="Minority">Minority</option>
+              </select>
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="birthPlace"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Birth Place
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.birth_place}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="nationality"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Nationality <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.nationality}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="motherTongue"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Mother Tongue <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.mother_tongue}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            {/* Student Details */}
+            {/* <div className="w-[120%] mx-auto h-2 bg-white col-span-4"></div> */}
+            <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
+              {" "}
+              Student Details
+            </h5>
+            <div className="mt-2">
+              <label
+                htmlFor="studentName"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Student Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.student_name}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="studentClass"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Class <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="studentClass"
+                disabled
+                value={selectedClass}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              >
+                <option value="">Select</option>
+                {classes.map((cls) => (
+                  <option key={cls.class_id} value={cls.class_id}>
+                    {cls.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* Division Dropdown */}
+            <div className="mt-2">
+              <label
+                htmlFor="division"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Division <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="division"
+                disabled
+                value={selectedDivision}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                // Disable division until class is selected
+              >
+                <option value="">Select</option>
+                {divisions.map((div) => (
+                  <option key={div.section_id} value={div.section_id}>
+                    {div.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="rollNumber"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Roll No.
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.roll_no}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="grnNumber"
+                className="block font-bold text-xs mb-0.5"
+              >
+                GRN No. <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.reg_id}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>{" "}
+            <div className="mt-2">
+              <label htmlFor="house" className="block font-bold text-xs mb-0.5">
+                House
+              </label>
+              <select
+                id="house"
+                disabled
+                value={formData.house}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              >
+                <option>Select</option>
+                <option value="D">Diamond</option>
+                <option value="E">Emerald</option>
+                <option value="R">Ruby</option>
+                <option value="S">Sapphire</option>
+              </select>
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="admittedInClass"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Admitted In Class <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="admittedInClass"
+                disabled
+                value={formData.admission_class}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              >
+                <option>Select</option>
+                <option value="Nursery">Nursery</option>
+                <option value="LKG">LKG</option>
+                <option value="UKG">UKG</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+              </select>
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="dataOfAdmission"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Date of Admission <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                disabled
+                value={formData.admission_date}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="studentIdNumber"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Student ID No.
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.student_id}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="studentAadharNumber"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Student Aadhar No. <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.stu_aadhaar_no}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>{" "}
+            {selectedClass > 99 && (
+              <div className="mt-2">
+                <label
+                  htmlFor="studentAadharNumber"
+                  className="block font-bold text-xs mb-0.5"
+                >
+                  Udise Pen No.
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  maxLength={14}
+                  value={formData.udise_pen_no}
+                  className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                  // onBlur={handleBlur}
+                />
+              </div>
+            )}
+            {/* Address Information */}
+            <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
+              {" "}
+              Address Information
+            </h5>
+            <div className="mt-2">
+              <label
+                htmlFor="address"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Address <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="address"
+                disabled
+                rows={2}
+                value={formData.permant_add}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label htmlFor="city" className="block font-bold text-xs mb-0.5">
+                City <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                disabled
+                maxLength={100}
+                value={formData.city}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label htmlFor="state" className="block font-bold text-xs mb-0.5">
+                State <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.state}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="pincode"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Pincode
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.pincode}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            {/* </div> */}
+            {/*  */}
+            {/* <div className="w-full sm:max-w-[30%]"> */}
+            {/* Emergency Contact */}
+            <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
+              {" "}
+              Emergency Contact
+            </h5>
+            <div className="mt-2">
+              <label
+                htmlFor="emergencyName"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Emergency Name
+              </label>
+              <input
+                type="text"
+                id="emergencyName"
+                disabled
+                value={formData.emergency_name}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="emergencyAddress"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Emergency Address
+              </label>
+              <textarea
+                id="emergencyAddress"
+                disabled
+                value={formData.emergency_add}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+              <div className="flex flex-row items-center gap-2 -mt-1 w-full">
+                <input
+                  type="checkbox"
+                  disabled
+                  className="border h-[26px] border-[#ccc] px-3 py-[6px] text-[14px] leading-4 outline-none"
+                  onChange={(event) => {
+                    if (event.target.checked) {
+                      setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        emergency_add: prevFormData.permant_add,
+                      }));
+                    } else {
+                      setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        emergency_add: "",
+                      }));
+                    }
+                  }}
+                />
+                <label htmlFor="sameAs" className="text-xs">
+                  Same as permanent address
+                </label>
+              </div>
+            </div>
+            <div className="w-full flex flex-row items-center">
+              <span className="w-[15%] h-[34px] text-[14px] text-[#555] text-center border border-[#ccc] border-r-0 flex items-center justify-center p-1">
+                +91
+              </span>
+              <input
+                type="text"
+                inputMode="numeric"
+                id="emergencyContact"
+                name="emergency_contact"
+                maxLength={10}
+                value={formData.emergency_contact}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+                  if (value.length <= 10) {
+                    setFormData({
+                      ...formData,
+                      emergency_contact: value,
+                    });
+                  }
+                }}
+              />
+            </div>
+            {/* Transport Information */}
+            {/* <h5 className="col-span-4 text-gray-500 mt-2 relative top-2"> Transport Information</h5> */}
+            <div className="mt-2">
+              <label
+                htmlFor="transportMode"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Transport Mode
+              </label>
+              <select
+                id="transportMode"
+                disabled
+                value={formData.transport_mode}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                // onChange={handleChange}
+                // onBlur={handleBlur}
+              >
+                <option>Select</option>
+                <option value="School Bus">School Bus</option>
+                <option value="Private Van">Private Van</option>
+                <option value="Self">Self</option>
+              </select>
+              <input
+                type="text"
+                id="vehicleNumber"
+                disabled
+                maxLength={13}
+                placeholder="Vehicle No."
+                value={formData.vehicle_no}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            {/* Health Information */}
+            <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
+              {" "}
+              Health Information
+            </h5>
+            <div className="mt-2">
+              <label
+                htmlFor="allergies"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Allergies(if any)
+              </label>
+              <input
+                type="text"
+                disabled
+                maxLength={200}
+                value={formData.allergies}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="height"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Height
+              </label>
+              <input
+                type="text"
+                id="height"
+                maxLength={4.1}
+                disabled
+                value={formData.height}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="weight"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Weight
+              </label>
+              <input
+                type="text"
+                id="weight"
+                disabled
+                maxLength={4.1}
+                value={formData.weight}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              />
+            </div>
+            <div className="  flex gap-4 pt-[7px]">
+              <div
+                htmlFor="weight"
+                className="block font-bold text-[.9em] mt-4 "
+              >
+                Has Spectacles
+              </div>
+              <div className="flex items-center gap-6 mt-3">
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="yes"
+                    disabled
+                    checked={formData.hasSpectacles === "Yes"}
+                    value="Yes"
+
+                    // onBlur={handleBlur}
+                  />
+                  <label htmlFor="yes" className="ml-1">
+                    Yes
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="no"
+                    disabled
+                    checked={formData.hasSpectacles === "No"}
+                    value="No"
+                    // onBlur={handleBlur}
+                  />
+                  <label htmlFor="no" className="ml-1">
+                    No
+                  </label>
+                </div>
+              </div>
+            </div>
+            {/* ... */}
+            {/* Add other form fields similarly */}
+            {/* ... */}
+            <div className="w-full col-span-4 relative top-4">
+              <div className="w-full mx-auto">
+                <h3 className="text-blue-500 w-full mx-auto text-center  md:text-[1.2em] text-nowrap font-bold">
+                  {" "}
+                  <FaUserGroup className="text-[1.4em] text-blue-700 inline" />{" "}
+                  Parent's Information :{" "}
+                </h3>
+              </div>
+            </div>
+            <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
+              {" "}
+              Father Details
+            </h5>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="email"
+                disabled
+                maxLength={100}
+                value={formData.father_name}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Occupation
+              </label>
+              <input
+                type="text"
+                id="email"
+                maxLength={100}
+                disabled
+                value={formData.father_occupation}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="bloodGroup"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Blood group
+              </label>
+              <select
+                id="bloodGroup"
+                disabled
+                value={formData.blood_group}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+
+                // onBlur={handleBlur}
+              >
+                <option>Select</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+            </div>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Father Aadhaar Card No. <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="email"
+                disabled
+                maxLength={12}
+                value={formData.father_adhar_card}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Office Address
+              </label>
+              <textarea
+                id="email"
+                rows={2}
+                maxLength={200}
+                disabled
+                value={formData.f_office_add}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="telephone"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Telephone
+              </label>
+              <input
+                type="text"
+                maxLength={11}
+                id="telephone"
+                disabled
+                value={formData.f_office_tel}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            <div>
+              <label htmlFor="phone" className="block font-bold text-xs mb-0.5">
+                Mobile Number <span className="text-red-500">*</span>
+              </label>
+              <div className="flex">
+                <span className="w-[15%] h-[34px] text-[14px] text-[#555] text-center border border-[#ccc] border-r-0 flex items-center justify-center p-1">
+                  +91
+                </span>
+                <input
+                  type="tel"
+                  id="phone"
+                  disabled
+                  pattern="\d{10}"
+                  maxLength="10"
+                  value={formData.f_mobile}
+                  className="input-field block w-full border-1 border-gray-400 outline-none rounded-r-md py-1 px-3 bg-white shadow-inner"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  id="setusernameFatherMob"
+                  name="setUsername"
+                  // checked={formData.selectedUsername === "FatherMob"}
+                />
+                <label htmlFor="setusernameFatherMob">
+                  Set this as username
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  value="FatherMob"
+                  id="receiveSmsmob"
+                  checked={formData.SetToReceiveSMS === "FatherMob"}
+                />
+                <label htmlFor="receiveSmsmob">
+                  Set to receive SMS at this no.
+                </label>
+              </div>
+            </div>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Email Id <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                disabled
+                maxLength={50}
+                value={formData.f_email}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  id="setUserNameFather"
+                  // checked={selectedUsername === "Father"}
+                />
+                <label htmlFor="setUserNameFather">Set this as username</label>
+              </div>
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="dataOfAdmission"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Father Date Of Birth
+              </label>
+              <input
+                type="date"
+                id="dataOfAdmission"
+                disabled
+                value={formData.f_dob}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                // onBlur={handleBlur}
+              />
+            </div>
+            {/* Mother information */}
+            <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
+              {" "}
+              Mother Details
+            </h5>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                disabled
+                value={formData.mother_name}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Occupation
+              </label>
+              <input
+                type="text"
+                id="email"
+                maxLength={100}
+                disabled
+                value={formData.mother_occupation}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="bloodGroup"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Blood group
+              </label>
+              <select
+                id="bloodGroup"
+                disabled
+                value={formData.m_blood}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                // onBlur={handleBlur}
+              >
+                <option>Select</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+            </div>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Mother Aadhaar Card No. <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="email"
+                disabled
+                maxLength={12}
+                value={formData.mother_adhar_card}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Office Address
+              </label>
+              <textarea
+                id="email"
+                rows={2}
+                value={formData.m_office_add}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="m_office_tel"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Telephone
+              </label>
+              <input
+                type="text"
+                maxLength={11}
+                id="m_office_tel"
+                disabled
+                value={formData.m_office_tel}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>
+            {/* <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Telephone
+              </label>
+              <input
+                type="text"
+                maxLength={11}
+                id="email"
+                name="m_office_tel"
+                value={formData.m_office_tel}
+                onChange={handleChange}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div> */}
+            <div>
+              <label htmlFor="phone" className="block font-bold text-xs mb-0.5">
+                Mobile Number <span className="text-red-500">*</span>
+              </label>
+              <div className="flex">
+                <span className="w-[15%] h-[34px] text-[14px] text-[#555] text-center border border-[#ccc] border-r-0 flex items-center justify-center p-1">
+                  +91
+                </span>
+                <input
+                  type="tel"
+                  id="phone"
+                  disabled
+                  value={formData.m_mobile}
+                  className="input-field block w-full border-1 border-gray-400 outline-none rounded-r-md py-1 px-3 bg-white shadow-inner"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  id="setusernameMotherMob"
+                  name="setUsername"
+                  // checked={selectedUsername === "MotherMob"}
+                />
+                <label htmlFor="setusernameMotherMob">
+                  Set this as username
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  disabled
+                  value="MotherMob"
+                  id="receiveSmsmobMother"
+                  checked={formData.SetToReceiveSMS === "MotherMob"}
+                />
+                <label htmlFor="receiveSmsmobMother">
+                  Set to receive SMS at this no.
+                </label>
+              </div>
+            </div>
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Email Id <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                disabled
+                maxLength={50}
+                value={formData.m_emailid}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  id="emailuser"
+                  disabled // checked={selectedUsername === "Mother"}
+                />
+                <label htmlFor="emailuser">Set this as username</label>
+              </div>
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="dataOfAdmission"
+                className="block font-bold text-xs mb-0.5"
+              >
+                Mother Date Of Birth
+              </label>
+              <input
+                type="date"
+                id="dataOfAdmission"
+                disabled
+                value={formData.f_dob}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                // onBlur={handleBlur}
+              />
+            </div>
+            {/*  */}
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
