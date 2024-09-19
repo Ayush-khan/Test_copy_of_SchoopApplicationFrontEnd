@@ -2435,6 +2435,8 @@ function Form() {
     f_office_tel: "",
     f_mobile: "",
     f_email: "",
+    f_dob: " ",
+    m_dob: " ",
     parent_adhar_no: "",
     mother_name: "",
     mother_occupation: "",
@@ -2517,6 +2519,8 @@ function Form() {
         pincode: student.pincode || "",
         image_name: student.image_name || "",
         // Parent information
+        f_dob: student?.parents?.f_dob || " ",
+        m_dob: student?.parents?.m_dob || " ",
         father_name: student?.parents?.father_name || " ",
         father_occupation: student?.parents?.father_occupation || "",
         f_office_add: student?.parents?.f_office_add || "  ",
@@ -3838,28 +3842,36 @@ function Form() {
                 />
               </div>
             </div> */}
-            <div className="w-full flex flex-row items-center">
-              <span className="w-[15%] h-[34px] text-[14px] text-[#555] text-center border border-[#ccc] border-r-0 flex items-center justify-center p-1">
-                +91
-              </span>
-              <input
-                type="text"
-                inputMode="numeric"
-                id="emergencyContact"
-                name="emergency_contact"
-                maxLength={10}
-                value={formData.emergency_contact}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
-                  if (value.length <= 10) {
-                    setFormData({
-                      ...formData,
-                      emergency_contact: value,
-                    });
-                  }
-                }}
-              />
+            <div className="mt-2">
+              <label
+                htmlFor="emergencyContact"
+                className=" font-bold text-xs mb-0.5"
+              >
+                Emergency Contact{" "}
+              </label>
+              <div className="w-full flex flex-row items-center">
+                <span className="w-[15%] h-[34px] text-[14px] text-[#555] text-center border border-[#ccc] border-r-0 flex items-center justify-center p-1">
+                  +91
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  id="emergencyContact"
+                  name="emergency_contact"
+                  maxLength={10}
+                  value={formData.emergency_contact}
+                  className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+                    if (value.length <= 10) {
+                      setFormData({
+                        ...formData,
+                        emergency_contact: value,
+                      });
+                    }
+                  }}
+                />
+              </div>
             </div>
             {/* Transport Information */}
             {/* <h5 className="col-span-4 text-gray-500 mt-2 relative top-2"> Transport Information</h5> */}
