@@ -18,6 +18,7 @@ function SubjectForRc() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
+  // State for handling the edit and add forms
   const [newSectionName, setNewSectionName] = useState("");
   const [newSequenceNumber, setNewSequenceNumber] = useState("");
   const [newSubjectType, setNewSubjectType] = useState("");
@@ -29,6 +30,7 @@ function SubjectForRc() {
   const [nameAvailable, setNameAvailable] = useState(true);
   const [nameError, setNameError] = useState("");
   const pageSize = 10;
+  const [backendErrors, setBackendErrors] = useState({});
 
   const fetchSections = async () => {
     try {
@@ -126,16 +128,20 @@ function SubjectForRc() {
       console.error("Error checking class name:", error);
     }
   };
+  // Function to open the Edit modal with pre-filled data
   const handleEdit = (section) => {
-    setCurrentSection(section);
-    setNewSectionName(section.name);
-    setNewSubjectType(section);
-
-    setShowEditModal(true);
+    setCurrentSection(section); // Store the section being edited
+    setNewSectionName(section.name); // Pre-fill the section name
+    setNewSequenceNumber(section.sequence); // Pre-fill the sequence number
+    setShowEditModal(true); // Show the Edit modal
   };
-
+  // Function to open the Add modal and clear the form fields
   const handleAdd = () => {
-    setShowAddModal(true);
+    setNewSectionName(""); // Reset section name for Add form
+    setNewSequenceNumber(""); // Reset sequence number for Add form
+    setFieldErrors({}); // Clear any existing field errors
+    setNameError(""); // Clear name error
+    setShowAddModal(true); // Show the Add modal
   };
 
   const handleCloseModal = () => {
@@ -143,6 +149,7 @@ function SubjectForRc() {
     setShowEditModal(false);
     setShowDeleteModal(false);
     setNewSectionName("");
+    setBackendErrors("");
     setCurrentSection(null);
     setFieldErrors({}); // Clear field-specific errors when closing the modal
     setNameError("");
@@ -166,23 +173,23 @@ function SubjectForRc() {
       }
       console.log("Name is:", newSectionName);
 
-      //   const checkNameResponse = await axios.post(
-      //     `${API_URL}/api/check_subject_name`,
-      //     { name: newSectionName },
-      //     {
-      //       headers: { Authorization: `Bearer ${token}` },
-      //       withCredentials: true,
-      //     }
-      //   );
+      const checkNameResponse = await axios.post(
+        `${API_URL}/api/check_subject_name`,
+        { sequence: newSequenceNumber },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
 
-      //   if (checkNameResponse.data?.exists === true) {
-      //     setNameError("Name is already taken.");
-      //     setNameAvailable(false);
-      //     return;
-      //   } else {
-      //     setNameError("");
-      //     setNameAvailable(true);
-      //   }
+      if (checkNameResponse.data?.exists === true) {
+        setNameError("The sequence has already been taken.");
+        setNameAvailable(false);
+        return;
+      } else {
+        setNameError("");
+        setNameAvailable(true);
+      }
       await axios.post(
         `${API_URL}/api/subject_for_reportcard`,
         { name: newSectionName, sequence: newSequenceNumber },
@@ -208,7 +215,6 @@ function SubjectForRc() {
       }
     }
   };
-
   const handleSubmitEdit = async () => {
     // Validate both subject name and sequence number
     const validationErrors = validateSectionName(
@@ -226,24 +232,8 @@ function SubjectForRc() {
       if (!token) {
         throw new Error("No authentication token or academic year found");
       }
-      //   const nameCheckResponse = await axios.post(
-      //     `${API_URL}/api/check_subject_name`,
-      //     { name: newSectionName },
-      //     {
-      //       headers: { Authorization: `Bearer ${token}` },
-      //       withCredentials: true,
-      //     }
-      //   );
 
-      //   if (nameCheckResponse.data?.exists === true) {
-      //     setNameError("Name already taken.");
-      //     setNameAvailable(false);
-      //     return;
-      //   } else {
-      //     setNameError("");
-      //     setNameAvailable(true);
-      //   }
-      await axios.put(
+      const response = await axios.put(
         `${API_URL}/api/subject_for_reportcard/${currentSection.sub_rc_master_id}`,
         { name: newSectionName, sequence: newSequenceNumber },
         {
@@ -259,15 +249,76 @@ function SubjectForRc() {
       toast.success("Subject Updated successfully!");
     } catch (error) {
       console.error("Error editing Subject:", error);
+
       if (error.response && error.response.data && error.response.data.errors) {
-        Object.values(error.response.data.errors).forEach((err) =>
-          toast.error(err)
-        );
+        // Store the errors in backendErrors state
+        setBackendErrors(error.response.data.errors);
       } else {
         toast.error("Server error. Please try again later.");
       }
     }
   };
+
+  // const handleSubmitEdit = async () => {
+  //   // Validate both subject name and sequence number
+  //   const validationErrors = validateSectionName(
+  //     newSectionName,
+  //     newSequenceNumber
+  //   );
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setFieldErrors(validationErrors);
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     if (!token) {
+  //       throw new Error("No authentication token or academic year found");
+  //     }
+  //     //   const nameCheckResponse = await axios.post(
+  //     //     `${API_URL}/api/check_subject_name`,
+  //     //     { name: newSectionName },
+  //     //     {
+  //     //       headers: { Authorization: `Bearer ${token}` },
+  //     //       withCredentials: true,
+  //     //     }
+  //     //   );
+
+  //     //   if (nameCheckResponse.data?.exists === true) {
+  //     //     setNameError("Name already taken.");
+  //     //     setNameAvailable(false);
+  //     //     return;
+  //     //   } else {
+  //     //     setNameError("");
+  //     //     setNameAvailable(true);
+  //     //   }
+  //     const response = await axios.put(
+  //       `${API_URL}/api/subject_for_reportcard/${currentSection.sub_rc_master_id}`,
+  //       { name: newSectionName, sequence: newSequenceNumber },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         withCredentials: true,
+  //       }
+  //     );
+
+  //     fetchSections();
+  //     handleCloseModal();
+  //     toast.success("Subject Updated successfully!");
+  //   } catch (error) {
+  //     console.error("Error editing Subject:", error);
+
+  //     if (error.response && error.response.data && error.response.data.errors) {
+  //       Object.values(error.response.data.errors).forEach((err) =>
+  //         toast.error(err)
+  //       );
+  //     } else {
+  //       toast.error("Server error. Please try again later.");
+  //     }
+  //   }
+  // };
 
   const handleDelete = (id) => {
     const sectionToDelete = sections.find((sec) => sec.sub_rc_master_id === id);
@@ -316,6 +367,8 @@ function SubjectForRc() {
   };
   const handleChangeSequenceNumber = (e) => {
     const { value } = e.target;
+    setBackendErrors("");
+    setNameError("");
     setNewSequenceNumber(value);
 
     setFieldErrors((prevErrors) => ({
@@ -516,7 +569,7 @@ function SubjectForRc() {
               <div className="modal-content">
                 <div className="flex justify-between p-3">
                   <h5 className="modal-title">
-                    Create New Subject for report card
+                    Create Subject for report card
                   </h5>
                   <RxCross1
                     className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -547,11 +600,11 @@ function SubjectForRc() {
                       // onBlur={handleBlur}
                     />
                     <div className="absolute top-9 left-1/3">
-                      {!nameAvailable && (
+                      {/* {!nameAvailable && (
                         <small className=" block text-danger text-xs ">
                           {nameError}
                         </small>
-                      )}
+                      )} */}
                       {fieldErrors.name && (
                         <small className="text-danger text-xs">
                           {fieldErrors.name}
@@ -630,10 +683,7 @@ function SubjectForRc() {
               ></div>
               <div className="modal-body">
                 <div className=" relative mb-3 flex justify-center  mx-4">
-                  <label
-                    htmlFor="editSectionName"
-                    className="w-1/2 mt-2 text-nowrap"
-                  >
+                  <label htmlFor="editSectionName" className="w-1/2 mt-2">
                     Subject Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -645,26 +695,22 @@ function SubjectForRc() {
                     onChange={handleChangeSectionName}
                     // onChange={(e) => setNewSectionName(e.target.value)}
                     // onBlur={handleBlur}
-                  />{" "}
+                  />
+                  <div className="absolute top-9 left-1/3 ">
+                    {/* {!nameAvailable && (
+                      <small className=" block text-danger text-xs">
+                        {nameError}
+                      </small>
+                    )} */}
+                    {fieldErrors.name && (
+                      <small className="text-danger text-xs">
+                        {fieldErrors.name}
+                      </small>
+                    )}
+                  </div>
                 </div>
-                <div className=" relative left-[35%] -top-7">
-                  {!nameAvailable && (
-                    <small className=" block text-danger text-xs">
-                      {nameError}
-                    </small>
-                  )}
-                  {fieldErrors.name && (
-                    <small className="text-danger text-xs">
-                      {fieldErrors.name}
-                    </small>
-                  )}
-                </div>
-
                 <div className=" relative mb-3 flex justify-center  mx-4">
-                  <label
-                    htmlFor="sequenceNumber"
-                    className="w-1/2 mt-2 text-nowrap"
-                  >
+                  <label htmlFor="sequenceNumber" className="w-1/2 mt-2">
                     Sequence No <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -677,18 +723,23 @@ function SubjectForRc() {
                     // onChange={(e) => setNewSectionName(e.target.value)}
                     // onBlur={handleBlur}
                   />
-                </div>
-                <div className=" md:relative md:left-[35%] md:-top-7">
-                  {!nameAvailable && (
-                    <small className=" block text-danger text-xs ">
-                      {nameError}
-                    </small>
-                  )}
-                  {fieldErrors.sequenceNumber && (
-                    <small className="text-danger text-xs">
-                      {fieldErrors.sequenceNumber}
-                    </small>
-                  )}
+                  <div className="absolute top-9 left-1/3">
+                    {backendErrors.sequence && (
+                      <span className="block text-danger text-xs">
+                        {backendErrors.sequence[0]}
+                      </span>
+                    )}
+                    {/* {!nameAvailable && (
+                      <small className=" block text-danger text-xs ">
+                        {nameError}
+                      </small>
+                    )} */}
+                    {fieldErrors.sequenceNumber && (
+                      <small className="text-danger text-xs">
+                        {fieldErrors.sequenceNumber}
+                      </small>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className=" flex justify-end p-3">
