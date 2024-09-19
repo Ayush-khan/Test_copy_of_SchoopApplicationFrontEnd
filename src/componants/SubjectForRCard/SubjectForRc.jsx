@@ -19,6 +19,7 @@ function SubjectForRc() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
   const [newSectionName, setNewSectionName] = useState("");
+  const [newSequenceNumber, setNewSequenceNumber] = useState("");
   const [newSubjectType, setNewSubjectType] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
@@ -61,16 +62,34 @@ function SubjectForRc() {
     fetchSections();
   }, []);
 
-  const validateSectionName = (name) => {
-    const regex = /^[a-zA-Z]+$/;
-    let errors = {};
-    if (!name) errors.name = "Please enter section name.";
-    if (name.length > 255)
-      errors.name = "The name field must not exceed 255 characters.";
-    if (!regex.test(name))
-      errors.name = "Please enter alphabets without space.";
+  const validateSectionName = (name, sequenceNumber) => {
+    const errors = {};
+
+    // Validate subject name
+    if (!name || name.trim() === "") {
+      errors.name = "Subject name is required.";
+    }
+
+    // Validate sequence number
+    if (!sequenceNumber) {
+      errors.sequenceNumber = "Sequence number is required.";
+    } else if (!/^\d+$/.test(sequenceNumber)) {
+      errors.sequenceNumber = "Please enter a valid whole number.";
+    }
+
     return errors;
   };
+
+  // const validateSectionName = (name) => {
+  //   const regex = /^[a-zA-Z]+$/;
+  //   let errors = {};
+  //   if (!name) errors.name = "Please enter section name.";
+  //   if (name.length > 255)
+  //     errors.name = "The name field must not exceed 255 characters.";
+  //   if (!regex.test(name))
+  //     errors.name = "Please enter alphabets without space.";
+  //   return errors;
+  // };
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
   };
@@ -130,7 +149,11 @@ function SubjectForRc() {
   };
 
   const handleSubmitAdd = async () => {
-    const validationErrors = validateSectionName(newSectionName);
+    // Validate both subject name and sequence number
+    const validationErrors = validateSectionName(
+      newSectionName,
+      newSequenceNumber
+    );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       return;
@@ -139,7 +162,7 @@ function SubjectForRc() {
       const token = localStorage.getItem("authToken");
 
       if (!token) {
-        throw new Error("No authentication token or academic year found");
+        throw new Error("No authentication token found");
       }
       console.log("Name is:", newSectionName);
 
@@ -162,7 +185,7 @@ function SubjectForRc() {
       //   }
       await axios.post(
         `${API_URL}/api/subject_for_reportcard`,
-        { name: newSectionName },
+        { name: newSectionName, sequence: newSequenceNumber },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -187,7 +210,11 @@ function SubjectForRc() {
   };
 
   const handleSubmitEdit = async () => {
-    const validationErrors = validateSectionName(newSectionName);
+    // Validate both subject name and sequence number
+    const validationErrors = validateSectionName(
+      newSectionName,
+      newSequenceNumber
+    );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       return;
@@ -218,7 +245,7 @@ function SubjectForRc() {
       //   }
       await axios.put(
         `${API_URL}/api/subject_for_reportcard/${currentSection.sub_rc_master_id}`,
-        { name: newSectionName, sequence: currentSection?.sequence },
+        { name: newSectionName, sequence: newSequenceNumber },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -287,12 +314,25 @@ function SubjectForRc() {
       }
     }
   };
+  const handleChangeSequenceNumber = (e) => {
+    const { value } = e.target;
+    setNewSequenceNumber(value);
+
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      sequenceNumber: /^\d+$/.test(value)
+        ? ""
+        : "Please enter a valid whole number for the sequence.",
+    }));
+  };
+
   const handleChangeSectionName = (e) => {
     const { value } = e.target;
     setNewSectionName(value);
+
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
-      name: validateSectionName(value).name,
+      name: value ? "" : "Subject name is required.",
     }));
   };
 
@@ -486,7 +526,7 @@ function SubjectForRc() {
                   />
                 </div>
                 <div
-                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  className=" relative  mb-3 h-1 w-[99%] mx-auto bg-red-700"
                   style={{
                     backgroundColor: "#C03078",
                   }}
@@ -515,6 +555,34 @@ function SubjectForRc() {
                       {fieldErrors.name && (
                         <small className="text-danger text-xs">
                           {fieldErrors.name}
+                        </small>
+                      )}
+                    </div>
+                  </div>
+                  <div className=" relative mb-3 flex justify-center  mx-4">
+                    <label htmlFor="sequenceNumber" className="w-1/2 mt-2">
+                      Sequence No <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={2}
+                      className="form-control shadow-md mb-2"
+                      id="sequenceNumber"
+                      value={newSequenceNumber}
+                      onChange={handleChangeSequenceNumber}
+                      // onChange={(e) => setNewSectionName(e.target.value)}
+                      // onBlur={handleBlur}
+                    />
+                    <div className="absolute top-9 left-1/3">
+                      {!nameAvailable && (
+                        <small className=" block text-danger text-xs ">
+                          {nameError}
+                        </small>
+                      )}
+
+                      {fieldErrors.sequenceNumber && (
+                        <small className="text-danger text-xs">
+                          {fieldErrors.sequenceNumber}
                         </small>
                       )}
                     </div>
@@ -562,7 +630,10 @@ function SubjectForRc() {
               ></div>
               <div className="modal-body">
                 <div className=" relative mb-3 flex justify-center  mx-4">
-                  <label htmlFor="editSectionName" className="w-1/2 mt-2">
+                  <label
+                    htmlFor="editSectionName"
+                    className="w-1/2 mt-2 text-nowrap"
+                  >
                     Subject Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -574,19 +645,50 @@ function SubjectForRc() {
                     onChange={handleChangeSectionName}
                     // onChange={(e) => setNewSectionName(e.target.value)}
                     // onBlur={handleBlur}
+                  />{" "}
+                </div>
+                <div className=" relative left-[35%] -top-7">
+                  {!nameAvailable && (
+                    <small className=" block text-danger text-xs">
+                      {nameError}
+                    </small>
+                  )}
+                  {fieldErrors.name && (
+                    <small className="text-danger text-xs">
+                      {fieldErrors.name}
+                    </small>
+                  )}
+                </div>
+
+                <div className=" relative mb-3 flex justify-center  mx-4">
+                  <label
+                    htmlFor="sequenceNumber"
+                    className="w-1/2 mt-2 text-nowrap"
+                  >
+                    Sequence No <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={2}
+                    className="form-control shadow-md mb-2"
+                    id="sequenceNumber"
+                    value={newSequenceNumber}
+                    onChange={handleChangeSequenceNumber}
+                    // onChange={(e) => setNewSectionName(e.target.value)}
+                    // onBlur={handleBlur}
                   />
-                  <div className="absolute top-9 left-1/3 ">
-                    {!nameAvailable && (
-                      <small className=" block text-danger text-xs">
-                        {nameError}
-                      </small>
-                    )}
-                    {fieldErrors.name && (
-                      <small className="text-danger text-xs">
-                        {fieldErrors.name}
-                      </small>
-                    )}
-                  </div>
+                </div>
+                <div className=" md:relative md:left-[35%] md:-top-7">
+                  {!nameAvailable && (
+                    <small className=" block text-danger text-xs ">
+                      {nameError}
+                    </small>
+                  )}
+                  {fieldErrors.sequenceNumber && (
+                    <small className="text-danger text-xs">
+                      {fieldErrors.sequenceNumber}
+                    </small>
+                  )}
                 </div>
               </div>
               <div className=" flex justify-end p-3">
