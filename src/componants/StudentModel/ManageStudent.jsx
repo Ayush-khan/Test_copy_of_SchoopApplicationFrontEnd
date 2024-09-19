@@ -1711,8 +1711,24 @@ function ManageSubjectList() {
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {subject?.roll_no}
                               </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {subject?.photo}
+                              </td>{" "} */}
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
+                                {console.log(
+                                  "the teacher image",
+                                  `${API_URL}${subject?.teacher_image_name}`
+                                )}
+
+                                <img
+                                  src={
+                                    subject?.teacher_image_name
+                                      ? `${API_URL}${subject?.teacher_image_name}`
+                                      : "https://via.placeholder.com/50"
+                                  }
+                                  alt={subject?.name}
+                                  className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
+                                />
                               </td>
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {`${subject?.first_name} ${subject?.mid_name} ${subject?.last_name}`}
@@ -1722,7 +1738,6 @@ function ManageSubjectList() {
                                   subject?.get_division?.name
                                 }`}
                               </td>
-
                               {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {subject?.get_division?.name}
                               </td> */}
@@ -1797,7 +1812,6 @@ function ManageSubjectList() {
                                   )}
                                 </button>
                               </td> */}
-
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 <button
                                   onClick={() => handleView(subject)}

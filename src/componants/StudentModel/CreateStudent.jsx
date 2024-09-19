@@ -112,14 +112,14 @@
 //   //   f_office_tel: "",
 //   //   f_mobile: "",
 //   //   f_email: "",
-//   //   father_adhar_card: "",
+//   //   parent_adhar_no: "",
 //   //   mother_name: " ",
 //   //   mother_occupation: "",
 //   //   m_office_add: " ",
 //   //   m_office_tel: "",
 //   //   m_mobile: "",
 //   //   m_emailid: "",
-//   //   mother_adhar_card: "",
+//   //   m_adhar_no: "",
 
 //   //   // Preferences
 //   //   SetToReceiveSMS: "",
@@ -174,14 +174,14 @@
 //     f_office_tel: "",
 //     f_mobile: "",
 //     f_email: "",
-//     father_adhar_card: "",
+//     parent_adhar_no: "",
 //     mother_name: "",
 //     mother_occupation: "",
 //     m_office_add: "",
 //     m_office_tel: "",
 //     m_mobile: "",
 //     m_emailid: "",
-//     mother_adhar_card: "",
+//     m_adhar_no: "",
 //     udise_pen_no: "",
 //     // Preferences
 //     SetToReceiveSMS: "",
@@ -262,14 +262,14 @@
 //         f_office_tel: student?.parents?.f_office_tel || "",
 //         f_mobile: student?.parents?.f_mobile || "",
 //         f_email: student?.parents?.f_email || "",
-//         father_adhar_card: student?.parents?.father_adhar_card || "",
+//         parent_adhar_no: student?.parents?.parent_adhar_no || "",
 //         mother_name: student?.parents?.mother_name || " ",
 //         mother_occupation: student?.parents?.mother_occupation || "",
 //         m_office_add: student?.parents?.m_office_add || " ",
 //         m_office_tel: student?.parents?.m_office_tel || "",
 //         m_mobile: student?.parents?.m_mobile || "",
 //         m_emailid: student?.parents?.m_emailid || "",
-//         mother_adhar_card: student?.parents?.mother_adhar_card || "",
+//         m_adhar_no: student?.parents?.m_adhar_no || "",
 //         udise_pen_no: student.udise_pen_no || " ",
 //         // Preferences
 //         SetToReceiveSMS: student.SetToReceiveSMS || "",
@@ -536,11 +536,11 @@
 //     const stu_aadhaar_no = validateAadhar(formData.stu_aadhaar_no);
 //     if (stu_aadhaar_no) newErrors.stu_aadhaar_no = stu_aadhaar_no;
 //     // mother adhar card validatoins
-//     const mother_adhar_card = validateAadhar(formData.mother_adhar_card);
-//     if (mother_adhar_card) newErrors.mother_adhar_card = mother_adhar_card;
+//     const m_adhar_no = validateAadhar(formData.m_adhar_no);
+//     if (m_adhar_no) newErrors.m_adhar_no = m_adhar_no;
 //     // Father adhar validations
-//     const aadharError = validateAadhar(formData.father_adhar_card);
-//     if (aadharError) newErrors.father_adhar_card = aadharError;
+//     const aadharError = validateAadhar(formData.parent_adhar_no);
+//     if (aadharError) newErrors.parent_adhar_no = aadharError;
 
 //     const f_email = validateEmail(formData.f_email);
 //     if (f_email) newErrors.f_email = f_email;
@@ -551,16 +551,16 @@
 //     if (!formData.father_name.trim())
 //       newErrors.father_name = "Father Name is required";
 //     // mother
-//     if (!formData.mother_adhar_card.trim())
-//       newErrors.mother_adhar_card = "Mother Aadhaar Card No. is required";
+//     if (!formData.m_adhar_no.trim())
+//       newErrors.m_adhar_no = "Mother Aadhaar Card No. is required";
 //     if (!formData.stu_aadhaar_no.trim())
 //       newErrors.stu_aadhaar_no = "Student Aadhaar Card No. is required";
-//     if (!formData.father_adhar_card.trim())
-//       newErrors.father_adhar_card = "Father Aadhaar Card No. is required";
+//     if (!formData.parent_adhar_no.trim())
+//       newErrors.parent_adhar_no = "Father Aadhaar Card No. is required";
 //     if (!formData.mother_name.trim())
 //       newErrors.mother_name = "Mother Name is required";
-//     // if (!formData.mother_adhar_card.trim())
-//     //   newErrors.mother_adhar_card = "Mother Aadhaar Card No. is required";
+//     // if (!formData.m_adhar_no.trim())
+//     //   newErrors.m_adhar_no = "Mother Aadhaar Card No. is required";
 //     // Add more validations as needed
 
 //     return newErrors;
@@ -586,12 +586,12 @@
 //       fieldErrors.f_mobile = validatePhone(newValue);
 //     } else if (name === "m_mobile") {
 //       fieldErrors.m_mobile = validatePhone(newValue);
-//     } else if (name === "father_adhar_card") {
-//       fieldErrors.father_adhar_card = validateAadhar(newValue);
+//     } else if (name === "parent_adhar_no") {
+//       fieldErrors.parent_adhar_no = validateAadhar(newValue);
 //     } else if (name === "stu_aadhaar_no") {
 //       fieldErrors.stu_aadhaar_no = validateAadhar(newValue);
-//     } else if (name === "mother_adhar_card") {
-//       fieldErrors.mother_adhar_card = validateAadhar(newValue);
+//     } else if (name === "m_adhar_no") {
+//       fieldErrors.m_adhar_no = validateAadhar(newValue);
 //     } else if (name === "f_email" || name === "m_emailid") {
 //       fieldErrors[name] = validateEmail(newValue);
 //     }
@@ -1702,8 +1702,8 @@
 //                   <input
 //                     type="radio"
 //                     id="yes"
-//                     name="hasSpectacles"
-//                     checked={formData.hasSpectacles === "Yes"}
+//                     name="has_specs"
+//                     checked={formData.has_specs === "Yes"}
 //                     value="Yes"
 //                     onChange={handleChange}
 //                     // onBlur={handleBlur}
@@ -1716,8 +1716,8 @@
 //                   <input
 //                     type="radio"
 //                     id="no"
-//                     name="hasSpectacles"
-//                     checked={formData.hasSpectacles === "No"}
+//                     name="has_specs"
+//                     checked={formData.has_specs === "No"}
 //                     value="No"
 //                     onChange={handleChange}
 //                     // onBlur={handleBlur}
@@ -1810,15 +1810,15 @@
 //               <input
 //                 type="text"
 //                 id="email"
-//                 name="father_adhar_card"
+//                 name="parent_adhar_no"
 //                 maxLength={12}
-//                 value={formData.father_adhar_card}
+//                 value={formData.parent_adhar_no}
 //                 onChange={handleChange}
 //                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
 //               />
-//               {errors.father_adhar_card && (
+//               {errors.parent_adhar_no && (
 //                 <span className="text-red-500 text-xs">
-//                   {errors.father_adhar_card}
+//                   {errors.parent_adhar_no}
 //                 </span>
 //               )}
 //             </div>
@@ -2070,15 +2070,15 @@
 //               <input
 //                 type="text"
 //                 id="email"
-//                 name="mother_adhar_card"
+//                 name="m_adhar_no"
 //                 maxLength={12}
-//                 value={formData.mother_adhar_card}
+//                 value={formData.m_adhar_no}
 //                 onChange={handleChange}
 //                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
 //               />
-//               {errors.mother_adhar_card && (
+//               {errors.m_adhar_no && (
 //                 <span className="text-red-500 text-xs">
-//                   {errors.mother_adhar_card}
+//                   {errors.m_adhar_no}
 //                 </span>
 //               )}
 //             </div>
@@ -2435,14 +2435,14 @@ function Form() {
     f_office_tel: "",
     f_mobile: "",
     f_email: "",
-    father_adhar_card: "",
+    parent_adhar_no: "",
     mother_name: "",
     mother_occupation: "",
     m_office_add: "",
     m_office_tel: "",
     m_mobile: "",
     m_emailid: "",
-    mother_adhar_card: "",
+    m_adhar_no: "",
     udise_pen_no: "",
     // Preferences
     SetToReceiveSMS: "",
@@ -2523,14 +2523,14 @@ function Form() {
         f_office_tel: student?.parents?.f_office_tel || "",
         f_mobile: student?.parents?.f_mobile || "",
         f_email: student?.parents?.f_email || "",
-        father_adhar_card: student?.parents?.father_adhar_card || "",
+        parent_adhar_no: student?.parents?.parent_adhar_no || "",
         mother_name: student?.parents?.mother_name || " ",
         mother_occupation: student?.parents?.mother_occupation || "",
         m_office_add: student?.parents?.m_office_add || " ",
         m_office_tel: student?.parents?.m_office_tel || "",
         m_mobile: student?.parents?.m_mobile || "",
         m_emailid: student?.parents?.m_emailid || "",
-        mother_adhar_card: student?.parents?.mother_adhar_card || "",
+        m_adhar_no: student?.parents?.m_adhar_no || "",
         udise_pen_no: student.udise_pen_no || " ",
         // Preferences
         SetToReceiveSMS: student.SetToReceiveSMS || "",
@@ -2782,11 +2782,11 @@ function Form() {
     const stu_aadhaar_no = validateAadhar(formData.stu_aadhaar_no);
     if (stu_aadhaar_no) newErrors.stu_aadhaar_no = stu_aadhaar_no;
     // mother adhar card validatoins
-    const mother_adhar_card = validateAadhar(formData.mother_adhar_card);
-    if (mother_adhar_card) newErrors.mother_adhar_card = mother_adhar_card;
+    const m_adhar_no = validateAadhar(formData.m_adhar_no);
+    if (m_adhar_no) newErrors.m_adhar_no = m_adhar_no;
     // Father adhar validations
-    const aadharError = validateAadhar(formData.father_adhar_card);
-    if (aadharError) newErrors.father_adhar_card = aadharError;
+    const aadharError = validateAadhar(formData.parent_adhar_no);
+    if (aadharError) newErrors.parent_adhar_no = aadharError;
 
     const f_email = validateEmail(formData.f_email);
     if (f_email) newErrors.f_email = f_email;
@@ -2797,16 +2797,16 @@ function Form() {
     if (!formData.father_name.trim())
       newErrors.father_name = "Father Name is required";
     // mother
-    if (!formData.mother_adhar_card.trim())
-      newErrors.mother_adhar_card = "Mother Aadhaar Card No. is required";
+    if (!formData.m_adhar_no.trim())
+      newErrors.m_adhar_no = "Mother Aadhaar Card No. is required";
     if (!formData.stu_aadhaar_no.trim())
       newErrors.stu_aadhaar_no = "Student Aadhaar Card No. is required";
-    if (!formData.father_adhar_card.trim())
-      newErrors.father_adhar_card = "Father Aadhaar Card No. is required";
+    if (!formData.parent_adhar_no.trim())
+      newErrors.parent_adhar_no = "Father Aadhaar Card No. is required";
     if (!formData.mother_name.trim())
       newErrors.mother_name = "Mother Name is required";
-    // if (!formData.mother_adhar_card.trim())
-    //   newErrors.mother_adhar_card = "Mother Aadhaar Card No. is required";
+    // if (!formData.m_adhar_no.trim())
+    //   newErrors.m_adhar_no = "Mother Aadhaar Card No. is required";
     // Add more validations as needed
 
     return newErrors;
@@ -2832,12 +2832,12 @@ function Form() {
       fieldErrors.f_mobile = validatePhone(newValue);
     } else if (name === "m_mobile") {
       fieldErrors.m_mobile = validatePhone(newValue);
-    } else if (name === "father_adhar_card") {
-      fieldErrors.father_adhar_card = validateAadhar(newValue);
+    } else if (name === "parent_adhar_no") {
+      fieldErrors.parent_adhar_no = validateAadhar(newValue);
     } else if (name === "stu_aadhaar_no") {
       fieldErrors.stu_aadhaar_no = validateAadhar(newValue);
-    } else if (name === "mother_adhar_card") {
-      fieldErrors.mother_adhar_card = validateAadhar(newValue);
+    } else if (name === "m_adhar_no") {
+      fieldErrors.m_adhar_no = validateAadhar(newValue);
     } else if (name === "f_email" || name === "m_emailid") {
       fieldErrors[name] = validateEmail(newValue);
     }
@@ -3966,9 +3966,9 @@ function Form() {
                   <input
                     type="radio"
                     id="yes"
-                    name="hasSpectacles"
-                    checked={formData.hasSpectacles === "Yes"}
-                    value="Yes"
+                    name="has_specs"
+                    checked={formData.has_specs === "Y"}
+                    value="Y"
                     onChange={handleChange}
                     // onBlur={handleBlur}
                   />
@@ -3980,9 +3980,9 @@ function Form() {
                   <input
                     type="radio"
                     id="no"
-                    name="hasSpectacles"
-                    checked={formData.hasSpectacles === "No"}
-                    value="No"
+                    name="has_specs"
+                    checked={formData.has_specs === "N" || !formData.has_specs}
+                    value="N"
                     onChange={handleChange}
                     // onBlur={handleBlur}
                   />
@@ -4074,15 +4074,15 @@ function Form() {
               <input
                 type="text"
                 id="email"
-                name="father_adhar_card"
+                name="parent_adhar_no"
                 maxLength={12}
-                value={formData.father_adhar_card}
+                value={formData.parent_adhar_no}
                 onChange={handleChange}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
               />
-              {errors.father_adhar_card && (
+              {errors.parent_adhar_no && (
                 <span className="text-red-500 text-xs">
-                  {errors.father_adhar_card}
+                  {errors.parent_adhar_no}
                 </span>
               )}
             </div>
@@ -4303,15 +4303,15 @@ function Form() {
               <input
                 type="text"
                 id="email"
-                name="mother_adhar_card"
+                name="m_adhar_no"
                 maxLength={12}
-                value={formData.mother_adhar_card}
+                value={formData.m_adhar_no}
                 onChange={handleChange}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
               />
-              {errors.mother_adhar_card && (
+              {errors.m_adhar_no && (
                 <span className="text-red-500 text-xs">
-                  {errors.mother_adhar_card}
+                  {errors.m_adhar_no}
                 </span>
               )}
             </div>
@@ -4468,7 +4468,7 @@ function Form() {
                 type="date"
                 id="dataOfAdmission"
                 name="m_dob"
-                value={formData.f_dob}
+                value={formData.m_dob}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
