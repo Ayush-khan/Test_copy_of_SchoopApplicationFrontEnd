@@ -12,6 +12,7 @@ import Select from "react-select";
 import { MdLockReset, MdOutlineRemoveRedEye } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 function NewStudentList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -31,6 +32,7 @@ function NewStudentList() {
   const [pageCount, setPageCount] = useState(0);
   //   variable to store the respone of the allot subject tab
   const [nameError, setNameError] = useState(null);
+  //   const [selectedFile, setSelectedFile] = useState(null);
   const pageSize = 10;
 
   // for react-search of manage tab teacher Edit and select class
@@ -40,6 +42,10 @@ function NewStudentList() {
   const [userIdset, setUserIdset] = useState("");
   const [passwordError, setPasswordError] = useState(""); // For password error
   const [userIdError, setUserIdError] = useState(""); // For userId error
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadStatus, setUploadStatus] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showDisplayUpload, setShowDisplayUpload] = useState(false);
 
   // Custom styles for the close button
 
@@ -79,7 +85,7 @@ function NewStudentList() {
   const handleSearch = async () => {
     if (!classIdForManage) {
       setNameError("Please select Class.");
-      toast.error("Please select Class!");
+      //   toast.error("Please select Class!");
       return;
     }
     setLoading(true);
@@ -99,6 +105,7 @@ function NewStudentList() {
       const studentList = response?.data || [];
       setSubjects(studentList);
       setPageCount(Math.ceil(studentList.length / pageSize)); // Set page count based on response size
+      setShowDisplayUpload(true);
     } catch (error) {
       toast.error("Error fetching student details.");
     } finally {
@@ -106,8 +113,28 @@ function NewStudentList() {
     }
   };
 
+  const fetchAllStudents = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      setLoading(true);
+
+      const response = await axios.get(`${API_URL}/api/get_all_studentlist`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const allStudentList = response?.data || [];
+      setSubjects(allStudentList); // Store in `students`
+      setPageCount(Math.ceil(allStudentList.length / pageSize));
+    } catch (error) {
+      toast.error("Error fetching the student list.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchInitialData(); // Fetch classes once when the component mounts
+    fetchAllStudents();
   }, []);
 
   // Handle pagination
@@ -238,6 +265,69 @@ function NewStudentList() {
     setShowDActiveModal(false);
   };
 
+  // for uplode portions
+  // Function to download the CSV template
+  const handleDownloadTemplate = async () => {
+    try {
+      // Adjust classIdForManage dynamically if needed
+      const response = await axios.get(
+        `${API_URL}/api/students/download-template/${classIdForManage}`,
+        {
+          responseType: "blob", // Important for handling binary data
+        }
+      );
+
+      // Trigger download using a hidden link element
+      triggerFileDownload(response.data, "student_list_template.csv");
+    } catch (error) {
+      console.error("Error downloading template:", error);
+    }
+  };
+
+  // Helper function to trigger file download
+  const triggerFileDownload = (blobData, fileName) => {
+    const url = window.URL.createObjectURL(new Blob([blobData]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", fileName); // Set the file name
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link); // Cleanup after download
+  };
+
+  // Handle file selection
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]); // Set the selected file to state
+  };
+
+  // Function to upload the selected CSV file
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      alert("Please select a file first"); // Check if file is selected
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", selectedFile); // Append the selected file
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/students/update-students-csv`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setUploadStatus("File uploaded successfully!");
+      setErrorMessage(""); // Clear any error messages
+    } catch (error) {
+      setErrorMessage("Failed to upload file.");
+      console.error("Error uploading file:", error);
+    }
+  };
+
   const filteredSections = subjects.filter((section) => {
     // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
     const studentFullName =
@@ -276,42 +366,115 @@ function NewStudentList() {
         <div className="bg-white w-full md:w-[95%] mx-auto rounded-md ">
           <div className="w-full  mx-auto">
             <ToastContainer />
+
             <div className="mb-4  ">
               <div className="  w-[90%]  mx-auto ">
-                <div className=" w-full md:w-[50%]  flex justify-center flex-col md:flex-row gap-x-1 md:gap-x-4 ">
-                  <div className="w-full  gap-x-3 md:justify-start justify-between  my-1 md:my-4 flex  md:flex-row  ">
-                    <label
-                      htmlFor="classSection"
-                      className=" mr-2 pt-2 items-center text-center"
-                    >
-                      Class <span className="text-red-500">*</span>
-                    </label>
-                    <div className="w-[60%] md:w-[60%] ">
-                      <Select
-                        value={selectedClass}
-                        onChange={handleClassSelect}
-                        options={classOptions}
-                        placeholder="Select "
-                        isSearchable
-                        isClearable
-                        className="text-sm"
-                      />
-                      {nameError && (
-                        <div className=" relative top-0.5 ml-1 text-danger text-xs">
-                          {nameError}
-                        </div>
-                      )}
+                {showDisplayUpload ? (
+                  <div className=" w-full border border-gray-300 rounded-md  mx-auto mt-10">
+                    <h2 className="text-center text-xl font-semibold mb-6 text-blue-500 pt-3">
+                      Upload student data from excel sheet:
+                    </h2>
+
+                    <div className="grid grid-cols-3 gap-8 text-center">
+                      {/* Download Student List Template */}
+                      <div className="flex flex-col items-center">
+                        <h5 className="font-semibold mb-2">
+                          Download Student List Template
+                        </h5>
+                        <p className="text-sm text-gray-500 mb-4">
+                          # Please download the template by clicking the button
+                          below.
+                          <br /># Enter student details in the downloaded file.
+                          Do not add any students.
+                        </p>
+                        <button
+                          onClick={handleDownloadTemplate}
+                          className="bg-blue-500 text-white rounded-full p-4 mb-2 hover:bg-blue-600"
+                        >
+                          <i className="fas fa-download text-xl"></i>
+                        </button>
+                      </div>
+
+                      {/* File Upload */}
+                      <div className="flex flex-col items-center">
+                        <h5 className="font-semibold mb-2">
+                          Class: {classIdForManage}
+                        </h5>
+                        <p className="font-medium mb-2">
+                          Select a file to upload
+                        </p>
+                        <p className="text-sm text-gray-500 mb-4">
+                          # Do not change the name of the file or the contents
+                          of the first 4 columns.
+                          <br /># Please click below to select the file
+                          downloaded in the previous step.
+                        </p>
+                        <input
+                          type="file"
+                          accept=".csv"
+                          onChange={handleFileChange} // Added the onChange event to handle file selection
+                          className="mb-4"
+                        />
+                        <button className="bg-blue-500 text-white rounded-full p-4 hover:bg-blue-600">
+                          <i className="fas fa-search text-xl"></i>
+                        </button>
+                      </div>
+
+                      {/* Register New Students */}
+                      <div className="flex flex-col items-center">
+                        <h5 className="font-semibold mb-2">
+                          Register New Students
+                        </h5>
+                        <p className="text-sm text-gray-500 mb-4">
+                          # Please click the upload button to upload the file.
+                          <br /># Students will be registered in the
+                          application, and their details will be emailed.
+                        </p>
+                        <button
+                          onClick={handleUpload} // Trigger file upload
+                          className="bg-blue-500 text-white rounded-full p-4 hover:bg-blue-600"
+                        >
+                          <i className="fas fa-upload text-xl"></i>
+                        </button>
+                      </div>
                     </div>
                   </div>
+                ) : (
+                  <div className=" w-full md:w-[43%]  flex justify-center flex-col md:flex-row gap-x-1 md:gap-x-4 ">
+                    <div className="w-full  gap-x-3 md:justify-start justify-between  my-1 md:my-4 flex  md:flex-row  ">
+                      <label
+                        htmlFor="classSection"
+                        className=" mr-2 pt-2 items-center text-center"
+                      >
+                        Class <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[70%] ">
+                        <Select
+                          value={selectedClass}
+                          onChange={handleClassSelect}
+                          options={classOptions}
+                          placeholder="Select "
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                        />
+                        {nameError && (
+                          <div className=" relative top-0.5 ml-1 text-danger text-xs">
+                            {nameError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
-                  <button
-                    onClick={handleSearch}
-                    type="button"
-                    className=" my-1 md:my-4 btn h-10  w-18 md:w-auto btn-primary "
-                  >
-                    Search
-                  </button>
-                </div>
+                    <button
+                      onClick={handleSearch}
+                      type="button"
+                      className=" my-1 md:my-4 btn h-10  w-18 md:w-auto btn-primary "
+                    >
+                      Search
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
             {subjects.length > 0 && (
