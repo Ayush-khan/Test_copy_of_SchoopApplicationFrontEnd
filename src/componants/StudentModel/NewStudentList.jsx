@@ -278,15 +278,15 @@ function NewStudentList() {
             <ToastContainer />
             <div className="mb-4  ">
               <div className="  w-[90%]  mx-auto ">
-                <div className=" w-full flex justify-center flex-col md:flex-row gap-x-1 md:gap-x-8">
+                <div className=" w-full md:w-[50%]  flex justify-center flex-col md:flex-row gap-x-1 md:gap-x-4 ">
                   <div className="w-full  gap-x-3 md:justify-start justify-between  my-1 md:my-4 flex  md:flex-row  ">
                     <label
                       htmlFor="classSection"
                       className=" mr-2 pt-2 items-center text-center"
                     >
-                      Class
+                      Class <span className="text-red-500">*</span>
                     </label>
-                    <div className="w-[60%] md:w-[50%] ">
+                    <div className="w-[60%] md:w-[60%] ">
                       <Select
                         value={selectedClass}
                         onChange={handleClassSelect}
