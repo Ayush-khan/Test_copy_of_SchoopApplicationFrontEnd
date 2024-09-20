@@ -470,6 +470,9 @@ function SubjectForRc() {
                         S.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Sequence No
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Subject for report card
                       </th>
 
@@ -493,6 +496,11 @@ function SubjectForRc() {
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {index + 1}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {section.sequence}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
