@@ -125,6 +125,7 @@ function NewStudentList() {
       const allStudentList = response?.data || [];
       setSubjects(allStudentList); // Store in `students`
       setPageCount(Math.ceil(allStudentList.length / pageSize));
+      setShowDisplayUpload(false);
     } catch (error) {
       toast.error("Error fetching the student list.");
     } finally {
