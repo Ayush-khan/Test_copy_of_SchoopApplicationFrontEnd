@@ -367,7 +367,7 @@ function NewStudentList() {
           }}
         ></div>
         {/* <hr className="relative -top-3" /> */}
-        {/* gf */}
+        {/* gf  ghrthtr*/}
 
         <div className="bg-white w-full md:w-[95%] mx-auto rounded-md ">
           <div className="w-full  mx-auto">
