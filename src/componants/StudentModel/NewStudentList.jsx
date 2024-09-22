@@ -136,6 +136,8 @@ function NewStudentList() {
   useEffect(() => {
     fetchInitialData(); // Fetch classes once when the component mounts
     fetchAllStudents();
+    // Clear the selected file when the page is refreshed or component is mounted
+    setSelectedFile(null);
   }, []);
 
   // Handle pagination
@@ -298,7 +300,9 @@ function NewStudentList() {
 
   // Handle file selection
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]); // Set the selected file to state
+    const file = event.target.files[0];
+    setSelectedFile(file); // Set the selected file to state
+    // setSelectedFile(event.target.files[0]); // Set the selected file to state
   };
 
   // Function to upload the selected CSV file
@@ -369,79 +373,83 @@ function NewStudentList() {
             <ToastContainer />
 
             <div className="mb-4  ">
-              <div className="  w-[90%]  mx-auto ">
+              <div className="  w-[100%]  mx-auto ">
                 {showDisplayUpload ? (
-                  <div className=" w-full border border-gray-300 rounded-md  mx-auto mt-10">
-                    <h2 className="text-center text-xl font-semibold mb-6 text-blue-500 pt-3">
-                      Upload student data from excel sheet:
+                  <div className="max-w-full  bg-white shadow-md rounded-lg border border-gray-300 mx-auto mt-10 p-6">
+                    <h2 className="text-center text-2xl font-semibold mb-8 text-blue-600">
+                      Upload Student Data from Excel Sheet
                     </h2>
 
-                    <div className="grid grid-cols-3 gap-8 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
                       {/* Download Student List Template */}
-                      <div className="flex flex-col items-center">
-                        <h5 className="font-semibold mb-2">
-                          Download Student List Template
+                      <div className="flex flex-col items-center p-4 bg-gray-50 rounded-md">
+                        <h5 className="font-semibold mb-3 text-gray-800">
+                          Download Template
                         </h5>
-                        <p className="text-sm text-gray-500 mb-4">
-                          # Please download the template by clicking the button
-                          below.
-                          <br /># Enter student details in the downloaded file.
-                          Do not add any students.
+                        <p className="text-sm text-gray-600 mb-4">
+                          # Please download the template by clicking below.
+                          <br />
+                          # Enter student details in the downloaded file.
+                          <br /># Do not add new students.
                         </p>
                         <button
                           onClick={handleDownloadTemplate}
-                          className="bg-blue-500 text-white rounded-full p-4 mb-2 hover:bg-blue-600"
+                          className="bg-blue-600 text-white text-xs rounded-full px-6 py-3 hover:bg-blue-700 transition duration-200"
                         >
-                          <i className="fas fa-download text-xl"></i>
+                          <i className="fas fa-download text-lg"></i> Download
+                          Template
                         </button>
                       </div>
 
                       {/* File Upload */}
-                      <div className="flex flex-col items-center">
-                        <h5 className="font-semibold mb-2">
+                      <div className="flex flex-col items-center p-4 bg-gray-50 rounded-md">
+                        <h5 className="font-semibold mb-3 text-gray-800">
                           Class: {classIdForManage}
                         </h5>
-                        <p className="font-medium mb-2">
+                        <p className="font-medium text-gray-800 mb-2">
                           Select a file to upload
                         </p>
-                        <p className="text-sm text-gray-500 mb-4">
-                          # Do not change the name of the file or the contents
-                          of the first 4 columns.
-                          <br /># Please click below to select the file
-                          downloaded in the previous step.
+                        <p className="text-sm text-gray-600 mb-4">
+                          # Do not change the file name or contents of the first
+                          4 columns.
+                          <br /># Please select the file downloaded in the
+                          previous step.
                         </p>
-                        <input
-                          type="file"
-                          accept=".csv"
-                          onChange={handleFileChange} // Added the onChange event to handle file selection
-                          className="mb-4"
-                        />
-                        <button className="bg-blue-500 text-white rounded-full p-4 hover:bg-blue-600">
-                          <i className="fas fa-search text-xl"></i>
-                        </button>
+
+                        <label className="bg-blue-600 text-white rounded-full  text-xs px-6 py-3 hover:bg-blue-700 cursor-pointer transition duration-200">
+                          <i className="fas fa-upload text-lg"></i>{" "}
+                          {selectedFile ? selectedFile.name : "Choose File"}
+                          <input
+                            type="file"
+                            accept=".csv"
+                            onChange={handleFileChange}
+                            className="hidden"
+                          />
+                        </label>
                       </div>
 
                       {/* Register New Students */}
-                      <div className="flex flex-col items-center">
-                        <h5 className="font-semibold mb-2">
+                      <div className="flex flex-col items-center p-4 bg-gray-50 rounded-md">
+                        <h5 className="font-semibold mb-3 text-gray-800">
                           Register New Students
                         </h5>
-                        <p className="text-sm text-gray-500 mb-4">
-                          # Please click the upload button to upload the file.
-                          <br /># Students will be registered in the
-                          application, and their details will be emailed.
+                        <p className="text-sm text-gray-600 mb-4">
+                          # Click upload to register students.
+                          <br /># Their details will be emailed after
+                          registration.
                         </p>
                         <button
-                          onClick={handleUpload} // Trigger file upload
-                          className="bg-blue-500 text-white rounded-full p-4 hover:bg-blue-600"
+                          onClick={handleUpload}
+                          className="bg-blue-600 text-white text-xs rounded-full px-6 py-3 hover:bg-blue-700 transition duration-200"
                         >
-                          <i className="fas fa-upload text-xl"></i>
+                          <i className="fas fa-cloud-upload-alt text-lg"></i>{" "}
+                          Upload
                         </button>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className=" w-full md:w-[43%]  flex justify-center flex-col md:flex-row gap-x-1 md:gap-x-4 ">
+                  <div className=" w-full md:w-[38%] relative left-0 md:left-[2%] flex justify-center flex-col md:flex-row gap-x-1 md:gap-x-4 ">
                     <div className="w-full  gap-x-3 md:justify-start justify-between  my-1 md:my-4 flex  md:flex-row  ">
                       <label
                         htmlFor="classSection"
