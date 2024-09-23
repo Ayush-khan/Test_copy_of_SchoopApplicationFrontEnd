@@ -2510,12 +2510,11 @@ function ManageSubjectList() {
                         Teacher assigned <span className="text-red-500">*</span>
                       </label>
                       <Select
-                        // className="border w-[50%] h-10 rounded-md px-3 py-2 md:w-full mr-2 shadow-md"
                         className="w-full text-sm shadow-md"
-                        value={selectedTeacher}
+                        value={selectedTeacher} // Set the selected value
                         onChange={handleTeacherSelect}
-                        options={teacherOptions}
-                        placeholder="Select "
+                        options={teacherOptions} // Teacher options
+                        placeholder="Select"
                         isSearchable
                       />
                       {/* <input

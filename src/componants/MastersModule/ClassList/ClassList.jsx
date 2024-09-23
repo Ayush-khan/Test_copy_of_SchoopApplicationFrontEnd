@@ -700,7 +700,7 @@ function ClassList() {
                   />
                 </div>
                 <div
-                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  className=" relative  mb-3 h-1 w-[100%] mx-auto bg-red-700"
                   style={{
                     backgroundColor: "#C03078",
                   }}

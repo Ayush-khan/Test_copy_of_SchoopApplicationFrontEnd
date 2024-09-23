@@ -2063,3 +2063,116 @@
     </div>
   </div>
 )
+
+
+// Dumy data
+ {showDisplayUpload ? (
+                  <div className="max-w-full  bg-white shadow-md rounded-lg border border-gray-300 mx-auto mt-10 p-6">
+                    <h2 className="text-center text-2xl font-semibold mb-8 text-blue-600">
+                      Upload Student Data from Excel Sheet
+                    </h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                      {/* Download Student List Template */}
+                      <div className="flex flex-col items-center p-4 bg-gray-50 rounded-md">
+                        <h5 className="font-semibold mb-3 text-gray-800">
+                          Download Template
+                        </h5>
+                        <p className="text-sm text-gray-600 mb-4">
+                          # Please download the template by clicking below.
+                          <br />
+                          # Enter student details in the downloaded file.
+                          <br /># Do not add new students.
+                        </p>
+                        <button
+                          onClick={handleDownloadTemplate}
+                          className="bg-blue-600 text-white text-xs rounded-full px-6 py-3 hover:bg-blue-700 transition duration-200"
+                        >
+                          <i className="fas fa-download text-lg"></i> Download
+                          Template
+                        </button>
+                      </div>
+
+                      {/* File Upload */}
+                      <div className="flex flex-col items-center p-4 bg-gray-50 rounded-md">
+                        <h5 className="font-semibold mb-3 text-gray-800">
+                          Class: {classIdForManage}
+                        </h5>
+                        <p className="font-medium text-gray-800 mb-2">
+                          Select a file to upload
+                        </p>
+                        <p className="text-sm text-gray-600 mb-4">
+                          # Do not change the file name or contents of the first
+                          4 columns.
+                          <br /># Please select the file downloaded in the
+                          previous step.
+                        </p>
+
+                        <label className="bg-blue-600 text-white rounded-full  text-xs px-6 py-3 hover:bg-blue-700 cursor-pointer transition duration-200">
+                          <i className="fas fa-upload text-lg"></i>{" "}
+                          {selectedFile ? selectedFile.name : "Choose File"}
+                          <input
+                            type="file"
+                            accept=".csv"
+                            onChange={handleFileChange}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+
+                      {/* Register New Students */}
+                      <div className="flex flex-col items-center p-4 bg-gray-50 rounded-md">
+                        <h5 className="font-semibold mb-3 text-gray-800">
+                          Register New Students
+                        </h5>
+                        <p className="text-sm text-gray-600 mb-4">
+                          # Click upload to register students.
+                          <br /># Their details will be emailed after
+                          registration.
+                        </p>
+                        <button
+                          onClick={handleUpload}
+                          className="bg-blue-600 text-white text-xs rounded-full px-6 py-3 hover:bg-blue-700 transition duration-200"
+                        >
+                          <i className="fas fa-cloud-upload-alt text-lg"></i>{" "}
+                          Upload
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className=" w-full md:w-[38%] relative left-0 md:left-[2%] flex justify-center flex-col md:flex-row gap-x-1 md:gap-x-4 ">
+                    <div className="w-full  gap-x-3 md:justify-start justify-between  my-1 md:my-4 flex  md:flex-row  ">
+                      <label
+                        htmlFor="classSection"
+                        className=" mr-2 pt-2 items-center text-center"
+                      >
+                        Class <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[70%] ">
+                        <Select
+                          value={selectedClass}
+                          onChange={handleClassSelect}
+                          options={classOptions}
+                          placeholder="Select "
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                        />
+                        {nameError && (
+                          <div className=" relative top-0.5 ml-1 text-danger text-xs">
+                            {nameError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleSearch}
+                      type="button"
+                      className=" my-1 md:my-4 btn h-10  w-18 md:w-auto btn-primary "
+                    >
+                      Search
+                    </button>
+                  </div>
+                )}

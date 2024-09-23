@@ -520,12 +520,15 @@ function NavBar() {
   const [academicYear, setAcademicYear] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [menuDropdownOpen, setMenuDropdownOpen] = useState({});
-  const [inputValueGR, setInputValueGR] = useState("");
+  // const [inputValueGR, setInputValueGR] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   // const [sessionData, setsessionData] = useState({});
   const [sessionData, setSessionData] = useState({});
   const [userProfileName, setuserProfilName] = useState("");
-
+  const [inputValueGR, setInputValueGR] = useState("");
+  const [subjects, setSubjects] = useState([]);
+  const [loading, setLoading] = useState(false);
+  // const navigate = useNavigate();
   const [navItems, setNavItems] = useState([]);
   const [roleId, setRoleId] = useState(""); // Add roleId state
   function getCurrentDate() {
@@ -658,6 +661,54 @@ function NavBar() {
 
     fetcUSerProfilehData();
   }, [API_URL]);
+
+  // for GR number setup
+  // Function to handle search based on GR number
+  const handleSearch = async () => {
+    if (!inputValueGR) {
+      toast.error("Please enter a GR number!");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${API_URL}/api/student_by_reg_no/${inputValueGR}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const studentList = response?.data?.student || [];
+      setSubjects(studentList);
+      handleView();
+
+      if (studentList.length === 0) {
+        toast.error("No student found with this GR number.");
+      }
+    } catch (error) {
+      // Show the error message from the backend if available
+      const errorMessage =
+        error?.response?.data?.message || "Error fetching student details.";
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to handle keypress (Enter) in the input field
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  // Function to handle the view of student details
+  const handleView = (student) => {
+    navigate(`/student/view/${student.student_id}`, {
+      state: { student: student },
+    });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem("authToken");
@@ -983,29 +1034,46 @@ function NavBar() {
             </Navbar>
             <div className="flex items-center  ">
               {/* className="w-12 lg:w-16 outline-none border border-black px-2 rounded-md text-pink-500 mr-2" */}
-              <div>
-                <input
-                  type="text"
-                  id="search"
-                  name="search"
-                  placeholder="GR NO"
-                  value={inputValueGR}
-                  onChange={(e) => {
-                    setInputValueGR(e.target.value);
-                  }}
-                  style={{
-                    display: "inline",
-                    position: "relative",
-                    zIndex: "2",
-                    // width: "70%",
-                    padding: "3px",
-                    paddingRight: "4px",
-                    // Adjust the input text size if needed
-                  }}
-                  className={` w-12 lg:w-20 mr-4 outline-none border-1 border-gray-400  rounded-md py-0.5 text-xs lg:text-sm`}
-                />
-              </div>
-
+              <div className="flex items-center">
+                <div>
+                  <input
+                    type="text"
+                    id="search"
+                    name="search"
+                    placeholder="GR NO"
+                    value={inputValueGR}
+                    onChange={(e) => {
+                      setInputValueGR(e.target.value);
+                    }}
+                    onKeyPress={handleKeyPress} // Trigger search on Enter key press
+                    style={{
+                      display: "inline",
+                      position: "relative",
+                      zIndex: "2",
+                      padding: "3px",
+                      paddingRight: "4px",
+                    }}
+                    className={`w-12 lg:w-20 mr-4 outline-none border-1 border-gray-400 rounded-md py-0.5 text-xs lg:text-sm`}
+                    disabled={loading}
+                  />
+                </div>
+              </div>{" "}
+              {/* {subjects.length > 0 && (
+                <div className="mt-4">
+                  <h3>Search Results:</h3>
+                  <ul>
+                    {subjects.map((student) => (
+                      <li
+                        key={student.student_id}
+                        className="cursor-pointer p-2 border-b"
+                        onClick={() => handleView(student)}
+                      >
+                        {student.student_name} (GR: {student.gr_no})
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )} */}
               <NavDropdown
                 // title={selectedYear}
                 title={
