@@ -119,7 +119,7 @@ const Footer = () => {
         <div className="text-sm md:text-base">
           <p>
             <a
-              href="/contact-support"
+              href="mailto:supportsacs@aceventura.in"
               className="no-underline text-white flex items-center justify-center md:justify-start hover:underline pt-3"
             >
               <MdMarkEmailRead className="text-white text-lg mr-2" />
