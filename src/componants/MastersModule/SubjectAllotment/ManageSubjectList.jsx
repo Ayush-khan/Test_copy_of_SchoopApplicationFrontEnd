@@ -1784,10 +1784,9 @@ function ManageSubjectList() {
         }
       );
 
+      toast.success("Subject Record updated successfully!");
       handleSearch();
       handleCloseModal();
-      toast.success("Subject Record updated successfully!");
-
       // setSubjects([]);
     } catch (error) {
       if (error.response && error.response.data) {

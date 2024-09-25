@@ -31,7 +31,7 @@ function SubjectList() {
     "Co-Scholastic",
     "Social",
     "Compulsory",
-    "optional",
+    "Optional",
     "Co-Scholastic_hsc",
   ]);
 
@@ -40,7 +40,7 @@ function SubjectList() {
   const fetchSections = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
+      // const academicYr = localStorage.getItem("academicYear");
 
       if (!token) {
         throw new Error("No authentication token found");

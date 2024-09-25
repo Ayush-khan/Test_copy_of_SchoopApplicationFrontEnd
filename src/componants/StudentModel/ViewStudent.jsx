@@ -248,7 +248,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.first_name}
-                className=" input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className="  block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
             {/* Add other form fields similarly */}
@@ -263,7 +263,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.mid_name}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -279,7 +279,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.last_name}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -295,7 +295,7 @@ function ViewStudent() {
                 type="date"
                 disabled
                 value={formData.dob}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -317,7 +317,7 @@ function ViewStudent() {
                     ? "Male"
                     : ""
                 }
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               ></input>
@@ -333,7 +333,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.blood_group}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               ></input>
@@ -349,7 +349,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.religion}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               ></input>
@@ -362,7 +362,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.caste}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -378,7 +378,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.category}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               ></input>
@@ -394,7 +394,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.birth_place}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -410,7 +410,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.nationality}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -426,7 +426,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.mother_tongue}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -448,7 +448,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.student_name}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -464,7 +464,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.class_id}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               ></input>
             </div>
             {/* Division Dropdown */}
@@ -479,7 +479,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.section_id}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
                 // Disable division until class is selected
               ></input>
             </div>
@@ -494,7 +494,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.roll_no}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -510,7 +510,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.reg_id}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -533,7 +533,7 @@ function ViewStudent() {
                     ? "Sapphire"
                     : ""
                 }
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               ></input>
@@ -549,7 +549,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.admission_class}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               ></input>
@@ -565,7 +565,7 @@ function ViewStudent() {
                 type="date"
                 disabled
                 value={formData.admission_date}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -581,7 +581,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.student_id}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -597,7 +597,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.stu_aadhaar_no}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -615,7 +615,7 @@ function ViewStudent() {
                   disabled
                   maxLength={14}
                   value={formData.udise_pen_no}
-                  className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                  className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                   // onBlur={handleBlur}
                 />
@@ -638,7 +638,7 @@ function ViewStudent() {
                 disabled
                 rows={2}
                 value={formData.permant_add}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -652,7 +652,7 @@ function ViewStudent() {
                 disabled
                 maxLength={100}
                 value={formData.city}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -665,7 +665,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.state}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -681,7 +681,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.pincode}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -706,7 +706,7 @@ function ViewStudent() {
                 id="emergencyName"
                 disabled
                 value={formData.emergency_name}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -722,7 +722,7 @@ function ViewStudent() {
                 id="emergencyAddress"
                 disabled
                 value={formData.emergency_add}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
               <div className="flex flex-row items-center gap-2 -mt-1 w-full">
                 <input
@@ -766,7 +766,7 @@ function ViewStudent() {
                   disabled
                   maxLength={10}
                   value={formData.emergency_contact}
-                  className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                  className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
                 />
               </div>
             </div>
@@ -783,7 +783,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.transport_mode}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
                 // onChange={handleChange}
                 // onBlur={handleBlur}
               >
@@ -799,7 +799,7 @@ function ViewStudent() {
                 maxLength={13}
                 placeholder="Vehicle No."
                 value={formData.vehicle_no}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -821,7 +821,7 @@ function ViewStudent() {
                 disabled
                 maxLength={200}
                 value={formData.allergies}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -839,7 +839,7 @@ function ViewStudent() {
                 maxLength={4.1}
                 disabled
                 value={formData.height}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -857,7 +857,7 @@ function ViewStudent() {
                 disabled
                 maxLength={4.1}
                 value={formData.weight}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               />
@@ -923,7 +923,7 @@ function ViewStudent() {
                 disabled
                 maxLength={100}
                 value={formData.father_name}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
             <div className="mt-2">
@@ -936,7 +936,7 @@ function ViewStudent() {
                 maxLength={100}
                 disabled
                 value={formData.father_occupation}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
             <div className="mt-2">
@@ -950,7 +950,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.blood_group}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
               ></input>
@@ -965,7 +965,7 @@ function ViewStudent() {
                 disabled
                 maxLength={12}
                 value={formData.parent_adhar_no}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
             <div className="mt-2">
@@ -978,7 +978,7 @@ function ViewStudent() {
                 maxLength={200}
                 disabled
                 value={formData.f_office_add}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
             <div className="mt-2">
@@ -994,7 +994,7 @@ function ViewStudent() {
                 id="telephone"
                 disabled
                 value={formData.f_office_tel}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
             <div>
@@ -1012,7 +1012,7 @@ function ViewStudent() {
                   pattern="\d{10}"
                   maxLength="10"
                   value={formData.f_mobile}
-                  className="input-field block w-full border-1 border-gray-400 outline-none rounded-r-md py-1 px-3 bg-white shadow-inner"
+                  className=" block w-full  outline-none rounded-r-md py-1 px-3 bg-gray-300 "
                   required
                 />
               </div>
@@ -1048,7 +1048,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.f_email}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
 
               {/* <div className="flex items-center gap-2">
@@ -1072,7 +1072,7 @@ function ViewStudent() {
                 id="dataOfAdmission"
                 disabled
                 value={formData.f_dob}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
                 // onBlur={handleBlur}
               />
             </div>
@@ -1087,7 +1087,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.user_id}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
             {/* Mother information */}
@@ -1103,7 +1103,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.mother_name}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
             <div className="mt-2">
@@ -1116,7 +1116,7 @@ function ViewStudent() {
                 maxLength={100}
                 disabled
                 value={formData.mother_occupation}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
             <div className="mt-2">
@@ -1130,7 +1130,7 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.m_blood}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
                 // onBlur={handleBlur}
               ></input>
             </div>
@@ -1144,7 +1144,7 @@ function ViewStudent() {
                 disabled
                 maxLength={12}
                 value={formData.m_adhar_no}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
             <div className="mt-2">
@@ -1156,7 +1156,7 @@ function ViewStudent() {
                 disabled
                 rows={2}
                 value={formData.m_office_add}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
             <div className="mt-2">
@@ -1172,10 +1172,11 @@ function ViewStudent() {
                 id="m_office_tel"
                 disabled
                 value={formData.m_office_tel}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
             {/* <div className="mt-2">
+            
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Telephone
               </label>
@@ -1186,7 +1187,7 @@ function ViewStudent() {
                 name="m_office_tel"
                 value={formData.m_office_tel}
                 onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div> */}
             <div>
@@ -1202,7 +1203,7 @@ function ViewStudent() {
                   id="phone"
                   disabled
                   value={formData.m_mobile}
-                  className="input-field block w-full border-1 border-gray-400 outline-none rounded-r-md py-1 px-3 bg-white shadow-inner"
+                  className=" block w-full  outline-none rounded-r-md py-1 px-3 bg-gray-300 "
                   required
                 />
               </div>
@@ -1241,7 +1242,7 @@ function ViewStudent() {
                 disabled
                 maxLength={50}
                 value={formData.m_emailid}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
 
               {/* <div className="flex items-center gap-2">
@@ -1266,7 +1267,7 @@ function ViewStudent() {
                 id="dataOfAdmission"
                 disabled
                 value={formData.f_dob}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
                 // onBlur={handleBlur}
               />
             </div>

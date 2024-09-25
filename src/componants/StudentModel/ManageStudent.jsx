@@ -342,13 +342,15 @@ function ManageSubjectList() {
   //     }
   //   }
   // };
+  const [errorMessage, setErrorMessage] = useState(""); // State to store error message
+
   const handleSubmitResetPassword = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      console.log("token", token);
 
       if (!token) {
         toast.error("Authentication token missing");
+        setErrorMessage("Authentication token missing"); // Set error below the field
         return;
       }
 
@@ -363,9 +365,22 @@ function ManageSubjectList() {
 
       toast.success("Password updated successfully!");
       setShowEditModal(false); // Close modal after success
+      setErrorMessage(""); // Clear error message on success
     } catch (error) {
       console.error("Error resetting password:", error);
-      toast.error("Failed to update password. Please try again.");
+
+      // Capture server error message and set it below the field
+      if (
+        error.response &&
+        error?.response?.data &&
+        error?.response?.data?.Message
+      ) {
+        setErrorMessage(error?.response?.data?.Message);
+        toast.error(error?.response?.data?.Message); // Show toast with the error
+      } else {
+        setErrorMessage("Failed to update password. Please try again.");
+        toast.error("Failed to update password. Please try again.");
+      }
     }
   };
 

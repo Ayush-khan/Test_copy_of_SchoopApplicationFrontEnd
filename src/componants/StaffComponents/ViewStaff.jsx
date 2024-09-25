@@ -152,7 +152,7 @@ function ViewStaff() {
               <label htmlFor="address" className="block font-bold text-xs mb-2">
                 Address
               </label>
-              <p className="input-field resize h-[70%]  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner">
+              <p className="input-field resize h-[70%]  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
                 {formData.address}
               </p>
             </div>
@@ -199,11 +199,11 @@ function ViewStaff() {
                   {field.label}
                 </label>
                 {formData[field.name] ? (
-                  <p className="input-field w-full border  border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner">
+                  <p className="input-field w-full border  border-gray-300 rounded-md py-1 px-3 bg-gray-300 ">
                     {field.value || formData[field.name]}
                   </p>
                 ) : (
-                  <p className="input-field w-full border pointer-events-none cursor-none border-gray-300 rounded-md py-3 px-3 bg-white shadow-inner">
+                  <p className="input-field w-full border pointer-events-none cursor-none border-gray-300 rounded-md py-3 px-3 bg-gray-300 ">
                     {field.value || formData[field.name]}
                   </p>
                 )}

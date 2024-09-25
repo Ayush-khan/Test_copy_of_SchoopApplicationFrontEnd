@@ -256,10 +256,10 @@ function Form() {
       setSelectedClass(student.class_id || ""); // Set the selected class
       setSelectedDivision(student.section_id || ""); // Set the selected division
 
-      if (student.student_image) {
+      if (student.image_name) {
         setPhotoPreview(
           // `${API_URL}/path/to/images/${student.teacher_image_name}`
-          `${student.student_image}`
+          `${student.image_name}`
         );
       }
     }
@@ -618,7 +618,7 @@ function Form() {
   const handleImageCropped = (croppedImageData) => {
     setFormData((prevData) => ({
       ...prevData,
-      student_image: croppedImageData,
+      image_name: croppedImageData,
     }));
   };
 
