@@ -1481,21 +1481,29 @@ function ManageSubjectList() {
     }
     try {
       console.log(
-        "for this sectiong id in seaching inside subjectallotment",
+        "for this section id in searching inside subject allotment",
         classIdForManage
       );
+
       const token = localStorage.getItem("authToken");
+
+      // Clear the subjects state before making the request
+      setSubjects([]);
+
       const response = await axios.get(`${API_URL}/api/get_subject_Alloted`, {
         headers: { Authorization: `Bearer ${token}` },
-        // params: { section_id: classSection },
         params: { section_id: classIdForManage },
       });
-      console.log(
-        "the response of the subjectallotment is *******",
-        response.data
-      );
+
+      console.log("The response of the subject allotment is: ", response.data);
+
       if (response.data.length > 0) {
+        // After clearing the state, update with new data
         setSubjects(response.data);
+
+        // Logging after state update
+        console.log("Updated subjects data", response.data);
+
         setPageCount(Math.ceil(response.data.length / 10)); // Example pagination logic
       } else {
         setSubjects([]);
@@ -1506,6 +1514,7 @@ function ManageSubjectList() {
       setError("Error fetching subjects");
     }
   };
+
   // const handleSearchForsubjectAllot = async () => {
   //   try {
   //     console.log(
@@ -1564,6 +1573,7 @@ function ManageSubjectList() {
           subjects: response.data.subjects,
         }));
         setAllotSubjectTabData(formattedAllotments);
+        console.log("formatted Allotments", formattedAllotments);
       } else {
         toast.error("Unexpected data format");
       }
@@ -1626,9 +1636,10 @@ function ManageSubjectList() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
+      console.log("getSUbjects data from preselected1", response.data.subjects);
       const subjectIds = response.data.subjects.map((subject) => subject.sm_id);
       setSelectedSubjects(subjectIds);
+      console.log("getSUbjects data from preselected2", selectedSubjects);
     } catch (error) {
       console.error("Error fetching subjects:", error);
     }
@@ -2155,126 +2166,125 @@ function ManageSubjectList() {
                   </div>
                 </div>
               </div>
-              {subjects.length > 0 && (
-                <div className="container mt-4">
-                  <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                      <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                        Manage Subjects List
-                      </h3>
-                      <div className="w-1/2 md:w-fit mr-1 ">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search "
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div
-                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                      style={{
-                        backgroundColor: "#C03078",
-                      }}
-                    ></div>
 
-                    <div className="card-body w-full">
-                      <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-                        <table className="min-w-full leading-normal table-auto">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                S.No
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Class
-                              </th>
-                              {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+              <div className="container mt-4">
+                <div className="card mx-auto lg:w-full shadow-lg">
+                  <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                    <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                      Manage Subjects List
+                    </h3>
+                    <div className="w-1/2 md:w-fit mr-1 ">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search "
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+                    style={{
+                      backgroundColor: "#C03078",
+                    }}
+                  ></div>
+
+                  <div className="card-body w-full">
+                    <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+                      <table className="min-w-full leading-normal table-auto">
+                        <thead>
+                          <tr className="bg-gray-100">
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              S.No
+                            </th>
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Class
+                            </th>
+                            {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Division
                               </th> */}
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Subject
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Teacher
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Edit
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Delete
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {displayedSections.map((subject, index) => (
-                              <tr
-                                key={subject.section_id}
-                                className="text-gray-700 text-sm font-light"
-                              >
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {index + 1}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {`${subject?.get_class?.name} ${subject?.get_division?.name}`}
-                                </td>
-                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Subject
+                            </th>
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Teacher
+                            </th>
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Edit
+                            </th>
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Delete
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {displayedSections.map((subject, index) => (
+                            <tr
+                              key={subject.section_id}
+                              className="text-gray-700 text-sm font-light"
+                            >
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {index + 1}
+                              </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {`${subject?.get_class?.name} ${subject?.get_division?.name}`}
+                              </td>
+                              {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.get_division?.name}
                                 </td> */}
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_subject?.name}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_teacher?.name}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  <button
-                                    onClick={() => handleEdit(subject)}
-                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                  >
-                                    <FontAwesomeIcon icon={faEdit} />
-                                  </button>
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  <button
-                                    onClick={() =>
-                                      handleDelete(subject?.subject_id)
-                                    }
-                                    className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                  >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                      <div className=" flex justify-center pt-2 -mb-3">
-                        <ReactPaginate
-                          previousLabel={"Previous"}
-                          nextLabel={"Next"}
-                          breakLabel={"..."}
-                          pageCount={pageCount}
-                          onPageChange={handlePageClick}
-                          marginPagesDisplayed={1}
-                          pageRangeDisplayed={1}
-                          containerClassName={"pagination"}
-                          pageClassName={"page-item"}
-                          pageLinkClassName={"page-link"}
-                          previousClassName={"page-item"}
-                          previousLinkClassName={"page-link"}
-                          nextClassName={"page-item"}
-                          nextLinkClassName={"page-link"}
-                          breakClassName={"page-item"}
-                          breakLinkClassName={"page-link"}
-                          activeClassName={"active"}
-                        />
-                      </div>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {subject?.get_subject?.name}
+                              </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {subject?.get_teacher?.name}
+                              </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                <button
+                                  onClick={() => handleEdit(subject)}
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                >
+                                  <FontAwesomeIcon icon={faEdit} />
+                                </button>
+                              </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                <button
+                                  onClick={() =>
+                                    handleDelete(subject?.subject_id)
+                                  }
+                                  className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                >
+                                  <FontAwesomeIcon icon={faTrash} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className=" flex justify-center pt-2 -mb-3">
+                      <ReactPaginate
+                        previousLabel={"Previous"}
+                        nextLabel={"Next"}
+                        breakLabel={"..."}
+                        pageCount={pageCount}
+                        onPageChange={handlePageClick}
+                        marginPagesDisplayed={1}
+                        pageRangeDisplayed={1}
+                        containerClassName={"pagination"}
+                        pageClassName={"page-item"}
+                        pageLinkClassName={"page-link"}
+                        previousClassName={"page-item"}
+                        previousLinkClassName={"page-link"}
+                        nextClassName={"page-item"}
+                        nextLinkClassName={"page-link"}
+                        breakClassName={"page-item"}
+                        breakLinkClassName={"page-link"}
+                        activeClassName={"active"}
+                      />
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           )}
 

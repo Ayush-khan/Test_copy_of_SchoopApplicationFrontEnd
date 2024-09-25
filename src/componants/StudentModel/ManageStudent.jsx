@@ -355,14 +355,19 @@ function ManageSubjectList() {
       }
 
       // API call to reset the password with correct header placement
-      await axios.put(
+      const response = await axios.put(
         `${API_URL}/api/resetPasssword/${userIdset}`,
         {}, // Pass empty body if there's no data to send
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
+      if (response?.data?.Status === 404) {
+        console.log("Response is fail");
+        // toast.error("User not found");
+        setErrorMessage("Invalid user ID");
+        return;
+      }
       toast.success("Password updated successfully!");
       setShowEditModal(false); // Close modal after success
       setErrorMessage(""); // Clear error message on success
@@ -448,6 +453,7 @@ function ManageSubjectList() {
   };
 
   const handleCloseModal = () => {
+    setErrorMessage("");
     setShowEditModal(false);
     setShowDeleteModal(false);
     setShowDActiveModal(false);
@@ -895,9 +901,13 @@ function ManageSubjectList() {
                       value={userIdset} // Prefill userId
                       onChange={handleUserIdChange}
                     />
-                    {userIdError && (
-                      <span className="text-danger text-xs">{userIdError}</span>
-                    )}
+                    <div className="absolute top-9 left-1/3">
+                      {errorMessage && (
+                        <span className="text-danger text-xs">
+                          {errorMessage}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Password Input

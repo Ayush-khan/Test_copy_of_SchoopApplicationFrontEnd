@@ -421,6 +421,10 @@ const AllotSubjectTab = () => {
         `${API_URL}/api/get_sub_report_allotted/${classId}/${subjectType.value}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      console.log(
+        "without maching preselected subject come form api",
+        response?.data?.subjectAllotments
+      );
       const fetchedPreCheckedSubjects = response?.data?.subjectAllotments.map(
         (subject) => subject.get_subjects_for_report_card.sub_rc_master_id
       );
