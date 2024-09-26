@@ -402,7 +402,7 @@ function NewStudentList() {
                         </button>
                       </div>
 
-                      {/* File Upload  gdg*/}
+                      {/* File Upload dfgs  gdg*/}
                       <div className="flex flex-col items-center p-4 bg-gray-50 rounded-md">
                         <h5 className="font-semibold mb-3 text-gray-800">
                           Class: {classIdForManage}
