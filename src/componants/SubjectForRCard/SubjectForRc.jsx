@@ -174,7 +174,7 @@ function SubjectForRc() {
       console.log("Name is:", newSectionName);
 
       const checkNameResponse = await axios.post(
-        `${API_URL}/api/check_subject_name`,
+        `${API_URL}/api/check_subject_name_for_report_card`,
         { sequence: newSequenceNumber },
         {
           headers: { Authorization: `Bearer ${token}` },

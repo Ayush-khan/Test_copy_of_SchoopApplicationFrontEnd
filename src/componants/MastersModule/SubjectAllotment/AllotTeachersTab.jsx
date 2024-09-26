@@ -1117,6 +1117,8 @@ const AllotTeachersTab = () => {
   const [subjects, setSubjects] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
+  const [selectedClassId, setSelectedClassId] = useState(null);
+
   const [selectedDivision, setSelectedDivision] = useState(null);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [preSubjects, setPreSubjects] = useState([]);
@@ -1214,6 +1216,8 @@ const AllotTeachersTab = () => {
   };
 
   const handleClassChange = async (selectedOption) => {
+    console.log("handleClassChnage", selectedOption);
+    setSelectedClassId(selectedOption.value);
     setSelectedClass(selectedOption);
     setSelectedDivision(null);
     setSelectedTeacher(null); // Clear teacher when class changes
@@ -1239,6 +1243,8 @@ const AllotTeachersTab = () => {
   };
 
   const handleDivisionChange = async (selectedOption) => {
+    console.log("handleDivisionChnage", selectedOption);
+
     setSelectedDivision(selectedOption);
     setSubjects([]);
     setPreSubjects([]);
@@ -1246,13 +1252,17 @@ const AllotTeachersTab = () => {
 
     try {
       const token = localStorage.getItem("authToken");
+      // Fetch pre-selected subjects for the selected class and division
+      const params = new URLSearchParams();
+      params.append("section_id[]", selectedOption.value); // Add division/section ID as a parameter
       const response = await axios.get(
-        `${API_URL}/api/get_subjects/${selectedOption.value}`,
+        `${API_URL}/api/get_presubjects/${selectedClassId}?${params.toString()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       setSubjects(response.data?.subjects);
+      console.log("presubjects comes", response.data?.subjects);
     } catch (error) {
       toast.error("Error fetching subjects");
     }
@@ -1446,7 +1456,7 @@ const AllotTeachersTab = () => {
                         onChange={() => handleSubjectChange(subject.sm_id)}
                       />
                       <span className="font-normal text-gray-600">
-                        {subject.name}
+                        {subject?.get_subject?.name}
                       </span>
                     </label>
                   ))}

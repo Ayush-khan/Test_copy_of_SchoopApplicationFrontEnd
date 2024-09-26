@@ -710,7 +710,7 @@ function EditStaff() {
                 htmlFor="designation"
                 className="block font-bold  text-xs mb-2"
               >
-                Designation
+                Designation <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"

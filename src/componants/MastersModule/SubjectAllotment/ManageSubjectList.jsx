@@ -2525,6 +2525,7 @@ function ManageSubjectList() {
                         options={teacherOptions} // Teacher options
                         placeholder="Select"
                         isSearchable
+                        isClearable
                       />
                       {/* <input
                         type="text"

@@ -1726,7 +1726,8 @@ function CreateStaff() {
 
     // Validate sex
     if (!formData.sex) newErrors.sex = "Gender is required";
-
+    if (!formData.designation)
+      newErrors.designation = "Designation is required";
     // Validate address
     if (!formData.address) newErrors.address = "Address is required";
 
@@ -2138,7 +2139,7 @@ function CreateStaff() {
                 htmlFor="experience"
                 className="block font-bold  text-xs mb-2"
               >
-                experience <span className="text-red-500">*</span>
+                Experience <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -2263,7 +2264,7 @@ function CreateStaff() {
                 htmlFor="designation"
                 className="block font-bold  text-xs mb-2"
               >
-                designation
+                Designation <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -2275,6 +2276,11 @@ function CreateStaff() {
                 // required
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
+              {errors.designation && (
+                <span className="text-red-500 text-xs">
+                  {errors.designation}
+                </span>
+              )}
             </div>
             <div>
               <label
