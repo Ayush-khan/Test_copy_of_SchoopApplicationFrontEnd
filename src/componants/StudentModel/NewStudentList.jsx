@@ -316,7 +316,7 @@ function NewStudentList() {
     formData.append("file", selectedFile); // Append the selected file
 
     try {
-      const response = await axios.post(
+      const response = await axios.put(
         `${API_URL}/api/students/update-students-csv`,
         formData,
         {
