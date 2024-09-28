@@ -305,7 +305,7 @@ function NewStudentList() {
     // setSelectedFile(event.target.files[0]); // Set the selected file to state
   };
 
-  // Function to upload the selected CSV file fds dfsdffd dfs
+  // Function to upload the selected CSV file fds
   const handleUpload = async () => {
     if (!selectedFile) {
       alert("Please select a file first"); // Check if file is selected
