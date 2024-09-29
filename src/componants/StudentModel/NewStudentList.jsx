@@ -309,7 +309,7 @@ function NewStudentList() {
     link.click();
     document.body.removeChild(link); // Cleanup after download
   };
-  // gfdg
+
   // Handle file selection
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -506,7 +506,7 @@ function NewStudentList() {
                         {uploadStatus && (
                           <p style={{ color: "green" }}>{uploadStatus}</p>
                         )}
-                        {/* dfgsgdsf */}
+
                         {/* <button
                           onClick={handleUpload}
                           className="bg-blue-600 text-white text-xs rounded-full px-6 py-3 hover:bg-blue-700 transition duration-200"
