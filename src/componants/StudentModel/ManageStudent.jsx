@@ -694,13 +694,13 @@ function ManageSubjectList() {
                               <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
                                 {console.log(
                                   "the teacher image",
-                                  `${API_URL}${subject?.image_url}`
+                                  `${subject?.image_url}`
                                 )}
 
                                 <img
                                   src={
-                                    subject?.image_url
-                                      ? `${API_URL}${subject?.image_url}`
+                                    subject?.image_name
+                                      ? `${subject?.image_name}`
                                       : "https://via.placeholder.com/50"
                                   }
                                   alt={subject?.name}

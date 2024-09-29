@@ -182,7 +182,7 @@ const ImageCropper = ({ onImageCropped, photoPreview }) => {
       reader.readAsDataURL(file);
     }
   };
-
+  // without compress code
   // const handleSave = () => {
   //   const cropper = cropperRef.current?.cropper;
   //   if (cropper) {
@@ -196,33 +196,81 @@ const ImageCropper = ({ onImageCropped, photoPreview }) => {
   //     console.error("Cropper is not initialized or ref is not set.");
   //   }
   // };
+  // compress but size greater
+  // const handleSave = () => {
+  //   const cropper = cropperRef.current?.cropper;
+  //   if (cropper) {
+  //     const croppedCanvas = cropper.getCroppedCanvas();
+
+  //     // Convert the canvas to a Blob instead of a dataURL to have control over file size
+  //     croppedCanvas.toBlob(
+  //       (blob) => {
+  //         if (blob.size <= 1024 * 1024) {
+  //           // If the size is less than or equal to 1MB, convert it to a dataURL and save it
+  //           const reader = new FileReader();
+  //           reader.onloadend = () => {
+  //             const croppedImageData = reader.result;
+  //             setCroppedImage(croppedImageData);
+  //             setEditingImage(null);
+  //             setModalOpen(false);
+  //             onImageCropped(croppedImageData);
+  //           };
+  //           reader.readAsDataURL(blob);
+  //         } else {
+  //           console.error("Image exceeds 1MB, please try cropping smaller.");
+  //           // Handle cases where the image size exceeds 1 MB
+  //         }
+  //       },
+  //       "image/jpeg", // Output format
+  //       0.8 // Quality level from 0 to 1, adjust as needed
+  //     );
+  //   } else {
+  //     console.error("Cropper is not initialized or ref is not set.");
+  //   }
+  // };
+  // try up for reduce more size
   const handleSave = () => {
     const cropper = cropperRef.current?.cropper;
     if (cropper) {
-      const croppedCanvas = cropper.getCroppedCanvas();
+      const croppedCanvas = cropper.getCroppedCanvas({
+        width: 1024, // Resize canvas width, you can adjust as needed
+        height: 1024, // Resize canvas height, you can adjust as needed
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: "high",
+      });
+      // Convert the canvas to a Blob with compression
+      const compressImage = (canvas, quality = 0.8) => {
+        return new Promise((resolve) => {
+          canvas.toBlob(
+            (blob) => {
+              if (blob.size <= 500 * 1024) {
+                resolve(blob);
+              } else {
+                // If size exceeds 500KB, recursively try with lower quality
+                resolve(compressImage(canvas, quality * 0.9));
+              }
+            },
+            "image/jpeg",
+            quality // Start with 80% quality
+          );
+        });
+      };
 
-      // Convert the canvas to a Blob instead of a dataURL to have control over file size
-      croppedCanvas.toBlob(
-        (blob) => {
-          if (blob.size <= 1024 * 1024) {
-            // If the size is less than or equal to 1MB, convert it to a dataURL and save it
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const croppedImageData = reader.result;
-              setCroppedImage(croppedImageData);
-              setEditingImage(null);
-              setModalOpen(false);
-              onImageCropped(croppedImageData);
-            };
-            reader.readAsDataURL(blob);
-          } else {
-            console.error("Image exceeds 1MB, please try cropping smaller.");
-            // Handle cases where the image size exceeds 1 MB
-          }
-        },
-        "image/jpeg", // Output format
-        0.8 // Quality level from 0 to 1, adjust as needed
-      );
+      compressImage(croppedCanvas)
+        .then((compressedBlob) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const compressedImageData = reader.result;
+            setCroppedImage(compressedImageData);
+            setEditingImage(null);
+            setModalOpen(false);
+            onImageCropped(compressedImageData);
+          };
+          reader.readAsDataURL(compressedBlob);
+        })
+        .catch((error) => {
+          console.error("Error during image compression:", error);
+        });
     } else {
       console.error("Cropper is not initialized or ref is not set.");
     }
@@ -300,6 +348,7 @@ const ImageCropper = ({ onImageCropped, photoPreview }) => {
                 Cancel
               </button>{" "}
               <button
+                type="button"
                 onClick={handleSave}
                 className="bg-blue-500 font-md text-white px-4 py-2 rounded hover:bg-blue-600"
               >

@@ -807,7 +807,7 @@ function ClassList() {
   const fetchDepartments = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
+      // const academicYr = localStorage.getItem("academicYear");
 
       if (!token) {
         throw new Error("No authentication token found");
@@ -901,9 +901,14 @@ function ClassList() {
       );
       console.log("the response of the namechack api", response.data);
       if (response.data?.exists === true) {
+        console.log("the EXI NAME IS  ");
+
         setNameError("Name is already taken.");
         setNameAvailable(false);
+        return;
       } else {
+        console.log("the EXI NAME IS NO  ");
+
         setNameError("");
         setNameAvailable(true);
       }
@@ -937,7 +942,50 @@ function ClassList() {
     setFieldErrors({});
   };
 
+  // const handleSubmitAdd = async () => {
+  //   const validationErrors = validateSectionName(newClassName, newDepartmentId);
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setFieldErrors(validationErrors);
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     // const academicYr = localStorage.getItem("academicYear");
+
+  //     if (!token) {
+  //       throw new Error("No authentication token found");
+  //     }
+
+  //     if (!nameAvailable) {
+  //       return;
+  //     }
+
+  //     await axios.post(
+  //       `${API_URL}/api/classes`,
+  //       { name: newClassName, department_id: newDepartmentId },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         withCredentials: true,
+  //       }
+  //     );
+
+  //     fetchClasses();
+  //     handleCloseModal();
+  //     toast.success("Class added successfully!");
+  //   } catch (error) {
+  //     if (error.response && error.response.data) {
+  //       toast.error(`Error adding class: ${error.response.data.message}`);
+  //     } else {
+  //       toast.error(`Error adding class: ${error.message}`);
+  //     }
+  //     console.error("Error adding class:", error);
+  //   }
+  // };
   const handleSubmitAdd = async () => {
+    // Perform validation first
     const validationErrors = validateSectionName(newClassName, newDepartmentId);
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
@@ -946,12 +994,33 @@ function ClassList() {
 
     try {
       const token = localStorage.getItem("authToken");
-      // const academicYr = localStorage.getItem("academicYear");
-
       if (!token) {
         throw new Error("No authentication token found");
       }
 
+      // Step 1: Check if the class name is available using the same logic from handleBlur
+      const checkNameResponse = await axios.post(
+        `${API_URL}/api/check_class_name`,
+        { name: newClassName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      // Step 2: If the name already exists, stop the submission
+      if (checkNameResponse.data?.exists) {
+        setNameError("Name is already taken.");
+        setNameAvailable(false);
+        return;
+      } else {
+        setNameError("");
+        setNameAvailable(true);
+      }
+
+      // Step 3: Continue with form submission if name is available
       await axios.post(
         `${API_URL}/api/classes`,
         { name: newClassName, department_id: newDepartmentId },
@@ -963,10 +1032,12 @@ function ClassList() {
         }
       );
 
+      // Step 4: Post-submission actions
       fetchClasses();
       handleCloseModal();
       toast.success("Class added successfully!");
     } catch (error) {
+      // Handle errors
       if (error.response && error.response.data) {
         toast.error(`Error adding class: ${error.response.data.message}`);
       } else {
@@ -989,8 +1060,29 @@ function ClassList() {
       if (!token || !currentClass || !currentClass.class_id) {
         throw new Error("Class ID is missing");
       }
-      if (!nameAvailable) {
+      console.log("the EXI NAME IS  ", currentClass);
+      console.log("The name is  ", newClassName);
+
+      // Step 1: Check if the class name is available using the same logic from handleBlur
+      const checkNameResponse = await axios.post(
+        `${API_URL}/api/check_class_name`,
+        { name: newClassName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      // Step 2: If the name already exists, stop the submission
+      if (checkNameResponse.data?.exists) {
+        setNameError("Name is already taken.");
+        setNameAvailable(false);
         return;
+      } else {
+        setNameError("");
+        setNameAvailable(true);
       }
       await axios.put(
         `${API_URL}/api/classes/${currentClass.class_id}`,
@@ -1069,6 +1161,8 @@ function ClassList() {
   );
   const handleChangeSectionName = (e) => {
     const { value } = e.target;
+    console.log("sectionNameis", sectionNameis, "value is", e.target.value);
+
     // setNameError("");
     setNewClassName(value);
     setFieldErrors((prevErrors) => ({
@@ -1080,12 +1174,19 @@ function ClassList() {
   const handleChangeDepartmentId = (e) => {
     const { value } = e.target;
     // setNewClassName(value);
-
+    console.log(
+      "sectionNameis",
+      sectionNameis,
+      "reatValue",
+      value,
+      "value is",
+      e.target.value
+    );
     setNewDepartmentId(value);
+    // console.log("departmentId", department_id);
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
-      department_id: validateSectionName(sectionNameis, e.target.value)
-        .department_id,
+      department_id: validateSectionName(value, e.target.value).department_id,
     }));
   };
 

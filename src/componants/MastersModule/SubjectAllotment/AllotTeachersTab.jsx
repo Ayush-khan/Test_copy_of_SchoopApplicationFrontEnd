@@ -1462,7 +1462,7 @@ const AllotTeachersTab = () => {
                   ))}
                 </div>
                 {subjectError && (
-                  <p className="relative -top-5 text-red-500 text-xs ">
+                  <p className="relative top-3  text-red-500 text-xs ">
                     {subjectError}
                   </p>
                 )}
