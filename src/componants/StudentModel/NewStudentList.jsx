@@ -311,7 +311,6 @@ function NewStudentList() {
   };
 
   // Handle file selection
-  // Handle file selection
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     setSelectedFile(file); // Set the selected file to state
