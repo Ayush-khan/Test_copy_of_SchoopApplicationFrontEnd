@@ -506,7 +506,7 @@ function NewStudentList() {
                         {uploadStatus && (
                           <p style={{ color: "green" }}>{uploadStatus}</p>
                         )}
-
+                        {/* dfgsgdsf  dsfsedf*/}
                         {/* <button
                           onClick={handleUpload}
                           className="bg-blue-600 text-white text-xs rounded-full px-6 py-3 hover:bg-blue-700 transition duration-200"
