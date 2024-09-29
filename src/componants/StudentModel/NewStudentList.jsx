@@ -309,7 +309,7 @@ function NewStudentList() {
     link.click();
     document.body.removeChild(link); // Cleanup after download
   };
-  // gfdg fgd hth
+  // gfdg
   // Handle file selection
   const handleFileChange = (event) => {
     const file = event.target.files[0];
