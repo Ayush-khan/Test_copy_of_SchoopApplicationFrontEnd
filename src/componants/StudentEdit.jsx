@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import NavBar from "../Layouts/NavBar";
 
+
+// hjkfdsh
 function StudentEdit() {
   let { id } = useParams();
   const navigate = useNavigate(); // Move useNavigate to the correct place

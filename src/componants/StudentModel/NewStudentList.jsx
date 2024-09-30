@@ -27,6 +27,7 @@ function NewStudentList() {
   const [currestSubjectNameForDelete, setCurrestSubjectNameForDelete] =
     useState("");
   const [classIdForManage, setclassIdForManage] = useState("");
+  const [classNameForBulkUpload, setClassNameForBulkUpload] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
@@ -47,6 +48,8 @@ function NewStudentList() {
   // const [errorMessage, setErrorMessage] = useState("");
   const [uploadStatus, setUploadStatus] = useState(""); // For success message
   const [errorMessage, setErrorMessage] = useState(""); // For error message
+  const [errorMessageUrl, setErrorMessageUrl] = useState(""); // For error message
+
   const [loading, setLoading] = useState(false); // For loader
   const [showDisplayUpload, setShowDisplayUpload] = useState(false);
   const [isFileUploaded, setIsFileUploaded] = useState(false); // Track upload status
@@ -66,6 +69,8 @@ function NewStudentList() {
     setNameError("");
     setSelectedClass(selectedOption);
     setclassIdForManage(selectedOption.value); // Assuming value is the class ID
+    setClassNameForBulkUpload(selectedOption.label);
+    console.log("selected class name", selectedOption);
     setSectionIdForStudentList(selectedOption.value); //
   };
 
@@ -311,6 +316,7 @@ function NewStudentList() {
   };
 
   // Handle file selection
+  // Handle file selection
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     setSelectedFile(file); // Set the selected file to state
@@ -358,17 +364,20 @@ function NewStudentList() {
     } catch (error) {
       setLoading(false); // Hide loader
 
-      const showErrorForUploading = error?.response?.data?.error;
+      const showErrorForUploading = error?.response?.data?.message;
+      const showErrorForUploadingUrl = error?.response?.data?.invalid_rows;
       setErrorMessage(
         !showErrorForUploading
           ? "Failed to upload file. Please try again..."
           : `Error-Message: ${showErrorForUploading}.`
       );
+      setErrorMessageUrl(`${API_URL}${showErrorForUploadingUrl}`);
+      console.log("showerrormessage url", errorMessageUrl);
 
       toast.error(
         !showErrorForUploading
           ? "Error uploading file."
-          : error?.response?.data?.error
+          : error?.response?.data?.message
       );
 
       console.error("Error uploading file:", showErrorForUploading);
@@ -447,7 +456,7 @@ function NewStudentList() {
                       {/* File Upload dfgs  gdg*/}
                       <div className="flex flex-col items-center p-4 bg-gray-100 rounded-md">
                         <h5 className="font-semibold mb-3 text-gray-800">
-                          Class: {classIdForManage}
+                          Class: {classNameForBulkUpload}
                         </h5>
                         <p className="font-medium text-gray-800 mb-2">
                           Select a file to upload
@@ -487,10 +496,34 @@ function NewStudentList() {
                           application. Their userid and password will be sent as
                           email at the email id's provided.
                         </p>
-                        <div className="text-xs my-0 ">
-                          {errorMessage && (
-                            <p style={{ color: "red" }}>{errorMessage}</p>
-                          )}
+                        <div className="text-xs  flex flex-col justify-around  ">
+                          <span>
+                            {errorMessage && (
+                              <p style={{ color: "red" }}>{errorMessage}</p>
+                            )}
+                          </span>
+                          <span className="mb-2">
+                            {" "}
+                            {errorMessageUrl && (
+                              <a
+                                href="#"
+                                style={{ color: "red" }}
+                                className="text-xs"
+                                onClick={() => {
+                                  const link = document.createElement("a");
+                                  link.href = errorMessageUrl;
+                                  link.setAttribute("download", "data.csv"); // Name the file as data.csv
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  document.body.removeChild(link);
+                                }}
+                              >
+                                <span className="underline text-blue-500 hover:text-blue-800 mr-2">
+                                  Download CSV to see errors.
+                                </span>
+                              </a>
+                            )}
+                          </span>
                         </div>
 
                         <button
