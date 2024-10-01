@@ -1221,6 +1221,7 @@ function ClassList() {
     console.log("sectionNameis", sectionNameis, "value is", e.target.value);
 
     // setNameError("");
+    setBackendErrors("");
     setNewClassName(value);
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
