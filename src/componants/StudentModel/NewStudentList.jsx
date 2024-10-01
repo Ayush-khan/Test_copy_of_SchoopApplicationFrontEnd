@@ -176,7 +176,7 @@ function NewStudentList() {
   const handleEdit = (section) => {
     setCurrentSection(section);
     navigate(
-      `/student/edit/${section.student_id}`,
+      `/newStudetEdit/edit/${section.student_id}`,
 
       {
         state: { student: section },
@@ -263,7 +263,7 @@ function NewStudentList() {
       }
 
       await axios.delete(
-        `${API_URL}/api/students/${currentSection?.classToDelete?.student_id}`,
+        `${API_URL}/api/newstudents/${currentSection?.classToDelete?.student_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

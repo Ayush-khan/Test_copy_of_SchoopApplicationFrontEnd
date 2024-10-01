@@ -850,7 +850,7 @@ function EditOfNewStudentList() {
           </h5>
           <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-            onClick={() => navigate("/manageStudent")}
+            onClick={() => navigate("/newStudentList")}
           />
         </div>
         <div
@@ -2206,20 +2206,6 @@ function EditOfNewStudentList() {
               )}
             </div> */}
             <div className="mt-2">
-              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
-                Office Address
-              </label>
-              <textarea
-                id="email"
-                rows={2}
-                maxLength={200}
-                name="m_office_add"
-                value={formData.m_office_add}
-                onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-            </div>
-            <div className="mt-2">
               <label
                 htmlFor="m_office_tel"
                 className="block font-bold text-xs mb-0.5"
@@ -2241,6 +2227,20 @@ function EditOfNewStudentList() {
                     });
                   }
                 }}
+                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+            </div>{" "}
+            <div className="mt-2">
+              <label htmlFor="email" className="block font-bold text-xs mb-0.5">
+                Office Address
+              </label>
+              <textarea
+                id="email"
+                rows={2}
+                maxLength={200}
+                name="m_office_add"
+                value={formData.m_office_add}
+                onChange={handleChange}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
               />
             </div>
@@ -2367,7 +2367,7 @@ function EditOfNewStudentList() {
             </div> */}
             {/*  */}
             {/* added father feilds here */}
-            <div className="col-span-3 md:mr-9 my-2 text-right">
+            <div className="col-span-4 md:mr-9 my-2 text-right">
               <button
                 // type="submit"
                 // type="button"
