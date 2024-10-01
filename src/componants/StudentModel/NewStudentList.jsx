@@ -53,6 +53,7 @@ function NewStudentList() {
   const [loading, setLoading] = useState(false); // For loader
   const [showDisplayUpload, setShowDisplayUpload] = useState(false);
   const [isFileUploaded, setIsFileUploaded] = useState(false); // Track upload status
+  const [isDataPosted, setIsDataPosted] = useState(false); // Flag for tracking successful post
 
   // Custom styles for the close button
 
@@ -150,13 +151,23 @@ function NewStudentList() {
   // }, []);
 
   // Fetch initial data when component mounts or when file is successfully uploaded
+  // useEffect(() => {
+  //   fetchInitialData();
+  //   fetchAllStudents();
+
+  //   setSelectedFile(null); // Clear the selected file on mount or upload
+  // }, [isFileUploaded]); // Trigger this effect when 'isFileUploaded' change
+
+  // Re-fetch data when the component mounts or after successful post
   useEffect(() => {
     fetchInitialData();
     fetchAllStudents();
-
-    setSelectedFile(null); // Clear the selected file on mount or upload
-  }, [isFileUploaded]); // Trigger this effect when 'isFileUploaded' change
-
+    // If data is posted successfully, reset the flag and refetch
+    if (isDataPosted) {
+      handleSearch();
+      setIsDataPosted(false); // Reset the flag after refresh
+    }
+  }, [isDataPosted]);
   // Handle pagination
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
@@ -322,6 +333,7 @@ function NewStudentList() {
     setSelectedFile(file); // Set the selected file to state
     setErrorMessage(""); // Clear any previous error
     setUploadStatus(""); // Clear any previous success
+    setErrorMessageUrl("");
   };
 
   // Function to upload the selected CSV file
@@ -351,16 +363,23 @@ function NewStudentList() {
           },
         }
       );
-
+      console.log("the response of post bulk upload", response);
       if (response.status === 200) {
-        // If file upload is successful
-        setUploadStatus("File uploaded successfully!");
-        setErrorMessage(""); // Clear any error messages
-        toast.success("File uploaded successfully!");
-        setSelectedFile(null); // Clear the selected file
-        setLoading(false);
-        setIsFileUploaded(true); // Mark as uploaded
+        toast.success("Data posted successfully!");
+        setIsDataPosted(true); // Set the flag to true after a successful post
       }
+      // if (response.status === 200) {
+      //   // If file upload is successful
+      //   setUploadStatus("File uploaded successfully!");
+      //   setErrorMessage(""); // Clear any error messages
+      //   toast.success("File uploaded successfully!");
+
+      //   setSelectedFile(null); // Clear the selected file
+      //   setLoading(false);
+      //   setIsFileUploaded(true); // Mark as uploaded
+      //   // setShowDisplayUpload(false);
+      //   setErrorMessageUrl("");
+      // }
     } catch (error) {
       setLoading(false); // Hide loader
 
@@ -431,7 +450,9 @@ function NewStudentList() {
                     <h2 className="text-center text-2xl font-semibold mb-8 text-blue-600">
                       Upload Student Data from Excel Sheet
                     </h2>
-
+                    <h5 className="  text-center mx-auto font-semibold mb-3 text-gray-500 ">
+                      Class: {classNameForBulkUpload}
+                    </h5>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
                       {/* Download Student List Template */}
                       <div className="flex flex-col items-center p-4 bg-gray-100 rounded-md">
@@ -456,11 +477,9 @@ function NewStudentList() {
                       {/* File Upload dfgs  gdg*/}
                       <div className="flex flex-col items-center p-4 bg-gray-100 rounded-md">
                         <h5 className="font-semibold mb-3 text-gray-800">
-                          Class: {classNameForBulkUpload}
-                        </h5>
-                        <p className="font-medium text-gray-800 mb-2">
                           Select a file to upload
-                        </p>
+                        </h5>
+
                         <p className="text-sm text-gray-600 mb-4">
                           # Do not change the file name or contents of the first
                           4 columns.
@@ -551,40 +570,49 @@ function NewStudentList() {
                     </div>
                   </div>
                 ) : (
-                  <div className=" w-full md:w-[38%] relative left-0 md:left-[2%] flex justify-center flex-col md:flex-row gap-x-1 md:gap-x-4 ">
-                    <div className="w-full  gap-x-3 md:justify-start justify-between  my-1 md:my-4 flex  md:flex-row  ">
-                      <label
-                        htmlFor="classSection"
-                        className=" mr-2 pt-2 items-center text-center"
-                      >
-                        Class <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[70%] ">
-                        <Select
-                          value={selectedClass}
-                          onChange={handleClassSelect}
-                          options={classOptions}
-                          placeholder="Select "
-                          isSearchable
-                          isClearable
-                          className="text-sm"
-                        />
-                        {nameError && (
-                          <div className=" relative top-0.5 ml-1 text-danger text-xs">
-                            {nameError}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                  <div className="max-w-full bg-white shadow-md rounded-lg border border-gray-300 mx-auto mt-10 p-6">
+                    <h2 className="text-center text-2xl font-semibold mb-8 text-blue-600">
+                      Upload Student Data from Excel Sheet
+                    </h2>
 
-                    <button
-                      onClick={handleSearch}
-                      type="button"
-                      className=" my-1 md:my-4 btn h-10  w-18 md:w-auto btn-primary "
-                    >
-                      Search
-                    </button>
+                    {/* <div className="w-full  grid grid-cols-1 md:grid-cols-3 gap-6 text-center"> */}
+                    {/* Download Student List Template */}
+                    <div className=" w-full md:w-[49%]  mx-auto flex justify-center flex-col md:flex-row gap-x-1 md:gap-x-4 ">
+                      <div className="w-full  gap-x-3 md:justify-center justify-around  my-1 md:my-4 flex  md:flex-row  ">
+                        <label
+                          htmlFor="classSection"
+                          className=" mr-2 pt-2 items-center text-center"
+                        >
+                          Class <span className="text-red-500">*</span>
+                        </label>
+                        <div className="w-[65%] md:w-[55%] ">
+                          <Select
+                            value={selectedClass}
+                            onChange={handleClassSelect}
+                            options={classOptions}
+                            placeholder="Select "
+                            isSearchable
+                            isClearable
+                            className="text-sm"
+                          />
+                          {nameError && (
+                            <div className=" relative top-0.5 ml-1 text-danger text-xs">
+                              {nameError}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleSearch}
+                        type="button"
+                        className="mr-0 md:mr-4 my-1 md:my-4 btn h-10  w-18 md:w-auto btn-primary "
+                      >
+                        Search
+                      </button>
+                    </div>
                   </div>
+                  // </div>
                 )}
               </div>
             </div>

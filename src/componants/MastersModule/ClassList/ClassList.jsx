@@ -772,11 +772,13 @@ function ClassList() {
   const [pageCount, setPageCount] = useState(0);
   const pageSize = 10;
   const [validationErrors, setValidationErrors] = useState({});
+
   // validations state for unique name
   const [nameAvailable, setNameAvailable] = useState(true);
   const [nameError, setNameError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
   const [sectionNameis, newSectionNameis] = useState({});
+  const [backendErrors, setBackendErrors] = useState({});
 
   const fetchClasses = async () => {
     try {
@@ -940,6 +942,7 @@ function ClassList() {
     setValidationErrors({});
     setNameError("");
     setFieldErrors({});
+    setBackendErrors("");
   };
 
   // const handleSubmitAdd = async () => {
@@ -1047,6 +1050,68 @@ function ClassList() {
     }
   };
 
+  // const handleSubmitEdit = async () => {
+  //   const validationErrors = validateSectionName(newClassName, newDepartmentId);
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setFieldErrors(validationErrors);
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     if (!token || !currentClass || !currentClass.class_id) {
+  //       throw new Error("Class ID is missing");
+  //     }
+  //     console.log("the EXI NAME IS  ", currentClass);
+  //     console.log("The name is  ", newClassName);
+
+  //     // Step 1: Check if the class name is available using the same logic from handleBlur
+  //     // const checkNameResponse = await axios.post(
+  //     //   `${API_URL}/api/check_class_name`,
+  //     //   { name: newClassName },
+  //     //   {
+  //     //     headers: {
+  //     //       Authorization: `Bearer ${token}`,
+  //     //     },
+  //     //     withCredentials: true,
+  //     //   }
+  //     // );
+
+  //     // Step 2: If the name already exists, stop the submission
+  //     // if (checkNameResponse.data?.exists) {
+  //     //   setNameError("Name is already taken.");
+  //     //   setNameAvailable(false);
+  //     //   return;
+  //     // } else {
+  //     //   setNameError("");
+  //     //   setNameAvailable(true);
+  //     // }
+
+  //     console.log("className:", newClassName, "deparment_id", newDepartmentId);
+  //     const response = await axios.put(
+  //       `${API_URL}/api/classes/${currentClass.class_id}`,
+  //       { name: newClassName, department_id: newDepartmentId },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         withCredentials: true,
+  //       }
+  //     );
+
+  //     fetchClasses();
+  //     handleCloseModal();
+  //     toast.success("Class updated successfully!");
+  //   } catch (error) {
+  //     if (error.response && error.response.data) {
+  //       toast.error(`Error updating class: ${error.response.data.message}`);
+  //     } else {
+  //       toast.error(`Error updating class: ${error.message}`);
+  //     }
+  //     console.error("Error editing class:", error);
+  //   }
+  // };
   const handleSubmitEdit = async () => {
     const validationErrors = validateSectionName(newClassName, newDepartmentId);
     if (Object.keys(validationErrors).length > 0) {
@@ -1060,31 +1125,11 @@ function ClassList() {
       if (!token || !currentClass || !currentClass.class_id) {
         throw new Error("Class ID is missing");
       }
-      console.log("the EXI NAME IS  ", currentClass);
-      console.log("The name is  ", newClassName);
 
-      // Step 1: Check if the class name is available using the same logic from handleBlur
-      const checkNameResponse = await axios.post(
-        `${API_URL}/api/check_class_name`,
-        { name: newClassName },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
+      console.log("Existing Class:", currentClass);
+      console.log("New Class Name:", newClassName);
 
-      // Step 2: If the name already exists, stop the submission
-      if (checkNameResponse.data?.exists) {
-        setNameError("Name is already taken.");
-        setNameAvailable(false);
-        return;
-      } else {
-        setNameError("");
-        setNameAvailable(true);
-      }
-      await axios.put(
+      const response = await axios.put(
         `${API_URL}/api/classes/${currentClass.class_id}`,
         { name: newClassName, department_id: newDepartmentId },
         {
@@ -1098,9 +1143,21 @@ function ClassList() {
       fetchClasses();
       handleCloseModal();
       toast.success("Class updated successfully!");
+
+      // Reset backend errors on successful submission
+      setBackendErrors({});
     } catch (error) {
       if (error.response && error.response.data) {
-        toast.error(`Error updating class: ${error.response.data.message}`);
+        const backendErrors = error.response.data.errors;
+        if (backendErrors) {
+          // Store backend validation errors in the state
+          setBackendErrors(backendErrors);
+
+          // Optionally show a toast with error messages
+          toast.error(`Error: ${backendErrors.name?.join(", ")}`);
+        } else {
+          toast.error(`Error updating class: ${error.response.data.message}`);
+        }
       } else {
         toast.error(`Error updating class: ${error.message}`);
       }
@@ -1507,9 +1564,9 @@ function ClassList() {
                       // onChange={(e) => setNewClassName(e.target.value)}
                     />
                     <div className="absolute top-9 left-1/3 ">
-                      {!nameAvailable && (
-                        <span className=" block text-red-500 text-xs">
-                          {nameError}
+                      {backendErrors.name && (
+                        <span className="text-danger text-xs">
+                          {backendErrors.name.join(", ")}
                         </span>
                       )}
 
