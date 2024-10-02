@@ -104,7 +104,7 @@ function NewStudentList() {
       let response;
       if (selectedClass) {
         response = await axios.get(
-          `${API_URL}/api/get_student_by_sectionId/${selectedClass.value}`,
+          `${API_URL}/api/get_newstudent_by_sectionId/${selectedClass.value}`,
           {
             headers: { Authorization: `Bearer ${token}` },
             // params: { section_id: selectedClass.value },
@@ -128,9 +128,12 @@ function NewStudentList() {
       const token = localStorage.getItem("authToken");
       setLoading(true);
 
-      const response = await axios.get(`${API_URL}/api/get_all_studentlist`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_all_newstudentlist`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       const allStudentList = response?.data || [];
       setSubjects(allStudentList); // Store in `students`
@@ -263,7 +266,7 @@ function NewStudentList() {
       }
 
       await axios.delete(
-        `${API_URL}/api/newstudents/${currentSection?.classToDelete?.student_id}`,
+        `${API_URL}/api/deleteNewstudent/${currentSection?.classToDelete?.student_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -367,6 +370,7 @@ function NewStudentList() {
       if (response.status === 200) {
         toast.success("Data posted successfully!");
         setIsDataPosted(true); // Set the flag to true after a successful post
+        setSelectedFile(null);
       }
       // if (response.status === 200) {
       //   // If file upload is successful

@@ -13,6 +13,7 @@ function EditOfNewStudentList() {
   const API_URL = import.meta.env.VITE_API_URL;
   // for unique user name
   const [usernameError, setUsernameError] = useState(""); // To store the error message
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -320,6 +321,7 @@ function EditOfNewStudentList() {
   // Handle student selection
   const handleStudentSelect = (selectedOption) => {
     setSelectedStudent(selectedOption);
+    setSelectedStudentId(selectedOption.value);
   };
 
   // Fetch classes with student count
@@ -531,10 +533,10 @@ function EditOfNewStudentList() {
     if (!formData.dob) newErrors.dob = "Date of Birth is required";
     if (!formData.nationality)
       newErrors.nationality = "Nationality is required";
-    // if (!formData.mother_tongue)
-    //   newErrors.mother_tongue = "MotherTongue is required";
-    // if (!formData.student_name)
-    //   newErrors.student_name = "Student name is required";
+    if (!formData.mother_tongue)
+      newErrors.mother_tongue = "MotherTongue is required";
+    if (!formData.student_name)
+      newErrors.student_name = "Student name is required";
     if (!formData.reg_id) {
       newErrors.reg_id = "GR number is required";
     }
@@ -562,9 +564,9 @@ function EditOfNewStudentList() {
     if (!formData.section_id || formData.section_id === "Select") {
       newErrors.section_id = "Division selection is required";
     }
-    // if (!formData.admission_class || formData.admission_class === "Select") {
-    //   newErrors.admission_class = "Admission class selection is required";
-    // }
+    if (!formData.admission_class || formData.admission_class === "Select") {
+      newErrors.admission_class = "Admission class selection is required";
+    }
 
     // newErrors.gender = "Gender selection is required";
 
@@ -578,8 +580,8 @@ function EditOfNewStudentList() {
     const stu_aadhaar_no = validateAadhar(formData.stu_aadhaar_no);
     if (stu_aadhaar_no) newErrors.stu_aadhaar_no = stu_aadhaar_no;
     // mother adhar card validatoins
-    // const m_adhar_no = validateAadhar(formData.m_adhar_no);
-    // if (m_adhar_no) newErrors.m_adhar_no = m_adhar_no;
+    const m_adhar_no = validateAadhar(formData.m_adhar_no);
+    if (m_adhar_no) newErrors.m_adhar_no = m_adhar_no;
     // Father adhar validations
     const aadharError = validateAadhar(formData.parent_adhar_no);
     if (aadharError) newErrors.parent_adhar_no = aadharError;
@@ -593,8 +595,8 @@ function EditOfNewStudentList() {
     if (!formData.father_name.trim())
       newErrors.father_name = "Father Name is required";
     // mother
-    // if (!formData.m_adhar_no.trim())
-    //   newErrors.m_adhar_no = "Mother Aadhaar Card No. is required";
+    if (!formData.m_adhar_no.trim())
+      newErrors.m_adhar_no = "Mother Aadhaar Card No. is required";
     if (!formData.stu_aadhaar_no.trim())
       newErrors.stu_aadhaar_no = "Student Aadhaar Card No. is required";
     if (!formData.parent_adhar_no.trim())
@@ -848,6 +850,34 @@ function EditOfNewStudentList() {
     }
   };
 
+  const handleSearch = async () => {
+    if (!selectedStudentId) {
+      setNameError("Please select Student.");
+      toast.error("Please select Student!");
+      return;
+    }
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      let response;
+      if (selectedStudentId) {
+        response = await axios.get(
+          `${API_URL}/api/getParentInfoOfStudent/${selectedStudentId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+      console.log("the response", response.data);
+      const studentList = response?.data?.parent || [];
+      //   setSubjects(studentList);
+      console.log("The data of the studentList parent info", studentList);
+      //   setPageCount(Math.ceil(studentList.length / pageSize)); // Set page count based on response size
+    } catch (error) {
+      toast.error("Error fetching student details.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Fetch class names when component loads
 
   return (
@@ -1094,7 +1124,7 @@ function EditOfNewStudentList() {
               )}
             </div>
             {/* Birth place */}
-            {/* <div className="mt-2">
+            <div className="mt-2">
               <label
                 htmlFor="birthPlace"
                 className="block font-bold text-xs mb-0.5"
@@ -1111,7 +1141,7 @@ function EditOfNewStudentList() {
                 onChange={handleChange}
                 // onBlur={handleBlur}
               />
-            </div> */}
+            </div>
             <div className="mt-2">
               <label
                 htmlFor="nationality"
@@ -1136,7 +1166,7 @@ function EditOfNewStudentList() {
               )}
             </div>
             {/* Mother toung */}
-            {/* <div className="mt-2">
+            <div className="mt-2">
               <label
                 htmlFor="motherTongue"
                 className="block font-bold text-xs mb-0.5"
@@ -1158,7 +1188,7 @@ function EditOfNewStudentList() {
                   {errors.mother_tongue}
                 </p>
               )}
-            </div> */}
+            </div>
             {/* Student Details */}
             {/* <div className="w-[120%] mx-auto h-2 bg-white col-span-4"></div> */}
             <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
@@ -1166,7 +1196,7 @@ function EditOfNewStudentList() {
               Student Details
             </h5>
             {/* Student Name is */}
-            {/* <div className="mt-2">
+            <div className="mt-2">
               <label
                 htmlFor="studentName"
                 className="block font-bold text-xs mb-0.5"
@@ -1188,7 +1218,7 @@ function EditOfNewStudentList() {
                   {errors.student_name}
                 </p>
               )}
-            </div> */}
+            </div>
             <div className="mt-2">
               <label
                 htmlFor="studentClass"
@@ -1304,7 +1334,7 @@ function EditOfNewStudentList() {
               </select>
             </div>
             {/* Admision in class */}
-            {/* <div className="mt-2">
+            <div className="mt-2">
               <label
                 htmlFor="admittedInClass"
                 className="block font-bold text-xs mb-0.5"
@@ -1341,7 +1371,7 @@ function EditOfNewStudentList() {
                   {errors.admission_class}
                 </p>
               )}
-            </div> */}
+            </div>
             <div className="mt-2">
               <label
                 htmlFor="dataOfAdmission"
@@ -1365,7 +1395,7 @@ function EditOfNewStudentList() {
               )}
             </div>
             {/* Student Id number */}
-            {/* <div className="mt-2">
+            <div className="mt-2">
               <label
                 htmlFor="studentIdNumber"
                 className="block font-bold text-xs mb-0.5"
@@ -1382,7 +1412,7 @@ function EditOfNewStudentList() {
                 onChange={handleChange}
                 // onBlur={handleBlur}
               />
-            </div> */}
+            </div>
             <div className="mt-2">
               <label
                 htmlFor="studentAadharNumber"
@@ -1408,7 +1438,7 @@ function EditOfNewStudentList() {
               )}
             </div>{" "}
             {/* Udise Number */}
-            {/* {selectedClass > 99 && (
+            {selectedClass > 99 && (
               <div className="mt-2">
                 <label
                   htmlFor="studentAadharNumber"
@@ -1427,7 +1457,7 @@ function EditOfNewStudentList() {
                   // onBlur={handleBlur}
                 />
               </div>
-            )} */}
+            )}
             {/* Address Information */}
             <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
               {" "}
@@ -1763,7 +1793,7 @@ function EditOfNewStudentList() {
               />
             </div>
             {/* Has Spectales */}
-            {/* <div className="  flex gap-4 pt-[7px]">
+            <div className="  flex gap-4 pt-[7px]">
               <div
                 htmlFor="weight"
                 className="block font-bold text-[.9em] mt-4 "
@@ -1800,7 +1830,7 @@ function EditOfNewStudentList() {
                   </label>
                 </div>
               </div>
-            </div> */}
+            </div>
             {/* ... */}
             {/* Add other form fields similarly */}
             {/* ... */}
@@ -1827,6 +1857,7 @@ function EditOfNewStudentList() {
                     //   id="siblingmap"
                     value="yes"
                     name="parentExist"
+                    checked={parentExist === "yes"} // Check 'no' by default
                     //   className="md:text-nowrap"
                     onChange={handleRadioChange}
                   />{" "}
@@ -1836,6 +1867,7 @@ function EditOfNewStudentList() {
                   <input
                     type="radio"
                     value="no"
+                    checked={parentExist === "no"} // Check 'no' by default
                     name="parentExist"
                     onChange={handleRadioChange}
                   />{" "}
@@ -1895,7 +1927,7 @@ function EditOfNewStudentList() {
               </div>
 
               <button
-                // onClick={handleSearch}
+                onClick={handleSearch}
                 type="button"
                 className=" my-1 md:my-4 btn h-10  w-18 md:w-auto btn-primary "
               >
@@ -2156,7 +2188,7 @@ function EditOfNewStudentList() {
               </div>
             </div>
             {/* Father Date of birth */}
-            {/* <div className="mt-2">
+            <div className="mt-2">
               <label
                 htmlFor="dataOfAdmission"
                 className="block font-bold text-xs mb-0.5"
@@ -2168,11 +2200,16 @@ function EditOfNewStudentList() {
                 id="dataOfAdmission"
                 name="f_dob"
                 value={formData.f_dob}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
                 onChange={handleChange}
                 // onBlur={handleBlur}
               />
-            </div> */}
+            </div>
             {/* Mother information */}
             <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
               {" "}
@@ -2253,7 +2290,7 @@ function EditOfNewStudentList() {
               </select>
             </div>
             {/* Mother Adhar Card */}
-            {/* <div className="mt-2">
+            <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
                 Mother Aadhaar Card No. <span className="text-red-500">*</span>
               </label>
@@ -2264,14 +2301,19 @@ function EditOfNewStudentList() {
                 maxLength={12}
                 value={formData.m_adhar_no}
                 onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
               />
               {errors.m_adhar_no && (
                 <span className="text-red-500 text-xs">
                   {errors.m_adhar_no}
                 </span>
               )}
-            </div> */}
+            </div>
             <div className="mt-2">
               <label
                 htmlFor="m_office_tel"
@@ -2435,7 +2477,7 @@ function EditOfNewStudentList() {
               </div>
             </div>
             {/* Mother date of birth */}
-            {/* <div className="mt-2">
+            <div className="mt-2">
               <label
                 htmlFor="dataOfAdmission"
                 className="block font-bold text-xs mb-0.5"
@@ -2447,11 +2489,16 @@ function EditOfNewStudentList() {
                 id="dataOfAdmission"
                 name="m_dob"
                 value={formData.m_dob}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
                 onChange={handleChange}
                 // onBlur={handleBlur}
               />
-            </div> */}
+            </div>
             {/*  */}
             {/* added father feilds here */}
             <div className="col-span-4 md:mr-9 my-2 text-right">

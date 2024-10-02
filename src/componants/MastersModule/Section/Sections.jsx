@@ -697,6 +697,8 @@ function Sections() {
   };
   const handleChangeSectionName = (e) => {
     const { value } = e.target;
+    setNameError("");
+
     setNewSectionName(value);
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
