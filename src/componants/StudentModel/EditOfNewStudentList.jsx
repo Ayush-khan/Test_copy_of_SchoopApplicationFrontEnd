@@ -271,16 +271,25 @@ function EditOfNewStudentList() {
   //   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isDropdownDisabled, setIsDropdownDisabled] = useState(false);
+  //   const [isDropdownDisabled, setIsDropdownDisabled] = useState(false);
+  const [parentExist, setParentExist] = useState(""); // Track the selected radio button
+
   // Handler for radio button change
-  const handleRadioChange = (event) => {
-    const value = event.target.value;
-    if (value === "yes") {
-      setIsDropdownDisabled(false); // Enable dropdown if "Yes" is selected
-    } else {
-      setIsDropdownDisabled(true); // Keep dropdown disabled if "No" is selected
-    }
+  //   const handleRadioChange = (event) => {
+  //     const value = event.target.value;
+  //     if (value === "yes") {
+  //       setIsDropdownDisabled(false); // Enable dropdown if "Yes" is selected
+  //     } else {
+  //       setIsDropdownDisabled(true); // Keep dropdown disabled if "No" is selected
+  //     }
+  //   };
+  // Handle radio button change
+  const handleRadioChange = (e) => {
+    setParentExist(e.target.value);
   };
+  // Conditionally disable/enable fields based on the selected radio button value
+  const isDropdownDisabled = parentExist === "no"; // Disable dropdowns if "no" is selected
+  const areOtherFieldsDisabled = parentExist === "yes"; // Disable other fields if "yes" is selected
 
   // Custom styles for class dropdown
   const classOptions = useMemo(
@@ -353,6 +362,7 @@ function EditOfNewStudentList() {
 
   useEffect(() => {
     fetchInitialData(); // Fetch classes when the component mounts
+    fetchStudentNameWithClassId();
   }, []);
 
   // Fetch divisions when the class is already selected (for pre-filled data)
@@ -1868,7 +1878,7 @@ function EditOfNewStudentList() {
                     value={selectedStudent}
                     onChange={handleStudentSelect}
                     options={studentOptions}
-                    placeholder="Student Name "
+                    placeholder="Student Name"
                     isSearchable
                     isClearable
                     className="text-sm"
@@ -1907,7 +1917,14 @@ function EditOfNewStudentList() {
                 maxLength={100}
                 value={formData.father_name}
                 onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
+
+                // className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
               />
               {errors.father_name && (
                 <span className="text-red-500 text-xs">
@@ -1926,7 +1943,12 @@ function EditOfNewStudentList() {
                 name="father_occupation"
                 value={formData.father_occupation}
                 onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
               />
             </div>
             <div className="mt-2">
@@ -1940,7 +1962,12 @@ function EditOfNewStudentList() {
                 id="bloodGroup"
                 name="blood_group"
                 value={formData.blood_group}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
                 onChange={handleChange}
                 // onBlur={handleBlur}
               >
@@ -1966,7 +1993,12 @@ function EditOfNewStudentList() {
                 maxLength={12}
                 value={formData.parent_adhar_no}
                 onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
               />
               {errors.parent_adhar_no && (
                 <span className="text-red-500 text-xs">
@@ -1985,7 +2017,12 @@ function EditOfNewStudentList() {
                 name="f_office_add"
                 value={formData.f_office_add}
                 onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
               />
             </div>
             <div className="mt-2">
@@ -2010,7 +2047,12 @@ function EditOfNewStudentList() {
                     });
                   }
                 }}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
               />
             </div>
             <div>
@@ -2029,7 +2071,12 @@ function EditOfNewStudentList() {
                   maxLength="10"
                   value={formData.f_mobile}
                   onChange={handleChange}
-                  className="input-field block w-full border-1 border-gray-400 outline-none rounded-r-md py-1 px-3 bg-white shadow-inner"
+                  disabled={areOtherFieldsDisabled}
+                  className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                    areOtherFieldsDisabled
+                      ? "bg-gray-200  text-gray-500"
+                      : "bg-white"
+                  }`}
                   required
                 />
               </div>
@@ -2081,7 +2128,12 @@ function EditOfNewStudentList() {
                 maxLength={50}
                 value={formData.f_email}
                 onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
               />
               {errors.f_email && (
                 <span className="text-red-500 text-xs">{errors.f_email}</span>
@@ -2137,7 +2189,12 @@ function EditOfNewStudentList() {
                 name="mother_name"
                 value={formData.mother_name}
                 onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
               />
               {errors.mother_name && (
                 <span className="text-red-500 text-xs">
@@ -2156,7 +2213,12 @@ function EditOfNewStudentList() {
                 name="mother_occupation"
                 value={formData.mother_occupation}
                 onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
               />
             </div>
             <div className="mt-2">
@@ -2170,7 +2232,12 @@ function EditOfNewStudentList() {
                 id="bloodGroup"
                 name="m_blood"
                 value={formData.m_blood}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
                 onChange={handleChange}
                 // onBlur={handleBlur}
               >
@@ -2227,7 +2294,12 @@ function EditOfNewStudentList() {
                     });
                   }
                 }}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
               />
             </div>{" "}
             <div className="mt-2">
@@ -2241,7 +2313,12 @@ function EditOfNewStudentList() {
                 name="m_office_add"
                 value={formData.m_office_add}
                 onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
               />
             </div>
             {/* <div className="mt-2">
@@ -2274,7 +2351,12 @@ function EditOfNewStudentList() {
                   maxLength="10"
                   value={formData.m_mobile}
                   onChange={handleChange}
-                  className="input-field block w-full border-1 border-gray-400 outline-none rounded-r-md py-1 px-3 bg-white shadow-inner"
+                  disabled={areOtherFieldsDisabled}
+                  className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                    areOtherFieldsDisabled
+                      ? "bg-gray-200  text-gray-500"
+                      : "bg-white"
+                  }`}
                   required
                 />
               </div>
@@ -2326,7 +2408,12 @@ function EditOfNewStudentList() {
                 maxLength={50}
                 value={formData.m_emailid}
                 onChange={handleChange}
-                className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                disabled={areOtherFieldsDisabled}
+                className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
+                  areOtherFieldsDisabled
+                    ? "bg-gray-200  text-gray-500"
+                    : "bg-white"
+                }`}
               />
               {errors.m_emailid && (
                 <span className="text-red-500 text-xs">{errors.m_emailid}</span>

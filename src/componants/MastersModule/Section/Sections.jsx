@@ -466,13 +466,22 @@ function Sections() {
   const validateSectionName = (name) => {
     const regex = /^[a-zA-Z]+$/;
     let errors = {};
-    if (!name) errors.name = "Please enter section name.";
-    if (name.length > 255)
-      errors.name = "The name field must not exceed 255 characters.";
-    if (!regex.test(name))
-      errors.name = "Please enter alphabets without space.";
+
+    // Check if the name is empty
+    if (!name) {
+      errors.name = "Please enter the section name.";
+    } else {
+      // Additional validations if the name is not empty
+      if (name.length > 255) {
+        errors.name = "The name field must not exceed 255 characters.";
+      } else if (!regex.test(name)) {
+        errors.name = "Please enter alphabets without spaces.";
+      }
+    }
+
     return errors;
   };
+
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
   };
