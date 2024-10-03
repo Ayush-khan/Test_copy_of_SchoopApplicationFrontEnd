@@ -779,7 +779,7 @@ function ClassList() {
   const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
   const [sectionNameis, newSectionNameis] = useState({});
   const [backendErrors, setBackendErrors] = useState({});
-
+  const [roleId, setRoleId] = useState("");
   const fetchClasses = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -828,9 +828,34 @@ function ClassList() {
     }
   };
 
+  // for role_id
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      // Fetch session data
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRoleId(sessionResponse?.data?.user.role_id); // Store role_id
+      // setRoleId("A"); // Store role_id
+      console.log("roleIDis:", roleId);
+      // Fetch academic year data
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   useEffect(() => {
     fetchClasses();
     fetchDepartments();
+    fetchDataRoleId();
   }, []);
 
   const handlePageClick = (data) => {
@@ -1368,22 +1393,45 @@ function ClassList() {
                               }
                             </p>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                              onClick={() => handleEdit(classItem)}
-                            >
-                              <FontAwesomeIcon icon={faEdit} />
-                            </button>
-                          </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                              onClick={() => handleDelete(classItem.class_id)}
-                            >
-                              <FontAwesomeIcon icon={faTrash} />
-                            </button>
-                          </td>
+                          {roleId === "M" ? (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-pink-600 hover:text-pink-800 hover:bg-transparent "
+                                // onClick={() => handleEdit(classItem)}
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                              </button>
+                            </td>
+                          ) : (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                onClick={() => handleEdit(classItem)}
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                              </button>
+                            </td>
+                          )}
+
+                          {roleId === "M" ? (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-green-600 hover:text-green-800 hover:bg-transparent "
+                                // onClick={() => handleDelete(classItem.class_id)}
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                            </td>
+                          ) : (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                onClick={() => handleDelete(classItem.class_id)}
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                            </td>
+                          )}
                         </tr>
                       ))
                     ) : (

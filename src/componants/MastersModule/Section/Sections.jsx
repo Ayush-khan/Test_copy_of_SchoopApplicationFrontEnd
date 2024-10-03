@@ -432,12 +432,12 @@ function Sections() {
   // validations state for unique name
   const [nameAvailable, setNameAvailable] = useState(true);
   const [nameError, setNameError] = useState("");
+  const [roleId, setRoleId] = useState("");
   const pageSize = 10;
 
   const fetchSections = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
       if (!token) {
         throw new Error("No authentication token found");
@@ -461,6 +461,7 @@ function Sections() {
 
   useEffect(() => {
     fetchSections();
+    fetchDataRoleId();
   }, []);
 
   const validateSectionName = (name) => {
@@ -486,38 +487,63 @@ function Sections() {
     setCurrentPage(data.selected);
   };
 
-  // APi calling for check unique name
-  const handleBlur = async () => {
+  // for role_id
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
     try {
-      const token = localStorage.getItem("authToken");
-      console.log("the response of the namechack api____", newSectionName);
-
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      const response = await axios.post(
-        `${API_URL}/api/check_section_name`,
-        { name: newSectionName },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
-      console.log("the response of the namechack api", response.data);
-      if (response.data?.exists === true) {
-        setNameError("Name is already taken.");
-        setNameAvailable(false);
-      } else {
-        setNameError("");
-        setNameAvailable(true);
-      }
+      // Fetch session data
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRoleId(sessionResponse?.data?.user.role_id); // Store role_id
+      // setRoleId("A"); // Store role_id
+      console.log("roleIDis:", roleId);
+      // Fetch academic year data
     } catch (error) {
-      console.error("Error checking class name:", error);
+      console.error("Error fetching data:", error);
     }
   };
+
+  // // APi calling for check unique name
+  // const handleBlur = async () => {
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     console.log("the response of the namechack api____", newSectionName);
+
+  //     if (!token) {
+  //       throw new Error("No authentication token found");
+  //     }
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/check_section_name`,
+  //       { name: newSectionName },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         withCredentials: true,
+  //       }
+  //     );
+  //     console.log("the response of the namechack api", response.data);
+  //     if (response.data?.exists === true) {
+  //       setNameError("Name is already taken.");
+  //       setNameAvailable(false);
+  //     } else {
+  //       setNameError("");
+  //       setNameAvailable(true);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error checking class name:", error);
+  //   }
+  // };
   const handleEdit = (section) => {
     setCurrentSection(section);
     setNewSectionName(section.name);
@@ -817,26 +843,48 @@ function Sections() {
                               {section.name}
                             </p>
                           </td>
-
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                              onClick={() => handleEdit(section)}
-                            >
-                              <FontAwesomeIcon icon={faEdit} />
-                            </button>
-                          </td>
-
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                              onClick={() =>
-                                handleDelete(section.department_id)
-                              }
-                            >
-                              <FontAwesomeIcon icon={faTrash} />
-                            </button>
-                          </td>
+                          {roleId === "M" ? (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-pink-600 hover:text-pink-800 hover:bg-transparent "
+                                // onClick={() => handleEdit(section)}
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                              </button>
+                            </td>
+                          ) : (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                onClick={() => handleEdit(section)}
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                              </button>
+                            </td>
+                          )}
+                          {roleId === "M" ? (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-green-600 hover:green-red-800 hover:bg-transparent "
+                                // onClick={() =>
+                                //   handleDelete(section.department_id)
+                                // }
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                            </td>
+                          ) : (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                onClick={() =>
+                                  handleDelete(section.department_id)
+                                }
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                            </td>
+                          )}
                         </tr>
                       ))
                     ) : (
