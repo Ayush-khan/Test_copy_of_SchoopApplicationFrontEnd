@@ -129,6 +129,7 @@ import SubjectAllotmentForReportCard from "../componants/SubjectAllotmentForRepo
 import SubjectForRc from "../componants/SubjectForRCard/SubjectForRc.jsx";
 import NewStudentList from "../componants/StudentModel/NewStudentList.jsx";
 import EditOfNewStudentList from "../componants/StudentModel/EditOfNewStudentList.jsx";
+import AllotClassTeacher from "../componants/AllotClassTeacher/AllotClassTeacher.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -248,7 +249,11 @@ function Index() {
           path="/newStudetEdit/edit/:id"
           element={<PrivateRoute element={EditOfNewStudentList} />}
         />
-
+        {/* AllotClassTeacher */}
+        <Route
+          path="/allotClassTeacher"
+          element={<PrivateRoute element={AllotClassTeacher} />}
+        />
         <Route path="/sections" element={<PrivateRoute element={Sections} />} />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />

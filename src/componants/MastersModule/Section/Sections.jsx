@@ -849,7 +849,7 @@ function Sections() {
                                 className="text-pink-600 hover:text-pink-800 hover:bg-transparent "
                                 // onClick={() => handleEdit(section)}
                               >
-                                <FontAwesomeIcon icon={faEdit} />
+                                {/* <FontAwesomeIcon icon={faEdit} /> */}
                               </button>
                             </td>
                           ) : (
@@ -870,7 +870,7 @@ function Sections() {
                                 //   handleDelete(section.department_id)
                                 // }
                               >
-                                <FontAwesomeIcon icon={faTrash} />
+                                {/* <FontAwesomeIcon icon={faTrash} /> */}
                               </button>
                             </td>
                           ) : (

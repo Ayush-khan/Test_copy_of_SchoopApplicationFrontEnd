@@ -1275,7 +1275,7 @@ function ClassList() {
 
   // if (loading) return <p>Loading...</p>;
   // if (error) return <p>Error: {error}</p>;
-
+  // dfgdfg
   return (
     <>
       {/* <NavBar /> */}
@@ -1399,7 +1399,7 @@ function ClassList() {
                                 className="text-pink-600 hover:text-pink-800 hover:bg-transparent "
                                 // onClick={() => handleEdit(classItem)}
                               >
-                                <FontAwesomeIcon icon={faEdit} />
+                                {/* <FontAwesomeIcon icon={faEdit} /> */}
                               </button>
                             </td>
                           ) : (
@@ -1419,7 +1419,7 @@ function ClassList() {
                                 className="text-green-600 hover:text-green-800 hover:bg-transparent "
                                 // onClick={() => handleDelete(classItem.class_id)}
                               >
-                                <FontAwesomeIcon icon={faTrash} />
+                                {/* <FontAwesomeIcon icon={faTrash} /> */}
                               </button>
                             </td>
                           ) : (

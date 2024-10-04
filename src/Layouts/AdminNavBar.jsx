@@ -894,7 +894,7 @@ const AdminNavBar = () => {
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
-          to="#"
+          to="/allotClassTeacher"
           className="text-sm font-bold hover:text-black"
         >
           Allot Class Teachers
