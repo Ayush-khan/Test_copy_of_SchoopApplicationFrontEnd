@@ -277,7 +277,7 @@ function Grade() {
     }
   };
 
-  //   fiosd klfgjd njmojkngoi hiugf
+  //   fiosd klfgjd njmojkngoi hiugf fdgerg greg
   const handleDelete = (id) => {
     const sectionToDelete = sections.find((sec) => sec.section_id === id);
     setCurrentSection(sectionToDelete);
