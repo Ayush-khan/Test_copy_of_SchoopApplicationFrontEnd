@@ -590,7 +590,7 @@ function Exam() {
                     {/* <div className="form-group"> */}
                     <div className=" relative mb-3 flex justify-center  mx-4">
                       <label htmlFor="departmentId" className="w-1/2 mt-2">
-                        Class <span className="text-red-500">*</span>
+                        Term <span className="text-red-500">*</span>
                       </label>
                       <select
                         id="departmentId"
@@ -626,40 +626,50 @@ function Exam() {
                         )}
                       </div>
                     </div>
-                  </div>
 
-                  <div className="modal-body">
-                    <div className="form-group">
-                      <label>Start Date</label>
+                    <div className="mt-4 relative mb-3 flex justify-center  mx-4">
+                      <label htmlFor="startDate" className="w-1/2 mt-2">
+                        Start Date <span className="text-red-500">*</span>
+                      </label>
+
                       <input
                         type="date"
-                        className="form-control"
+                        id="startDate"
+                        className="form-control shadow-md"
                         value={startDate}
                         onChange={(e) =>
                           handleChange("startDate", e.target.value)
                         }
                       />
-                      {fieldErrors.startDate && (
-                        <span className="text-danger">
-                          {fieldErrors.startDate}
-                        </span>
-                      )}
+                      <div className="absolute top-9 left-1/3">
+                        {fieldErrors.startDate && (
+                          <span className="text-danger text-xs">
+                            {fieldErrors.startDate}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="form-group">
-                      <label>End Date</label>
+                    <div className="mt-4 relative mb-3 flex justify-center  mx-4">
+                      <label htmlFor="endDate" className="w-1/2 mt-2">
+                        End Date <span className="text-red-500">*</span>
+                      </label>
+
                       <input
                         type="date"
-                        className="form-control"
+                        id="endDate"
+                        className="form-control shadow-md"
                         value={endDate}
                         onChange={(e) =>
                           handleChange("endDate", e.target.value)
                         }
                       />
-                      {fieldErrors.endDate && (
-                        <span className="text-danger">
-                          {fieldErrors.endDate}
-                        </span>
-                      )}
+                      <div className="absolute top-9 left-1/3 ">
+                        {fieldErrors.endDate && (
+                          <span className=" block text-red-500 text-xs">
+                            {fieldErrors.endDate}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="form-group">
                       <label>Open Day</label>
@@ -765,7 +775,7 @@ function Exam() {
                   </div>
                   <div className=" relative mb-3 flex justify-center  mx-4">
                     <label htmlFor="editDepartmentId" className="w-1/2 mt-2">
-                      Class <span className="text-red-500">*</span>
+                      Term <span className="text-red-500">*</span>
                     </label>
                     <select
                       id="editDepartmentId"
@@ -799,8 +809,7 @@ function Exam() {
                       )}
                     </div>
                   </div>
-                </div>
-                <div className="modal-body">
+
                   <div className="form-group">
                     <label>Start Date</label>
                     <input

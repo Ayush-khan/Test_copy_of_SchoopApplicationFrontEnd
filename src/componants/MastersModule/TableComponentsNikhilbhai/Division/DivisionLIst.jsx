@@ -194,9 +194,9 @@
 //   };
 
 //   const handleCloseModal = () => {
-//     setShowAddModal(false);
-//     setShowEditModal(false);
-//     setShowDeleteModal(false);
+// setShowAddModal(false);
+// setShowEditModal(false);
+// setShowDeleteModal(false);
 //     setNewSectionName("");
 //     setNewDepartmentId("");
 //     setCurrentSection(null);
