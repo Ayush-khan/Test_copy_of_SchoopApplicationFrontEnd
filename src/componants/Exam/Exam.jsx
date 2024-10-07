@@ -7,10 +7,9 @@ import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
-import Select from "react-select";
 
-// The Division List component
-function AllotClassTeacher() {
+// The is the divisionlist module
+function Exam() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,57 +28,54 @@ function AllotClassTeacher() {
   const [nameError, setNameError] = useState("");
   const [nameAvailable, setNameAvailable] = useState(true);
   const [roleId, setRoleId] = useState("");
-  const [classes, setClasses] = useState([]);
-  const [teachers, setTeachers] = useState([]);
+  const [termsName, setTermsName] = useState([]);
+  const [startDate, setStartDate] = useState(""); // New state for Start Date
+  const [endDate, setEndDate] = useState(""); // New state for End Date
+  const [openDay, setOpenDay] = useState(""); // New state for Open Day
+  const [comment, setComment] = useState(""); // New state for Comment
   const pageSize = 10;
 
   useEffect(() => {
-    fetchClassTeacher();
-    fetchTeachers();
-    fetchClassNames();
+    fetchExams();
+    fetchDataRoleId();
+    fetchTermsName();
   }, []);
 
-  const fetchClassNames = async () => {
+  const fetchTermsName = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_class_section`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("the classes are ", response.data);
-      setClasses(
-        response.data.map((classItem) => ({
-          value: classItem.section_id,
-          label: `${classItem?.get_class?.name}${" "}${classItem.name}`,
-        }))
+      const response = await axios.get(
+        `${API_URL}/api/get_class_for_division`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
+      if (Array.isArray(response.data)) {
+        setTermsName(response.data);
+      } else {
+        setError("Unexpected data format");
+      }
     } catch (error) {
-      toast.error("Error fetching class names");
+      console.error("Error fetching class names:", error);
     }
   };
 
-  const fetchTeachers = async () => {
+  // Fetching all exams list
+  const fetchExams = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_teacher_list`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTeachers(
-        response.data.map((teacher) => ({
-          value: teacher.reg_id,
-          label: teacher.name,
-        }))
-      );
-    } catch (error) {
-      toast.error("Error fetching teachers");
-    }
-  };
 
-  const fetchClassTeacher = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
       const response = await axios.get(`${API_URL}/api/getDivision`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
       });
+
       setSections(response.data);
     } catch (error) {
       setError(error.message);
@@ -88,56 +84,125 @@ function AllotClassTeacher() {
     }
   };
 
-  const validateFields = (departmentId, teacherId) => {
-    const errors = {};
-    // const alphabetRegex = /^[A-Za-z]+$/;
+  // for role_id
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
 
-    if (!departmentId) {
-      errors.department_id = "Please select a class."; // Error message for class dropdown
+    if (!token) {
+      console.error("No authentication token found");
+      return;
     }
 
-    if (!teacherId) {
-      errors.teacher_id = "Please select a teacher."; // Error message for teacher dropdown
+    try {
+      // Fetch session data
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRoleId(sessionResponse?.data?.user.role_id); // Store role_id
+      // setRoleId("A"); // Store role_id
+      console.log("roleIDis:", roleId);
+      // Fetch academic year data
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  // Filter and paginate sections
+  const filteredSections = sections.filter((section) =>
+    section.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const displayedSections = filteredSections.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize
+  );
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections]);
+
+  const validateFormFields = (
+    name,
+    departmentId,
+    startDate,
+    endDate,
+    openDay,
+    comment
+  ) => {
+    const errors = {};
+    const alphabetRegex = /^[A-Za-z]+$/;
+
+    if (!name || name.trim() === "") {
+      errors.name = "Please enter division name.";
+    } else if (!alphabetRegex.test(name)) {
+      errors.name = "The name field can only contain alphabets.";
+    } else if (name.length > 1) {
+      errors.name = "The name field must not exceed 1 character.";
+    }
+
+    if (!departmentId) {
+      errors.department_id = "Please select a class.";
+    }
+
+    if (!startDate) {
+      errors.startDate = "Start Date is required.";
+    }
+
+    if (!endDate) {
+      errors.endDate = "End Date is required.";
+    }
+
+    if (!openDay) {
+      errors.openDay = "Open Day is required.";
+    }
+
+    if (!comment || comment.trim() === "") {
+      errors.comment = "Comment is required.";
     }
 
     return errors;
   };
 
-  const handleAdd = () => {
-    setShowAddModal(true);
-    setFieldErrors({});
-    setNewSectionName("");
-    setNewDepartmentId("");
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
   };
-  const handleDelete = (id) => {
-    const sectionToDelete = sections.find((sec) => sec.section_id === id);
-    setCurrentSection(sectionToDelete);
-    setShowDeleteModal(true);
-  };
+
   const handleEdit = (section) => {
     setCurrentSection(section);
     setNewSectionName(section.name);
-    setClassName(section?.get_class?.name); // Readonly class field
+    setClassName(section.get_class.class_id);
     setNewDepartmentId(section.get_class.class_id);
     setShowEditModal(true);
-    setFieldErrors({});
+  };
+
+  const handleAdd = () => {
+    setShowAddModal(true);
   };
 
   const handleCloseModal = () => {
     setShowAddModal(false);
     setShowEditModal(false);
+    setShowDeleteModal(false);
     setNewSectionName("");
     setNewDepartmentId("");
     setCurrentSection(null);
+    setNameError("");
+    setStartDate("");
+    setEndDate("");
+    setOpenDay("");
+    setComment("");
     setFieldErrors({});
   };
 
   const handleSubmitAdd = async () => {
-    const teacherId = null; // Add teacher ID for the add form
-    const validationErrors = validateFields(
+    const validationErrors = validateFormFields(
       newSectionName,
       newDepartmentId,
-      teacherId
+      startDate,
+      endDate,
+      openDay,
+      comment
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
@@ -151,26 +216,34 @@ function AllotClassTeacher() {
         {
           name: newSectionName,
           class_id: newDepartmentId,
-          teacher_id: teacherId,
+          startDate,
+          endDate,
+          openDay,
+          comment,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         }
       );
 
-      fetchClassTeacher();
+      fetchExams();
       handleCloseModal();
       toast.success("Division added successfully!");
     } catch (error) {
-      toast.error("Error adding division. Please try again.");
+      console.error("Error adding division:", error);
+      toast.error("Server error. Please try again later.");
     }
   };
 
   const handleSubmitEdit = async () => {
-    const validationErrors = validateFields(
+    const validationErrors = validateFormFields(
       newSectionName,
       newDepartmentId,
-      teacherId
+      startDate,
+      endDate,
+      openDay,
+      comment
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
@@ -184,20 +257,32 @@ function AllotClassTeacher() {
         {
           name: newSectionName,
           class_id: newDepartmentId,
-          teacher_id: teacherId,
+          startDate,
+          endDate,
+          openDay,
+          comment,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         }
       );
 
-      fetchClassTeacher();
+      fetchExams();
       handleCloseModal();
       toast.success("Division updated successfully!");
     } catch (error) {
-      toast.error("Error updating division. Please try again.");
+      console.error("Error editing division:", error);
+      toast.error("Server error. Please try again later.");
     }
   };
+
+  const handleDelete = (id) => {
+    const sectionToDelete = sections.find((sec) => sec.section_id === id);
+    setCurrentSection(sectionToDelete);
+    setShowDeleteModal(true);
+  };
+
   const handleSubmitDelete = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -208,7 +293,7 @@ function AllotClassTeacher() {
       }
 
       const response = await axios.delete(
-        `${API_URL}/api//${currentSection.section_id}`,
+        `${API_URL}/api/getDivision/${currentSection.section_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -219,7 +304,7 @@ function AllotClassTeacher() {
       );
 
       if (response.data.success) {
-        fetchSections();
+        fetchExams();
         setShowDeleteModal(false);
         setCurrentSection(null);
         toast.success("Division deleted successfully!");
@@ -239,30 +324,51 @@ function AllotClassTeacher() {
       }
     }
   };
-  // Filter and paginate sections
-  const filteredSections = sections.filter((section) =>
-    section.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  const displayedSections = filteredSections.slice(
-    currentPage * pageSize,
-    (currentPage + 1) * pageSize
-  );
-  const handlePageClick = (data) => {
-    setCurrentPage(data.selected);
+
+  const handleChange = (field, value) => {
+    switch (field) {
+      case "startDate":
+        setStartDate(value);
+        break;
+      case "endDate":
+        setEndDate(value);
+        break;
+      case "openDay":
+        setOpenDay(value);
+        break;
+      case "comment":
+        setComment(value);
+        break;
+      default:
+        break;
+    }
+
+    // Clear error when field changes
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      [field]: "",
+    }));
+  };
+  const handleChangeSectionName = (e) => {
+    const { value } = e.target;
+    setNewSectionName(value);
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      name: validateFormFields(value, newDepartmentId).name,
+    }));
   };
 
-  const handleClassChange = (selectedOption) => {
-    setNewDepartmentId(selectedOption?.value || "");
-    // Clear the error for department field
-    setFieldErrors((prev) => ({ ...prev, department_id: "" }));
+  const handleChangeDepartmentId = (e) => {
+    const { value } = e.target;
+    setClassName(value);
+    setNewDepartmentId(value);
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      department_id: validateFormFields(newSectionName, e.target.value)
+        .department_id,
+    }));
   };
 
-  const handleTeacherChange = (selectedOption) => {
-    // Assuming you will store teacherId here in future
-    const teacherId = selectedOption?.value || "";
-    // Clear the error for teacher field
-    setFieldErrors((prev) => ({ ...prev, teacher_id: "" }));
-  };
   return (
     <>
       <ToastContainer />
@@ -271,7 +377,7 @@ function AllotClassTeacher() {
         <div className="card mx-auto lg:w-3/4 shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Class Teacher
+              Exams
             </h3>{" "}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -309,10 +415,10 @@ function AllotClassTeacher() {
                         S.No
                       </th>
                       <th className=" -px-2  text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Class
+                        Exams List
                       </th>
                       <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Teacher
+                        Comment
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Edit
@@ -390,7 +496,7 @@ function AllotClassTeacher() {
                     ) : (
                       <tr>
                         <td colSpan="5" className="text-center">
-                          No Class Teacher found
+                          No Division found
                         </td>
                       </tr>
                     )}
@@ -423,7 +529,6 @@ function AllotClassTeacher() {
         </div>
 
         {/* Modal for adding a new section */}
-
         {showAddModal && (
           <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
             <div
@@ -436,9 +541,7 @@ function AllotClassTeacher() {
               <div className="modal-dialog modal-dialog-centered ">
                 <div className="modal-content">
                   <div className="flex justify-between p-3">
-                    <h5 className="modal-title">
-                      Create Class Teacher Allotment
-                    </h5>
+                    <h5 className="modal-title"> Create New Exam</h5>
 
                     <RxCross1
                       className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -455,20 +558,67 @@ function AllotClassTeacher() {
                   ></div>
                   {/* <hr className="font-bold"></hr> */}
                   <div className="modal-body">
-                    <div className="relative mb-3 flex justify-center mx-4">
+                    <div className=" relative mb-3 flex justify-center  mx-4">
                       <label htmlFor="sectionName" className="w-1/2 mt-2">
-                        Class Name <span className="text-red-500">*</span>
+                        Division Name <span className="text-red-500">*</span>
                       </label>
-                      <Select
-                        className="w-full text-sm"
-                        options={classes}
-                        isClearable
-                        value={classes.find(
-                          (option) => option.value === newDepartmentId
-                        )}
-                        onChange={handleClassChange}
+                      <input
+                        type="text"
+                        maxLength={1}
+                        className="form-control shadow-md mb-2"
+                        // style={{ background: "#F8F8F8" }}
+                        id="sectionName"
+                        value={newSectionName}
+                        // placeholder="e.g A, B, C, D"
+                        onChange={handleChangeSectionName}
+                        // onChange={}
+                        // onBlur={handleBlur}
                       />
-                      <div className="absolute top-8 left-1/3">
+                      <div className="absolute top-9 left-1/3">
+                        {!nameAvailable && (
+                          <span className=" block text-danger text-xs">
+                            {nameError}
+                          </span>
+                        )}
+                        {fieldErrors.name && (
+                          <span className="text-danger text-xs">
+                            {fieldErrors.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {/* <div className="form-group"> */}
+                    <div className=" relative mb-3 flex justify-center  mx-4">
+                      <label htmlFor="departmentId" className="w-1/2 mt-2">
+                        Class <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        id="departmentId"
+                        className="form-control shadow-md"
+                        value={newDepartmentId}
+                        onChange={handleChangeDepartmentId}
+                      >
+                        <option value="">Select </option>
+                        {/* {classes.map((cls, index) => (
+                          <option key={index} value={cls}>
+                            {cls}
+                          </option>
+                        ))} */}
+                        {termsName.length === 0 ? (
+                          <option value="">No Terms available</option>
+                        ) : (
+                          termsName.map((cls) => (
+                            <option
+                              key={cls.class_id}
+                              value={cls.class_id}
+                              className="max-h-20 overflow-y-scroll "
+                            >
+                              {cls.name}
+                            </option>
+                          ))
+                        )}
+                      </select>
+                      <div className="absolute top-9 left-1/3">
                         {fieldErrors.department_id && (
                           <span className="text-danger text-xs">
                             {fieldErrors.department_id}
@@ -476,25 +626,71 @@ function AllotClassTeacher() {
                         )}
                       </div>
                     </div>
+                  </div>
 
-                    {/* <div className="form-group"> */}
-                    <div className="relative mb-3 flex justify-center mx-4 mt-2">
-                      <label htmlFor="departmentId" className="w-1/2 mt-2">
-                        Teacher <span className="text-red-500">*</span>
-                      </label>
-                      <Select
-                        className="w-full text-sm"
-                        options={teachers}
-                        isClearable
-                        onChange={handleTeacherChange}
+                  <div className="modal-body">
+                    <div className="form-group">
+                      <label>Start Date</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={startDate}
+                        onChange={(e) =>
+                          handleChange("startDate", e.target.value)
+                        }
                       />
-                      <div className="absolute top-9 left-1/3">
-                        {fieldErrors.teacher_id && (
-                          <span className="text-danger text-xs">
-                            {fieldErrors.teacher_id}
-                          </span>
-                        )}
-                      </div>
+                      {fieldErrors.startDate && (
+                        <span className="text-danger">
+                          {fieldErrors.startDate}
+                        </span>
+                      )}
+                    </div>
+                    <div className="form-group">
+                      <label>End Date</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={endDate}
+                        onChange={(e) =>
+                          handleChange("endDate", e.target.value)
+                        }
+                      />
+                      {fieldErrors.endDate && (
+                        <span className="text-danger">
+                          {fieldErrors.endDate}
+                        </span>
+                      )}
+                    </div>
+                    <div className="form-group">
+                      <label>Open Day</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={openDay}
+                        onChange={(e) =>
+                          handleChange("openDay", e.target.value)
+                        }
+                      />
+                      {fieldErrors.openDay && (
+                        <span className="text-danger">
+                          {fieldErrors.openDay}
+                        </span>
+                      )}
+                    </div>
+                    <div className="form-group">
+                      <label>Comment</label>
+                      <textarea
+                        className="form-control"
+                        value={comment}
+                        onChange={(e) =>
+                          handleChange("comment", e.target.value)
+                        }
+                      />
+                      {fieldErrors.comment && (
+                        <span className="text-danger">
+                          {fieldErrors.comment}
+                        </span>
+                      )}
                     </div>
                   </div>
                   {/* <div className="modal-footer d-flex justify-content-end"> */}
@@ -517,7 +713,6 @@ function AllotClassTeacher() {
         )}
 
         {/* Modal for editing a section */}
-
         {showEditModal && (
           <div
             className="modal"
@@ -526,7 +721,7 @@ function AllotClassTeacher() {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Edit Class Teacher Allotment</h5>
+                  <h5 className="modal-title">Edit Exams</h5>
                   <RxCross1
                     className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -543,15 +738,18 @@ function AllotClassTeacher() {
                 <div className="modal-body">
                   <div className=" relative mb-3 flex justify-center  mx-4">
                     <label htmlFor="editSectionName" className="w-1/2 mt-2">
-                      Class <span className="text-red-500">*</span>
+                      Division Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      className="form-control"
-                      value={className}
-                      readOnly
+                      maxLength={1}
+                      className="form-control shadow-md mb-2"
+                      id="editSectionName"
+                      value={newSectionName}
+                      onChange={handleChangeSectionName}
+                      // onBlur={handleBlur}
                     />
-                    {/* <div className="absolute top-9 left-1/3 ">
+                    <div className="absolute top-9 left-1/3 ">
                       {!nameAvailable && (
                         <span className=" block text-red-500 text-xs">
                           {nameError}
@@ -563,25 +761,96 @@ function AllotClassTeacher() {
                           {fieldErrors.name}
                         </span>
                       )}
-                    </div> */}
+                    </div>
                   </div>
-                  <div className="relative mb-3 flex justify-center mx-4 mt-2">
-                    <label htmlFor="departmentId" className="w-1/2 mt-2">
-                      Teacher <span className="text-red-500">*</span>
+                  <div className=" relative mb-3 flex justify-center  mx-4">
+                    <label htmlFor="editDepartmentId" className="w-1/2 mt-2">
+                      Class <span className="text-red-500">*</span>
                     </label>
-                    <Select
-                      className="w-full text-sm"
-                      options={teachers}
-                      isClearable
-                      onChange={handleTeacherChange}
-                    />
+                    <select
+                      id="editDepartmentId"
+                      className="form-control shadow-md"
+                      value={className}
+                      onChange={handleChangeDepartmentId}
+                    >
+                      <option value="">Select</option>
+                      {/* {classes.map((cls, index) => (
+                        <option key={index} value={cls}>
+                          {cls}
+                        </option>
+                      ))} */}
+                      {/* <option value="">--Please choose a class--</option> */}
+                      {console.log("the termsName", termsName)}
+                      {termsName.length === 0 ? (
+                        <option value="">No Terms available</option>
+                      ) : (
+                        termsName.map((cls) => (
+                          <option key={cls.class_id} value={cls.class_id}>
+                            {cls.name}
+                          </option>
+                        ))
+                      )}
+                    </select>
                     <div className="absolute top-9 left-1/3">
-                      {fieldErrors.teacher_id && (
+                      {fieldErrors.department_id && (
                         <span className="text-danger text-xs">
-                          {fieldErrors.teacher_id}
+                          {fieldErrors.department_id}
                         </span>
                       )}
                     </div>
+                  </div>
+                </div>
+                <div className="modal-body">
+                  <div className="form-group">
+                    <label>Start Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={startDate}
+                      onChange={(e) =>
+                        handleChange("startDate", e.target.value)
+                      }
+                    />
+                    {fieldErrors.startDate && (
+                      <span className="text-danger">
+                        {fieldErrors.startDate}
+                      </span>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label>End Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={endDate}
+                      onChange={(e) => handleChange("endDate", e.target.value)}
+                    />
+                    {fieldErrors.endDate && (
+                      <span className="text-danger">{fieldErrors.endDate}</span>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label>Open Day</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={openDay}
+                      onChange={(e) => handleChange("openDay", e.target.value)}
+                    />
+                    {fieldErrors.openDay && (
+                      <span className="text-danger">{fieldErrors.openDay}</span>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label>Comment</label>
+                    <textarea
+                      className="form-control"
+                      value={comment}
+                      onChange={(e) => handleChange("comment", e.target.value)}
+                    />
+                    {fieldErrors.comment && (
+                      <span className="text-danger">{fieldErrors.comment}</span>
+                    )}
                   </div>
                 </div>
                 <div className=" flex justify-end p-3">
@@ -600,64 +869,6 @@ function AllotClassTeacher() {
             </div>
           </div>
         )}
-        {/* {showEditModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="flex justify-between p-3">
-                  <h5>Edit Class Teacher Allotment</h5>
-                  <RxCross1 onClick={handleCloseModal} />
-                </div>
-                <div className="modal-body">
-                  <div className="form-group">
-                    <label>Division Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={newSectionName}
-                      onChange={(e) => setNewSectionName(e.target.value)}
-                    />
-                    {fieldErrors.name && (
-                      <span className="text-danger">{fieldErrors.name}</span>
-                    )}
-                  </div>
-                  <div className="form-group">
-                    <label>Class</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={className}
-                      readOnly
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Select Teacher</label>
-                    <Select
-                      options={teachers}
-                      onChange={(selectedOption) =>
-                        console.log("Edit teacher logic here")
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    onClick={handleSubmitEdit}
-                    className="btn btn-primary"
-                  >
-                    Save Changes
-                  </button>
-                  <button
-                    onClick={handleCloseModal}
-                    className="btn btn-secondary"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )} */}
 
         {/* Modal for confirming deletion */}
         {showDeleteModal && (
@@ -684,7 +895,7 @@ function AllotClassTeacher() {
                 ></div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to delete Class Teacher:{" "}
+                    Are you sure you want to delete Division:{" "}
                     {currentSection.name}?
                   </p>
                 </div>
@@ -708,4 +919,4 @@ function AllotClassTeacher() {
   );
 }
 
-export default AllotClassTeacher;
+export default Exam;

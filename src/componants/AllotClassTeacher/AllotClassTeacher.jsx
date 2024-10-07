@@ -624,13 +624,11 @@
 //                     </label>
 //                     <input
 //                       type="text"
-
 //                       className="form-control shadow-md mb-2"
 //                       id="editSectionName"
 //                       value={newSectionName}
 //                       readOnly
 //                       onChange={handleChangeSectionName}
-
 //                     />
 //                     <div className="absolute top-9 left-1/3 ">
 //                       {!nameAvailable && (
@@ -650,14 +648,14 @@
 //                     <label htmlFor="editDepartmentId" className="w-1/2 mt-2">
 //                       Teacher <span className="text-red-500">*</span>
 //                     </label>
-//                    <Select
-//                         options={teachers}
-//                         value={selectedTeacher}
-//                         onChange={setSelectedTeacher}
-//                         placeholder="Select"
-//                         isClearable
-//                         className="w-full md:w-[50%]"
-//                       />
+//                     <Select
+//                       options={teachers}
+//                       value={selectedTeacher}
+//                       onChange={setSelectedTeacher}
+//                       placeholder="Select"
+//                       isClearable
+//                       className="w-full md:w-[50%]"
+//                     />
 //                     <div className="absolute top-9 left-1/3">
 //                       {fieldErrors.department_id && (
 //                         <span className="text-danger text-xs">
@@ -666,7 +664,6 @@
 //                       )}
 //                     </div>
 //                   </div>
-
 //                 </div>
 //                 <div className=" flex justify-end p-3">
 //                   {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
@@ -765,10 +762,11 @@ function AllotClassTeacher() {
   const [newDepartmentId, setNewDepartmentId] = useState("");
   const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
   const [nameError, setNameError] = useState("");
-  const [nameAvailable, setNameAvailable] = useState(true);
   const [roleId, setRoleId] = useState("");
   const [classes, setClasses] = useState([]);
   const [teachers, setTeachers] = useState([]);
+  const [teacherId, setTeacherId] = useState(""); // State for selected teacher
+
   const pageSize = 10;
 
   useEffect(() => {
@@ -780,13 +778,14 @@ function AllotClassTeacher() {
   const fetchClassNames = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/getClassList`, {
+      const response = await axios.get(`${API_URL}/api/get_class_section`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log("the classes are ", response.data);
       setClasses(
         response.data.map((classItem) => ({
-          value: classItem.class_id,
-          label: classItem.class_name,
+          value: classItem.section_id,
+          label: `${classItem?.get_class?.name}${" "}${classItem.name}`,
         }))
       );
     } catch (error) {
@@ -825,24 +824,15 @@ function AllotClassTeacher() {
     }
   };
 
-  const validateFields = (name, departmentId, teacherId) => {
+  const validateFields = (departmentId, teacherId) => {
     const errors = {};
-    const alphabetRegex = /^[A-Za-z]+$/;
-
-    if (!name || name.trim() === "") {
-      errors.name = "Please enter division name.";
-    } else if (!alphabetRegex.test(name)) {
-      errors.name = "The name field should only contain alphabets.";
-    } else if (name.length > 1) {
-      errors.name = "The name must not exceed 1 character.";
-    }
 
     if (!departmentId) {
-      errors.department_id = "Please select a class.";
+      errors.department_id = "Please select a class."; // Error message for class dropdown
     }
 
     if (!teacherId) {
-      errors.teacher_id = "Please select a teacher.";
+      errors.teacher_id = "Please select a teacher."; // Error message for teacher dropdown
     }
 
     return errors;
@@ -854,12 +844,18 @@ function AllotClassTeacher() {
     setNewSectionName("");
     setNewDepartmentId("");
   };
-
+  const handleDelete = (id) => {
+    const sectionToDelete = sections.find((sec) => sec.section_id === id);
+    setCurrentSection(sectionToDelete);
+    setShowDeleteModal(true);
+  };
   const handleEdit = (section) => {
     setCurrentSection(section);
     setNewSectionName(section.name);
-    setClassName(section.get_class.class_name); // Readonly class field
+    setClassName(section?.get_class?.name); // Readonly class field
     setNewDepartmentId(section.get_class.class_id);
+    console.log("the handleEdit ", section);
+    // setTeacherId(" ");
     setShowEditModal(true);
     setFieldErrors({});
   };
@@ -867,31 +863,38 @@ function AllotClassTeacher() {
   const handleCloseModal = () => {
     setShowAddModal(false);
     setShowEditModal(false);
+    setShowDeleteModal(false);
     setNewSectionName("");
     setNewDepartmentId("");
     setCurrentSection(null);
+    setFieldErrors({});
+    setTeacherId("");
+    setNameError("");
   };
 
   const handleSubmitAdd = async () => {
-    const teacherId = null; // Add teacher ID for the add form
-    const validationErrors = validateFields(
-      newSectionName,
-      newDepartmentId,
-      teacherId
-    );
+    const validationErrors = validateFields(newDepartmentId, teacherId);
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       return;
     }
-
+    console.log(
+      "Edit Form",
+      "name:",
+      newSectionName,
+      "class_id:",
+      newDepartmentId, // Pass class ID
+      "teacher_id:",
+      teacherId
+    );
     try {
       const token = localStorage.getItem("authToken");
       await axios.post(
-        `${API_URL}/api/store_division`,
+        `${API_URL}/api/`,
         {
           name: newSectionName,
-          class_id: newDepartmentId,
-          teacher_id: teacherId,
+          class_id: newDepartmentId, // Pass class ID
+          teacher_id: teacherId, // Pass teacher ID
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -907,25 +910,34 @@ function AllotClassTeacher() {
   };
 
   const handleSubmitEdit = async () => {
-    const teacherId = null; // For edit mode, teacher can be selected or null
-    const validationErrors = validateFields(
-      newSectionName,
-      newDepartmentId,
-      teacherId
-    );
+    const validationErrors = validateFields(newDepartmentId, teacherId);
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       return;
     }
-
+    console.log(
+      "Edit Form",
+      "name:",
+      newSectionName,
+      "class_id:",
+      newDepartmentId, // Pass class ID
+      "teacher_id:",
+      teacherId
+    );
+    console.log("new start checking the teacheID");
+    if (!teacherId) {
+      console.log("check teacherId is here");
+      setFieldErrors({ teacher_id: "Please select a teacher." });
+      return;
+    }
     try {
       const token = localStorage.getItem("authToken");
       await axios.put(
         `${API_URL}/api/getDivision/${currentSection.section_id}`,
         {
           name: newSectionName,
-          class_id: newDepartmentId,
-          teacher_id: teacherId,
+          class_id: newDepartmentId, // Pass class ID
+          teacher_id: teacherId, // Pass teacher ID
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -933,10 +945,53 @@ function AllotClassTeacher() {
       );
 
       fetchClassTeacher();
+      setTeacherId("");
       handleCloseModal();
       toast.success("Division updated successfully!");
     } catch (error) {
       toast.error("Error updating division. Please try again.");
+    }
+  };
+
+  const handleSubmitDelete = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const academicYr = localStorage.getItem("academicYear");
+
+      if (!token || !currentSection || !currentSection.section_id) {
+        throw new Error("Division ID is missing");
+      }
+
+      const response = await axios.delete(
+        `${API_URL}/api//${currentSection.section_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-Academic-Year": academicYr,
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.success) {
+        fetchClassTeacher();
+        setShowDeleteModal(false);
+        setCurrentSection(null);
+        toast.success("Division deleted successfully!");
+      } else {
+        toast.error(response.data.message || "Failed to delete Division");
+      }
+    } catch (error) {
+      console.error("Error deleting Division:", error);
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Server error. Please try again later.");
+      }
     }
   };
   // Filter and paginate sections
@@ -949,6 +1004,17 @@ function AllotClassTeacher() {
   );
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
+  };
+  const handleClassChange = (selectedOption) => {
+    setNewDepartmentId(selectedOption ? selectedOption.value : "");
+    // Clear class error if it was previously set
+    setFieldErrors((prevErrors) => ({ ...prevErrors, department_id: "" }));
+  };
+
+  const handleTeacherChange = (selectedOption) => {
+    setTeacherId(selectedOption ? selectedOption.value : "");
+    // Clear teacher error if it was previously set
+    setFieldErrors((prevErrors) => ({ ...prevErrors, teacher_id: "" }));
   };
 
   return (
@@ -1143,42 +1209,43 @@ function AllotClassTeacher() {
                   ></div>
                   {/* <hr className="font-bold"></hr> */}
                   <div className="modal-body">
-                    <div className=" relative mb-3 flex justify-center  mx-4">
+                    <div className="relative mb-3 flex justify-center mx-4">
                       <label htmlFor="sectionName" className="w-1/2 mt-2">
                         Class Name <span className="text-red-500">*</span>
                       </label>
                       <Select
+                        className="w-full text-sm"
                         options={classes}
+                        isClearable
                         value={classes.find(
                           (option) => option.value === newDepartmentId
                         )}
-                        onChange={(selectedOption) =>
-                          setNewDepartmentId(selectedOption.value)
-                        }
+                        onChange={handleClassChange}
                       />
-                      {fieldErrors.department_id && (
-                        <span className="text-danger">
-                          {fieldErrors.department_id}
-                        </span>
-                      )}
+                      <div className="absolute top-8 left-1/3">
+                        {fieldErrors.department_id && (
+                          <span className="text-danger text-xs">
+                            {fieldErrors.department_id}
+                          </span>
+                        )}
+                      </div>
                     </div>
+
                     {/* <div className="form-group"> */}
-                    <div className=" relative mb-3 flex justify-center  mx-4">
+                    <div className="relative mb-3 flex justify-center mx-4 mt-2">
                       <label htmlFor="departmentId" className="w-1/2 mt-2">
                         Teacher <span className="text-red-500">*</span>
                       </label>
                       <Select
+                        className="w-full text-sm"
                         options={teachers}
                         isClearable
-                        // onChange={(selectedOption) =>
-                        //   console.log("Add teacher logic here")
-                        // }
+                        onChange={handleTeacherChange}
                       />
-
                       <div className="absolute top-9 left-1/3">
-                        {fieldErrors.department_id && (
+                        {fieldErrors.teacher_id && (
                           <span className="text-danger text-xs">
-                            {fieldErrors.department_id}
+                            {fieldErrors.teacher_id}
                           </span>
                         )}
                       </div>
@@ -1217,7 +1284,6 @@ function AllotClassTeacher() {
                   <RxCross1
                     className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
-                    // className="btn-close text-red-600"
                     onClick={handleCloseModal}
                   />
                 </div>
@@ -1238,34 +1304,21 @@ function AllotClassTeacher() {
                       value={className}
                       readOnly
                     />
-                    {/* <div className="absolute top-9 left-1/3 ">
-                      {!nameAvailable && (
-                        <span className=" block text-red-500 text-xs">
-                          {nameError}
-                        </span>
-                      )}
-
-                      {fieldErrors.name && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.name}
-                        </span>
-                      )}
-                    </div> */}
                   </div>
-                  <div className=" relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="editDepartmentId" className="w-1/2 mt-2">
+                  <div className="relative mb-3 flex justify-center mx-4 mt-2">
+                    <label htmlFor="departmentId" className="w-1/2 mt-2">
                       Teacher <span className="text-red-500">*</span>
                     </label>
                     <Select
+                      className="w-full text-sm"
                       options={teachers}
-                      //   onChange={(selectedOption) =>
-                      //     console.log("Edit teacher logic here")
-                      //   }
+                      isClearable
+                      onChange={handleTeacherChange}
                     />
                     <div className="absolute top-9 left-1/3">
-                      {fieldErrors.department_id && (
+                      {fieldErrors.teacher_id && (
                         <span className="text-danger text-xs">
-                          {fieldErrors.department_id}
+                          {fieldErrors.teacher_id}
                         </span>
                       )}
                     </div>
@@ -1372,7 +1425,7 @@ function AllotClassTeacher() {
                 <div className="modal-body">
                   <p>
                     Are you sure you want to delete Class Teacher:{" "}
-                    {currentSection.name}?
+                    {currentSection?.name}?
                   </p>
                 </div>
                 <div className=" flex justify-end p-3">
