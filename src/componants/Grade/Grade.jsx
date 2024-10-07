@@ -9,7 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 
 // The is the divisionlist module
-function Exam() {
+function Grade() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,7 @@ function Exam() {
   const pageSize = 10;
 
   useEffect(() => {
-    fetchExams();
+    fetchGrades();
     fetchDataRoleId();
     fetchTermsName();
   }, []);
@@ -61,7 +61,7 @@ function Exam() {
   };
 
   // Fetching all exams list
-  const fetchExams = async () => {
+  const fetchGrades = async () => {
     try {
       const token = localStorage.getItem("authToken");
 
@@ -227,7 +227,7 @@ function Exam() {
         }
       );
 
-      fetchExams();
+      fetchGrades();
       handleCloseModal();
       toast.success("Division added successfully!");
     } catch (error) {
@@ -268,7 +268,7 @@ function Exam() {
         }
       );
 
-      fetchExams();
+      fetchGrades();
       handleCloseModal();
       toast.success("Division updated successfully!");
     } catch (error) {
@@ -304,7 +304,7 @@ function Exam() {
       );
 
       if (response.data.success) {
-        fetchExams();
+        fetchGrades();
         setShowDeleteModal(false);
         setCurrentSection(null);
         toast.success("Division deleted successfully!");
@@ -377,7 +377,7 @@ function Exam() {
         <div className="card mx-auto lg:w-3/4 shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Exams
+              Grades
             </h3>{" "}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -415,7 +415,16 @@ function Exam() {
                         S.No
                       </th>
                       <th className=" -px-2  text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Exams List
+                        Class
+                      </th>
+                      <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Subject Type
+                      </th>
+                      <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Marks form
+                      </th>
+                      <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Marks upto
                       </th>
                       <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Comment
@@ -445,6 +454,21 @@ function Exam() {
                           <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section.name}
+                            </p>
+                          </td>
+                          <td className="text-center px-2  border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {section.subject_type}
+                            </p>
+                          </td>
+                          <td className="text-center px-2  border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {section.Marksform}
+                            </p>
+                          </td>
+                          <td className="text-center px-2  border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {section.MarksUpto}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
@@ -967,4 +991,4 @@ function Exam() {
   );
 }
 
-export default Exam;
+export default Grade;

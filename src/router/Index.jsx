@@ -131,6 +131,7 @@ import NewStudentList from "../componants/StudentModel/NewStudentList.jsx";
 import EditOfNewStudentList from "../componants/StudentModel/EditOfNewStudentList.jsx";
 import AllotClassTeacher from "../componants/AllotClassTeacher/AllotClassTeacher.jsx";
 import Exam from "../componants/Exam/Exam.jsx";
+import Grade from "../componants/Grade/Grade.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -257,6 +258,9 @@ function Index() {
         />
         {/* ExamMdule */}
         <Route path="/exams" element={<PrivateRoute element={Exam} />} />
+        {/* Grade Module */}
+        <Route path="/grades" element={<PrivateRoute element={Grade} />} />
+
         <Route path="/sections" element={<PrivateRoute element={Sections} />} />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />
