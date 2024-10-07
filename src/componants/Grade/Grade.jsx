@@ -277,7 +277,7 @@ function Grade() {
     }
   };
 
-  //   fiosd klfgjd
+  //   fiosd
   const handleDelete = (id) => {
     const sectionToDelete = sections.find((sec) => sec.section_id === id);
     setCurrentSection(sectionToDelete);
