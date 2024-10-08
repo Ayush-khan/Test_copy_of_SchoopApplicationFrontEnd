@@ -131,10 +131,10 @@ function MarksHeading() {
       errors.name = "The name field must not exceed 1 character.";
     }
 
-    if (writtenExam === "") {
+    if (!writtenExam) {
+      // Only show error if writtenExam is not selected
       errors.written_exam = "Please select whether it's a written exam.";
     }
-
     return errors;
   };
 
@@ -146,7 +146,8 @@ function MarksHeading() {
     setCurrentSection(section);
     setNewSectionName(section.name);
     setClassName(section.get_class.class_id);
-    setNewDepartmentId(section.get_class.class_id);
+    // i have to select this
+    // setNewDepartmentId(section.get_class.class_id);
     setShowEditModal(true);
   };
 
@@ -337,17 +338,31 @@ function MarksHeading() {
       name: validateSectionName(value, newDepartmentId).name,
     }));
   };
-
   const handleChangeDepartmentId = (e) => {
     const { value } = e.target;
-    setClassName(value);
-    setNewDepartmentId(value);
-    setFieldErrors((prevErrors) => ({
-      ...prevErrors,
-      department_id: validateSectionName(newSectionName, e.target.value)
-        .department_id,
-    }));
+    setClassName(value); // Update class name
+    setNewDepartmentId(value); // Update department (written exam selection)
+
+    // Remove the written exam error if a valid option is selected
+    setFieldErrors((prevErrors) => {
+      const newErrors = { ...prevErrors };
+      if (value) {
+        delete newErrors.written_exam; // Clear error if valid
+      }
+      return newErrors;
+    });
   };
+
+  //   const handleChangeDepartmentId = (e) => {
+  //     const { value } = e.target;
+  //     setClassName(value);
+  //     setNewDepartmentId(value);
+  //     setFieldErrors((prevErrors) => ({
+  //       ...prevErrors,
+  //       department_id: validateSectionName(newSectionName, e.target.value)
+  //         .department_id,
+  //     }));
+  //   };
 
   return (
     <>
@@ -571,13 +586,13 @@ function MarksHeading() {
                       <label htmlFor="departmentId" className="w-1/2 mt-2">
                         Written Exam <span className="text-red-500">*</span>
                       </label>{" "}
-                      <div>
+                      <div className="w-full  pt-2">
                         <label>
                           <input
                             type="radio"
                             name="written_exam"
-                            value="1"
-                            checked={newDepartmentId === "1"} // Replace with state for written exam
+                            value="Y"
+                            checked={newDepartmentId === "Y"} // Replace with state for written exam
                             onChange={handleChangeDepartmentId}
                           />{" "}
                           Yes
@@ -586,17 +601,19 @@ function MarksHeading() {
                           <input
                             type="radio"
                             name="written_exam"
-                            value="0"
-                            checked={newDepartmentId === "0"} // Replace with state for written exam
+                            value="N"
+                            checked={newDepartmentId === "N"} // Replace with state for written exam
                             onChange={handleChangeDepartmentId}
                           />{" "}
                           No
                         </label>
-                      </div>
+                      </div>{" "}
+                    </div>
+                    <div className=" w-[60%] relative h-4 -top-4 left-[35%] ">
                       {fieldErrors.written_exam && (
-                        <div className="text-danger">
+                        <span className="block text-danger text-xs">
                           {fieldErrors.written_exam}
-                        </div>
+                        </span>
                       )}
                     </div>
                   </div>
@@ -649,7 +666,7 @@ function MarksHeading() {
                     </label>
                     <input
                       type="text"
-                      maxLength={1}
+                      maxLength={50}
                       className="form-control shadow-md mb-2"
                       id="editSectionName"
                       value={newSectionName}
@@ -674,13 +691,13 @@ function MarksHeading() {
                     <label htmlFor="departmentId" className="w-1/2 mt-2">
                       Written Exam <span className="text-red-500">*</span>
                     </label>{" "}
-                    <div>
+                    <div className="w-full  pt-2">
                       <label>
                         <input
                           type="radio"
                           name="written_exam"
-                          value="1"
-                          checked={newDepartmentId === "1"} // Replace with state for written exam
+                          value="Y"
+                          checked={newDepartmentId === "Y"} // Replace with state for written exam
                           onChange={handleChangeDepartmentId}
                         />{" "}
                         Yes
@@ -689,17 +706,19 @@ function MarksHeading() {
                         <input
                           type="radio"
                           name="written_exam"
-                          value="0"
-                          checked={newDepartmentId === "0"} // Replace with state for written exam
+                          value="N"
+                          checked={newDepartmentId === "N"} // Replace with state for written exam
                           onChange={handleChangeDepartmentId}
                         />{" "}
                         No
                       </label>
-                    </div>
+                    </div>{" "}
+                  </div>
+                  <div className=" w-[60%] relative h-4 -top-4 left-[35%] ">
                     {fieldErrors.written_exam && (
-                      <div className="text-danger">
+                      <span className="block text-danger text-xs">
                         {fieldErrors.written_exam}
-                      </div>
+                      </span>
                     )}
                   </div>
                   {/* Radio buttons for Written Exam */}
