@@ -1109,10 +1109,19 @@ const AdminNavBar = () => {
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
-          to="/grades"
+          // to="/grades"
+          to="#"
           className="text-sm font-bold hover:text-black"
         >
           Grades
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          // to="/grades"
+          to="/marksHeading"
+          className="text-sm font-bold hover:text-black"
+        >
+          Marks heading
         </NavDropdown.Item>
       </NavDropdown>
 
