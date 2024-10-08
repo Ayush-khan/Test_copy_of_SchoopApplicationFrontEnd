@@ -29,33 +29,36 @@ function MarksHeading() {
   const [nameAvailable, setNameAvailable] = useState(true);
   const [roleId, setRoleId] = useState("");
   const [classes, setClasses] = useState([]);
+  const pageSize = 10;
+  //   useEffect(() => {
+  //     const fetchClassNames = async () => {
+  //       try {
+  //         const token = localStorage.getItem("authToken");
+  //         const response = await axios.get(
+  //           `${API_URL}/api/get_class_for_division`,
+  //           {
+  //             headers: { Authorization: `Bearer ${token}` },
+  //           }
+  //         );
+  //         if (Array.isArray(response.data)) {
+  //           setClasses(response.data);
+  //         } else {
+  //           setError("Unexpected data format");
+  //         }
+  //       } catch (error) {
+  //         console.error("Error fetching class names:", error);
+  //       }
+  //     };
+
+  //     fetchClassNames();
+  //   }, []);
 
   useEffect(() => {
-    const fetchClassNames = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        const response = await axios.get(
-          `${API_URL}/api/get_class_for_division`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        if (Array.isArray(response.data)) {
-          setClasses(response.data);
-        } else {
-          setError("Unexpected data format");
-        }
-      } catch (error) {
-        console.error("Error fetching class names:", error);
-      }
-    };
-
-    fetchClassNames();
+    fetchMarksHeading();
+    fetchDataRoleId();
   }, []);
 
-  const pageSize = 10;
-
-  const fetchSections = async () => {
+  const fetchMarksHeading = async () => {
     try {
       const token = localStorage.getItem("authToken");
 
@@ -102,10 +105,6 @@ function MarksHeading() {
       console.error("Error fetching data:", error);
     }
   };
-  useEffect(() => {
-    fetchSections();
-    fetchDataRoleId();
-  }, []);
 
   // Filter and paginate sections
   const filteredSections = sections.filter((section) =>
@@ -120,34 +119,20 @@ function MarksHeading() {
     setPageCount(Math.ceil(filteredSections.length / pageSize));
   }, [filteredSections]);
 
-  // const validateSectionName = (name, departmentId) => {
-  //   const errors = {};
-  //   if (!name || name.trim() === "") {
-  //     errors.name = "The name field is required.";
-  //   } else if (name.length > 1) {
-  //     errors.name = "The name field must not exceed 1 character.";
-  //   }
-  //   if (!departmentId) {
-  //     errors.department_id = "The class is required.";
-  //   }
-  //   return errors;
-  // };
-  const validateSectionName = (name, departmentId) => {
+  const validateSectionName = (name, writtenExam) => {
     const errors = {};
 
     // Regular expression to match only alphabets
-    const alphabetRegex = /^[A-Za-z]+$/;
+    //    const alphabetRegex = /^[A-Za-z]+$/;
 
     if (!name || name.trim() === "") {
-      errors.name = "Please enter division name.";
-    } else if (!alphabetRegex.test(name)) {
-      errors.name = "The name field only contain alphabets.";
-    } else if (name.length > 1) {
+      errors.name = "Please enter marks heading name.";
+    } else if (name.length > 50) {
       errors.name = "The name field must not exceed 1 character.";
     }
 
-    if (!departmentId) {
-      errors.department_id = "Please Select class.";
+    if (writtenExam === "") {
+      errors.written_exam = "Please select whether it's a written exam.";
     }
 
     return errors;
@@ -198,7 +183,7 @@ function MarksHeading() {
 
       const checkNameResponse = await axios.post(
         `${API_URL}/api/check_division_name`,
-        { name: newSectionName, class_id: newDepartmentId },
+        { name: newSectionName, written_exam: newDepartmentId }, // Sending the written_exam value
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -223,7 +208,7 @@ function MarksHeading() {
         }
       );
 
-      fetchSections();
+      fetchMarksHeading();
       handleCloseModal();
       toast.success("Division added successfully!");
     } catch (error) {
@@ -256,7 +241,7 @@ function MarksHeading() {
 
       const nameCheckResponse = await axios.post(
         `${API_URL}/api/check_division_name`,
-        { name: newSectionName, class_id: newDepartmentId },
+        { name: newSectionName, written_exam: newDepartmentId }, // Sending the written_exam value
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -281,7 +266,7 @@ function MarksHeading() {
         }
       );
 
-      fetchSections();
+      fetchMarksHeading();
       handleCloseModal();
       toast.success("Division updated successfully!");
     } catch (error) {
@@ -323,7 +308,7 @@ function MarksHeading() {
       );
 
       if (response.data.success) {
-        fetchSections();
+        fetchMarksHeading();
         setShowDeleteModal(false);
         setCurrentSection(null);
         toast.success("Division deleted successfully!");
@@ -372,7 +357,7 @@ function MarksHeading() {
         <div className="card mx-auto lg:w-3/4 shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Division
+              Marks Headings
             </h3>{" "}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -410,10 +395,10 @@ function MarksHeading() {
                         S.No
                       </th>
                       <th className=" -px-2  text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Divisions
+                        Marks Heading
                       </th>
                       <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Class
+                        Written Exam
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Edit
@@ -439,12 +424,12 @@ function MarksHeading() {
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section.name}
+                              {section?.name}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.get_class?.name}
+                              {section?.written_exam}
                             </p>
                           </td>
 
@@ -491,7 +476,7 @@ function MarksHeading() {
                     ) : (
                       <tr>
                         <td colSpan="5" className="text-center">
-                          No Division found
+                          No Marks Headings found
                         </td>
                       </tr>
                     )}
@@ -536,7 +521,7 @@ function MarksHeading() {
               <div className="modal-dialog modal-dialog-centered ">
                 <div className="modal-content">
                   <div className="flex justify-between p-3">
-                    <h5 className="modal-title">Create New Division</h5>
+                    <h5 className="modal-title">Create Marks Heading</h5>
 
                     <RxCross1
                       className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -555,11 +540,11 @@ function MarksHeading() {
                   <div className="modal-body">
                     <div className=" relative mb-3 flex justify-center  mx-4">
                       <label htmlFor="sectionName" className="w-1/2 mt-2">
-                        Division Name <span className="text-red-500">*</span>
+                        Marks Heading <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        maxLength={1}
+                        maxLength={50}
                         className="form-control shadow-md mb-2"
                         // style={{ background: "#F8F8F8" }}
                         id="sectionName"
@@ -582,44 +567,37 @@ function MarksHeading() {
                         )}
                       </div>
                     </div>
-                    {/* <div className="form-group"> */}
                     <div className=" relative mb-3 flex justify-center  mx-4">
                       <label htmlFor="departmentId" className="w-1/2 mt-2">
-                        Class <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        id="departmentId"
-                        className="form-control shadow-md"
-                        value={newDepartmentId}
-                        onChange={handleChangeDepartmentId}
-                      >
-                        <option value="">Select </option>
-                        {/* {classes.map((cls, index) => (
-                          <option key={index} value={cls}>
-                            {cls}
-                          </option>
-                        ))} */}
-                        {classes.length === 0 ? (
-                          <option value="">No classes available</option>
-                        ) : (
-                          classes.map((cls) => (
-                            <option
-                              key={cls.class_id}
-                              value={cls.class_id}
-                              className="max-h-20 overflow-y-scroll "
-                            >
-                              {cls.name}
-                            </option>
-                          ))
-                        )}
-                      </select>
-                      <div className="absolute top-9 left-1/3">
-                        {fieldErrors.department_id && (
-                          <span className="text-danger text-xs">
-                            {fieldErrors.department_id}
-                          </span>
-                        )}
+                        Written Exam <span className="text-red-500">*</span>
+                      </label>{" "}
+                      <div>
+                        <label>
+                          <input
+                            type="radio"
+                            name="written_exam"
+                            value="1"
+                            checked={newDepartmentId === "1"} // Replace with state for written exam
+                            onChange={handleChangeDepartmentId}
+                          />{" "}
+                          Yes
+                        </label>
+                        <label className="ml-3">
+                          <input
+                            type="radio"
+                            name="written_exam"
+                            value="0"
+                            checked={newDepartmentId === "0"} // Replace with state for written exam
+                            onChange={handleChangeDepartmentId}
+                          />{" "}
+                          No
+                        </label>
                       </div>
+                      {fieldErrors.written_exam && (
+                        <div className="text-danger">
+                          {fieldErrors.written_exam}
+                        </div>
+                      )}
                     </div>
                   </div>
                   {/* <div className="modal-footer d-flex justify-content-end"> */}
@@ -650,7 +628,7 @@ function MarksHeading() {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Edit Division</h5>
+                  <h5 className="modal-title">Edit Marks Heading</h5>
                   <RxCross1
                     className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -667,7 +645,7 @@ function MarksHeading() {
                 <div className="modal-body">
                   <div className=" relative mb-3 flex justify-center  mx-4">
                     <label htmlFor="editSectionName" className="w-1/2 mt-2">
-                      Division Name <span className="text-red-500">*</span>
+                      Marks Heading <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -693,41 +671,38 @@ function MarksHeading() {
                     </div>
                   </div>
                   <div className=" relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="editDepartmentId" className="w-1/2 mt-2">
-                      Class <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      id="editDepartmentId"
-                      className="form-control shadow-md"
-                      value={className}
-                      onChange={handleChangeDepartmentId}
-                    >
-                      <option value="">Select</option>
-                      {/* {classes.map((cls, index) => (
-                        <option key={index} value={cls}>
-                          {cls}
-                        </option>
-                      ))} */}
-                      {/* <option value="">--Please choose a class--</option> */}
-                      {console.log("the classes", classes)}
-                      {classes.length === 0 ? (
-                        <option value="">No classes available</option>
-                      ) : (
-                        classes.map((cls) => (
-                          <option key={cls.class_id} value={cls.class_id}>
-                            {cls.name}
-                          </option>
-                        ))
-                      )}
-                    </select>
-                    <div className="absolute top-9 left-1/3">
-                      {fieldErrors.department_id && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.department_id}
-                        </span>
-                      )}
+                    <label htmlFor="departmentId" className="w-1/2 mt-2">
+                      Written Exam <span className="text-red-500">*</span>
+                    </label>{" "}
+                    <div>
+                      <label>
+                        <input
+                          type="radio"
+                          name="written_exam"
+                          value="1"
+                          checked={newDepartmentId === "1"} // Replace with state for written exam
+                          onChange={handleChangeDepartmentId}
+                        />{" "}
+                        Yes
+                      </label>
+                      <label className="ml-3">
+                        <input
+                          type="radio"
+                          name="written_exam"
+                          value="0"
+                          checked={newDepartmentId === "0"} // Replace with state for written exam
+                          onChange={handleChangeDepartmentId}
+                        />{" "}
+                        No
+                      </label>
                     </div>
+                    {fieldErrors.written_exam && (
+                      <div className="text-danger">
+                        {fieldErrors.written_exam}
+                      </div>
+                    )}
                   </div>
+                  {/* Radio buttons for Written Exam */}
                 </div>
                 <div className=" flex justify-end p-3">
                   {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
@@ -771,7 +746,7 @@ function MarksHeading() {
                 ></div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to delete Division:{" "}
+                    Are you sure you want to delete Marks Heading:{" "}
                     {currentSection.name}?
                   </p>
                 </div>
