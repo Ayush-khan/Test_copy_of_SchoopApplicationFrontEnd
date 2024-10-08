@@ -28,20 +28,30 @@ function Grade() {
   const [nameError, setNameError] = useState("");
   const [nameAvailable, setNameAvailable] = useState(true);
   const [roleId, setRoleId] = useState("");
-  const [termsName, setTermsName] = useState([]);
+  const [termsName, setTermsName] = useState([
+    "Scholastic",
+    "Co-Scholastic",
+    "Social",
+    "Compulsory",
+    "Optional",
+    "Co-Scholastic_hsc",
+  ]);
   const [startDate, setStartDate] = useState(""); // New state for Start Date
   const [endDate, setEndDate] = useState(""); // New state for End Date
   const [openDay, setOpenDay] = useState(""); // New state for Open Day
   const [comment, setComment] = useState(""); // New state for Comment
   const pageSize = 10;
-
+  const [classes, setClasses] = useState([]);
+  const [selectedClasses, setSelectedClasses] = useState([]); // Store selected class_ids
+  const [errorMessage, setErrorMessage] = useState("");
   useEffect(() => {
     fetchGrades();
+    fetchClassNames();
     fetchDataRoleId();
-    fetchTermsName();
+    // fetchTermsName();
   }, []);
 
-  const fetchTermsName = async () => {
+  const fetchClassNames = async () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
@@ -51,13 +61,48 @@ function Grade() {
         }
       );
       if (Array.isArray(response.data)) {
-        setTermsName(response.data);
+        setClasses(response.data);
       } else {
         setError("Unexpected data format");
       }
     } catch (error) {
       console.error("Error fetching class names:", error);
     }
+  };
+  //   const fetchTermsName = async () => {
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+  //       const response = await axios.get(
+  //         `${API_URL}/api/get_class_for_division`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+  //       if (Array.isArray(response.data)) {
+  //         setTermsName(response.data);
+  //       } else {
+  //         setError("Unexpected data format");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching class names:", error);
+  //     }
+  //   };
+  // Handle checkbox change
+  // Handle checkbox change
+  const handleCheckboxChange = (classId) => {
+    setSelectedClasses((prevSelectedClasses) => {
+      // Toggle selection: add or remove the selected class
+      const updatedSelection = prevSelectedClasses.includes(classId)
+        ? prevSelectedClasses.filter((id) => id !== classId)
+        : [...prevSelectedClasses, classId];
+
+      // Clear the error if at least one class is selected
+      if (updatedSelection.length > 0) {
+        setErrorMessage("");
+      }
+
+      return updatedSelection;
+    });
   };
 
   // Fetching all exams list
@@ -128,37 +173,38 @@ function Grade() {
     startDate,
     endDate,
     openDay,
-    comment
+    selectedClasses // Add the selectedClasses field
   ) => {
     const errors = {};
     const alphabetRegex = /^[A-Za-z]+$/;
 
     if (!name || name.trim() === "") {
-      errors.name = "Please enter division name.";
+      errors.name = "Please enter Grade name.";
     } else if (!alphabetRegex.test(name)) {
       errors.name = "The name field can only contain alphabets.";
-    } else if (name.length > 1) {
-      errors.name = "The name field must not exceed 1 character.";
+    } else if (name.length > 3) {
+      errors.name = "The name field must not exceed 3 characters.";
     }
 
     if (!departmentId) {
-      errors.department_id = "Please select a class.";
+      errors.department_id = "Please select a Subject Type.";
     }
 
     if (!startDate) {
-      errors.startDate = "Start Date is required.";
+      errors.startDate = "Marks from is required.";
     }
 
     if (!endDate) {
-      errors.endDate = "End Date is required.";
+      errors.endDate = "Marks upto is required.";
     }
 
     if (!openDay) {
       errors.openDay = "Open Day is required.";
     }
 
-    if (!comment || comment.trim() === "") {
-      errors.comment = "Comment is required.";
+    // Validate if at least one class is selected
+    if (!selectedClasses || selectedClasses.length === 0) {
+      errors.selectedClasses = "Please select at least one class.";
     }
 
     return errors;
@@ -192,18 +238,32 @@ function Grade() {
     setEndDate("");
     setOpenDay("");
     setComment("");
+    setSelectedClasses("");
     setFieldErrors({});
+    setErrorMessage("");
   };
 
+  // Handle form submit (Add)
   const handleSubmitAdd = async () => {
     const validationErrors = validateFormFields(
       newSectionName,
       newDepartmentId,
       startDate,
       endDate,
-      openDay,
+
+      //   selectedClasses, // Pass the selectedClasses field
       comment
     );
+    if (selectedClasses.length === 0) {
+      setErrorMessage("Please select at least one class.");
+      return;
+    } else {
+      // Proceed with form submission
+      setErrorMessage("");
+      // Your form submission logic here
+      console.log("Form submitted with selected classes:", selectedClasses);
+    }
+
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       return;
@@ -218,8 +278,8 @@ function Grade() {
           class_id: newDepartmentId,
           startDate,
           endDate,
-          openDay,
           comment,
+          classIds: selectedClasses, // Add selected class IDs
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -235,19 +295,29 @@ function Grade() {
       toast.error("Server error. Please try again later.");
     }
   };
-
+  console.log("selectedClasses", selectedClasses);
   const handleSubmitEdit = async () => {
     const validationErrors = validateFormFields(
       newSectionName,
       newDepartmentId,
       startDate,
       endDate,
-      openDay,
+      //   selectedClasses, // Add the selectedClasses field
+
       comment
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       return;
+    }
+    if (selectedClasses.length === 0) {
+      setErrorMessage("Please select at least one class.");
+      return;
+    } else {
+      // Proceed with form submission
+      setErrorMessage("");
+      // Your form submission logic here
+      console.log("Form submitted with selected classes:", selectedClasses);
     }
 
     try {
@@ -261,6 +331,7 @@ function Grade() {
           endDate,
           openDay,
           comment,
+          classIds: selectedClasses, // Add selected class IDs
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -565,7 +636,7 @@ function Grade() {
               <div className="modal-dialog modal-dialog-centered ">
                 <div className="modal-content">
                   <div className="flex justify-between p-3">
-                    <h5 className="modal-title"> Create New Exam</h5>
+                    <h5 className="modal-title"> Create New Grade</h5>
 
                     <RxCross1
                       className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -582,9 +653,9 @@ function Grade() {
                   ></div>
                   {/* <hr className="font-bold"></hr> */}
                   <div className="modal-body">
-                    <div className=" relative mb-3 flex justify-center  mx-4">
+                    <div className=" relative  flex justify-center  mx-4">
                       <label htmlFor="sectionName" className="w-1/2 mt-2">
-                        Exam Name <span className="text-red-500">*</span>
+                        Grade Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -593,28 +664,28 @@ function Grade() {
                         // style={{ background: "#F8F8F8" }}
                         id="sectionName"
                         value={newSectionName}
-                        // placeholder="e.g A, B, C, D"
+                        placeholder="e.g A+ or A or B+"
                         onChange={handleChangeSectionName}
                         // onChange={}
                         // onBlur={handleBlur}
-                      />
-                      <div className="absolute top-9 left-1/3">
-                        {!nameAvailable && (
-                          <span className=" block text-danger text-xs">
-                            {nameError}
-                          </span>
-                        )}
-                        {fieldErrors.name && (
-                          <span className="text-danger text-xs">
-                            {fieldErrors.name}
-                          </span>
-                        )}
-                      </div>
+                      />{" "}
+                    </div>
+                    <div className=" w-[60%] relative h-4 -top-2 left-[35%] ">
+                      {!nameAvailable && (
+                        <span className=" block text-danger text-xs">
+                          {nameError}
+                        </span>
+                      )}
+                      {fieldErrors.name && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.name}
+                        </span>
+                      )}
                     </div>
                     {/* <div className="form-group"> */}
-                    <div className=" relative mb-3 flex justify-center  mx-4">
+                    <div className=" relative  flex justify-center  mx-4">
                       <label htmlFor="departmentId" className="w-1/2 mt-2">
-                        Term <span className="text-red-500">*</span>
+                        Subject Type <span className="text-red-500">*</span>
                       </label>
                       <select
                         id="departmentId"
@@ -629,94 +700,118 @@ function Grade() {
                           </option>
                         ))} */}
                         {termsName.length === 0 ? (
-                          <option value="">No Terms available</option>
+                          <option value="">No Subject Type available</option>
                         ) : (
-                          termsName.map((cls) => (
+                          termsName.map((cls, index) => (
                             <option
-                              key={cls.class_id}
-                              value={cls.class_id}
+                              key={index}
+                              value={cls}
                               className="max-h-20 overflow-y-scroll "
                             >
-                              {cls.name}
+                              {cls}
                             </option>
                           ))
                         )}
-                      </select>
-                      <div className="absolute top-9 left-1/3">
-                        {fieldErrors.department_id && (
-                          <span className="text-danger text-xs">
-                            {fieldErrors.department_id}
-                          </span>
-                        )}
-                      </div>
+                      </select>{" "}
+                    </div>
+                    <div className=" w-[60%] relative h-4 -top-2 left-[35%] ">
+                      {fieldErrors.department_id && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.department_id}
+                        </span>
+                      )}
                     </div>
 
-                    <div className="mt-4 relative mb-3 flex justify-center  mx-4">
-                      <label htmlFor="startDate" className="w-1/2 mt-2">
-                        Start Date <span className="text-red-500">*</span>
+                    <div className=" relative  flex justify-center  mx-4">
+                      <label htmlFor="marksFrom" className="w-1/2 mt-2">
+                        Marks from <span className="text-red-500">*</span>
                       </label>
-
                       <input
-                        type="date"
-                        id="startDate"
+                        type="text"
+                        id="marksFrom"
                         className="form-control shadow-md"
+                        maxLength={4.1}
+                        placeholder="e.g 90"
                         value={startDate}
                         onChange={(e) =>
                           handleChange("startDate", e.target.value)
                         }
-                      />
-                      <div className="absolute top-9 left-1/3">
-                        {fieldErrors.startDate && (
-                          <span className="text-danger text-xs">
-                            {fieldErrors.startDate}
-                          </span>
-                        )}
-                      </div>
+                      />{" "}
                     </div>
-                    <div className="mt-4 relative mb-3 flex justify-center  mx-4">
-                      <label htmlFor="endDate" className="w-1/2 mt-2">
-                        End Date <span className="text-red-500">*</span>
+                    <div className=" w-[60%] relative -top-2 h-4  left-[35%] ">
+                      {fieldErrors.startDate && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.startDate}
+                        </span>
+                      )}
+                    </div>
+                    <div className="relative  flex justify-center  mx-4">
+                      <label htmlFor="marksUpto" className="w-1/2 mt-2">
+                        Marks upto <span className="text-red-500">*</span>
                       </label>
-
                       <input
-                        type="date"
-                        id="endDate"
+                        type="text"
+                        id="marksUpto"
+                        maxLength={4.1}
+                        placeholder="e.g 100"
                         className="form-control shadow-md"
                         value={endDate}
                         onChange={(e) =>
                           handleChange("endDate", e.target.value)
                         }
-                      />
-                      <div className="absolute top-9 left-1/3 ">
-                        {fieldErrors.endDate && (
-                          <span className=" block text-red-500 text-xs">
-                            {fieldErrors.endDate}
-                          </span>
-                        )}
-                      </div>
+                      />{" "}
                     </div>
-                    <div className="mt-4 relative mb-3 flex justify-center  mx-4">
-                      <label htmlFor="openDay" className="w-1/2 mt-2">
-                        Open Day <span className="text-red-500">*</span>
+                    <div className=" w-[60%] relative h-4  left-[35%] ">
+                      {fieldErrors.endDate && (
+                        <span className=" block text-red-500 text-xs">
+                          {fieldErrors.endDate}
+                        </span>
+                      )}
+                    </div>
+                    <div className=" relative  flex justify-center  mx-4">
+                      <label htmlFor="classCheckboxes" className="w-1/2 mt-2">
+                        Class <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="date"
-                        id="openDay"
-                        className="form-control shadow-md mb-2"
-                        value={openDay}
-                        onChange={(e) =>
-                          handleChange("openDay", e.target.value)
-                        }
-                      />
-                      <div className="absolute top-9 left-1/3 ">
-                        {fieldErrors.openDay && (
-                          <span className=" block text-red-500 text-xs">
-                            {fieldErrors.openDay}
-                          </span>
+
+                      <div className="flex flex-wrap gap-x-4 md:gap-x-2 w-full mt-2 md:mt-0 md:w-[150%]   ">
+                        {classes.length === 0 ? (
+                          <span>No Classes Available</span>
+                        ) : (
+                          classes.map((cls) => (
+                            <div
+                              key={cls.class_id}
+                              className="relative left-0 md:left-8 mb-2"
+                            >
+                              <label>
+                                {" "}
+                                <input
+                                  type="checkbox"
+                                  id={`class-${cls.class_id}`}
+                                  checked={selectedClasses.includes(
+                                    cls.class_id
+                                  )}
+                                  onChange={() =>
+                                    handleCheckboxChange(cls.class_id)
+                                  }
+                                />
+                                <span className=" text-gray-800 ml-1 ">
+                                  {cls.name}
+                                </span>
+                              </label>
+                            </div>
+                          ))
                         )}
                       </div>
                     </div>
-                    <div className=" relative mb-3 flex justify-center  mx-4">
+                    <div className=" w-[60%] relative h-4 -top-2 left-[35%] ">
+                      {errorMessage && (
+                        <span className=" block text-red-500 text-xs">
+                          {errorMessage}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className=" relative  flex justify-center  mx-4">
                       <label htmlFor="comment" className="w-1/2 mt-2">
                         Comment
                       </label>
@@ -766,7 +861,7 @@ function Grade() {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Edit Exams</h5>
+                  <h5 className="modal-title">Edit Grade</h5>
                   <RxCross1
                     className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -781,132 +876,161 @@ function Grade() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  <div className=" relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="editSectionName" className="w-1/2 mt-2">
-                      Exam Name <span className="text-red-500">*</span>
+                  <div className=" relative  flex justify-center  mx-4">
+                    <label htmlFor="sectionName" className="w-1/2 mt-2">
+                      Grade Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       maxLength={50}
                       className="form-control shadow-md mb-2"
-                      id="editSectionName"
+                      // style={{ background: "#F8F8F8" }}
+                      id="sectionName"
                       value={newSectionName}
+                      placeholder="e.g A+ or A or B+"
                       onChange={handleChangeSectionName}
+                      // onChange={}
                       // onBlur={handleBlur}
-                    />
-                    <div className="absolute top-9 left-1/3 ">
-                      {!nameAvailable && (
-                        <span className=" block text-red-500 text-xs">
-                          {nameError}
-                        </span>
-                      )}
-
-                      {fieldErrors.name && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.name}
-                        </span>
-                      )}
-                    </div>
+                    />{" "}
                   </div>
-                  <div className=" relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="editDepartmentId" className="w-1/2 mt-2">
-                      Term <span className="text-red-500">*</span>
+                  <div className=" w-[60%] relative h-4 -top-2 left-[35%] ">
+                    {!nameAvailable && (
+                      <span className=" block text-danger text-xs">
+                        {nameError}
+                      </span>
+                    )}
+                    {fieldErrors.name && (
+                      <span className="text-danger text-xs">
+                        {fieldErrors.name}
+                      </span>
+                    )}
+                  </div>
+                  {/* <div className="form-group"> */}
+                  <div className=" relative  flex justify-center  mx-4">
+                    <label htmlFor="departmentId" className="w-1/2 mt-2">
+                      Subject Type <span className="text-red-500">*</span>
                     </label>
                     <select
-                      id="editDepartmentId"
+                      id="departmentId"
                       className="form-control shadow-md"
-                      value={className}
+                      value={newDepartmentId}
                       onChange={handleChangeDepartmentId}
                     >
-                      <option value="">Select</option>
+                      <option value="">Select </option>
                       {/* {classes.map((cls, index) => (
-                        <option key={index} value={cls}>
-                          {cls}
-                        </option>
-                      ))} */}
-                      {/* <option value="">--Please choose a class--</option> */}
-                      {console.log("the termsName", termsName)}
+                          <option key={index} value={cls}>
+                            {cls}
+                          </option>
+                        ))} */}
                       {termsName.length === 0 ? (
-                        <option value="">No Terms available</option>
+                        <option value="">No Subject Type available</option>
                       ) : (
-                        termsName.map((cls) => (
-                          <option key={cls.class_id} value={cls.class_id}>
-                            {cls.name}
+                        termsName.map((cls, index) => (
+                          <option
+                            key={index}
+                            value={cls}
+                            className="max-h-20 overflow-y-scroll "
+                          >
+                            {cls}
                           </option>
                         ))
                       )}
-                    </select>
-                    <div className="absolute top-9 left-1/3">
-                      {fieldErrors.department_id && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.department_id}
-                        </span>
-                      )}
-                    </div>
+                    </select>{" "}
+                  </div>
+                  <div className=" w-[60%] relative h-4 -top-2 left-[35%] ">
+                    {fieldErrors.department_id && (
+                      <span className="text-danger text-xs">
+                        {fieldErrors.department_id}
+                      </span>
+                    )}
                   </div>
 
-                  <div className="mt-4 relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="startDate" className="w-1/2 mt-2">
-                      Start Date <span className="text-red-500">*</span>
+                  <div className=" relative  flex justify-center  mx-4">
+                    <label htmlFor="marksFrom" className="w-1/2 mt-2">
+                      Marks from <span className="text-red-500">*</span>
                     </label>
-
                     <input
-                      type="date"
-                      id="startDate"
+                      type="text"
+                      id="marksFrom"
                       className="form-control shadow-md"
+                      maxLength={4.1}
+                      placeholder="e.g 90"
                       value={startDate}
                       onChange={(e) =>
                         handleChange("startDate", e.target.value)
                       }
-                    />
-                    <div className="absolute top-9 left-1/3">
-                      {fieldErrors.startDate && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.startDate}
-                        </span>
-                      )}
-                    </div>
+                    />{" "}
                   </div>
-                  <div className="mt-4 relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="endDate" className="w-1/2 mt-2">
-                      End Date <span className="text-red-500">*</span>
+                  <div className=" w-[60%] relative -top-2 h-4  left-[35%] ">
+                    {fieldErrors.startDate && (
+                      <span className="text-danger text-xs">
+                        {fieldErrors.startDate}
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative  flex justify-center  mx-4">
+                    <label htmlFor="marksUpto" className="w-1/2 mt-2">
+                      Marks upto <span className="text-red-500">*</span>
                     </label>
-
                     <input
-                      type="date"
-                      id="endDate"
+                      type="text"
+                      id="marksUpto"
+                      maxLength={4.1}
+                      placeholder="e.g 100"
                       className="form-control shadow-md"
                       value={endDate}
                       onChange={(e) => handleChange("endDate", e.target.value)}
-                    />
-                    <div className="absolute top-9 left-1/3 ">
-                      {fieldErrors.endDate && (
-                        <span className=" block text-red-500 text-xs">
-                          {fieldErrors.endDate}
-                        </span>
-                      )}
-                    </div>
+                    />{" "}
                   </div>
-                  <div className="mt-4 relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="openDay" className="w-1/2 mt-2">
-                      Open Day <span className="text-red-500">*</span>
+                  <div className=" w-[60%] relative h-4  left-[35%] ">
+                    {fieldErrors.endDate && (
+                      <span className=" block text-red-500 text-xs">
+                        {fieldErrors.endDate}
+                      </span>
+                    )}
+                  </div>
+                  <div className=" relative  flex justify-center  mx-4">
+                    <label htmlFor="classCheckboxes" className="w-1/2 mt-2">
+                      Class <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="date"
-                      id="openDay"
-                      className="form-control shadow-md mb-2"
-                      value={openDay}
-                      onChange={(e) => handleChange("openDay", e.target.value)}
-                    />
-                    <div className="absolute top-9 left-1/3 ">
-                      {fieldErrors.openDay && (
-                        <span className=" block text-red-500 text-xs">
-                          {fieldErrors.openDay}
-                        </span>
+
+                    <div className="flex flex-wrap gap-x-4 md:gap-x-2 w-full mt-2 md:mt-0 md:w-[150%]   ">
+                      {classes.length === 0 ? (
+                        <span>No Classes Available</span>
+                      ) : (
+                        classes.map((cls) => (
+                          <div
+                            key={cls.class_id}
+                            className="relative left-0 md:left-8 mb-2"
+                          >
+                            <label>
+                              {" "}
+                              <input
+                                type="checkbox"
+                                id={`class-${cls.class_id}`}
+                                checked={selectedClasses.includes(cls.class_id)}
+                                onChange={() =>
+                                  handleCheckboxChange(cls.class_id)
+                                }
+                              />
+                              <span className=" text-gray-800 ml-1 ">
+                                {cls.name}
+                              </span>
+                            </label>
+                          </div>
+                        ))
                       )}
                     </div>
                   </div>
-                  <div className=" relative mb-3 flex justify-center  mx-4">
+                  <div className=" w-[60%] relative h-4 -top-2 left-[35%] ">
+                    {errorMessage && (
+                      <span className=" block text-red-500 text-xs">
+                        {errorMessage}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className=" relative  flex justify-center  mx-4">
                     <label htmlFor="comment" className="w-1/2 mt-2">
                       Comment
                     </label>
@@ -919,12 +1043,12 @@ function Grade() {
                     />{" "}
                   </div>
                   {/* <div className="relative  -top-6 left-[36%]">
-                    {fieldErrors.comment && (
-                      <span className=" block text-red-500 text-xs">
-                        {fieldErrors.comment}
-                      </span>
-                    )}
-                  </div> */}
+                      {fieldErrors.comment && (
+                        <span className=" block text-red-500 text-xs">
+                          {fieldErrors.comment}
+                        </span>
+                      )}
+                    </div> */}
                 </div>
                 <div className=" flex justify-end p-3">
                   {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
@@ -968,7 +1092,8 @@ function Grade() {
                 ></div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to delete Exam: {currentSection.name}?
+                    Are you sure you want to delete Grade: {currentSection.name}
+                    ?
                   </p>
                 </div>
                 <div className=" flex justify-end p-3">

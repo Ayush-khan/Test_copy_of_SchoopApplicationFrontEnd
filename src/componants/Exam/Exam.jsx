@@ -131,18 +131,16 @@ function Exam() {
     comment
   ) => {
     const errors = {};
-    const alphabetRegex = /^[A-Za-z]+$/;
+    // const alphabetRegex = /^[A-Za-z]+$/;
 
     if (!name || name.trim() === "") {
-      errors.name = "Please enter division name.";
-    } else if (!alphabetRegex.test(name)) {
-      errors.name = "The name field can only contain alphabets.";
-    } else if (name.length > 1) {
-      errors.name = "The name field must not exceed 1 character.";
+      errors.name = "Please enter Exam name.";
+    } else if (name.length > 50) {
+      errors.name = "The name field must not exceed 50 character.";
     }
 
     if (!departmentId) {
-      errors.department_id = "Please select a class.";
+      errors.department_id = "Please select a Terms.";
     }
 
     if (!startDate) {
