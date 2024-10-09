@@ -133,6 +133,7 @@ import AllotClassTeacher from "../componants/AllotClassTeacher/AllotClassTeacher
 import Exam from "../componants/Exam/Exam.jsx";
 import Grade from "../componants/Grade/Grade.jsx";
 import MarksHeading from "../componants/MarksHeading/MarksHeading.jsx";
+import AllotMarksHeading from "../componants/AllotMarkHeading/AllotMaekHeading.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -266,6 +267,11 @@ function Index() {
         <Route
           path="/marksHeading"
           element={<PrivateRoute element={MarksHeading} />}
+        />
+        {/* AllotMarksHeading module */}
+        <Route
+          path="/allotMarksHeading"
+          element={<PrivateRoute element={AllotMarksHeading} />}
         />
 
         <Route path="/sections" element={<PrivateRoute element={Sections} />} />
