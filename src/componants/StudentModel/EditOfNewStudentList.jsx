@@ -925,7 +925,7 @@ function EditOfNewStudentList() {
     //   formattedFormData.append(key, formData[key]);
     // });
     if (parentExist === "no") {
-      formData.parent_id = " ";
+      formData.parent_id = 0;
       console.log("formadata parent_id not exit", formData.parent_id);
     } else {
       console.log("formadata parent_id is exit", formData.parent_id);
@@ -937,12 +937,12 @@ function EditOfNewStudentList() {
       }
       // console.log("formattedFormData", formattedFormData);
       console.log("formData", formData);
+      // const ParentIdIs=formData.parent_id;
       const response = await axios.put(
-        `${API_URL}/api/students/${student.student_id}`,
+        `${API_URL}/api/updateNewStudent/${student.student_id}/${formData?.parent_id}`,
         formData, // Send the FormData object
         {
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         }

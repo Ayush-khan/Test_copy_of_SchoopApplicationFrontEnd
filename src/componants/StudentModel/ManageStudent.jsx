@@ -746,7 +746,7 @@ function ManageSubjectList() {
                                         // onClick={() => ()}
                                         className="text-green-500-600 hover:text-green-800 hover:bg-transparent "
                                       >
-                                        <FontAwesomeIcon icon={faTrash} />
+                                        {/* <FontAwesomeIcon icon={faTrash} /> */}
                                       </button>
                                     </td>
                                   )}
