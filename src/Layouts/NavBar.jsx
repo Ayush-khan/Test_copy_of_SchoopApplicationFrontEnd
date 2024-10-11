@@ -793,6 +793,88 @@ function NavBar() {
     // Define your static menu items here
     return <AdminNavBar />;
   };
+  //  100% fully working navbar dynamically with css proper
+  // const renderDynamicMenu = () => {
+  //   const renderDropdownItemsis = (items) => {
+  //     return items.map((item) =>
+  //       item.sub_menus && item.sub_menus.length > 0 ? (
+  //         <NavDropdown
+  //           key={item.menu_id}
+  //           title={
+  //             <span className="nav-dropdown-title bold-navbar-item">
+  //               {item.name}
+  //             </span>
+  //           }
+  //           className="custom-dropdown font-bold text-[.9em]"
+  //         >
+  //           {item.sub_menus.map((subItem) =>
+  //             subItem.sub_menus && subItem.sub_menus.length > 0 ? (
+  //               <NavDropdown
+  //                 key={subItem.menu_id}
+  //                 title={
+  //                   <span className="nav-dropdown-title light-submenu-item">
+  //                     {subItem.name}
+  //                   </span>
+  //                 }
+  //                 className="custom-submenu-dropdown dropend" // Add dropend class here
+  //               >
+  //                 {subItem.sub_menus.map((childItem) =>
+  //                   childItem.sub_menus && childItem.sub_menus.length > 0 ? (
+  //                     <NavDropdown
+  //                       key={childItem.menu_id}
+  //                       title={
+  //                         <span className="nav-dropdown-title light-submenu-item">
+  //                           {childItem.name}
+  //                         </span>
+  //                       }
+  //                       className="custom-submenu-dropdown dropend" // Add dropend class here
+  //                     >
+  //                       {childItem.sub_menus.map((grandChildItem) => (
+  //                         <NavDropdown.Item
+  //                           key={grandChildItem.menu_id}
+  //                           onClick={() => navigate(grandChildItem.url)}
+  //                           className="light-submenu-item"
+  //                         >
+  //                           {grandChildItem.name}
+  //                         </NavDropdown.Item>
+  //                       ))}
+  //                     </NavDropdown>
+  //                   ) : (
+  //                     <NavDropdown.Item
+  //                       key={childItem.menu_id}
+  //                       onClick={() => navigate(childItem.url)}
+  //                       className="light-submenu-item"
+  //                     >
+  //                       {childItem.name}
+  //                     </NavDropdown.Item>
+  //                   )
+  //                 )}
+  //               </NavDropdown>
+  //             ) : (
+  //               <NavDropdown.Item
+  //                 key={subItem.menu_id}
+  //                 onClick={() => navigate(subItem.url)}
+  //                 className="light-submenu-item"
+  //               >
+  //                 {subItem.name}
+  //               </NavDropdown.Item>
+  //             )
+  //           )}
+  //         </NavDropdown>
+  //       ) : (
+  //         <Nav.Link
+  //           key={item.menu_id}
+  //           onClick={() => item.url && navigate(item.url)}
+  //           className="custom-nav-link bold-navbar-item"
+  //         >
+  //           {item.name}
+  //         </Nav.Link>
+  //       )
+  //     );
+  //   };
+  //   return renderDropdownItemsis(navItems);
+  // };
+  // Taking time to uncommnet it
   const renderDynamicMenu = () => {
     const renderDropdownItemsis = (items) => {
       return items.map((item) =>

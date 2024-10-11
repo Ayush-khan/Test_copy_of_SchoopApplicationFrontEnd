@@ -119,7 +119,7 @@ function EditOfNewStudentList() {
     nationality: "",
     pincode: "",
     image_name: "",
-    student_id: "",
+    // student_id: "",
     reg_no: " ",
     // Parent fields
     parent_id: "",
@@ -192,7 +192,7 @@ function EditOfNewStudentList() {
         city: student.city || " ",
         state: student.state || "",
         roll_no: student.roll_no || "",
-        student_id: student.student_id || " ",
+        // student_id: student.student_id || " ",
         reg_no: student.reg_no || " ",
         blood_group: student.blood_group || " ",
         category: student.category || " ",
@@ -1498,9 +1498,9 @@ function EditOfNewStudentList() {
               <input
                 type="text"
                 id="studentIdNumber"
-                name="student_id"
+                name="stud_id_no"
                 maxLength={25}
-                value={formData.student_id}
+                value={formData.stud_id_no}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
