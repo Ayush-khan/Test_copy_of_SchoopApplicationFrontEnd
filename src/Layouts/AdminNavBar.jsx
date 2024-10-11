@@ -2,14 +2,16 @@ import React from "react";
 import { NavDropdown, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { IoIosHelpCircleOutline } from "react-icons/io";
-import "./styles.css";
+import styles from "./StyleAdminNavbarCss.module.css";
 
 const AdminNavBar = () => {
   return (
     <>
       {/* Role Dropdown */}
       <NavDropdown
-        title={<span className="nav-dropdown-title">Role</span>}
+        title={
+          <span className="nav-dropdown-title custom-dropdown ">Role</span>
+        }
         // title="Role"
         style={{ color: "black", fontWeight: "700" }}
         className="pr-0 mr-0 w-fit"
@@ -38,7 +40,11 @@ const AdminNavBar = () => {
           id="students-dropdown"
           title={<span className="nav-dropdown-title">Students</span>}
           // title="Students"
-          style={{ color: "black", fontWeight: "700" }}
+          style={{
+            color: "gray",
+            fontWeight: "400",
+            display: "block",
+          }}
         >
           <NavDropdown.Item
             as={Link}
@@ -113,7 +119,11 @@ const AdminNavBar = () => {
           id="certificate-dropdown"
           // title="Certificate"
           title={<span className="nav-dropdown-title">Certificate</span>}
-          style={{ color: "black", fontWeight: "700" }}
+          style={{
+            color: "gray",
+            fontWeight: "400",
+            display: "block",
+          }}
         >
           <NavDropdown.Item as={Link} to="#" className="text-sm font-bold">
             Bonafide Certificate
@@ -154,7 +164,11 @@ const AdminNavBar = () => {
           id="staff-dropdown"
           title={<span className="nav-dropdown-title">Staff</span>}
           // title=""
-          style={{ color: "black", fontWeight: "700" }}
+          style={{
+            color: "gray",
+            fontWeight: "400",
+            display: "block",
+          }}
         >
           <NavDropdown.Item
             as={Link}
@@ -187,7 +201,11 @@ const AdminNavBar = () => {
           title={
             <span className="nav-dropdown-title">Leaving Certificate</span>
           }
-          style={{ color: "black", fontWeight: "700" }}
+          style={{
+            color: "gray",
+            fontWeight: "400",
+            display: "block",
+          }}
         >
           <NavDropdown.Item as={Link} to="#" className="text-sm font-bold">
             Generate LC
@@ -207,7 +225,11 @@ const AdminNavBar = () => {
           id="leave-dropdown"
           title={<span className="nav-dropdown-title">Leave</span>}
           // title=""
-          style={{ color: "black", fontWeight: "700" }}
+          style={{
+            color: "gray",
+            fontWeight: "400",
+            display: "block",
+          }}
         >
           <NavDropdown.Item as={Link} to="#" className="text-sm font-bold">
             Leave Allocation
