@@ -762,19 +762,44 @@ function AllotClassTeacher() {
   const [newDepartmentId, setNewDepartmentId] = useState("");
   const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
   const [nameError, setNameError] = useState("");
-  const [roleId, setRoleId] = useState("");
   const [classes, setClasses] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [teacherId, setTeacherId] = useState(""); // State for selected teacher
-
+  const [roleId, setRoleId] = useState("");
+  const [academicYear, setAcademicYear] = useState("");
   const pageSize = 10;
 
   useEffect(() => {
     fetchClassTeacher();
     fetchTeachers();
     fetchClassNames();
+    fetchDataRoleId();
   }, []);
+  // for role_id
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
 
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      // Fetch session data
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRoleId(sessionResponse?.data?.user.role_id); // Store role_id
+      // setRoleId("A"); // Store role_id
+      setAcademicYear(sessionResponse?.data?.custom_claims?.academic_yr);
+      console.log("roleIDis:", sessionResponse.data);
+      // Fetch academic year data
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   const fetchClassNames = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -813,9 +838,10 @@ function AllotClassTeacher() {
   const fetchClassTeacher = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/getDivision`, {
+      const response = await axios.get(`${API_URL}/api/get_Classteacherslist`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log("Allot Teacher tab", response.data);
       setSections(response.data);
     } catch (error) {
       setError(error.message);
@@ -851,9 +877,10 @@ function AllotClassTeacher() {
   };
   const handleEdit = (section) => {
     setCurrentSection(section);
-    setNewSectionName(section.name);
+    setNewSectionName(section?.section_id);
     setClassName(section?.get_class?.name); // Readonly class field
-    setNewDepartmentId(section.get_class.class_id);
+    setNewDepartmentId(section?.get_class?.class_id);
+    setTeacherId(section?.get_teacher?.teacher_id);
     console.log("the handleEdit ", section);
     // setTeacherId(" ");
     setShowEditModal(true);
@@ -885,7 +912,9 @@ function AllotClassTeacher() {
       "class_id:",
       newDepartmentId, // Pass class ID
       "teacher_id:",
-      teacherId
+      teacherId,
+      "academicYear:",
+      academicYear
     );
     try {
       const token = localStorage.getItem("authToken");
@@ -895,6 +924,7 @@ function AllotClassTeacher() {
           name: newSectionName,
           class_id: newDepartmentId, // Pass class ID
           teacher_id: teacherId, // Pass teacher ID
+          academic_yr: academicYear,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -938,6 +968,7 @@ function AllotClassTeacher() {
           name: newSectionName,
           class_id: newDepartmentId, // Pass class ID
           teacher_id: teacherId, // Pass teacher ID
+          academic_yr: academicYear,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -996,15 +1027,25 @@ function AllotClassTeacher() {
   };
   // Filter and paginate sections
   const filteredSections = sections.filter((section) =>
-    section.name.toLowerCase().includes(searchTerm.toLowerCase())
+    section?.get_teacher?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Calculate the total number of pages
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections.length]);
+
+  // Get the sections for the current page
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
+
+  // Handle page change
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
   };
+
   const handleClassChange = (selectedOption) => {
     setNewDepartmentId(selectedOption ? selectedOption.value : "");
     // Clear class error if it was previously set
@@ -1092,12 +1133,12 @@ function AllotClassTeacher() {
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section.name}
+                              {section?.get_class?.name}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.get_class?.name}
+                              {section?.get_teacher?.name}
                             </p>
                           </td>
 

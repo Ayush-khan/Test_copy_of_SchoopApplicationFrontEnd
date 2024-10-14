@@ -2,7 +2,7 @@ import React from "react";
 import { NavDropdown, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { IoIosHelpCircleOutline } from "react-icons/io";
-import styles from "./StyleAdminNavbarCss.module.css";
+import "./styles.css";
 
 const AdminNavBar = () => {
   return (
