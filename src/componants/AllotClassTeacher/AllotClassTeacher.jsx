@@ -1364,7 +1364,7 @@ function AllotClassTeacher() {
           </div>
         )}
 
-        {/* Modal for editing a section fd fgdfgdh das*/}
+        {/* Modal for editing a section fd fgdfgdh da dfgs*/}
 
         {showEditModal && (
           <div
