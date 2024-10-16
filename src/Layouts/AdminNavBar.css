@@ -1,0 +1,56 @@
+/* Navbar items hover effect */
+.custom-nav-dropdown .nav-dropdown-title {
+  color: black;
+  font-weight: 700;
+}
+
+.custom-nav-dropdown:hover .nav-dropdown-title {
+  color: white;
+  background-color: #343a40;
+}
+
+/* Submenus background color should stay the same */
+.custom-submenu .dropdown-menu {
+  display: none;
+  background-color: #c1d1e0; /* Submenu background remains dark */
+}
+
+.custom-submenu:hover .dropdown-menu {
+  display: block;
+}
+
+/* Individual dropdown items hover effect */
+.custom-submenu .dropdown-item {
+  color: white; /* Text color inside dropdown */
+  background-color: #89939e; /* Background remains dark */
+}
+
+.custom-submenu .dropdown-item:hover {
+  color: #343a40; /* Text changes to dark on hover */
+  background-color: white; /* Background turns white on hover */
+}
+
+/* General hover effect for all dropdown items in the main menu */
+.custom-nav-dropdown .dropdown-item {
+  color: black;
+  font-weight: 400;
+  background-color: white; /* Default background color for dropdown */
+}
+
+.custom-nav-dropdown .dropdown-item:hover {
+  color: white; /* Text turns white on hover */
+  background-color: #8495a7; /* Background turns dark on hover */
+}
+
+/* Preventing dropdowns from opening on click */
+.custom-submenu .dropdown-toggle::after {
+  display: none;
+}
+
+/* Show dropdown on hover */
+.custom-submenu:hover .dropdown-menu {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  transition: all 0.3s ease-in-out;
+}

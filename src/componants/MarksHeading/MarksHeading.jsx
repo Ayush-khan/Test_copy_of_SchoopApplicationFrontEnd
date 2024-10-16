@@ -29,6 +29,7 @@ function MarksHeading() {
   const [nameAvailable, setNameAvailable] = useState(true);
   const [roleId, setRoleId] = useState("");
   const [classes, setClasses] = useState([]);
+  const [sequence, setSequence] = useState([]);
   const pageSize = 10;
   //   useEffect(() => {
   //     const fetchClassNames = async () => {
@@ -66,7 +67,7 @@ function MarksHeading() {
         throw new Error("No authentication token found");
       }
 
-      const response = await axios.get(`${API_URL}/api/getDivision`, {
+      const response = await axios.get(`${API_URL}/api/get_Markheadingslist`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -74,6 +75,7 @@ function MarksHeading() {
       });
 
       setSections(response.data);
+      console.log("this is the markheading get", sections);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -119,22 +121,48 @@ function MarksHeading() {
     setPageCount(Math.ceil(filteredSections.length / pageSize));
   }, [filteredSections]);
 
-  const validateSectionName = (name, writtenExam) => {
+  // const validateSectionName = (name, writtenExam) => {
+  //   const errors = {};
+
+  //   // Regular expression to match only alphabets
+  //   //    const alphabetRegex = /^[A-Za-z]+$/;
+
+  //   if (!name || name.trim() === "") {
+  //     errors.name = "Please enter marks heading name.";
+  //   } else if (name.length > 50) {
+  //     errors.name = "The name field must not exceed 50 character.";
+  //   }
+
+  //   if (!writtenExam) {
+  //     // Only show error if writtenExam is not selected
+  //     errors.written_exam = "Please select whether it's a written exam.";
+  //   }
+  //   return errors;
+  // };
+
+  const validateSectionName = (name, writtenExam, sequence) => {
     const errors = {};
 
-    // Regular expression to match only alphabets
-    //    const alphabetRegex = /^[A-Za-z]+$/;
-
+    // Name validation
     if (!name || name.trim() === "") {
       errors.name = "Please enter marks heading name.";
     } else if (name.length > 50) {
-      errors.name = "The name field must not exceed 1 character.";
+      errors.name = "The name field must not exceed 50 characters.";
     }
 
+    // Written Exam validation
     if (!writtenExam) {
-      // Only show error if writtenExam is not selected
       errors.written_exam = "Please select whether it's a written exam.";
     }
+
+    // Sequence validation
+    const sequenceRegex = /^[0-9]{1,2}$/; // Ensure 1 or 2 digit numbers only
+    if (!sequence || sequence.trim() === "") {
+      errors.sequence = "Please enter sequence number.";
+    } else if (!sequenceRegex.test(sequence)) {
+      errors.sequence = "Sequence must be a number with a maximum of 2 digits.";
+    }
+
     return errors;
   };
 
@@ -144,14 +172,16 @@ function MarksHeading() {
 
   const handleEdit = (section) => {
     setCurrentSection(section);
-    setNewSectionName(section.name);
-    setClassName(section.get_class.class_id);
+    setNewSectionName(section?.name);
+    setClassName(section?.marks_headings_id);
+    setSequence(section?.sequence);
     // i have to select this
-    // setNewDepartmentId(section.get_class.class_id);
+    setNewDepartmentId(section?.written_exam);
     setShowEditModal(true);
   };
 
   const handleAdd = () => {
+    setSequence("");
     setShowAddModal(true);
   };
 
@@ -169,7 +199,8 @@ function MarksHeading() {
   const handleSubmitAdd = async () => {
     const validationErrors = validateSectionName(
       newSectionName,
-      newDepartmentId
+      newDepartmentId,
+      sequence
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
@@ -182,27 +213,38 @@ function MarksHeading() {
         throw new Error("No authentication token found");
       }
 
-      const checkNameResponse = await axios.post(
-        `${API_URL}/api/check_division_name`,
-        { name: newSectionName, written_exam: newDepartmentId }, // Sending the written_exam value
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
+      // const checkNameResponse = await axios.post(
+      //   `${API_URL}/api/check_division_name`,
+      //   { name: newSectionName, written_exam: newDepartmentId }, // Sending the written_exam value
+      //   {
+      //     headers: { Authorization: `Bearer ${token}` },
+      //     withCredentials: true,
+      //   }
+      // );
+
+      // if (checkNameResponse.data?.exists === true) {
+      //   setNameError("Name already taken.");
+      //   setNameAvailable(false);
+      //   return;
+      // } else {
+      //   setNameError("");
+      //   setNameAvailable(true);
+      // }
+      console.log(
+        "name:",
+        newSectionName,
+        "written_exam:",
+        newDepartmentId,
+        "sequence:",
+        sequence
       );
-
-      if (checkNameResponse.data?.exists === true) {
-        setNameError("Name already taken.");
-        setNameAvailable(false);
-        return;
-      } else {
-        setNameError("");
-        setNameAvailable(true);
-      }
-
       await axios.post(
-        `${API_URL}/api/store_division`,
-        { name: newSectionName, class_id: newDepartmentId },
+        `${API_URL}/api/save_Markheadings`,
+        {
+          name: newSectionName,
+          written_exam: newDepartmentId,
+          sequence: sequence,
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -211,23 +253,23 @@ function MarksHeading() {
 
       fetchMarksHeading();
       handleCloseModal();
-      toast.success("Division added successfully!");
+      toast.success("Marks headings added successfully!");
     } catch (error) {
-      console.error("Error adding Division:", error);
-      if (error.response && error.response.data && error.response.data.errors) {
-        Object.values(error.response.data.errors).forEach((err) =>
-          toast.error(err)
-        );
-      } else {
-        toast.error("Server error. Please try again later.");
-      }
+      console.error("Error adding Marks headings:", error);
+
+      toast.error(error?.response?.data?.message);
+      console.error(
+        "Error adding Marks headings:",
+        error?.response?.data?.message
+      );
     }
   };
 
   const handleSubmitEdit = async () => {
     const validationErrors = validateSectionName(
       newSectionName,
-      newDepartmentId
+      newDepartmentId,
+      sequence
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
@@ -236,31 +278,42 @@ function MarksHeading() {
 
     try {
       const token = localStorage.getItem("authToken");
-      if (!token || !currentSection || !currentSection.section_id) {
+      if (!token || !currentSection || !currentSection?.marks_headings_id) {
         throw new Error("No authentication token or section ID found");
       }
 
-      const nameCheckResponse = await axios.post(
-        `${API_URL}/api/check_division_name`,
-        { name: newSectionName, written_exam: newDepartmentId }, // Sending the written_exam value
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
+      // const nameCheckResponse = await axios.post(
+      //   `${API_URL}/api/check_division_name`,
+      //   { name: newSectionName, written_exam: newDepartmentId }, // Sending the written_exam value
+      //   {
+      //     headers: { Authorization: `Bearer ${token}` },
+      //     withCredentials: true,
+      //   }
+      // );
+
+      // if (nameCheckResponse.data?.exists === true) {
+      //   setNameError("Name already taken.");
+      //   setNameAvailable(false);
+      //   return;
+      // } else {
+      //   setNameError("");
+      //   setNameAvailable(true);
+      // }
+      console.log(
+        "name:",
+        newSectionName,
+        "written_exam:",
+        newDepartmentId,
+        "sequence:",
+        sequence
       );
-
-      if (nameCheckResponse.data?.exists === true) {
-        setNameError("Name already taken.");
-        setNameAvailable(false);
-        return;
-      } else {
-        setNameError("");
-        setNameAvailable(true);
-      }
-
       await axios.put(
-        `${API_URL}/api/getDivision/${currentSection.section_id}`,
-        { name: newSectionName, class_id: newDepartmentId },
+        `${API_URL}/api/update_Markheadings/${currentSection?.marks_headings_id}`,
+        {
+          name: newSectionName,
+          written_exam: newDepartmentId,
+          sequence: sequence,
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -269,9 +322,9 @@ function MarksHeading() {
 
       fetchMarksHeading();
       handleCloseModal();
-      toast.success("Division updated successfully!");
+      toast.success("Marks headings updated successfully!");
     } catch (error) {
-      console.error("Error editing Division:", error);
+      console.error("Error editing Marks headings:", error);
       if (error.response && error.response.data && error.response.data.errors) {
         Object.values(error.response.data.errors).forEach((err) =>
           toast.error(err)
@@ -283,7 +336,9 @@ function MarksHeading() {
   };
 
   const handleDelete = (id) => {
-    const sectionToDelete = sections.find((sec) => sec.section_id === id);
+    const sectionToDelete = sections.find(
+      (sec) => sec.marks_headings_id === id
+    );
     setCurrentSection(sectionToDelete);
     setShowDeleteModal(true);
   };
@@ -291,18 +346,17 @@ function MarksHeading() {
   const handleSubmitDelete = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
+      // const academicYr = localStorage.getItem("academicYear");
 
-      if (!token || !currentSection || !currentSection.section_id) {
-        throw new Error("Division ID is missing");
+      if (!token || !currentSection || !currentSection?.marks_headings_id) {
+        throw new Error("Marks headings ID is missing");
       }
 
       const response = await axios.delete(
-        `${API_URL}/api/getDivision/${currentSection.section_id}`,
+        `${API_URL}/api/delete_Markheadings/${currentSection.marks_headings_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
           withCredentials: true,
         }
@@ -312,12 +366,12 @@ function MarksHeading() {
         fetchMarksHeading();
         setShowDeleteModal(false);
         setCurrentSection(null);
-        toast.success("Division deleted successfully!");
+        toast.success("Marks headings deleted successfully!");
       } else {
-        toast.error(response.data.message || "Failed to delete Division");
+        toast.error(response.data.message || "Failed to delete Marks headings");
       }
     } catch (error) {
-      console.error("Error deleting Division:", error);
+      console.error("Error deleting Marks headings:", error);
       if (
         error.response &&
         error.response.data &&
@@ -351,6 +405,20 @@ function MarksHeading() {
       }
       return newErrors;
     });
+  };
+  const handleChangeSequence = (e) => {
+    const { value } = e.target;
+
+    // Only allow numbers with max length 2
+    if (/^[0-9]{0,2}$/.test(value)) {
+      setSequence(value);
+
+      // Clear sequence error if input is valid
+      setFieldErrors((prevErrors) => ({
+        ...prevErrors,
+        sequence: value ? "" : "Please enter a sequence.", // Clear error if value is valid
+      }));
+    }
   };
 
   //   const handleChangeDepartmentId = (e) => {
@@ -412,6 +480,9 @@ function MarksHeading() {
                       <th className=" -px-2  text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Marks Heading
                       </th>
+                      <th className=" -px-2  text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Sequence
+                      </th>
                       <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Written Exam
                       </th>
@@ -440,6 +511,11 @@ function MarksHeading() {
                           <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section?.name}
+                            </p>
+                          </td>
+                          <td className="text-center px-2  border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {section?.sequence}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
@@ -480,7 +556,9 @@ function MarksHeading() {
                             <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                               <button
                                 className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                onClick={() => handleDelete(section.section_id)}
+                                onClick={() =>
+                                  handleDelete(section.marks_headings_id)
+                                }
                               >
                                 <FontAwesomeIcon icon={faTrash} />
                               </button>
@@ -582,6 +660,36 @@ function MarksHeading() {
                         )}
                       </div>
                     </div>
+
+                    <div className=" relative mb-3 flex justify-center  mx-4">
+                      <label htmlFor="sequence" className="w-1/2 mt-2">
+                        Sequence <span className="text-red-500">*</span>
+                      </label>
+
+                      <input
+                        type="text"
+                        value={sequence}
+                        id="sequence"
+                        className="form-control shadow-md mb-2 "
+                        onChange={handleChangeSequence}
+                        // onChange={(e) => {
+                        //   const value = e.target.value;
+
+                        //   // Only allow numeric input with max length 2
+                        //   if (/^\d{0,2}$/.test(value)) {
+                        //     setSequence(value);
+                        //   }
+                        // }}
+                      />
+                    </div>
+                    <div className=" w-[60%] relative h-4 -top-4 left-[35%] ">
+                      {fieldErrors.sequence && (
+                        <span className="block text-danger text-xs">
+                          {fieldErrors.sequence}
+                        </span>
+                      )}
+                    </div>
+
                     <div className=" relative mb-3 flex justify-center  mx-4">
                       <label htmlFor="departmentId" className="w-1/2 mt-2">
                         Written Exam <span className="text-red-500">*</span>
@@ -617,6 +725,7 @@ function MarksHeading() {
                       )}
                     </div>
                   </div>
+
                   {/* <div className="modal-footer d-flex justify-content-end"> */}
                   {/* modified code by divyani mam guidance */}
                   <div className=" flex justify-end p-3">
@@ -686,6 +795,35 @@ function MarksHeading() {
                         </span>
                       )}
                     </div>
+                  </div>
+
+                  <div className=" relative mb-3 flex justify-center  mx-4">
+                    <label htmlFor="sequence" className="w-1/2 mt-2">
+                      Sequence <span className="text-red-500">*</span>
+                    </label>
+
+                    <input
+                      type="text"
+                      value={sequence}
+                      id="sequence"
+                      className="form-control shadow-md mb-2 "
+                      onChange={handleChangeSequence}
+                      // onChange={(e) => {
+                      //   const value = e.target.value;
+
+                      //   // Only allow numeric input with max length 2
+                      //   if (/^\d{0,2}$/.test(value)) {
+                      //     setSequence(value);
+                      //   }
+                      // }}
+                    />
+                  </div>
+                  <div className=" w-[60%] relative h-4 -top-4 left-[35%] ">
+                    {fieldErrors.sequence && (
+                      <span className="block text-danger text-xs">
+                        {fieldErrors.sequence}
+                      </span>
+                    )}
                   </div>
                   <div className=" relative mb-3 flex justify-center  mx-4">
                     <label htmlFor="departmentId" className="w-1/2 mt-2">
@@ -766,7 +904,7 @@ function MarksHeading() {
                 <div className="modal-body">
                   <p>
                     Are you sure you want to delete Marks Heading:{" "}
-                    {currentSection.name}?
+                    {currentSection?.name}?
                   </p>
                 </div>
                 <div className=" flex justify-end p-3">

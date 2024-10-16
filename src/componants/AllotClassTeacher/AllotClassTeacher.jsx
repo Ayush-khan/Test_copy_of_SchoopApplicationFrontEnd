@@ -911,7 +911,9 @@ function AllotClassTeacher() {
   const handleEdit = (section) => {
     setCurrentSection(section);
     setNewSectionName(section?.section_id);
-    setClassName(section?.get_class?.name); // Readonly class field
+    setClassName(
+      `${section?.get_class?.name}${" "} ${section?.get_division?.name}`
+    ); // Readonly class field
     setNewDepartmentId(section?.get_class?.class_id);
     setTeacherId(section?.get_teacher?.teacher_id);
     console.log("the handleEdit ", section);
@@ -1394,7 +1396,7 @@ function AllotClassTeacher() {
                     </label>
                     <input
                       type="text"
-                      className="form-control bg-gray-200"
+                      className=" w-full shadow-md border-1 border-gray-300 outline-none rounded-md pl-3 bg-gray-200"
                       value={className}
                       readOnly
                     />
@@ -1409,7 +1411,7 @@ function AllotClassTeacher() {
                       options={teachers}
                       defaultValue={teacherId} // Pre-fill the selected teacher
                       isClearable
-                      value={selectedTeacher} // Pre-fill the selected teacher
+                      // value={selectedTeacher} // Pre-fill the selected teacher
                       onChange={handleTeacherChange}
                     />
                     {/* <Select
