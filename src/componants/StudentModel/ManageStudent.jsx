@@ -708,8 +708,13 @@ function ManageSubjectList() {
                                 />
                               </td>
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {`${subject?.first_name} ${subject?.mid_name} ${subject?.last_name}`}
+                                {`${subject?.first_name ?? ""} ${
+                                  subject?.mid_name
+                                    ? subject.mid_name + " "
+                                    : ""
+                                }${subject?.last_name ?? ""}`.trim()}
                               </td>
+
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
                                 {`${subject?.get_class?.name}${" "}${
                                   subject?.get_division?.name

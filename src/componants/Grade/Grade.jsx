@@ -107,13 +107,14 @@ function Grade() {
         throw new Error("No authentication token found");
       }
 
-      const response = await axios.get(`${API_URL}/api/getDivision`, {
+      const response = await axios.get(`${API_URL}/api/get_Gradeslist`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         withCredentials: true,
       });
 
+      console.log("the Grades data", sections);
       setSections(response.data);
     } catch (error) {
       setError(error.message);
@@ -147,10 +148,13 @@ function Grade() {
     }
   };
 
-  // Filter and paginate sections
-  const filteredSections = sections.filter((section) =>
-    section.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter by both class_name and subject_type
+  const filteredSections = sections.filter(
+    (section) =>
+      section?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      section?.subject_type.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -210,8 +214,8 @@ function Grade() {
   const handleEdit = (section) => {
     setCurrentSection(section);
     setNewSectionName(section.name);
-    setClassName(section.get_class.class_id);
-    setNewDepartmentId(section.get_class.class_id);
+    setClassName(section?.class_id);
+    setNewDepartmentId(section?.class_id);
     setShowEditModal(true);
   };
 
@@ -265,7 +269,7 @@ function Grade() {
     try {
       const token = localStorage.getItem("authToken");
       await axios.post(
-        `${API_URL}/api/store_division`,
+        `${API_URL}/api/save_Grades`,
         {
           name: newSectionName,
           class_id: newDepartmentId,
@@ -282,9 +286,9 @@ function Grade() {
 
       fetchGrades();
       handleCloseModal();
-      toast.success("Division added successfully!");
+      toast.success("Grade added successfully!");
     } catch (error) {
-      console.error("Error adding division:", error);
+      console.error("Error adding Grade:", error);
       toast.error("Server error. Please try again later.");
     }
   };
@@ -316,7 +320,7 @@ function Grade() {
     try {
       const token = localStorage.getItem("authToken");
       await axios.put(
-        `${API_URL}/api/getDivision/${currentSection.section_id}`,
+        `${API_URL}/api/update_Grades/${currentSection.grade_id}`,
         {
           name: newSectionName,
           class_id: newDepartmentId,
@@ -334,15 +338,15 @@ function Grade() {
 
       fetchGrades();
       handleCloseModal();
-      toast.success("Division updated successfully!");
+      toast.success("Grade updated successfully!");
     } catch (error) {
-      console.error("Error editing division:", error);
+      console.error("Error editing Grade:", error);
       toast.error("Server error. Please try again later.");
     }
   };
 
   const handleDelete = (id) => {
-    const sectionToDelete = sections.find((sec) => sec.section_id === id);
+    const sectionToDelete = sections.find((sec) => sec.grade_id === id);
     setCurrentSection(sectionToDelete);
     setShowDeleteModal(true);
   };
@@ -350,18 +354,16 @@ function Grade() {
   const handleSubmitDelete = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
-      if (!token || !currentSection || !currentSection.section_id) {
-        throw new Error("Division ID is missing");
+      if (!token || !currentSection || !currentSection.grade_id) {
+        throw new Error("Grade ID is missing");
       }
 
       const response = await axios.delete(
-        `${API_URL}/api/getDivision/${currentSection.section_id}`,
+        `${API_URL}/api/delete_Grades/${currentSection.grade_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
           withCredentials: true,
         }
@@ -371,12 +373,12 @@ function Grade() {
         fetchGrades();
         setShowDeleteModal(false);
         setCurrentSection(null);
-        toast.success("Division deleted successfully!");
+        toast.success("Grade deleted successfully!");
       } else {
         toast.error(response.data.message || "Failed to delete Division");
       }
     } catch (error) {
-      console.error("Error deleting Division:", error);
+      console.error("Error deleting Grade:", error);
       if (
         error.response &&
         error.response.data &&
@@ -505,7 +507,7 @@ function Grade() {
                     {displayedSections.length ? (
                       displayedSections.map((section, index) => (
                         <tr
-                          key={section.section_id}
+                          key={section?.grade_id}
                           className={`${
                             index % 2 === 0 ? "bg-white" : "bg-gray-100"
                           } hover:bg-gray-50`}
@@ -517,27 +519,27 @@ function Grade() {
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section.name}
+                              {section?.name}
                             </p>
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section.subject_type}
+                              {section?.subject_type}
                             </p>
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section.Marksform}
+                              {section?.mark_from}
                             </p>
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section.MarksUpto}
+                              {section?.mark_upto}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.get_class?.name}
+                              {section?.comment}
                             </p>
                           </td>
 
@@ -573,7 +575,7 @@ function Grade() {
                             <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                               <button
                                 className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                onClick={() => handleDelete(section.section_id)}
+                                onClick={() => handleDelete(section?.grade_id)}
                               >
                                 <FontAwesomeIcon icon={faTrash} />
                               </button>
