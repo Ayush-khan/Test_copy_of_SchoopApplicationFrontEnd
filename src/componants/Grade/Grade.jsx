@@ -38,7 +38,7 @@ function Grade() {
   const [selectedClasses, setSelectedClasses] = useState([]); // Store selected class_ids
   const [errorMessage, setErrorMessage] = useState("");
   const [academicYear, setAcademicYear] = useState("");
-
+  const [subjectType, setSubjectType] = useState("");
   useEffect(() => {
     fetchGrades();
     fetchClassNames();
@@ -177,12 +177,10 @@ function Grade() {
     selectedClasses // Add the selectedClasses field
   ) => {
     const errors = {};
-    const alphabetRegex = /^[A-Za-z]+$/;
+    // const alphabetRegex = /^[A-Za-z]+$/;
 
     if (!name || name.trim() === "") {
       errors.name = "Please enter Grade name.";
-    } else if (!alphabetRegex.test(name)) {
-      errors.name = "The name field can only contain alphabets.";
     } else if (name.length > 3) {
       errors.name = "The name field must not exceed 3 characters.";
     }
@@ -219,7 +217,15 @@ function Grade() {
     setCurrentSection(section);
     setNewSectionName(section.name);
     setClassName(section?.class_id);
-    setNewDepartmentId(section?.class_id);
+    setNewDepartmentId(section?.subject_type);
+    setStartDate(section?.mark_from);
+    setEndDate(section?.mark_upto);
+    setComment(section?.comment);
+    // Ensure that selectedClasses is always an array, even if class_id is a single value
+    setSelectedClasses(
+      Array.isArray(section?.class_id) ? section.class_id : [section.class_id]
+    );
+
     setShowEditModal(true);
   };
 
@@ -274,7 +280,7 @@ function Grade() {
     console.log("end");
 
     console.log("endDate:", endDate);
-    console.log("comment:".comment);
+    console.log("comment:", comment);
     console.log(
       "name:",
       newSectionName,
@@ -284,7 +290,8 @@ function Grade() {
       startDate,
       "mark_upto:",
       endDate,
-      "comment:".comment,
+      "comment:",
+      comment,
       "class_id:",
       selectedClasses
     );
@@ -299,13 +306,14 @@ function Grade() {
           mark_from: startDate,
           mark_upto: endDate,
           comment: comment,
+          class_id: selectedClasses,
           academic_yr: academicYear,
 
           // class_id: selectedClasses, // Add selected class IDs
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
+          // withCredentials: true,
         }
       );
 
@@ -348,12 +356,11 @@ function Grade() {
         `${API_URL}/api/update_Grades/${currentSection.grade_id}`,
         {
           name: newSectionName,
-          class_id: newDepartmentId,
-          startDate,
-          endDate,
-          openDay,
-          comment,
-          classIds: selectedClasses, // Add selected class IDs
+          subject_type: newDepartmentId,
+          mark_from: startDate,
+          mark_upto: endDate,
+          comment: comment,
+          class_id: selectedClasses,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -434,7 +441,6 @@ function Grade() {
         break;
     }
 
-    // Clear error when field changes
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
       [field]: "",
@@ -506,6 +512,9 @@ function Grade() {
                         S.No
                       </th>
                       <th className=" -px-2  text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Grade name
+                      </th>
+                      <th className=" -px-2  text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Class
                       </th>
                       <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -540,6 +549,13 @@ function Grade() {
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {index + 1}
+                            </p>
+                          </td>
+                          <td className="text-center px-2  border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {`${section?.get_class?.name || ""} ${
+                                section?.get_section?.name || ""
+                              }`}
                             </p>
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">
@@ -679,7 +695,7 @@ function Grade() {
                       </label>
                       <input
                         type="text"
-                        maxLength={50}
+                        maxLength={2}
                         className="form-control shadow-md mb-2"
                         // style={{ background: "#F8F8F8" }}
                         id="sectionName"
@@ -753,9 +769,13 @@ function Grade() {
                         maxLength={4.1}
                         placeholder="e.g 90"
                         value={startDate}
-                        onChange={(e) =>
-                          handleChange("startDate", e.target.value)
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+                            // Allow only numbers
+                            handleChange("startDate", value);
+                          }
+                        }}
                       />{" "}
                     </div>
                     <div className=" w-[60%] relative -top-2 h-4  left-[35%] ">
@@ -776,9 +796,13 @@ function Grade() {
                         placeholder="e.g 100"
                         className="form-control shadow-md"
                         value={endDate}
-                        onChange={(e) =>
-                          handleChange("endDate", e.target.value)
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+                            // Allow only numbers
+                            handleChange("endDate", value);
+                          }
+                        }}
                       />{" "}
                     </div>
                     <div className=" w-[60%] relative h-4  left-[35%] ">
@@ -845,13 +869,6 @@ function Grade() {
                         }
                       />{" "}
                     </div>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter comment"
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                    />
 
                     {/* <div className="relative  -top-6 left-[36%]">
                       {fieldErrors.comment && (
@@ -910,7 +927,7 @@ function Grade() {
                     </label>
                     <input
                       type="text"
-                      maxLength={50}
+                      maxLength={2}
                       className="form-control shadow-md mb-2"
                       // style={{ background: "#F8F8F8" }}
                       id="sectionName"
@@ -984,9 +1001,13 @@ function Grade() {
                       maxLength={4.1}
                       placeholder="e.g 90"
                       value={startDate}
-                      onChange={(e) =>
-                        handleChange("startDate", e.target.value)
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d*$/.test(value)) {
+                          // Allow only numbers
+                          handleChange("startDate", value);
+                        }
+                      }}
                     />{" "}
                   </div>
                   <div className=" w-[60%] relative -top-2 h-4  left-[35%] ">
@@ -1007,7 +1028,13 @@ function Grade() {
                       placeholder="e.g 100"
                       className="form-control shadow-md"
                       value={endDate}
-                      onChange={(e) => handleChange("endDate", e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d*$/.test(value)) {
+                          // Allow only numbers
+                          handleChange("endDate", value);
+                        }
+                      }}
                     />{" "}
                   </div>
                   <div className=" w-[60%] relative h-4  left-[35%] ">
