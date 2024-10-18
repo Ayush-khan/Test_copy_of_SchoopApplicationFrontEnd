@@ -82,6 +82,7 @@ function EditOfNewStudentList() {
     setSelectedDivision(selectedDivisionId);
     setFormData((prev) => ({ ...prev, section_id: selectedDivisionId }));
   };
+  console.log("the data of student", student);
   const [formData, setFormData] = useState({
     // Student fields
     first_name: "",
@@ -304,6 +305,8 @@ function EditOfNewStudentList() {
         m_dob: "",
         f_blood_group: "",
         m_blood_group: "",
+        SetToReceiveSMS: "",
+        SetEmailIDAsUsername: "",
       }));
       setSelectedClass(null);
       setClassIdForSearch(null);
@@ -391,11 +394,57 @@ function EditOfNewStudentList() {
     }
   };
 
+  // useEffect(() => {
+  //   if (parentInformation) {
+  //     setFormData((prevFormData) => ({
+  //       ...prevFormData, // Spread the existing formData to retain other values
+  //       // Now update only the parent-related fields
+  //       parent_id: parentInformation.parent_id || " ",
+  //       father_name: parentInformation.father_name || "",
+  //       father_occupation: parentInformation.father_occupation || "",
+  //       f_office_add: parentInformation.f_office_add || "",
+  //       f_office_tel: parentInformation.f_office_tel || "",
+  //       f_mobile: parentInformation.f_mobile || "",
+  //       f_email: parentInformation.f_email || "",
+  //       parent_adhar_no: parentInformation.parent_adhar_no || "",
+  //       mother_name: parentInformation.mother_name || "",
+  //       mother_occupation: parentInformation.mother_occupation || "",
+  //       m_office_add: parentInformation.m_office_add || "",
+  //       m_office_tel: parentInformation.m_office_tel || "",
+  //       m_mobile: parentInformation.m_mobile || "",
+  //       m_emailid: parentInformation.m_emailid || "",
+  //       m_adhar_no: parentInformation.m_adhar_no || "",
+  //       f_dob: parentInformation.f_dob || "",
+  //       m_dob: parentInformation.m_dob || "",
+  //       f_blood_group: parentInformation.f_blood_group || "",
+  //       m_blood_group: parentInformation.m_blood_group || "",
+  //     }));
+
+  //     // Set additional preferences for mobile or email-based login or SMS settings
+  //     setFatherMobileSelected({
+  //       setUsername: parentInformation.SetEmailIDAsUsername === "FatherMob",
+  //       receiveSms: parentInformation.SetToReceiveSMS === "FatherMob",
+  //     });
+  //     setMotherMobileSelected({
+  //       setUsername: parentInformation.SetEmailIDAsUsername === "MotherMob",
+  //       receiveSms: parentInformation.SetToReceiveSMS === "MotherMob",
+  //     });
+  //     setFatherEmailSelected({
+  //       setUsername: parentInformation.SetEmailIDAsUsername === "Father",
+  //     });
+  //     setMotherEmailSelected({
+  //       setUsername: parentInformation.SetEmailIDAsUsername === "Mother",
+  //     });
+  //   }
+  // }, [parentInformation]);
+
+  // Fetch classes with student count
+
+  //  newLogic
   useEffect(() => {
     if (parentInformation) {
       setFormData((prevFormData) => ({
         ...prevFormData, // Spread the existing formData to retain other values
-        // Now update only the parent-related fields
         parent_id: parentInformation.parent_id || " ",
         father_name: parentInformation.father_name || "",
         father_occupation: parentInformation.father_occupation || "",
@@ -417,25 +466,38 @@ function EditOfNewStudentList() {
         m_blood_group: parentInformation.m_blood_group || "",
       }));
 
-      // Set additional preferences for mobile or email-based login or SMS settings
+      // Setting up preselected values for the radio buttons based on parentInformation
+      const userId = parentInformation.user_master?.user_id; // Assuming user_master exists in parentInformation
+
       setFatherMobileSelected({
-        setUsername: parentInformation.SetEmailIDAsUsername === "FatherMob",
-        receiveSms: parentInformation.SetToReceiveSMS === "FatherMob",
+        setUsername:
+          parentInformation.SetEmailIDAsUsername === "FatherMob" ||
+          userId === parentInformation.f_mobile,
+        receiveSms:
+          parentInformation.SetToReceiveSMS === "FatherMob" ||
+          userId === parentInformation.f_mobile,
       });
       setMotherMobileSelected({
-        setUsername: parentInformation.SetEmailIDAsUsername === "MotherMob",
-        receiveSms: parentInformation.SetToReceiveSMS === "MotherMob",
+        setUsername:
+          parentInformation.SetEmailIDAsUsername === "MotherMob" ||
+          userId === parentInformation.m_mobile,
+        receiveSms:
+          parentInformation.SetToReceiveSMS === "MotherMob" ||
+          userId === parentInformation.m_mobile,
       });
       setFatherEmailSelected({
-        setUsername: parentInformation.SetEmailIDAsUsername === "Father",
+        setUsername:
+          parentInformation.SetEmailIDAsUsername === "Father" ||
+          userId === parentInformation.f_email,
       });
       setMotherEmailSelected({
-        setUsername: parentInformation.SetEmailIDAsUsername === "Mother",
+        setUsername:
+          parentInformation.SetEmailIDAsUsername === "Mother" ||
+          userId === parentInformation.m_emailid,
       });
     }
   }, [parentInformation]);
 
-  // Fetch classes with student count
   const fetchInitialData = async () => {
     setLoading(true);
     try {
@@ -577,6 +639,11 @@ function EditOfNewStudentList() {
 
   const handleFatherMobileSelection = async () => {
     setUsernameErrors("");
+    // Clear only the SetEmailIDAsUsername error
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      SetEmailIDAsUsername: "", // Clear username error
+    }));
     await handleSetUsernameSelection(
       "FatherMob",
       formData.f_mobile,
@@ -586,6 +653,10 @@ function EditOfNewStudentList() {
 
   const handleMotherMobileSelection = async () => {
     setUsernameErrors("");
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      SetEmailIDAsUsername: "",
+    }));
     await handleSetUsernameSelection(
       "MotherMob",
       formData.m_mobile,
@@ -595,11 +666,21 @@ function EditOfNewStudentList() {
 
   const handleFatherEmailSelection = async () => {
     setUsernameErrors("");
+    // Clear only the SetEmailIDAsUsername error
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      SetEmailIDAsUsername: "",
+    }));
     await handleSetUsernameSelection("Father", formData.f_email, "fatherEmail");
   };
 
   const handleMotherEmailSelection = async () => {
     setUsernameErrors("");
+    // Clear only the SetEmailIDAsUsername error
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      SetEmailIDAsUsername: "",
+    }));
     await handleSetUsernameSelection(
       "Mother",
       formData.m_emailid,
@@ -609,6 +690,10 @@ function EditOfNewStudentList() {
 
   // Handle SMS selection
   const handleReceiveSmsSelection = (value) => {
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      SetToReceiveSMS: "", // Clear SetToReceiveSMS error when this is selected
+    }));
     setFormData((prevData) => ({
       ...prevData,
       SetToReceiveSMS: value, // One of 'FatherMob', 'MotherMob'
@@ -639,6 +724,11 @@ function EditOfNewStudentList() {
     const newErrors = {};
 
     // Validate required fields
+    // Validate required fields
+    if (!formData?.SetEmailIDAsUsername)
+      newErrors.SetEmailIDAsUsername = "User name is required";
+    if (!formData?.SetToReceiveSMS)
+      newErrors.SetToReceiveSMS = "ReceiveSms name is required";
     if (!formData.first_name) newErrors.first_name = "First name is required";
     // if (!formData.gender) newErrors.gender = "Gender selection is required";
     if (!formData.dob) newErrors.dob = "Date of Birth is required";
@@ -2086,8 +2176,8 @@ function EditOfNewStudentList() {
               </label>
               <select
                 id="bloodGroup"
-                name="blood_group"
-                value={formData.blood_group}
+                name="f_blood_group"
+                value={formData.f_blood_group}
                 disabled={areOtherFieldsDisabled}
                 className={`input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 shadow-inner ${
                   areOtherFieldsDisabled
@@ -2229,6 +2319,13 @@ function EditOfNewStudentList() {
                   Set this as username
                 </label>
               </div>
+              <div className={`${errors.SetEmailIDAsUsername ? "h-2" : ""}`}>
+                {errors.SetEmailIDAsUsername && (
+                  <span className="text-red-500 text-xs relative left-5 -top-2">
+                    {errors.SetEmailIDAsUsername}
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 <input
                   type="radio"
@@ -2242,6 +2339,11 @@ function EditOfNewStudentList() {
                   Set to receive SMS at this no.
                 </label>
               </div>
+              {errors.SetToReceiveSMS && (
+                <span className="text-red-500 text-xs relative left-5 -top-2">
+                  {errors.SetToReceiveSMS}
+                </span>
+              )}{" "}
             </div>
             <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">

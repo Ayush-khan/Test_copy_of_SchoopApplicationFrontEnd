@@ -37,6 +37,8 @@ function Grade() {
   const [classes, setClasses] = useState([]);
   const [selectedClasses, setSelectedClasses] = useState([]); // Store selected class_ids
   const [errorMessage, setErrorMessage] = useState("");
+  const [academicYear, setAcademicYear] = useState("");
+
   useEffect(() => {
     fetchGrades();
     fetchClassNames();
@@ -140,6 +142,8 @@ function Grade() {
         },
       });
       setRoleId(sessionResponse?.data?.user.role_id); // Store role_id
+      setAcademicYear(sessionResponse?.data?.custom_claims?.academic_yr);
+
       // setRoleId("A"); // Store role_id
       console.log("roleIDis:", roleId);
       // Fetch academic year data
@@ -169,7 +173,7 @@ function Grade() {
     departmentId,
     startDate,
     endDate,
-    openDay,
+
     selectedClasses // Add the selectedClasses field
   ) => {
     const errors = {};
@@ -195,9 +199,9 @@ function Grade() {
       errors.endDate = "Marks upto is required.";
     }
 
-    if (!openDay) {
-      errors.openDay = "Open Day is required.";
-    }
+    // if (!openDay) {
+    //   errors.openDay = "Open Day is required.";
+    // }
 
     // Validate if at least one class is selected
     if (!selectedClasses || selectedClasses.length === 0) {
@@ -242,6 +246,7 @@ function Grade() {
 
   // Handle form submit (Add)
   const handleSubmitAdd = async () => {
+    console.log("tip");
     const validationErrors = validateFormFields(
       newSectionName,
       newDepartmentId,
@@ -251,6 +256,12 @@ function Grade() {
       //   selectedClasses, // Pass the selectedClasses field
       comment
     );
+    if (Object.keys(validationErrors).length > 0) {
+      setFieldErrors(validationErrors);
+      return;
+    }
+    console.log("mid");
+
     if (selectedClasses.length === 0) {
       setErrorMessage("Please select at least one class.");
       return;
@@ -260,23 +271,37 @@ function Grade() {
       // Your form submission logic here
       console.log("Form submitted with selected classes:", selectedClasses);
     }
+    console.log("end");
 
-    if (Object.keys(validationErrors).length > 0) {
-      setFieldErrors(validationErrors);
-      return;
-    }
-
+    console.log("endDate:", endDate);
+    console.log("comment:".comment);
+    console.log(
+      "name:",
+      newSectionName,
+      "subject_type:",
+      newDepartmentId,
+      "mark_from:",
+      startDate,
+      "mark_upto:",
+      endDate,
+      "comment:".comment,
+      "class_id:",
+      selectedClasses
+    );
     try {
       const token = localStorage.getItem("authToken");
+      console.log("stated");
       await axios.post(
         `${API_URL}/api/save_Grades`,
         {
           name: newSectionName,
-          class_id: newDepartmentId,
-          startDate,
-          endDate,
-          comment,
-          classIds: selectedClasses, // Add selected class IDs
+          subject_type: newDepartmentId,
+          mark_from: startDate,
+          mark_upto: endDate,
+          comment: comment,
+          academic_yr: academicYear,
+
+          // class_id: selectedClasses, // Add selected class IDs
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -586,7 +611,7 @@ function Grade() {
                     ) : (
                       <tr>
                         <td colSpan="5" className="text-center">
-                          No Division found
+                          No Grades are found...
                         </td>
                       </tr>
                     )}
@@ -820,6 +845,14 @@ function Grade() {
                         }
                       />{" "}
                     </div>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter comment"
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                    />
+
                     {/* <div className="relative  -top-6 left-[36%]">
                       {fieldErrors.comment && (
                         <span className=" block text-red-500 text-xs">

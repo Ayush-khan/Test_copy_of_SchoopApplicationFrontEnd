@@ -286,6 +286,34 @@ function Form() {
     }
   }, [selectedClass, API_URL]);
 
+  // Logic for the preselect readio button
+  useEffect(() => {
+    if (student) {
+      // Set form data from student object...
+      setFormData((prev) => ({
+        ...prev,
+        f_mobile: student.parents?.f_mobile || "",
+        f_email: student.parents?.f_email || "",
+        m_mobile: student.parents?.m_mobile || "",
+        m_emailid: student.parents?.m_emailid || "",
+        SetToReceiveSMS: student.SetToReceiveSMS || "",
+        SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
+      }));
+
+      // Initializing selectedUsername based on conditions
+      const userId = student.user_master?.user_id;
+      if (userId === student.parents?.f_mobile) {
+        setSelectedUsername("FatherMob");
+      } else if (userId === student.parents?.m_mobile) {
+        setSelectedUsername("MotherMob");
+      } else if (userId === student.parents?.f_email) {
+        setSelectedUsername("Father");
+      } else if (userId === student.parents?.m_emailid) {
+        setSelectedUsername("Mother");
+      }
+    }
+  }, [student]);
+
   // Function to check username uniqueness
   // Function to check username uniqueness
   // const studentId=student.student_id
@@ -319,6 +347,7 @@ function Form() {
   //     }));
   //   }
   // };
+
   const checkUserId = async (studentId, userId) => {
     try {
       const token = localStorage.getItem("authToken");
@@ -363,6 +392,11 @@ function Form() {
 
   const handleFatherMobileSelection = async () => {
     setUsernameErrors("");
+    // Clear only the SetEmailIDAsUsername error
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      SetEmailIDAsUsername: "", // Clear username error
+    }));
     await handleSetUsernameSelection(
       "FatherMob",
       formData.f_mobile,
@@ -372,6 +406,11 @@ function Form() {
 
   const handleMotherMobileSelection = async () => {
     setUsernameErrors("");
+    // Clear only the SetEmailIDAsUsername error
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      SetEmailIDAsUsername: "",
+    }));
     await handleSetUsernameSelection(
       "MotherMob",
       formData.m_mobile,
@@ -381,11 +420,21 @@ function Form() {
 
   const handleFatherEmailSelection = async () => {
     setUsernameErrors("");
+    // Clear only the SetEmailIDAsUsername error
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      SetEmailIDAsUsername: "",
+    }));
     await handleSetUsernameSelection("Father", formData.f_email, "fatherEmail");
   };
 
   const handleMotherEmailSelection = async () => {
     setUsernameErrors("");
+    // Clear only the SetEmailIDAsUsername error
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      SetEmailIDAsUsername: "",
+    }));
     await handleSetUsernameSelection(
       "Mother",
       formData.m_emailid,
@@ -395,6 +444,10 @@ function Form() {
 
   // Handle SMS selection
   const handleReceiveSmsSelection = (value) => {
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      SetToReceiveSMS: "", // Clear SetToReceiveSMS error when this is selected
+    }));
     setFormData((prevData) => ({
       ...prevData,
       SetToReceiveSMS: value, // One of 'FatherMob', 'MotherMob'
@@ -425,6 +478,10 @@ function Form() {
     const newErrors = {};
 
     // Validate required fields
+    if (!formData?.SetEmailIDAsUsername)
+      newErrors.SetEmailIDAsUsername = "User name is required";
+    if (!formData?.SetToReceiveSMS)
+      newErrors.SetToReceiveSMS = "ReceiveSms name is required";
     if (!formData.first_name) newErrors.first_name = "First name is required";
     // if (!formData.gender) newErrors.gender = "Gender selection is required";
     if (!formData.dob) newErrors.dob = "Date of Birth is required";
@@ -678,6 +735,98 @@ function Form() {
   //     }
   //   }
   // };
+
+  // debuging the logic of preselected input button
+  // const checkUserIdConditions = (student) => {
+  //   let conditionMet = false;
+  //   console.log(
+  //     "student?.user_master?.user_id:",
+  //     student?.user_master?.user_id,
+  //     "and",
+  //     "formData?.m_mobile:",
+  //     student?.parents?.m_mobile
+  //   );
+  //   console.log(
+  //     "student?.user_master?.user_id:",
+  //     student?.user_master?.user_id,
+  //     "and",
+  //     "formData?.f_mobile:",
+  //     student?.parents?.f_mobile
+  //   );
+  //   console.log(
+  //     "student?.user_master?.user_id:",
+  //     student?.user_master?.user_id,
+  //     "and",
+  //     "formData?.f_email:",
+  //     student?.parents?.f_email
+  //   );
+  //   console.log(
+  //     "student?.user_master?.user_id:",
+  //     student?.user_master?.user_id,
+  //     "and",
+  //     "formData?.m_emailid:",
+  //     student?.parents?.m_emailid
+  //   );
+  //   // Check if user_id matches mother mobile number
+  //   if (student?.user_master?.user_id === formData?.m_mobile) {
+  //     console.log("User ID matches mother's mobile number: true");
+  //     console.log(
+  //       "student?.user_master?.user_id:",
+  //       student?.user_master?.user_id,
+  //       "and",
+  //       "formData?.m_mobile:",
+  //       formData?.m_mobile
+  //     );
+  //     conditionMet = true;
+  //     // Call your function here if needed
+  //     // yourFunction();
+  //   } else {
+  //     console.log("User ID matches mother's mobile number: false");
+  //   }
+
+  //   // Check if user_id matches mother email
+  //   if (
+  //     student?.user_master?.user_id === formData?.m_emailid &&
+  //     !conditionMet
+  //   ) {
+  //     console.log("User ID matches mother's email: true");
+  //     conditionMet = true;
+  //     // Call your function here if needed
+  //     // yourFunction();
+  //   } else {
+  //     console.log("User ID matches mother's email: false");
+  //   }
+
+  //   // Check if user_id matches father email
+  //   if (student?.user_master?.user_id === formData?.f_email && !conditionMet) {
+  //     console.log("User ID matches father's email: true");
+  //     conditionMet = true;
+  //     // Call your function here if needed
+  //     // yourFunction();
+  //   } else {
+  //     console.log("User ID matches father's email: false");
+  //   }
+
+  //   // Check if user_id matches father mobile number
+  //   if (student?.user_master?.user_id === formData?.f_mobile && !conditionMet) {
+  //     console.log("User ID matches father's mobile number: true");
+  //     conditionMet = true;
+  //     // Call your function here if needed
+  //     // yourFunction();
+  //   } else {
+  //     console.log("User ID matches father's mobile number: false");
+  //   }
+
+  //   // Console log when the function has been executed
+  //   if (conditionMet) {
+  //     console.log("Match found, function executed.");
+  //   } else {
+  //     console.log("No match found, function not executed.");
+  //   }
+  // };
+  // Example usage
+  // checkUserIdConditions(student);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = validate();
@@ -1753,8 +1902,8 @@ function Form() {
               </label>
               <select
                 id="bloodGroup"
-                name="blood_group"
-                value={formData.blood_group}
+                name="f_blood_group"
+                value={formData.f_blood_group}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                 onChange={handleChange}
                 // onBlur={handleBlur}
@@ -1865,11 +2014,21 @@ function Form() {
                   id="setusernameFatherMob"
                   name="setUsername"
                   onChange={handleFatherMobileSelection}
-                  checked={selectedUsername === "FatherMob"}
+                  checked={
+                    selectedUsername === "FatherMob" ||
+                    student?.user_master?.user_id === student?.parents?.f_mobile
+                  }
                 />
                 <label htmlFor="setusernameFatherMob">
                   Set this as username
                 </label>
+              </div>
+              <div className={`${errors.SetEmailIDAsUsername ? "h-2" : ""}`}>
+                {errors.SetEmailIDAsUsername && (
+                  <span className="text-red-500 text-xs relative left-5 -top-2">
+                    {errors.SetEmailIDAsUsername}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <input
@@ -1884,6 +2043,11 @@ function Form() {
                   Set to receive SMS at this no.
                 </label>
               </div>
+              {errors.SetToReceiveSMS && (
+                <span className="text-red-500 text-xs relative left-5 -top-2">
+                  {errors.SetToReceiveSMS}
+                </span>
+              )}{" "}
             </div>
             <div className="mt-2">
               <label htmlFor="email" className="block font-bold text-xs mb-0.5">
@@ -1913,7 +2077,10 @@ function Form() {
                   id="setUserNameFather"
                   name="setUsername"
                   onChange={handleFatherEmailSelection}
-                  checked={selectedUsername === "Father"}
+                  checked={
+                    selectedUsername === "Father" ||
+                    student?.user_master?.user_id === student?.parent?.f_email
+                  }
                 />
                 <label htmlFor="setUserNameFather">Set this as username</label>
               </div>
@@ -2108,7 +2275,10 @@ function Form() {
                   id="setusernameMotherMob"
                   name="setUsername"
                   onChange={handleMotherMobileSelection}
-                  checked={selectedUsername === "MotherMob"}
+                  checked={
+                    selectedUsername === "MotherMob" ||
+                    student?.user_master?.user_id === student?.parent?.m_mobile
+                  }
                 />
                 <label htmlFor="setusernameMotherMob">
                   Set this as username
@@ -2155,7 +2325,10 @@ function Form() {
                   id="emailuser"
                   name="setUsername"
                   onChange={handleMotherEmailSelection}
-                  checked={selectedUsername === "Mother"}
+                  checked={
+                    selectedUsername === "Mother" ||
+                    student?.user_master?.user_id === student?.parent?.m_emailid
+                  }
                 />
                 <label htmlFor="emailuser">Set this as username</label>
               </div>
