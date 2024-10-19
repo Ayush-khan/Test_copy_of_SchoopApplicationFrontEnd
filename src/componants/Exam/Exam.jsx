@@ -497,7 +497,7 @@ function Exam() {
                     ) : (
                       <tr>
                         <td colSpan="5" className="text-center">
-                          No Division found
+                          No Exams are found
                         </td>
                       </tr>
                     )}
