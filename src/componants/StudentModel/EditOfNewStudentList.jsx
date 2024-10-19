@@ -2672,7 +2672,7 @@ function EditOfNewStudentList() {
                 <label htmlFor="emailuser">Set this as username</label>
               </div>
             </div>
-            {/* Mother date gfh hgtf of birth */}
+            {/* Mother date  of birth */}
             <div className="mt-2">
               <label
                 htmlFor="dataOfAdmission"
