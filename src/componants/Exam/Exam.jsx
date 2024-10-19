@@ -69,7 +69,7 @@ function Exam() {
         throw new Error("No authentication token found");
       }
 
-      const response = await axios.get(`${API_URL}/api/getDivision`, {
+      const response = await axios.get(`${API_URL}/api/get_Examslist`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -168,13 +168,18 @@ function Exam() {
 
   const handleEdit = (section) => {
     setCurrentSection(section);
-    setNewSectionName(section.name);
-    setClassName(section.get_class.class_id);
-    setNewDepartmentId(section.get_class.class_id);
+    setNewSectionName(section?.name);
+    // setClassName(section.get_class.class_id);
+    setStartDate(section?.start_date);
+    setEndDate(section?.end_date);
+    setOpenDay(section?.open_day);
+    setComment(section?.comment);
+    setNewDepartmentId(section?.term_id);
     setShowEditModal(true);
   };
 
   const handleAdd = () => {
+    setNewSectionName(" ");
     setShowAddModal(true);
   };
 
@@ -210,14 +215,14 @@ function Exam() {
     try {
       const token = localStorage.getItem("authToken");
       await axios.post(
-        `${API_URL}/api/store_division`,
+        `${API_URL}/api/save_Exams`,
         {
           name: newSectionName,
-          class_id: newDepartmentId,
-          startDate,
-          endDate,
-          openDay,
-          comment,
+          term_id: newDepartmentId,
+          start_date: startDate,
+          end_date: endDate,
+          open_day: openDay,
+          comment: comment,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -227,9 +232,9 @@ function Exam() {
 
       fetchExams();
       handleCloseModal();
-      toast.success("Division added successfully!");
+      toast.success("Exam added successfully!");
     } catch (error) {
-      console.error("Error adding division:", error);
+      console.error("Error adding Exam:", error);
       toast.error("Server error. Please try again later.");
     }
   };
@@ -251,14 +256,14 @@ function Exam() {
     try {
       const token = localStorage.getItem("authToken");
       await axios.put(
-        `${API_URL}/api/getDivision/${currentSection.section_id}`,
+        `${API_URL}/api/update_Exams/${currentSection?.exam_id}`,
         {
           name: newSectionName,
-          class_id: newDepartmentId,
-          startDate,
-          endDate,
-          openDay,
-          comment,
+          term_id: newDepartmentId,
+          start_date: startDate,
+          end_date: endDate,
+          open_day: openDay,
+          comment: comment,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -268,15 +273,15 @@ function Exam() {
 
       fetchExams();
       handleCloseModal();
-      toast.success("Division updated successfully!");
+      toast.success("Exam updated successfully!");
     } catch (error) {
-      console.error("Error editing division:", error);
+      console.error("Error editing Exam:", error);
       toast.error("Server error. Please try again later.");
     }
   };
 
   const handleDelete = (id) => {
-    const sectionToDelete = sections.find((sec) => sec.section_id === id);
+    const sectionToDelete = sections.find((sec) => sec.exam_id === id);
     setCurrentSection(sectionToDelete);
     setShowDeleteModal(true);
   };
@@ -284,18 +289,16 @@ function Exam() {
   const handleSubmitDelete = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
-      if (!token || !currentSection || !currentSection.section_id) {
-        throw new Error("Division ID is missing");
+      if (!token || !currentSection || !currentSection.exam_id) {
+        throw new Error("Exam ID is missing");
       }
 
       const response = await axios.delete(
-        `${API_URL}/api/getDivision/${currentSection.section_id}`,
+        `${API_URL}/api/delete_Exams/${currentSection.exam_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
           withCredentials: true,
         }
@@ -305,12 +308,12 @@ function Exam() {
         fetchExams();
         setShowDeleteModal(false);
         setCurrentSection(null);
-        toast.success("Division deleted successfully!");
+        toast.success("Exam deleted successfully!");
       } else {
-        toast.error(response.data.message || "Failed to delete Division");
+        toast.error(response.data.message || "Failed to delete Exam");
       }
     } catch (error) {
-      console.error("Error deleting Division:", error);
+      console.error("Error deleting Exam:", error);
       if (
         error.response &&
         error.response.data &&
@@ -442,12 +445,12 @@ function Exam() {
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section.name}
+                              {section?.name}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.get_class?.name}
+                              {section?.comment}
                             </p>
                           </td>
 
@@ -483,7 +486,7 @@ function Exam() {
                             <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                               <button
                                 className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                onClick={() => handleDelete(section.section_id)}
+                                onClick={() => handleDelete(section?.exam_id)}
                               >
                                 <FontAwesomeIcon icon={faTrash} />
                               </button>
