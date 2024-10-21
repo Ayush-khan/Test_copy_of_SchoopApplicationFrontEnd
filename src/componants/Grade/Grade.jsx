@@ -9,7 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 
-// The is the divisionlist module gbujgu ctgydfc
+// The is the divisionlist module
 function Grade() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [sections, setSections] = useState([]);
