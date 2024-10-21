@@ -157,7 +157,7 @@ function MarksHeading() {
 
     // Sequence validation
     const sequenceRegex = /^[0-9]{1,2}$/; // Ensure 1 or 2 digit numbers only
-    if (!sequence || sequence.trim() === "") {
+    if (!sequence) {
       errors.sequence = "Please enter sequence number.";
     } else if (!sequenceRegex.test(sequence)) {
       errors.sequence = "Sequence must be a number with a maximum of 2 digits.";

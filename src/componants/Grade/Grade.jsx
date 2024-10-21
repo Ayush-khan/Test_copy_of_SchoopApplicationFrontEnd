@@ -529,16 +529,15 @@ function Grade() {
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {`${section?.get_class?.name || ""} ${
-                                section?.get_section?.name || ""
-                              }`}
+                              {section?.name}
                             </p>
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.name}
+                              {`${section?.class?.name || ""} `}
                             </p>
                           </td>
+
                           <td className="text-center px-2  border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section?.subject_type}
