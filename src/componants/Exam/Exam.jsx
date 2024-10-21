@@ -44,19 +44,17 @@ function Exam() {
   const fetchTermsName = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(
-        `${API_URL}/api/get_class_for_division`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/get_Term`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log(response.data); // Debugging line
       if (Array.isArray(response.data)) {
         setTermsName(response.data);
       } else {
         setError("Unexpected data format");
       }
     } catch (error) {
-      console.error("Error fetching class names:", error);
+      console.error("Error fetching term names:", error);
     }
   };
 
@@ -167,6 +165,7 @@ function Exam() {
   };
 
   const handleEdit = (section) => {
+    console.log("edit", section);
     setCurrentSection(section);
     setNewSectionName(section?.name);
     // setClassName(section.get_class.class_id);
@@ -211,6 +210,7 @@ function Exam() {
       setFieldErrors(validationErrors);
       return;
     }
+    console.log("terId for add", newDepartmentId);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -252,7 +252,7 @@ function Exam() {
       setFieldErrors(validationErrors);
       return;
     }
-
+    console.log("terId for edit", newDepartmentId);
     try {
       const token = localStorage.getItem("authToken");
       await axios.put(
@@ -589,7 +589,7 @@ function Exam() {
                       </div>
                     </div>
                     {/* <div className="form-group"> */}
-                    <div className=" relative mb-3 flex justify-center  mx-4">
+                    <div className="relative mb-3 flex justify-center mx-4">
                       <label htmlFor="departmentId" className="w-1/2 mt-2">
                         Term <span className="text-red-500">*</span>
                       </label>
@@ -599,22 +599,17 @@ function Exam() {
                         value={newDepartmentId}
                         onChange={handleChangeDepartmentId}
                       >
-                        <option value="">Select </option>
-                        {/* {classes.map((cls, index) => (
-                          <option key={index} value={cls}>
-                            {cls}
-                          </option>
-                        ))} */}
+                        <option value="">Select Term</option>
                         {termsName.length === 0 ? (
                           <option value="">No Terms available</option>
                         ) : (
-                          termsName.map((cls) => (
+                          termsName.map((term) => (
                             <option
-                              key={cls.class_id}
-                              value={cls.class_id}
-                              className="max-h-20 overflow-y-scroll "
+                              key={term.term_id}
+                              value={term.term_id}
+                              className="max-h-20 overflow-y-scroll"
                             >
-                              {cls.name}
+                              {term.name}
                             </option>
                           ))
                         )}
@@ -792,7 +787,7 @@ function Exam() {
                     <select
                       id="editDepartmentId"
                       className="form-control shadow-md"
-                      value={className}
+                      value={newDepartmentId}
                       onChange={handleChangeDepartmentId}
                     >
                       <option value="">Select</option>
@@ -806,9 +801,9 @@ function Exam() {
                       {termsName.length === 0 ? (
                         <option value="">No Terms available</option>
                       ) : (
-                        termsName.map((cls) => (
-                          <option key={cls.class_id} value={cls.class_id}>
-                            {cls.name}
+                        termsName.map((terms) => (
+                          <option key={terms.term_id} value={terms.term_id}>
+                            {terms.name}
                           </option>
                         ))
                       )}
