@@ -522,6 +522,22 @@ function AllotMarksHeading() {
                       {newSubject}
                     </span>
                   </div>
+                  <div className="relative flex justify-start mx-4 gap-x-7">
+                    <label htmlFor="newSubjectName" className="w-1/2 mt-2">
+                      Exam:
+                    </label>
+                    <span className="font-semibold form-control shadow-md mb-2">
+                      {newSubject}
+                    </span>
+                  </div>
+                  <div className="relative flex justify-start mx-4 gap-x-7">
+                    <label htmlFor="newSubjectName" className="w-1/2 mt-2">
+                      Marks Heading assigned
+                    </label>
+                    <span className="font-semibold form-control shadow-md mb-2">
+                      {newSubject}
+                    </span>
+                  </div>
 
                   <div className="modal-body">
                     <div

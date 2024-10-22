@@ -375,7 +375,6 @@ function Exam() {
       <ToastContainer />
 
       <div className="container  mt-4">
-        coming soon
         <div className="card mx-auto lg:w-3/4 shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">

@@ -134,6 +134,7 @@ import Exam from "../componants/Exam/Exam.jsx";
 import Grade from "../componants/Grade/Grade.jsx";
 import MarksHeading from "../componants/MarksHeading/MarksHeading.jsx";
 import AllotMarksHeading from "../componants/AllotMarkHeading/AllotMaekHeading.jsx";
+import CareTacker from "../componants/CareTacker/CareTacker.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -253,6 +254,12 @@ function Index() {
           path="/newStudetEdit/edit/:id"
           element={<PrivateRoute element={EditOfNewStudentList} />}
         />
+
+        <Route
+          path="/careTacker"
+          element={<PrivateRoute element={CareTacker} />}
+        />
+
         {/* AllotClassTeacher */}
         <Route
           path="/allotClassTeacher"

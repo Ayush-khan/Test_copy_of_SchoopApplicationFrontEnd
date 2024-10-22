@@ -663,10 +663,10 @@ const AllotMarksHeadingTab = () => {
   const fetchExams = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/getExamsList`, {
+      const response = await axios.get(`${API_URL}/api/get_Examslist`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setExams(response.data); // Assuming the exam list structure
+      setExams(response?.data); // Assuming the exam list structure
     } catch (error) {
       toast.error("Error fetching exams");
     }
@@ -675,12 +675,12 @@ const AllotMarksHeadingTab = () => {
   const fetchMarksHeadings = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/getMarksHeadings`, {
+      const response = await axios.get(`${API_URL}/api/get_Markheadingslist`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       // Assuming the response contains marks headings data in the desired format
       const formattedData = response.data.map((heading) => ({
-        marks_headings_id: heading.id,
+        marks_headings_id: heading.marks_headings_id,
         name: heading.name,
         highest_marks: "",
         selected: false,
@@ -695,12 +695,12 @@ const AllotMarksHeadingTab = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/getSubjects/${classId}`,
+        `${API_URL}/api/get_subject_Alloted_for_report_card/${classId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setSubjects(response.data.subjects); // Adjust based on actual API response structure
+      setSubjects(response?.data?.subjectAllotments); // Adjust based on actual API response structure
     } catch (error) {
       toast.error("Error fetching subjects");
     }
@@ -835,7 +835,7 @@ const AllotMarksHeadingTab = () => {
             {/* Select Class */}
             <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
               <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
-                Select Class
+                Select Class <span className="text-red-500">*</span>
               </label>
               <div className="w-full relative">
                 <Select
@@ -856,11 +856,34 @@ const AllotMarksHeadingTab = () => {
                 )}
               </div>
             </div>
-
+            {/* Select Subject */}
+            <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
+              <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
+                Select Subject <span className="text-red-500">*</span>
+              </label>
+              <div className="w-full relative">
+                <Select
+                  value={selectedSubject}
+                  onChange={handleSubjectChange}
+                  placeholder="Select"
+                  className="w-full md:w-[50%] "
+                  isClearable
+                  options={subjects.map((subject) => ({
+                    value: subject?.sub_rc_master_id,
+                    label: subject?.get_subjects_for_report_card?.name,
+                  }))}
+                />
+                {subjectError && (
+                  <p className="relative  -mb-3 text-red-500 text-sm">
+                    {subjectError}
+                  </p>
+                )}
+              </div>
+            </div>
             {/* Select Exam */}
             <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
               <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
-                Select Exam
+                Select Exam <span className="text-red-500">*</span>
               </label>
               <div className="w-full relative">
                 <Select
@@ -882,72 +905,86 @@ const AllotMarksHeadingTab = () => {
               </div>
             </div>
 
-            {/* Select Subject */}
-            <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
-              <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
-                Select Subject
-              </label>
-              <div className="w-full relative">
-                <Select
-                  value={selectedSubject}
-                  onChange={handleSubjectChange}
-                  placeholder="Select"
-                  className="w-full md:w-[50%] "
-                  isClearable
-                  options={subjects.map((subject) => ({
-                    value: subject.subject_id,
-                    label: subject.name,
-                  }))}
-                />
-                {subjectError && (
-                  <p className="relative  -mb-3 text-red-500 text-sm">
-                    {subjectError}
+            {/* Marks Headings */}
+            <div className="mt-4 shadow-md  w-full md:w-[70%] ml-0 md:ml-4">
+              <div className="w-full overflow-x-auto">
+                {/* Sticky Header */}
+                <div className="w-full sticky top-0 bg-white  ">
+                  <div className="grid grid-cols-2 text-start ">
+                    <h6 className="text-gray-700 font-semibold py-2  pl-2">
+                      Marks Headings <span className="text-red-500">*</span>
+                    </h6>
+                    <h6 className="text-gray-700 font-semibold py-2 text-center pr-4">
+                      Highest Marks <span className="text-red-500">*</span>
+                    </h6>
+                  </div>
+                </div>
+
+                {/* Scrollable Content */}
+                {marksHeadingsData.length > 0 ? (
+                  <div className="max-h-64 overflow-y-auto">
+                    {marksHeadingsData.map((heading, index) => (
+                      <div
+                        key={heading.marks_headings_id}
+                        className="grid grid-cols-2 w-full  text-center py-2"
+                      >
+                        <div className="flex items-center justify-start px-2">
+                          {/* Checkbox with consistent alignment */}
+                          <input
+                            type="checkbox"
+                            checked={heading.selected}
+                            onChange={() => handleMarksHeadingChange(index)}
+                            className="mr-2"
+                          />
+                          {/* Toggle checkbox when clicking on the label */}
+                          <label
+                            onClick={() => handleMarksHeadingChange(index)}
+                            className="cursor-pointer"
+                          >
+                            {heading.name}
+                          </label>
+                        </div>
+
+                        <div>
+                          <input
+                            type="text"
+                            maxLength={3}
+                            value={heading.highest_marks}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              // Allow only positive integers
+                              if (/^\d*$/.test(value)) {
+                                handleHighestMarksChange(index, value);
+                              }
+                            }}
+                            disabled={!heading.selected}
+                            placeholder="Highest marks"
+                            className={`border p-1 bg-gray-100 shadow-md rounded w-full md:w-1/2 text-start ${
+                              highestMarksError[index] ? "border-red-500" : ""
+                            }`}
+                          />
+                          {/* Individual error message for each input */}
+                          {highestMarksError[index] && (
+                            <p className="h-1 text-red-500 text-xs ">
+                              {highestMarksError[index]}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-blue-600">
+                    No marks headings available
+                  </p>
+                )}
+
+                {marksHeadingError && (
+                  <p className=" text-center text-red-500 text-xs">
+                    {marksHeadingError}
                   </p>
                 )}
               </div>
-            </div>
-
-            {/* Marks Headings */}
-            <div className="mt-4">
-              <h4 className="text-gray-700 font-semibold">Marks Headings</h4>
-              {marksHeadingsData.length > 0 ? (
-                marksHeadingsData.map((heading, index) => (
-                  <div
-                    key={heading.marks_headings_id}
-                    className="flex items-center my-2"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={heading.selected}
-                      onChange={() => handleMarksHeadingChange(index)}
-                      className="mr-2"
-                    />
-                    <label className="mr-2">{heading.name}</label>
-                    <input
-                      type="number"
-                      value={heading.highest_marks}
-                      onChange={(e) =>
-                        handleHighestMarksChange(index, e.target.value)
-                      }
-                      disabled={!heading.selected}
-                      placeholder="Highest marks"
-                      className={`border p-1 rounded ${
-                        highestMarksError[index] ? "border-red-500" : ""
-                      }`}
-                    />
-                    {highestMarksError[index] && (
-                      <p className="text-red-500 text-xs ml-4">
-                        {highestMarksError[index]}
-                      </p>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p>No marks headings available</p>
-              )}
-              {marksHeadingError && (
-                <p className="text-red-500 text-xs">{marksHeadingError}</p>
-              )}
             </div>
 
             {/* Save Button */}
