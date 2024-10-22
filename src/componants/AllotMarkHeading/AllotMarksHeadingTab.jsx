@@ -987,7 +987,7 @@ const AllotMarksHeadingTab = () => {
               </div>
             </div>
 
-            {/* Save Button */}
+            {/* Save Button  is */}
             <div className="flex justify-center mt-6">
               <button
                 onClick={handleSave}
