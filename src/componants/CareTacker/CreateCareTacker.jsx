@@ -22,7 +22,7 @@ function CreateCareTacker() {
     phone: "",
     email: "",
     aadhar_card_no: "",
-    role: "",
+    teacher_category: "",
     employeeId: "",
     teacher_image_name: null,
     special_sub: "",
@@ -43,7 +43,7 @@ function CreateCareTacker() {
   };
 
   const validateAadhar = (aadhar) => {
-    if (!aadhar) return "Aadhar card number is required";
+    // if (!aadhar) return "Aadhar card number is required";
     if (!/^\d{12}$/.test(aadhar.replace(/\s+/g, "")))
       return "Aadhar card number must be 12 digits";
     return null;
@@ -55,11 +55,11 @@ function CreateCareTacker() {
   //     return null;
   //   };
 
-  const validateExperience = (experience) => {
-    if (!experience) return "Experience is required";
-    if (!/^\d+$/.test(experience)) return "Experience must be a whole number";
-    return null;
-  };
+  //   const validateExperience = (experience) => {
+  //     if (!experience) return "Experience is required";
+  //     if (!/^\d+$/.test(experience)) return "Experience must be a whole number";
+  //     return null;
+  //   };
 
   const validate = () => {
     const newErrors = {};
@@ -68,9 +68,15 @@ function CreateCareTacker() {
     if (!formData.name) newErrors.name = "Name is required";
     else if (!/^[^\d].*/.test(formData.name))
       newErrors.name = "Name should not start with a number";
+    // Validate academic qualifications (now a single text input)
+    if (!formData.academic_qual)
+      newErrors.academic_qual = "Academic qualification is required";
 
     // Validate birthday
     if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
+    // Validate teacher category
+    if (!formData.teacher_category)
+      newErrors.teacher_category = "Teacher Category is required";
 
     // Validate date of joining
     if (!formData.date_of_joining)
@@ -79,10 +85,8 @@ function CreateCareTacker() {
     // Validate sex
     if (!formData.sex) newErrors.sex = "Gender is required";
 
-    // Validate designation
-    if (!formData.designation)
-      newErrors.designation = "Designation is required";
-
+    // Validate Employee Id
+    if (!formData.employeeId) newErrors.employeeId = "Employee Id is required";
     // Validate address
     if (!formData.address) newErrors.address = "Address is required";
 
@@ -95,16 +99,12 @@ function CreateCareTacker() {
     // if (emailError) newErrors.email = emailError;
 
     // Validate experience
-    const experienceError = validateExperience(formData.experience);
-    if (experienceError) newErrors.experience = experienceError;
+    // const experienceError = validateExperience(formData.experience);
+    // if (experienceError) newErrors.experience = experienceError;
 
     // Validate aadhar card number
     const aadharError = validateAadhar(formData.aadhar_card_no);
     if (aadharError) newErrors.aadhar_card_no = aadharError;
-
-    // Validate academic qualifications (now a single text input)
-    if (!formData.academic_qual.trim())
-      newErrors.academic_qual = "Academic qualification is required";
 
     setErrors(newErrors);
     return newErrors;
@@ -113,7 +113,7 @@ function CreateCareTacker() {
     const { name, value } = event.target;
     let newValue = value;
 
-    // Handle specific input sanitization
+    // Input sanitization for specific fields
     if (name === "experience") {
       newValue = newValue.replace(/[^0-9]/g, ""); // Only allow numbers in experience
     } else if (name === "aadhar_card_no") {
@@ -123,126 +123,76 @@ function CreateCareTacker() {
       newValue = newValue.replace(/[^\d]/g, ""); // Only allow digits for phone and aadhar card
     }
 
-    // Update formData for all fields (including academic_qual which is now a text input)
+    // Update formData for the field
     setFormData((prevData) => ({
       ...prevData,
       [name]: newValue,
     }));
 
-    // Validate field based on the field's name
+    // Field-specific validation
     let fieldErrors = {};
+
+    // Name validation
+    if (name === "name") {
+      if (!newValue) fieldErrors.name = "Name is required";
+      else if (/^\d/.test(newValue))
+        fieldErrors.name = "Name should not start with a number";
+    }
+
+    // Academic Qualification validation
+    if (name === "academic_qual") {
+      if (!newValue)
+        fieldErrors.academic_qual = "Academic qualification is required";
+    }
+
+    // Date of Birth validation
+    if (name === "birthday") {
+      if (!newValue) fieldErrors.birthday = "Date of Birth is required";
+    }
+
+    // Teacher Category validation
+    if (name === "teacher_category") {
+      if (!newValue)
+        fieldErrors.teacher_category = "Teacher Category is required";
+    }
+
+    // Date of Joining validation
+    if (name === "date_of_joining") {
+      if (!newValue)
+        fieldErrors.date_of_joining = "Date of Joining is required";
+    }
+
+    // Gender validation
+    if (name === "sex") {
+      if (!newValue) fieldErrors.sex = "Gender is required";
+    }
+
+    // Employee ID validation
+    if (name === "employeeId") {
+      if (!newValue) fieldErrors.employeeId = "Employee ID is required";
+    }
+
+    // Address validation
+    if (name === "address") {
+      if (!newValue) fieldErrors.address = "Address is required";
+    }
+
+    // Phone validation
     if (name === "phone") {
       fieldErrors.phone = validatePhone(newValue);
-    } else if (name === "aadhar_card_no") {
+    }
+
+    // Aadhaar card validation
+    if (name === "aadhar_card_no") {
       fieldErrors.aadhar_card_no = validateAadhar(newValue);
     }
-    // else if (name === "email") {
-    //   fieldErrors.email = validateEmail(newValue);
-    // }
-    else if (name === "experience") {
-      fieldErrors.experience = validateExperience(newValue);
-    }
 
-    // Set any field-specific errors
+    // Update the errors state with the new field errors
     setErrors((prevErrors) => ({
       ...prevErrors,
-      ...fieldErrors,
+      [name]: fieldErrors[name],
     }));
   };
-
-  //   const validate = () => {
-  //     const newErrors = {};
-
-  //     // Validate name
-  //     if (!formData.name) newErrors.name = "Name is required";
-  //     else if (!/^[^\d].*/.test(formData.name))
-  //       newErrors.name = "Name should not start with a number";
-
-  //     // Validate birthday
-  //     if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
-
-  //     // Validate date of joining
-  //     if (!formData.date_of_joining)
-  //       newErrors.date_of_joining = "Date of Joining is required";
-
-  //     // Validate sex
-  //     if (!formData.sex) newErrors.sex = "Gender is required";
-  //     if (!formData.designation)
-  //       newErrors.designation = "Designation is required";
-  //     // Validate address
-  //     if (!formData.address) newErrors.address = "Address is required";
-
-  //     // Validate phone number
-  //     const phoneError = validatePhone(formData.phone);
-  //     if (phoneError) newErrors.phone = phoneError;
-
-  //     // Validate email
-  //     const emailError = validateEmail(formData.email);
-  //     if (emailError) newErrors.email = emailError;
-
-  //     // Validate experience
-  //     const experienceError = validateExperience(formData.experience);
-  //     if (experienceError) newErrors.experience = experienceError;
-
-  //     // Validate aadhar card number
-  //     const aadharError = validateAadhar(formData.aadhar_card_no);
-  //     if (aadharError) newErrors.aadhar_card_no = aadharError;
-
-  //     // Validate academic qualifications
-  //     if (!formData.academic_qual.length)
-  //       newErrors.academic_qual =
-  //         "Please select at least one academic qualification";
-
-  //     setErrors(newErrors);
-  //     return newErrors;
-  //   };
-
-  //   const handleChange = (event) => {
-  //     const { name, value, checked } = event.target;
-  //     let newValue = value;
-
-  //     if (name === "experience") {
-  //       newValue = newValue.replace(/[^0-9]/g, "");
-  //     } else if (name === "aadhar_card_no") {
-  //       newValue = newValue.replace(/\s+/g, "");
-  //     }
-  //     if (name === "phone" || name === "aadhar_card_no") {
-  //       newValue = newValue.replace(/[^\d]/g, "");
-  //     }
-
-  //     if (name === "academic_qual") {
-  //       setFormData((prevData) => {
-  //         const newAcademicQual = checked
-  //           ? [...prevData.academic_qual, value]
-  //           : prevData.academic_qual.filter(
-  //               (qualification) => qualification !== value
-  //             );
-  //         return { ...prevData, academic_qual: newAcademicQual };
-  //       });
-  //     } else {
-  //       setFormData((prevData) => ({
-  //         ...prevData,
-  //         [name]: newValue,
-  //       }));
-  //     }
-
-  //     // Validate field based on name
-  //     let fieldErrors = {};
-  //     if (name === "phone") {
-  //       fieldErrors.phone = validatePhone(newValue);
-  //     } else if (name === "aadhar_card_no") {
-  //       fieldErrors.aadhar_card_no = validateAadhar(newValue);
-  //     } else if (name === "email") {
-  //       fieldErrors.email = validateEmail(newValue);
-  //     } else if (name === "experience") {
-  //       fieldErrors.experience = validateExperience(newValue);
-  //     }
-
-  //     setErrors((prevErrors) => ({
-  //       ...prevErrors,
-  //       ...fieldErrors,
-  //     }));
-  //   };
 
   const formatDateString = (dateString) => {
     if (!dateString) return "";
@@ -257,9 +207,9 @@ function CreateCareTacker() {
 
     if (Object.keys(errorsToCheck).length > 0) {
       setErrors(errorsToCheck);
-      Object.values(errorsToCheck).forEach((error) => {
-        toast.error(error);
-      });
+      //   Object.values(errorsToCheck).forEach((error) => {
+      //     // toast.error(error);
+      //   });
       return;
     }
 
@@ -287,14 +237,14 @@ function CreateCareTacker() {
       );
 
       if (response.status === 201) {
-        toast.success("Teacher created successfully!");
+        toast.success("Care tacker created successfully!");
         setTimeout(() => {
-          navigate("/StaffList");
+          navigate("/careTacker");
         }, 3000);
       }
     } catch (error) {
       console.error("Error:", error.message);
-      toast.error("An error occurred while creating the teacher.");
+      toast.error("An error occurred while creating the Care tacker.");
 
       if (error.response && error.response.data && error.response.data.errors) {
         setBackendErrors(error.response.data.errors || {});
@@ -327,14 +277,14 @@ function CreateCareTacker() {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <p className="  md:absolute md:right-10  md:top-[16%]   text-gray-500 ">
+        <p className="  md:absolute md:right-10  md:top-[15%]   text-gray-500 ">
           <span className="text-red-500">*</span>indicates mandatory information
         </p>
         <form
           onSubmit={handleSubmit}
           className="  md:mx-5 overflow-x-hidden shadow-md p-2 bg-gray-50"
         >
-          <div className=" flex flex-col gap-4 md:grid  md:grid-cols-4 md:gap-x-14 md:mx-10 gap-y-1">
+          <div className=" flex flex-col gap-4 md:grid  md:grid-cols-3 md:gap-x-14 md:mx-10 gap-y-1">
             <div className=" ">
               <label
                 htmlFor="staffName"
@@ -354,6 +304,9 @@ function CreateCareTacker() {
                 placeholder="Name"
                 className="block  border w-full border-gray-300 rounded-md py-1 px-3  bg-white shadow-inner"
               />
+              {errors.name && (
+                <div className="text-red-500 text-xs ml-2">{errors.name}</div>
+              )}
             </div>
             <div>
               <label
@@ -372,7 +325,7 @@ function CreateCareTacker() {
                 className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
               {errors.birthday && (
-                <div className="text-red-500 text-xs mt-1">
+                <div className="text-red-500 text-xs ml-2">
                   {errors.birthday}
                 </div>
               )}
@@ -394,7 +347,7 @@ function CreateCareTacker() {
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
               {errors.date_of_joining && (
-                <span className="text-red-500 text-xs">
+                <span className="text-red-500 text-xs ml-2">
                   {errors.date_of_joining}
                 </span>
               )}
@@ -404,22 +357,18 @@ function CreateCareTacker() {
                 htmlFor="designation"
                 className="block font-bold  text-xs mb-2"
               >
-                Designation <span className="text-red-500">*</span>
+                Designation
               </label>
               <input
                 type="text"
                 maxLength={30}
                 id="designation"
+                readOnly
                 name="designation"
                 value={formData.designation}
                 onChange={handleChange}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                className="input-field bg-gray-200 block w-full border border-gray-300 rounded-md py-1 px-3  outline-none shadow-inner"
               />
-              {errors.designation && (
-                <span className="text-red-500 text-xs">
-                  {errors.designation}
-                </span>
-              )}
             </div>
 
             <div>
@@ -439,7 +388,7 @@ function CreateCareTacker() {
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
               {errors.academic_qual && (
-                <span className="error text-red-500 text-xs">
+                <span className="text-red-500 text-xs ml-2">
                   {errors.academic_qual}
                 </span>
               )}
@@ -450,7 +399,7 @@ function CreateCareTacker() {
                 htmlFor="aadhar_card_no"
                 className="block font-bold  text-xs mb-2"
               >
-                Aadhaar Card No. <span className="text-red-500">*</span>
+                Aadhaar Card No.
               </label>
               <input
                 type="tel"
@@ -464,12 +413,12 @@ function CreateCareTacker() {
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />{" "}
               {backendErrors.aadhar_card_no && (
-                <span className="text-red-500 text-xs">
+                <span className="text-red-500 text-xs ml-2">
                   {backendErrors.aadhar_card_no[0]}
                 </span>
               )}
               {errors.aadhar_card_no && (
-                <span className="text-red-500 text-xs">
+                <span className="text-red-500 text-xs ml-2">
                   {errors.aadhar_card_no}
                 </span>
               )}
@@ -495,7 +444,7 @@ function CreateCareTacker() {
                 <option value="O">Other</option>
               </select>
               {errors.sex && (
-                <span className="text-red-500 text-xs">{errors.sex}</span>
+                <span className="text-red-500 text-xs ml-2">{errors.sex}</span>
               )}
             </div>
 
@@ -570,8 +519,13 @@ function CreateCareTacker() {
                 value={formData.address}
                 onChange={handleChange}
                 className="input-field resize block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-                rows="4"
+                rows="2"
               />
+              {errors.address && (
+                <div className="text-red-500 text-xs ml-2">
+                  {errors.address}
+                </div>
+              )}
             </div>
 
             <div>
@@ -595,10 +549,12 @@ function CreateCareTacker() {
                 />
               </div>
               {backendErrors.phone && (
-                <span className="error">{backendErrors.phone[0]}</span>
+                <span className="error ml-2">{backendErrors.phone[0]}</span>
               )}
               {errors.phone && (
-                <span className="text-red-500 text-xs">{errors.phone}</span>
+                <span className="text-red-500 text-xs ml-2">
+                  {errors.phone}
+                </span>
               )}
             </div>
 
@@ -619,19 +575,22 @@ function CreateCareTacker() {
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
               {errors.employeeId && (
-                <span className="text-red-500 text-xs">
+                <span className="text-red-500 text-xs ml-2">
                   {errors.employeeId}
                 </span>
               )}
             </div>
             <div>
-              <label htmlFor="role" className="block font-bold  text-xs mb-2">
+              <label
+                htmlFor="teacher_category"
+                className="block font-bold  text-xs mb-2"
+              >
                 Teacher Category <span className="text-red-500">*</span>
               </label>
               <select
-                id="role"
-                name="role"
-                value={formData.role}
+                id="teacher_category"
+                name="teacher_category"
+                value={formData.teacher_category}
                 onChange={handleChange}
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               >
@@ -651,8 +610,10 @@ function CreateCareTacker() {
                 <option value="X">Support Staff</option>
                 <option value="Y">Security</option>
               </select>
-              {errors.role && (
-                <span className="text-red-500 text-xs">{errors.role}</span>
+              {errors.teacher_category && (
+                <span className="text-red-500 text-xs ml-2">
+                  {errors.teacher_category}
+                </span>
               )}
             </div>
 
