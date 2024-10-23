@@ -20,9 +20,7 @@ function AllotMarksHeading() {
   const [currentSection, setCurrentSection] = useState(null);
   const [currestSubjectNameForDelete, setCurrestSubjectNameForDelete] =
     useState("");
-  const [newSubject, setnewSubjectnName] = useState("");
-  const [newclassnames, setnewclassnames] = useState("");
-  const [teacherNameIs, setTeacherNameIs] = useState("");
+
   // This is hold the allot subjet api response
   const [classIdForManage, setclassIdForManage] = useState("");
   //   For the dropdown of Teachers name api
@@ -30,12 +28,20 @@ function AllotMarksHeading() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
-  const dropdownRef = useRef(null);
+
   //   for allot subject checkboxes
   const [error, setError] = useState(null);
   const [nameError, setNameError] = useState(null);
   // for react-search of manage tab teacher Edit and select class
   const [selectedClass, setSelectedClass] = useState(null);
+  // for Edit model
+  const [newClassName, setNewClassName] = useState("");
+  const [newSubjectName, setNewSubjectName] = useState("");
+  const [newExamName, setNewExamName] = useState("");
+  const [newMarksHeading, setNewMarksHeading] = useState("");
+  const [highestMarks, setHighestMarks] = useState("");
+  const [marksError, setMarksError] = useState(""); // Error for validation
+
   const pageSize = 10;
   useEffect(() => {
     fetchClassNames();
@@ -114,7 +120,9 @@ function AllotMarksHeading() {
       );
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/get_subject_Alloted_for_report_card/${classIdForManage}`,
+        `${API_URL}/api/get_AllotMarkheadingslist`,
+
+        // `${API_URL}/api/get_AllotMarkheadingslist/${classIdForManage}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           // params: { section_id: classSection },
@@ -123,18 +131,18 @@ function AllotMarksHeading() {
       );
       console.log(
         "the response of the AllotMarksHeadingTab is *******",
-        response.data?.subjectAllotments
+        response.data
       );
-      if (response?.data?.subjectAllotments.length > 0) {
-        setSubjects(response.data?.subjectAllotments);
-        setPageCount(Math.ceil(response?.data?.subjectAllotments.length / 10)); // Example pagination logic
+      if (response?.data.length > 0) {
+        setSubjects(response.data);
+        setPageCount(Math.ceil(response?.data.length / 10)); // Example pagination logic
       } else {
         setSubjects([]);
-        toast.error("No subjects found for the selected class.");
+        toast.error("No Allot Markheadings are found for the selected class.");
       }
     } catch (error) {
-      console.error("Error fetching subjects:", error);
-      setError("Error fetching subjects");
+      console.error("Error fetching Allot Markheadings:", error);
+      setError("Error fetching Allot Markheadings");
     }
   };
 
@@ -147,25 +155,45 @@ function AllotMarksHeading() {
 
   const handleEdit = (section) => {
     setCurrentSection(section);
-    console.log("curentedit", section);
-    setnewclassnames(section?.get_clases?.name);
-    setnewSubjectnName(section?.get_subjects_for_report_card?.name);
-    setTeacherNameIs(section?.subject_type || ""); // Ensure subject_type is set
+    console.log("currentedit", section);
+
+    // Set values for the edit modal
+    setNewClassName(section?.get_class?.name);
+    setNewSubjectName(section?.get_subject?.name);
+    setNewExamName(section?.get_exam?.name); // Assuming exam details are available
+    setNewMarksHeading(section?.get_marksheading?.name || ""); // Set marks heading if available
+
+    setHighestMarks(section?.highest_marks || ""); // Set highest marks or empty
+    setMarksError(""); // Reset the error message when opening the modal
 
     setShowEditModal(true);
+  };
+  // Handle the highest marks change with validation
+  const handleMarksChange = (e) => {
+    const value = e.target.value;
+
+    // Check if the input is empty
+    if (value === "") {
+      setMarksError("Highest Marks is required."); // Set error for empty field
+      setHighestMarks(""); // Clear the value in the state
+    }
+    // Allow only numbers
+    else if (/^\d*$/.test(value)) {
+      setHighestMarks(value);
+      setMarksError(""); // Clear error if input is valid
+    }
+    // Handle invalid input (non-numeric)
   };
 
   const handleDelete = (sectionId) => {
     const classToDelete = subjects.find(
-      (cls) => cls.sub_reportcard_id === sectionId
+      (cls) => cls.allot_markheadings_id === sectionId
     );
-
+    console.log("classsToDelete", classToDelete);
     // Set the current section and subject name for deletion
     if (classToDelete) {
       setCurrentSection(classToDelete); // Set the current section directly
-      setCurrestSubjectNameForDelete(
-        classToDelete.get_subjects_for_report_card?.name
-      ); // Set subject name for display
+      setCurrestSubjectNameForDelete(classToDelete.get_marksheading?.name); // Set subject name for display
       setShowDeleteModal(true); // Show the delete modal
     } else {
       console.error("Section not found for deletion");
@@ -176,20 +204,48 @@ function AllotMarksHeading() {
     try {
       const token = localStorage.getItem("authToken");
 
-      if (!token || !currentSection || !currentSection.sub_reportcard_id) {
-        throw new Error("Subject ID is missing");
+      if (!token || !currentSection || !currentSection.allot_markheadings_id) {
+        throw new Error("Allot Markheadings ID is missing");
       }
 
       // Ensure that the subject type is not empty
-      if (!teacherNameIs) {
-        toast.error("Please select a subject type.");
+      // Clear previous errors
+      setMarksError("");
+      console.log(
+        "class_name:",
+        newClassName,
+        "subject_name:",
+        newSubjectName,
+        "exam_name:",
+        newExamName,
+        "marks_heading:",
+        newMarksHeading,
+        "highest_marks:",
+        highestMarks
+      );
+      // Validate Highest Marks
+      // if (highestMarks.trim() === "") {
+      //   setMarksError("Highest Marks is required.");
+      //   return;
+      // }
+      if (!highestMarks) {
+        setMarksError("Highest Marks is required.");
         return;
       }
-
+      // If there's still an error message, stop the submission
+      if (marksError) {
+        return; // Halt submission if error exists
+      }
       // Make the PUT request to update the subject type
       await axios.put(
-        `${API_URL}/api/get_sub_report_allotted/${currentSection.sub_reportcard_id}`,
-        { subject_type: teacherNameIs }, // Send the selected subject type
+        `${API_URL}/api/update_AllotMarkheadings/${currentSection.allot_markheadings_id}`,
+        {
+          class_name: newClassName,
+          subject_name: newSubjectName,
+          exam_name: newExamName,
+          marks_heading: newMarksHeading,
+          highest_marks: highestMarks,
+        }, // Send the selected subject type
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -199,34 +255,35 @@ function AllotMarksHeading() {
       );
 
       handleSearch(); // Refresh the list or data
+
+      toast.success("Allot Markheadings record updated successfully!");
       handleCloseModal(); // Close the modal
-      toast.success("Subject record updated successfully!");
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error updating subject record: ${error.response.data.error}`
+          `Error updating Allot Markheadings record: ${error.response.data.error}`
         );
       } else {
-        toast.error(`Error updating subject record: ${error.message}`);
+        toast.error(
+          `Error updating Allot Markheadings record: ${error.message}`
+        );
       }
-      console.error("Error editing subject record:", error);
-    } finally {
-      setShowEditModal(false);
+      console.error("Error editing Allot Markheadings record:", error);
     }
   };
 
   const handleSubmitDelete = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const subReportCardId = currentSection?.sub_reportcard_id; // Get the correct ID
+      const subReportCardId = currentSection?.allot_markheadings_id; // Get the correct ID
 
       if (!token || !subReportCardId) {
-        throw new Error("Subject Allotment ID is missing");
+        throw new Error("Allot Markheadings  ID is missing");
       }
 
       // Send the delete request to the backend
       await axios.delete(
-        `${API_URL}/api/get_sub_report_allotted/${subReportCardId}`,
+        `${API_URL}/api/delete_AllotMarkheadings/${subReportCardId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -237,14 +294,16 @@ function AllotMarksHeading() {
 
       handleSearch(); // Refresh the data (this seems like the method to refetch data)
       setShowDeleteModal(false); // Close the modal
-      toast.success("Subject deleted successfully!");
+      toast.success("Allot Markheadings deleted successfully!");
     } catch (error) {
       if (error.response && error.response.data) {
-        toast.error(`Error deleting subject: ${error.response.data.message}`);
+        toast.error(
+          `Error deleting Allot Markheadings: ${error.response.data.message}`
+        );
       } else {
-        toast.error(`Error deleting subject: ${error.message}`);
+        toast.error(`Error deleting Allot Markheadings: ${error.message}`);
       }
-      console.error("Error deleting subject:", error);
+      console.error("Error deleting Allot Markheadings:", error);
     }
   };
 
@@ -255,14 +314,13 @@ function AllotMarksHeading() {
 
   const filteredSections = subjects.filter((section) => {
     // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
-    const teacherName = section?.subject_type?.toLowerCase() || "";
-    const subjectName =
-      section?.get_subjects_for_report_card?.name?.toLowerCase() || "";
+    const subjectNameIs = section?.get_subject?.name?.toLowerCase() || "";
+    const markHeadingIs = section?.get_marksheading?.name?.toLowerCase() || "";
 
     // Check if the search term is present in either the teacher's name or the subject's name
     return (
-      teacherName.includes(searchTerm.toLowerCase()) ||
-      subjectName.includes(searchTerm.toLowerCase())
+      subjectNameIs.includes(searchTerm.toLowerCase()) ||
+      markHeadingIs.includes(searchTerm.toLowerCase())
     );
   });
   const displayedSections = filteredSections.slice(
@@ -402,27 +460,27 @@ function AllotMarksHeading() {
                           <tbody>
                             {displayedSections.map((subject, index) => (
                               <tr
-                                key={subject.sub_rc_master_id}
+                                key={subject.allot_markheadings_id}
                                 className="text-gray-700 text-sm font-light"
                               >
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {index + 1}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_clases?.name}
+                                  {subject?.get_class?.name}
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_subjects_for_report_card?.name}
+                                  {subject?.get_subject?.name}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.exam}
+                                  {subject?.get_exam?.name}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.marks_height}
+                                  {subject?.get_marksheading?.name}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.height_marks}
+                                  {subject?.highest_marks}
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
@@ -436,7 +494,9 @@ function AllotMarksHeading() {
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
                                     onClick={() =>
-                                      handleDelete(subject?.sub_reportcard_id)
+                                      handleDelete(
+                                        subject?.allot_markheadings_id
+                                      )
                                     }
                                     className="text-red-600 hover:text-red-800 hover:bg-transparent "
                                   >
@@ -499,71 +559,67 @@ function AllotMarksHeading() {
                 </div>
                 <div
                   className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                  style={{
-                    backgroundColor: "#C03078",
-                  }}
+                  style={{ backgroundColor: "#C03078" }}
                 ></div>
                 <div className="modal-body">
-                  {/* Modal content for editing */}
                   <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
                     <label htmlFor="newClassName" className="w-1/2 mt-2">
                       Class:
                     </label>
-                    <div className="font-bold form-control shadow-md mb-2">
-                      {newclassnames}
+                    <div className="w-full bg-gray-200 p-2 rounded-md shadow-md ">
+                      {newClassName}
                     </div>
                   </div>
 
-                  <div className="relative flex justify-start mx-4 gap-x-7">
+                  <div className="relative flex justify-start mx-4 gap-x-7 mb-2">
                     <label htmlFor="newSubjectName" className="w-1/2 mt-2">
                       Subject:
                     </label>
-                    <span className="font-semibold form-control shadow-md mb-2">
-                      {newSubject}
-                    </span>
-                  </div>
-                  <div className="relative flex justify-start mx-4 gap-x-7">
-                    <label htmlFor="newSubjectName" className="w-1/2 mt-2">
-                      Exam:
-                    </label>
-                    <span className="font-semibold form-control shadow-md mb-2">
-                      {newSubject}
-                    </span>
-                  </div>
-                  <div className="relative flex justify-start mx-4 gap-x-7">
-                    <label htmlFor="newSubjectName" className="w-1/2 mt-2">
-                      Marks Heading assigned
-                    </label>
-                    <span className="font-semibold form-control shadow-md mb-2">
-                      {newSubject}
-                    </span>
-                  </div>
-
-                  <div className="modal-body">
-                    <div
-                      ref={dropdownRef}
-                      className="relative mb-3 flex justify-center mx-2 gap-4"
-                    >
-                      <label
-                        htmlFor="subjectType"
-                        className="w-1/2 mt-2 text-nowrap"
-                      >
-                        Subject Type <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        className=" rounded-md border-1  text-black w-full text-[1em] shadow-md p-2 "
-                        value={teacherNameIs} // Prefilled value from state
-                        onChange={(e) => setTeacherNameIs(e.target.value)} // Update state on change
-                      >
-                        <option value="" disabled>
-                          Select
-                        </option>
-                        <option value="Scholastic">Scholastic</option>
-                        <option value="Co-Scholastic">Co-Scholastic</option>
-                      </select>
+                    <div className="w-full bg-gray-200 p-2 rounded-md shadow-md mb-2">
+                      {newSubjectName}
                     </div>
                   </div>
+
+                  <div className="relative flex justify-start mx-4 gap-x-7 mb-2">
+                    <label htmlFor="newExamName" className="w-1/2 mt-2">
+                      Exam:
+                    </label>
+                    <div className="w-full bg-gray-200 p-2 rounded-md shadow-md mb-2">
+                      {newExamName}
+                    </div>
+                  </div>
+
+                  <div className="relative flex justify-start mx-4 gap-x-7 mb-2">
+                    <label htmlFor="newMarksHeading" className="w-1/2 mt-2">
+                      Marks Heading Assigned:
+                    </label>
+                    <div className="w-full bg-gray-200 p-2 rounded-md shadow-md mb-2">
+                      {newMarksHeading}
+                    </div>
+                  </div>
+
+                  {/* Highest Marks Input */}
+                  <div className="relative flex justify-start mx-4 gap-x-7">
+                    <label htmlFor="highestMarks" className="w-1/2 mt-2">
+                      Highest Marks <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={3}
+                      className="rounded-md border-1 text-black w-full text-[1em] shadow-md p-2"
+                      value={highestMarks}
+                      onChange={handleMarksChange}
+                      placeholder="Enter highest marks"
+                    />
+                  </div>
+                  <div className="w-[60%] relative h-4 left-[40%]">
+                    {marksError && (
+                      <span className="text-red-500 text-xs">{marksError}</span>
+                    )}
+                  </div>
+                  {/* Display error message if any */}
                 </div>
+
                 <div className="flex justify-end p-3">
                   <button
                     type="button"
@@ -605,7 +661,7 @@ function AllotMarksHeading() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to delete this subject{" "}
+                  Are you sure you want to delete this alloted Marks heading{" "}
                   {` ${currestSubjectNameForDelete} `} ?
                 </div>
                 <div className=" flex justify-end p-3">

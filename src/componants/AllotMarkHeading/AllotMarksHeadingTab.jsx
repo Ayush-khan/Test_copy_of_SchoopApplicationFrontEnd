@@ -731,13 +731,101 @@ const AllotMarksHeadingTab = () => {
     setMarksHeadingError("");
   };
 
-  const handleHighestMarksChange = (index, newMarks) => {
+  // const handleHighestMarksChange = (index, newMarks) => {
+
+  //   const updatedMarksHeadings = [...marksHeadingsData];
+  //   updatedMarksHeadings[index].highest_marks = newMarks;
+  //   setMarksHeadingsData(updatedMarksHeadings);
+
+  //   const updatedMarksErrors = [...highestMarksError];
+  //   updatedMarksErrors[index] = ""; // Clear any existing error when input is provided
+  //   setHighestMarksError(updatedMarksErrors);
+  // };
+
+  // const handleSave = async () => {
+  //   let hasError = false;
+
+  //   // Validate form fields
+  //   if (!selectedClass) {
+  //     setClassError("Please select a class.");
+  //     hasError = true;
+  //   }
+  //   if (!selectedExam) {
+  //     setExamError("Please select an exam.");
+  //     hasError = true;
+  //   }
+  //   if (!selectedSubject) {
+  //     setSubjectError("Please select a subject.");
+  //     hasError = true;
+  //   }
+
+  //   // Validate marks headings
+  //   const selectedHeadings = marksHeadingsData.filter(
+  //     (heading) => heading.selected
+  //   );
+  //   if (selectedHeadings.length === 0) {
+  //     setMarksHeadingError("Please select at least one marks heading.");
+  //     hasError = true;
+  //   }
+
+  //   // Validate highest marks for selected headings
+  //   const marksErrors = [];
+  //   selectedHeadings.forEach((heading, index) => {
+  //     if (!heading.highest_marks) {
+  //       marksErrors[index] = "Highest marks is required.";
+  //       hasError = true;
+  //     }
+  //   });
+  //   setHighestMarksError(marksErrors);
+
+  //   if (hasError) return;
+
+  //   // Prepare data to send to API
+  //   const marksData = selectedHeadings.map((heading) => ({
+  //     marks_heading_id: heading.marks_headings_id,
+  //     highest_marks: heading.highest_marks,
+  //   }));
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     await axios.post(
+  //       `${API_URL}/api/saveMarksHeadings`,
+  //       {
+  //         class_id: selectedClass.value,
+  //         exam_id: selectedExam.value,
+  //         subject_id: selectedSubject.value,
+  //         marks: marksData,
+  //       },
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     toast.success("Marks headings saved successfully");
+  //     // Reset the form
+  //     setSelectedClass(null);
+  //     setSelectedExam(null);
+  //     setSelectedSubject(null);
+  //     setMarksHeadingsData(
+  //       marksHeadingsData.map((heading) => ({
+  //         ...heading,
+  //         selected: false,
+  //         highest_marks: "",
+  //       }))
+  //     );
+  //   } catch (error) {
+  //     toast.error("Error saving marks headings");
+  //   }
+  // };
+
+  const handleHighestMarksChange = (index, newMarks, marks_headings_id) => {
     const updatedMarksHeadings = [...marksHeadingsData];
     updatedMarksHeadings[index].highest_marks = newMarks;
     setMarksHeadingsData(updatedMarksHeadings);
 
-    const updatedMarksErrors = [...highestMarksError];
-    updatedMarksErrors[index] = ""; // Clear any existing error when input is provided
+    // Clear error for the specific marks_headings_id when input is provided
+    const updatedMarksErrors = { ...highestMarksError };
+    updatedMarksErrors[marks_headings_id] = ""; // Clear error for this specific id
     setHighestMarksError(updatedMarksErrors);
   };
 
@@ -768,11 +856,13 @@ const AllotMarksHeadingTab = () => {
     }
 
     // Validate highest marks for selected headings
-    const marksErrors = [];
-    selectedHeadings.forEach((heading, index) => {
-      if (!heading.highest_marks) {
-        marksErrors[index] = "Highest marks is required.";
+    const marksErrors = { ...highestMarksError }; // Store errors by marks_headings_id
+    selectedHeadings.forEach((heading) => {
+      if (!heading.highest_marks || heading.highest_marks.trim() === "") {
+        marksErrors[heading.marks_headings_id] = "Highest marks is required.";
         hasError = true;
+      } else {
+        marksErrors[heading.marks_headings_id] = ""; // Clear error if valid
       }
     });
     setHighestMarksError(marksErrors);
@@ -788,7 +878,7 @@ const AllotMarksHeadingTab = () => {
     try {
       const token = localStorage.getItem("authToken");
       await axios.post(
-        `${API_URL}/api/saveMarksHeadings`,
+        `${API_URL}/api/save_AllotMarkheadings`,
         {
           class_id: selectedClass.value,
           exam_id: selectedExam.value,
@@ -906,7 +996,7 @@ const AllotMarksHeadingTab = () => {
             </div>
 
             {/* Marks Headings */}
-            <div className="mt-4 shadow-md  w-full md:w-[70%] ml-0 md:ml-4">
+            <div className="mt-4 shadow-md  w-full md:w-[60%] ml-0 md:ml-4">
               <div className="w-full overflow-x-auto">
                 {/* Sticky Header */}
                 <div className="w-full sticky top-0 bg-white  ">
@@ -926,7 +1016,7 @@ const AllotMarksHeadingTab = () => {
                     {marksHeadingsData.map((heading, index) => (
                       <div
                         key={heading.marks_headings_id}
-                        className="grid grid-cols-2 w-full  text-center py-2"
+                        className="grid grid-cols-2 w-full text-center py-2"
                       >
                         <div className="flex items-center justify-start px-2">
                           {/* Checkbox with consistent alignment */}
@@ -954,19 +1044,25 @@ const AllotMarksHeadingTab = () => {
                               const value = e.target.value;
                               // Allow only positive integers
                               if (/^\d*$/.test(value)) {
-                                handleHighestMarksChange(index, value);
+                                handleHighestMarksChange(
+                                  index,
+                                  value,
+                                  heading.marks_headings_id
+                                );
                               }
                             }}
                             disabled={!heading.selected}
                             placeholder="Highest marks"
                             className={`border p-1 bg-gray-100 shadow-md rounded w-full md:w-1/2 text-start ${
-                              highestMarksError[index] ? "border-red-500" : ""
+                              highestMarksError[heading.marks_headings_id]
+                                ? "border-red-500"
+                                : ""
                             }`}
                           />
-                          {/* Individual error message for each input */}
-                          {highestMarksError[index] && (
-                            <p className="h-1 text-red-500 text-xs ">
-                              {highestMarksError[index]}
+                          {/* Individual error message for each input based on marks_headings_id */}
+                          {highestMarksError[heading.marks_headings_id] && (
+                            <p className="h-1 text-red-500 text-xs">
+                              {highestMarksError[heading.marks_headings_id]}
                             </p>
                           )}
                         </div>
@@ -988,7 +1084,7 @@ const AllotMarksHeadingTab = () => {
             </div>
 
             {/* Save Button  */}
-            <div className="flex justify-center mt-6">
+            <div className=" flex float-end mt-6">
               <button
                 onClick={handleSave}
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
