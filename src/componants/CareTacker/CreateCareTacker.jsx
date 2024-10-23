@@ -10,7 +10,7 @@ function CreateCareTacker() {
     name: "",
     birthday: "",
     date_of_joining: "",
-    designation: "",
+    designation: "Caretaker",
     academic_qual: [],
     professional_qual: "",
     trained: "",
@@ -23,7 +23,7 @@ function CreateCareTacker() {
     email: "",
     aadhar_card_no: "",
     teacher_category: "",
-    employeeId: "",
+    employee_id: "",
     teacher_image_name: null,
     special_sub: "",
   });
@@ -86,7 +86,8 @@ function CreateCareTacker() {
     if (!formData.sex) newErrors.sex = "Gender is required";
 
     // Validate Employee Id
-    if (!formData.employeeId) newErrors.employeeId = "Employee Id is required";
+    if (!formData.employee_id)
+      newErrors.employee_id = "Employee Id is required";
     // Validate address
     if (!formData.address) newErrors.address = "Address is required";
 
@@ -168,8 +169,8 @@ function CreateCareTacker() {
     }
 
     // Employee ID validation
-    if (name === "employeeId") {
-      if (!newValue) fieldErrors.employeeId = "Employee ID is required";
+    if (name === "employee_id") {
+      if (!newValue) fieldErrors.employee_id = "Employee ID is required";
     }
 
     // Address validation
@@ -226,7 +227,7 @@ function CreateCareTacker() {
         throw new Error("No authentication token is found");
       }
       const response = await axios.post(
-        `${API_URL}/api/store_staff`,
+        `${API_URL}/api/save_caretaker`,
         formattedFormData,
         {
           headers: {
@@ -244,12 +245,24 @@ function CreateCareTacker() {
       }
     } catch (error) {
       console.error("Error:", error.message);
-      toast.error("An error occurred while creating the Care tacker.");
 
-      if (error.response && error.response.data && error.response.data.errors) {
-        setBackendErrors(error.response.data.errors || {});
+      if (error.response && error.response.data) {
+        // If backend validation errors are present
+        const backendErrors = error.response.data;
+
+        // Format backend errors to match the state structure
+        const formattedBackendErrors = {};
+        Object.keys(backendErrors).forEach((key) => {
+          formattedBackendErrors[key] = backendErrors[key][0]; // Use the first error message in the array
+        });
+
+        // Merge backend errors with current state errors
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          ...formattedBackendErrors,
+        }));
       } else {
-        toast.error(error.message);
+        toast.error("An error occurred while creating the Care tacker.");
       }
     }
   };
@@ -414,7 +427,7 @@ function CreateCareTacker() {
               />{" "}
               {backendErrors.aadhar_card_no && (
                 <span className="text-red-500 text-xs ml-2">
-                  {backendErrors.aadhar_card_no[0]}
+                  {backendErrors.aadhar_card_no}
                 </span>
               )}
               {errors.aadhar_card_no && (
@@ -549,7 +562,7 @@ function CreateCareTacker() {
                 />
               </div>
               {backendErrors.phone && (
-                <span className="error ml-2">{backendErrors.phone[0]}</span>
+                <span className="error ml-2">{backendErrors.phone}</span>
               )}
               {errors.phone && (
                 <span className="text-red-500 text-xs ml-2">
@@ -560,7 +573,7 @@ function CreateCareTacker() {
 
             <div>
               <label
-                htmlFor="employeeId"
+                htmlFor="employee_id"
                 className="block font-bold  text-xs mb-2"
               >
                 Employee ID <span className="text-red-500">*</span>
@@ -568,15 +581,20 @@ function CreateCareTacker() {
               <input
                 type="tel"
                 maxLength={5}
-                id="employeeId"
-                name="employeeId"
-                value={formData.employeeId}
+                id="employee_id"
+                name="employee_id"
+                value={formData.employee_id}
                 onChange={handleChange}
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
-              {errors.employeeId && (
+              {backendErrors.employee_id && (
                 <span className="text-red-500 text-xs ml-2">
-                  {errors.employeeId}
+                  {backendErrors.employee_id}
+                </span>
+              )}
+              {errors.employee_id && (
+                <span className="text-red-500 text-xs ml-2">
+                  {errors.employee_id}
                 </span>
               )}
             </div>

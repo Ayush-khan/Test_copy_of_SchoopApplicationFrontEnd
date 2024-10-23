@@ -36,7 +36,7 @@ function CareTacker() {
         throw new Error("No authentication token found");
       }
 
-      const response = await axios.get(`${API_URL}/api/staff_list`, {
+      const response = await axios.get(`${API_URL}/api/get_caretaker`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -112,11 +112,11 @@ function CareTacker() {
       const token = localStorage.getItem("authToken");
 
       if (!token || !currentStaff) {
-        throw new Error("Teacher ID is missing");
+        throw new Error("Caretacker ID is missing");
       }
 
       const response = await axios.delete(
-        `${API_URL}/api/teachers/${currentStaff}`,
+        `${API_URL}/api/delete_caretaker/${currentStaff}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -125,16 +125,16 @@ function CareTacker() {
         }
       );
 
-      if (response.status === 200) {
-        fetchStaffs(); // Refresh staff list after successful deletion
-        handleCloseModal();
-        toast.success("Staff deleted successfully!");
-      } else {
-        toast.error("Failed to delete staff");
-      }
+      //   if (response.status === 200) {
+      fetchStaffs(); // Refresh staff list after successful deletion
+      handleCloseModal();
+      toast.success("CareTacker deleted successfully!");
+      //   } else {
+      //     toast.error("Failed to delete CareTacker");
+      //   }
     } catch (error) {
-      console.error("Error deleting staff:", error);
-      toast.error("Failed to delete staff");
+      console.error("Error deleting CareTacker:", error);
+      toast.error("Failed to delete CareTacker");
     }
   };
 

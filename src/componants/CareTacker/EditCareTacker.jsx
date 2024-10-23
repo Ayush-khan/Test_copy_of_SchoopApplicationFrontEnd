@@ -23,7 +23,7 @@ function EditCareTacker() {
     email: "",
     aadhar_card_no: "",
     teacher_category: "",
-    employeeId: "",
+    employee_id: "",
     // teacher_image_name: null,
     // special_sub: "",
   });
@@ -118,7 +118,8 @@ function EditCareTacker() {
     if (!formData.sex) newErrors.sex = "Gender is required";
 
     // Validate Employee Id
-    if (!formData.employeeId) newErrors.employeeId = "Employee Id is required";
+    if (!formData.employee_id)
+      newErrors.employee_id = "Employee Id is required";
     // Validate address
     if (!formData.address) newErrors.address = "Address is required";
 
@@ -201,8 +202,8 @@ function EditCareTacker() {
     }
 
     // Employee ID validation
-    if (name === "employeeId") {
-      if (!newValue) fieldErrors.employeeId = "Employee ID is required";
+    if (name === "employee_id") {
+      if (!newValue) fieldErrors.employee_id = "Employee ID is required";
     }
 
     // Address validation
@@ -259,7 +260,9 @@ function EditCareTacker() {
         throw new Error("No authentication token is found");
       }
       const response = await axios.post(
-        `${API_URL}/api/store_staff`,
+        `${API_URL}/api/update_caretaker/${staff.teacher_id}`,
+
+        // `${API_URL}/api/update_caretaker`,
         formattedFormData,
         {
           headers: {
@@ -270,17 +273,17 @@ function EditCareTacker() {
       );
 
       if (response.status === 201) {
-        toast.success("Care tacker created successfully!");
+        toast.success("Care tacker updated successfully!");
         setTimeout(() => {
           navigate("/careTacker");
         }, 3000);
       }
     } catch (error) {
       console.error("Error:", error.message);
-      toast.error("An error occurred while creating the Care tacker.");
+      toast.error("An error occurred while updating the Care tacker.");
 
-      if (error.response && error.response.data && error.response.data.errors) {
-        setBackendErrors(error.response.data.errors || {});
+      if (error.response && error.response.data) {
+        setBackendErrors(error.response.data || {});
       } else {
         toast.error(error.message);
       }
@@ -602,14 +605,14 @@ function EditCareTacker() {
                 type="tel"
                 maxLength={5}
                 id="employeeId"
-                name="employeeId"
-                value={formData.employeeId}
+                name="employee_id"
+                value={formData.employee_id}
                 onChange={handleChange}
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
-              {errors.employeeId && (
+              {errors.employee_id && (
                 <span className="text-red-500 text-xs ml-2">
-                  {errors.employeeId}
+                  {errors.employee_id}
                 </span>
               )}
             </div>
