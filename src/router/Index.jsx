@@ -135,6 +135,9 @@ import Grade from "../componants/Grade/Grade.jsx";
 import MarksHeading from "../componants/MarksHeading/MarksHeading.jsx";
 import AllotMarksHeading from "../componants/AllotMarkHeading/AllotMaekHeading.jsx";
 import CareTacker from "../componants/CareTacker/CareTacker.jsx";
+import CreateCareTacker from "../componants/CareTacker/CreateCareTacker.jsx";
+import EditCareTacker from "../componants/CareTacker/EditCareTacker.jsx";
+import ViewCareTacker from "../componants/CareTacker/ViewCareTacker.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -186,6 +189,23 @@ function Index() {
         <Route
           path="/staff/view/:id"
           element={<PrivateRoute element={ViewStaff} />}
+        />
+        {/* CareTacker */}
+        <Route
+          path="/careTacker"
+          element={<PrivateRoute element={CareTacker} />}
+        />
+        <Route
+          path="/CreateCareTacker"
+          element={<PrivateRoute element={CreateCareTacker} />}
+        />
+        <Route
+          path="/CareTacker/edit/:id"
+          element={<PrivateRoute element={EditCareTacker} />}
+        />
+        <Route
+          path="/CareTacker/view/:id"
+          element={<PrivateRoute element={ViewCareTacker} />}
         />
         <Route
           path="/eventcard"
@@ -253,11 +273,6 @@ function Index() {
         <Route
           path="/newStudetEdit/edit/:id"
           element={<PrivateRoute element={EditOfNewStudentList} />}
-        />
-
-        <Route
-          path="/careTacker"
-          element={<PrivateRoute element={CareTacker} />}
         />
 
         {/* AllotClassTeacher */}

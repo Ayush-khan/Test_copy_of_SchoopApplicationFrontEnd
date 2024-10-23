@@ -621,6 +621,7 @@ import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
 
 const AllotMarksHeadingTab = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -640,7 +641,7 @@ const AllotMarksHeadingTab = () => {
   const [subjectError, setSubjectError] = useState("");
   const [marksHeadingError, setMarksHeadingError] = useState("");
   const [highestMarksError, setHighestMarksError] = useState([]);
-
+  const navigate = useNavigate();
   // Fetch class list and exams on component mount
   useEffect(() => {
     fetchClassNames();
@@ -883,7 +884,7 @@ const AllotMarksHeadingTab = () => {
           class_id: selectedClass.value,
           exam_id: selectedExam.value,
           subject_id: selectedSubject.value,
-          marks: marksData,
+          highest_marks_allocation: marksData,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -902,6 +903,7 @@ const AllotMarksHeadingTab = () => {
           highest_marks: "",
         }))
       );
+      navigate("/allotMarksHeading"); // Replace '/your-target-route' with the desired route
     } catch (error) {
       toast.error("Error saving marks headings");
     }

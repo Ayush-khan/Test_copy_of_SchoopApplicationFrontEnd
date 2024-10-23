@@ -120,9 +120,9 @@ function AllotMarksHeading() {
       );
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/get_AllotMarkheadingslist`,
+        // `${API_URL}/api/get_AllotMarkheadingslist`,
 
-        // `${API_URL}/api/get_AllotMarkheadingslist/${classIdForManage}`,
+        `${API_URL}/api/get_AllotMarkheadingslist/${classIdForManage}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           // params: { section_id: classSection },
