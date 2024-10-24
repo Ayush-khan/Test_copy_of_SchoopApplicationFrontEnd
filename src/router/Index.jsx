@@ -138,6 +138,7 @@ import CareTacker from "../componants/CareTacker/CareTacker.jsx";
 import CreateCareTacker from "../componants/CareTacker/CreateCareTacker.jsx";
 import EditCareTacker from "../componants/CareTacker/EditCareTacker.jsx";
 import ViewCareTacker from "../componants/CareTacker/ViewCareTacker.jsx";
+import BonafiedCertificates from "../componants/Certificates/BonafiedCertificates.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -173,6 +174,12 @@ function Index() {
           path="/student-demo-table"
           element={<PrivateRoute element={DemoTable} />}
         />
+        {/* All Certificates  */}
+        <Route
+          path="/BonafiedCertificates"
+          element={<PrivateRoute element={BonafiedCertificates} />}
+        />
+
         {/* Staff endPoints */}
         <Route
           path="/StaffList"
