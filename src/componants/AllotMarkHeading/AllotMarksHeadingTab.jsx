@@ -579,40 +579,69 @@ const AllotMarksHeadingTab = () => {
   const fetchHighestMarks = async (classId, examId, subjectId) => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_highest_marks`, {
-        params: {
-          class_id: classId,
-          exam_id: examId,
-          subject_id: subjectId,
-        },
-        headers: { Authorization: `Bearer ${token}` },
-      });
 
-      // Assuming response structure is:
-      // {
-      //   "highest_marks_allocation": [
-      //     { "marks_heading_id": 36, "highest_marks": "100" },
-      //     { "marks_heading_id": 24, "highest_marks": "50" }
-      //   ]
-      // }
-      const highestMarksAllocation = response.data.highest_marks_allocation;
+      // Directly include classId, examId, and subjectId in the URL
+      const response = await axios.get(
+        `${API_URL}/api/get_markheadingsForClassSubExam/${classId}/${examId}/${subjectId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const highestMarksAllocation = response.data;
+      console.log("highestMarksAllocation", highestMarksAllocation);
 
       // Map the fetched highest marks to existing marksHeadingsData
       const updatedMarksHeadingsData = marksHeadingsData.map((heading) => {
         const matchedHeading = highestMarksAllocation.find(
-          (hm) => hm.marks_heading_id === heading.marks_headings_id
+          (hm) => hm.marks_headings_id === heading.marks_headings_id
         );
         return {
           ...heading,
           highest_marks: matchedHeading ? matchedHeading.highest_marks : "",
+          selected: !!matchedHeading, // Pre-check the checkbox if it exists in the response
         };
       });
 
       setMarksHeadingsData(updatedMarksHeadingsData);
+      if (marksHeadingsData) {
+        setMarksHeadingError("");
+      }
     } catch (error) {
       toast.error("Error fetching highest marks");
     }
   };
+  // const fetchHighestMarks = async (classId, examId, subjectId) => {
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     // Directly include classId, examId, and subjectId in the URL
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_markheadingsForClassSubExam/${classId}/${examId}/${subjectId}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     const highestMarksAllocation = response.data;
+  //     console.log("the preselected data", response);
+
+  //     // Map the fetched highest marks to existing marksHeadingsData
+  //     const updatedMarksHeadingsData = marksHeadingsData.map((heading) => {
+  //       const matchedHeading = highestMarksAllocation.find(
+  //         (hm) => hm.marks_heading_id === heading.marks_headings_id
+  //       );
+  //       return {
+  //         ...heading,
+  //         highest_marks: matchedHeading ? matchedHeading.highest_marks : "",
+  //       };
+  //     });
+
+  //     setMarksHeadingsData(updatedMarksHeadingsData);
+  //   } catch (error) {
+  //     toast.error("Error fetching highest marks");
+  //   }
+  // };
 
   const handleClassChange = (selectedOption) => {
     setSelectedClass(selectedOption);
@@ -624,6 +653,13 @@ const AllotMarksHeadingTab = () => {
   const handleExamChange = (selectedOption) => {
     setSelectedExam(selectedOption);
     setExamError("");
+    if (selectedClass && selectedSubject && selectedOption) {
+      fetchHighestMarks(
+        selectedClass.value,
+        selectedSubject.value,
+        selectedOption.value
+      );
+    }
   };
 
   // const handleSubjectChange = (selectedOption) => {
@@ -647,9 +683,22 @@ const AllotMarksHeadingTab = () => {
     const updatedMarksHeadings = [...marksHeadingsData];
     updatedMarksHeadings[index].selected =
       !updatedMarksHeadings[index].selected;
+
+    // Optionally clear the highest_marks when unchecking
+    if (!updatedMarksHeadings[index].selected) {
+      updatedMarksHeadings[index].highest_marks = ""; // Clear marks when unchecked
+    }
+
     setMarksHeadingsData(updatedMarksHeadings);
     setMarksHeadingError("");
   };
+  // const handleMarksHeadingChange = (index) => {
+  //   const updatedMarksHeadings = [...marksHeadingsData];
+  //   updatedMarksHeadings[index].selected =
+  //     !updatedMarksHeadings[index].selected;
+  //   setMarksHeadingsData(updatedMarksHeadings);
+  //   setMarksHeadingError("");
+  // };
 
   // const handleHighestMarksChange = (index, newMarks) => {
 
@@ -778,7 +827,7 @@ const AllotMarksHeadingTab = () => {
     // Validate highest marks for selected headings
     const marksErrors = { ...highestMarksError }; // Store errors by marks_headings_id
     selectedHeadings.forEach((heading) => {
-      if (!heading.highest_marks || heading.highest_marks.trim() === "") {
+      if (!heading.highest_marks) {
         marksErrors[heading.marks_headings_id] = "Highest marks is required.";
         hasError = true;
       } else {
