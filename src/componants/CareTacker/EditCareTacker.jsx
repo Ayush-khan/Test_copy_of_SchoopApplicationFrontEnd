@@ -10,11 +10,11 @@ function EditCareTacker() {
     name: "",
     birthday: "",
     date_of_joining: "",
-    designation: "",
+    designation: "Caretaker",
     academic_qual: "",
-    // professional_qual: "",
-    // trained: "",
-    // experience: "",
+    professional_qual: "",
+    trained: "",
+    experience: "",
     sex: "",
     blood_group: "",
     religion: "",
@@ -22,10 +22,10 @@ function EditCareTacker() {
     phone: "",
     email: "",
     aadhar_card_no: "",
-    teacher_category: "",
+    teacher_id: "",
     employee_id: "",
-    // teacher_image_name: null,
-    // special_sub: "",
+    teacher_image_name: null,
+    special_sub: "",
   });
   const [errors, setErrors] = useState({});
   const [backendErrors, setBackendErrors] = useState({});
@@ -53,7 +53,7 @@ function EditCareTacker() {
         // email: staff.email || "",
         designation: staff.designation || "",
         academic_qual: staff.academic_qual || "",
-        // professional_qual: staff.professional_qual || "",
+        teacher_id: staff.tc_id || "",
         // special_sub: staff.special_sub || "",
         // trained: staff.trained || "",
         // experience: staff.experience || "",
@@ -67,6 +67,33 @@ function EditCareTacker() {
     }
   }, [staff, API_URL]);
 
+  const [classes, setClasses] = useState([]);
+
+  // Validation functions
+
+  const fetchTeacherCategory = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+
+      setClasses(response?.data?.data);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  useEffect(() => {
+    fetchTeacherCategory();
+  }, []);
   // Validation functions
   const validatePhone = (phone) => {
     if (!phone) return "Phone number is required";
@@ -107,8 +134,8 @@ function EditCareTacker() {
     // Validate birthday
     if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
     // Validate teacher category
-    if (!formData.teacher_category)
-      newErrors.teacher_category = "Teacher Category is required";
+    if (!formData.teacher_id)
+      newErrors.teacher_id = "Teacher Category is required";
 
     // Validate date of joining
     if (!formData.date_of_joining)
@@ -147,10 +174,9 @@ function EditCareTacker() {
     let newValue = value;
 
     // Input sanitization for specific fields
-    // if (name === "experience") {
-    //   newValue = newValue.replace(/[^0-9]/g, ""); // Only allow numbers in experience
-    // }
-    if (name === "aadhar_card_no") {
+    if (name === "experience") {
+      newValue = newValue.replace(/[^0-9]/g, ""); // Only allow numbers in experience
+    } else if (name === "aadhar_card_no") {
       newValue = newValue.replace(/\s+/g, ""); // Remove spaces from aadhar card number
     }
     if (name === "phone" || name === "aadhar_card_no") {
@@ -185,9 +211,8 @@ function EditCareTacker() {
     }
 
     // Teacher Category validation
-    if (name === "teacher_category") {
-      if (!newValue)
-        fieldErrors.teacher_category = "Teacher Category is required";
+    if (name === "teacher_id") {
+      if (!newValue) fieldErrors.teacher_id = "Teacher Category is required";
     }
 
     // Date of Joining validation
@@ -259,14 +284,14 @@ function EditCareTacker() {
       if (!token) {
         throw new Error("No authentication token is found");
       }
-      const response = await axios.post(
+      const response = await axios.put(
         `${API_URL}/api/update_caretaker/${staff.teacher_id}`,
 
         // `${API_URL}/api/update_caretaker`,
         formattedFormData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            // "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
@@ -618,37 +643,30 @@ function EditCareTacker() {
             </div>
             <div>
               <label
-                htmlFor="teacher_category"
-                className="block font-bold  text-xs mb-2"
+                htmlFor="teacher_id"
+                className="block font-bold text-xs mb-2"
               >
                 Teacher Category <span className="text-red-500">*</span>
               </label>
               <select
-                id="teacher_category"
-                name="teacher_category"
-                value={formData.teacher_category}
+                id="teacher_id"
+                name="teacher_id"
+                value={formData.teacher_id}
                 onChange={handleChange}
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               >
                 <option className="bg-gray-300" value="">
                   Select
                 </option>
-                <option value="A">Admin</option>
-                <option value="B">Bus</option>
-                <option value="E">Data Entry</option>
-                <option value="F">Finance</option>
-                <option value="L">Librarian</option>
-                <option value="M">Management</option>
-                <option value="N">Printer</option>
-                <option value="O">owner</option>
-                <option value="R">Support</option>
-                <option value="T">Teacher</option>
-                <option value="X">Support Staff</option>
-                <option value="Y">Security</option>
+                {classes.map((category) => (
+                  <option key={category.tc_id} value={category.tc_id}>
+                    {category.name}
+                  </option>
+                ))}
               </select>
-              {errors.teacher_category && (
+              {errors.teacher_id && (
                 <span className="text-red-500 text-xs ml-2">
-                  {errors.teacher_category}
+                  {errors.teacher_id}
                 </span>
               )}
             </div>

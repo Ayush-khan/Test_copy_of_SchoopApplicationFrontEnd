@@ -43,8 +43,8 @@ function CareTacker() {
         withCredentials: true,
       });
 
-      setStaffs(response.data);
-      setPageCount(Math.ceil(response.data.length / pageSize));
+      setStaffs(response?.data?.data);
+      setPageCount(Math.ceil(response.data?.data.length / pageSize));
     } catch (error) {
       setError(error.message);
     } finally {
@@ -125,13 +125,13 @@ function CareTacker() {
         }
       );
 
-      //   if (response.status === 200) {
-      fetchStaffs(); // Refresh staff list after successful deletion
-      handleCloseModal();
-      toast.success("CareTacker deleted successfully!");
-      //   } else {
-      //     toast.error("Failed to delete CareTacker");
-      //   }
+      if (response.status === 200) {
+        fetchStaffs(); // Refresh staff list after successful deletion
+        handleCloseModal();
+        toast.success("CareTacker deleted successfully!");
+      } else {
+        toast.error("Failed to delete CareTacker");
+      }
     } catch (error) {
       console.error("Error deleting CareTacker:", error);
       toast.error("Failed to delete CareTacker");
@@ -232,12 +232,22 @@ function CareTacker() {
                             {index + 1}
                           </p>
                         </td>
-
                         <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                            {staffItem?.name}{" "}
+                            {staffItem?.isDelete == "Y" && (
+                              <span className="text-red-500">
+                                (Left school)
+                              </span>
+                            )}
+                          </p>
+                        </td>
+
+                        {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                           <p className="text-gray-900 whitespace-no-wrap relative top-2">
                             {staffItem?.name}
                           </p>
-                        </td>
+                        </td> */}
 
                         <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                           <p className="text-gray-900 whitespace-no-wrap relative top-2">

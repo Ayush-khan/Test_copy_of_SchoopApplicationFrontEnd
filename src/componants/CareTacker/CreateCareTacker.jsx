@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -22,7 +22,7 @@ function CreateCareTacker() {
     phone: "",
     email: "",
     aadhar_card_no: "",
-    teacher_category: "",
+    teacher_id: "",
     employee_id: "",
     teacher_image_name: null,
     special_sub: "",
@@ -34,8 +34,33 @@ function CreateCareTacker() {
   const MAX_DATE = "2006-12-31";
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
+  const [classes, setClasses] = useState([]);
 
   // Validation functions
+
+  const fetchTeacherCategory = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+
+      setClasses(response?.data?.data);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  useEffect(() => {
+    fetchTeacherCategory();
+  }, []);
   const validatePhone = (phone) => {
     if (!phone) return "Phone number is required";
     if (!/^\d{10}$/.test(phone)) return "Phone number must be 10 digits";
@@ -75,8 +100,8 @@ function CreateCareTacker() {
     // Validate birthday
     if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
     // Validate teacher category
-    if (!formData.teacher_category)
-      newErrors.teacher_category = "Teacher Category is required";
+    if (!formData.teacher_id)
+      newErrors.teacher_id = "Teacher Category is required";
 
     // Validate date of joining
     if (!formData.date_of_joining)
@@ -152,9 +177,8 @@ function CreateCareTacker() {
     }
 
     // Teacher Category validation
-    if (name === "teacher_category") {
-      if (!newValue)
-        fieldErrors.teacher_category = "Teacher Category is required";
+    if (name === "teacher_id") {
+      if (!newValue) fieldErrors.teacher_id = "Teacher Category is required";
     }
 
     // Date of Joining validation
@@ -600,37 +624,30 @@ function CreateCareTacker() {
             </div>
             <div>
               <label
-                htmlFor="teacher_category"
-                className="block font-bold  text-xs mb-2"
+                htmlFor="teacher_id"
+                className="block font-bold text-xs mb-2"
               >
                 Teacher Category <span className="text-red-500">*</span>
               </label>
               <select
-                id="teacher_category"
-                name="teacher_category"
-                value={formData.teacher_category}
+                id="teacher_id"
+                name="teacher_id"
+                value={formData.teacher_id}
                 onChange={handleChange}
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               >
                 <option className="bg-gray-300" value="">
                   Select
                 </option>
-                <option value="A">Admin</option>
-                <option value="B">Bus</option>
-                <option value="E">Data Entry</option>
-                <option value="F">Finance</option>
-                <option value="L">Librarian</option>
-                <option value="M">Management</option>
-                <option value="N">Printer</option>
-                <option value="O">owner</option>
-                <option value="R">Support</option>
-                <option value="T">Teacher</option>
-                <option value="X">Support Staff</option>
-                <option value="Y">Security</option>
+                {classes.map((category) => (
+                  <option key={category.tc_id} value={category.tc_id}>
+                    {category.name}
+                  </option>
+                ))}
               </select>
-              {errors.teacher_category && (
+              {errors.teacher_id && (
                 <span className="text-red-500 text-xs ml-2">
-                  {errors.teacher_category}
+                  {errors.teacher_id}
                 </span>
               )}
             </div>

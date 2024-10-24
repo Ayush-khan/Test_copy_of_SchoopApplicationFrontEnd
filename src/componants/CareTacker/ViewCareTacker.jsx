@@ -19,8 +19,8 @@ function ViewCareTacker() {
     phone: "",
     email: "",
     aadhar_card_no: "",
-    teacher_category: "",
-    employeeId: "",
+    teacher_id: "",
+    employee_id: "",
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
@@ -44,11 +44,57 @@ function ViewCareTacker() {
         designation: staff.designation || "",
         academic_qual: staff.academic_qual || "",
         aadhar_card_no: staff.aadhar_card_no || "",
+        teacher_id: staff.tc_id || "",
+
         isDelete: staff.isDelete || "N",
       });
     }
   }, [staff, API_URL]);
 
+  const [classes, setClasses] = useState([]);
+
+  const fetchTeacherCategory = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+
+      setClasses(response.data.data); // Assuming response has 'data' property holding the categories array
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  useEffect(() => {
+    fetchTeacherCategory();
+  }, []);
+  // Function to get teacher category name based on tc_id
+  const getTeacherCategoryName = (tc_id) => {
+    const category = classes.find((cat) => cat.tc_id === tc_id);
+    return category ? category.name : "Unknown Category";
+  };
+
+  // Function to convert gender code to readable format
+  const getGenderDisplay = (genderCode) => {
+    switch (genderCode) {
+      case "M":
+        return "Male";
+      case "F":
+        return "Female";
+      case "O":
+        return "Other";
+      default:
+        return "Unknown";
+    }
+  };
   return (
     <div className="container mx-auto p-4 ">
       <ToastContainer />
@@ -153,7 +199,7 @@ function ViewCareTacker() {
               </label>
 
               <p className="input-field h-9  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
-                {formData.sex}
+                {getGenderDisplay(formData.sex)}
               </p>
             </div>
 
@@ -223,7 +269,7 @@ function ViewCareTacker() {
 
             <div>
               <label
-                htmlFor="employeeId"
+                htmlFor="employee_id"
                 className="block font-bold  text-xs mb-2"
               >
                 Employee ID
@@ -232,10 +278,10 @@ function ViewCareTacker() {
               <input
                 type="tel"
                 maxLength={5}
-                id="employeeId"
+                id="employee_id"
                 readOnly
-                name="employeeId"
-                value={formData.employeeId}
+                name="employee_id"
+                value={formData.employee_id}
                 className="input-field outline-none block w-full border border-gray-300 rounded-md py-1 px-3 bg-gray-300 shadow-inner"
               />
             </div>
@@ -247,7 +293,7 @@ function ViewCareTacker() {
                 Teacher Category
               </label>
               <p className="input-field h-9  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
-                {formData.teacher_category}
+                {getTeacherCategoryName(formData.teacher_id)}{" "}
               </p>
             </div>
 
