@@ -1,711 +1,516 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import ReactPaginate from "react-paginate";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useState, useEffect } from "react";
 import { RxCross1 } from "react-icons/rx";
-import Select from "react-select";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
 
-// The Division List component
-function AllotClassTeacher() {
-  const API_URL = import.meta.env.VITE_API_URL; // URL for host
-  const [sections, setSections] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [currentSection, setCurrentSection] = useState(null);
-  const [newSectionName, setNewSectionName] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [className, setClassName] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageCount, setPageCount] = useState(0);
-  const [newDepartmentId, setNewDepartmentId] = useState("");
-  const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
-  const [nameError, setNameError] = useState("");
-  const [nameAvailable, setNameAvailable] = useState(true);
-  const [roleId, setRoleId] = useState("");
-  const [classes, setClasses] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const pageSize = 10;
+function EditCareTacker() {
+  const API_URL = import.meta.env.VITE_API_URL;
+  const [formData, setFormData] = useState({
+    sr_no: "",
+    student_name: "",
+    dob: "",
+    date_of_joining: "",
+    father_name: "",
+    academic_qual: "",
+    professional_qual: "",
+    trained: "",
+    experience: "",
+    sex: "",
+    blood_group: "",
+    religion: "",
+    address: "",
+    phone: "",
+    email: "",
+    aadhar_card_no: "",
+    teacher_id: "",
+    employee_id: "",
+    teacher_image_name: null,
+    special_sub: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [backendErrors, setBackendErrors] = useState({});
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { staff } = location.state || {};
+  // Maximum date for date_of_birth
+  const MAX_DATE = "2006-12-31";
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
-    fetchClassTeacher();
-    fetchTeachers();
-    fetchClassNames();
-  }, []);
-
-  const fetchClassNames = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_class_section`, {
-        headers: { Authorization: `Bearer ${token}` },
+    if (staff) {
+      setFormData({
+        employee_id: staff.employee_id || " ",
+        student_name: staff.student_name || "",
+        dob: staff.dob || "",
+        date_of_joining: staff.date_of_joining || "",
+        sex: staff.sex || "",
+        religion: staff.religion || "",
+        blood_group: staff.blood_group || "",
+        address: staff.address || "",
+        phone: staff.phone || "",
+        father_name: staff.father_name || "",
+        academic_qual: staff.academic_qual || "",
+        teacher_id: staff.tc_id || "",
+        aadhar_card_no: staff.aadhar_card_no || "",
+        isDelete: staff.isDelete || "N",
       });
-      console.log("the classes are ", response.data);
-      setClasses(
-        response.data.map((classItem) => ({
-          value: classItem.section_id,
-          label: `${classItem?.get_class?.name}${" "}${classItem.name}`,
-        }))
-      );
-    } catch (error) {
-      toast.error("Error fetching class names");
     }
-  };
+  }, [staff, API_URL]);
 
-  const fetchTeachers = async () => {
+  const [classes, setClasses] = useState([]);
+
+  // Validation functions
+
+  const fetchTeacherCategory = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_teacher_list`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTeachers(
-        response.data.map((teacher) => ({
-          value: teacher.reg_id,
-          label: teacher.name,
-        }))
-      );
-    } catch (error) {
-      toast.error("Error fetching teachers");
-    }
-  };
 
-  const fetchClassTeacher = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/getDivision`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSections(response.data);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const validateFields = (departmentId, teacherId) => {
-    const errors = {};
-    // const alphabetRegex = /^[A-Za-z]+$/;
-
-    if (!departmentId) {
-      errors.department_id = "Please select a class."; // Error message for class dropdown
-    }
-
-    if (!teacherId) {
-      errors.teacher_id = "Please select a teacher."; // Error message for teacher dropdown
-    }
-
-    return errors;
-  };
-
-  const handleAdd = () => {
-    setShowAddModal(true);
-    setFieldErrors({});
-    setNewSectionName("");
-    setNewDepartmentId("");
-  };
-  const handleDelete = (id) => {
-    const sectionToDelete = sections.find((sec) => sec.section_id === id);
-    setCurrentSection(sectionToDelete);
-    setShowDeleteModal(true);
-  };
-  const handleEdit = (section) => {
-    setCurrentSection(section);
-    setNewSectionName(section.name);
-    setClassName(section?.get_class?.name); // Readonly class field
-    setNewDepartmentId(section.get_class.class_id);
-    setShowEditModal(true);
-    setFieldErrors({});
-  };
-
-  const handleCloseModal = () => {
-    setShowAddModal(false);
-    setShowEditModal(false);
-    setNewSectionName("");
-    setNewDepartmentId("");
-    setCurrentSection(null);
-    setFieldErrors({});
-  };
-
-  const handleSubmitAdd = async () => {
-    const teacherId = null; // Add teacher ID for the add form
-    const validationErrors = validateFields(
-      newSectionName,
-      newDepartmentId,
-      teacherId
-    );
-    if (Object.keys(validationErrors).length > 0) {
-      setFieldErrors(validationErrors);
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("authToken");
-      await axios.post(
-        `${API_URL}/api/store_division`,
-        {
-          name: newSectionName,
-          class_id: newDepartmentId,
-          teacher_id: teacherId,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      fetchClassTeacher();
-      handleCloseModal();
-      toast.success("Division added successfully!");
-    } catch (error) {
-      toast.error("Error adding division. Please try again.");
-    }
-  };
-
-  const handleSubmitEdit = async () => {
-    const validationErrors = validateFields(
-      newSectionName,
-      newDepartmentId,
-      teacherId
-    );
-    if (Object.keys(validationErrors).length > 0) {
-      setFieldErrors(validationErrors);
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("authToken");
-      await axios.put(
-        `${API_URL}/api/getDivision/${currentSection.section_id}`,
-        {
-          name: newSectionName,
-          class_id: newDepartmentId,
-          teacher_id: teacherId,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      fetchClassTeacher();
-      handleCloseModal();
-      toast.success("Division updated successfully!");
-    } catch (error) {
-      toast.error("Error updating division. Please try again.");
-    }
-  };
-  const handleSubmitDelete = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
-
-      if (!token || !currentSection || !currentSection.section_id) {
-        throw new Error("Division ID is missing");
+      if (!token) {
+        throw new Error("No authentication token found");
       }
 
-      const response = await axios.delete(
-        `${API_URL}/api//${currentSection.section_id}`,
+      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+
+      setClasses(response?.data?.data);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  useEffect(() => {
+    fetchTeacherCategory();
+  }, []);
+  // Validation functions
+  const validatePhone = (phone) => {
+    if (!phone) return "Phone number is required";
+    if (!/^\d{10}$/.test(phone)) return "Phone number must be 10 digits";
+    return null;
+  };
+
+  const validateAadhar = (aadhar) => {
+    // if (!aadhar) return "Aadhar card number is required";
+    if (!/^\d{12}$/.test(aadhar.replace(/\s+/g, "")))
+      return "Aadhar card number must be 12 digits";
+    return null;
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    // Validate name
+    if (!formData.student_name) newErrors.student_name = "Name is required";
+    else if (!/^[^\d].*/.test(formData.student_name))
+      newErrors.student_name = "Name should not start with a number";
+    // Validate academic qualifications (now a single text input)
+    if (!formData.academic_qual)
+      newErrors.academic_qual = "Academic qualification is required";
+
+    // Validate dob
+    if (!formData.dob) newErrors.dob = "Date of Birth is required";
+    if (!formData.father_name)
+      newErrors.father_name = "Father Name is required";
+
+    // Validate teacher category
+    if (!formData.teacher_id)
+      newErrors.teacher_id = "Teacher Category is required";
+
+    // Validate date of joining
+    if (!formData.date_of_joining)
+      newErrors.date_of_joining = "Date of Joining is required";
+
+    // Validate sex
+    if (!formData.sex) newErrors.sex = "Gender is required";
+
+    // Validate Employee Id
+    if (!formData.employee_id)
+      newErrors.employee_id = "Employee Id is required";
+    // Validate address
+    if (!formData.address) newErrors.address = "Address is required";
+
+    // Validate phone number
+    const phoneError = validatePhone(formData.phone);
+    if (phoneError) newErrors.phone = phoneError;
+
+    const aadharError = validateAadhar(formData.aadhar_card_no);
+    if (aadharError) newErrors.aadhar_card_no = aadharError;
+
+    setErrors(newErrors);
+    return newErrors;
+  };
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    let newValue = value;
+
+    // Input sanitization for specific fields
+    if (name === "experience") {
+      newValue = newValue.replace(/[^0-9]/g, ""); // Only allow numbers in experience
+    } else if (name === "aadhar_card_no") {
+      newValue = newValue.replace(/\s+/g, ""); // Remove spaces from aadhar card number
+    }
+    if (name === "phone" || name === "aadhar_card_no") {
+      newValue = newValue.replace(/[^\d]/g, ""); // Only allow digits for phone and aadhar card
+    }
+
+    // Update formData for the field
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: newValue,
+    }));
+
+    // Field-specific validation
+    let fieldErrors = {};
+
+    // Name validation
+    if (name === "student_name") {
+      if (!newValue) fieldErrors.student_name = "Name is required";
+      else if (/^\d/.test(newValue))
+        fieldErrors.student_name = "Name should not start with a number";
+    }
+
+    // Academic Qualification validation
+    if (name === "academic_qual") {
+      if (!newValue)
+        fieldErrors.academic_qual = "Academic qualification is required";
+    }
+
+    // Date of Birth validation
+    if (name === "dob") {
+      if (!newValue) fieldErrors.dob = "Date of Birth is required";
+    }
+    if (name === "father_name") {
+      if (!newValue) fieldErrors.father_name = "Father Name is required";
+    }
+
+    // Teacher Category validation
+    if (name === "teacher_id") {
+      if (!newValue) fieldErrors.teacher_id = "Teacher Category is required";
+    }
+
+    // Date of Joining validation
+    if (name === "date_of_joining") {
+      if (!newValue)
+        fieldErrors.date_of_joining = "Date of Joining is required";
+    }
+
+    // Gender validation
+    if (name === "sex") {
+      if (!newValue) fieldErrors.sex = "Gender is required";
+    }
+
+    // Employee ID validation
+    if (name === "employee_id") {
+      if (!newValue) fieldErrors.employee_id = "Employee ID is required";
+    }
+
+    // Address validation
+    if (name === "address") {
+      if (!newValue) fieldErrors.address = "Address is required";
+    }
+
+    // Phone validation
+    if (name === "phone") {
+      fieldErrors.phone = validatePhone(newValue);
+    }
+
+    // Aadhaar card validation
+    if (name === "aadhar_card_no") {
+      fieldErrors.aadhar_card_no = validateAadhar(newValue);
+    }
+
+    // Update the errors state with the new field errors
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: fieldErrors[name],
+    }));
+  };
+
+  const formatDateString = (dateString) => {
+    if (!dateString) return "";
+    const [year, month, day] = dateString.split("-");
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const validationErrors = validate();
+    const errorsToCheck = validationErrors || {};
+
+    if (Object.keys(errorsToCheck).length > 0) {
+      setErrors(errorsToCheck);
+      //   Object.values(errorsToCheck).forEach((error) => {
+      //     // toast.error(error);
+      //   });
+      return;
+    }
+
+    const formattedFormData = {
+      ...formData,
+      dob: formatDateString(formData.dob),
+      date_of_joining: formatDateString(formData.date_of_joining),
+      //   teacher_image_name: String(formData.teacher_image_name),
+    };
+
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token is found");
+      }
+      const response = await axios.put(
+        `${API_URL}/api/update_caretaker/${staff.teacher_id}`,
+
+        // `${API_URL}/api/update_caretaker`,
+        formattedFormData,
         {
           headers: {
+            // "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
-          withCredentials: true,
         }
       );
 
-      if (response.data.success) {
-        fetchSections();
-        setShowDeleteModal(false);
-        setCurrentSection(null);
-        toast.success("Division deleted successfully!");
-      } else {
-        toast.error(response.data.message || "Failed to delete Division");
+      if (response.status === 201) {
+        toast.success("Care tacker updated successfully!");
+        setTimeout(() => {
+          navigate("/careTacker");
+        }, 3000);
       }
     } catch (error) {
-      console.error("Error deleting Division:", error);
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        toast.error(error.response.data.message);
+      console.error("Error:", error.message);
+      toast.error("An error occurred while updating the Care tacker.");
+
+      if (error.response && error.response.data) {
+        setBackendErrors(error.response.data || {});
       } else {
-        toast.error("Server error. Please try again later.");
+        toast.error(error.message);
       }
     }
   };
-  // Filter and paginate sections
-  const filteredSections = sections.filter((section) =>
-    section.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  const displayedSections = filteredSections.slice(
-    currentPage * pageSize,
-    (currentPage + 1) * pageSize
-  );
-  const handlePageClick = (data) => {
-    setCurrentPage(data.selected);
-  };
 
-  const handleClassChange = (selectedOption) => {
-    setNewDepartmentId(selectedOption?.value || "");
-    // Clear the error for department field
-    setFieldErrors((prev) => ({ ...prev, department_id: "" }));
-  };
-
-  const handleTeacherChange = (selectedOption) => {
-    // Assuming you will store teacherId here in future
-    const teacherId = selectedOption?.value || "";
-    // Clear the error for teacher field
-    setFieldErrors((prev) => ({ ...prev, teacher_id: "" }));
-  };
   return (
-    <>
+    <div className="container mx-auto p-4 ">
       <ToastContainer />
+      <div className="card p-4 rounded-md ">
+        <div className=" card-header mb-4 flex justify-between items-center ">
+          <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+            Edit Caretaker
+          </h5>
 
-      <div className="container  mt-4">
-        <div className="card mx-auto lg:w-3/4 shadow-lg">
-          <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
-            <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Class Teacher
-            </h3>{" "}
-            <div className="box-border flex md:gap-x-2 justify-end md:h-10">
-              <div className=" w-1/2 md:w-fit mr-1">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search "
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <button
-                className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                onClick={handleAdd}
+          <RxCross1
+            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() => {
+              setErrors({});
+              navigate("/careTacker");
+            }}
+          />
+        </div>
+        <div
+          className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+          style={{
+            backgroundColor: "#C03078",
+          }}
+        ></div>
+        <p className="  md:absolute md:right-10  md:top-[15%]   text-gray-500 ">
+          <span className="text-red-500">*</span>indicates mandatory information
+        </p>
+        <form
+          onSubmit={handleSubmit}
+          className="  md:mx-5 overflow-x-hidden shadow-md p-2 bg-gray-50"
+        >
+          <div className=" flex flex-col gap-4 md:grid  md:grid-cols-3 md:gap-x-14 md:mx-10 gap-y-1">
+            <div className=" ">
+              <label
+                htmlFor="staffName"
+                className="block font-bold  text-xs mb-2"
               >
-                <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
-                Add
+                Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                maxLength={100}
+                id="staffName"
+                name="student_name"
+                pattern="^[^\d].*"
+                title="Name should not start with a number"
+                value={formData.student_name}
+                onChange={handleChange}
+                placeholder="Name"
+                className="block  border w-full border-gray-300 rounded-md py-1 px-3  bg-white shadow-inner"
+              />
+              {errors.student_name && (
+                <div className="text-red-500 text-xs ml-2">
+                  {errors.student_name}
+                </div>
+              )}
+            </div>
+            <div>
+              <label htmlFor="dob" className="block font-bold text-xs mb-2">
+                Date of Birth <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                id="dob"
+                max={MAX_DATE}
+                name="dob"
+                value={formData.dob}
+                onChange={handleChange}
+                className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+              {errors.dob && (
+                <div className="text-red-500 text-xs ml-2">{errors.dob}</div>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="date_of_joining"
+                className="block font-bold  text-xs mb-2"
+              >
+                Bithday <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                id="date_of_joining"
+                max={today}
+                name="date_of_joining"
+                value={formData.date_of_joining}
+                onChange={handleChange}
+                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+              {errors.date_of_joining && (
+                <span className="text-red-500 text-xs ml-2">
+                  {errors.date_of_joining}
+                </span>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="father_name"
+                className="block font-bold  text-xs mb-2"
+              >
+                Father's Name
+              </label>
+              <input
+                type="text"
+                maxLength={30}
+                id="father_name"
+                readOnly
+                name="father_name"
+                value={formData.father_name}
+                onChange={handleChange}
+                className="input-field bg-gray-200 block w-full border border-gray-300 rounded-md py-1 px-3  outline-none shadow-inner"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="academic_qual"
+                className="block font-bold  text-xs mb-2"
+              >
+                Class/Divsion <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                maxLength={12}
+                id="academic_qual"
+                name="academic_qual"
+                value={formData.academic_qual}
+                onChange={handleChange} // Using the handleChange function to update formData and validate
+                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+              {errors.academic_qual && (
+                <span className="text-red-500 text-xs ml-2">
+                  {errors.academic_qual}
+                </span>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="address"
+                className="block font-bold  text-xs mb-2"
+              >
+                Birth date in words <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                type="text"
+                maxLength={200}
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                className="input-field resize block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+              {errors.address && (
+                <div className="text-red-500 text-xs ml-2">
+                  {errors.address}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="employeeId"
+                className="block font-bold  text-xs mb-2"
+              >
+                Nationality <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                maxLength={5}
+                id="employeeId"
+                name="employee_id"
+                value={formData.employee_id}
+                onChange={handleChange}
+                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+              {errors.employee_id && (
+                <span className="text-red-500 text-xs ml-2">
+                  {errors.employee_id}
+                </span>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="employeeId"
+                className="block font-bold  text-xs mb-2"
+              >
+                Purpose <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                maxLength={5}
+                id="employeeId"
+                name="employee_id"
+                value={formData.employee_id}
+                onChange={handleChange}
+                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+              />
+              {errors.employee_id && (
+                <span className="text-red-500 text-xs ml-2">
+                  {errors.employee_id}
+                </span>
+              )}
+            </div>
+
+            <div className="col-span-3  text-right">
+              <button
+                type="submit"
+                style={{ backgroundColor: "#2196F3" }}
+                className=" text-white font-bold py-1 border-1 border-blue-500 px-4 rounded"
+              >
+                Update
               </button>
             </div>
           </div>
-          <div
-            className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-            style={{
-              backgroundColor: "#C03078",
-            }}
-          ></div>
-
-          <div className="card-body w-full">
-            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden ">
-              <div className="bg-white rounded-lg shadow-xs ">
-                <table className="min-w-full leading-normal table-auto ">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        S.No
-                      </th>
-                      <th className=" -px-2  text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Class
-                      </th>
-                      <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Teacher
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Edit
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Delete
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {displayedSections.length ? (
-                      displayedSections.map((section, index) => (
-                        <tr
-                          key={section.section_id}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
-                        >
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {index + 1}
-                            </p>
-                          </td>
-                          <td className="text-center px-2  border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section.name}
-                            </p>
-                          </td>
-                          <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.get_class?.name}
-                            </p>
-                          </td>
-
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-pink-600 hover:text-pink-800 hover:bg-transparent "
-                                // onClick={() => handleEdit(section)}
-                              >
-                                {/* <FontAwesomeIcon icon={faEdit} /> */}
-                              </button>{" "}
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                onClick={() => handleEdit(section)}
-                              >
-                                <FontAwesomeIcon icon={faEdit} />
-                              </button>{" "}
-                            </td>
-                          )}
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-green-600 hover:text-green-800 hover:bg-transparent "
-                                // onClick={() => handleDelete(section.section_id)}
-                              >
-                                {/* <FontAwesomeIcon icon={faTrash} /> */}
-                              </button>
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                onClick={() => handleDelete(section.section_id)}
-                              >
-                                <FontAwesomeIcon icon={faTrash} />
-                              </button>
-                            </td>
-                          )}
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" className="text-center">
-                          No Class Teacher found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            {filteredSections.length > pageSize && (
-              <ReactPaginate
-                previousLabel={"Previous"}
-                nextLabel={"Next"}
-                breakLabel={"..."}
-                pageCount={pageCount}
-                marginPagesDisplayed={1}
-                pageRangeDisplayed={1}
-                onPageChange={handlePageClick}
-                containerClassName={"pagination justify-content-center"}
-                pageClassName={"page-item"}
-                pageLinkClassName={"page-link"}
-                previousClassName={"page-item"}
-                previousLinkClassName={"page-link"}
-                nextClassName={"page-item"}
-                nextLinkClassName={"page-link"}
-                breakClassName={"page-item"}
-                breakLinkClassName={"page-link"}
-                activeClassName={"active"}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Modal for adding a new section */}
-
-        {showAddModal && (
-          <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
-            <div
-              className="modal"
-              style={{
-                display: "block",
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
-              }}
-            >
-              <div className="modal-dialog modal-dialog-centered ">
-                <div className="modal-content">
-                  <div className="flex justify-between p-3">
-                    <h5 className="modal-title">
-                      Create Class Teacher Allotment
-                    </h5>
-
-                    <RxCross1
-                      className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                      type="button"
-                      // className="btn-close text-red-600"
-                      onClick={handleCloseModal}
-                    />
-                  </div>
-                  <div
-                    className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                    style={{
-                      backgroundColor: "#C03078",
-                    }}
-                  ></div>
-                  {/* <hr className="font-bold"></hr> */}
-                  <div className="modal-body">
-                    <div className="relative mb-3 flex justify-center mx-4">
-                      <label htmlFor="sectionName" className="w-1/2 mt-2">
-                        Class Name <span className="text-red-500">*</span>
-                      </label>
-                      <Select
-                        className="w-full text-sm"
-                        options={classes}
-                        isClearable
-                        value={classes.find(
-                          (option) => option.value === newDepartmentId
-                        )}
-                        onChange={handleClassChange}
-                      />
-                      <div className="absolute top-8 left-1/3">
-                        {fieldErrors.department_id && (
-                          <span className="text-danger text-xs">
-                            {fieldErrors.department_id}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* <div className="form-group"> */}
-                    <div className="relative mb-3 flex justify-center mx-4 mt-2">
-                      <label htmlFor="departmentId" className="w-1/2 mt-2">
-                        Teacher <span className="text-red-500">*</span>
-                      </label>
-                      <Select
-                        className="w-full text-sm"
-                        options={teachers}
-                        isClearable
-                        onChange={handleTeacherChange}
-                      />
-                      <div className="absolute top-9 left-1/3">
-                        {fieldErrors.teacher_id && (
-                          <span className="text-danger text-xs">
-                            {fieldErrors.teacher_id}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  {/* <div className="modal-footer d-flex justify-content-end"> */}
-                  {/* modified code by divyani mam guidance */}
-                  <div className=" flex justify-end p-3">
-                    {/* <button type="button" className="btn btn-secondary me-2" onClick={handleCloseModal}>Cancel</button> */}
-                    <button
-                      type="button"
-                      className="btn btn-primary px-3 mb-2 "
-                      style={{}}
-                      onClick={handleSubmitAdd}
-                    >
-                      Add
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Modal for editing a section */}
-
-        {showEditModal && (
-          <div
-            className="modal"
-            style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Edit Class Teacher Allotment</h5>
-                  <RxCross1
-                    className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                    type="button"
-                    // className="btn-close text-red-600"
-                    onClick={handleCloseModal}
-                  />
-                </div>
-                <div
-                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                  style={{
-                    backgroundColor: "#C03078",
-                  }}
-                ></div>
-                <div className="modal-body">
-                  <div className=" relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="editSectionName" className="w-1/2 mt-2">
-                      Class <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={className}
-                      readOnly
-                    />
-                    {/* <div className="absolute top-9 left-1/3 ">
-                      {!nameAvailable && (
-                        <span className=" block text-red-500 text-xs">
-                          {nameError}
-                        </span>
-                      )}
-
-                      {fieldErrors.name && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.name}
-                        </span>
-                      )}
-                    </div> */}
-                  </div>
-                  <div className="relative mb-3 flex justify-center mx-4 mt-2">
-                    <label htmlFor="departmentId" className="w-1/2 mt-2">
-                      Teacher <span className="text-red-500">*</span>
-                    </label>
-                    <Select
-                      className="w-full text-sm"
-                      options={teachers}
-                      isClearable
-                      onChange={handleTeacherChange}
-                    />
-                    <div className="absolute top-9 left-1/3">
-                      {fieldErrors.teacher_id && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.teacher_id}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className=" flex justify-end p-3">
-                  {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
-                  <button
-                    type="button"
-                    // className="btn btn-primary"
-                    className="btn btn-primary px-3 mb-2 "
-                    style={{}}
-                    onClick={handleSubmitEdit}
-                  >
-                    Update
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {/* {showEditModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="flex justify-between p-3">
-                  <h5>Edit Class Teacher Allotment</h5>
-                  <RxCross1 onClick={handleCloseModal} />
-                </div>
-                <div className="modal-body">
-                  <div className="form-group">
-                    <label>Division Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={newSectionName}
-                      onChange={(e) => setNewSectionName(e.target.value)}
-                    />
-                    {fieldErrors.name && (
-                      <span className="text-danger">{fieldErrors.name}</span>
-                    )}
-                  </div>
-                  <div className="form-group">
-                    <label>Class</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={className}
-                      readOnly
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Select Teacher</label>
-                    <Select
-                      options={teachers}
-                      onChange={(selectedOption) =>
-                        console.log("Edit teacher logic here")
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    onClick={handleSubmitEdit}
-                    className="btn btn-primary"
-                  >
-                    Save Changes
-                  </button>
-                  <button
-                    onClick={handleCloseModal}
-                    className="btn btn-secondary"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )} */}
-
-        {/* Modal for confirming deletion */}
-        {showDeleteModal && (
-          <div
-            className="modal"
-            style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Confirm Deletion</h5>
-                  <RxCross1
-                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                    type="button"
-                    // className="btn-close text-red-600"
-                    onClick={handleCloseModal}
-                  />
-                </div>
-                <div
-                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                  style={{
-                    backgroundColor: "#C03078",
-                  }}
-                ></div>
-                <div className="modal-body">
-                  <p>
-                    Are you sure you want to delete Class Teacher:{" "}
-                    {currentSection.name}?
-                  </p>
-                </div>
-                <div className=" flex justify-end p-3">
-                  {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
-                  <button
-                    type="button"
-                    className="btn btn-danger px-3 mb-2"
-                    style={{}}
-                    onClick={handleSubmitDelete}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        </form>
       </div>
-    </>
+    </div>
   );
 }
 
-export default AllotClassTeacher;
+export default EditCareTacker;

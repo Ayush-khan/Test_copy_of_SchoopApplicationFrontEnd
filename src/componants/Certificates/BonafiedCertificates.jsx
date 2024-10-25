@@ -9,6 +9,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 // import AllotSubjectTab from "./AllotMarksHeadingTab";
 import Select from "react-select";
+import CreateCreateBonafide from "./CreateCreateBonafide";
 function BonafiedCertificates() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [activeTab, setActiveTab] = useState("Manage");
@@ -536,7 +537,9 @@ function BonafiedCertificates() {
             </div>
           )}
           {activeTab === "CreateBonafide" && (
-            <div>{/* <AllotSubjectTab /> */}</div>
+            <div>
+              <CreateCreateBonafide />
+            </div>
           )}
         </div>
       </div>
