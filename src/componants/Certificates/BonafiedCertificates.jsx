@@ -123,10 +123,10 @@ function BonafiedCertificates() {
       const response = await axios.get(
         // `${API_URL}/api/get_AllotMarkheadingslist`,
 
-        `${API_URL}/api/get_AllotMarkheadingslist/${classIdForManage}`,
+        `${API_URL}/api/get_bonafidecertificatelist/${classIdForManage}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          // params: { section_id: classSection },
+          // params: { q: selectedClass },
           //   params: { class_id: classIdForManage },
         }
       );
@@ -134,16 +134,18 @@ function BonafiedCertificates() {
         "the response of the AllotMarksHeadingTab is *******",
         response.data
       );
-      if (response?.data.length > 0) {
-        setSubjects(response.data);
-        setPageCount(Math.ceil(response?.data.length / 10)); // Example pagination logic
+      if (response?.data?.data.length > 0) {
+        setSubjects(response?.data?.data);
+        setPageCount(Math.ceil(response?.data?.data.length / 10)); // Example pagination logic
       } else {
         setSubjects([]);
-        toast.error("No Allot Markheadings are found for the selected class.");
+        toast.error(
+          "No Bonafied certificates Listing are found for the selected class."
+        );
       }
     } catch (error) {
-      console.error("Error fetching Allot Markheadings:", error);
-      setError("Error fetching Allot Markheadings");
+      console.error("Error fetching Bonafied certificates Listing:", error);
+      setError("Error fetching Bonafied certificates");
     }
   };
 

@@ -128,8 +128,8 @@ const AdminNavBar = () => {
         >
           <NavDropdown.Item
             as={Link}
-            // to="/BonafiedCertificates"
-            to="#"
+            to="/BonafiedCertificates"
+            // to="#"
             className="text-sm font-bold"
           >
             Bonafide Certificate

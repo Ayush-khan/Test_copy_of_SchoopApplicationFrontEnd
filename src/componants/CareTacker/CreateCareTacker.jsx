@@ -11,7 +11,7 @@ function CreateCareTacker() {
     birthday: "",
     date_of_joining: "",
     designation: "Caretaker",
-    academic_qual: [],
+    academic_qual: "",
     professional_qual: "",
     trained: "",
     experience: "",
@@ -319,7 +319,7 @@ function CreateCareTacker() {
         </p>
         <form
           onSubmit={handleSubmit}
-          className="  md:mx-5 overflow-x-hidden shadow-md p-2 bg-gray-50"
+          className="  md:mx-5 overflow-x-hidden shadow-md p-2 bg-gray-50 "
         >
           <div className=" flex flex-col gap-4 md:grid  md:grid-cols-3 md:gap-x-14 md:mx-10 gap-y-1">
             <div className=" ">
