@@ -373,10 +373,14 @@ const CreateCreateBonafide = () => {
         {/* Search Section */}
         <div className="w-full col-span-4 flex justify-center flex-col md:flex-row gap-x-1 md:gap-x-8 bg-white rounded-lg border border-gray-300 mx-auto mt-10 p-6">
           <div className="w-full md:w-[80%] flex md:flex-row justify-between items-center">
-            <div className="w-full md:w[80%] flex flex-col gap-y-2 md:gap-y-0 md:flex-row ml-0 md:ml-10">
+            <div className="w-full md:w-[80%] flex flex-col gap-y-2 md:gap-y-0 md:flex-row ml-0 md:ml-10">
               <div className="w-full gap-x-3 md:justify-start justify-between my-1 md:my-4 flex md:flex-row">
                 <div className="w-full md:w-[60%]">
+                  <label className="text-sm mb-1" htmlFor="classSelect">
+                    Class
+                  </label>
                   <Select
+                    id="classSelect"
                     value={selectedClass}
                     onChange={handleClassSelect}
                     options={classOptions}
@@ -394,7 +398,11 @@ const CreateCreateBonafide = () => {
               </div>
               <div className="w-full relative left-0 md:-left-[7%] justify-between md:w-[90%] my-1 md:my-4 flex md:flex-row">
                 <div className="w-full md:w-[80%]">
+                  <label className="text-sm mb-1" htmlFor="studentSelect">
+                    Student Name
+                  </label>
                   <Select
+                    id="studentSelect"
                     value={selectedStudent}
                     onChange={handleStudentSelect}
                     options={studentOptions}
@@ -423,7 +431,7 @@ const CreateCreateBonafide = () => {
 
         {/* Form Section - Displayed when parentInformation is fetched */}
         {parentInformation && (
-          <div className=" w-full md:w-[80%]  mx-auto p-4 ">
+          <div className=" w-full   mx-auto p-4 ">
             <div className="card mx-auto lg:w-full shadow-md">
               {/* <div className="card p-4 rounded-md "> */}
               <div className=" card-header mb-4 flex justify-between items-center ">

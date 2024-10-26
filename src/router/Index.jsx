@@ -177,6 +177,7 @@ function Index() {
         {/* All Certificates  */}
         <Route
           path="/BonafiedCertificates"
+          // path="#"
           element={<PrivateRoute element={BonafiedCertificates} />}
         />
 
