@@ -182,7 +182,7 @@ function Index() {
           // path="#"
           element={<PrivateRoute element={BonafiedCertificates} />}
         />
-        {/* Cast certificate */}
+        {/* Cast certificate fsd */}
         <Route
           path="/castCertificate"
           // path="#"
