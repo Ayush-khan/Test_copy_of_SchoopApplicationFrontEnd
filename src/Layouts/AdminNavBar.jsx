@@ -128,7 +128,7 @@ const AdminNavBar = () => {
         >
           <NavDropdown.Item
             as={Link}
-            to="/BonafiedCertificates"
+            to="/bonafiedCertificates"
             // to="#"
             className="text-sm font-bold"
           >
@@ -136,7 +136,8 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
-            to="#"
+            // to="#"
+            to="/castCertificate"
             className="text-sm font-bold hover:text-black"
           >
             Caste Certificate
@@ -157,7 +158,7 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
-            to="#"
+            to="/simpleBonafied"
             className="text-sm font-bold hover:text-black"
           >
             Simple Bonafide Certificate

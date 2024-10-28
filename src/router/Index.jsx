@@ -138,7 +138,9 @@ import CareTacker from "../componants/CareTacker/CareTacker.jsx";
 import CreateCareTacker from "../componants/CareTacker/CreateCareTacker.jsx";
 import EditCareTacker from "../componants/CareTacker/EditCareTacker.jsx";
 import ViewCareTacker from "../componants/CareTacker/ViewCareTacker.jsx";
-import BonafiedCertificates from "../componants/Certificates/BonafiedCertificates.jsx";
+import BonafiedCertificates from "../componants/Certificates/BonafiedCertificate/BonafiedCertificates.jsx";
+import SImpleBonafied from "../componants/Certificates/SimpleBonafied/SImpleBonafied.jsx";
+import CastCertificate from "../componants/Certificates/CastCertificate/CastCertificate.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -176,9 +178,21 @@ function Index() {
         />
         {/* All Certificates  */}
         <Route
-          path="/BonafiedCertificates"
+          path="/bonafiedCertificates"
           // path="#"
           element={<PrivateRoute element={BonafiedCertificates} />}
+        />
+        {/* Cast certificate */}
+        <Route
+          path="/castCertificate"
+          // path="#"
+          element={<PrivateRoute element={CastCertificate} />}
+        />
+        {/* Simple Bonafied */}
+        <Route
+          path="/simpleBonafied"
+          // path="#"
+          element={<PrivateRoute element={SImpleBonafied} />}
         />
 
         {/* Staff endPoints */}

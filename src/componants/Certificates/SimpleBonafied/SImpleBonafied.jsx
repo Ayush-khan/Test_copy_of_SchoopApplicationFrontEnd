@@ -10,8 +10,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 // import AllotSubjectTab from "./AllotMarksHeadingTab";
 import Select from "react-select";
-import CreateCreateBonafide from "./CreateCreateBonafide";
-function BonafiedCertificates() {
+import CreateSimpleBonafied from "./CreateSimpleBonafied";
+function SImpleBonafied() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [activeTab, setActiveTab] = useState("Manage");
   const [classes, setClasses] = useState([]);
@@ -286,14 +286,10 @@ function BonafiedCertificates() {
 
   const filteredSections = subjects.filter((section) => {
     // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
-    const subjectNameIs = section?.get_subject?.name?.toLowerCase() || "";
-    const markHeadingIs = section?.get_marksheading?.name?.toLowerCase() || "";
+    const subjectNameIs = section?.stud_name.toLowerCase() || "";
 
     // Check if the search term is present in either the teacher's name or the subject's name
-    return (
-      subjectNameIs.includes(searchTerm.toLowerCase()) ||
-      markHeadingIs.includes(searchTerm.toLowerCase())
-    );
+    return subjectNameIs.includes(searchTerm.toLowerCase());
   });
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
@@ -525,7 +521,7 @@ function BonafiedCertificates() {
           )}
           {activeTab === "CreateBonafide" && (
             <div>
-              <CreateCreateBonafide />
+              <CreateSimpleBonafied />
             </div>
           )}
         </div>
@@ -623,4 +619,4 @@ function BonafiedCertificates() {
   );
 }
 
-export default BonafiedCertificates;
+export default SImpleBonafied;

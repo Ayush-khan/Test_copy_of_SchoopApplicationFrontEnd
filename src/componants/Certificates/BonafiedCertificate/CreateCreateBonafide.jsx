@@ -23,7 +23,7 @@ const CreateCreateBonafide = () => {
     sr_no: "",
     stud_name: "",
     dob: "",
-    issue_date_bonafide: "",
+    date: "",
     father_name: "",
     class_division: "",
     professional_qual: "",
@@ -304,7 +304,7 @@ const CreateCreateBonafide = () => {
           dob: fetchedData.studentinformation.dob || "",
           dob_words: convertDateToWords(fetchedData.studentinformation.dob),
 
-          issue_date_bonafide: today || "",
+          date: today || "",
           father_name: fetchedData.parentinformation.father_name || "",
           class_division:
             `${fetchedData.classname.name}-${fetchedData.sectionname.name}` ||
@@ -355,8 +355,7 @@ const CreateCreateBonafide = () => {
       newErrors.father_name = "Father Name is required";
 
     // Validate date of joining
-    if (!formData.issue_date_bonafide)
-      newErrors.issue_date_bonafide = " Date is required";
+    if (!formData.date) newErrors.date = " Date is required";
 
     // Validate Employee Id
     if (!formData.purpose) newErrors.purpose = "purpose is required";
@@ -426,8 +425,8 @@ const CreateCreateBonafide = () => {
     }
 
     // Date of Joining validation
-    if (name === "issue_date_bonafide") {
-      if (!newValue) fieldErrors.issue_date_bonafide = " Date is required";
+    if (name === "date") {
+      if (!newValue) fieldErrors.date = " Date is required";
     }
 
     // Employee ID validation
@@ -470,7 +469,7 @@ const CreateCreateBonafide = () => {
     const formattedFormData = {
       ...formData,
       dob: formatDateString(formData.dob),
-      issue_date_bonafide: formatDateString(formData.issue_date_bonafide),
+      date: formatDateString(formData.date),
     };
 
     try {
@@ -513,7 +512,7 @@ const CreateCreateBonafide = () => {
           father_name: "",
           dob: "",
           dob_words: "",
-          issue_date_bonafide: "",
+          date: "",
           class_division: "",
           purpose: "",
           nationality: "",
@@ -839,14 +838,14 @@ const CreateCreateBonafide = () => {
                       type="date"
                       id="date_of_joining"
                       // max={today}
-                      name="issue_date_bonafide"
-                      value={formData.issue_date_bonafide}
+                      name="date"
+                      value={formData.date}
                       onChange={handleChange}
                       className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                     />
-                    {errors.issue_date_bonafide && (
+                    {errors.date && (
                       <span className="text-red-500 text-xs ml-2">
-                        {errors.issue_date_bonafide}
+                        {errors.date}
                       </span>
                     )}
                   </div>
