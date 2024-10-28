@@ -672,7 +672,6 @@ const CreeateCastCertificate = () => {
             </div>
           </div>
         </div>
-
         {/* Form Section - Displayed when parentInformation is fetched */}
         {/* {parentInformation && ( */}
         <div className="container mx-auto p-4 ">
@@ -957,6 +956,7 @@ const CreeateCastCertificate = () => {
             </form>
           </div>
         </div>
+        {/* dfs */}
         {/* )} */}
       </div>
     </div>
