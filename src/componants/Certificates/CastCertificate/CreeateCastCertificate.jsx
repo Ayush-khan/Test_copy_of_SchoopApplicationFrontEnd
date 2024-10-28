@@ -956,7 +956,7 @@ const CreeateCastCertificate = () => {
             </form>
           </div>
         </div>
-        {/* dfs  fdgd fdg*/}
+        {/* dfs */}
         {/* )} */}
       </div>
     </div>
