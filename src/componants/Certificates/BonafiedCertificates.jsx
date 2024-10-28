@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { ImCheckboxChecked } from "react-icons/im";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -60,8 +61,8 @@ function BonafiedCertificates() {
   }));
   console.log("teacherOptions", teacherOptions);
   const classOptions = classes.map((cls) => ({
-    value: cls.section_id,
-    label: `${cls?.get_class?.name}  ${cls.name}`,
+    value: `1${cls?.get_class?.name}-${cls.name}`,
+    label: `${cls?.get_class?.name} ${cls.name}`,
   }));
 
   const fetchClassNames = async () => {
@@ -123,11 +124,11 @@ function BonafiedCertificates() {
       const response = await axios.get(
         // `${API_URL}/api/get_AllotMarkheadingslist`,
 
-        `${API_URL}/api/get_bonafidecertificatelist/${classIdForManage}`,
+        `${API_URL}/api/get_bonafidecertificatelist`,
         {
           headers: { Authorization: `Bearer ${token}` },
           // params: { q: selectedClass },
-          //   params: { class_id: classIdForManage },
+          params: { section_id: classIdForManage },
         }
       );
       console.log(
@@ -160,14 +161,14 @@ function BonafiedCertificates() {
     setCurrentSection(section);
     console.log("currentedit", section);
 
-    // Set values for the edit modal
-    setNewClassName(section?.get_class?.name);
-    setNewSubjectName(section?.get_subject?.name);
-    setNewExamName(section?.get_exam?.name); // Assuming exam details are available
-    setNewMarksHeading(section?.get_marksheading?.name || ""); // Set marks heading if available
+    // // Set values for the edit modal
+    // setNewClassName(section?.get_class?.name);
+    // setNewSubjectName(section?.get_subject?.name);
+    // setNewExamName(section?.get_exam?.name); // Assuming exam details are available
+    // setNewMarksHeading(section?.get_marksheading?.name || ""); // Set marks heading if available
 
-    setHighestMarks(section?.highest_marks || ""); // Set highest marks or empty
-    setMarksError(""); // Reset the error message when opening the modal
+    // setHighestMarks(section?.highest_marks || ""); // Set highest marks or empty
+    // setMarksError(""); // Reset the error message when opening the modal
 
     setShowEditModal(true);
   };
@@ -189,17 +190,15 @@ function BonafiedCertificates() {
   };
 
   const handleDelete = (sectionId) => {
-    const classToDelete = subjects.find(
-      (cls) => cls.allot_markheadings_id === sectionId
-    );
+    const classToDelete = subjects.find((cls) => cls.sr_no === sectionId);
     console.log("classsToDelete", classToDelete);
     // Set the current section and subject name for deletion
     if (classToDelete) {
       setCurrentSection(classToDelete); // Set the current section directly
-      setCurrestSubjectNameForDelete(classToDelete.get_marksheading?.name); // Set subject name for display
+      setCurrestSubjectNameForDelete(classToDelete?.stud_name); // Set subject name for display
       setShowDeleteModal(true); // Show the delete modal
     } else {
-      console.error("Section not found for deletion");
+      console.error("Bonafied certificate not found for deletion");
     }
   };
 
@@ -207,12 +206,10 @@ function BonafiedCertificates() {
     try {
       const token = localStorage.getItem("authToken");
 
-      if (!token || !currentSection || !currentSection.allot_markheadings_id) {
-        throw new Error("Allot Markheadings ID is missing");
+      if (!token || !currentSection || !currentSection.sr_no) {
+        throw new Error("Token or Serial Number is missing");
       }
 
-      // Ensure that the subject type is not empty
-      // Clear previous errors
       setMarksError("");
       console.log(
         "class_name:",
@@ -226,87 +223,59 @@ function BonafiedCertificates() {
         "highest_marks:",
         highestMarks
       );
-      // Validate Highest Marks
-      // if (highestMarks.trim() === "") {
-      //   setMarksError("Highest Marks is required.");
-      //   return;
-      // }
-      if (!highestMarks) {
-        setMarksError("Highest Marks is required.");
-        return;
-      }
-      // If there's still an error message, stop the submission
-      if (marksError) {
-        return; // Halt submission if error exists
-      }
-      // Make the PUT request to update the subject type
+
       await axios.put(
-        `${API_URL}/api/update_AllotMarkheadings/${currentSection.allot_markheadings_id}`,
-        {
-          class_name: newClassName,
-          subject_name: newSubjectName,
-          exam_name: newExamName,
-          marks_heading: newMarksHeading,
-          highest_marks: highestMarks,
-        }, // Send the selected subject type
+        `${API_URL}/api/update_isIssued/${currentSection.sr_no}`,
+        {}, // Pass empty object for no payload
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          withCredentials: true,
         }
       );
 
       handleSearch(); // Refresh the list or data
-
-      toast.success("Allot Markheadings record updated successfully!");
+      toast.success("Bonafied issue status updated successfully!");
       handleCloseModal(); // Close the modal
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error updating Allot Markheadings record: ${error.response.data.error}`
+          `Error updating Bonafied issue status: ${error.response.data.error}`
         );
       } else {
-        toast.error(
-          `Error updating Allot Markheadings record: ${error.message}`
-        );
+        toast.error(`Error updating Bonafied issue status: ${error.message}`);
       }
-      console.error("Error editing Allot Markheadings record:", error);
+      console.error("Error Bonafied issue status:", error);
     }
   };
 
   const handleSubmitDelete = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const subReportCardId = currentSection?.allot_markheadings_id; // Get the correct ID
+      const subReportCardId = currentSection?.sr_no; // Get the correct ID
 
       if (!token || !subReportCardId) {
-        throw new Error("Allot Markheadings  ID is missing");
+        throw new Error("Token or Serial Number is missing");
       }
 
       // Send the delete request to the backend
-      await axios.delete(
-        `${API_URL}/api/delete_AllotMarkheadings/${subReportCardId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
+      await axios.delete(`${API_URL}/api/delete_isDeleted/${subReportCardId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
 
       handleSearch(); // Refresh the data (this seems like the method to refetch data)
       setShowDeleteModal(false); // Close the modal
-      toast.success("Allot Markheadings deleted successfully!");
+      toast.success("Bonafied deleted successfully!");
     } catch (error) {
       if (error.response && error.response.data) {
-        toast.error(
-          `Error deleting Allot Markheadings: ${error.response.data.message}`
-        );
+        toast.error(`Error deleting Bonafied: ${error.response.data.message}`);
       } else {
-        toast.error(`Error deleting Allot Markheadings: ${error.message}`);
+        toast.error(`Error deleting Bonafied: ${error.message}`);
       }
-      console.error("Error deleting Allot Markheadings:", error);
+      console.error("Error deleting Bonafied:", error);
     }
   };
 
@@ -410,7 +379,7 @@ function BonafiedCertificates() {
                   <div className="card mx-auto lg:w-full shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                        Manage Marks Heading Allotment
+                        Manage Bonafide Certificate
                       </h3>
                       <div className="w-1/2 md:w-fit mr-1 ">
                         <input
@@ -437,77 +406,93 @@ function BonafiedCertificates() {
                                 S.No
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Class
+                                Student Name
                               </th>
 
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Subject
+                                Class/Division
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Exam
+                                Status
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Marks Heading
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Highest Marks
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Edit
-                              </th>
+
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Delete
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Issue
                               </th>
                             </tr>
                           </thead>
                           <tbody>
-                            {displayedSections.map((subject, index) => (
-                              <tr
-                                key={subject.allot_markheadings_id}
-                                className="text-gray-700 text-sm font-light"
-                              >
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {index + 1}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_class?.name}
-                                </td>
+                            {displayedSections.map((subject, index) => {
+                              // Determine the status text and button visibility based on conditions
+                              let statusText = "";
+                              let showIssueButton = true;
+                              let showDeleteButton = true;
 
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_subject?.name}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_exam?.name}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_marksheading?.name}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.highest_marks}
-                                </td>
+                              if (subject.IsDeleted === "Y") {
+                                statusText = "Deleted";
+                                showIssueButton = false;
+                                showDeleteButton = false;
+                              } else if (subject.IsIssued === "Y") {
+                                statusText = "Issued";
+                                showIssueButton = false;
+                                showDeleteButton = false;
+                              } else if (subject.IsGenerated === "Y") {
+                                statusText = "Generated";
+                                showIssueButton = true;
+                                showDeleteButton = true;
+                              }
 
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  <button
-                                    onClick={() => handleEdit(subject)}
-                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                  >
-                                    <FontAwesomeIcon icon={faEdit} />
-                                  </button>
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  <button
-                                    onClick={() =>
-                                      handleDelete(
-                                        subject?.allot_markheadings_id
-                                      )
-                                    }
-                                    className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                  >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
+                              return (
+                                <tr
+                                  key={subject.sr_no}
+                                  className="text-gray-700 text-sm font-light"
+                                >
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {index + 1}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.stud_name}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.class_division}
+                                  </td>
+
+                                  {/* Status column */}
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {statusText}
+                                  </td>
+
+                                  {/* Delete button */}
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {showDeleteButton && (
+                                      <button
+                                        onClick={() =>
+                                          handleDelete(subject?.sr_no)
+                                        }
+                                        className="text-red-600 hover:text-red-800 hover:bg-transparent"
+                                      >
+                                        <FontAwesomeIcon icon={faTrash} />
+                                      </button>
+                                    )}
+                                  </td>
+
+                                  {/* Issue button */}
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {showIssueButton && (
+                                      <button
+                                        onClick={() => handleEdit(subject)}
+                                        className="text-green-600 hover:text-green-800 hover:bg-transparent"
+                                      >
+                                        <ImCheckboxChecked />
+                                      </button>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
@@ -548,88 +533,41 @@ function BonafiedCertificates() {
 
       {/* Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="modal show" style={{ display: "block" }}>
+        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal fade show" style={{ display: "block" }}>
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Edit Allotment</h5>
+                  <h5 className="modal-title">Confirm Issue</h5>
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
+                    // className="btn-close text-red-600"
                     onClick={handleCloseModal}
                   />
+                  {console.log(
+                    "the currecnt section inside delete of the managesubjhect",
+                    currentSection
+                  )}
                 </div>
                 <div
-                  className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                  style={{ backgroundColor: "#C03078" }}
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
                 ></div>
                 <div className="modal-body">
-                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
-                    <label htmlFor="newClassName" className="w-1/2 mt-2">
-                      Class:
-                    </label>
-                    <div className="w-full bg-gray-200 p-2 rounded-md shadow-md ">
-                      {newClassName}
-                    </div>
-                  </div>
-
-                  <div className="relative flex justify-start mx-4 gap-x-7 mb-2">
-                    <label htmlFor="newSubjectName" className="w-1/2 mt-2">
-                      Subject:
-                    </label>
-                    <div className="w-full bg-gray-200 p-2 rounded-md shadow-md mb-2">
-                      {newSubjectName}
-                    </div>
-                  </div>
-
-                  <div className="relative flex justify-start mx-4 gap-x-7 mb-2">
-                    <label htmlFor="newExamName" className="w-1/2 mt-2">
-                      Exam:
-                    </label>
-                    <div className="w-full bg-gray-200 p-2 rounded-md shadow-md mb-2">
-                      {newExamName}
-                    </div>
-                  </div>
-
-                  <div className="relative flex justify-start mx-4 gap-x-7 mb-2">
-                    <label htmlFor="newMarksHeading" className="w-1/2 mt-2">
-                      Marks Heading Assigned:
-                    </label>
-                    <div className="w-full bg-gray-200 p-2 rounded-md shadow-md mb-2">
-                      {newMarksHeading}
-                    </div>
-                  </div>
-
-                  {/* Highest Marks Input */}
-                  <div className="relative flex justify-start mx-4 gap-x-7">
-                    <label htmlFor="highestMarks" className="w-1/2 mt-2">
-                      Highest Marks <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      maxLength={3}
-                      className="rounded-md border-1 text-black w-full text-[1em] shadow-md p-2"
-                      value={highestMarks}
-                      onChange={handleMarksChange}
-                      placeholder="Enter highest marks"
-                    />
-                  </div>
-                  <div className="w-[60%] relative h-4 left-[40%]">
-                    {marksError && (
-                      <span className="text-red-500 text-xs">{marksError}</span>
-                    )}
-                  </div>
-                  {/* Display error message if any */}
+                  Are you sure you want to issue this certificate?{" "}
+                  {` ${currestSubjectNameForDelete} `} ?
                 </div>
-
-                <div className="flex justify-end p-3">
+                <div className=" flex justify-end p-3">
                   <button
                     type="button"
-                    className="btn btn-primary px-3 mb-2"
+                    style={{ backgroundColor: "#2196F3" }}
+                    className="btn text-white px-3 mb-2"
                     onClick={handleSubmitEdit}
                   >
-                    Update
+                    Issue
                   </button>
                 </div>
               </div>
@@ -664,7 +602,7 @@ function BonafiedCertificates() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to delete this alloted Marks heading{" "}
+                  Are you sure you want to delete this certificate of{" "}
                   {` ${currestSubjectNameForDelete} `} ?
                 </div>
                 <div className=" flex justify-end p-3">
