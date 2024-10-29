@@ -61,7 +61,7 @@ function CastCertificate() {
   }));
   console.log("teacherOptions", teacherOptions);
   const classOptions = classes.map((cls) => ({
-    value: `1${cls?.get_class?.name}-${cls.name}`,
+    value: `${cls?.get_class?.name} ${cls.name}`,
     label: `${cls?.get_class?.name} ${cls.name}`,
   }));
 
@@ -124,7 +124,7 @@ function CastCertificate() {
       const response = await axios.get(
         // `${API_URL}/api/get_AllotMarkheadingslist`,
 
-        `${API_URL}/api/get_bonafidecertificatelist`,
+        `${API_URL}/api/get_castebonafidecertificatelist`,
         {
           headers: { Authorization: `Bearer ${token}` },
           // params: { q: selectedClass },
@@ -141,12 +141,12 @@ function CastCertificate() {
       } else {
         setSubjects([]);
         toast.error(
-          "No Bonafied certificates Listing are found for the selected class."
+          "No Cast certificates Listing are found for the selected class."
         );
       }
     } catch (error) {
-      console.error("Error fetching Bonafied certificates Listing:", error);
-      setError("Error fetching Bonafied certificates");
+      console.error("Error fetching Cast certificates Listing:", error);
+      setError("Error fetching Cast certificates");
     }
   };
 
@@ -198,7 +198,7 @@ function CastCertificate() {
       setCurrestSubjectNameForDelete(classToDelete?.stud_name); // Set subject name for display
       setShowDeleteModal(true); // Show the delete modal
     } else {
-      console.error("Bonafied certificate not found for deletion");
+      console.error("Cast certificate not found for deletion");
     }
   };
 
@@ -225,7 +225,7 @@ function CastCertificate() {
       );
 
       await axios.put(
-        `${API_URL}/api/update_isIssued/${currentSection.sr_no}`,
+        `${API_URL}/api/update_casteisIssued/${currentSection.sr_no}`,
         {}, // Pass empty object for no payload
         {
           headers: {
@@ -235,17 +235,19 @@ function CastCertificate() {
       );
 
       handleSearch(); // Refresh the list or data
-      toast.success("Bonafied issue status updated successfully!");
+      toast.success("Cast certificate issue status updated successfully!");
       handleCloseModal(); // Close the modal
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error updating Bonafied issue status: ${error.response.data.error}`
+          `Error updating Cast Certificate issue status: ${error.response.data.error}`
         );
       } else {
-        toast.error(`Error updating Bonafied issue status: ${error.message}`);
+        toast.error(
+          `Error updating Cast Certificate issue status: ${error.message}`
+        );
       }
-      console.error("Error Bonafied issue status:", error);
+      console.error("Error Cast Certificate issue status:", error);
     }
   };
 
@@ -259,23 +261,28 @@ function CastCertificate() {
       }
 
       // Send the delete request to the backend
-      await axios.delete(`${API_URL}/api/delete_isDeleted/${subReportCardId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
+      await axios.delete(
+        `${API_URL}/api/delete_casteisDeleted/${subReportCardId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
 
       handleSearch(); // Refresh the data (this seems like the method to refetch data)
       setShowDeleteModal(false); // Close the modal
-      toast.success("Bonafied deleted successfully!");
+      toast.success("Cast Certificate deleted successfully!");
     } catch (error) {
       if (error.response && error.response.data) {
-        toast.error(`Error deleting Bonafied: ${error.response.data.message}`);
+        toast.error(
+          `Error deleting Cast Certificate: ${error.response.data.message}`
+        );
       } else {
-        toast.error(`Error deleting Bonafied: ${error.message}`);
+        toast.error(`Error deleting Cast Certificate: ${error.message}`);
       }
-      console.error("Error deleting Bonafied:", error);
+      console.error("Error deleting Cast Certificate:", error);
     }
   };
 
@@ -304,7 +311,7 @@ function CastCertificate() {
       {/* <ToastContainer /> */}
       <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-          Manage Bonafide Certificate
+          Caste Certificate
         </h3>
         <div
           className=" relative  mb-8   h-1  mx-auto bg-red-700"
@@ -314,7 +321,7 @@ function CastCertificate() {
         ></div>
         <ul className="grid grid-cols-2 gap-x-10 relative -left-6 md:left-0 md:flex md:flex-row relative -top-4">
           {/* Tab Navigation */}
-          {["Manage", "CreateBonafide"].map((tab) => (
+          {["Manage", "CreateCasteCertificate"].map((tab) => (
             <li
               key={tab}
               className={`md:-ml-7 shadow-md ${
@@ -375,7 +382,7 @@ function CastCertificate() {
                   <div className="card mx-auto lg:w-full shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                        Manage Bonafide Certificate
+                        Manage Caste Certificate
                       </h3>
                       <div className="w-1/2 md:w-fit mr-1 ">
                         <input
@@ -519,7 +526,7 @@ function CastCertificate() {
               )}
             </div>
           )}
-          {activeTab === "CreateBonafide" && (
+          {activeTab === "CreateCasteCertificate" && (
             <div>
               <CreeateCastCertificate />
             </div>

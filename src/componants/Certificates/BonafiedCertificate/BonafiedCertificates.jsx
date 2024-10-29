@@ -61,7 +61,7 @@ function BonafiedCertificates() {
   }));
   console.log("teacherOptions", teacherOptions);
   const classOptions = classes.map((cls) => ({
-    value: `1${cls?.get_class?.name}-${cls.name}`,
+    value: `${cls?.get_class?.name} ${cls.name}`,
     label: `${cls?.get_class?.name} ${cls.name}`,
   }));
 
@@ -304,7 +304,7 @@ function BonafiedCertificates() {
       {/* <ToastContainer /> */}
       <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-          Manage Bonafide Certificate
+          Bonafide Certificate
         </h3>
         <div
           className=" relative  mb-8   h-1  mx-auto bg-red-700"

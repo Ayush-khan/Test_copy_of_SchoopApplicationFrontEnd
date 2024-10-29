@@ -18,6 +18,8 @@ const CreateCreateBonafide = () => {
   const [selectedClass, setSelectedClass] = useState(null);
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingForSearch, setLoadingForSearch] = useState(false);
+
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     sr_no: "",
@@ -192,7 +194,7 @@ const CreateCreateBonafide = () => {
   }, []);
 
   const fetchInitialData = async () => {
-    setLoading(true);
+    // setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
       const classResponse = await axios.get(
@@ -204,13 +206,14 @@ const CreateCreateBonafide = () => {
       setClassesforForm(classResponse.data || []);
     } catch (error) {
       toast.error("Error fetching initial data.");
-    } finally {
-      setLoading(false);
     }
+    // finally {
+    //   setLoading(false);
+    // }
   };
 
   const fetchStudentNameWithClassId = async (section_id = null) => {
-    setLoading(true);
+    // setLoading(true);
     try {
       const params = section_id ? { section_id } : {};
       const token = localStorage.getItem("authToken");
@@ -224,9 +227,10 @@ const CreateCreateBonafide = () => {
       setStudentNameWithClassId(response?.data?.students || []);
     } catch (error) {
       toast.error("Error fetching students.");
-    } finally {
-      setLoading(false);
     }
+    // finally {
+    //   setLoading(false);
+    // }
   };
 
   const classOptions = useMemo(
@@ -284,6 +288,7 @@ const CreateCreateBonafide = () => {
     if (hasError) return;
 
     try {
+      setLoadingForSearch(true); // Start loading
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
         `${API_URL}/api/get_srnobonafide/${selectedStudentId}`,
@@ -300,7 +305,9 @@ const CreateCreateBonafide = () => {
         // Populate formData with the fetched data
         setFormData({
           sr_no: fetchedData.sr_no || "",
-          stud_name: fetchedData.studentinformation.student_name || "",
+          stud_name: `${fetchedData?.studentinformation?.first_name || ""} ${
+            fetchedData?.studentinformation?.mid_name || ""
+          } ${fetchedData?.studentinformation?.last_name || ""}`,
           dob: fetchedData.studentinformation.dob || "",
           dob_words: convertDateToWords(fetchedData.studentinformation.dob),
 
@@ -329,6 +336,8 @@ const CreateCreateBonafide = () => {
       }
     } catch (error) {
       toast.error("Error fetching data for the selected student.");
+    } finally {
+      setLoadingForSearch(false);
     }
   };
   // For FOrm
@@ -493,7 +502,7 @@ const CreateCreateBonafide = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Student information updated successfully!");
+        toast.success("Bonafied Certificate updated successfully!");
 
         // Create a URL for the PDF blob and initiate download
         const pdfBlob = new Blob([response.data], { type: "application/pdf" });
@@ -610,9 +619,9 @@ const CreateCreateBonafide = () => {
       <div className="container mt-4">
         {/* Search Section */}
         <div className="w-[95%] flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg border border-gray-400 shadow-md mx-auto mt-10 p-6">
-          <div className="w-full md:w-[90%] flex md:flex-row justify-between items-center">
+          <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center">
             <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ">
-              <div className="w-full  gap-x-14 md:gap-x-6 md:justify-start justify-between my-1 md:my-4 flex md:flex-row">
+              <div className="w-full  gap-x-14 md:gap-x-6 md:justify-start  my-1 md:my-4 flex md:flex-row">
                 <label
                   className="text-md mt-1.5 mr-1 md:mr-0 "
                   htmlFor="classSelect"
@@ -631,15 +640,15 @@ const CreateCreateBonafide = () => {
                     className="text-sm"
                   />
                   {nameErrorForClass && (
-                    <div className="relative top-0.5 ml-1 text-danger text-xs">
+                    <span className="h-8  relative  ml-1 text-danger text-xs">
                       {nameErrorForClass}
-                    </div>
+                    </span>
                   )}
                 </div>
               </div>
               <div className="w-full gap-x-6 relative left-0 md:-left-[5%] justify-between md:w-[98%] my-1 md:my-4 flex md:flex-row">
                 <label
-                  className=" md:w-[45%] text-md mt-1.5 "
+                  className=" md:w-[50%] text-md mt-1.5 "
                   htmlFor="studentSelect"
                 >
                   Student Name <span className="text-red-500 ">*</span>
@@ -656,19 +665,58 @@ const CreateCreateBonafide = () => {
                     className="text-sm"
                   />
                   {nameError && (
-                    <span className="relative top-0.5 md:absolute md:top-[74%] ml-1 text-danger text-xs">
+                    <span className="h-8  relative  ml-1 text-danger text-xs">
                       {nameError}
                     </span>
                   )}
                 </div>
               </div>
+
               <button
+                type="search"
+                onClick={handleSearch}
+                style={{ backgroundColor: "#2196F3" }}
+                className={` my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary   text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                  loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={loadingForSearch}
+              >
+                {loadingForSearch ? (
+                  <span className="flex items-center">
+                    <svg
+                      className="animate-spin h-4 w-4 mr-2 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      ></path>
+                    </svg>
+                    Loading...
+                  </span>
+                ) : (
+                  "Search"
+                )}
+              </button>
+
+              {/* <button
                 onClick={handleSearch}
                 type="button"
                 className="my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary"
               >
                 Search
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -676,7 +724,7 @@ const CreateCreateBonafide = () => {
         {/* Form Section - Displayed when parentInformation is fetched */}
         {parentInformation && (
           <div className="container mx-auto p-4 ">
-            <div className="card  rounded-md ">
+            <div className="card  px-3 rounded-md ">
               {/* <div className="card p-4 rounded-md "> */}
               <div className=" card-header mb-4 flex justify-between items-center ">
                 <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
@@ -953,7 +1001,7 @@ const CreateCreateBonafide = () => {
                           Loading...
                         </span>
                       ) : (
-                        "Update"
+                        "Generate PDF"
                       )}
                     </button>
                   </div>
