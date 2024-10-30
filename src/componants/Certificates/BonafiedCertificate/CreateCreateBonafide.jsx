@@ -271,6 +271,7 @@ const CreateCreateBonafide = () => {
     // Reset error messages
     setNameError("");
     setNameErrorForClass("");
+    setErrors({}); // Clears all field-specific errors
 
     // Validate if class and student are selected
     let hasError = false;
@@ -286,7 +287,20 @@ const CreateCreateBonafide = () => {
 
     // If there are validation errors, exit the function
     if (hasError) return;
+    // Reset form data and selected values after successful submission
+    setFormData({
+      sr_no: "",
+      stud_name: "",
+      father_name: "",
+      dob: "",
+      dob_words: "",
+      date: "",
+      class_division: "",
+      purpose: "",
+      nationality: "",
 
+      // Add other fields here if needed
+    });
     try {
       setLoadingForSearch(true); // Start loading
       const token = localStorage.getItem("authToken");

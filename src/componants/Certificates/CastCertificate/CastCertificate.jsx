@@ -61,7 +61,7 @@ function CastCertificate() {
   }));
   console.log("teacherOptions", teacherOptions);
   const classOptions = classes.map((cls) => ({
-    value: `${cls?.get_class?.name} ${cls.name}`,
+    value: `${cls?.get_class?.name}-${cls.name}`,
     label: `${cls?.get_class?.name} ${cls.name}`,
   }));
 
@@ -128,7 +128,7 @@ function CastCertificate() {
         {
           headers: { Authorization: `Bearer ${token}` },
           // params: { q: selectedClass },
-          params: { section_id: classIdForManage },
+          params: { q: classIdForManage },
         }
       );
       console.log(
