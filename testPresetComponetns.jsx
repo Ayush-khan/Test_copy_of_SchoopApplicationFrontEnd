@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-// command for install it npm install lodash --force
+// command for installing it npm install lodash --force
 import debounce from "lodash/debounce";
 
 import axios from "axios";
