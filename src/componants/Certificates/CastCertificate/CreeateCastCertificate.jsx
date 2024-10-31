@@ -1,4 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import debounce from "lodash/debounce";
+
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
@@ -27,31 +29,30 @@ const CreeateCastCertificate = () => {
     date: "",
     stud_name: "",
     stud_id_no: "",
-    student_UID: "",
+    stud_id: "",
+    // student_UID: "",
     father_name: "",
     mother_name: "",
     class_division: "",
     religion: "",
     caste: "",
-    subCaste: "",
-    birthPlace: "",
+    subcaste: "",
+    birth_place: "",
     state: "",
-    motherTongue: "",
+    mother_tongue: "",
     dob: "",
     dob_words: "",
     nationality: "",
-    previousSchoolAndClass: "",
+    prev_school_class: "",
     admission_date: "",
-    learningHistory: "",
-    progressReport: "",
-    behavior: "",
-    reasonForLeaving: "",
-    dateOfLeavingCertificate: "",
-    phone: "",
-    email: "",
+    class_when_learning: "",
+    progress: "",
+    behaviour: "",
+    leaving_reason: "",
+    lc_date_n_no: "",
+
     stu_aadhaar_no: "",
     teacher_image_name: null,
-    purpose: " ",
   });
 
   const getYearInWords = (year) => {
@@ -197,13 +198,19 @@ const CreeateCastCertificate = () => {
   // Get today's date in YYYY-MM-DD format
   // Calculate today's date
   const today = new Date().toISOString().split("T")[0];
+
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [loadingForClass, setLoadingForClass] = useState(false);
+  const [loadingForStudent, setLoadingForStudent] = useState(false);
+
+  // Fetch classes on initial load
   useEffect(() => {
-    fetchInitialData(); // Fetch classes on component mount
-    fetchStudentNameWithClassId();
+    fetchClasses();
   }, []);
 
-  const fetchInitialData = async () => {
-    // setLoading(true);
+  // Fetch only classes initially
+  const fetchClasses = async () => {
+    setLoadingForClass(true);
     try {
       const token = localStorage.getItem("authToken");
       const classResponse = await axios.get(
@@ -214,34 +221,53 @@ const CreeateCastCertificate = () => {
       );
       setClassesforForm(classResponse.data || []);
     } catch (error) {
-      toast.error("Error fetching initial data.");
+      toast.error("Error fetching classes.");
+    } finally {
+      setLoadingForClass(false);
     }
-    // finally {
-    //   setLoading(false);
-    // }
   };
 
-  const fetchStudentNameWithClassId = async (section_id = null) => {
-    // setLoading(true);
-    try {
-      const params = section_id ? { section_id } : {};
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(
-        `${API_URL}/api/getStudentListBySection`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params,
-        }
-      );
-      setStudentNameWithClassId(response?.data?.students || []);
-    } catch (error) {
-      toast.error("Error fetching students.");
-    }
-    // finally {
-    //   setLoading(false);
-    // }
+  // Fetch students only when a class is selected
+  const fetchStudentNameWithClassId = useCallback(
+    debounce(async (section_id) => {
+      setLoadingForStudent(true);
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(
+          `${API_URL}/api/getStudentListBySection`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { section_id },
+          }
+        );
+        setFilteredStudents(response?.data?.students || []);
+      } catch (error) {
+        toast.error("Error fetching students.");
+      } finally {
+        setLoadingForStudent(false);
+      }
+    }, 500),
+    []
+  );
+
+  // Handle class selection
+  const handleClassSelect = (selectedOption) => {
+    setNameErrorForClass(""); // Reset class error on selection
+    setSelectedClass(selectedOption);
+    setSelectedStudent(null);
+    setSelectedStudentId(null);
+    setClassIdForSearch(selectedOption.value); // Set class ID for search
+    fetchStudentNameWithClassId(selectedOption.value); // Fetch students for the selected class
   };
 
+  // Handle student selection
+  const handleStudentSelect = (selectedOption) => {
+    setNameError(""); // Reset student error on selection
+    setSelectedStudent(selectedOption);
+    setSelectedStudentId(selectedOption.value); // Set selected student ID
+  };
+
+  // Memoized class options
   const classOptions = useMemo(
     () =>
       classesforForm.map((cls) => ({
@@ -251,30 +277,94 @@ const CreeateCastCertificate = () => {
       })),
     [classesforForm]
   );
-
+  // Memoized student options
   const studentOptions = useMemo(
     () =>
-      studentNameWithClassId.map((stu) => ({
+      filteredStudents.map((stu) => ({
         value: stu.student_id,
         label: `${stu?.first_name} ${stu?.mid_name} ${stu.last_name}`,
       })),
-    [studentNameWithClassId]
+    [filteredStudents]
   );
 
-  const handleClassSelect = (selectedOption) => {
-    setNameErrorForClass(""); // Reset class error on selection
-    setSelectedClass(selectedOption);
-    setSelectedStudent(null);
-    setSelectedStudentId(null);
-    setClassIdForSearch(selectedOption.value);
-    fetchStudentNameWithClassId(selectedOption.value);
-  };
+  // useEffect(() => {
+  //   fetchInitialData(); // Fetch classes on component mount
+  //   fetchStudentNameWithClassId();
+  // }, []);
 
-  const handleStudentSelect = (selectedOption) => {
-    setNameError(""); // Reset student error on selection
-    setSelectedStudent(selectedOption);
-    setSelectedStudentId(selectedOption.value);
-  };
+  // const fetchInitialData = async () => {
+  //   // setLoading(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const classResponse = await axios.get(
+  //       `${API_URL}/api/getallClassWithStudentCount`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+  //     setClassesforForm(classResponse.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching initial data.");
+  //   }
+  //   // finally {
+  //   //   setLoading(false);
+  //   // }
+  // };
+
+  // const fetchStudentNameWithClassId = async (section_id = null) => {
+  //   // setLoading(true);
+  //   try {
+  //     const params = section_id ? { section_id } : {};
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await axios.get(
+  //       `${API_URL}/api/getStudentListBySection`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         params,
+  //       }
+  //     );
+  //     setStudentNameWithClassId(response?.data?.students || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching students.");
+  //   }
+  //   // finally {
+  //   //   setLoading(false);
+  //   // }
+  // };
+
+  // const classOptions = useMemo(
+  //   () =>
+  //     classesforForm.map((cls) => ({
+  //       value: cls.section_id,
+  //       label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+  //       key: `${cls.class_id}-${cls.section_id}`,
+  //     })),
+  //   [classesforForm]
+  // );
+
+  // const studentOptions = useMemo(
+  //   () =>
+  //     studentNameWithClassId.map((stu) => ({
+  //       value: stu.student_id,
+  //       label: `${stu?.first_name} ${stu?.mid_name} ${stu.last_name}`,
+  //     })),
+  //   [studentNameWithClassId]
+  // );
+
+  // const handleClassSelect = (selectedOption) => {
+  //   setNameErrorForClass(""); // Reset class error on selection
+  //   setSelectedClass(selectedOption);
+  //   setSelectedStudent(null);
+  //   setSelectedStudentId(null);
+  //   setClassIdForSearch(selectedOption.value);
+  //   fetchStudentNameWithClassId(selectedOption.value);
+  // };
+
+  // const handleStudentSelect = (selectedOption) => {
+  //   setNameError(""); // Reset student error on selection
+  //   setSelectedStudent(selectedOption);
+  //   setSelectedStudentId(selectedOption.value);
+  // };
 
   const handleSearch = async () => {
     // Reset error messages
@@ -302,32 +392,31 @@ const CreeateCastCertificate = () => {
       date: "",
       stud_name: "",
       stud_id_no: "",
-      student_UID: "",
+      stud_id: " ",
+      // student_UID: "",
       stu_aadhaar_no: "",
       father_name: "",
       mother_name: "",
       class_division: "",
       religion: "",
       caste: "",
-      subCaste: "",
-      birthPlace: "",
+      subcaste: "",
+      birth_place: "",
       state: "",
-      motherTongue: "",
+      mother_tongue: "",
       dob: "",
       dob_words: "",
       nationality: "",
-      previousSchoolAndClass: "",
+      prev_school_class: "",
       admission_date: "",
-      learningHistory: "",
-      progressReport: "",
-      behavior: "",
-      reasonForLeaving: "",
-      dateOfLeavingCertificate: "",
-      phone: "",
-      email: "",
+      class_when_learning: "",
+      progress: "",
+      behaviour: "",
+      leaving_reason: "",
+      lc_date_n_no: "",
+
       // stu_aadhaar_no: "",
       teacher_image_name: null,
-      purpose: " ",
     });
 
     try {
@@ -355,6 +444,7 @@ const CreeateCastCertificate = () => {
             fetchedData.studentinformation?.mid_name || ""
           } ${fetchedData.studentinformation?.last_name || ""}`,
           stud_id_no: fetchedData.studentinformation.stud_id_no || "",
+          stud_id: fetchedData.studentinformation.student_id || " ",
           father_name: fetchedData.studentinformation.father_name || "",
           mother_name: fetchedData.studentinformation.mother_name || "",
           class_division:
@@ -363,10 +453,10 @@ const CreeateCastCertificate = () => {
           admission_date: fetchedData.studentinformation.admission_date || "",
           religion: fetchedData.studentinformation.religion || "",
           caste: fetchedData.studentinformation.caste || "",
-          subCaste: fetchedData.studentinformation.subcaste || "",
-          birthPlace: fetchedData.studentinformation.birth_place || "", // Adjusted according to the fetched data
+          subcaste: fetchedData.studentinformation.subcaste || "",
+          birth_place: fetchedData.studentinformation.birth_place || "", // Adjusted according to the fetched data
           state: fetchedData.studentinformation.state || "",
-          motherTongue: fetchedData.studentinformation.mother_tongue || "",
+          mother_tongue: fetchedData.studentinformation.mother_tongue || "",
           dob: fetchedData.studentinformation.dob || "",
           dob_words: fetchedData.dobinwords || "", // Directly from fetched data
           nationality: fetchedData.studentinformation.nationality || "",
@@ -424,8 +514,8 @@ const CreeateCastCertificate = () => {
   //   if (!formData.state) newErrors.state = "State is required";
 
   //   // Validate Mother Tongue
-  //   if (!formData.motherTongue)
-  //     newErrors.motherTongue = "Mother Tongue is required";
+  //   if (!formData.mother_tongue)
+  //     newErrors.mother_tongue = "Mother Tongue is required";
 
   //   // Validate Date of Birth
   //   if (!formData.dob) newErrors.dob = "Date of Birth is required";
@@ -439,8 +529,8 @@ const CreeateCastCertificate = () => {
   //     newErrors.nationality = "Nationality is required";
 
   //   // Validate Previous School and Class
-  //   if (!formData.previousSchoolAndClass)
-  //     newErrors.previousSchoolAndClass =
+  //   if (!formData.prev_school_class)
+  //     newErrors.prev_school_class =
   //       "Previous School and Class is required";
 
   //   // Validate Date of Admission
@@ -448,23 +538,23 @@ const CreeateCastCertificate = () => {
   //     newErrors.admission_date = "Date of Admission is required";
 
   //   // Validate Learning History
-  //   if (!formData.learningHistory)
-  //     newErrors.learningHistory = "Learning History is required";
+  //   if (!formData.class_when_learning)
+  //     newErrors.class_when_learning = "Learning History is required";
 
   //   // Validate Progress Report
-  //   if (!formData.progressReport)
-  //     newErrors.progressReport = "Progress Report is required";
+  //   if (!formData.progress)
+  //     newErrors.progress = "Progress Report is required";
 
   //   // Validate Behavior
-  //   if (!formData.behavior) newErrors.behavior = "Behavior is required";
+  //   if (!formData.behaviour) newErrors.behaviour = "Behavior is required";
 
   //   // Validate Reason for Leaving
-  //   if (!formData.reasonForLeaving)
-  //     newErrors.reasonForLeaving = "Reason for Leaving is required";
+  //   if (!formData.leaving_reason)
+  //     newErrors.leaving_reason = "Reason for Leaving is required";
 
   //   // Validate Date of Leaving Certificate
-  //   if (!formData.dateOfLeavingCertificate)
-  //     newErrors.dateOfLeavingCertificate =
+  //   if (!formData.lc_date_n_no)
+  //     newErrors.lc_date_n_no =
   //       "Date of Leaving Certificate is required";
 
   //   // Validate Aadhar Card Number
@@ -492,19 +582,19 @@ const CreeateCastCertificate = () => {
       "father_name",
       "mother_name",
       "class_division",
-      "birthPlace",
+      "birth_place",
       "state",
-      "motherTongue",
+      "mother_tongue",
       "dob",
       "dob_words",
       "nationality",
-      "previousSchoolAndClass",
+      "prev_school_class",
       "admission_date",
-      "learningHistory",
-      "progressReport",
-      "behavior",
-      "reasonForLeaving",
-      "dateOfLeavingCertificate",
+      "class_when_learning",
+      "progress",
+      "behaviour",
+      "leaving_reason",
+      "lc_date_n_no",
       "stu_aadhaar_no",
     ];
 
@@ -711,25 +801,26 @@ const CreeateCastCertificate = () => {
           date: "",
           stud_name: "",
           stud_id_no: "",
+          stud_id: "",
           father_name: "",
           mother_name: "",
           class_division: "",
           religion: "",
           caste: "",
-          subCaste: "",
-          birthPlace: "",
+          subcaste: "",
+          birth_place: "",
           state: "",
-          motherTongue: "",
+          mother_tongue: "",
           dob: "",
           dob_words: "",
           nationality: "",
-          previousSchoolAndClass: "",
+          prev_school_class: "",
           admission_date: "",
-          learningHistory: "",
-          progressReport: "",
-          behavior: "",
-          reasonForLeaving: "",
-          dateOfLeavingCertificate: "",
+          class_when_learning: "",
+          progress: "",
+          behaviour: "",
+          leaving_reason: "",
+          lc_date_n_no: "",
           stu_aadhaar_no: "",
         });
         setSelectedClass(null);
@@ -814,20 +905,20 @@ const CreeateCastCertificate = () => {
   //         class_division: "",
   //         religion: "",
   //         caste: "",
-  //         subCaste: "",
+  //         subcaste: "",
   //         birthPlace: "",
   //         state: "",
-  //         motherTongue: "",
+  //         mother_tongue: "",
   //         dob: "",
   //         dob_words: "",
   //         nationality: "",
-  //         previousSchoolAndClass: "",
+  //         prev_school_class: "",
   //         admission_date: "",
-  //         learningHistory: "",
-  //         progressReport: "",
-  //         behavior: "",
-  //         reasonForLeaving: "",
-  //         dateOfLeavingCertificate: "",
+  //         class_when_learning: "",
+  //         progress: "",
+  //         behaviour: "",
+  //         leaving_reason: "",
+  //         lc_date_n_no: "",
   //         phone: "",
   //         email: "",
   //         stu_aadhaar_no: "",
@@ -920,61 +1011,124 @@ const CreeateCastCertificate = () => {
   // };
 
   return (
-    <div>
+    <div className="">
       <ToastContainer />
-      <div className="container mt-4">
+      <div className="     w-full md:container mt-4">
         {/* Search Section */}
-        <div className="w-[95%] flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg border border-gray-400 shadow-md mx-auto mt-10 p-6">
-          <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center">
+        <div className=" w-[95%] border-3  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg border border-gray-400 shadow-md mx-auto mt-10 p-6 ">
+          <div className="w-[99%] flex md:flex-row justify-between items-center">
             <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ">
-              <div className="w-full  gap-x-14 md:gap-x-6 md:justify-start  my-1 md:my-4 flex md:flex-row">
-                <label
-                  className="text-md mt-1.5 mr-1 md:mr-0 "
-                  htmlFor="classSelect"
-                >
-                  Class <span className="text-red-500 ">*</span>
-                </label>{" "}
-                <div className="w-full md:w-[50%] ">
-                  <Select
-                    id="classSelect"
-                    value={selectedClass}
-                    onChange={handleClassSelect}
-                    options={classOptions}
-                    placeholder="Select"
-                    isSearchable
-                    isClearable
-                    className="text-sm"
-                  />
-                  {nameErrorForClass && (
-                    <span className="h-8  relative  ml-1 text-danger text-xs">
-                      {nameErrorForClass}
-                    </span>
-                  )}
+              <div className="w-full flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                {/* Class Selection */}
+                <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
+                  <label
+                    className="text-md mt-1.5 mr-1 md:mr-0"
+                    htmlFor="classSelect"
+                  >
+                    Class <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full md:w-[50%]">
+                    <Select
+                      id="classSelect"
+                      value={selectedClass}
+                      onChange={handleClassSelect}
+                      options={classOptions}
+                      placeholder={
+                        loadingForClass ? (
+                          <div className="flex items-center">
+                            <svg
+                              className="animate-spin h-4 w-4 mr-2 text-gray-500"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              ></path>
+                            </svg>
+                            Loading Classes...
+                          </div>
+                        ) : (
+                          "Select"
+                        )
+                      }
+                      isSearchable
+                      isClearable
+                      className="text-sm"
+                      isDisabled={loadingForClass}
+                    />
+                    {nameErrorForClass && (
+                      <span className="h-8 relative ml-1 text-danger text-xs">
+                        {nameErrorForClass}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="w-full gap-x-6 relative left-0 md:-left-[5%] justify-between md:w-[98%] my-1 md:my-4 flex md:flex-row">
-                <label
-                  className=" md:w-[50%] text-md mt-1.5 "
-                  htmlFor="studentSelect"
-                >
-                  Student Name <span className="text-red-500 ">*</span>
-                </label>{" "}
-                <div className="w-full md:w-[80%]">
-                  <Select
-                    id="studentSelect"
-                    value={selectedStudent}
-                    onChange={handleStudentSelect}
-                    options={studentOptions}
-                    placeholder="Select"
-                    isSearchable
-                    isClearable
-                    className="text-sm"
-                  />
-                  {nameError && (
-                    <span className="h-8  relative  ml-1 text-danger text-xs">
-                      {nameError}
-                    </span>
-                  )}
+
+                {/* Student Selection */}
+                <div className="w-full gap-x-6 relative left-0 md:-left-[5%] justify-between md:w-[98%] my-1 md:my-4 flex md:flex-row">
+                  <label
+                    className="md:w-[50%] text-md mt-1.5"
+                    htmlFor="studentSelect"
+                  >
+                    Student Name <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full md:w-[80%]">
+                    <Select
+                      id="studentSelect"
+                      value={selectedStudent}
+                      onChange={handleStudentSelect}
+                      options={studentOptions}
+                      placeholder={
+                        loadingForStudent ? (
+                          <div className="flex items-center">
+                            <svg
+                              className="animate-spin h-4 w-4 mr-2 text-gray-500"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              ></path>
+                            </svg>
+                            Loading students...
+                          </div>
+                        ) : (
+                          "Select"
+                        )
+                      }
+                      isSearchable
+                      isClearable
+                      className="text-sm"
+                      isDisabled={loadingForStudent || !selectedClass}
+                    />
+                    {nameError && (
+                      <span className="h-8 relative ml-1 text-danger text-xs">
+                        {nameError}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1029,11 +1183,11 @@ const CreeateCastCertificate = () => {
 
         {/* Form Section - Displayed when parentInformation is fetched */}
         {parentInformation && (
-          <div className="container mx-auto p-4 ">
-            <div className="card  px-3 rounded-md ">
+          <div className=" w-full  md:container mx-auto py-4 p-4 px-4  ">
+            <div className="    card  px-3 rounded-md ">
               {/* <div className="card p-4 rounded-md "> */}
 
-              <div className=" card-header mb-4 flex justify-between items-center ">
+              <div className=" card-header mb-4 flex justify-between items-center  ">
                 <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
                   Student Information
                 </h5>
@@ -1059,7 +1213,7 @@ const CreeateCastCertificate = () => {
 
               <form
                 onSubmit={handleSubmit}
-                className=" md:gap-x-14 md:mx-4 gap-y-1   overflow-x-hidden shadow-md p-2 bg-gray-50 mb-4"
+                className=" w-full gap-x-1 md:gap-x-14  gap-y-1   overflow-x-hidden shadow-md p-4  bg-gray-50 mb-4"
               >
                 {/* Document Information */}
                 <fieldset className="mb-4">
@@ -1097,6 +1251,7 @@ const CreeateCastCertificate = () => {
                         type="text"
                         id="reg_no"
                         name="reg_no"
+                        maxLength={10}
                         value={formData.reg_no}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -1171,6 +1326,7 @@ const CreeateCastCertificate = () => {
                         type="text"
                         id="stud_id_no"
                         name="stud_id_no"
+                        maxLength={25}
                         value={formData.stud_id_no}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -1192,6 +1348,7 @@ const CreeateCastCertificate = () => {
                         type="text"
                         id="stu_aadhaar_no"
                         name="stu_aadhaar_no"
+                        maxLength={12}
                         value={formData.stu_aadhaar_no}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -1246,6 +1403,7 @@ const CreeateCastCertificate = () => {
                         type="text"
                         id="mother_name"
                         name="mother_name"
+                        maxLength={50}
                         value={formData.mother_name}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -1299,6 +1457,7 @@ const CreeateCastCertificate = () => {
                         type="text"
                         id="religion"
                         name="religion"
+                        maxLength={20}
                         value={formData.religion}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -1315,6 +1474,7 @@ const CreeateCastCertificate = () => {
                         type="text"
                         id="caste"
                         name="caste"
+                        maxLength={20}
                         value={formData.caste}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -1322,16 +1482,17 @@ const CreeateCastCertificate = () => {
                     </div>
                     <div>
                       <label
-                        htmlFor="subCaste"
+                        htmlFor="subcaste"
                         className="block font-bold text-xs mb-2"
                       >
                         Sub-Caste
                       </label>
                       <input
                         type="text"
-                        id="subCaste"
-                        name="subCaste"
-                        value={formData.subCaste}
+                        id="subcaste"
+                        name="subcaste"
+                        maxLength={100}
+                        value={formData.subcaste}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
@@ -1356,14 +1517,15 @@ const CreeateCastCertificate = () => {
                       <input
                         type="text"
                         id="birthPlace"
-                        name="birthPlace"
-                        value={formData.birthPlace}
+                        maxLength={20}
+                        name="birth_place"
+                        value={formData.birth_place}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
-                      {errors.birthPlace && (
+                      {errors.birth_place && (
                         <span className="text-red-500 text-xs ml-2 h-1">
-                          {errors.birthPlace}
+                          {errors.birth_place}
                         </span>
                       )}
                     </div>
@@ -1378,6 +1540,7 @@ const CreeateCastCertificate = () => {
                         type="text"
                         id="state"
                         name="state"
+                        maxLength={50}
                         value={formData.state}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -1390,22 +1553,23 @@ const CreeateCastCertificate = () => {
                     </div>
                     <div>
                       <label
-                        htmlFor="motherTongue"
+                        htmlFor="mother_tongue"
                         className="block font-bold text-xs mb-2"
                       >
                         Mother Tongue <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        id="motherTongue"
-                        name="motherTongue"
-                        value={formData.motherTongue}
+                        id="mother_tongue"
+                        name="mother_tongue"
+                        maxLength={50}
+                        value={formData.mother_tongue}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
-                      {errors.motherTongue && (
+                      {errors.mother_tongue && (
                         <span className="text-red-500 text-xs ml-2 h-1">
-                          {errors.motherTongue}
+                          {errors.mother_tongue}
                         </span>
                       )}
                     </div>
@@ -1467,6 +1631,7 @@ const CreeateCastCertificate = () => {
                         type="text"
                         id="nationality"
                         name="nationality"
+                        maxLength={100}
                         value={formData.nationality}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -1490,7 +1655,7 @@ const CreeateCastCertificate = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label
-                        htmlFor="previousSchoolAndClass"
+                        htmlFor="prev_school_class"
                         className="block font-bold text-xs mb-2"
                       >
                         Previous School and Class{" "}
@@ -1498,15 +1663,16 @@ const CreeateCastCertificate = () => {
                       </label>
                       <input
                         type="text"
-                        id="previousSchoolAndClass"
-                        name="previousSchoolAndClass"
-                        value={formData.previousSchoolAndClass}
+                        id="prev_school_class"
+                        maxLength={100}
+                        name="prev_school_class"
+                        value={formData.prev_school_class}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
-                      {errors.previousSchoolAndClass && (
+                      {errors.prev_school_class && (
                         <span className="text-red-500 text-xs ml-2 h-1">
-                          {errors.previousSchoolAndClass}
+                          {errors.prev_school_class}
                         </span>
                       )}
                     </div>
@@ -1532,72 +1698,76 @@ const CreeateCastCertificate = () => {
                         </span>
                       )}
                     </div>
-                    <div>
+                    <div className=" relative -top-4">
                       <label
-                        htmlFor="learningHistory"
-                        className="block font-bold text-xs mb-2"
+                        htmlFor="class_when_learning"
+                        className="block font-bold text-xs mb-2 "
                       >
-                        Learning History <span className="text-red-500">*</span>
+                        In which class and when was he/she was learning from{" "}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        id="learningHistory"
-                        name="learningHistory"
-                        value={formData.learningHistory}
+                        id="class_when_learning"
+                        maxLength={100}
+                        name="class_when_learning"
+                        value={formData.class_when_learning}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
-                      {errors.learningHistory && (
+                      {errors.class_when_learning && (
                         <span className="text-red-500 text-xs ml-2 h-1">
-                          {errors.learningHistory}
+                          {errors.class_when_learning}
                         </span>
                       )}
                     </div>
                     <div>
                       <label
-                        htmlFor="progressReport"
+                        htmlFor="progress"
                         className="block font-bold text-xs mb-2"
                       >
                         Progress Report <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        id="progressReport"
-                        name="progressReport"
-                        value={formData.progressReport}
+                        id="progress"
+                        name="progress"
+                        maxLength={200}
+                        value={formData.progress}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
-                      {errors.progressReport && (
+                      {errors.progress && (
                         <span className="text-red-500 text-xs ml-2 h-1">
-                          {errors.progressReport}
+                          {errors.progress}
                         </span>
                       )}
                     </div>
                     <div>
                       <label
-                        htmlFor="behavior"
+                        htmlFor="behaviour"
                         className="block font-bold text-xs mb-2"
                       >
                         Behavior <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        id="behavior"
-                        name="behavior"
-                        value={formData.behavior}
+                        id="behaviour"
+                        name="behaviour"
+                        maxLength={200}
+                        value={formData.behaviour}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
-                      {errors.behavior && (
+                      {errors.behaviour && (
                         <span className="text-red-500 text-xs ml-2 h-1">
-                          {errors.behavior}
+                          {errors.behaviour}
                         </span>
                       )}
                     </div>
                     <div>
                       <label
-                        htmlFor="reasonForLeaving"
+                        htmlFor="leaving_reason"
                         className="block font-bold text-xs mb-2"
                       >
                         Reason for Leaving{" "}
@@ -1605,21 +1775,22 @@ const CreeateCastCertificate = () => {
                       </label>
                       <input
                         type="text"
-                        id="reasonForLeaving"
-                        name="reasonForLeaving"
-                        value={formData.reasonForLeaving}
+                        id="leaving_reason"
+                        name="leaving_reason"
+                        maxLength={100}
+                        value={formData.leaving_reason}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
-                      {errors.reasonForLeaving && (
+                      {errors.leaving_reason && (
                         <span className="text-red-500 text-xs ml-2 h-1">
-                          {errors.reasonForLeaving}
+                          {errors.leaving_reason}
                         </span>
                       )}
                     </div>
                     <div>
                       <label
-                        htmlFor="dateOfLeavingCertificate"
+                        htmlFor="lc_date_n_no"
                         className="block font-bold text-xs mb-2"
                       >
                         Date of Leaving Certificate{" "}
@@ -1627,15 +1798,15 @@ const CreeateCastCertificate = () => {
                       </label>
                       <input
                         type="date"
-                        id="dateOfLeavingCertificate"
-                        name="dateOfLeavingCertificate"
-                        value={formData.dateOfLeavingCertificate}
+                        id="lc_date_n_no"
+                        name="lc_date_n_no"
+                        value={formData.lc_date_n_no}
                         onChange={handleChange}
                         className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
-                      {errors.dateOfLeavingCertificate && (
+                      {errors.lc_date_n_no && (
                         <span className="text-red-500 text-xs ml-2 h-1">
-                          {errors.dateOfLeavingCertificate}
+                          {errors.lc_date_n_no}
                         </span>
                       )}
                     </div>

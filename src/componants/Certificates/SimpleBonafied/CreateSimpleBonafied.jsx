@@ -631,10 +631,10 @@ const CreateSimpleBonafied = () => {
   return (
     <div>
       <ToastContainer />
-      <div className="container mt-4">
+      <div className="     w-full md:container mt-4">
         {/* Search Section */}
-        <div className="w-[95%] flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg border border-gray-400 shadow-md mx-auto mt-10 p-6">
-          <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center">
+        <div className=" w-[95%] border-3  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg border border-gray-400 shadow-md mx-auto mt-10 p-6 ">
+          <div className="w-[99%] flex md:flex-row justify-between items-center">
             <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ">
               <div className="w-full  gap-x-14 md:gap-x-6 md:justify-start  my-1 md:my-4 flex md:flex-row">
                 <label
@@ -738,7 +738,8 @@ const CreateSimpleBonafied = () => {
 
         {/* Form Section - Displayed when parentInformation is fetched */}
         {parentInformation && (
-          <div className="container mx-auto p-4 ">
+          // <div className="container mx-auto p-4 ">
+          <div className=" w-full  md:container mx-auto py-4 p-4 px-4  ">
             <div className="card  px-3 rounded-md ">
               {/* <div className="card p-4 rounded-md "> */}
               <div className=" card-header   mb-4 flex justify-between items-center ">
