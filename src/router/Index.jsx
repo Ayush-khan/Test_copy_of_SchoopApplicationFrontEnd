@@ -142,6 +142,7 @@ import BonafiedCertificates from "../componants/Certificates/BonafiedCertificate
 import SImpleBonafied from "../componants/Certificates/SimpleBonafied/SImpleBonafied.jsx";
 import CastCertificate from "../componants/Certificates/CastCertificate/CastCertificate.jsx";
 import CharacterCertificate from "../componants/Certificates/CharaterCertificates/CharacterCertificate.jsx";
+import PercentageCertificate from "../componants/Certificates/PercentageCertificate/PercentageCertificate.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -189,9 +190,14 @@ function Index() {
           // path="#"
           element={<PrivateRoute element={CastCertificate} />}
         />
+        <Route
+          path="/percentageCertificate"
+          // path="#"
+          element={<PrivateRoute element={PercentageCertificate} />}
+        />
         {/* CharacterCertifiacte */}
         <Route
-          path="/CharacterCertificate"
+          path="/characterCertificate"
           // path="#"
           element={<PrivateRoute element={CharacterCertificate} />}
         />
