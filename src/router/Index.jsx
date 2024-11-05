@@ -141,6 +141,7 @@ import ViewCareTacker from "../componants/CareTacker/ViewCareTacker.jsx";
 import BonafiedCertificates from "../componants/Certificates/BonafiedCertificate/BonafiedCertificates.jsx";
 import SImpleBonafied from "../componants/Certificates/SimpleBonafied/SImpleBonafied.jsx";
 import CastCertificate from "../componants/Certificates/CastCertificate/CastCertificate.jsx";
+import CharacterCertificate from "../componants/Certificates/CharaterCertificates/CharacterCertificate.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -187,6 +188,12 @@ function Index() {
           path="/castCertificate"
           // path="#"
           element={<PrivateRoute element={CastCertificate} />}
+        />
+        {/* CharacterCertifiacte */}
+        <Route
+          path="/CharacterCertificate"
+          // path="#"
+          element={<PrivateRoute element={CharacterCertificate} />}
         />
         {/* Simple Bonafied */}
         <Route

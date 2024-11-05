@@ -144,7 +144,7 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
-            to="#"
+            to="/CharacterCertificate"
             className="text-sm font-bold hover:text-black"
           >
             Character Certificate
