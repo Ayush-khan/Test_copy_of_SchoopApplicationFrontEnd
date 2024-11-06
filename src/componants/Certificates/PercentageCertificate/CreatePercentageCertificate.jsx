@@ -612,8 +612,7 @@ const CreatePercentageCertificate = () => {
                         htmlFor="roll_no"
                         className="block font-bold text-xs mb-2"
                       >
-                        General Register No.{" "}
-                        <span className="text-red-500">*</span>
+                        Roll No. <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"

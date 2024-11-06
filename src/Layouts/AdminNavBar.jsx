@@ -215,7 +215,11 @@ const AdminNavBar = () => {
             display: "block",
           }}
         >
-          <NavDropdown.Item as={Link} to="#" className="text-sm font-bold">
+          <NavDropdown.Item
+            as={Link}
+            to="/leavingCertificate"
+            className="text-sm font-bold"
+          >
             Generate LC
           </NavDropdown.Item>
           <NavDropdown.Item
