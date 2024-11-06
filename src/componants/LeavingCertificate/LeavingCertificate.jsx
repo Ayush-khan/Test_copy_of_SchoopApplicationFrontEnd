@@ -1540,7 +1540,7 @@ const LeavingCertificate = () => {
                       </div>
                     </div>
                   </fieldset>
-                  {/* Admission Details */}
+                  {/* Admission Details gdfgd*/}
                   <fieldset className="mb-4">
                     {/* <legend className="font-bold"> */}
                     <h5 className="col-span-4 text-blue-400 py-2">
