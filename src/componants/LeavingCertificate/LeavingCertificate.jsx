@@ -21,19 +21,24 @@ const LeavingCertificate = () => {
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
+  const [selectedActivities, setSelectedActivities] = useState([]);
 
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     sr_no: "",
     reg_no: "",
     date: "",
-    stud_name: "",
+    first_name: "",
+    mid_name: "",
+    last_name: "",
+    udise_pen_no: "",
     stud_id_no: "",
+    promoted_to: " ",
+    School_Board: "",
     stud_id: "",
     // student_UID: "",
     father_name: "",
     mother_name: "",
-    class_division: "",
     religion: "",
     caste: "",
     subcaste: "",
@@ -46,10 +51,12 @@ const LeavingCertificate = () => {
     prev_school_class: "",
     admission_date: "",
     class_when_learning: "",
-    progress: "",
-    behaviour: "",
+
     leaving_reason: "",
     lc_date_n_no: "",
+    lc_date_n_school: "",
+    prev_class: "",
+    dobProof: "",
 
     stu_aadhaar_no: "",
     teacher_image_name: null,
@@ -271,6 +278,12 @@ const LeavingCertificate = () => {
     setSelectedStudent(null);
     setSelectedStudentId(null);
     setClassIdForSearch(selectedOption.value);
+    console.log(
+      "classIdForSearch",
+      classIdForSearch,
+      "setSelectedClass",
+      selectedClass
+    );
     fetchStudentNameWithClassId(selectedOption.value);
   };
 
@@ -304,14 +317,19 @@ const LeavingCertificate = () => {
       sr_no: "",
       reg_no: "",
       date: "",
-      stud_name: "",
+      first_name: "",
+
+      mid_name: "",
+      last_name: "",
+      udise_pen_no: "",
       stud_id_no: "",
+      promoted_to: " ",
+      School_Board: "",
       stud_id: " ",
       // student_UID: "",
       stu_aadhaar_no: "",
       father_name: "",
       mother_name: "",
-      class_division: "",
       religion: "",
       caste: "",
       subcaste: "",
@@ -324,11 +342,12 @@ const LeavingCertificate = () => {
       prev_school_class: "",
       admission_date: "",
       class_when_learning: "",
-      progress: "",
-      behaviour: "",
+
       leaving_reason: "",
       lc_date_n_no: "",
-
+      lc_date_n_school: "",
+      prev_class: "",
+      dobProof: "",
       // stu_aadhaar_no: "",
       teacher_image_name: null,
     });
@@ -354,16 +373,21 @@ const LeavingCertificate = () => {
           sr_no: fetchedData.sr_no || "",
           reg_no: fetchedData.studentinformation.reg_no || "",
           date: today || "", // Directly from the fetched data
-          stud_name: `${fetchedData.studentinformation?.first_name || ""} ${
-            fetchedData.studentinformation?.mid_name || ""
-          } ${fetchedData.studentinformation?.last_name || ""}`,
+          // first_name: `${fetchedData.studentinformation?.first_name || ""} ${
+          //   fetchedData.studentinformation?.mid_name || ""
+          // } ${fetchedData.studentinformation?.last_name || ""}`,
           stud_id_no: fetchedData.studentinformation.stud_id_no || "",
+          first_name: fetchedData.studentinformation.first_name || "",
+          mid_name: fetchedData.studentinformation.mid_name || "",
+          last_name: fetchedData.studentinformation.last_name || "",
+          udise_pen_no: fetchedData.studentinformation.udise_pen_no || "",
+          promoted_to: fetchedData.studentinformation.promoted_to || "",
+          School_Board: fetchedData.studentinformation.School_Board || "",
+
           stud_id: fetchedData.studentinformation.student_id || " ",
           father_name: fetchedData.studentinformation.father_name || "",
           mother_name: fetchedData.studentinformation.mother_name || "",
-          class_division:
-            `${fetchedData.studentinformation.classname}-${fetchedData.studentinformation.sectionname}` ||
-            "",
+
           admission_date: fetchedData.studentinformation.admission_date || "",
           religion: fetchedData.studentinformation.religion || "",
           caste: fetchedData.studentinformation.caste || "",
@@ -400,9 +424,9 @@ const LeavingCertificate = () => {
   //   if (!formData.date) newErrors.date = "Date is required";
 
   //   // Validate Student Name
-  //   if (!formData.stud_name) newErrors.stud_name = "Student Name is required";
-  //   else if (!/^[^\d].*/.test(formData.stud_name))
-  //     newErrors.stud_name = "Student Name should not start with a number";
+  //   if (!formData.first_name) newErrors.first_name = "Student Name is required";
+  //   else if (!/^[^\d].*/.test(formData.first_name))
+  //     newErrors.first_name = "Student Name should not start with a number";
 
   //   // Validate Student ID
   //   if (!formData.stud_id_no) newErrors.stud_id_no = "Student ID is required";
@@ -491,11 +515,13 @@ const LeavingCertificate = () => {
     const requiredFields = [
       "reg_no",
       "date",
-      "stud_name",
+      "first_name",
+      "udise_pen_no",
       "stud_id_no",
+      "promoted_to",
+      "School_Board",
       "father_name",
       "mother_name",
-      "class_division",
       "birth_place",
       "state",
       "mother_tongue",
@@ -505,10 +531,12 @@ const LeavingCertificate = () => {
       "prev_school_class",
       "admission_date",
       "class_when_learning",
-      "progress",
-      "behaviour",
       "leaving_reason",
       "lc_date_n_no",
+      "lc_date_n_school",
+      "prev_class",
+      "dobProof",
+      "academicYear",
       "stu_aadhaar_no",
     ];
 
@@ -519,8 +547,8 @@ const LeavingCertificate = () => {
     });
 
     // Additional validations for specific fields
-    if (formData.stud_name && /^\d/.test(formData.stud_name)) {
-      newErrors.stud_name = "Student Name should not start with a number";
+    if (formData.first_name && /^\d/.test(formData.first_name)) {
+      newErrors.first_name = "Student Name should not start with a number";
     }
 
     if (formData.father_name && /^\d/.test(formData.father_name)) {
@@ -550,8 +578,8 @@ const LeavingCertificate = () => {
     let fieldErrors = {};
 
     // Individual field validation logic
-    if (name === "stud_name" && /^\d/.test(value)) {
-      fieldErrors.stud_name = "Student Name should not start with a number";
+    if (name === "first_name" && /^\d/.test(value)) {
+      fieldErrors.first_name = "Student Name should not start with a number";
     }
 
     if (name === "father_name" && /^\d/.test(value)) {
@@ -595,10 +623,10 @@ const LeavingCertificate = () => {
   //   let fieldErrors = {};
 
   //   // Name validation
-  //   if (name === "stud_name") {
-  //     if (!newValue) fieldErrors.stud_name = "Name is required";
+  //   if (name === "first_name") {
+  //     if (!newValue) fieldErrors.first_name = "Name is required";
   //     else if (/^\d/.test(newValue))
-  //       fieldErrors.stud_name = "Name should not start with a number";
+  //       fieldErrors.first_name = "Name should not start with a number";
   //   }
   //   if (name === "father_name") {
   //     if (!newValue) fieldErrors.father_name = "Name is required";
@@ -713,12 +741,16 @@ const LeavingCertificate = () => {
           sr_no: "",
           reg_no: "",
           date: "",
-          stud_name: "",
+          first_name: "",
+          mid_name: "",
+          last_name: "",
+          udise_pen_no: "",
+          promoted_to: "",
+          School_Board: "",
           stud_id_no: "",
           stud_id: "",
           father_name: "",
           mother_name: "",
-          class_division: "",
           religion: "",
           caste: "",
           subcaste: "",
@@ -731,10 +763,10 @@ const LeavingCertificate = () => {
           prev_school_class: "",
           admission_date: "",
           class_when_learning: "",
-          progress: "",
-          behaviour: "",
           leaving_reason: "",
           lc_date_n_no: "",
+          lc_date_n_school: "",
+          prev_class: "",
           stu_aadhaar_no: "",
         });
         setSelectedClass(null);
@@ -756,173 +788,21 @@ const LeavingCertificate = () => {
     }
   };
 
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   const validationErrors = validate();
-  //   const errorsToCheck = validationErrors || {};
+  const handleCheckboxChange = (event) => {
+    const { value, checked } = event.target;
+    if (checked) {
+      // Add the activity if checked
+      setSelectedActivities((prev) => [...prev, value]);
+    } else {
+      // Remove the activity if unchecked
+      setSelectedActivities((prev) =>
+        prev.filter((activity) => activity !== value)
+      );
+    }
+  };
 
-  //   if (Object.keys(errorsToCheck).length > 0) {
-  //     setErrors(errorsToCheck);
-  //     return;
-  //   }
-
-  //   const formattedFormData = {
-  //     ...formData,
-  //     dob: formatDateString(formData.dob),
-  //     date: formatDateString(formData.date),
-  //   };
-
-  //   try {
-  //     setLoading(true); // Start loading
-
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       throw new Error("No authentication token is found");
-  //     }
-
-  //     // Make an API call with the "blob" response type to download the PDF
-  //     const response = await axios.post(
-  //       `${API_URL}/api/save_pdfcastebonafide`,
-  //       formattedFormData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         responseType: "blob", // Set response type to blob to handle PDF data
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success("Cast Certificate updated successfully!");
-
-  //       // Create a URL for the PDF blob and initiate download
-  //       const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-  //       const pdfUrl = URL.createObjectURL(pdfBlob);
-  //       const link = document.createElement("a");
-  //       link.href = pdfUrl;
-  //       link.download = "BonafideCertificate.pdf"; // PDF file name
-  //       document.body.appendChild(link);
-  //       link.click();
-  //       document.body.removeChild(link);
-
-  //       // Reset form data and selected values after successful submission
-  //       // Reset form data and selected values after successful submission
-  //       setFormData({
-  //         sr_no: "",
-  //         reg_no: "",
-  //         date: "",
-  //         stud_name: "",
-  //         stud_id_no: "",
-  //         student_UID: "",
-  //         father_name: "",
-  //         mother_name: "",
-  //         class_division: "",
-  //         religion: "",
-  //         caste: "",
-  //         subcaste: "",
-  //         birthPlace: "",
-  //         state: "",
-  //         mother_tongue: "",
-  //         dob: "",
-  //         dob_words: "",
-  //         nationality: "",
-  //         prev_school_class: "",
-  //         admission_date: "",
-  //         class_when_learning: "",
-  //         progress: "",
-  //         behaviour: "",
-  //         leaving_reason: "",
-  //         lc_date_n_no: "",
-  //         phone: "",
-  //         email: "",
-  //         stu_aadhaar_no: "",
-  //         teacher_image_name: null,
-  //         purpose: " ",
-  //       });
-  //       setSelectedClass(null); // Reset class selection
-  //       setSelectedStudent(null); // Reset student selection
-  //       setErrors({});
-  //       setBackendErrors({});
-  //       setTimeout(() => {
-  //         setParentInformation(null);
-  //       }, 3000);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error.response.data, error.response.sr_no);
-  //     toast.error("An error occurred while updating the Cast Certificate.");
-
-  //     if (error.response && error.response) {
-  //       setBackendErrors(error.response || {});
-  //     } else {
-  //       toast.error(error.response.sr_no);
-  //     }
-  //   } finally {
-  //     setLoading(false); // Stop loading
-  //   }
-  // };
-
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   const validationErrors = validate();
-  //   const errorsToCheck = validationErrors || {};
-
-  //   if (Object.keys(errorsToCheck).length > 0) {
-  //     setErrors(errorsToCheck);
-  //     return;
-  //   }
-
-  //   const formattedFormData = {
-  //     ...formData,
-  //     dob: formatDateString(formData.dob),
-  //     admission_date: formatDateString(formData.admission_date),
-  //   };
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       throw new Error("No authentication token is found");
-  //     }
-
-  //     // Make an API call with the "blob" response type to download the PDF
-  //     const response = await axios.post(
-  //       `${API_URL}/api/save_pdfbonafide`,
-  //       formattedFormData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         responseType: "blob", // Set response type to blob to handle PDF data
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success("Student information updated successfully!");
-
-  //       // Create a URL for the PDF blob and initiate download
-  //       const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-  //       const pdfUrl = URL.createObjectURL(pdfBlob);
-  //       const link = document.createElement("a");
-  //       link.href = pdfUrl;
-  //       link.download = "BonafideCertificate.pdf"; // PDF file name
-  //       document.body.appendChild(link);
-  //       link.click();
-  //       document.body.removeChild(link);
-
-  //       // setTimeout(() => {
-  //       //   navigate("/careTacker");
-  //       // }, 3000);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error.response.data, error.response.sr_no);
-  //     toast.error("An error occurred while updating the Student information.");
-
-  //     if (error.response && error.response) {
-  //       setBackendErrors(error.response || {});
-  //     } else {
-  //       toast.error(error.response.sr_no);
-  //     }
-  //   }
-  // };
+  // Log or save selectedActivities when needed
+  console.log(selectedActivities);
 
   return (
     <div className="mx-auto w-[95%] p-4 bg-white mt-4 ">
@@ -1165,14 +1045,14 @@ const LeavingCertificate = () => {
                           type="text"
                           maxLength={200}
                           id="staffName"
-                          name="stud_name"
-                          value={formData.stud_name}
+                          name="first_name"
+                          value={formData.first_name}
                           onChange={handleChange}
                           className="block  border w-full border-1 border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
                         />
-                        {errors.stud_name && (
+                        {errors.first_name && (
                           <div className="text-red-500 text-xs ml-2 ">
-                            {errors.stud_name}
+                            {errors.first_name}
                           </div>
                         )}
                       </div>
@@ -1233,13 +1113,14 @@ const LeavingCertificate = () => {
                         )}
                       </div>
 
-                      {classIdForSearch > 99 && (
+                      {classIdForSearch > 427 && (
                         <div className="mt-2">
                           <label
                             htmlFor="studentAadharNumber"
                             className="block font-bold text-xs mb-0.5"
                           >
-                            Udise Pen No.
+                            Udise Pen No.{" "}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -1251,7 +1132,12 @@ const LeavingCertificate = () => {
                             className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                             onChange={handleChange}
                             // onBlur={handleBlur}
-                          />
+                          />{" "}
+                          {errors.udise_pen_no && (
+                            <span className="text-red-500 text-xs ml-2 h-1">
+                              {errors.udise_pen_no}
+                            </span>
+                          )}
                         </div>
                       )}
                       <div>
@@ -1344,28 +1230,6 @@ const LeavingCertificate = () => {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div>
                         <label
-                          htmlFor="class_division"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Class/Division <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="class_division"
-                          name="class_division"
-                          value={formData.class_division}
-                          onChange={handleChange}
-                          readOnly
-                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                        />
-                        {errors.class_division && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.class_division}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <label
                           htmlFor="religion"
                           className="block font-bold text-xs mb-2"
                         >
@@ -1414,6 +1278,71 @@ const LeavingCertificate = () => {
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="subcaste"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Subjects Studied{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="subcaste"
+                          name="subcaste"
+                          maxLength={100}
+                          value={formData.subcaste}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="PromotedTo"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Promoted to <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="PromotedTo"
+                          name="promoted_to"
+                          maxLength={100}
+                          value={formData.promoted_to}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.promoted_to && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.promoted_to}
+                          </span>
+                        )}
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="School/Board"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          School/Board Annual Exam Last Taken with Result{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="School/Board"
+                          name="School_Board"
+                          maxLength={100}
+                          value={formData.School_Board}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.School_Board && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.School_Board}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </fieldset>
@@ -1576,7 +1505,7 @@ const LeavingCertificate = () => {
                           htmlFor="prev_school_class"
                           className="block font-bold text-xs mb-2"
                         >
-                          Previous School and Class{" "}
+                          Previous School Attended{" "}
                           <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -1616,12 +1545,12 @@ const LeavingCertificate = () => {
                           </span>
                         )}
                       </div>
-                      <div className=" relative -top-4">
+                      <div className=" ">
                         <label
                           htmlFor="class_when_learning"
                           className="block font-bold text-xs mb-2 "
                         >
-                          In which class and when was he/she was learning from{" "}
+                          Admitted in Class
                           <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -1641,49 +1570,80 @@ const LeavingCertificate = () => {
                       </div>
                       <div>
                         <label
-                          htmlFor="progress"
+                          htmlFor="Date_of_Leaving_School"
                           className="block font-bold text-xs mb-2"
                         >
-                          Progress Report{" "}
+                          Date of Leaving School
                           <span className="text-red-500">*</span>
                         </label>
                         <input
-                          type="text"
-                          id="progress"
-                          name="progress"
-                          maxLength={200}
-                          value={formData.progress}
+                          type="date"
+                          id="Date_of_Leaving_School"
+                          name="lc_date_n_school"
+                          value={formData.lc_date_n_school}
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                        {errors.progress && (
+                        {errors.lc_date_n_school && (
                           <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.progress}
+                            {errors.lc_date_n_school}
+                          </span>
+                        )}
+                      </div>{" "}
+                      {/* Dropdown for Proof of DOB submitted */}
+                      <div className="mb-4">
+                        <label
+                          htmlFor="dobProof"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Proof of DOB Submitted at the Time of Admission
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          id="dobProof"
+                          name="dobProof"
+                          value={formData.dobProof}
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        >
+                          <option value="">Select an option</option>
+                          <option value="Birth Certificate">
+                            Birth Certificate
+                          </option>
+                          <option value="School Leaving Certificate">
+                            School Leaving Certificate
+                          </option>
+                          <option value="Aadhar Card">Aadhar Card</option>
+                          <option value="Passport">Passport</option>
+                        </select>
+                        {errors.dobProof && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.dobProof}
                           </span>
                         )}
                       </div>
                       <div>
                         <label
-                          htmlFor="behaviour"
+                          htmlFor="prev_class"
                           className="block font-bold text-xs mb-2"
                         >
-                          Behavior <span className="text-red-500">*</span>
+                          Class in Which Last Studied in
+                          <span className="text-red-500">*</span>
                         </label>
                         <input
-                          type="text"
-                          id="behaviour"
-                          name="behaviour"
-                          maxLength={200}
-                          value={formData.behaviour}
+                          type="date"
+                          id="prev_class"
+                          name="prev_class"
+                          value={formData.prev_class}
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                        {errors.behaviour && (
+                        {errors.prev_class && (
                           <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.behaviour}
+                            {errors.prev_class}
                           </span>
                         )}
-                      </div>
+                      </div>{" "}
                       <div>
                         <label
                           htmlFor="leaving_reason"
@@ -1731,6 +1691,265 @@ const LeavingCertificate = () => {
                       </div>
                     </div>
                   </fieldset>
+                  {/* School Records */}
+                  <fieldset className="mb-4">
+                    <h5 className="col-span-4 text-blue-400 py-2">
+                      School Records
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <label
+                          htmlFor="attendance"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Attendance <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="attendance"
+                          name="attendance"
+                          value={formData.attendance}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.attendance && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.attendance}
+                          </span>
+                        )}
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="paid_month"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Month Up to Which School Fees are Paid{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="paid_month"
+                          name="paid_month"
+                          value={formData.paid_month}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.paid_month && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.paid_month}
+                          </span>
+                        )}
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="conduct"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Conduct <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="conduct"
+                          name="conduct"
+                          value={formData.conduct}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.conduct && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.conduct}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mb-4">
+                        <label
+                          htmlFor="group"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Whether Part of (NCC Cadet, Boy Scout, Girl Guide)
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          id="group"
+                          value={formData.group}
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        >
+                          <option value="">Select an option</option>
+                          <option value="NCC Cadet">NCC Cadet</option>
+                          <option value="Boy Scout">Boy Scout</option>
+                          <option value="Girl Guide">Girl Guide</option>
+                          <option value="N.A">N.A</option>
+                        </select>
+                      </div>
+
+                      {/* Display selected value for reference */}
+
+                      <div>
+                        <label
+                          htmlFor="activities"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Extra-Curricular Activities{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        {/* <input
+                          type="text"
+                          id="activities"
+                          name="activities"
+                          value={formData.activities}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        /> */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {[
+                            "Football",
+                            "Basketball",
+                            "Volleyball",
+                            "Tennis",
+                            "Kho Kho",
+                            "Table Tennis",
+                            "Kabaddi",
+                            "Cricket",
+                            "Athletics",
+                            "Dodgeball",
+                            "Throwball",
+                            "Handball",
+                            "Tug of War",
+                            "Gymnastics",
+                            "Skating",
+                            "Martial Arts",
+                            "Badminton",
+                            "Chess",
+                            "Carrom",
+                          ].map((activity) => (
+                            <div key={activity} className="flex items-center">
+                              <input
+                                type="checkbox"
+                                id={activity}
+                                value={activity}
+                                onChange={handleCheckboxChange}
+                                className="mr-2"
+                              />
+                              <label htmlFor={activity} className="text-sm">
+                                {activity}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                        {errors.activities && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.activities}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </fieldset>
+
+                  {/* Certificate Information */}
+                  <fieldset className="mb-4">
+                    <h5 className="col-span-4 text-blue-400 py-2">
+                      Certificate Information
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <label
+                          htmlFor="application_date"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Date of Application for Certificate{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          id="application_date"
+                          name="application_date"
+                          value={formData.application_date}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.application_date && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.application_date}
+                          </span>
+                        )}
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="remarks"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Any Other Remarks{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="remarks"
+                          name="remarks"
+                          value={formData.remarks}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.remarks && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.remarks}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* <div>
+                        <label
+                          htmlFor="academic_year"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Academic Year <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="academic_year"
+                          name="academic_year"
+                          value={formData.academic_year}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.academic_year && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.academic_year}
+                          </span>
+                        )}
+                      </div> */}
+                      {/* Dropdown for Academic Year */}
+                      <div className="mb-4">
+                        <label
+                          htmlFor="academicYear"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Academic Year <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          id="academicYear"
+                          name="academicYear"
+                          value={formData.academicYear}
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        >
+                          <option value="">Select an academic year</option>
+                          <option value="2022-2023">2022-2023</option>
+                          <option value="2023-2024">2023-2024</option>
+                          <option value="2024-2025">2024-2025</option>
+                        </select>
+                        {errors.academicYear && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.academicYear}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </fieldset>
+
                   <div className="col-span-3 text-right">
                     <button
                       type="submit"
