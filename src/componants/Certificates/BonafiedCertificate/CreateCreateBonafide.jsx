@@ -218,13 +218,13 @@ const CreateCreateBonafide = () => {
       const params = section_id ? { section_id } : {};
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/getStudentListBySection`,
+        `${API_URL}/api/getStudentListBySectionData`,
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
         }
       );
-      setStudentNameWithClassId(response?.data?.students || []);
+      setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching students.");
     }
@@ -784,7 +784,7 @@ const CreateCreateBonafide = () => {
                       readOnly
                       value={formData.sr_no}
                       onChange={handleChange}
-                      className="block  border w-full border-gray-300 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                     />
                     {backendErrors.sr_no && (
                       <span className="text-red-500 text-xs ml-2">
@@ -811,7 +811,7 @@ const CreateCreateBonafide = () => {
                       name="stud_name"
                       value={formData.stud_name}
                       onChange={handleChange}
-                      className="block  border w-full border-gray-300 rounded-md py-1 px-3  bg-white shadow-inner"
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
                     />
                     {errors.stud_name && (
                       <div className="text-red-500 text-xs ml-2">
@@ -834,7 +834,7 @@ const CreateCreateBonafide = () => {
                       name="father_name"
                       value={formData.father_name}
                       onChange={handleChange}
-                      className="input-field bg-white block w-full border border-gray-300 rounded-md py-1 px-3  outline-none shadow-inner"
+                      className="input-field bg-white block w-full border border-gray-900 rounded-md py-1 px-3  outline-none shadow-inner"
                     />
                     {errors.father_name && (
                       <div className="text-red-500 text-xs ml-2">
@@ -857,7 +857,7 @@ const CreateCreateBonafide = () => {
                       name="dob"
                       value={formData.dob}
                       onChange={handleChange}
-                      className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                      className="block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                     />
                     {errors.dob && (
                       <div className="text-red-500 text-xs ml-2">
@@ -881,7 +881,7 @@ const CreateCreateBonafide = () => {
                       name="dob_words"
                       value={formData.dob_words}
                       onChange={handleChange}
-                      className="input-field resize block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                      className="input-field resize block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                     />
                     {errors.dob_words && (
                       <div className="text-red-500 text-xs ml-2">
@@ -904,7 +904,7 @@ const CreateCreateBonafide = () => {
                       name="date"
                       value={formData.date}
                       onChange={handleChange}
-                      className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                      className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                     />
                     {errors.date && (
                       <span className="text-red-500 text-xs ml-2">
@@ -927,7 +927,7 @@ const CreateCreateBonafide = () => {
                       name="class_division"
                       value={formData.class_division}
                       onChange={handleChange} // Using the handleChange function to update formData and validate
-                      className="input-field block w-full outline-none border border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                      className="input-field block w-full outline-none border border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                     />
                     {errors.class_division && (
                       <span className="text-red-500 text-xs ml-2">
@@ -950,7 +950,7 @@ const CreateCreateBonafide = () => {
                       name="purpose"
                       value={formData.purpose}
                       onChange={handleChange}
-                      className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                      className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                     />
                     {errors.purpose && (
                       <span className="text-red-500 text-xs ml-2">
@@ -972,7 +972,7 @@ const CreateCreateBonafide = () => {
                       name="nationality"
                       value={formData.nationality}
                       onChange={handleChange}
-                      className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                      className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                     />
                     {errors.nationality && (
                       <span className="text-red-500 text-xs ml-2">

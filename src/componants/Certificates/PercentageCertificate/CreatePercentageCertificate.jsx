@@ -79,13 +79,13 @@ const CreatePercentageCertificate = () => {
       const params = section_id ? { section_id } : {};
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/getStudentListBySection`,
+        `${API_URL}/api/getStudentListBySectionData`,
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
         }
       );
-      setStudentNameWithClassId(response?.data?.students || []);
+      setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching students.");
     }
@@ -604,7 +604,7 @@ const CreatePercentageCertificate = () => {
                         name="sr_no"
                         value={formData.sr_no}
                         readOnly
-                        className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                     </div>
                     <div>
@@ -621,7 +621,7 @@ const CreatePercentageCertificate = () => {
                         maxLength={10}
                         value={formData.roll_no}
                         onChange={handleChange}
-                        className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                        className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
                       {errors.roll_no && (
                         <span className="text-red-500 text-xs ml-2 h-1">
@@ -642,7 +642,7 @@ const CreatePercentageCertificate = () => {
                         name="date"
                         value={formData.date}
                         onChange={handleChange}
-                        className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                        className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
                       {errors.date && (
                         <span className="text-red-500 text-xs ml-2 h-1">
@@ -664,7 +664,7 @@ const CreatePercentageCertificate = () => {
                         name="stud_name"
                         value={formData.stud_name}
                         onChange={handleChange}
-                        className="block  border w-full border-gray-300 rounded-md py-1 px-3  bg-white shadow-inner"
+                        className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
                       />
                       {errors.stud_name && (
                         <div className="text-red-500 text-xs ml-2 ">
@@ -691,7 +691,7 @@ const CreatePercentageCertificate = () => {
                           })
                         }
                         readOnly
-                        className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.class_division && (
                         <span className="text-red-500 text-xs ml-2 h-1">
@@ -729,7 +729,7 @@ const CreatePercentageCertificate = () => {
                             handleMarksChange(subject.c_sm_id, e.target.value)
                           }
                           maxLength={3}
-                          className="block  border w-full border-gray-300 rounded-md py-1 px-3  bg-white shadow-inner"
+                          className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
                         />
                         {errors[subject.c_sm_id] && (
                           <span className="text-red-500 text-xs ml-2">
@@ -753,7 +753,7 @@ const CreatePercentageCertificate = () => {
                         name="total"
                         value={total}
                         readOnly
-                        className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                     </div>
 
@@ -770,7 +770,7 @@ const CreatePercentageCertificate = () => {
                         name="percentage"
                         value={percentage}
                         readOnly
-                        className="input-field block border w-full border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                     </div>
                   </div>

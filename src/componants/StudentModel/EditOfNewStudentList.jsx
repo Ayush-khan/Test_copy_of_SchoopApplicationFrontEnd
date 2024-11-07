@@ -521,13 +521,13 @@ function EditOfNewStudentList() {
       const params = section_id ? { section_id } : {};
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/getStudentListBySection`,
+        `${API_URL}/api/getStudentListBySectionData`,
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
         }
       );
-      setStudentNameWithClassId(response?.data?.students || []);
+      setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching students.");
     } finally {
