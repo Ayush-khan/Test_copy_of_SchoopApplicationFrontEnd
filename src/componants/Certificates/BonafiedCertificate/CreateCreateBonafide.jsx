@@ -518,12 +518,23 @@ const CreateCreateBonafide = () => {
       if (response.status === 200) {
         toast.success("Bonafied Certificate updated successfully!");
 
+        // Extract filename from Content-Disposition header
+        const contentDisposition = response.headers["content-disposition"];
+        let filename = "DownloadedFile.pdf"; // Fallback name
+
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="(.+?)"/);
+          if (match && match[1]) {
+            filename = match[1];
+          }
+        }
+
         // Create a URL for the PDF blob and initiate download
         const pdfBlob = new Blob([response.data], { type: "application/pdf" });
         const pdfUrl = URL.createObjectURL(pdfBlob);
         const link = document.createElement("a");
         link.href = pdfUrl;
-        link.download = "BonafideCertificate.pdf"; // PDF file name
+        link.download = filename;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -797,6 +808,28 @@ const CreateCreateBonafide = () => {
                       </div>
                     )}
                   </div>
+                  <div>
+                    <label
+                      htmlFor="date_of_joining"
+                      className="block font-bold  text-xs mb-2"
+                    >
+                      Issue Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      id="date_of_joining"
+                      // max={today}
+                      name="date"
+                      value={formData.date}
+                      onChange={handleChange}
+                      className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                    />
+                    {errors.date && (
+                      <span className="text-red-500 text-xs ml-2">
+                        {errors.date}
+                      </span>
+                    )}
+                  </div>
                   <div className=" ">
                     <label
                       htmlFor="staffName"
@@ -811,7 +844,8 @@ const CreateCreateBonafide = () => {
                       name="stud_name"
                       value={formData.stud_name}
                       onChange={handleChange}
-                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
+                      readOnly
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                     />
                     {errors.stud_name && (
                       <div className="text-red-500 text-xs ml-2">
@@ -834,7 +868,8 @@ const CreateCreateBonafide = () => {
                       name="father_name"
                       value={formData.father_name}
                       onChange={handleChange}
-                      className="input-field bg-white block w-full border border-gray-900 rounded-md py-1 px-3  outline-none shadow-inner"
+                      readOnly
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                     />
                     {errors.father_name && (
                       <div className="text-red-500 text-xs ml-2">
@@ -890,28 +925,6 @@ const CreateCreateBonafide = () => {
                     )}
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor="date_of_joining"
-                      className="block font-bold  text-xs mb-2"
-                    >
-                      Date <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      id="date_of_joining"
-                      // max={today}
-                      name="date"
-                      value={formData.date}
-                      onChange={handleChange}
-                      className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                    />
-                    {errors.date && (
-                      <span className="text-red-500 text-xs ml-2">
-                        {errors.date}
-                      </span>
-                    )}
-                  </div>
                   <div>
                     <label
                       htmlFor="class_division"
@@ -972,7 +985,8 @@ const CreateCreateBonafide = () => {
                       name="nationality"
                       value={formData.nationality}
                       onChange={handleChange}
-                      className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                      readOnly
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                     />
                     {errors.nationality && (
                       <span className="text-red-500 text-xs ml-2">

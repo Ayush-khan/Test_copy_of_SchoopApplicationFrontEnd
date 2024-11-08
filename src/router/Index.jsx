@@ -163,6 +163,12 @@ function Index() {
           path="//manage-role-access/:roleId"
           element={<PrivateRoute element={ManageRoleAccess} />}
         />
+
+        {/* <Route
+          path="/TestForAllfunctionlity"
+          // path="#"
+          element={<PrivateRoute element={TestForAllfunctionlity} />}
+        /> */}
         <Route
           path="/student-create"
           element={<PrivateRoute element={CreateStudent} />}

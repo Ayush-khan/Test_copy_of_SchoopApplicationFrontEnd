@@ -492,12 +492,22 @@ const CreateCharacterCertificate = () => {
       if (response.status === 200) {
         toast.success("CharacterCertificate updated successfully!");
 
+        // Extract filename from Content-Disposition header
+        const contentDisposition = response.headers["content-disposition"];
+        let filename = "DownloadedFile.pdf"; // Fallback name
+
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="(.+?)"/);
+          if (match && match[1]) {
+            filename = match[1];
+          }
+        }
         // Create a URL for the PDF blob and initiate download
         const pdfBlob = new Blob([response.data], { type: "application/pdf" });
         const pdfUrl = URL.createObjectURL(pdfBlob);
         const link = document.createElement("a");
         link.href = pdfUrl;
-        link.download = "BonafideCertificate.pdf"; // PDF file name
+        link.download = filename;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -768,34 +778,12 @@ const CreateCharacterCertificate = () => {
                       </div>
                     )}
                   </div>
-                  <div className=" ">
-                    <label
-                      htmlFor="staffName"
-                      className="block font-bold  text-xs mb-2"
-                    >
-                      Student Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      maxLength={200}
-                      id="staffName"
-                      name="stud_name"
-                      value={formData.stud_name}
-                      onChange={handleChange}
-                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
-                    />
-                    {errors.stud_name && (
-                      <div className="text-red-500 text-xs ml-2">
-                        {errors.stud_name}
-                      </div>
-                    )}
-                  </div>
                   <div>
                     <label
                       htmlFor="date_of_joining"
                       className="block font-bold  text-xs mb-2"
                     >
-                      Date <span className="text-red-500">*</span>
+                      Issue Date <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
@@ -812,6 +800,30 @@ const CreateCharacterCertificate = () => {
                       </span>
                     )}
                   </div>
+                  <div className=" ">
+                    <label
+                      htmlFor="staffName"
+                      className="block font-bold  text-xs mb-2"
+                    >
+                      Student Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={200}
+                      id="staffName"
+                      name="stud_name"
+                      value={formData.stud_name}
+                      onChange={handleChange}
+                      readOnly
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
+                    />
+                    {errors.stud_name && (
+                      <div className="text-red-500 text-xs ml-2">
+                        {errors.stud_name}
+                      </div>
+                    )}
+                  </div>
+
                   <div>
                     <label
                       htmlFor="dob"

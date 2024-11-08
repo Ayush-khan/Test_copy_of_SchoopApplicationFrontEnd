@@ -399,13 +399,23 @@ const CreatePercentageCertificate = () => {
 
       if (response.status === 200) {
         toast.success("Cast Certificate updated successfully!");
+        // Extract filename from Content-Disposition header
+        const contentDisposition = response.headers["content-disposition"];
+        let filename = "DownloadedFile.pdf"; // Fallback name
 
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="(.+?)"/);
+          if (match && match[1]) {
+            filename = match[1];
+          }
+        }
         // Download PDF
         const pdfBlob = new Blob([response.data], { type: "application/pdf" });
         const pdfUrl = URL.createObjectURL(pdfBlob);
         const link = document.createElement("a");
         link.href = pdfUrl;
-        link.download = "BonafideCertificate.pdf";
+        link.download = filename;
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -609,32 +619,10 @@ const CreatePercentageCertificate = () => {
                     </div>
                     <div>
                       <label
-                        htmlFor="roll_no"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Roll No. <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="roll_no"
-                        name="roll_no"
-                        maxLength={10}
-                        value={formData.roll_no}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.roll_no && (
-                        <span className="text-red-500 text-xs ml-2 h-1">
-                          {errors.roll_no}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label
                         htmlFor="date"
                         className="block font-bold text-xs mb-2"
                       >
-                        Date <span className="text-red-500">*</span>
+                        Issue Date <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="date"
@@ -650,6 +638,30 @@ const CreatePercentageCertificate = () => {
                         </span>
                       )}
                     </div>
+                    <div>
+                      <label
+                        htmlFor="roll_no"
+                        className="block font-bold text-xs mb-2"
+                      >
+                        Roll No. <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="roll_no"
+                        name="roll_no"
+                        maxLength={10}
+                        value={formData.roll_no}
+                        onChange={handleChange}
+                        readOnly
+                        className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
+                      />
+                      {errors.roll_no && (
+                        <span className="text-red-500 text-xs ml-2 h-1">
+                          {errors.roll_no}
+                        </span>
+                      )}
+                    </div>
+
                     <div className=" ">
                       <label
                         htmlFor="staffName"
@@ -664,7 +676,8 @@ const CreatePercentageCertificate = () => {
                         name="stud_name"
                         value={formData.stud_name}
                         onChange={handleChange}
-                        className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
+                        readOnly
+                        className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                       />
                       {errors.stud_name && (
                         <div className="text-red-500 text-xs ml-2 ">

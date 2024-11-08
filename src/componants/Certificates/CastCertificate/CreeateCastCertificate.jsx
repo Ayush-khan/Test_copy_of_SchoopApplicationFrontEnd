@@ -2562,12 +2562,24 @@ const CreeateCastCertificate = () => {
       if (response.status === 200) {
         toast.success("Cast Certificate updated successfully!");
 
+        // Extract filename from Content-Disposition header
+        const contentDisposition = response.headers["content-disposition"];
+        let filename = "DownloadedFile.pdf"; // Fallback name
+
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="(.+?)"/);
+          if (match && match[1]) {
+            filename = match[1];
+          }
+        }
         // Download PDF
         const pdfBlob = new Blob([response.data], { type: "application/pdf" });
         const pdfUrl = URL.createObjectURL(pdfBlob);
         const link = document.createElement("a");
         link.href = pdfUrl;
-        link.download = "BonafideCertificate.pdf";
+        link.download = filename;
+
+        // link.download = "BonafideCertificate.pdf";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
