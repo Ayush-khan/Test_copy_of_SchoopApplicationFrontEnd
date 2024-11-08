@@ -341,17 +341,33 @@ const CreatePercentageCertificate = () => {
     });
 
     // Validate marks for each subject
+    // formData.classsubject?.forEach((subject) => {
+    //   const markValue = marks[subject.c_sm_id];
+    //   console.log("markds", markValue);
+    //   if (markValue === undefined || markValue === "" || markValue === 0) {
+    //     newErrors[subject.c_sm_id] = `${subject.name} marks are required.`;
+    //   } else if (!/^\d+$/.test(markValue)) {
+    //     newErrors[subject.c_sm_id] = `${subject.name} marks should be numeric.`;
+    //   } else if (markValue.toString().length > 3) {
+    //     newErrors[
+    //       subject.c_sm_id
+    //     ] = `${subject.name} marks cannot exceed 3 characters.`;
+    //   }
+    // });
+    // Validate marks for each subject
     formData.classsubject?.forEach((subject) => {
       const markValue = marks[subject.c_sm_id];
-      console.log("markds", markValue);
+      console.log("marks", markValue);
+
       if (markValue === undefined || markValue === "" || markValue === 0) {
         newErrors[subject.c_sm_id] = `${subject.name} marks are required.`;
-      } else if (!/^\d+$/.test(markValue)) {
+      } else if (isNaN(markValue)) {
         newErrors[subject.c_sm_id] = `${subject.name} marks should be numeric.`;
-      } else if (markValue.toString().length > 3) {
+      } else if (parseFloat(markValue) > 100 || parseFloat(markValue) < 1) {
         newErrors[
           subject.c_sm_id
-        ] = `${subject.name} marks cannot exceed 3 characters.`;
+        ] = `${subject.name} marks should not exceed 100.
+.`;
       }
     });
 
@@ -398,7 +414,7 @@ const CreatePercentageCertificate = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Cast Certificate updated successfully!");
+        toast.success("Percentage Certificate updated successfully!");
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
         let filename = "DownloadedFile.pdf"; // Fallback name
@@ -439,7 +455,9 @@ const CreatePercentageCertificate = () => {
       }
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
-      toast.error("An error occurred while updating the Cast Certificate.");
+      toast.error(
+        "An error occurred while updating the Percentage Certificate."
+      );
 
       if (error.response && error.response.data) {
         setBackendErrors(error.response.data);

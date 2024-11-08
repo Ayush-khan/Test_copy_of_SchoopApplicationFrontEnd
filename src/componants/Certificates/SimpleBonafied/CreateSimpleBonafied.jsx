@@ -517,7 +517,7 @@ const CreateSimpleBonafied = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Simple Bonafied Certificate updated successfully!");
+        toast.success("Simple Bonafide Certificate updated successfully!");
 
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
@@ -563,7 +563,9 @@ const CreateSimpleBonafied = () => {
       }
     } catch (error) {
       console.error("Error:", error.response.data, error.response.sr_no);
-      toast.error("An error occurred while updating the Student information.");
+      toast.error(
+        "An error occurred while updating the Simple Bonafide Certificate."
+      );
 
       if (error.response && error.response) {
         setBackendErrors(error.response || {});

@@ -52,6 +52,7 @@ const LeavingCertificate = () => {
     admission_date: "",
     class_when_learning: "",
 
+    subjects: [],
     leaving_reason: "",
     lc_date_n_no: "",
     lc_date_n_school: "",
@@ -343,6 +344,7 @@ const LeavingCertificate = () => {
       admission_date: "",
       class_when_learning: "",
 
+      subjects: [],
       leaving_reason: "",
       lc_date_n_no: "",
       lc_date_n_school: "",
@@ -356,7 +358,7 @@ const LeavingCertificate = () => {
       setLoadingForSearch(true); // Start loading
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/get_srnocastebonafide/${selectedStudentId}`,
+        `${API_URL}/api/get_srnoleavingcertificatedata/${selectedStudentId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -367,12 +369,17 @@ const LeavingCertificate = () => {
         const fetchedData = response.data.data; // Extract the data
 
         setParentInformation(fetchedData); // Assuming response data contains parent information
-
+        // Extract all subject names for initial selected state
+        const allSubjectNames = (fetchedData.classsubject || []).map(
+          (subject) => subject.name
+        );
         // Populate formData with the fetched data
         setFormData({
           sr_no: fetchedData.sr_no || "",
           reg_no: fetchedData.studentinformation.reg_no || "",
           date: today || "", // Directly from the fetched data
+          subjects: fetchedData.classsubject || [],
+          selectedSubjects: allSubjectNames, // Initialize with all subjects checked
           // first_name: `${fetchedData.studentinformation?.first_name || ""} ${
           //   fetchedData.studentinformation?.mid_name || ""
           // } ${fetchedData.studentinformation?.last_name || ""}`,
@@ -803,6 +810,20 @@ const LeavingCertificate = () => {
 
   // Log or save selectedActivities when needed
   console.log(selectedActivities);
+  // Handle selection of each subject
+  const handleSubjectSelection = (e, subjectName) => {
+    setFormData((prevData) => {
+      const updatedSelectedSubjects = e.target.checked
+        ? [...prevData.selectedSubjects, subjectName] // add subject if checked
+        : prevData.selectedSubjects.filter((name) => name !== subjectName); // remove subject if unchecked
+
+      return {
+        ...prevData,
+        selectedSubjects: updatedSelectedSubjects,
+      };
+    });
+  };
+  console.log("handleSubjectSelection", formData.selectedSubjects);
 
   return (
     <div className="mx-auto w-[95%] p-4 bg-white mt-4 ">
@@ -1281,21 +1302,64 @@ const LeavingCertificate = () => {
                       </div>
                       <div>
                         <label
-                          htmlFor="subcaste"
+                          htmlFor="subjects"
                           className="block font-bold text-xs mb-2"
                         >
                           Subjects Studied{" "}
                           <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="text"
-                          id="subcaste"
-                          name="subcaste"
-                          maxLength={100}
-                          value={formData.subcaste}
-                          onChange={handleChange}
-                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                        />
+
+                        {/* Render checkboxes for each subject */}
+                        {formData.subjects && formData.subjects.length > 0 ? (
+                          formData.subjects.map((subject, index) => (
+                            <div key={index} className="mb-2">
+                              <label className="inline-flex items-center">
+                                <input
+                                  type="checkbox"
+                                  name="subjects"
+                                  value={subject.name}
+                                  checked={formData.selectedSubjects.includes(
+                                    subject.name
+                                  )}
+                                  onChange={(e) =>
+                                    handleSubjectSelection(e, subject.name)
+                                  }
+                                  className="form-checkbox h-4 w-4 text-blue-600"
+                                />
+                                <span className="ml-2 text-sm">
+                                  {subject.name}
+                                </span>
+                              </label>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-gray-500">
+                            No subjects available
+                          </p>
+                        )}
+
+                        {/* Conditional extra subject for class 100 */}
+                        {formData.class === 100 && (
+                          <div className="mb-2">
+                            <label className="inline-flex items-center">
+                              <input
+                                type="checkbox"
+                                name="subjects"
+                                value="Basic Mathematics"
+                                checked={formData.selectedSubjects.includes(
+                                  "Basic Mathematics"
+                                )}
+                                onChange={(e) =>
+                                  handleSubjectSelection(e, "Basic Mathematics")
+                                }
+                                className="form-checkbox h-4 w-4 text-blue-600"
+                              />
+                              <span className="ml-2 text-sm">
+                                Basic Mathematics
+                              </span>
+                            </label>
+                          </div>
+                        )}
                       </div>
 
                       <div>
