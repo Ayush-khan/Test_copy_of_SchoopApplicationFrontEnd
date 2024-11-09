@@ -2130,7 +2130,8 @@ const CreeateCastCertificate = () => {
   );
 
   const handleClassSelect = (selectedOption) => {
-    setNameErrorForClass(""); // Reset class error on selection
+    // setNameErrorForClass(""); // Reset class error on selection
+    setNameError("");
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
@@ -2150,20 +2151,26 @@ const CreeateCastCertificate = () => {
     setNameErrorForClass("");
     setErrors({}); // Clears all field-specific errors
 
+    if (!selectedClass && !selectedStudent) {
+      setNameError("Please select at least one of them.");
+      toast.error("Please select at least one of them!");
+      return;
+    }
+
     // Validate if class and student are selected
-    let hasError = false;
+    // let hasError = false;
 
-    if (!selectedClass) {
-      setNameErrorForClass("Please select a class.");
-      hasError = true;
-    }
-    if (!selectedStudent) {
-      setNameError("Please select a student.");
-      hasError = true;
-    }
+    // if (!selectedClass) {
+    //   setNameErrorForClass("Please select a class.");
+    //   hasError = true;
+    // }
+    // if (!selectedStudent) {
+    //   setNameError("Please select a student.");
+    //   hasError = true;
+    // }
 
-    // If there are validation errors, exit the function
-    if (hasError) return;
+    // // If there are validation errors, exit the function
+    // if (hasError) return;
     setFormData({
       sr_no: "",
       reg_no: "",
@@ -2826,9 +2833,9 @@ const CreeateCastCertificate = () => {
                     isClearable
                     className="text-sm"
                   />
-                  {nameErrorForClass && (
+                  {nameError && (
                     <span className="h-8  relative  ml-1 text-danger text-xs">
-                      {nameErrorForClass}
+                      {nameError}
                     </span>
                   )}
                 </div>

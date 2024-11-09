@@ -253,7 +253,8 @@ const CreateSimpleBonafied = () => {
   );
 
   const handleClassSelect = (selectedOption) => {
-    setNameErrorForClass(""); // Reset class error on selection
+    // setNameErrorForClass(""); // Reset class error on selection
+    setNameError("");
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
@@ -273,20 +274,25 @@ const CreateSimpleBonafied = () => {
     setNameErrorForClass("");
     setErrors({}); // Clears all field-specific errors
 
-    // Validate if class and student are selected
-    let hasError = false;
-
-    if (!selectedClass) {
-      setNameErrorForClass("Please select a class.");
-      hasError = true;
+    if (!selectedClass && !selectedStudent) {
+      setNameError("Please select at least one of them.");
+      toast.error("Please select at least one of them!");
+      return;
     }
-    if (!selectedStudent) {
-      setNameError("Please select a student.");
-      hasError = true;
-    }
+    // // Validate if class and student are selected
+    // let hasError = false;
 
-    // If there are validation errors, exit the function
-    if (hasError) return;
+    // if (!selectedClass) {
+    //   setNameErrorForClass("Please select a class.");
+    //   hasError = true;
+    // }
+    // if (!selectedStudent) {
+    //   setNameError("Please select a student.");
+    //   hasError = true;
+    // }
+
+    // // If there are validation errors, exit the function
+    // if (hasError) return;
     setFormData({
       sr_no: "",
       stud_name: "",
@@ -666,9 +672,9 @@ const CreateSimpleBonafied = () => {
                     isClearable
                     className="text-sm"
                   />
-                  {nameErrorForClass && (
+                  {nameError && (
                     <span className="h-8  relative  ml-1 text-danger text-xs">
-                      {nameErrorForClass}
+                      {nameError}
                     </span>
                   )}
                 </div>

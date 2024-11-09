@@ -251,7 +251,8 @@ const CreateCharacterCertificate = () => {
   );
 
   const handleClassSelect = (selectedOption) => {
-    setNameErrorForClass(""); // Reset class error on selection
+    // setNameErrorForClass(""); // Reset class error on selection
+    setNameError("");
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
@@ -271,20 +272,25 @@ const CreateCharacterCertificate = () => {
     setNameErrorForClass("");
     setErrors({}); // Clears all field-specific errors
 
+    if (!selectedClass && !selectedStudent) {
+      setNameError("Please select at least one of them.");
+      toast.error("Please select at least one of them!");
+      return;
+    }
     // Validate if class and student are selected
-    let hasError = false;
+    // let hasError = false;
 
-    if (!selectedClass) {
-      setNameErrorForClass("Please select a class.");
-      hasError = true;
-    }
-    if (!selectedStudent) {
-      setNameError("Please select a student.");
-      hasError = true;
-    }
+    // if (!selectedClass) {
+    //   setNameErrorForClass("Please select a class.");
+    //   hasError = true;
+    // }
+    // if (!selectedStudent) {
+    //   setNameError("Please select a student.");
+    //   hasError = true;
+    // }
 
-    // If there are validation errors, exit the function
-    if (hasError) return;
+    // // If there are validation errors, exit the function
+    // if (hasError) return;
     // Reset form data and selected values after successful submission
     setFormData({
       sr_no: "",
@@ -534,7 +540,9 @@ const CreateCharacterCertificate = () => {
       }
     } catch (error) {
       console.error("Error:", error.response.data, error.response.sr_no);
-      toast.error("An error occurred while updating the Student information.");
+      toast.error(
+        "An error occurred while updating the Character Certificate."
+      );
 
       if (error.response && error.response) {
         setBackendErrors(error.response || {});
@@ -635,9 +643,9 @@ const CreateCharacterCertificate = () => {
                     isClearable
                     className="text-sm"
                   />
-                  {nameErrorForClass && (
+                  {nameError && (
                     <span className="h-8  relative  ml-1 text-danger text-xs">
-                      {nameErrorForClass}
+                      {nameError}
                     </span>
                   )}
                 </div>

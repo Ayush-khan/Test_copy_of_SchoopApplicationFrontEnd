@@ -253,7 +253,8 @@ const CreateCreateBonafide = () => {
   );
 
   const handleClassSelect = (selectedOption) => {
-    setNameErrorForClass(""); // Reset class error on selection
+    // setNameErrorForClass(""); // Reset class error on selection
+    setNameError("");
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
@@ -273,20 +274,24 @@ const CreateCreateBonafide = () => {
     setNameErrorForClass("");
     setErrors({}); // Clears all field-specific errors
 
+    if (!selectedClass && !selectedStudent) {
+      setNameError("Please select at least one of them.");
+      toast.error("Please select at least one of them!");
+      return;
+    }
     // Validate if class and student are selected
-    let hasError = false;
-
-    if (!selectedClass) {
-      setNameErrorForClass("Please select a class.");
-      hasError = true;
-    }
-    if (!selectedStudent) {
-      setNameError("Please select a student.");
-      hasError = true;
-    }
+    // let hasError = false;
+    // if (!selectedClass) {
+    //   setNameErrorForClass("Please select a class.");
+    //   hasError = true;
+    // }
+    // if (!selectedStudent) {
+    //   setNameError("Please select a student.");
+    //   hasError = true;
+    // }
 
     // If there are validation errors, exit the function
-    if (hasError) return;
+    // if (hasError) return;
     // Reset form data and selected values after successful submission
     setFormData({
       sr_no: "",
@@ -664,11 +669,16 @@ const CreateCreateBonafide = () => {
                     isClearable
                     className="text-sm"
                   />
-                  {nameErrorForClass && (
+                  {/* {nameErrorForClass && (
                     <span className="h-8  relative  ml-1 text-danger text-xs">
                       {nameErrorForClass}
                     </span>
-                  )}
+                  )} */}
+                  {nameError && (
+                    <div className=" h-8  relative  ml-1 text-danger text-xs">
+                      {nameError}
+                    </div>
+                  )}{" "}
                 </div>
               </div>
               <div className="w-full gap-x-6 relative left-0 md:-left-[5%] justify-between md:w-[98%] my-1 md:my-4 flex md:flex-row">
@@ -689,11 +699,16 @@ const CreateCreateBonafide = () => {
                     isClearable
                     className="text-sm"
                   />
-                  {nameError && (
+                  {/* {nameError && (
                     <span className="h-8  relative  ml-1 text-danger text-xs">
                       {nameError}
                     </span>
-                  )}
+                  )} */}
+                  {nameError && (
+                    <div className=" h-8  relative  ml-1 text-danger text-xs">
+                      {nameError}
+                    </div>
+                  )}{" "}
                 </div>
               </div>
 
