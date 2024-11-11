@@ -1777,7 +1777,7 @@ const LeavingCertificate = () => {
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         /> */}
-                        <div className="grid grid-cols-2 md:grid-cols-9 gap-2">
+                        <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
                           {[
                             "Football",
                             "Basketball",
