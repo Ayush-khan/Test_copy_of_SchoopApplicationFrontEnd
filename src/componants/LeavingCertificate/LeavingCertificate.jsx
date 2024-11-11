@@ -1,6 +1,7 @@
 // Try UP
 import { useState, useEffect, useMemo } from "react";
 // import debounce from "lodash/debounce";
+import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
@@ -21,6 +22,8 @@ const LeavingCertificate = () => {
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
+  const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
+
   const [selectedActivities, setSelectedActivities] = useState([]);
 
   const navigate = useNavigate();
@@ -34,7 +37,7 @@ const LeavingCertificate = () => {
     udise_pen_no: "",
     stud_id_no: "",
     promoted_to: " ",
-    School_Board: "",
+    last_exam: "",
     stud_id: "",
     // student_UID: "",
     father_name: "",
@@ -50,17 +53,18 @@ const LeavingCertificate = () => {
     nationality: "",
     prev_school_class: "",
     admission_date: "",
-    class_when_learning: "",
-
+    admission_class: "",
+    attendance: "",
     subjects: [],
-    leaving_reason: "",
-    lc_date_n_no: "",
-    lc_date_n_school: "",
-    prev_class: "",
-    dobProof: "",
+    reason_leaving: "",
+    application_date: "",
+    leaving_date: "",
+    standard_studying: "",
+    dob_proof: "",
     class_id_for_subj: "",
     stu_aadhaar_no: "",
     teacher_image_name: null,
+    academicStudent: [],
   });
 
   const getYearInWords = (year) => {
@@ -331,7 +335,7 @@ const LeavingCertificate = () => {
       udise_pen_no: "",
       stud_id_no: "",
       promoted_to: " ",
-      School_Board: "",
+      last_exam: "",
       stud_id: " ",
       // student_UID: "",
       stu_aadhaar_no: "",
@@ -348,15 +352,16 @@ const LeavingCertificate = () => {
       nationality: "",
       prev_school_class: "",
       admission_date: "",
-      class_when_learning: "",
-
+      admission_class: "",
+      attendance: "",
       subjects: [],
-      leaving_reason: "",
-      lc_date_n_no: "",
-      lc_date_n_school: "",
-      prev_class: "",
-      dobProof: "",
+      reason_leaving: "",
+      application_date: "",
+      leaving_date: "",
+      standard_studying: "",
+      dob_proof: "",
       // stu_aadhaar_no: "",
+      academicStudent: [],
       teacher_image_name: null,
     });
 
@@ -386,6 +391,7 @@ const LeavingCertificate = () => {
           reg_no: fetchedData.studentinformation.reg_no || "",
           date: today || "", // Directly from the fetched data
           subjects: fetchedData.classsubject || [],
+          academicStudent: fetchedData.academicStudent || [],
           selectedSubjects: allSubjectNames, // Initialize with all subjects checked
           // first_name: `${fetchedData.studentinformation?.first_name || ""} ${
           //   fetchedData.studentinformation?.mid_name || ""
@@ -396,7 +402,7 @@ const LeavingCertificate = () => {
           last_name: fetchedData.studentinformation.last_name || "",
           udise_pen_no: fetchedData.studentinformation.udise_pen_no || "",
           promoted_to: fetchedData.studentinformation.promoted_to || "",
-          School_Board: fetchedData.studentinformation.School_Board || "",
+          last_exam: fetchedData.studentinformation.last_exam || "",
 
           stud_id: fetchedData.studentinformation.student_id || " ",
           father_name: fetchedData.studentinformation.father_name || "",
@@ -410,7 +416,9 @@ const LeavingCertificate = () => {
           state: fetchedData.studentinformation.state || "",
           mother_tongue: fetchedData.studentinformation.mother_tongue || "",
           dob: fetchedData.studentinformation.dob || "",
-          dob_words: fetchedData.dobinwords || "", // Directly from fetched data
+          // dob_words: fetchedData.dobinwords || "", // Directly from fetched data
+          dob_words: convertDateToWords(fetchedData.studentinformation.dob),
+          attendance: fetchedData.total_attendance || "",
           nationality: fetchedData.studentinformation.nationality || "",
           stu_aadhaar_no: fetchedData.studentinformation.stu_aadhaar_no || "",
           teacher_image_name:
@@ -490,8 +498,8 @@ const LeavingCertificate = () => {
   //     newErrors.admission_date = "Date of Admission is required";
 
   //   // Validate Learning History
-  //   if (!formData.class_when_learning)
-  //     newErrors.class_when_learning = "Learning History is required";
+  //   if (!formData.admission_class)
+  //     newErrors.admission_class = "Learning History is required";
 
   //   // Validate Progress Report
   //   if (!formData.progress)
@@ -501,12 +509,12 @@ const LeavingCertificate = () => {
   //   if (!formData.behaviour) newErrors.behaviour = "Behavior is required";
 
   //   // Validate Reason for Leaving
-  //   if (!formData.leaving_reason)
-  //     newErrors.leaving_reason = "Reason for Leaving is required";
+  //   if (!formData.reason_leaving)
+  //     newErrors.reason_leaving = "Reason for Leaving is required";
 
   //   // Validate Date of Leaving Certificate
-  //   if (!formData.lc_date_n_no)
-  //     newErrors.lc_date_n_no =
+  //   if (!formData.application_date)
+  //     newErrors.application_date =
   //       "Date of Leaving Certificate is required";
 
   //   // Validate Aadhar Card Number
@@ -533,7 +541,7 @@ const LeavingCertificate = () => {
       "udise_pen_no",
       "stud_id_no",
       "promoted_to",
-      "School_Board",
+      "last_exam",
       "father_name",
       "mother_name",
       "birth_place",
@@ -544,14 +552,22 @@ const LeavingCertificate = () => {
       "nationality",
       "prev_school_class",
       "admission_date",
-      "class_when_learning",
-      "leaving_reason",
-      "lc_date_n_no",
-      "lc_date_n_school",
-      "prev_class",
-      "dobProof",
-      "academicYear",
+      "admission_class",
+      "reason_leaving",
+      "application_date",
+      "leaving_date",
+      "standard_studying",
+      "dob_proof",
+      // "academic_yr",
       "stu_aadhaar_no",
+      "admission_date",
+      "dob_proof",
+      "part_of",
+      "attendance",
+      "fee_month",
+      "remark",
+      "conduct",
+      "application_date",
     ];
 
     requiredFields.forEach((field) => {
@@ -580,7 +596,8 @@ const LeavingCertificate = () => {
   };
 
   // Handle change for form fields
-  const handleChange = (event) => {
+  // Handle change for form fields
+  const handleChange = async (event) => {
     const { name, value } = event.target;
 
     setFormData((prev) => ({
@@ -609,6 +626,124 @@ const LeavingCertificate = () => {
     // }
 
     setErrors((prevErrors) => ({ ...prevErrors, [name]: fieldErrors[name] }));
+    // If academic year is changed, trigger the search API with the new academic year
+    if (name === "academic_yr") {
+      try {
+        await handleSearchForAcademicYr(value); // Pass the new academic year to handleSearch
+      } catch (error) {
+        console.error("Failed to fetch data for academic year", error);
+      }
+    }
+  };
+  const handleSearchForAcademicYr = async (selectedAcademicYear) => {
+    setErrors({}); // Clears all field-specific errors
+
+    // Optional validation to ensure an academic year is selected
+    if (!selectedAcademicYear) {
+      toast.error("Please select an academic year!");
+      return;
+    }
+
+    // Reset form data to ensure it updates with fresh data
+    setFormData({
+      sr_no: "",
+      reg_no: "",
+      date: "",
+      first_name: "",
+      mid_name: "",
+      last_name: "",
+      udise_pen_no: "",
+      stud_id_no: "",
+      promoted_to: " ",
+      last_exam: "",
+      stud_id: " ",
+      stu_aadhaar_no: "",
+      father_name: "",
+      mother_name: "",
+      religion: "",
+      caste: "",
+      subcaste: "",
+      birth_place: "",
+      state: "",
+      mother_tongue: "",
+      dob: "",
+      dob_words: "",
+      nationality: "",
+      prev_school_class: "",
+      admission_date: "",
+      admission_class: "",
+      attendance: "",
+      subjects: [],
+      reason_leaving: "",
+      application_date: "",
+      leaving_date: "",
+      standard_studying: "",
+      dob_proof: "",
+      academicStudent: [],
+      teacher_image_name: null,
+    });
+
+    try {
+      setLoadingForSearchAcy(true); // Start loading
+      const token = localStorage.getItem("authToken");
+
+      // Make API call with academic year as part of the endpoint
+      const response = await axios.get(
+        `${API_URL}/api/get_srnoleavingcertificateByAcademicyr/${selectedStudentId}/${selectedAcademicYear}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response?.data?.data) {
+        const fetchedData = response.data.data;
+
+        // Set fetched data to the form
+        setFormData({
+          sr_no: fetchedData.sr_no || "",
+          class_id_for_subj: fetchedData.studentinformation.class_id || "",
+          reg_no: fetchedData.studentinformation.reg_no || "",
+          date: today || "",
+          subjects: fetchedData.classsubject || [],
+          academicStudent: fetchedData.academicStudent || [],
+          selectedSubjects: (fetchedData.classsubject || []).map(
+            (subject) => subject.name
+          ),
+          stud_id_no: fetchedData.studentinformation.stud_id_no || "",
+          first_name: fetchedData.studentinformation.first_name || "",
+          mid_name: fetchedData.studentinformation.mid_name || "",
+          last_name: fetchedData.studentinformation.last_name || "",
+          udise_pen_no: fetchedData.studentinformation.udise_pen_no || "",
+          promoted_to: fetchedData.studentinformation.promoted_to || "",
+          last_exam: fetchedData.studentinformation.last_exam || "",
+          stud_id: fetchedData.studentinformation.student_id || " ",
+          father_name: fetchedData.studentinformation.father_name || "",
+          mother_name: fetchedData.studentinformation.mother_name || "",
+          admission_date: fetchedData.studentinformation.admission_date || "",
+          religion: fetchedData.studentinformation.religion || "",
+          caste: fetchedData.studentinformation.caste || "",
+          subcaste: fetchedData.studentinformation.subcaste || "",
+          birth_place: fetchedData.studentinformation.birth_place || "",
+          state: fetchedData.studentinformation.state || "",
+          mother_tongue: fetchedData.studentinformation.mother_tongue || "",
+          dob: fetchedData.studentinformation.dob || "",
+          dob_words: convertDateToWords(fetchedData.studentinformation.dob),
+          attendance: fetchedData.total_attendance || "",
+          nationality: fetchedData.studentinformation.nationality || "",
+          stu_aadhaar_no: fetchedData.studentinformation.stu_aadhaar_no || "",
+          teacher_image_name:
+            fetchedData.studentinformation.father_image_name || null,
+          purpose: fetchedData.purpose || " ",
+        });
+      } else {
+        toast.error("No data found for the selected academic year.");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Error fetching data for the selected academic year.");
+    } finally {
+      setLoadingForSearchAcy(false);
+    }
   };
 
   // const handleChange = (event) => {
@@ -760,7 +895,7 @@ const LeavingCertificate = () => {
           last_name: "",
           udise_pen_no: "",
           promoted_to: "",
-          School_Board: "",
+          last_exam: "",
           stud_id_no: "",
           stud_id: "",
           father_name: "",
@@ -776,11 +911,11 @@ const LeavingCertificate = () => {
           nationality: "",
           prev_school_class: "",
           admission_date: "",
-          class_when_learning: "",
-          leaving_reason: "",
-          lc_date_n_no: "",
-          lc_date_n_school: "",
-          prev_class: "",
+          admission_class: "",
+          reason_leaving: "",
+          application_date: "",
+          leaving_date: "",
+          standard_studying: "",
           stu_aadhaar_no: "",
         });
         setSelectedClass(null);
@@ -805,13 +940,11 @@ const LeavingCertificate = () => {
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
     if (checked) {
-      // Add the activity if checked
+      // Add the games if checked
       setSelectedActivities((prev) => [...prev, value]);
     } else {
-      // Remove the activity if unchecked
-      setSelectedActivities((prev) =>
-        prev.filter((activity) => activity !== value)
-      );
+      // Remove the games if unchecked
+      setSelectedActivities((prev) => prev.filter((games) => games !== value));
     }
   };
 
@@ -949,13 +1082,17 @@ const LeavingCertificate = () => {
               </div>
             </div>
           </div>
-
           {/* Form Section - Displayed when parentInformation is fetched */}
+          {/* Conditionally render Loader */}
+          {loadingForSearchAcy && (
+            <div className="fixed  inset-0 z-50   flex items-center justify-center bg-gray-700 bg-opacity-50">
+              <LoaderStyle />
+            </div>
+          )}{" "}
           {parentInformation && (
             <div className=" w-full  md:container mx-auto py-4 p-4 px-4  ">
               <div className="    card  px-3 rounded-md ">
                 {/* <div className="card p-4 rounded-md "> */}
-
                 <div className=" card-header mb-4 flex justify-between items-center  ">
                   <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
                     Student Information
@@ -979,7 +1116,6 @@ const LeavingCertificate = () => {
                   <span className="text-red-500 ">*</span>indicates mandatory
                   information
                 </p>
-
                 <form
                   onSubmit={handleSubmit}
                   className=" w-full gap-x-1 md:gap-x-14  gap-y-1   overflow-x-hidden shadow-md p-4  bg-gray-50 mb-4"
@@ -1405,15 +1541,15 @@ const LeavingCertificate = () => {
                         <input
                           type="text"
                           id="School/Board"
-                          name="School_Board"
+                          name="last_exam"
                           maxLength={100}
-                          value={formData.School_Board}
+                          value={formData.last_exam}
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                        {errors.School_Board && (
+                        {errors.last_exam && (
                           <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.School_Board}
+                            {errors.last_exam}
                           </span>
                         )}
                       </div>
@@ -1620,7 +1756,7 @@ const LeavingCertificate = () => {
                       </div>
                       <div className=" ">
                         <label
-                          htmlFor="class_when_learning"
+                          htmlFor="admission_class"
                           className="block font-bold text-xs mb-2 "
                         >
                           Admitted in Class
@@ -1628,16 +1764,16 @@ const LeavingCertificate = () => {
                         </label>
                         <input
                           type="text"
-                          id="class_when_learning"
+                          id="admission_class"
                           maxLength={100}
-                          name="class_when_learning"
-                          value={formData.class_when_learning}
+                          name="admission_class"
+                          value={formData.admission_class}
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                        {errors.class_when_learning && (
+                        {errors.admission_class && (
                           <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.class_when_learning}
+                            {errors.admission_class}
                           </span>
                         )}
                       </div>{" "}
@@ -1652,34 +1788,34 @@ const LeavingCertificate = () => {
                         <input
                           type="date"
                           id="Date_of_Leaving_School"
-                          name="lc_date_n_school"
-                          value={formData.lc_date_n_school}
+                          name="leaving_date"
+                          value={formData.leaving_date}
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                        {errors.lc_date_n_school && (
+                        {errors.leaving_date && (
                           <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.lc_date_n_school}
+                            {errors.leaving_date}
                           </span>
                         )}
                       </div>{" "}
                       {/* Dropdown for Proof of DOB submitted */}
                       <div className="">
                         <label
-                          htmlFor="dobProof"
+                          htmlFor="dob_proof"
                           className="block font-bold text-xs mb-2"
                         >
                           Proof of DOB Submitted at the Time of Admission
                           <span className="text-red-500">*</span>
                         </label>
                         <select
-                          id="dobProof"
-                          name="dobProof"
-                          value={formData.dobProof}
+                          id="dob_proof"
+                          name="dob_proof"
+                          value={formData.dob_proof}
                           onChange={handleChange}
                           className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         >
-                          <option value="">Select an option</option>
+                          <option value="">Select</option>
                           <option value="Birth Certificate">
                             Birth Certificate
                           </option>
@@ -1689,36 +1825,41 @@ const LeavingCertificate = () => {
                           <option value="Aadhar Card">Aadhar Card</option>
                           <option value="Passport">Passport</option>
                         </select>
-                        {errors.dobProof && (
+                        {errors.dob_proof && (
                           <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.dobProof}
+                            {errors.dob_proof}
                           </span>
                         )}
                       </div>{" "}
                       <div className="">
                         <label
-                          htmlFor="group"
+                          htmlFor="part_of"
                           className="block font-bold text-xs mb-2"
                         >
                           Whether Part of (NCC Cadet, Boy Scout, Girl Guide)
                           <span className="text-red-500">*</span>
                         </label>
                         <select
-                          id="group"
-                          value={formData.group}
+                          id="part_of"
+                          value={formData.part_of}
                           onChange={handleChange}
                           className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         >
-                          <option value="">Select an option</option>
+                          <option value="">Select</option>
                           <option value="NCC Cadet">NCC Cadet</option>
                           <option value="Boy Scout">Boy Scout</option>
                           <option value="Girl Guide">Girl Guide</option>
                           <option value="N.A">N.A</option>
                         </select>
+                        {errors.part_of && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.part_of}
+                          </span>
+                        )}
                       </div>
                       <div className="mt-3">
                         <label
-                          htmlFor="leaving_reason"
+                          htmlFor="reason_leaving"
                           className="block font-bold text-xs mb-2"
                         >
                           Reason for Leaving{" "}
@@ -1726,38 +1867,38 @@ const LeavingCertificate = () => {
                         </label>
                         <input
                           type="text"
-                          id="leaving_reason"
-                          name="leaving_reason"
+                          id="reason_leaving"
+                          name="reason_leaving"
                           maxLength={100}
-                          value={formData.leaving_reason}
+                          value={formData.reason_leaving}
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                        {errors.leaving_reason && (
+                        {errors.reason_leaving && (
                           <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.leaving_reason}
+                            {errors.reason_leaving}
                           </span>
                         )}
                       </div>
                       <div className="mt-3">
                         <label
-                          htmlFor="lc_date_n_no"
+                          htmlFor="application_date"
                           className="block font-bold text-xs mb-2"
                         >
-                          Date of Leaving Certificate{" "}
+                          Date of application for Certificate{" "}
                           <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="date"
-                          id="lc_date_n_no"
-                          name="lc_date_n_no"
-                          value={formData.lc_date_n_no}
+                          id="application_date"
+                          name="application_date"
+                          value={formData.application_date}
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                        {errors.lc_date_n_no && (
+                        {errors.application_date && (
                           <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.lc_date_n_no}
+                            {errors.application_date}
                           </span>
                         )}
                       </div>
@@ -1798,17 +1939,17 @@ const LeavingCertificate = () => {
                             "Badminton",
                             "Chess",
                             "Carrom",
-                          ].map((activity) => (
-                            <div key={activity} className="flex items-center">
+                          ].map((games) => (
+                            <div key={games} className="flex items-center">
                               <input
                                 type="checkbox"
-                                id={activity}
-                                value={activity}
+                                id={games}
+                                value={games}
                                 onChange={handleCheckboxChange}
                                 className="mr-2"
                               />
-                              <label htmlFor={activity} className="text-sm">
-                                {activity}
+                              <label htmlFor={games} className="text-sm">
+                                {games}
                               </label>
                             </div>
                           ))}
@@ -1842,7 +1983,7 @@ const LeavingCertificate = () => {
                       </div>
                       <div>
                         <label
-                          htmlFor="paid_month"
+                          htmlFor="fee_month"
                           className="block font-bold text-xs mb-2"
                         >
                           Month Up to Which School Fees are Paid{" "}
@@ -1850,21 +1991,21 @@ const LeavingCertificate = () => {
                         </label>
                         <input
                           type="text"
-                          id="paid_month"
-                          name="paid_month"
-                          value={formData.paid_month}
+                          id="fee_month"
+                          name="fee_month"
+                          value={formData.fee_month}
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                        {errors.paid_month && (
+                        {errors.fee_month && (
                           <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.paid_month}
+                            {errors.fee_month}
                           </span>
                         )}
                       </div>
                       <div>
                         <label
-                          htmlFor="prev_class"
+                          htmlFor="standard_studying"
                           className="block font-bold text-xs mb-2"
                         >
                           Class in Which Last Studied in
@@ -1872,15 +2013,15 @@ const LeavingCertificate = () => {
                         </label>
                         <input
                           type="text"
-                          id="prev_class"
-                          name="prev_class"
-                          value={formData.prev_class}
+                          id="standard_studying"
+                          name="standard_studying"
+                          value={formData.standard_studying}
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                        {errors.prev_class && (
+                        {errors.standard_studying && (
                           <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.prev_class}
+                            {errors.standard_studying}
                           </span>
                         )}
                       </div>{" "}
@@ -1939,7 +2080,7 @@ const LeavingCertificate = () => {
                       </div>
                       <div>
                         <label
-                          htmlFor="remarks"
+                          htmlFor="remark"
                           className="block font-bold text-xs mb-2"
                         >
                           Any Other Remarks{" "}
@@ -1947,15 +2088,15 @@ const LeavingCertificate = () => {
                         </label>
                         <input
                           type="text"
-                          id="remarks"
-                          name="remarks"
-                          value={formData.remarks}
+                          id="remark"
+                          name="remark"
+                          value={formData.remark}
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                        {errors.remarks && (
+                        {errors.remark && (
                           <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.remarks}
+                            {errors.remark}
                           </span>
                         )}
                       </div>
@@ -1984,26 +2125,39 @@ const LeavingCertificate = () => {
                       {/* Dropdown for Academic Year */}
                       <div className="mb-4">
                         <label
-                          htmlFor="academicYear"
+                          htmlFor="academic_yr"
                           className="block font-bold text-xs mb-2"
                         >
                           Academic Year <span className="text-red-500">*</span>
                         </label>
+
                         <select
-                          id="academicYear"
-                          name="academicYear"
-                          value={formData.academicYear}
+                          id="academic_yr"
+                          name="academic_yr"
+                          value={formData.academic_yr}
                           onChange={handleChange}
                           className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         >
-                          <option value="">Select an academic year</option>
-                          <option value="2022-2023">2022-2023</option>
-                          <option value="2023-2024">2023-2024</option>
-                          <option value="2024-2025">2024-2025</option>
+                          <option value="">Select</option>
+
+                          {/* Render options dynamically from academicStudent data */}
+                          {formData.academicStudent &&
+                          formData.academicStudent.length > 0 ? (
+                            formData.academicStudent.map((item, index) => (
+                              <option key={index} value={item.academic_yr}>
+                                {item.academic_yr}
+                              </option>
+                            ))
+                          ) : (
+                            <option value="" disabled>
+                              No academic years available
+                            </option>
+                          )}
                         </select>
-                        {errors.academicYear && (
+
+                        {errors.academic_yr && (
                           <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.academicYear}
+                            {errors.academic_yr}
                           </span>
                         )}
                       </div>
