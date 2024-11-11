@@ -58,7 +58,7 @@ const LeavingCertificate = () => {
     lc_date_n_school: "",
     prev_class: "",
     dobProof: "",
-
+    class_id_for_subj: "",
     stu_aadhaar_no: "",
     teacher_image_name: null,
   });
@@ -274,7 +274,8 @@ const LeavingCertificate = () => {
   );
 
   const handleClassSelect = (selectedOption) => {
-    setNameErrorForClass(""); // Reset class error on selection
+    // setNameErrorForClass(""); // Reset class error on selection
+    setNameError("");
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
@@ -300,20 +301,25 @@ const LeavingCertificate = () => {
     setNameErrorForClass("");
     setErrors({}); // Clears all field-specific errors
 
+    if (!selectedClass && !selectedStudent) {
+      setNameError("Please select at least one of them.");
+      toast.error("Please select at least one of them!");
+      return;
+    }
     // Validate if class and student are selected
-    let hasError = false;
+    // let hasError = false;
 
-    if (!selectedClass) {
-      setNameErrorForClass("Please select a class.");
-      hasError = true;
-    }
-    if (!selectedStudent) {
-      setNameError("Please select a student.");
-      hasError = true;
-    }
+    // if (!selectedClass) {
+    //   setNameErrorForClass("Please select a class.");
+    //   hasError = true;
+    // }
+    // if (!selectedStudent) {
+    //   setNameError("Please select a student.");
+    //   hasError = true;
+    // }
 
-    // If there are validation errors, exit the function
-    if (hasError) return;
+    // // If there are validation errors, exit the function
+    // if (hasError) return;
     setFormData({
       sr_no: "",
       reg_no: "",
@@ -376,6 +382,7 @@ const LeavingCertificate = () => {
         // Populate formData with the fetched data
         setFormData({
           sr_no: fetchedData.sr_no || "",
+          class_id_for_subj: fetchedData.studentinformation.class_id || "",
           reg_no: fetchedData.studentinformation.reg_no || "",
           date: today || "", // Directly from the fetched data
           subjects: fetchedData.classsubject || [],
@@ -861,9 +868,9 @@ const LeavingCertificate = () => {
                       isClearable
                       className="text-sm"
                     />
-                    {nameErrorForClass && (
+                    {nameError && (
                       <span className="h-8  relative  ml-1 text-danger text-xs">
-                        {nameErrorForClass}
+                        {nameError}
                       </span>
                     )}
                   </div>
@@ -1029,7 +1036,7 @@ const LeavingCertificate = () => {
                           htmlFor="date"
                           className="block font-bold text-xs mb-2"
                         >
-                          Date <span className="text-red-500">*</span>
+                          Issue Date <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="date"
@@ -1282,28 +1289,11 @@ const LeavingCertificate = () => {
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="subcaste"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Sub-Caste
-                        </label>
-                        <input
-                          type="text"
-                          id="subcaste"
-                          name="subcaste"
-                          maxLength={100}
-                          value={formData.subcaste}
-                          onChange={handleChange}
-                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                        />
-                      </div>
-                      <div>
+                      </div>{" "}
+                      <div className="grid   col-span-2 row-span-2 ">
                         <label
                           htmlFor="subjects"
-                          className="block font-bold text-xs mb-2"
+                          className="block font-bold text-xs  col-span-3"
                         >
                           Subjects Studied{" "}
                           <span className="text-red-500">*</span>
@@ -1312,8 +1302,8 @@ const LeavingCertificate = () => {
                         {/* Render checkboxes for each subject */}
                         {formData.subjects && formData.subjects.length > 0 ? (
                           formData.subjects.map((subject, index) => (
-                            <div key={index} className="mb-2">
-                              <label className="inline-flex items-center">
+                            <div key={index} className="grid-col-3 relative ">
+                              <label className="">
                                 <input
                                   type="checkbox"
                                   name="subjects"
@@ -1333,35 +1323,55 @@ const LeavingCertificate = () => {
                             </div>
                           ))
                         ) : (
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-500 col-span-3">
                             No subjects available
                           </p>
                         )}
 
                         {/* Conditional extra subject for class 100 */}
-                        {formData.class === 100 && (
-                          <div className="mb-2">
-                            <label className="inline-flex items-center">
-                              <input
-                                type="checkbox"
-                                name="subjects"
-                                value="Basic Mathematics"
-                                checked={formData.selectedSubjects.includes(
-                                  "Basic Mathematics"
-                                )}
-                                onChange={(e) =>
-                                  handleSubjectSelection(e, "Basic Mathematics")
-                                }
-                                className="form-checkbox h-4 w-4 text-blue-600"
-                              />
-                              <span className="ml-2 text-sm">
-                                Basic Mathematics
-                              </span>
-                            </label>
-                          </div>
-                        )}
+                        {formData.class_id_for_subj &&
+                          formData.class_id_for_subj === 109 && (
+                            <div className="col-span-1 relative  ">
+                              <label className="inline-flex items-center">
+                                <input
+                                  type="checkbox"
+                                  name="subjects"
+                                  value="Basic Mathematics"
+                                  checked={formData.selectedSubjects.includes(
+                                    "Basic Mathematics"
+                                  )}
+                                  onChange={(e) =>
+                                    handleSubjectSelection(
+                                      e,
+                                      "Basic Mathematics"
+                                    )
+                                  }
+                                  className="form-checkbox h-4 w-4 text-blue-600"
+                                />
+                                <span className="ml-2 text-sm">
+                                  Basic Mathematics
+                                </span>
+                              </label>
+                            </div>
+                          )}
                       </div>
-
+                      <div>
+                        <label
+                          htmlFor="subcaste"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Sub-Caste
+                        </label>
+                        <input
+                          type="text"
+                          id="subcaste"
+                          name="subcaste"
+                          maxLength={100}
+                          value={formData.subcaste}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                      </div>
                       <div>
                         <label
                           htmlFor="PromotedTo"
@@ -1384,7 +1394,6 @@ const LeavingCertificate = () => {
                           </span>
                         )}
                       </div>
-
                       <div>
                         <label
                           htmlFor="School/Board"
@@ -1559,11 +1568,11 @@ const LeavingCertificate = () => {
                   <fieldset className="mb-4">
                     {/* <legend className="font-bold"> */}
                     <h5 className="col-span-4 text-blue-400 py-2">
-                      Admission Details
+                      Admission and School Records{" "}
                     </h5>
                     {/* </legend> */}
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4  gap-4">
                       <div>
                         <label
                           htmlFor="prev_school_class"
@@ -1631,7 +1640,7 @@ const LeavingCertificate = () => {
                             {errors.class_when_learning}
                           </span>
                         )}
-                      </div>
+                      </div>{" "}
                       <div>
                         <label
                           htmlFor="Date_of_Leaving_School"
@@ -1655,7 +1664,7 @@ const LeavingCertificate = () => {
                         )}
                       </div>{" "}
                       {/* Dropdown for Proof of DOB submitted */}
-                      <div className="mb-4">
+                      <div className="">
                         <label
                           htmlFor="dobProof"
                           className="block font-bold text-xs mb-2"
@@ -1685,30 +1694,29 @@ const LeavingCertificate = () => {
                             {errors.dobProof}
                           </span>
                         )}
-                      </div>
-                      <div>
+                      </div>{" "}
+                      <div className="">
                         <label
-                          htmlFor="prev_class"
+                          htmlFor="group"
                           className="block font-bold text-xs mb-2"
                         >
-                          Class in Which Last Studied in
+                          Whether Part of (NCC Cadet, Boy Scout, Girl Guide)
                           <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="date"
-                          id="prev_class"
-                          name="prev_class"
-                          value={formData.prev_class}
+                        <select
+                          id="group"
+                          value={formData.group}
                           onChange={handleChange}
-                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                        />
-                        {errors.prev_class && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.prev_class}
-                          </span>
-                        )}
-                      </div>{" "}
-                      <div>
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        >
+                          <option value="">Select an option</option>
+                          <option value="NCC Cadet">NCC Cadet</option>
+                          <option value="Boy Scout">Boy Scout</option>
+                          <option value="Girl Guide">Girl Guide</option>
+                          <option value="N.A">N.A</option>
+                        </select>
+                      </div>
+                      <div className="mt-3">
                         <label
                           htmlFor="leaving_reason"
                           className="block font-bold text-xs mb-2"
@@ -1731,7 +1739,7 @@ const LeavingCertificate = () => {
                           </span>
                         )}
                       </div>
-                      <div>
+                      <div className="mt-3">
                         <label
                           htmlFor="lc_date_n_no"
                           className="block font-bold text-xs mb-2"
@@ -1753,105 +1761,7 @@ const LeavingCertificate = () => {
                           </span>
                         )}
                       </div>
-                    </div>
-                  </fieldset>
-                  {/* School Records */}
-                  <fieldset className="mb-4">
-                    <h5 className="col-span-4 text-blue-400 py-2">
-                      School Records
-                    </h5>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div>
-                        <label
-                          htmlFor="attendance"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Attendance <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="attendance"
-                          name="attendance"
-                          value={formData.attendance}
-                          onChange={handleChange}
-                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                        />
-                        {errors.attendance && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.attendance}
-                          </span>
-                        )}
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="paid_month"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Month Up to Which School Fees are Paid{" "}
-                          <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="paid_month"
-                          name="paid_month"
-                          value={formData.paid_month}
-                          onChange={handleChange}
-                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                        />
-                        {errors.paid_month && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.paid_month}
-                          </span>
-                        )}
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="conduct"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Conduct <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="conduct"
-                          name="conduct"
-                          value={formData.conduct}
-                          onChange={handleChange}
-                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                        />
-                        {errors.conduct && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
-                            {errors.conduct}
-                          </span>
-                        )}
-                      </div>
-                      <div className="mb-4">
-                        <label
-                          htmlFor="group"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Whether Part of (NCC Cadet, Boy Scout, Girl Guide)
-                          <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                          id="group"
-                          value={formData.group}
-                          onChange={handleChange}
-                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                        >
-                          <option value="">Select an option</option>
-                          <option value="NCC Cadet">NCC Cadet</option>
-                          <option value="Boy Scout">Boy Scout</option>
-                          <option value="Girl Guide">Girl Guide</option>
-                          <option value="N.A">N.A</option>
-                        </select>
-                      </div>
-
-                      {/* Display selected value for reference */}
-
-                      <div>
+                      <div className="grid col-span-4 row-span-1">
                         <label
                           htmlFor="activities"
                           className="block font-bold text-xs mb-2"
@@ -1867,7 +1777,7 @@ const LeavingCertificate = () => {
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         /> */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-9 gap-2">
                           {[
                             "Football",
                             "Basketball",
@@ -1909,6 +1819,72 @@ const LeavingCertificate = () => {
                           </span>
                         )}
                       </div>
+                      <div>
+                        <label
+                          htmlFor="attendance"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Attendance <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="attendance"
+                          name="attendance"
+                          value={formData.attendance}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.attendance && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.attendance}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="paid_month"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Month Up to Which School Fees are Paid{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="paid_month"
+                          name="paid_month"
+                          value={formData.paid_month}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.paid_month && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.paid_month}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="prev_class"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Class in Which Last Studied in
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="prev_class"
+                          name="prev_class"
+                          value={formData.prev_class}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.prev_class && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.prev_class}
+                          </span>
+                        )}
+                      </div>{" "}
+                      {/* Display selected value for reference */}
                     </div>
                   </fieldset>
 
@@ -1940,7 +1916,27 @@ const LeavingCertificate = () => {
                           </span>
                         )}
                       </div>
-
+                      <div>
+                        <label
+                          htmlFor="conduct"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Conduct <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="conduct"
+                          name="conduct"
+                          value={formData.conduct}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.conduct && (
+                          <span className="text-red-500 text-xs ml-2 h-1">
+                            {errors.conduct}
+                          </span>
+                        )}
+                      </div>
                       <div>
                         <label
                           htmlFor="remarks"

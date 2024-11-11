@@ -366,14 +366,14 @@ const CreatePercentageCertificate = () => {
       console.log("marks", markValue);
 
       if (markValue === undefined || markValue === "" || markValue === 0) {
-        newErrors[subject.c_sm_id] = `${subject.name} marks are required.`;
+        newErrors[subject.c_sm_id] = `Marks are required.`;
       } else if (isNaN(markValue)) {
-        newErrors[subject.c_sm_id] = `${subject.name} marks should be numeric.`;
+        newErrors[subject.c_sm_id] = `Marks should be numeric.`;
       } else if (parseFloat(markValue) > 100 || parseFloat(markValue) < 1) {
         newErrors[
           subject.c_sm_id
-        ] = `${subject.name} marks should not exceed 100.
-.`;
+        ] = `${subject.name} Marks should not exceed 100.`;
+        //  `${subject.name} Marks should not exceed 100.
       }
     });
 
