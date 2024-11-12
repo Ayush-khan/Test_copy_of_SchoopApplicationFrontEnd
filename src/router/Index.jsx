@@ -143,7 +143,8 @@ import SImpleBonafied from "../componants/Certificates/SimpleBonafied/SImpleBona
 import CastCertificate from "../componants/Certificates/CastCertificate/CastCertificate.jsx";
 import CharacterCertificate from "../componants/Certificates/CharaterCertificates/CharacterCertificate.jsx";
 import PercentageCertificate from "../componants/Certificates/PercentageCertificate/PercentageCertificate.jsx";
-import LeavingCertificate from "../componants/LeavingCertificate/LeavingCertificate.jsx";
+// import LeavingCertificate from "../componants/LeavingCertificate/LeavingCertificate.jsx";
+import ManageLC from "../componants/LeavingCertificate/ManageLC.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -218,7 +219,7 @@ function Index() {
         <Route
           path="/leavingCertificate"
           // path="#"
-          element={<PrivateRoute element={LeavingCertificate} />}
+          element={<PrivateRoute element={ManageLC} />}
         />
         {/* Staff endPoints */}
         <Route
