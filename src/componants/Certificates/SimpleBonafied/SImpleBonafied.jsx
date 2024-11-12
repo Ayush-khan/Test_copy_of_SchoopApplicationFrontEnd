@@ -560,8 +560,8 @@ function SImpleBonafied() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to issue this certificate?{" "}
-                  {` ${currestSubjectNameForDelete} `} ?
+                  Are you sure you want to issue this certificate{" "}
+                  {` ${currentSection?.stud_name} `} ?
                 </div>
                 <div className=" flex justify-end p-3">
                   <button
