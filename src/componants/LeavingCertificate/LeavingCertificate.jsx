@@ -331,48 +331,44 @@ const LeavingCertificate = () => {
     // // If there are validation errors, exit the function
     // if (hasError) return;
     setFormData({
-      sr_no: "",
       grn_no: "",
-      date: "",
+      issue_date: "",
+      student_id_no: "",
+      aadhar_no: "",
       first_name: "",
-
       mid_name: "",
       last_name: "",
-      udise_pen_no: "",
-      student_id_no: "",
-      promoted_to: " ",
-      last_exam: "",
-      stud_id: " ",
-      // student_UID: "",
-      aadhar_no: "",
       father_name: "",
       mother_name: "",
+      nationality: "",
+      mother_tongue: "",
       religion: "",
       caste: "",
       subcaste: "",
       birth_place: "",
-      state: "",
-      mother_tongue: "",
       dob: "",
       dob_words: "",
-      nationality: "",
+      dob_proof: "",
       prev_school_class: "",
+      // previous_school_attended: "",
       date_of_admission: "",
       admission_class: "",
-      attendance: "",
-      subjectsFor: [],
-      subjects: [],
-
-      reason_leaving: "",
-      application_date: "",
       leaving_date: "",
       standard_studying: "",
-      dob_proof: "",
-      // aadhar_no: "",
-      academicStudent: [],
-      academic_yr: "", // Add this to track selected academic year
-
-      teacher_image_name: null,
+      last_exam: "",
+      subjects: [], // Empty array for selected subjects
+      promoted_to: "",
+      attendance: "",
+      fee_month: "",
+      part_of: "",
+      selectedActivities: [], // Empty array for selected activities
+      application_date: "",
+      conduct: "",
+      reason_leaving: "",
+      remark: "",
+      academic_yr: "",
+      stud_id: "",
+      udise_pen_no: "",
     });
 
     try {
@@ -404,7 +400,7 @@ const LeavingCertificate = () => {
           date: today || "", // Directly from the fetched data
           subjectsFor: fetchedData.classsubject || [],
           academicStudent: fetchedData.academicStudent || [],
-          // academic_yr: fetchedData.academicStudent?.[0]?.academic_yr || "", // Preselect first academic year if available
+          academic_yr: fetchedData.studentinformation?.academic_yr || "", // Preselect first academic year if available
           subjects: allSubjectNames,
 
           selectedSubjects: allSubjectNames, // Initialize with all subjects checked
@@ -549,7 +545,7 @@ const LeavingCertificate = () => {
   const validate = () => {
     const newErrors = {};
 
-    // Mandatory fields validations
+    // Required fields validation
     const requiredFields = [
       "grn_no",
       "issue_date",
@@ -574,37 +570,48 @@ const LeavingCertificate = () => {
       "leaving_date",
       "standard_studying",
       "dob_proof",
-      // "academic_yr",
       "aadhar_no",
-      "date_of_admission",
-      "dob_proof",
-      // "part_of",
       "attendance",
       "fee_month",
       "remark",
       "conduct",
-      "application_date",
     ];
 
     requiredFields.forEach((field) => {
       if (!formData[field]) {
-        newErrors[field] = `${field.replace(/_/g, " ")} is required`;
+        newErrors[field] = "This field is required";
       }
     });
-    // if (!formData.part_of) {
-    //   newErrors.part_of = "Part of is required";
-    // }
+
     // Additional validations for specific fields
     if (formData.first_name && /^\d/.test(formData.first_name)) {
       newErrors.first_name = "Student Name should not start with a number";
     }
-
     if (formData.father_name && /^\d/.test(formData.father_name)) {
       newErrors.father_name = "Father's Name should not start with a number";
     }
-
     if (formData.mother_name && /^\d/.test(formData.mother_name)) {
       newErrors.mother_name = "Mother's Name should not start with a number";
+    }
+
+    // Checkbox validation
+    if (!selectedActivities || selectedActivities.length === 0) {
+      newErrors.activities =
+        "Please select at least one extra-curricular activity";
+    }
+    if (!formData.selectedSubjects || formData.selectedSubjects.length === 0) {
+      newErrors.selectedSubjects = "Please select at least one subject";
+    }
+
+    // Dropdown-specific validations
+    if (!formData.dob_proof) {
+      newErrors.dob_proof = "This field is required";
+    }
+    if (!formData.part_of) {
+      newErrors.part_of = "This field is required";
+    }
+    if (!formData.academic_yr) {
+      newErrors.academic_yr = "This field is required";
     }
 
     setErrors(newErrors);
@@ -614,17 +621,29 @@ const LeavingCertificate = () => {
   };
 
   // Handle change for form fields
-  // Handle change for form fields
   const handleChange = async (event) => {
-    const { name, value } = event.target;
+    const { name, value, type, checked } = event.target;
 
-    // Update form data with selected value
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-      ...(name === "dob" && { dob_words: convertDateToWords(value) }),
-      ...(name === "academic_yr" && { academic_yr: value }), // explicitly update academic_yr
-    }));
+    // Handle checkboxes and dropdown values
+    if (type === "checkbox") {
+      setFormData((prevData) => {
+        const updatedSelectedItems = checked
+          ? [...prevData[name], value] // Add item if checked
+          : prevData[name].filter((item) => item !== value); // Remove item if unchecked
+
+        return {
+          ...prevData,
+          [name]: updatedSelectedItems,
+        };
+      });
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        ...(name === "dob" && { dob_words: convertDateToWords(value) }),
+        ...(name === "academic_yr" && { academic_yr: value }),
+      }));
+    }
 
     // Validation for specific fields
     let fieldErrors = {};
@@ -644,36 +663,37 @@ const LeavingCertificate = () => {
     // Fetch new data if academic year is changed
     if (name === "academic_yr") {
       try {
-        await handleSearchForAcademicYr(value); // Pass the new academic year to handleSearch
+        await handleSearchForAcademicYr(value);
       } catch (error) {
         console.error("Failed to fetch data for academic year", error);
       }
     }
   };
-  const handleAcademicYearChange = async (event) => {
-    // Capture the selected academic year from the dropdown
-    const selectedYear = event.target.value;
-    console.log("Selected Year:", selectedYear); // Check if selectedYear is being set correctly
 
-    // Update the academic year in formData
-    setFormData((prevData) => ({
-      ...prevData,
-      academic_yr: selectedYear, // Update formData with the new academic year
-    }));
-    console.log("acyr1", formData.academic_yr);
+  // const handleAcademicYearChange = async (event) => {
+  //   // Capture the selected academic year from the dropdown
+  //   const selectedYear = event.target.value;
+  //   console.log("Selected Year:", selectedYear); // Check if selectedYear is being set correctly
 
-    // Ensure selectedYear is valid before calling the search function
-    if (selectedYear) {
-      try {
-        console.log("Fetching data for academic year:", selectedYear); // Debug log for academic year before search
-        await handleSearchForAcademicYr(selectedYear); // Call the function with selectedYear directly
-      } catch (error) {
-        console.error("Failed to fetch data for academic year", error);
-        toast.error("Error fetching data for the selected academic year.");
-      }
-    }
-    console.log("acyr", formData.academic_yr);
-  };
+  //   // Update the academic year in formData
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     academic_yr: selectedYear, // Update formData with the new academic year
+  //   }));
+  //   console.log("acyr1", formData.academic_yr);
+
+  //   // Ensure selectedYear is valid before calling the search function
+  //   if (selectedYear) {
+  //     try {
+  //       console.log("Fetching data for academic year:", selectedYear); // Debug log for academic year before search
+  //       await handleSearchForAcademicYr(selectedYear); // Call the function with selectedYear directly
+  //     } catch (error) {
+  //       console.error("Failed to fetch data for academic year", error);
+  //       toast.error("Error fetching data for the selected academic year.");
+  //     }
+  //   }
+  //   console.log("acyr", formData.academic_yr);
+  // };
 
   console.log("academ,icyearchagne", formData.academic_yr);
   const handleSearchForAcademicYr = async (selectedAcademicYear) => {
@@ -687,43 +707,44 @@ const LeavingCertificate = () => {
 
     // Reset form data to ensure it updates with fresh data
     setFormData({
-      sr_no: "",
       grn_no: "",
       issue_date: "",
+      student_id_no: "",
+      aadhar_no: "",
       first_name: "",
       mid_name: "",
       last_name: "",
-      udise_pen_no: "",
-      student_id_no: "",
-      promoted_to: " ",
-      last_exam: "",
-      stud_id: " ",
-      aadhar_no: "",
       father_name: "",
       mother_name: "",
+      nationality: "",
+      mother_tongue: "",
       religion: "",
       caste: "",
       subcaste: "",
       birth_place: "",
-      state: "",
-      mother_tongue: "",
       dob: "",
       dob_words: "",
-      nationality: "",
+      dob_proof: "",
       prev_school_class: "",
+      // previous_school_attended: "",
       date_of_admission: "",
       admission_class: "",
-      attendance: "",
-      subjectsFor: [],
-      subjects: [],
-
-      reason_leaving: "",
-      application_date: "",
       leaving_date: "",
       standard_studying: "",
-      dob_proof: "",
-      // academicStudent: [],
-      teacher_image_name: null,
+      last_exam: "",
+      subjects: [], // Empty array for selected subjects
+      promoted_to: "",
+      attendance: "",
+      fee_month: "",
+      part_of: "",
+      selectedActivities: [], // Empty array for selected activities
+      application_date: "",
+      conduct: "",
+      reason_leaving: "",
+      remark: "",
+      academic_yr: "",
+      stud_id: "",
+      udise_pen_no: "",
     });
 
     try {
@@ -957,31 +978,41 @@ const LeavingCertificate = () => {
       );
 
       if (response.status === 200) {
-        toast.success("LC Certificate updated successfully!");
+        toast.success("LC Certificate Generated successfully!");
+        // Extract filename from Content-Disposition header
+        const contentDisposition = response.headers["content-disposition"];
+        let filename = "DownloadedFile.pdf"; // Fallback name
 
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="(.+?)"/);
+          if (match && match[1]) {
+            filename = match[1];
+          }
+        }
         // Download PDF
         const pdfBlob = new Blob([response.data], { type: "application/pdf" });
         const pdfUrl = URL.createObjectURL(pdfBlob);
         const link = document.createElement("a");
         link.href = pdfUrl;
-        link.download = "BonafideCertificate.pdf";
+        link.download = filename;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
 
         // Reset form data
         setFormData({
+          sr_no: "",
           grn_no: "",
-          issue_date: "",
-          student_id_no: "",
-          aadhar_no: "",
+          date: "",
           first_name: "",
           mid_name: "",
           last_name: "",
           udise_pen_no: "",
-          promoted_to: "",
+          student_id_no: "",
+          promoted_to: " ",
           last_exam: "",
           stud_id: "",
+          // student_UID: "",
           father_name: "",
           mother_name: "",
           religion: "",
@@ -996,13 +1027,22 @@ const LeavingCertificate = () => {
           prev_school_class: "",
           date_of_admission: "",
           admission_class: "",
+          attendance: "",
+          subjectsFor: [],
+          subjects: [],
+          selectedActivities: [],
+
           reason_leaving: "",
           application_date: "",
           leaving_date: "",
           standard_studying: "",
-          // aadhar_no: "",
-          subjects: [],
-          games: [],
+          dob_proof: "",
+          class_id_for_subj: "",
+          aadhar_no: "",
+          teacher_image_name: null,
+          academicStudent: [],
+          academic_yr: "", // Add this to track selected academic year
+          part_of: "",
         });
         setSelectedClass(null);
         setSelectedStudent(null);
@@ -1011,7 +1051,7 @@ const LeavingCertificate = () => {
       }
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
-      toast.error("An error occurred while updating the LC Certificate.");
+      toast.error("An error occurred while Generating the LC Certificate.");
 
       if (error.response && error.response.data) {
         setBackendErrors(error.response.data);
@@ -1025,12 +1065,23 @@ const LeavingCertificate = () => {
 
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
+    let updatedActivities;
+
     if (checked) {
-      // Add the games if checked
-      setSelectedActivities((prev) => [...prev, value]);
+      // Add the selected activity
+      updatedActivities = [...selectedActivities, value];
+      setSelectedActivities(updatedActivities);
     } else {
-      // Remove the games if unchecked
-      setSelectedActivities((prev) => prev.filter((games) => games !== value));
+      // Remove the unselected activity
+      updatedActivities = selectedActivities.filter(
+        (activity) => activity !== value
+      );
+      setSelectedActivities(updatedActivities);
+    }
+
+    // Remove error if at least one activity is selected
+    if (updatedActivities.length > 0) {
+      setErrors((prevErrors) => ({ ...prevErrors, activities: null }));
     }
   };
 
@@ -1042,6 +1093,10 @@ const LeavingCertificate = () => {
       const updatedSelectedSubjects = e.target.checked
         ? [...prevData.selectedSubjects, subjectName] // add subject if checked
         : prevData.selectedSubjects.filter((name) => name !== subjectName); // remove subject if unchecked
+      // Remove error if at least one subject is selected
+      if (updatedSelectedSubjects.length > 0) {
+        setErrors((prevErrors) => ({ ...prevErrors, selectedSubjects: null }));
+      }
 
       return {
         ...prevData,
@@ -1248,7 +1303,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.grn_no && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.grn_no}
                           </span>
                         )}
@@ -1269,7 +1324,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.issue_date && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.issue_date}
                           </span>
                         )}
@@ -1301,7 +1356,7 @@ const LeavingCertificate = () => {
                           className="block  border w-full border-1 border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
                         />
                         {errors.first_name && (
-                          <div className="text-red-500 text-xs ml-2 ">
+                          <div className="text-red-500 text-xs ml-1 ">
                             {errors.first_name}
                           </div>
                         )}
@@ -1357,7 +1412,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.student_id_no && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.student_id_no}
                           </span>
                         )}
@@ -1384,7 +1439,7 @@ const LeavingCertificate = () => {
                             // onBlur={handleBlur}
                           />{" "}
                           {errors.udise_pen_no && (
-                            <span className="text-red-500 text-xs ml-2 h-1">
+                            <span className="text-red-500 text-xs ml-1 h-1">
                               {errors.udise_pen_no}
                             </span>
                           )}
@@ -1408,7 +1463,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.aadhar_no && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.aadhar_no}
                           </span>
                         )}
@@ -1441,7 +1496,7 @@ const LeavingCertificate = () => {
                           className="input-field bg-white block w-full border border-1 border-gray-900 rounded-md py-1 px-3  outline-none shadow-inner"
                         />
                         {errors.father_name && (
-                          <div className="text-red-500 text-xs ml-2 ">
+                          <div className="text-red-500 text-xs ml-1 ">
                             {errors.father_name}
                           </div>
                         )}
@@ -1463,7 +1518,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.mother_name && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.mother_name}
                           </span>
                         )}
@@ -1540,7 +1595,7 @@ const LeavingCertificate = () => {
                                   }
                                   className="form-checkbox h-4 w-4 text-blue-600"
                                 />
-                                <span className="ml-2 text-sm">
+                                <span className="ml-1 text-sm">
                                   {subject.name}
                                 </span>
                               </label>
@@ -1572,12 +1627,17 @@ const LeavingCertificate = () => {
                                   }
                                   className="form-checkbox h-4 w-4 text-blue-600"
                                 />
-                                <span className="ml-2 text-sm">
+                                <span className="ml-1 text-sm">
                                   Basic Mathematics
                                 </span>
                               </label>
                             </div>
                           )}
+                        {errors.selectedSubjects && (
+                          <span className="text-red-500 text-xs ml-1 h-1 col-span-3">
+                            {errors.selectedSubjects}
+                          </span>
+                        )}
                       </div>
                       <div>
                         <label
@@ -1613,7 +1673,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.promoted_to && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.promoted_to}
                           </span>
                         )}
@@ -1636,7 +1696,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.last_exam && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.last_exam}
                           </span>
                         )}
@@ -1668,7 +1728,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.birth_place && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.birth_place}
                           </span>
                         )}
@@ -1690,7 +1750,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.state && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.state}
                           </span>
                         )}
@@ -1712,7 +1772,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.mother_tongue && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.mother_tongue}
                           </span>
                         )}
@@ -1735,7 +1795,7 @@ const LeavingCertificate = () => {
                           className="block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.dob && (
-                          <div className="text-red-500 text-xs ml-2 ">
+                          <div className="text-red-500 text-xs ml-1 ">
                             {errors.dob}
                           </div>
                         )}
@@ -1759,7 +1819,7 @@ const LeavingCertificate = () => {
                           className="input-field resize block w-full border border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.dob_words && (
-                          <div className="text-red-500 text-xs ml-2 ">
+                          <div className="text-red-500 text-xs ml-1 ">
                             {errors.dob_words}
                           </div>
                         )}
@@ -1781,7 +1841,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.nationality && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.nationality}
                           </span>
                         )}
@@ -1815,7 +1875,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.prev_school_class && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.prev_school_class}
                           </span>
                         )}
@@ -1837,7 +1897,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.date_of_admission && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.date_of_admission}
                           </span>
                         )}
@@ -1860,7 +1920,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.admission_class && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.admission_class}
                           </span>
                         )}
@@ -1882,7 +1942,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.leaving_date && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.leaving_date}
                           </span>
                         )}
@@ -1914,7 +1974,7 @@ const LeavingCertificate = () => {
                           <option value="Passport">Passport</option>
                         </select>
                         {errors.dob_proof && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.dob_proof}
                           </span>
                         )}
@@ -1941,7 +2001,7 @@ const LeavingCertificate = () => {
                           <option value="N.A">N.A</option>
                         </select>
                         {errors.part_of && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.part_of}
                           </span>
                         )}
@@ -1964,7 +2024,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.reason_leaving && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.reason_leaving}
                           </span>
                         )}
@@ -1986,11 +2046,12 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.application_date && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.application_date}
                           </span>
                         )}
                       </div>
+                      {/* // In your component JSX, display the error message */}
                       <div className="grid col-span-4 row-span-1">
                         <label
                           htmlFor="activities"
@@ -1999,14 +2060,6 @@ const LeavingCertificate = () => {
                           Extra-Curricular Activities{" "}
                           <span className="text-red-500">*</span>
                         </label>
-                        {/* <input
-                          type="text"
-                          id="activities"
-                          name="activities"
-                          value={formData.activities}
-                          onChange={handleChange}
-                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                        /> */}
                         <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
                           {[
                             "Football",
@@ -2044,7 +2097,7 @@ const LeavingCertificate = () => {
                           ))}
                         </div>
                         {errors.activities && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1 mt-2">
                             {errors.activities}
                           </span>
                         )}
@@ -2065,7 +2118,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.attendance && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.attendance}
                           </span>
                         )}
@@ -2087,7 +2140,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.fee_month && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.fee_month}
                           </span>
                         )}
@@ -2109,7 +2162,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.standard_studying && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.standard_studying}
                           </span>
                         )}
@@ -2141,7 +2194,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.application_date && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.application_date}
                           </span>
                         )}
@@ -2162,7 +2215,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.conduct && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.conduct}
                           </span>
                         )}
@@ -2184,7 +2237,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.remark && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.remark}
                           </span>
                         )}
@@ -2206,7 +2259,7 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                         {errors.academic_year && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.academic_year}
                           </span>
                         )}
@@ -2225,7 +2278,7 @@ const LeavingCertificate = () => {
                           name="academic_yr"
                           value={formData.academic_yr || ""}
                           // onChange={handleChange}
-                          onChange={handleAcademicYearChange}
+                          onChange={handleChange}
                           className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         >
                           <option value="">Select</option>
@@ -2244,7 +2297,7 @@ const LeavingCertificate = () => {
                         </select>
 
                         {errors.academic_yr && (
-                          <span className="text-red-500 text-xs ml-2 h-1">
+                          <span className="text-red-500 text-xs ml-1 h-1">
                             {errors.academic_yr}
                           </span>
                         )}
