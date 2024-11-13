@@ -146,6 +146,8 @@ import PercentageCertificate from "../componants/Certificates/PercentageCertific
 // import LeavingCertificate from "../componants/LeavingCertificate/LeavingCertificate.jsx";
 import ManageLC from "../componants/LeavingCertificate/ManageLC.jsx";
 import EditLeavingCertificate from "../componants/LeavingCertificate/EditLeavingCertificate.jsx";
+import EditBonafied from "../componants/Certificates/BonafiedCertificate/EditBonafied.jsx";
+import EditCastCertificate from "../componants/Certificates/CastCertificate/EditCastCertificate.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -193,11 +195,21 @@ function Index() {
           // path="#"
           element={<PrivateRoute element={BonafiedCertificates} />}
         />
+        <Route
+          path="/studentBonafied/edit/:id"
+          // path="#"
+          element={<PrivateRoute element={EditBonafied} />}
+        />
         {/* Cast certificate fsd */}
         <Route
           path="/castCertificate"
           // path="#"
           element={<PrivateRoute element={CastCertificate} />}
+        />
+        <Route
+          path="/studentCast/edit/:id"
+          // path="#"
+          element={<PrivateRoute element={EditCastCertificate} />}
         />
         <Route
           path="/percentageCertificate"

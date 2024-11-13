@@ -117,7 +117,7 @@ const CreatePercentageCertificate = () => {
 
   const handleClassSelect = (selectedOption) => {
     // setNameErrorForClass(""); // Reset class error on selection
-    setNameError("");
+    // setNameError("");
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
@@ -420,7 +420,7 @@ const CreatePercentageCertificate = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Percentage Certificate updated successfully!");
+        toast.success("Percentage Certificate Downloaded successfully!");
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
         let filename = "DownloadedFile.pdf"; // Fallback name
@@ -462,7 +462,7 @@ const CreatePercentageCertificate = () => {
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
       toast.error(
-        "An error occurred while updating the Percentage Certificate."
+        "An error occurred while Downloading the Percentage Certificate."
       );
 
       if (error.response && error.response.data) {

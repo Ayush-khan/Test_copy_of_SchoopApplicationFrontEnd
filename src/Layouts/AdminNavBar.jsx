@@ -202,35 +202,13 @@ const AdminNavBar = () => {
         </NavDropdown>
 
         {/* Leaving Certificate Sub-dropdown */}
-        <NavDropdown
-          className="dropend pr-0 mr-0"
-          id="leaving-certificate-dropdown"
-          // title=""
-          title={
-            <span className="nav-dropdown-title">Leaving Certificate</span>
-          }
-          style={{
-            color: "gray",
-            fontWeight: "400",
-            display: "block",
-          }}
+        <NavDropdown.Item
+          as={Link}
+          to="/leavingCertificate"
+          className="text-sm font-bold hover:text-black"
         >
-          <NavDropdown.Item
-            as={Link}
-            to="/leavingCertificate"
-            className="text-sm font-bold"
-          >
-            Generate LC
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="#"
-            className="text-sm font-bold hover:text-black"
-          >
-            Manage LC
-          </NavDropdown.Item>
-        </NavDropdown>
-
+          Leaving Certificate
+        </NavDropdown.Item>
         {/* Leave Sub-dropdown */}
         <NavDropdown
           className="dropend pr-0 mr-0"
@@ -330,6 +308,7 @@ const AdminNavBar = () => {
       </NavDropdown>
 
       {/* View Dropdown */}
+
       <NavDropdown
         // title=""
         title={<span className="nav-dropdown-title">View</span>}

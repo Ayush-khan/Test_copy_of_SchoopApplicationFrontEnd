@@ -285,7 +285,7 @@ const LeavingCertificate = () => {
 
   const handleClassSelect = (selectedOption) => {
     // setNameErrorForClass(""); // Reset class error on selection
-    setNameError("");
+    // setNameError("");
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
@@ -1143,7 +1143,7 @@ const LeavingCertificate = () => {
                   className=" ml-0 md:ml-4 md:w-[30%]  text-md mt-1.5 "
                   htmlFor="studentSelect"
                 >
-                  First Name <span className="text-red-500 ">*</span>
+                  Student Name <span className="text-red-500 ">*</span>
                 </label>{" "}
                 <div className="w-full md:w-[60%]">
                   <Select
@@ -1289,7 +1289,8 @@ const LeavingCertificate = () => {
                         maxLength={10}
                         value={formData.grn_no}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.grn_no && (
                         <span className="text-red-500 text-xs ml-1 h-1">
@@ -1333,7 +1334,7 @@ const LeavingCertificate = () => {
                         htmlFor="staffName"
                         className="block font-bold  text-xs mb-2"
                       >
-                        Student Name <span className="text-red-500">*</span>
+                        First Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -1342,7 +1343,8 @@ const LeavingCertificate = () => {
                         name="first_name"
                         value={formData.first_name}
                         onChange={handleChange}
-                        className="block  border w-full border-1 border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.first_name && (
                         <div className="text-red-500 text-xs ml-1 ">
@@ -1364,7 +1366,8 @@ const LeavingCertificate = () => {
                         name="mid_name"
                         value={formData.mid_name}
                         onChange={handleChange}
-                        className="block  border w-full border-1 border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                     </div>
                     <div className=" ">
@@ -1381,7 +1384,8 @@ const LeavingCertificate = () => {
                         name="last_name"
                         value={formData.last_name}
                         onChange={handleChange}
-                        className="block  border w-full border-1 border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                     </div>
                     <div>
@@ -1398,7 +1402,8 @@ const LeavingCertificate = () => {
                         maxLength={25}
                         value={formData.student_id_no}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.student_id_no && (
                         <span className="text-red-500 text-xs ml-1 h-1">
@@ -1422,7 +1427,8 @@ const LeavingCertificate = () => {
                           maxLength={14}
                           value={formData.udise_pen_no}
                           // className="input-field block w-full  border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                           onChange={handleChange}
                           // onBlur={handleBlur}
                         />{" "}
@@ -1448,7 +1454,8 @@ const LeavingCertificate = () => {
                         maxLength={12}
                         value={formData.aadhar_no}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.aadhar_no && (
                         <span className="text-red-500 text-xs ml-1 h-1">
@@ -1466,7 +1473,8 @@ const LeavingCertificate = () => {
                   </h5>
                   {/* </legend> */}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="w-full md:w-[80%]  grid grid-cols-1 md:grid-cols-2   gap-x-6 gap-4">
+                    {" "}
                     <div>
                       <label
                         htmlFor="father_name"
@@ -1481,7 +1489,8 @@ const LeavingCertificate = () => {
                         name="father_name"
                         value={formData.father_name}
                         onChange={handleChange}
-                        className="input-field bg-white block w-full border border-1 border-gray-900 rounded-md py-1 px-3  outline-none shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.father_name && (
                         <div className="text-red-500 text-xs ml-1 ">
@@ -1503,7 +1512,8 @@ const LeavingCertificate = () => {
                         maxLength={50}
                         value={formData.mother_name}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.mother_name && (
                         <span className="text-red-500 text-xs ml-1 h-1">
@@ -1535,7 +1545,8 @@ const LeavingCertificate = () => {
                         maxLength={20}
                         value={formData.religion}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                     </div>
                     <div>
@@ -1552,7 +1563,8 @@ const LeavingCertificate = () => {
                         maxLength={20}
                         value={formData.caste}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                     </div>{" "}
                     <div className="grid   col-span-2 row-span-2 ">
@@ -1637,7 +1649,8 @@ const LeavingCertificate = () => {
                         maxLength={100}
                         value={formData.subcaste}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                     </div>
                     <div>
@@ -1709,7 +1722,8 @@ const LeavingCertificate = () => {
                         name="birth_place"
                         value={formData.birth_place}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.birth_place && (
                         <span className="text-red-500 text-xs ml-1 h-1">
@@ -1731,7 +1745,8 @@ const LeavingCertificate = () => {
                         maxLength={50}
                         value={formData.state}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.state && (
                         <span className="text-red-500 text-xs ml-1 h-1">
@@ -1753,7 +1768,8 @@ const LeavingCertificate = () => {
                         maxLength={50}
                         value={formData.mother_tongue}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.mother_tongue && (
                         <span className="text-red-500 text-xs ml-1 h-1">
@@ -1776,7 +1792,8 @@ const LeavingCertificate = () => {
                         name="dob"
                         value={formData.dob}
                         onChange={handleChange}
-                        className="block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.dob && (
                         <div className="text-red-500 text-xs ml-1 ">
@@ -1800,7 +1817,8 @@ const LeavingCertificate = () => {
                         name="dob_words"
                         value={formData.dob_words}
                         onChange={handleChange}
-                        className="input-field resize block w-full border border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.dob_words && (
                         <div className="text-red-500 text-xs ml-1 ">
@@ -1822,7 +1840,8 @@ const LeavingCertificate = () => {
                         maxLength={100}
                         value={formData.nationality}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.nationality && (
                         <span className="text-red-500 text-xs ml-1 h-1">
@@ -1878,7 +1897,8 @@ const LeavingCertificate = () => {
                         name="date_of_admission"
                         value={formData.date_of_admission}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.date_of_admission && (
                         <span className="text-red-500 text-xs ml-1 h-1">
@@ -1901,7 +1921,8 @@ const LeavingCertificate = () => {
                         name="admission_class"
                         value={formData.admission_class}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                       {errors.admission_class && (
                         <span className="text-red-500 text-xs ml-1 h-1">

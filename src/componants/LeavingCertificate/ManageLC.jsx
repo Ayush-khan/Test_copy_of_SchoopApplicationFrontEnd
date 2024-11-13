@@ -496,7 +496,7 @@ function ManageLC() {
                                 setSrNo(value);
                               }
                             }}
-                            placeholder="Enter LC Number"
+                            placeholder="Enter LC No."
                             className="text-sm w-full h-9 mr-0 md:mr-8 px-2 py-1 border rounded-md"
                           />
                         </div>

@@ -254,7 +254,7 @@ const CreateCreateBonafide = () => {
 
   const handleClassSelect = (selectedOption) => {
     // setNameErrorForClass(""); // Reset class error on selection
-    setNameError("");
+    // setNameError("");
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
@@ -364,34 +364,31 @@ const CreateCreateBonafide = () => {
     const newErrors = {};
 
     // Validate name
-    if (!formData.stud_name) newErrors.stud_name = "Name is required";
+    if (!formData.stud_name) newErrors.stud_name = "This field is required";
     else if (!/^[^\d].*/.test(formData.stud_name))
       newErrors.stud_name = "Name should not start with a number";
 
     // Validate name
-    if (!formData.father_name) newErrors.father_name = "Name is required";
+    if (!formData.father_name) newErrors.father_name = "This field is required";
     else if (!/^[^\d].*/.test(formData.father_name))
       newErrors.father_name = "Name should not start with a number";
     // Validate academic qualifications (now a single text input)
     if (!formData.class_division)
-      newErrors.class_division = "Class and Division is required";
-    if (!formData.sr_no) newErrors.sr_no = "Serial number is required";
+      newErrors.class_division = "This field is required";
+    if (!formData.sr_no) newErrors.sr_no = "This field is required";
 
     // Validate dob
-    if (!formData.dob) newErrors.dob = "Date of Birth is required";
-    if (!formData.father_name)
-      newErrors.father_name = "Father Name is required";
+    if (!formData.dob) newErrors.dob = "This field is required";
+    if (!formData.father_name) newErrors.father_name = "This field is required";
 
     // Validate date of joining
-    if (!formData.date) newErrors.date = " Date is required";
+    if (!formData.date) newErrors.date = "This field is required";
 
     // Validate Employee Id
-    if (!formData.purpose) newErrors.purpose = "purpose is required";
+    if (!formData.purpose) newErrors.purpose = "This field is required";
     // Validate address
-    if (!formData.dob_words)
-      newErrors.dob_words = "  Birth date in words is required";
-    if (!formData.nationality)
-      newErrors.nationality = "Nationality is required";
+    if (!formData.dob_words) newErrors.dob_words = "This field is required";
+    if (!formData.nationality) newErrors.nationality = "This field is required";
 
     setErrors(newErrors);
     return newErrors;
@@ -521,7 +518,7 @@ const CreateCreateBonafide = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Bonafide Certificate updated successfully!");
+        toast.success("Bonafide Certificate Downloaded successfully!");
 
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
@@ -568,7 +565,9 @@ const CreateCreateBonafide = () => {
       }
     } catch (error) {
       console.error("Error:", error.response.data, error.response.sr_no);
-      toast.error("An error occurred while updating the Bonafide Certificate.");
+      toast.error(
+        "An error occurred while Downloading the Bonafide Certificate."
+      );
 
       if (error.response && error.response) {
         setBackendErrors(error.response || {});
@@ -781,13 +780,13 @@ const CreateCreateBonafide = () => {
                   backgroundColor: "#C03078",
                 }}
               ></div>
-              <p className=" text-[.9em] md:absolute md:right-6  md:top-[15%]   text-gray-500 ">
+              <p className=" text-[.9em] md:absolute md:right-5  md:top-[14%]   text-gray-500 ">
                 <span className="text-red-500 ">*</span>indicates mandatory
                 information
               </p>
               <form
                 onSubmit={handleSubmit}
-                className="  md:mx-5 overflow-x-hidden shadow-md p-2 bg-gray-50 mb-4"
+                className="  border-1 overflow-x-hidden shadow-md p-2 bg-gray-100 mb-4"
               >
                 <div className=" flex flex-col gap-4 md:grid  md:grid-cols-3 md:gap-x-14 md:mx-10 gap-y-1 pt-4 pb-4">
                   <div className=" ">
@@ -900,9 +899,10 @@ const CreateCreateBonafide = () => {
                       min={MIN_DATE} // Set minimum date
                       max={MAX_DATE} // Set maximum date to today
                       name="dob"
+                      readOnly
                       value={formData.dob}
                       onChange={handleChange}
-                      className="block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                     />
                     {errors.dob && (
                       <div className="text-red-500 text-xs ml-2">
@@ -924,9 +924,10 @@ const CreateCreateBonafide = () => {
                       maxLength={100}
                       id="dob_words"
                       name="dob_words"
+                      readOnly
                       value={formData.dob_words}
                       onChange={handleChange}
-                      className="input-field resize block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                     />
                     {errors.dob_words && (
                       <div className="text-red-500 text-xs ml-2">

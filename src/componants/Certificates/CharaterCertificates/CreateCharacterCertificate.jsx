@@ -252,7 +252,7 @@ const CreateCharacterCertificate = () => {
 
   const handleClassSelect = (selectedOption) => {
     // setNameErrorForClass(""); // Reset class error on selection
-    setNameError("");
+    // setNameError("");
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
@@ -273,8 +273,8 @@ const CreateCharacterCertificate = () => {
     setErrors({}); // Clears all field-specific errors
 
     if (!selectedStudent) {
-       setNameError("Please select Student Name.");
-       toast.error("Please select Student Name.!");
+      setNameError("Please select Student Name.");
+      toast.error("Please select Student Name.!");
       return;
     }
     // Validate if class and student are selected
@@ -496,7 +496,7 @@ const CreateCharacterCertificate = () => {
       );
 
       if (response.status === 200) {
-        toast.success("CharacterCertificate updated successfully!");
+        toast.success("CharacterCertificate Downloaded successfully!");
 
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
@@ -541,7 +541,7 @@ const CreateCharacterCertificate = () => {
     } catch (error) {
       console.error("Error:", error.response.data, error.response.sr_no);
       toast.error(
-        "An error occurred while updating the Character Certificate."
+        "An error occurred while Downloading the Character Certificate."
       );
 
       if (error.response && error.response) {
@@ -630,7 +630,7 @@ const CreateCharacterCertificate = () => {
                   className="text-md mt-1.5 mr-1 md:mr-0 "
                   htmlFor="classSelect"
                 >
-                  Class 
+                  Class
                 </label>{" "}
                 <div className="w-full md:w-[50%] ">
                   <Select
@@ -643,7 +643,6 @@ const CreateCharacterCertificate = () => {
                     isClearable
                     className="text-sm"
                   />
-                 
                 </div>
               </div>
               <div className="w-full gap-x-6 relative left-0 md:-left-[5%] justify-between md:w-[98%] my-1 md:my-4 flex md:flex-row">
@@ -843,7 +842,8 @@ const CreateCharacterCertificate = () => {
                       name="dob"
                       value={formData.dob}
                       onChange={handleChange}
-                      className="block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                      readOnly
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                     />
                     {errors.dob && (
                       <div className="text-red-500 text-xs ml-2">
@@ -867,7 +867,8 @@ const CreateCharacterCertificate = () => {
                       name="dob_words"
                       value={formData.dob_words}
                       onChange={handleChange}
-                      className="input-field resize block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                      readOnly
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                     />
                     {errors.dob_words && (
                       <div className="text-red-500 text-xs ml-2">

@@ -254,7 +254,7 @@ const CreateSimpleBonafied = () => {
 
   const handleClassSelect = (selectedOption) => {
     // setNameErrorForClass(""); // Reset class error on selection
-    setNameError("");
+    // setNameError("");
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
@@ -523,7 +523,7 @@ const CreateSimpleBonafied = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Simple Bonafide Certificate updated successfully!");
+        toast.success("Simple Bonafide Certificate Downloaded successfully!");
 
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
@@ -570,7 +570,7 @@ const CreateSimpleBonafied = () => {
     } catch (error) {
       console.error("Error:", error.response.data, error.response.sr_no);
       toast.error(
-        "An error occurred while updating the Simple Bonafide Certificate."
+        "An error occurred while Downloading the Simple Bonafide Certificate."
       );
 
       if (error.response && error.response) {
@@ -895,7 +895,8 @@ const CreateSimpleBonafied = () => {
                       name="dob"
                       value={formData.dob}
                       onChange={handleChange}
-                      className="block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                      readOnly
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                     />
                     {errors.dob && (
                       <div className="text-red-500 text-xs ml-2">
@@ -919,7 +920,8 @@ const CreateSimpleBonafied = () => {
                       name="dob_words"
                       value={formData.dob_words}
                       onChange={handleChange}
-                      className="input-field resize block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                      readOnly
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                     />
                     {errors.dob_words && (
                       <div className="text-red-500 text-xs ml-2">

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { ImCheckboxChecked } from "react-icons/im";
+import { ImCheckboxChecked, ImDownload } from "react-icons/im";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -17,6 +19,7 @@ function BonafiedCertificates() {
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
   // for allot subject tab
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
@@ -43,7 +46,7 @@ function BonafiedCertificates() {
   const [newMarksHeading, setNewMarksHeading] = useState("");
   const [highestMarks, setHighestMarks] = useState("");
   const [marksError, setMarksError] = useState(""); // Error for validation
-
+  const navigate = useNavigate();
   const pageSize = 10;
   useEffect(() => {
     fetchClassNames();
@@ -155,6 +158,100 @@ function BonafiedCertificates() {
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
     // Handle page change logic
+  };
+
+  const handleDownload = (section) => {
+    setCurrentSection(section);
+    console.log("currentedit", section);
+
+    // // Set values for the edit modal
+    // setNewClassName(section?.get_class?.name);
+    // setNewSubjectName(section?.get_subject?.name);
+    // setNewExamName(section?.get_exam?.name); // Assuming exam details are available
+    // setNewMarksHeading(section?.get_marksheading?.name || ""); // Set marks heading if available
+
+    // setHighestMarks(section?.highest_marks || ""); // Set highest marks or empty
+    // setMarksError(""); // Reset the error message when opening the modal
+
+    setShowDownloadModal(true);
+  };
+
+  const handleEditForm = (section) => {
+    setCurrentSection(section);
+    navigate(
+      `/studentBonafied/edit/${section?.sr_no}`,
+
+      {
+        state: { student: section },
+      }
+    );
+    // console.log("the currecne t section", currentSection);
+  };
+
+  const handleDownloadSumbit = async () => {
+    try {
+      //  setLoading(true); // Show loading indicator if you have one
+      const token = localStorage.getItem("authToken");
+      console.log("the sr for download", currentSection.sr_no);
+      if (!token || !currentSection || !currentSection.sr_no) {
+        throw new Error("Token or Serial Number is missing");
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/get_simpleisDownload/${currentSection.sr_no}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "blob", // Important for downloading files
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Bonafied certificate downloaded successfully!");
+
+        // Extract filename from Content-Disposition header if available
+        const contentDisposition = response.headers["content-disposition"];
+        let filename = "DownloadedCertificate.pdf"; // Default name if not specified
+
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="(.+?)"/);
+          if (match && match[1]) {
+            filename = match[1];
+          }
+        }
+
+        // Create a blob URL for the PDF file
+        const pdfBlob = new Blob([response.data], { type: "application/pdf" });
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+
+        // Create a link to initiate the download
+        const link = document.createElement("a");
+        link.href = pdfUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(pdfUrl); // Clean up the object URL
+        handleSearch(); // Optionally refresh your data
+        handleCloseModal(); // Optionally close modal if applicable
+      } else {
+        throw new Error("Failed to download the file");
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        toast.error(
+          `Error in Downloading Bonafied Certificate: ${error.response.data.error}`
+        );
+      } else {
+        toast.error(
+          `Error in Downloading Bonafied Certificate: ${error.message}`
+        );
+      }
+      console.error("Error in Downloading Bonafied Certificate:", error);
+    }
+    //    finally {
+    //      setLoading(false); // Stop loading indicator
+    //    }
   };
 
   const handleEdit = (section) => {
@@ -280,6 +377,7 @@ function BonafiedCertificates() {
   };
 
   const handleCloseModal = () => {
+    setShowDownloadModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
@@ -411,7 +509,12 @@ function BonafiedCertificates() {
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Status
                               </th>
-
+                              {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Download
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Edit
+                              </th> */}
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Delete
                               </th>
@@ -460,7 +563,22 @@ function BonafiedCertificates() {
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {statusText}
                                   </td>
-
+                                  {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    <button
+                                      onClick={() => handleDownload(subject)}
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                    >
+                                      <ImDownload />
+                                    </button>
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    <button
+                                      onClick={() => handleEditForm(subject)}
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                    >
+                                      <FontAwesomeIcon icon={faEdit} />
+                                    </button>
+                                  </td> */}
                                   {/* Delete button */}
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {showDeleteButton && (
@@ -564,6 +682,50 @@ function BonafiedCertificates() {
                     onClick={handleSubmitEdit}
                   >
                     Issue
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDownloadModal && (
+        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">Confirm Download</h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    // className="btn-close text-red-600"
+                    onClick={handleCloseModal}
+                  />
+                  {console.log(
+                    "the currecnt section inside delete of the managesubjhect",
+                    currentSection
+                  )}
+                </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="modal-body">
+                  Are you sure you want to Download this certificate{" "}
+                  {` ${currentSection?.stud_name} `} ?
+                </div>
+                <div className=" flex justify-end p-3">
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "#2196F3" }}
+                    className="btn text-white px-3 mb-2"
+                    onClick={handleDownloadSumbit}
+                  >
+                    Download
                   </button>
                 </div>
               </div>
