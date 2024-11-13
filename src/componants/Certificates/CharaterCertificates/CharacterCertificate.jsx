@@ -490,12 +490,12 @@ function CharacterCertificate() {
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Status
                               </th>
-                              {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Download
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Edit
-                              </th> */}
+                              </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Delete
                               </th>
@@ -544,7 +544,7 @@ function CharacterCertificate() {
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {statusText}
                                   </td>
-                                  {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     <button
                                       onClick={() => handleDownload(subject)}
                                       className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
@@ -559,7 +559,7 @@ function CharacterCertificate() {
                                     >
                                       <FontAwesomeIcon icon={faEdit} />
                                     </button>
-                                  </td> */}
+                                  </td>
                                   {/* Delete button */}
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {showDeleteButton && (

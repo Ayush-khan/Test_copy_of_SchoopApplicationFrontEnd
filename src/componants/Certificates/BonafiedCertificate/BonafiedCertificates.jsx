@@ -163,16 +163,6 @@ function BonafiedCertificates() {
   const handleDownload = (section) => {
     setCurrentSection(section);
     console.log("currentedit", section);
-
-    // // Set values for the edit modal
-    // setNewClassName(section?.get_class?.name);
-    // setNewSubjectName(section?.get_subject?.name);
-    // setNewExamName(section?.get_exam?.name); // Assuming exam details are available
-    // setNewMarksHeading(section?.get_marksheading?.name || ""); // Set marks heading if available
-
-    // setHighestMarks(section?.highest_marks || ""); // Set highest marks or empty
-    // setMarksError(""); // Reset the error message when opening the modal
-
     setShowDownloadModal(true);
   };
 
@@ -509,12 +499,12 @@ function BonafiedCertificates() {
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Status
                               </th>
-                              {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Download
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Edit
-                              </th> */}
+                              </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Delete
                               </th>
@@ -563,7 +553,7 @@ function BonafiedCertificates() {
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {statusText}
                                   </td>
-                                  {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     <button
                                       onClick={() => handleDownload(subject)}
                                       className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
@@ -578,7 +568,7 @@ function BonafiedCertificates() {
                                     >
                                       <FontAwesomeIcon icon={faEdit} />
                                     </button>
-                                  </td> */}
+                                  </td>
                                   {/* Delete button */}
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {showDeleteButton && (

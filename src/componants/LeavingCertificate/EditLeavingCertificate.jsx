@@ -1162,7 +1162,8 @@ const EditLeavingCertificate = () => {
             <h5 className="col-span-4 text-blue-400 py-2">Parent Details</h5>
             {/* </legend> */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="w-full md:w-[75%]  grid grid-cols-1 md:grid-cols-2   gap-x-6 gap-4">
+              {" "}
               <div>
                 <label
                   htmlFor="father_name"
@@ -1326,8 +1327,7 @@ const EditLeavingCertificate = () => {
                   maxLength={100}
                   value={formData.subcaste}
                   onChange={handleChange}
-                  readOnly
-                  className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                  className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
                 />
               </div>
               <div>

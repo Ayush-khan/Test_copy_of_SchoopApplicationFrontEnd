@@ -94,7 +94,7 @@ const EditCastCertificate = () => {
             state: fetchedData.state || "",
             mother_tongue: fetchedData.mother_tongue || "",
             dob: fetchedData.dob || "",
-            dob_words: fetchedData.dobinwords || "", // Directly from fetched data
+            dob_words: convertDateToWords(fetchedData.dob),
             nationality: fetchedData.nationality || "",
             stu_aadhaar_no: fetchedData.stu_aadhaar_no || "",
             teacher_image_name: fetchedData.father_image_name || null, // Assuming this is for a teacher image

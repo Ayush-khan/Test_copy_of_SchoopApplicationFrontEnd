@@ -358,26 +358,25 @@ const CreateCharacterCertificate = () => {
     const newErrors = {};
 
     // Validate name
-    if (!formData.stud_name) newErrors.stud_name = "Name is required";
+    if (!formData.stud_name) newErrors.stud_name = "This field is required";
     else if (!/^[^\d].*/.test(formData.stud_name))
       newErrors.stud_name = "Name should not start with a number";
 
     // Validate academic qualifications (now a single text input)
     if (!formData.class_division)
-      newErrors.class_division = "Class and Division is required";
-    if (!formData.sr_no) newErrors.sr_no = "Serial number is required";
+      newErrors.class_division = "This field is required";
+    if (!formData.sr_no) newErrors.sr_no = "This field is required";
 
     // Validate dob
-    if (!formData.dob) newErrors.dob = "Date of Birth is required";
+    if (!formData.dob) newErrors.dob = "This field is required";
 
     // Validate date of joining
-    if (!formData.date) newErrors.date = " Date is required";
+    if (!formData.date) newErrors.date = "This field is required";
 
     // Validate Employee Id
-    if (!formData.attempt) newErrors.attempt = "Attempt is required";
+    if (!formData.attempt) newErrors.attempt = "This field is required";
     // Validate address
-    if (!formData.dob_words)
-      newErrors.dob_words = "  Birth date in words is required";
+    if (!formData.dob_words) newErrors.dob_words = "This field is required";
 
     setErrors(newErrors);
     return newErrors;
