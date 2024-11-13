@@ -274,9 +274,9 @@ const CreateCreateBonafide = () => {
     setNameErrorForClass("");
     setErrors({}); // Clears all field-specific errors
 
-    if (!selectedClass && !selectedStudent) {
-      setNameError("Please select at least one of them.");
-      toast.error("Please select at least one of them!");
+    if (!selectedStudent) {
+      setNameError("Please select Student Name.");
+      toast.error("Please select Student Name.!");
       return;
     }
     // Validate if class and student are selected
@@ -656,7 +656,7 @@ const CreateCreateBonafide = () => {
                   className="text-md mt-1.5 mr-1 md:mr-0 "
                   htmlFor="classSelect"
                 >
-                  Class <span className="text-red-500 ">*</span>
+                  Class
                 </label>{" "}
                 <div className="w-full md:w-[50%] ">
                   <Select
@@ -674,11 +674,6 @@ const CreateCreateBonafide = () => {
                       {nameErrorForClass}
                     </span>
                   )} */}
-                  {nameError && (
-                    <div className=" h-8  relative  ml-1 text-danger text-xs">
-                      {nameError}
-                    </div>
-                  )}{" "}
                 </div>
               </div>
               <div className="w-full gap-x-6 relative left-0 md:-left-[5%] justify-between md:w-[98%] my-1 md:my-4 flex md:flex-row">

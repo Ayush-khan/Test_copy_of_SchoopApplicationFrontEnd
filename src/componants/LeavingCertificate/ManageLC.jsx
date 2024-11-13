@@ -9,6 +9,7 @@ import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 // import AllotSubjectTab from "./AllotMarksHeadingTab";
+import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import LeavingCertificate from "./LeavingCertificate";
 function ManageLC() {
@@ -46,6 +47,7 @@ function ManageLC() {
   const [marksError, setMarksError] = useState(""); // Error for validation
   const [srNo, setSrNo] = useState("");
   const [cancellationReason, setCancellationReason] = useState("");
+  const navigate = useNavigate();
   const pageSize = 10;
   useEffect(() => {
     fetchClassNames();
@@ -216,17 +218,19 @@ function ManageLC() {
   const handleEdit = (section) => {
     setCurrentSection(section);
     console.log("currentedit", section);
-
-    // // Set values for the edit modal
-    // setNewClassName(section?.get_class?.name);
-    // setNewSubjectName(section?.get_subject?.name);
-    // setNewExamName(section?.get_exam?.name); // Assuming exam details are available
-    // setNewMarksHeading(section?.get_marksheading?.name || ""); // Set marks heading if available
-
-    // setHighestMarks(section?.highest_marks || ""); // Set highest marks or empty
-    // setMarksError(""); // Reset the error message when opening the modal
-
     setShowEditModal(true);
+  };
+
+  const handleEditForm = (section) => {
+    setCurrentSection(section);
+    navigate(
+      `/studentLC/edit/${section?.sr_no}`,
+
+      {
+        state: { student: section },
+      }
+    );
+    // console.log("the currecne t section", currentSection);
   };
 
   const handleDownload = (section) => {
@@ -493,7 +497,7 @@ function ManageLC() {
                               }
                             }}
                             placeholder="Enter LC Number"
-                            className="text-sm w-full h-10 mr-0 md:mr-8 px-2 py-1 border rounded-md"
+                            className="text-sm w-full h-9 mr-0 md:mr-8 px-2 py-1 border rounded-md"
                           />
                         </div>
                       </div>
@@ -645,7 +649,7 @@ function ManageLC() {
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     <button
-                                      onClick={() => handleEdit(subject?.sr_no)}
+                                      onClick={() => handleEditForm(subject)}
                                       className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                                     >
                                       <FontAwesomeIcon icon={faEdit} />

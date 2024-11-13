@@ -145,6 +145,7 @@ import CharacterCertificate from "../componants/Certificates/CharaterCertificate
 import PercentageCertificate from "../componants/Certificates/PercentageCertificate/PercentageCertificate.jsx";
 // import LeavingCertificate from "../componants/LeavingCertificate/LeavingCertificate.jsx";
 import ManageLC from "../componants/LeavingCertificate/ManageLC.jsx";
+import EditLeavingCertificate from "../componants/LeavingCertificate/EditLeavingCertificate.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -220,6 +221,16 @@ function Index() {
           path="/leavingCertificate"
           // path="#"
           element={<PrivateRoute element={ManageLC} />}
+        />
+
+        {/* <Route
+          path="/student/edit/:id"
+          element={<PrivateRoute element={CreateStudent} />}
+        /> */}
+        <Route
+          path="/studentLC/edit/:id"
+          // path="#"
+          element={<PrivateRoute element={EditLeavingCertificate} />}
         />
         {/* Staff endPoints */}
         <Route
