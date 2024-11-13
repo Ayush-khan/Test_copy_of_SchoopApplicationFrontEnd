@@ -550,7 +550,7 @@ const LeavingCertificate = () => {
       "grn_no",
       "issue_date",
       "first_name",
-      "udise_pen_no",
+
       "student_id_no",
       "promoted_to",
       "last_exam",
@@ -582,9 +582,13 @@ const LeavingCertificate = () => {
         newErrors[field] = "This field is required";
       }
     });
-
-    // Additional validations for specific fields
+    if (classIdForSearch > 427) {
+      if (!formData.udise_pen_no) {
+        newErrors.udise_pen_no = "This field is required";
+      }
+    }
     if (formData.first_name && /^\d/.test(formData.first_name)) {
+      // Additional validations for specific fields
       newErrors.first_name = "Student Name should not start with a number";
     }
     if (formData.father_name && /^\d/.test(formData.father_name)) {
@@ -1139,7 +1143,7 @@ const LeavingCertificate = () => {
                   className=" ml-0 md:ml-4 md:w-[30%]  text-md mt-1.5 "
                   htmlFor="studentSelect"
                 >
-                  Student Name <span className="text-red-500 ">*</span>
+                  First Name <span className="text-red-500 ">*</span>
                 </label>{" "}
                 <div className="w-full md:w-[60%]">
                   <Select

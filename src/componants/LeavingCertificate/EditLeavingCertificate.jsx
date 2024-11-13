@@ -71,7 +71,7 @@ const EditLeavingCertificate = () => {
     academic_yr: "", // Add this to track selected academic year
     part_of: "",
     // games: "",
-    // selectedActivities:[],
+    selectedActivities: [],
   });
 
   // Fetch initial data on component load
@@ -94,6 +94,15 @@ const EditLeavingCertificate = () => {
           const fetchedData = response.data.data.leavingcertificatesingle;
           const DataStudentAc = response.data.data;
           // Update formData with the fetched data
+          // Inside useEffect, after fetching data and setting formData
+          const { subjects_studied, games } =
+            response.data.data.leavingcertificatesingle;
+          const classsubject = response.data.data.classsubject;
+          // Convert comma-separated strings to arrays
+          const selectedSubjects = subjects_studied
+            ? subjects_studied.split(",")
+            : [];
+          const selectedActivities = games ? games.split(",") : [];
           setFormData({
             sr_no: fetchedData.sr_no || "",
             student_id: fetchedData.student_id || "",
@@ -134,7 +143,10 @@ const EditLeavingCertificate = () => {
             conduct: fetchedData.conduct || "",
             fee_month: fetchedData.fee_month || "",
             subjects: DataStudentAc.classsubject || [],
-            selectedActivities: (fetchedData.games || "").split(","),
+            // selectedActivities: (fetchedData.games || "").split(","),
+            subjectsFor: classsubject, // All subjects to display
+            selectedSubjects: selectedSubjects, // Only selected subjects checked
+            selectedActivities: selectedActivities, // Only selected activities checked
           });
           toast.success("Data loaded successfully");
         } else {
@@ -436,7 +448,7 @@ const EditLeavingCertificate = () => {
       "grn_no",
       "issue_date",
       "first_name",
-      "udise_pen_no",
+
       "student_id_no",
       "promoted_to",
       "last_exam",
@@ -468,7 +480,11 @@ const EditLeavingCertificate = () => {
         newErrors[field] = "This field is required";
       }
     });
-
+    if (formData.class_id > 109) {
+      if (!formData.udise_pen_no) {
+        newErrors.udise_pen_no = "This field is required";
+      }
+    }
     // Additional validations for specific fields
     if (formData.first_name && /^\d/.test(formData.first_name)) {
       newErrors.first_name = "Student Name should not start with a number";
@@ -481,7 +497,10 @@ const EditLeavingCertificate = () => {
     }
 
     // Checkbox validation
-    if (!selectedActivities || selectedActivities.length === 0) {
+    if (
+      !formData.selectedActivities ||
+      formData.selectedActivities.length === 0
+    ) {
       newErrors.activities =
         "Please select at least one extra-curricular activity";
     }
@@ -714,6 +733,7 @@ const EditLeavingCertificate = () => {
       mother_name: formData.mother_name || "",
       nationality: formData.nationality || "",
       mother_tongue: formData.mother_tongue || "",
+      state: formData.state || "",
       religion: formData.religion || "",
       caste: formData.caste || "",
       subcaste: formData.subcaste || "",
@@ -747,8 +767,8 @@ const EditLeavingCertificate = () => {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
 
-      const response = await axios.post(
-        `${API_URL}/api/save_pdfleavingcertificate`,
+      const response = await axios.put(
+        `${API_URL}/api/update_leavingcertificate/${student?.sr_no}`,
         formattedFormData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -757,7 +777,7 @@ const EditLeavingCertificate = () => {
       );
 
       if (response.status === 200) {
-        toast.success("LC Certificate Generated successfully!");
+        toast.success("LC Certificate Updated successfully!");
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
         let filename = "DownloadedFile.pdf"; // Fallback name
@@ -827,10 +847,13 @@ const EditLeavingCertificate = () => {
         setSelectedStudent(null);
 
         setTimeout(() => setParentInformation(null), 3000);
+
+        // Navigate to the desired route after successful update
+        navigate("/leavingCertificate");
       }
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
-      toast.error("An error occurred while Generating the LC Certificate.");
+      toast.error("An error occurred while Updated the LC Certificate.");
 
       if (error.response && error.response.data) {
         setBackendErrors(error.response.data);
@@ -844,34 +867,33 @@ const EditLeavingCertificate = () => {
 
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
-    let updatedActivities;
+    setFormData((prevData) => {
+      const updatedActivities = checked
+        ? [...prevData.selectedActivities, value]
+        : prevData.selectedActivities.filter((activity) => activity !== value);
 
-    if (checked) {
-      // Add the selected activity
-      updatedActivities = [...selectedActivities, value];
-      setSelectedActivities(updatedActivities);
-    } else {
-      // Remove the unselected activity
-      updatedActivities = selectedActivities.filter(
-        (activity) => activity !== value
-      );
-      setSelectedActivities(updatedActivities);
-    }
+      // Remove error if at least one activity is selected
+      if (updatedActivities.length > 0) {
+        setErrors((prevErrors) => ({ ...prevErrors, activities: null }));
+      }
+      //   setSelectedActivities(updatedActivities);
 
-    // Remove error if at least one activity is selected
-    if (updatedActivities.length > 0) {
-      setErrors((prevErrors) => ({ ...prevErrors, activities: null }));
-    }
+      return {
+        ...prevData,
+        selectedActivities: updatedActivities,
+      };
+    });
   };
 
   // Log or save selectedActivities when needed
-  console.log(selectedActivities);
+  console.log("____activity", selectedActivities);
   // Handle selection of each subject
   const handleSubjectSelection = (e, subjectName) => {
     setFormData((prevData) => {
       const updatedSelectedSubjects = e.target.checked
         ? [...prevData.selectedSubjects, subjectName] // add subject if checked
         : prevData.selectedSubjects.filter((name) => name !== subjectName); // remove subject if unchecked
+
       // Remove error if at least one subject is selected
       if (updatedSelectedSubjects.length > 0) {
         setErrors((prevErrors) => ({ ...prevErrors, selectedSubjects: null }));
@@ -883,6 +905,7 @@ const EditLeavingCertificate = () => {
       };
     });
   };
+
   console.log("handleSubjectSelection", formData.selectedSubjects);
 
   return (
@@ -1001,7 +1024,7 @@ const EditLeavingCertificate = () => {
                   htmlFor="staffName"
                   className="block font-bold  text-xs mb-2"
                 >
-                  Student Name <span className="text-red-500">*</span>
+                  First Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -1223,13 +1246,13 @@ const EditLeavingCertificate = () => {
                 >
                   Subjects Studied <span className="text-red-500">*</span>
                 </label>
+                {/* Render checkboxes for each subject */}
+                {/* Render checkboxes for each subject */}
 
-                {/* Render checkboxes for each subject */}
-                {/* Render checkboxes for each subject */}
                 {formData.subjectsFor && formData.subjectsFor.length > 0 ? (
                   formData.subjectsFor.map((subject, index) => (
-                    <div key={index} className="grid-col-3 relative ">
-                      <label className="">
+                    <div key={index} className="grid-col-3 relative">
+                      <label>
                         <input
                           type="checkbox"
                           name="subjects"
@@ -1251,7 +1274,6 @@ const EditLeavingCertificate = () => {
                     No subjects available
                   </p>
                 )}
-
                 {/* Conditional extra subject for class 100 */}
                 {formData.class_id_for_subj &&
                   formData.class_id_for_subj === 109 && (
@@ -1708,21 +1730,23 @@ const EditLeavingCertificate = () => {
                     "Badminton",
                     "Chess",
                     "Carrom",
-                  ].map((games) => (
-                    <div key={games} className="flex items-center">
+                  ].map((activity) => (
+                    <div key={activity} className="flex items-center">
                       <input
                         type="checkbox"
-                        id={games}
-                        value={games}
+                        id={activity}
+                        value={activity}
+                        checked={formData.selectedActivities.includes(activity)}
                         onChange={handleCheckboxChange}
                         className="mr-2"
                       />
-                      <label htmlFor={games} className="text-sm">
-                        {games}
+                      <label htmlFor={activity} className="text-sm">
+                        {activity}
                       </label>
                     </div>
                   ))}
                 </div>
+
                 {errors.activities && (
                   <span className="text-red-500 text-xs ml-1 h-1 mt-2">
                     {errors.activities}
