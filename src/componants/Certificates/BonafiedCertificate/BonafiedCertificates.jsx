@@ -188,7 +188,7 @@ function BonafiedCertificates() {
       }
 
       const response = await axios.get(
-        `${API_URL}/api/get_simpleisDownload/${currentSection.sr_no}`,
+        `${API_URL}/api/get_bonafidecertificatedownload/${currentSection.sr_no}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "blob", // Important for downloading files
@@ -248,32 +248,7 @@ function BonafiedCertificates() {
     setCurrentSection(section);
     console.log("currentedit", section);
 
-    // // Set values for the edit modal
-    // setNewClassName(section?.get_class?.name);
-    // setNewSubjectName(section?.get_subject?.name);
-    // setNewExamName(section?.get_exam?.name); // Assuming exam details are available
-    // setNewMarksHeading(section?.get_marksheading?.name || ""); // Set marks heading if available
-
-    // setHighestMarks(section?.highest_marks || ""); // Set highest marks or empty
-    // setMarksError(""); // Reset the error message when opening the modal
-
     setShowEditModal(true);
-  };
-  // Handle the highest marks change with validation
-  const handleMarksChange = (e) => {
-    const value = e.target.value;
-
-    // Check if the input is empty
-    if (value === "") {
-      setMarksError("Highest Marks is required."); // Set error for empty field
-      setHighestMarks(""); // Clear the value in the state
-    }
-    // Allow only numbers
-    else if (/^\d*$/.test(value)) {
-      setHighestMarks(value);
-      setMarksError(""); // Clear error if input is valid
-    }
-    // Handle invalid input (non-numeric)
   };
 
   const handleDelete = (sectionId) => {

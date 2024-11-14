@@ -61,7 +61,7 @@ const EditBonafied = () => {
         if (!token) throw new Error("No authentication token found");
 
         const response = await axios.get(
-          `${API_URL}/api/get_datasimplebonafidestudent/${student?.sr_no}`,
+          `${API_URL}/api/get_databonafidestudent/${student?.sr_no}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -77,7 +77,7 @@ const EditBonafied = () => {
             sr_no: fetchedData.sr_no || "",
             stud_name: fetchedData.stud_name || "",
             dob: fetchedData.dob || "",
-            dob_words: fetchedData.dob_words || "",
+            dob_words: convertDateToWords(fetchedData.dob),
             issue_date_bonafide: fetchedData.issue_date_bonafide || "",
             father_name: fetchedData.father_name || "",
             class_division: fetchedData.class_division || "",
@@ -86,6 +86,7 @@ const EditBonafied = () => {
             IsDeleted: fetchedData.IsDeleted || "",
             IsIssued: fetchedData.IsIssued || "",
             stud_id: fetchedData.stud_id || "",
+            purpose: fetchedData.purpose || " ",
             nationality: fetchedData.nationality || "",
 
             // Add other fields as needed
@@ -401,7 +402,7 @@ const EditBonafied = () => {
 
       // Make an API call with the "blob" response type to download the PDF
       const response = await axios.put(
-        `${API_URL}/api/update_simplebonafidecertificate/${student?.sr_no}`,
+        `${API_URL}/api/update_bonafidecertificate/${student?.sr_no}`,
         formattedFormData,
         {
           headers: {
@@ -617,7 +618,8 @@ const EditBonafied = () => {
                 name="dob"
                 value={formData.dob}
                 onChange={handleChange}
-                className="block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                readOnly
+                className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
               />
               {errors.dob && (
                 <div className="text-red-500 text-xs ml-2">{errors.dob}</div>
@@ -638,7 +640,8 @@ const EditBonafied = () => {
                 name="dob_words"
                 value={formData.dob_words}
                 onChange={handleChange}
-                className="input-field resize block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                readOnly
+                className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
               />
               {errors.dob_words && (
                 <div className="text-red-500 text-xs ml-2">

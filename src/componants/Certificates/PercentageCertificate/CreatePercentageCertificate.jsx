@@ -237,7 +237,7 @@ const CreatePercentageCertificate = () => {
     // Individual field validation logic
     if (name === "stud_name") {
       if (!value) {
-        fieldErrors.stud_name = "Student name is required";
+        fieldErrors.stud_name = "This field is required";
       } else if (/^\d/.test(value)) {
         fieldErrors.stud_name = "Student name should not start with a number";
       }
@@ -254,7 +254,7 @@ const CreatePercentageCertificate = () => {
 
     // Check if the field is required and empty
     if (!value && requiredFields.includes(name)) {
-      fieldErrors[name] = `${name.replace(/_/g, " ")} is required`;
+      fieldErrors[name] = `This field is required`;
     }
 
     setErrors((prevErrors) => ({ ...prevErrors, [name]: fieldErrors[name] }));
@@ -342,7 +342,7 @@ const CreatePercentageCertificate = () => {
     // Check for empty required fields
     requiredFields.forEach((field) => {
       if (!formData[field]) {
-        newErrors[field] = `${field.replace(/_/g, " ")} is required.`;
+        newErrors[field] = `This field is required.`;
       }
     });
 

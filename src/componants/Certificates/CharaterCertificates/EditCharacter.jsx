@@ -681,7 +681,7 @@ const EditCharacter = () => {
                     Loading...
                   </span>
                 ) : (
-                  "Generate PDF"
+                  "Update"
                 )}
               </button>
             </div>

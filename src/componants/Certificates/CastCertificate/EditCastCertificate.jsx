@@ -24,8 +24,8 @@ const EditCastCertificate = () => {
     reg_no: "",
     date: "",
     stud_name: "",
-    stud_id_no: "",
     stud_id: "",
+    student_id: "",
     // student_UID: "",
     father_name: "",
     mother_name: "",
@@ -80,12 +80,11 @@ const EditCastCertificate = () => {
             stud_name: `${fetchedData?.first_name || ""} ${
               fetchedData?.mid_name || ""
             } ${fetchedData?.last_name || ""}`,
-            stud_id_no: fetchedData.stud_id_no || "",
-            stud_id: fetchedData.student_id || " ",
+            stud_id: fetchedData.stud_id || "",
+            student_id: fetchedData.student_id || " ",
             father_name: fetchedData.father_name || "",
             mother_name: fetchedData.mother_name || "",
-            class_division:
-              `${fetchedData.classname}-${fetchedData.sectionname}` || "",
+            class_division: fetchedData.class_division || " ",
             admission_date: fetchedData.admission_date || "",
             religion: fetchedData.religion || "",
             caste: fetchedData.caste || "",
@@ -266,7 +265,7 @@ const EditCastCertificate = () => {
       "reg_no",
       "date",
       "stud_name",
-      "stud_id_no",
+      "stud_id",
       "father_name",
       "mother_name",
       "class_division",
@@ -422,8 +421,8 @@ const EditCastCertificate = () => {
           reg_no: "",
           date: "",
           stud_name: "",
-          stud_id_no: "",
           stud_id: "",
+          student_id: "",
           father_name: "",
           mother_name: "",
           class_division: "",
@@ -545,7 +544,8 @@ const EditCastCertificate = () => {
                   maxLength={10}
                   value={formData.reg_no}
                   onChange={handleChange}
-                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
                 {errors.reg_no && (
                   <span className="text-red-500 text-xs ml-2 h-1">
@@ -555,7 +555,7 @@ const EditCastCertificate = () => {
               </div>
               <div>
                 <label htmlFor="date" className="block font-bold text-xs mb-2">
-                  Date <span className="text-red-500">*</span>
+                  Issue Date <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -593,7 +593,8 @@ const EditCastCertificate = () => {
                   name="stud_name"
                   value={formData.stud_name}
                   onChange={handleChange}
-                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
                 {errors.stud_name && (
                   <div className="text-red-500 text-xs ml-2 ">
@@ -603,23 +604,24 @@ const EditCastCertificate = () => {
               </div>
               <div>
                 <label
-                  htmlFor="stud_id_no"
+                  htmlFor="stud_id"
                   className="block font-bold text-xs mb-2"
                 >
                   Student ID <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  id="stud_id_no"
-                  name="stud_id_no"
+                  id="stud_id"
+                  name="stud_id"
                   maxLength={25}
-                  value={formData.stud_id_no}
+                  value={formData.stud_id}
                   onChange={handleChange}
-                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
-                {errors.stud_id_no && (
+                {errors.stud_id && (
                   <span className="text-red-500 text-xs ml-2 h-1">
-                    {errors.stud_id_no}
+                    {errors.stud_id}
                   </span>
                 )}
               </div>
@@ -637,7 +639,8 @@ const EditCastCertificate = () => {
                   maxLength={12}
                   value={formData.stu_aadhaar_no}
                   onChange={handleChange}
-                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
                 {errors.stu_aadhaar_no && (
                   <span className="text-red-500 text-xs ml-2 h-1">
@@ -653,7 +656,7 @@ const EditCastCertificate = () => {
             <h5 className="col-span-4 text-blue-400 py-2">Parent Details</h5>
             {/* </legend> */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="w-full md:w-[80%] grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
                   htmlFor="father_name"
@@ -668,7 +671,8 @@ const EditCastCertificate = () => {
                   name="father_name"
                   value={formData.father_name}
                   onChange={handleChange}
-                  className="input-field bg-white block w-full border border-gray-900 rounded-md py-1 px-3  outline-none shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
                 {errors.father_name && (
                   <div className="text-red-500 text-xs ml-2 ">
@@ -690,7 +694,8 @@ const EditCastCertificate = () => {
                   maxLength={50}
                   value={formData.mother_name}
                   onChange={handleChange}
-                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
                 {errors.mother_name && (
                   <span className="text-red-500 text-xs ml-2 h-1">
@@ -705,7 +710,7 @@ const EditCastCertificate = () => {
             {/* <legend className="font-bold"> */}
             <h5 className="col-span-4 text-blue-400 py-2">Academic Details</h5>
             {/* </legend> */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label
                   htmlFor="class_division"
@@ -742,7 +747,8 @@ const EditCastCertificate = () => {
                   maxLength={20}
                   value={formData.religion}
                   onChange={handleChange}
-                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
               </div>
               <div>
@@ -756,7 +762,8 @@ const EditCastCertificate = () => {
                   maxLength={20}
                   value={formData.caste}
                   onChange={handleChange}
-                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
               </div>
               <div>
@@ -800,7 +807,8 @@ const EditCastCertificate = () => {
                   name="birth_place"
                   value={formData.birth_place}
                   onChange={handleChange}
-                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
                 {errors.birth_place && (
                   <span className="text-red-500 text-xs ml-2 h-1">
@@ -819,7 +827,8 @@ const EditCastCertificate = () => {
                   maxLength={50}
                   value={formData.state}
                   onChange={handleChange}
-                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
                 {errors.state && (
                   <span className="text-red-500 text-xs ml-2 h-1">
@@ -841,7 +850,8 @@ const EditCastCertificate = () => {
                   maxLength={50}
                   value={formData.mother_tongue}
                   onChange={handleChange}
-                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
                 {errors.mother_tongue && (
                   <span className="text-red-500 text-xs ml-2 h-1">
@@ -861,7 +871,8 @@ const EditCastCertificate = () => {
                   name="dob"
                   value={formData.dob}
                   onChange={handleChange}
-                  className="block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
                 {errors.dob && (
                   <div className="text-red-500 text-xs ml-2 ">{errors.dob}</div>
@@ -882,7 +893,8 @@ const EditCastCertificate = () => {
                   name="dob_words"
                   value={formData.dob_words}
                   onChange={handleChange}
-                  className="input-field resize block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
                 {errors.dob_words && (
                   <div className="text-red-500 text-xs ml-2 ">
@@ -904,7 +916,8 @@ const EditCastCertificate = () => {
                   maxLength={100}
                   value={formData.nationality}
                   onChange={handleChange}
-                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
                 {errors.nationality && (
                   <span className="text-red-500 text-xs ml-2 h-1">
@@ -957,7 +970,8 @@ const EditCastCertificate = () => {
                   name="admission_date"
                   value={formData.admission_date}
                   onChange={handleChange}
-                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
                 />
                 {errors.admission_date && (
                   <span className="text-red-500 text-xs ml-2 h-1">

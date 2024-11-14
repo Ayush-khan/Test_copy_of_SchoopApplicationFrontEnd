@@ -3228,11 +3228,10 @@ const CreeateCastCertificate = () => {
                         type="text"
                         id="subcaste"
                         name="subcaste"
-                        readOnly
                         maxLength={100}
                         value={formData.subcaste}
                         onChange={handleChange}
-                        className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
                     </div>
                   </div>

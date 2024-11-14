@@ -13,16 +13,10 @@ import { RxCross1 } from "react-icons/rx";
 const EditSimpleBonafied = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [nameError, setNameError] = useState("");
-  const [nameErrorForClass, setNameErrorForClass] = useState("");
   const [selectedClass, setSelectedClass] = useState(null);
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [loadingForSearch, setLoadingForSearch] = useState(false);
   const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
-
-  const [selectedActivities, setSelectedActivities] = useState([]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,17 +31,13 @@ const EditSimpleBonafied = () => {
     professional_qual: "",
     trained: "",
     experience: "",
-    sex: "",
-    blood_group: "",
+
     religion: "",
     dob_words: "",
-    nationality: "",
-    phone: "",
-    email: "",
-    aadhar_card_no: "",
+
     stud_id: "",
 
-    purpose: " ",
+    // purpose: " ",
     teacher_image_name: null,
   });
 
@@ -77,18 +67,21 @@ const EditSimpleBonafied = () => {
             sr_no: fetchedData.sr_no || "",
             stud_name: fetchedData.stud_name || "",
             dob: fetchedData.dob || "",
-            dob_words: fetchedData.dob_words || "",
-            issue_date_bonafide: fetchedData.issue_date_bonafide || "",
+            dob_words: convertDateToWords(fetchedData?.dob),
+            date: today || "",
             father_name: fetchedData.father_name || "",
             class_division: fetchedData.class_division || "",
+            stud_id: fetchedData.stud_id || "",
+            issue_date_bonafide: fetchedData.issue_date_bonafide || "",
             academic_yr: fetchedData.academic_yr || "",
             IsGenerated: fetchedData.IsGenerated || "",
             IsDeleted: fetchedData.IsDeleted || "",
             IsIssued: fetchedData.IsIssued || "",
-            stud_id: fetchedData.stud_id || "",
-            nationality: fetchedData.nationality || "",
-
-            // Add other fields as needed
+            issued_date: fetchedData.issued_date || "",
+            deleted_date: fetchedData.deleted_date || "",
+            generated_by: fetchedData.generated_by || "",
+            issued_by: fetchedData.issued_by || "",
+            deleted_by: fetchedData.deleted_by || "",
           });
         } else {
           toast.error("Failed to load data");
@@ -248,44 +241,39 @@ const EditSimpleBonafied = () => {
   // Calculate today's date
   const today = new Date().toISOString().split("T")[0];
 
+  // For FOrm
   const validate = () => {
     const newErrors = {};
 
     // Validate name
-    if (!formData.stud_name) newErrors.stud_name = "Name is required";
+    if (!formData.stud_name) newErrors.stud_name = "Thid field is required";
     else if (!/^[^\d].*/.test(formData.stud_name))
       newErrors.stud_name = "Name should not start with a number";
 
     // Validate name
-    if (!formData.father_name) newErrors.father_name = "Name is required";
+    if (!formData.father_name) newErrors.father_name = "Thid field is required";
     else if (!/^[^\d].*/.test(formData.father_name))
       newErrors.father_name = "Name should not start with a number";
     // Validate academic qualifications (now a single text input)
     if (!formData.class_division)
-      newErrors.class_division = "Class and Division is required";
-    if (!formData.sr_no) newErrors.sr_no = "Serial number is required";
+      newErrors.class_division = "Thid field is required";
+    if (!formData.sr_no) newErrors.sr_no = "Thid field is required";
 
     // Validate dob
-    if (!formData.dob) newErrors.dob = "Date of Birth is required";
-    if (!formData.father_name)
-      newErrors.father_name = "Father Name is required";
+    if (!formData.dob) newErrors.dob = "Thid field is required";
+    if (!formData.father_name) newErrors.father_name = "Thid field is required";
 
     // Validate date of joining
-    if (!formData.date) newErrors.date = " Date is required";
+    if (!formData.date) newErrors.date = "Thid field is required";
 
     // Validate Employee Id
-    if (!formData.purpose) newErrors.purpose = "purpose is required";
+    // if (!formData.purpose) newErrors.purpose = "purpose is required";
     // Validate address
-    if (!formData.dob_words)
-      newErrors.dob_words = "  Birth date in words is required";
-    if (!formData.nationality)
-      newErrors.nationality = "Nationality is required";
+    if (!formData.dob_words) newErrors.dob_words = "Thid field is required";
 
     setErrors(newErrors);
     return newErrors;
   };
-
-  // Handle change for form fields
   const handleChange = (event) => {
     const { name, value } = event.target;
     let newValue = value;
@@ -313,52 +301,47 @@ const EditSimpleBonafied = () => {
 
     // Name validation
     if (name === "stud_name") {
-      if (!newValue) fieldErrors.stud_name = "Name is required";
+      if (!newValue) fieldErrors.stud_name = "Thid field is required";
       else if (/^\d/.test(newValue))
         fieldErrors.stud_name = "Name should not start with a number";
     }
     if (name === "father_name") {
-      if (!newValue) fieldErrors.father_name = "Name is required";
+      if (!newValue) fieldErrors.father_name = "Thid field is required";
       else if (/^\d/.test(newValue))
         fieldErrors.father_name = "Name should not start with a number";
     }
 
     // Academic Qualification validation
     if (name === "class_division") {
-      if (!newValue)
-        fieldErrors.class_division = "Class and Division is required";
+      if (!newValue) fieldErrors.class_division = "Thid field is required";
     }
 
     // Date of Birth validation
     if (name === "dob") {
-      if (!newValue) fieldErrors.dob = "Date of Birth is required";
+      if (!newValue) fieldErrors.dob = "Thid field is required";
     }
     // serial number
 
     if (name === "sr_no") {
-      if (!newValue) fieldErrors.sr_no = "Serial number is required";
+      if (!newValue) fieldErrors.sr_no = "Thid field is required";
     }
     if (name === "father_name") {
-      if (!newValue) fieldErrors.father_name = "Father Name is required";
+      if (!newValue) fieldErrors.father_name = "Thid field is required";
     }
 
     // Date of Joining validation
     if (name === "date") {
-      if (!newValue) fieldErrors.date = " Date is required";
+      if (!newValue) fieldErrors.date = "Thid field is required";
     }
 
     // Employee ID validation
-    if (name === "purpose") {
-      if (!newValue) fieldErrors.purpose = "Purpose  is required";
-    }
+    // if (name === "purpose") {
+    //   if (!newValue) fieldErrors.purpose = "Purpose  is required";
+    // }
 
     // Address validation
     if (name === "dob_words") {
-      if (!newValue)
-        fieldErrors.dob_words = "  Birth date in words is required";
-    }
-    if (name === "nationality") {
-      if (!newValue) fieldErrors.nationality = "Nationality is required";
+      if (!newValue) fieldErrors.dob_words = "Thid field is required";
     }
 
     // Update the errors state with the new field errors
@@ -412,7 +395,7 @@ const EditSimpleBonafied = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Bonafide Certificate updated successfully!");
+        toast.success("Simple Bonafide Certificate updated successfully!");
 
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
@@ -445,7 +428,6 @@ const EditSimpleBonafied = () => {
           date: "",
           class_division: "",
           purpose: "",
-          nationality: "",
 
           // Add other fields here if needed
         });
@@ -456,7 +438,7 @@ const EditSimpleBonafied = () => {
         setTimeout(() => setParentInformation(null), 3000);
 
         // Navigate to the desired route after successful update
-        navigate("/bonafiedCertificates");
+        navigate("/simpleBonafied");
       }
     } catch (error) {
       console.error("Error:", error.response.data, error.response.sr_no);
@@ -484,14 +466,14 @@ const EditSimpleBonafied = () => {
         {/* <div className="card p-4 rounded-md "> */}
         <div className=" card-header mb-4 flex justify-between items-center  ">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-            Edit Bonafied Certificate
+            Edit Simple Bonafied Certificate
           </h5>
 
           <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               setErrors({});
-              navigate("/bonafiedCertificates");
+              navigate("/simpleBonafied");
             }}
           />
         </div>
@@ -512,7 +494,7 @@ const EditSimpleBonafied = () => {
         )}{" "}
         <form
           onSubmit={handleSubmit}
-          className="  md:mx-5 overflow-x-hidden shadow-md p-2 bg-gray-50 mb-4"
+          className="  border-1 overflow-x-hidden shadow-md p-2 bg-gray-100 mb-4"
         >
           <div className=" flex flex-col gap-4 md:grid  md:grid-cols-3 md:gap-x-14 md:mx-10 gap-y-1 pt-4 pb-4">
             <div className=" ">
@@ -617,7 +599,8 @@ const EditSimpleBonafied = () => {
                 name="dob"
                 value={formData.dob}
                 onChange={handleChange}
-                className="block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                readOnly
+                className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
               />
               {errors.dob && (
                 <div className="text-red-500 text-xs ml-2">{errors.dob}</div>
@@ -638,7 +621,8 @@ const EditSimpleBonafied = () => {
                 name="dob_words"
                 value={formData.dob_words}
                 onChange={handleChange}
-                className="input-field resize block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                readOnly
+                className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
               />
               {errors.dob_words && (
                 <div className="text-red-500 text-xs ml-2">
@@ -667,52 +651,6 @@ const EditSimpleBonafied = () => {
               {errors.class_division && (
                 <span className="text-red-500 text-xs ml-2">
                   {errors.class_division}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="employeeId"
-                className="block font-bold  text-xs mb-2"
-              >
-                Purpose <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                maxLength={50}
-                id="employeeId"
-                name="purpose"
-                value={formData.purpose}
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-              {errors.purpose && (
-                <span className="text-red-500 text-xs ml-2">
-                  {errors.purpose}
-                </span>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="Nationality"
-                className="block font-bold  text-xs mb-2"
-              >
-                Nationality <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                maxLength={20}
-                id="Nationality"
-                name="nationality"
-                value={formData.nationality}
-                onChange={handleChange}
-                readOnly
-                className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
-              />
-              {errors.nationality && (
-                <span className="text-red-500 text-xs ml-2">
-                  {errors.nationality}
                 </span>
               )}
             </div>

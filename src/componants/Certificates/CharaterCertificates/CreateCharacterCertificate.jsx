@@ -408,41 +408,39 @@ const CreateCharacterCertificate = () => {
 
     // Name validation
     if (name === "stud_name") {
-      if (!newValue) fieldErrors.stud_name = "Name is required";
+      if (!newValue) fieldErrors.stud_name = "This field is required";
       else if (/^\d/.test(newValue))
         fieldErrors.stud_name = "Name should not start with a number";
     }
 
     // Academic Qualification validation
     if (name === "class_division") {
-      if (!newValue)
-        fieldErrors.class_division = "Class and Division is required";
+      if (!newValue) fieldErrors.class_division = "This field is required";
     }
 
     // Date of Birth validation
     if (name === "dob") {
-      if (!newValue) fieldErrors.dob = "Date of Birth is required";
+      if (!newValue) fieldErrors.dob = "This field is required";
     }
     // serial number
 
     if (name === "sr_no") {
-      if (!newValue) fieldErrors.sr_no = "Serial number is required";
+      if (!newValue) fieldErrors.sr_no = "This field is required";
     }
 
     // Date of Joining validation
     if (name === "date") {
-      if (!newValue) fieldErrors.date = " Date is required";
+      if (!newValue) fieldErrors.date = "This field is required";
     }
 
     // Employee ID validation
     if (name === "attempt") {
-      if (!newValue) fieldErrors.attempt = "Attempt is required";
+      if (!newValue) fieldErrors.attempt = "This field is required";
     }
 
     // Address validation
     if (name === "dob_words") {
-      if (!newValue)
-        fieldErrors.dob_words = "  Birth date in words is required";
+      if (!newValue) fieldErrors.dob_words = "This field is required";
     }
 
     // Update the errors state with the new field errors

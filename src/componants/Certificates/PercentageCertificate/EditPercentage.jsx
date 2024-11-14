@@ -12,42 +12,27 @@ import { RxCross1 } from "react-icons/rx";
 
 const EditPercentage = () => {
   const API_URL = import.meta.env.VITE_API_URL;
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [nameError, setNameError] = useState("");
-  const [nameErrorForClass, setNameErrorForClass] = useState("");
+
   const [selectedClass, setSelectedClass] = useState(null);
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [loadingForSearch, setLoadingForSearch] = useState(false);
   const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
 
-  const [selectedActivities, setSelectedActivities] = useState([]);
-
+  const [marks, setMarks] = useState({});
+  const [total, setTotal] = useState(0);
+  const [percentage, setPercentage] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
   const { student } = location.state || {};
   const [formData, setFormData] = useState({
     sr_no: "",
-    stud_name: "",
-    dob: "",
+    roll_no: "",
     date: "",
-    father_name: "",
-    class_division: "",
-    professional_qual: "",
-    trained: "",
-    experience: "",
-    sex: "",
-    blood_group: "",
-    religion: "",
-    dob_words: "",
-    nationality: "",
-    phone: "",
-    email: "",
-    aadhar_card_no: "",
+    stud_name: "",
     stud_id: "",
+    // student_UID: "",
+    class_division: "",
 
-    purpose: " ",
     teacher_image_name: null,
   });
 
@@ -61,7 +46,7 @@ const EditPercentage = () => {
         if (!token) throw new Error("No authentication token found");
 
         const response = await axios.get(
-          `${API_URL}/api/get_datasimplebonafidestudent/${student?.sr_no}`,
+          `${API_URL}/api/get_percentageData/${student?.sr_no}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -74,21 +59,20 @@ const EditPercentage = () => {
 
           // Populate formData with the fetched data
           setFormData({
+            classsubject: fetchedData.classsubject || "",
             sr_no: fetchedData.sr_no || "",
-            stud_name: fetchedData.stud_name || "",
-            dob: fetchedData.dob || "",
-            dob_words: fetchedData.dob_words || "",
-            issue_date_bonafide: fetchedData.issue_date_bonafide || "",
-            father_name: fetchedData.father_name || "",
-            class_division: fetchedData.class_division || "",
-            academic_yr: fetchedData.academic_yr || "",
-            IsGenerated: fetchedData.IsGenerated || "",
-            IsDeleted: fetchedData.IsDeleted || "",
-            IsIssued: fetchedData.IsIssued || "",
-            stud_id: fetchedData.stud_id || "",
-            nationality: fetchedData.nationality || "",
-
-            // Add other fields as needed
+            roll_no: fetchedData.studentinformation.roll_no || "",
+            date: today || "", // Directly from the fetched data
+            stud_name: `${fetchedData.studentinformation?.first_name || ""} ${
+              fetchedData.studentinformation?.mid_name || ""
+            } ${fetchedData.studentinformation?.last_name || ""}`,
+            stud_id: fetchedData.studentinformation.student_id || " ",
+            class_division:
+              `${fetchedData.studentinformation.classname}-${fetchedData.studentinformation.sectionname}` ||
+              "",
+            teacher_image_name:
+              fetchedData.studentinformation.father_image_name || null, // Assuming this is for a teacher image
+            purpose: fetchedData.purpose || " ",
           });
         } else {
           toast.error("Failed to load data");
@@ -248,124 +232,148 @@ const EditPercentage = () => {
   // Calculate today's date
   const today = new Date().toISOString().split("T")[0];
 
-  const validate = () => {
-    const newErrors = {};
-
-    // Validate name
-    if (!formData.stud_name) newErrors.stud_name = "Name is required";
-    else if (!/^[^\d].*/.test(formData.stud_name))
-      newErrors.stud_name = "Name should not start with a number";
-
-    // Validate name
-    if (!formData.father_name) newErrors.father_name = "Name is required";
-    else if (!/^[^\d].*/.test(formData.father_name))
-      newErrors.father_name = "Name should not start with a number";
-    // Validate academic qualifications (now a single text input)
-    if (!formData.class_division)
-      newErrors.class_division = "Class and Division is required";
-    if (!formData.sr_no) newErrors.sr_no = "Serial number is required";
-
-    // Validate dob
-    if (!formData.dob) newErrors.dob = "Date of Birth is required";
-    if (!formData.father_name)
-      newErrors.father_name = "Father Name is required";
-
-    // Validate date of joining
-    if (!formData.date) newErrors.date = " Date is required";
-
-    // Validate Employee Id
-    if (!formData.purpose) newErrors.purpose = "purpose is required";
-    // Validate address
-    if (!formData.dob_words)
-      newErrors.dob_words = "  Birth date in words is required";
-    if (!formData.nationality)
-      newErrors.nationality = "Nationality is required";
-
-    setErrors(newErrors);
-    return newErrors;
-  };
-
   // Handle change for form fields
   const handleChange = (event) => {
     const { name, value } = event.target;
-    let newValue = value;
 
-    if (name === "dob") {
-      setFormData((prev) => ({
-        ...prev,
-        dob: value,
-        dob_words: convertDateToWords(value),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-    // Update formData for the field
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: newValue,
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
     }));
 
-    // Field-specific validation
     let fieldErrors = {};
 
-    // Name validation
+    // Individual field validation logic
     if (name === "stud_name") {
-      if (!newValue) fieldErrors.stud_name = "Name is required";
-      else if (/^\d/.test(newValue))
-        fieldErrors.stud_name = "Name should not start with a number";
-    }
-    if (name === "father_name") {
-      if (!newValue) fieldErrors.father_name = "Name is required";
-      else if (/^\d/.test(newValue))
-        fieldErrors.father_name = "Name should not start with a number";
+      if (!value) {
+        fieldErrors.stud_name = "Student name is required";
+      } else if (/^\d/.test(value)) {
+        fieldErrors.stud_name = "Student name should not start with a number";
+      }
     }
 
-    // Academic Qualification validation
-    if (name === "class_division") {
-      if (!newValue)
-        fieldErrors.class_division = "Class and Division is required";
+    // Required fields list
+    const requiredFields = [
+      "roll_no",
+      "date",
+      //   "stud_name",
+      "class_division",
+      "roll_no",
+    ];
+
+    // Check if the field is required and empty
+    if (!value && requiredFields.includes(name)) {
+      fieldErrors[name] = `${name.replace(/_/g, " ")} is required`;
     }
 
-    // Date of Birth validation
-    if (name === "dob") {
-      if (!newValue) fieldErrors.dob = "Date of Birth is required";
-    }
-    // serial number
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: fieldErrors[name] }));
+  };
 
-    if (name === "sr_no") {
-      if (!newValue) fieldErrors.sr_no = "Serial number is required";
-    }
-    if (name === "father_name") {
-      if (!newValue) fieldErrors.father_name = "Father Name is required";
-    }
-
-    // Date of Joining validation
-    if (name === "date") {
-      if (!newValue) fieldErrors.date = " Date is required";
-    }
-
-    // Employee ID validation
-    if (name === "purpose") {
-      if (!newValue) fieldErrors.purpose = "Purpose  is required";
-    }
-
-    // Address validation
-    if (name === "dob_words") {
-      if (!newValue)
-        fieldErrors.dob_words = "  Birth date in words is required";
-    }
-    if (name === "nationality") {
-      if (!newValue) fieldErrors.nationality = "Nationality is required";
+  const handleMarksChange = (id, value) => {
+    // Update the errors state based on validation
+    if (!value) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [id]: "Marks are required.",
+      }));
+    } else if (!/^\d+$/.test(value)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [id]: "Marks should be numeric.",
+      }));
+    } else if (value.length > 3) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [id]: "Marks cannot exceed 3 characters.",
+      }));
+    } else {
+      // Remove the error if input is valid
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [id]: "",
+      }));
     }
 
-    // Update the errors state with the new field errors
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [name]: fieldErrors[name],
+    // Convert value to an integer if valid
+    const numericValue = parseInt(value, 10) || 0;
+    setMarks((prevMarks) => {
+      const updatedMarks = { ...prevMarks, [id]: numericValue };
+
+      // Calculate total
+      const totalMarks = Object.values(updatedMarks).reduce(
+        (acc, mark) => acc + mark,
+        0
+      );
+      setTotal(totalMarks);
+
+      // Calculate percentage if there are subjects
+      const subjectCount = formData.classsubject?.length || 0;
+      const calculatedPercentage =
+        subjectCount > 0 ? (totalMarks / (subjectCount * 100)) * 100 : 0;
+      setPercentage(calculatedPercentage.toFixed(2));
+
+      return updatedMarks;
+    });
+  };
+
+  const prepareSubmissionData = () => {
+    const formattedMarks = Object.entries(marks).map(([id, mark]) => ({
+      c_sm_id: parseInt(id),
+      marks: parseInt(mark),
     }));
+
+    const submissionData = {
+      roll_no: formData.roll_no,
+      stud_name: formData.stud_name,
+      class_division: formData.class_division,
+      percentage,
+      total,
+      stud_id: formData.stud_id,
+      class: formattedMarks,
+      date: today,
+    };
+
+    return submissionData;
+  };
+  const validate = () => {
+    const newErrors = {};
+
+    // Required fields validation with error messages
+    const requiredFields = [
+      "roll_no",
+      "date",
+      "stud_name",
+      "class_division",
+      "roll_no",
+      //   "stud_id",
+    ];
+
+    // Check for empty required fields
+    requiredFields.forEach((field) => {
+      if (!formData[field]) {
+        newErrors[field] = `This field is required.`;
+      }
+    });
+
+    // Validate marks for each subject
+    formData.classsubject?.forEach((subject) => {
+      const markValue = marks[subject.c_sm_id];
+      console.log("marks", markValue);
+
+      if (markValue === undefined || markValue === "" || markValue === 0) {
+        newErrors[subject.c_sm_id] = `Marks are required.`;
+      } else if (isNaN(markValue)) {
+        newErrors[subject.c_sm_id] = `Marks should be numeric.`;
+      } else if (parseFloat(markValue) > 100 || parseFloat(markValue) < 1) {
+        newErrors[
+          subject.c_sm_id
+        ] = `${subject.name} Marks should not exceed 100.`;
+        //  `${subject.name} Marks should not exceed 100.
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const formatDateString = (dateString) => {
@@ -377,19 +385,22 @@ const EditPercentage = () => {
   // Inside your component
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const validationErrors = validate();
-    const errorsToCheck = validationErrors || {};
+    console.log("Submit process started");
 
-    if (Object.keys(errorsToCheck).length > 0) {
-      setErrors(errorsToCheck);
+    // Clear previous errors
+    setErrors({});
+    setBackendErrors({});
+
+    // Check validation
+    if (!validate()) {
+      console.log("Validation failed, stopping submission");
       return;
     }
 
-    const formattedFormData = {
-      ...formData,
-      dob: formatDateString(formData.dob),
-      date: formatDateString(formData.date),
-    };
+    console.log("Validation passed, proceeding with submission");
+
+    const dataToSubmit = prepareSubmissionData();
+    console.log("dataTosubmkit", dataToSubmit);
 
     try {
       setLoading(true); // Start loading
@@ -401,8 +412,8 @@ const EditPercentage = () => {
 
       // Make an API call with the "blob" response type to download the PDF
       const response = await axios.put(
-        `${API_URL}/api/update_simplebonafidecertificate/${student?.sr_no}`,
-        formattedFormData,
+        `${API_URL}/api/update_percentagePDF/${student?.sr_no}`,
+        dataToSubmit,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -412,7 +423,7 @@ const EditPercentage = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Bonafide Certificate updated successfully!");
+        toast.success("Percentage Certificate updated successfully!");
 
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
@@ -449,18 +460,31 @@ const EditPercentage = () => {
 
           // Add other fields here if needed
         });
-        setSelectedClass(null); // Reset class selection
-        setSelectedStudent(null); // Reset student selection
-        setErrors({});
-        setBackendErrors({});
+        // Reset form data
+        setFormData({
+          sr_no: "",
+          roll_no: "",
+          date: "",
+          stud_name: "",
+          stud_id: "",
+          class_division: "",
+        });
+        setMarks({});
+        setTotal(0);
+        setPercentage(0);
+        setSelectedClass(null);
+        // setSelectedStudent(null);
+
         setTimeout(() => setParentInformation(null), 3000);
 
         // Navigate to the desired route after successful update
-        navigate("/bonafiedCertificates");
+        navigate("/percentageCertificate");
       }
     } catch (error) {
       console.error("Error:", error.response.data, error.response.sr_no);
-      toast.error("An error occurred while updating the Bonafide Certificate.");
+      toast.error(
+        "An error occurred while updating the Percentage Certificate."
+      );
 
       if (error.response && error.response) {
         setBackendErrors(error.response || {});
@@ -491,7 +515,7 @@ const EditPercentage = () => {
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               setErrors({});
-              navigate("/bonafiedCertificates");
+              navigate("/percentageCertificate");
             }}
           />
         </div>
@@ -512,250 +536,233 @@ const EditPercentage = () => {
         )}{" "}
         <form
           onSubmit={handleSubmit}
-          className="  md:mx-5 overflow-x-hidden shadow-md p-2 bg-gray-50 mb-4"
+          className=" w-full gap-x-1 md:gap-x-14  gap-y-1   overflow-x-hidden shadow-md p-4  bg-gray-50 mb-4"
         >
-          <div className=" flex flex-col gap-4 md:grid  md:grid-cols-3 md:gap-x-14 md:mx-10 gap-y-1 pt-4 pb-4">
-            <div className=" ">
-              <label htmlFor="sr_no" className="block font-bold  text-xs mb-2">
-                Sr No. <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                maxLength={100}
-                id="sr_no"
-                name="sr_no"
-                readOnly
-                value={formData.sr_no}
-                onChange={handleChange}
-                className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
-              />
-              {backendErrors.sr_no && (
-                <span className="text-red-500 text-xs ml-2">
-                  {backendErrors.sr_no}
-                </span>
-              )}
-              {errors.sr_no && (
-                <div className="text-red-500 text-xs ml-2">{errors.sr_no}</div>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="date_of_joining"
-                className="block font-bold  text-xs mb-2"
-              >
-                Issue Date <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                id="date_of_joining"
-                // max={today}
-                name="date"
-                value={formData.date}
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-              {errors.date && (
-                <span className="text-red-500 text-xs ml-2">{errors.date}</span>
-              )}
-            </div>
-            <div className=" ">
-              <label
-                htmlFor="staffName"
-                className="block font-bold  text-xs mb-2"
-              >
-                Student Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                maxLength={200}
-                id="staffName"
-                name="stud_name"
-                value={formData.stud_name}
-                onChange={handleChange}
-                readOnly
-                className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
-              />
-              {errors.stud_name && (
-                <div className="text-red-500 text-xs ml-2">
-                  {errors.stud_name}
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="father_name"
-                className="block font-bold  text-xs mb-2"
-              >
-                Father's Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                maxLength={50}
-                id="father_name"
-                name="father_name"
-                value={formData.father_name}
-                onChange={handleChange}
-                readOnly
-                className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
-              />
-              {errors.father_name && (
-                <div className="text-red-500 text-xs ml-2">
-                  {errors.father_name}
-                </div>
-              )}
-            </div>
-            <div>
-              <label htmlFor="dob" className="block font-bold text-xs mb-2">
-                Date of Birth <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                id="dob"
-                min={MIN_DATE} // Set minimum date
-                max={MAX_DATE} // Set maximum date to today
-                name="dob"
-                value={formData.dob}
-                onChange={handleChange}
-                className="block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-              {errors.dob && (
-                <div className="text-red-500 text-xs ml-2">{errors.dob}</div>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="dob_words"
-                className="block font-bold  text-xs mb-2"
-              >
-                Birth date in words <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                type="text"
-                maxLength={100}
-                id="dob_words"
-                name="dob_words"
-                value={formData.dob_words}
-                onChange={handleChange}
-                className="input-field resize block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-              {errors.dob_words && (
-                <div className="text-red-500 text-xs ml-2">
-                  {errors.dob_words}
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="class_division"
-                className="block font-bold  text-xs mb-2"
-              >
-                Class/Divsion <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                // maxLength={12}
-                id="class_division"
-                readOnly
-                name="class_division"
-                value={formData.class_division}
-                onChange={handleChange} // Using the handleChange function to update formData and validate
-                className="input-field block w-full outline-none border border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-              />
-              {errors.class_division && (
-                <span className="text-red-500 text-xs ml-2">
-                  {errors.class_division}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="employeeId"
-                className="block font-bold  text-xs mb-2"
-              >
-                Purpose <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                maxLength={50}
-                id="employeeId"
-                name="purpose"
-                value={formData.purpose}
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-              {errors.purpose && (
-                <span className="text-red-500 text-xs ml-2">
-                  {errors.purpose}
-                </span>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="Nationality"
-                className="block font-bold  text-xs mb-2"
-              >
-                Nationality <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                maxLength={20}
-                id="Nationality"
-                name="nationality"
-                value={formData.nationality}
-                onChange={handleChange}
-                readOnly
-                className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
-              />
-              {errors.nationality && (
-                <span className="text-red-500 text-xs ml-2">
-                  {errors.nationality}
-                </span>
-              )}
-            </div>
-
-            <div className="col-span-3 text-right">
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                style={{ backgroundColor: "#2196F3" }}
-                className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={loading}
-              >
-                {loading ? (
-                  <span className="flex items-center">
-                    <svg
-                      className="animate-spin h-4 w-4 mr-2 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      ></path>
-                    </svg>
-                    Loading...
+          {/* Document Information */}
+          <fieldset className="mb-4">
+            <h5 className="col-span-4 text-blue-400 pb-2">
+              {/* <legend className="font-semibold text-[1.2em]"> */}
+              Student Details
+              {/* </legend> */}
+            </h5>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label htmlFor="sr_no" className="block font-bold text-xs mb-2">
+                  Sr No. <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="sr_no"
+                  name="sr_no"
+                  value={formData.sr_no}
+                  readOnly
+                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                />
+              </div>
+              <div>
+                <label htmlFor="date" className="block font-bold text-xs mb-2">
+                  Issue Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                />
+                {errors.date && (
+                  <span className="text-red-500 text-xs ml-2 h-1">
+                    {errors.date}
                   </span>
-                ) : (
-                  "Update"
                 )}
-              </button>
+              </div>
+              <div>
+                <label
+                  htmlFor="roll_no"
+                  className="block font-bold text-xs mb-2"
+                >
+                  Roll No. <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="roll_no"
+                  name="roll_no"
+                  maxLength={10}
+                  value={formData.roll_no}
+                  onChange={handleChange}
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
+                />
+                {errors.roll_no && (
+                  <span className="text-red-500 text-xs ml-2 h-1">
+                    {errors.roll_no}
+                  </span>
+                )}
+              </div>
+
+              <div className=" ">
+                <label
+                  htmlFor="staffName"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Student Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  maxLength={200}
+                  id="staffName"
+                  name="stud_name"
+                  value={formData.stud_name}
+                  onChange={handleChange}
+                  readOnly
+                  className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
+                />
+                {errors.stud_name && (
+                  <div className="text-red-500 text-xs ml-2 ">
+                    {errors.stud_name}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label
+                  htmlFor="class_division"
+                  className="block font-bold text-xs mb-2"
+                >
+                  Class/Division <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="class_division"
+                  name="class_division"
+                  value={formData.class_division}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      class_division: e.target.value,
+                    })
+                  }
+                  readOnly
+                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                />
+                {errors.class_division && (
+                  <span className="text-red-500 text-xs ml-2 h-1">
+                    {errors.class_division}
+                  </span>
+                )}
+              </div>
             </div>
+          </fieldset>
+          {/* Student Identity */}
+
+          {/* Parent Details */}
+
+          <fieldset className="mb-4">
+            <h5 className="col-span-4 text-blue-400 py-2">
+              Academic Performance{" "}
+            </h5>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Dynamically generated input fields for subjects */}
+              {formData.classsubject?.map((subject) => (
+                <div key={subject.c_sm_id}>
+                  <label
+                    htmlFor={`subject-${subject.c_sm_id}`}
+                    className="block font-bold text-xs mb-2"
+                  >
+                    {subject.name} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    id={`subject-${subject.c_sm_id}`}
+                    name={`subject-${subject.c_sm_id}`}
+                    //   placeholder="Enter marks"
+                    value={marks[subject.c_sm_id] || ""}
+                    onChange={(e) =>
+                      handleMarksChange(subject.c_sm_id, e.target.value)
+                    }
+                    maxLength={3}
+                    className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
+                  />
+                  {errors[subject.c_sm_id] && (
+                    <span className="text-red-500 text-xs ml-2">
+                      {errors[subject.c_sm_id]}
+                    </span>
+                  )}
+                </div>
+              ))}
+
+              {/* Total and Percentage Fields */}
+              <div>
+                <label htmlFor="total" className="block font-bold text-xs mb-2">
+                  Total
+                </label>
+                <input
+                  type="number"
+                  id="total"
+                  name="total"
+                  value={total}
+                  readOnly
+                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="percentage"
+                  className="block font-bold text-xs mb-2"
+                >
+                  Percentage
+                </label>
+                <input
+                  type="number"
+                  id="percentage"
+                  name="percentage"
+                  value={percentage}
+                  readOnly
+                  className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                />
+              </div>
+            </div>
+          </fieldset>
+
+          <div className="col-span-3 text-right">
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              style={{ backgroundColor: "#2196F3" }}
+              className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin h-4 w-4 mr-2 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    ></path>
+                  </svg>
+                  Loading...
+                </span>
+              ) : (
+                "Update"
+              )}
+            </button>
           </div>
         </form>
       </div>
