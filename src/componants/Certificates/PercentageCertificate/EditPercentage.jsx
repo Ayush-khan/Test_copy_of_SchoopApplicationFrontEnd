@@ -36,11 +36,10 @@ const EditPercentage = () => {
     teacher_image_name: null,
   });
 
-  // Fetch initial data on component load
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        setLoading(true); // Start loading
+        setLoading(true);
         const token = localStorage.getItem("authToken");
 
         if (!token) throw new Error("No authentication token found");
@@ -53,16 +52,21 @@ const EditPercentage = () => {
         );
 
         if (response?.data?.data) {
-          const fetchedData = response.data.data; // Extract the data
+          const fetchedData = response.data.data;
+          const initialMarks = {};
 
-          setParentInformation(fetchedData); // Assuming response data contains form data
+          // Initialize marks from the fetched data
+          fetchedData.classsubject.forEach((subject) => {
+            initialMarks[subject.c_sm_id] = subject.marks || "";
+          });
 
-          // Populate formData with the fetched data
+          setMarks(initialMarks);
           setFormData({
-            classsubject: fetchedData.classsubject || "",
-            sr_no: fetchedData.sr_no || "",
+            ...formData,
+            classsubject: fetchedData.classsubject || [],
+            sr_no: fetchedData?.studentinfo?.sr_no || "",
             roll_no: fetchedData.studentinformation.roll_no || "",
-            date: today || "", // Directly from the fetched data
+            date: today || "",
             stud_name: `${fetchedData.studentinformation?.first_name || ""} ${
               fetchedData.studentinformation?.mid_name || ""
             } ${fetchedData.studentinformation?.last_name || ""}`,
@@ -70,10 +74,9 @@ const EditPercentage = () => {
             class_division:
               `${fetchedData.studentinformation.classname}-${fetchedData.studentinformation.sectionname}` ||
               "",
-            teacher_image_name:
-              fetchedData.studentinformation.father_image_name || null, // Assuming this is for a teacher image
-            purpose: fetchedData.purpose || " ",
           });
+
+          calculateTotalAndPercentage(initialMarks); // Initial calculation
         } else {
           toast.error("Failed to load data");
         }
@@ -81,153 +84,65 @@ const EditPercentage = () => {
         console.error("Error fetching initial data:", error);
         toast.error("Error fetching initial data");
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     };
 
     fetchInitialData();
   }, []);
 
-  const getYearInWords = (year) => {
-    if (year < 1000 || year > 9999) return "Year Out of Range"; // Optional range limit
+  // Update total and percentage dynamically
+  const calculateTotalAndPercentage = (marks) => {
+    const marksValues = Object.values(marks)
+      .filter((value) => value !== "" && !isNaN(value)) // Exclude empty or non-numeric values
+      .map(Number); // Convert to numbers
 
-    const thousands = [
-      "",
-      "One Thousand",
-      "Two Thousand",
-      "Three Thousand",
-      "Four Thousand",
-      "Five Thousand",
-      "Six Thousand",
-      "Seven Thousand",
-      "Eight Thousand",
-      "Nine Thousand",
-    ];
-    const hundreds = [
-      "",
-      "One Hundred",
-      "Two Hundred",
-      "Three Hundred",
-      "Four Hundred",
-      "Five Hundred",
-      "Six Hundred",
-      "Seven Hundred",
-      "Eight Hundred",
-      "Nine Hundred",
-    ];
-    const units = [
-      "",
-      "One",
-      "Two",
-      "Three",
-      "Four",
-      "Five",
-      "Six",
-      "Seven",
-      "Eight",
-      "Nine",
-    ];
-    const teens = [
-      "Ten",
-      "Eleven",
-      "Twelve",
-      "Thirteen",
-      "Fourteen",
-      "Fifteen",
-      "Sixteen",
-      "Seventeen",
-      "Eighteen",
-      "Nineteen",
-    ];
-    const tens = [
-      "",
-      "",
-      "Twenty",
-      "Thirty",
-      "Forty",
-      "Fifty",
-      "Sixty",
-      "Seventy",
-      "Eighty",
-      "Ninety",
-    ];
+    const totalMarks = marksValues.reduce((sum, mark) => sum + mark, 0);
+    const percentage = marksValues.length
+      ? (totalMarks / (marksValues.length * 100)) * 100
+      : 0;
 
-    const thousandDigit = Math.floor(year / 1000);
-    const hundredDigit = Math.floor((year % 1000) / 100);
-    const lastTwoDigits = year % 100;
-
-    const thousandsPart = thousands[thousandDigit];
-    const hundredsPart = hundreds[hundredDigit];
-
-    let lastTwoWords;
-    if (lastTwoDigits < 10) {
-      lastTwoWords = units[lastTwoDigits];
-    } else if (lastTwoDigits < 20) {
-      lastTwoWords = teens[lastTwoDigits - 10];
+    setTotal(totalMarks);
+    setPercentage(percentage.toFixed(2)); // Limit to two decimal places
+  };
+  // Handle change for marks input
+  const handleMarksChange = (subjectId, value) => {
+    // Update the errors state based on validation
+    if (!value) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [subjectId]: "Marks are required.",
+      }));
+    } else if (!/^\d+$/.test(value)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [subjectId]: "Marks should be numeric.",
+      }));
+    } else if (value.length > 3) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [subjectId]: "Marks cannot exceed 3 characters.",
+      }));
     } else {
-      lastTwoWords = `${tens[Math.floor(lastTwoDigits / 10)]} ${
-        units[lastTwoDigits % 10]
-      }`;
+      // Remove the error if input is valid
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [subjectId]: "",
+      }));
     }
 
-    return `${thousandsPart} ${hundredsPart} ${lastTwoWords}`.trim();
-  };
-
-  const getDayInWords = (day) => {
-    const dayWords = [
-      "First",
-      "Second",
-      "Third",
-      "Fourth",
-      "Fifth",
-      "Sixth",
-      "Seventh",
-      "Eighth",
-      "Ninth",
-      "Tenth",
-      "Eleventh",
-      "Twelfth",
-      "Thirteenth",
-      "Fourteenth",
-      "Fifteenth",
-      "Sixteenth",
-      "Seventeenth",
-      "Eighteenth",
-      "Nineteenth",
-      "Twentieth",
-      "Twenty-First",
-      "Twenty-Second",
-      "Twenty-Third",
-      "Twenty-Fourth",
-      "Twenty-Fifth",
-      "Twenty-Sixth",
-      "Twenty-Seventh",
-      "Twenty-Eighth",
-      "Twenty-Ninth",
-      "Thirtieth",
-      "Thirty-First",
-    ];
-    return dayWords[day];
-  };
-
-  const convertDateToWords = (dateString) => {
-    if (!dateString) return "";
-
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const month = date.toLocaleString("en-US", { month: "long" });
-    const year = date.getFullYear();
-
-    return `${getDayInWords(day)} ${month} ${getYearInWords(year)}`;
+    // Update the specific mark in the state
+    setMarks((prevMarks) => {
+      const updatedMarks = { ...prevMarks, [subjectId]: value };
+      calculateTotalAndPercentage(updatedMarks); // Recalculate each time a mark changes
+      return updatedMarks;
+    });
   };
 
   // for form
   const [errors, setErrors] = useState({});
   const [backendErrors, setBackendErrors] = useState({});
 
-  // Maximum date for date_of_birth
-  const MAX_DATE = "2030-12-31";
-  const MIN_DATE = "1996-01-01";
   // Get today's date in YYYY-MM-DD format
   // Calculate today's date
   const today = new Date().toISOString().split("T")[0];
@@ -263,78 +178,12 @@ const EditPercentage = () => {
 
     // Check if the field is required and empty
     if (!value && requiredFields.includes(name)) {
-      fieldErrors[name] = `${name.replace(/_/g, " ")} is required`;
+      fieldErrors[name] = `This field is required`;
     }
 
     setErrors((prevErrors) => ({ ...prevErrors, [name]: fieldErrors[name] }));
   };
 
-  const handleMarksChange = (id, value) => {
-    // Update the errors state based on validation
-    if (!value) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        [id]: "Marks are required.",
-      }));
-    } else if (!/^\d+$/.test(value)) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        [id]: "Marks should be numeric.",
-      }));
-    } else if (value.length > 3) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        [id]: "Marks cannot exceed 3 characters.",
-      }));
-    } else {
-      // Remove the error if input is valid
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        [id]: "",
-      }));
-    }
-
-    // Convert value to an integer if valid
-    const numericValue = parseInt(value, 10) || 0;
-    setMarks((prevMarks) => {
-      const updatedMarks = { ...prevMarks, [id]: numericValue };
-
-      // Calculate total
-      const totalMarks = Object.values(updatedMarks).reduce(
-        (acc, mark) => acc + mark,
-        0
-      );
-      setTotal(totalMarks);
-
-      // Calculate percentage if there are subjects
-      const subjectCount = formData.classsubject?.length || 0;
-      const calculatedPercentage =
-        subjectCount > 0 ? (totalMarks / (subjectCount * 100)) * 100 : 0;
-      setPercentage(calculatedPercentage.toFixed(2));
-
-      return updatedMarks;
-    });
-  };
-
-  const prepareSubmissionData = () => {
-    const formattedMarks = Object.entries(marks).map(([id, mark]) => ({
-      c_sm_id: parseInt(id),
-      marks: parseInt(mark),
-    }));
-
-    const submissionData = {
-      roll_no: formData.roll_no,
-      stud_name: formData.stud_name,
-      class_division: formData.class_division,
-      percentage,
-      total,
-      stud_id: formData.stud_id,
-      class: formattedMarks,
-      date: today,
-    };
-
-    return submissionData;
-  };
   const validate = () => {
     const newErrors = {};
 
@@ -376,12 +225,25 @@ const EditPercentage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const formatDateString = (dateString) => {
-    if (!dateString) return "";
-    const [year, month, day] = dateString.split("-");
-    return `${year}-${month}-${day}`;
-  };
+  const prepareSubmissionData = () => {
+    const formattedMarks = Object.entries(marks).map(([id, mark]) => ({
+      c_sm_id: parseInt(id),
+      marks: parseInt(mark),
+    }));
 
+    const submissionData = {
+      roll_no: formData.roll_no,
+      stud_name: formData.stud_name,
+      class_division: formData.class_division,
+      percentage,
+      total,
+      stud_id: formData.stud_id,
+      class: formattedMarks,
+      date: today,
+    };
+
+    return submissionData;
+  };
   // Inside your component
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -508,7 +370,7 @@ const EditPercentage = () => {
         {/* <div className="card p-4 rounded-md "> */}
         <div className=" card-header mb-4 flex justify-between items-center  ">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-            Edit Bonafied Certificate
+            Edit Percentage Certificate
           </h5>
 
           <RxCross1
@@ -536,7 +398,7 @@ const EditPercentage = () => {
         )}{" "}
         <form
           onSubmit={handleSubmit}
-          className=" w-full gap-x-1 md:gap-x-14  gap-y-1   overflow-x-hidden shadow-md p-4  bg-gray-50 mb-4"
+          className=" w-full gap-x-1 md:gap-x-14  gap-y-1   overflow-x-hidden shadow-md p-4 border-1 bg-gray-100 mb-4"
         >
           {/* Document Information */}
           <fieldset className="mb-4">
@@ -659,10 +521,9 @@ const EditPercentage = () => {
 
           <fieldset className="mb-4">
             <h5 className="col-span-4 text-blue-400 py-2">
-              Academic Performance{" "}
+              Academic Performance
             </h5>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Dynamically generated input fields for subjects */}
               {formData.classsubject?.map((subject) => (
                 <div key={subject.c_sm_id}>
                   <label
@@ -675,13 +536,12 @@ const EditPercentage = () => {
                     type="number"
                     id={`subject-${subject.c_sm_id}`}
                     name={`subject-${subject.c_sm_id}`}
-                    //   placeholder="Enter marks"
                     value={marks[subject.c_sm_id] || ""}
                     onChange={(e) =>
                       handleMarksChange(subject.c_sm_id, e.target.value)
                     }
                     maxLength={3}
-                    className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-white shadow-inner"
+                    className="block border w-full border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                   />
                   {errors[subject.c_sm_id] && (
                     <span className="text-red-500 text-xs ml-2">

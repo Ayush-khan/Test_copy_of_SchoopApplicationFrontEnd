@@ -500,21 +500,23 @@ function CastCertificate() {
                             {displayedSections.map((subject, index) => {
                               // Determine the status text and button visibility based on conditions
                               let statusText = "";
-                              let showIssueButton = true;
-                              let showDeleteButton = true;
+                              let showIssueButton = false;
+                              let showDeleteButton = false;
+                              let showEditButton = false;
+                              let showDownloadButton = false;
 
                               if (subject.IsDeleted === "Y") {
                                 statusText = "Deleted";
-                                showIssueButton = false;
-                                showDeleteButton = false;
                               } else if (subject.IsIssued === "Y") {
                                 statusText = "Issued";
-                                showIssueButton = false;
-                                showDeleteButton = false;
+                                showEditButton = true;
+                                showDownloadButton = true;
                               } else if (subject.IsGenerated === "Y") {
                                 statusText = "Generated";
                                 showIssueButton = true;
                                 showDeleteButton = true;
+                                showEditButton = true;
+                                showDownloadButton = true;
                               }
 
                               return (
@@ -536,22 +538,30 @@ function CastCertificate() {
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {statusText}
                                   </td>
+                                  {/* Download button */}
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    <button
-                                      onClick={() => handleDownload(subject)}
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                    >
-                                      <ImDownload />
-                                    </button>
+                                    {showDownloadButton && (
+                                      <button
+                                        onClick={() => handleDownload(subject)}
+                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                      >
+                                        <ImDownload />
+                                      </button>
+                                    )}
                                   </td>
+
+                                  {/* Edit button */}
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    <button
-                                      onClick={() => handleEditForm(subject)}
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                    >
-                                      <FontAwesomeIcon icon={faEdit} />
-                                    </button>
+                                    {showEditButton && (
+                                      <button
+                                        onClick={() => handleEditForm(subject)}
+                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                      >
+                                        <FontAwesomeIcon icon={faEdit} />
+                                      </button>
+                                    )}
                                   </td>
+
                                   {/* Delete button */}
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {showDeleteButton && (
