@@ -128,21 +128,6 @@ function ManageLC() {
     } else if (selectedClass) {
       params = { class_id: classIdForManage };
     }
-    // // Conditional logic for API query parameters
-    // if (srNo && selectedClass) {
-    //   params.class_id = classIdForManage;
-    //   params.sr_no = srNo;
-    // } else if (srNo) {
-    //   params.sr_no = srNo;
-    // } else if (selectedClass) {
-    //   params.class_id = classIdForManage;
-    // }
-
-    // // Error handling for required fields
-    // if (!params.q && !params.sr_no ) {
-    //   setNameError("Please select a class or enter an LC number.");
-    //   return;
-    // }
 
     // API call
     try {
@@ -162,6 +147,7 @@ function ManageLC() {
         toast.error("No Leaving Certificate records found.");
       }
     } catch (error) {
+      toast.error("Error in fetching certificates Listing");
       console.error("Error fetching Leaving Certificate records:", error);
       setError("Error fetching Leaving Certificate records");
     }

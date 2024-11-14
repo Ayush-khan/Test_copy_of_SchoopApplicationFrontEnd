@@ -441,8 +441,8 @@ const LeavingCertificate = () => {
         toast.error("No data found for the selected student.");
       }
     } catch (error) {
-      console.log("error is", error);
-      toast.error("Error fetching data for the selected student.");
+      console.log("error is now", error.response);
+      toast.error(error.response.message);
     } finally {
       setLoadingForSearch(false);
     }
