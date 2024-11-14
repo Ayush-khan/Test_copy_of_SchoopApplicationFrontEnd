@@ -345,7 +345,14 @@ const CreateCharacterCertificate = () => {
           special_sub: fetchedData.special_sub || "",
         });
       } else {
-        toast.error("No data found for the selected student.");
+        if (response.data && response.data.status === 403) {
+          toast.error(
+            "Character Certificate Already Generated. Please go to manage to download the Character Certificate."
+          );
+        } else {
+          // Show a generic error message if the error is not a 403
+          toast.error("No data found for the selected student.");
+        }
       }
     } catch (error) {
       toast.error("Error fetching data for the selected student.");

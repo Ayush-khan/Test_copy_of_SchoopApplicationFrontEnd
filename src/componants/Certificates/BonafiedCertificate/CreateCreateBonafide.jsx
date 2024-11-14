@@ -351,10 +351,22 @@ const CreateCreateBonafide = () => {
           special_sub: fetchedData.special_sub || "",
         });
       } else {
-        toast.error("No data found for the selected student.");
+        console.log("reponse", response.data.status);
+        if (response.data && response.data.status === 403) {
+          toast.error(
+            "Bonafide Certificate Already Generated. Please go to manage to download the Bonafide Certificate."
+          );
+        } else {
+          // Show a generic error message if the error is not a 403
+          toast.error("No data found for the selected student.");
+        }
+        // toast.error("No data found for the selected student.");
       }
     } catch (error) {
-      toast.error("Error fetching data for the selected student.");
+      console.log("error is", error);
+      // toast.error(error.message);
+      // Check if response has a 403 status and the specific error message
+      console.log("error is", error.response);
     } finally {
       setLoadingForSearch(false);
     }

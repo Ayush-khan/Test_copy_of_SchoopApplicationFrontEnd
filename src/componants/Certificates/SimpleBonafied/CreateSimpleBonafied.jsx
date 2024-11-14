@@ -339,7 +339,14 @@ const CreateSimpleBonafied = () => {
           // special_sub: fetchedData.studentinformation.special_sub || "",
         });
       } else {
-        toast.error("No data found for the selected student.");
+        if (response.data && response.data.status === 403) {
+          toast.error(
+            "Simple Bonafide Certificate Already Generated. Please go to manage to download the Simple Bonafide Certificate."
+          );
+        } else {
+          // Show a generic error message if the error is not a 403
+          toast.error("No data found for the selected student.");
+        }
       }
     } catch (error) {
       console.log("error", error);
