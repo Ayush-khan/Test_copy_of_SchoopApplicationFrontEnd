@@ -153,49 +153,6 @@ function ManageLC() {
     }
   };
 
-  //   // Listing tabs data for diffrente tabs
-  //   const handleSearch = async () => {
-  //     if (!classIdForManage) {
-  //       setNameError("Please select the class.");
-  //       return;
-  //     }
-  //     try {
-  //       console.log(
-  //         "for this sectiong id in seaching inside AllotMarksHeadingTab",
-  //         classIdForManage
-  //       );
-  //       const token = localStorage.getItem("authToken");
-  //       const response = await axios.get(
-  //         // `${API_URL}/api/get_AllotMarkheadingslist`,
-
-  //         `${API_URL}/api/get_leavingcertificatelist`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //           // params: { q: selectedClass },
-  //           params: { q: classIdForManage },
-  //         }
-  //       );
-  //       console.log(
-  //         "the response of the AllotMarksHeadingTab is *******",
-  //         response.data
-  //       );
-  //       if (response?.data?.data.length > 0) {
-  //         setSubjects(response?.data?.data);
-  //         setPageCount(Math.ceil(response?.data?.data.length / 10)); // Example pagination logic
-  //       } else {
-  //         setSubjects([]);
-  //         toast.error(
-  //           "No Cast certificates Listing are found for the selected class."
-  //         );
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching Cast certificates Listing:", error);
-  //       setError("Error fetching Cast certificates");
-  //     }
-  //   };
-
-  // Handle division checkbox change
-
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
     // Handle page change logic

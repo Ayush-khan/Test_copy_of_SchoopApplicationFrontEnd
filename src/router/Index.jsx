@@ -151,6 +151,7 @@ import EditCastCertificate from "../componants/Certificates/CastCertificate/Edit
 import EditCharacter from "../componants/Certificates/CharaterCertificates/EditCharacter.jsx";
 import EditSimpleBonafied from "../componants/Certificates/SimpleBonafied/EditSimpleBonafied.jsx";
 import EditPercentage from "../componants/Certificates/PercentageCertificate/EditPercentage.jsx";
+import ManageLCStudent from "../componants/LCStudent/ManageLCStudent.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -245,6 +246,13 @@ function Index() {
           path="/studentSimpleBonafied/edit/:id"
           // path="#"
           element={<PrivateRoute element={EditSimpleBonafied} />}
+        />
+
+        {/* LC Student */}
+        <Route
+          path="/manageStudentLC"
+          // path="#"
+          element={<PrivateRoute element={ManageLCStudent} />}
         />
         {/* leaving_certificate */}
         <Route
