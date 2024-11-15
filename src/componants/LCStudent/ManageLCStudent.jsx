@@ -293,10 +293,10 @@ function ManageLCStudent() {
             <ToastContainer />
             <div className="mb-4  ">
               <div className="md:w-[90%] mx-auto">
-                <div className="form-group mt-4 w-full md:w-[90%] flex justify-start gap-x-1 md:gap-x-6">
+                <div className="form-group  relative  left-0 md:left-[10%] mt-3 md:mt-5 w-full  md:w-[60%] flex justify-start gap-x-1 md:gap-x-6">
                   <label
                     htmlFor="classSection"
-                    className="w-1/4 pt-2 items-center text-center"
+                    className="w-1/3 pt-2 items-center text-center"
                   >
                     Select Class
                   </label>
@@ -305,7 +305,7 @@ function ManageLCStudent() {
                       value={selectedClass}
                       onChange={handleClassSelect}
                       options={classOptions}
-                      placeholder="Select Class"
+                      placeholder="Class"
                       isSearchable
                       isClearable
                       className=" text-sm w-full md:w-[60%] item-center relative left-0 md:left-4"

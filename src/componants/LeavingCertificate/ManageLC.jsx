@@ -445,7 +445,7 @@ function ManageLC() {
                         </div>
                       </div>
 
-                      <div className="w-full md:w-[50%]  gap-x-4  justify-between  my-1 md:my-4 flex md:flex-row">
+                      <div className="w-full md:w-[50%] border-4 gap-x-4  justify-between  my-1 md:my-4 flex md:flex-row">
                         <label
                           className=" ml-0 md:ml-4 w-[59%] md:w-[55%]  text-md mt-1.5 "
                           htmlFor="studentSelect"
