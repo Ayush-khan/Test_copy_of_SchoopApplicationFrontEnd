@@ -42,7 +42,12 @@ function ManageLCStudent() {
   const [nameError, setNameError] = useState(null);
   // for react-search of manage tab teacher Edit and select class
   const [selectedClass, setSelectedClass] = useState(null);
-
+  const [leavingCertificate, setLeavingCertificate] = useState({
+    last_date: "",
+    slc_no: "",
+    slc_issue_date: "",
+    leaving_remark: "",
+  });
   const navigate = useNavigate();
 
   const pageSize = 10;
@@ -53,7 +58,9 @@ function ManageLCStudent() {
   const handleClassSelect = (selectedOption) => {
     setNameError("");
     setSelectedClass(selectedOption);
-    setclassIdForManage(selectedOption.value); // Assuming value is the class ID
+    setclassIdForManage(selectedOption ? selectedOption.value : null); // Set to null if cleared
+
+    // setclassIdForManage(selectedOption.value); // Assuming value is the class ID
   };
 
   const classOptions = classes.map((cls) => ({
@@ -156,7 +163,7 @@ function ManageLCStudent() {
     console.log("HandleView-->", subjectIsPassForView);
     setCurrentSection(subjectIsPassForView);
     navigate(
-      `/student/view/${subjectIsPassForView.student_id}`,
+      `/studentLC/view/${subjectIsPassForView?.student_id}`,
 
       {
         state: { student: subjectIsPassForView },
@@ -164,12 +171,12 @@ function ManageLCStudent() {
     );
   };
   const handleDelete = (sectionId) => {
-    const classToDelete = subjects.find((cls) => cls.sr_no === sectionId);
+    const classToDelete = subjects.find((cls) => cls.student_id === sectionId);
     console.log("classsToDelete", classToDelete);
     // Set the current section and subject name for deletion
     if (classToDelete) {
       setCurrentSection(classToDelete); // Set the current section directly
-      setCurrestSubjectNameForDelete(classToDelete?.stud_name); // Set subject name for display
+      setCurrestSubjectNameForDelete(classToDelete?.student_name); // Set subject name for display
       setShowDeleteModal(true); // Show the delete modal
     } else {
       console.error("Bonafied certificate not found for deletion");
@@ -179,7 +186,7 @@ function ManageLCStudent() {
   const handleSubmitDelete = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const subReportCardId = currentSection?.sr_no; // Get the correct ID
+      const subReportCardId = currentSection?.student_id; // Get the correct ID
 
       if (!token || !subReportCardId) {
         throw new Error("Token or Serial Number is missing");
@@ -187,7 +194,7 @@ function ManageLCStudent() {
 
       // Send the delete request to the backend
       await axios.delete(
-        `${API_URL}/api/delete_simpleisDeleted/${subReportCardId}`,
+        `${API_URL}/api/delete_deletestudentleaving/${subReportCardId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -198,39 +205,49 @@ function ManageLCStudent() {
 
       handleSearch(); // Refresh the data (this seems like the method to refetch data)
       setShowDeleteModal(false); // Close the modal
-      toast.success("Simple Bonafied deleted successfully!");
+      toast.success("LC Student deleted successfully!");
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error deleting Simple Bonafied: ${error.response.data.message}`
+          `Error deleting LC Student : ${error.response.data.message}`
         );
       } else {
-        toast.error(`Error deleting Simple Bonafied: ${error.message}`);
+        toast.error(`Error deleting LC Student : ${error.message}`);
       }
-      console.error("Error deleting Simple Bonafied:", error);
+      console.error("Error deleting LC Student :", error);
     }
   };
 
-  const [newClassName, setNewClassName] = useState("");
-  const [newSubjectName, setNewSubjectName] = useState("");
-  const [newExamName, setNewExamName] = useState("");
-  const [newMarksHeading, setNewMarksHeading] = useState("");
-  const [highestMarks, setHighestMarks] = useState("");
-  const [marksError, setMarksError] = useState(""); // Error for validation
-
-  const handleEdit = (section) => {
+  const handleEdit = async (section) => {
     setCurrentSection(section);
     console.log("currentedit", section);
 
-    // Set values for the edit modal
-    setNewClassName(section?.get_class?.name);
-    setNewSubjectName(section?.get_subject?.name);
-    setNewExamName(section?.get_exam?.name); // Assuming exam details are available
-    setNewMarksHeading(section?.get_marksheading?.name || ""); // Set marks heading if available
+    // Fetch Leaving Certificate Data using token
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${API_URL}/api/get_leavingcertificatedetailstudent/${section.student_id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-    setHighestMarks(section?.highest_marks || ""); // Set highest marks or empty
-    setMarksError(""); // Reset the error message when opening the modal
+      // Assuming the response data structure remains the same
+      const data = response.data.data[0] || {}; // Extract the first item from the data array
 
+      // Set the leaving certificate details into state
+      setLeavingCertificate({
+        last_date: data.last_date || "",
+        slc_no: data.slc_no || "",
+        slc_issue_date: data.slc_issue_date || "",
+        leaving_remark: data.leaving_remark || "",
+      });
+    } catch (error) {
+      console.error("Error fetching leaving certificate details:", error);
+      setError("Error fetching leaving certificate details");
+    }
+
+    // Show the edit modal
     setShowEditModal(true);
   };
   const handleCloseModal = () => {
@@ -240,11 +257,18 @@ function ManageLCStudent() {
   };
 
   const filteredSections = subjects.filter((section) => {
-    // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
+    // Convert the fields to lowercase for case-insensitive comparison
     const subjectNameIs = section?.student_name.toLowerCase() || "";
-    // Check if the search term is present in either the teacher's name or the subject's name
-    return subjectNameIs.includes(searchTerm.toLowerCase());
+    const slcNoIs = section?.slc_no.toLowerCase() || "";
+    const searchTermLower = searchTerm.toLowerCase();
+
+    // Check if the search term is present in student_name or slc_no
+    return (
+      subjectNameIs.includes(searchTermLower) ||
+      slcNoIs.includes(searchTermLower)
+    );
   });
+
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -354,25 +378,8 @@ function ManageLCStudent() {
                         <tbody>
                           {displayedSections.map((subject, index) => {
                             // Determine the status text and button visibility based on conditions
-                            let statusText = "";
-                            let showIssueButton = false;
-                            let showDeleteButton = false;
-                            let showEditButton = false;
-                            let showDownloadButton = false;
 
-                            if (subject.IsDeleted === "Y") {
-                              statusText = "Deleted";
-                            } else if (subject.IsIssued === "Y") {
-                              statusText = "Issued";
-                              showEditButton = true;
-                              showDownloadButton = true;
-                            } else if (subject.IsGenerated === "Y") {
-                              statusText = "Generated";
-                              showIssueButton = true;
-                              showDeleteButton = true;
-                              showEditButton = true;
-                              showDownloadButton = true;
-                            }
+                            let showDeleteButton = subject.IsDelete === "N"; // Show delete button if IsDelete is "N"
 
                             return (
                               <tr
@@ -409,15 +416,17 @@ function ManageLCStudent() {
                                     .replace(/\s+/g, " ")}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.class_division}
+                                  {subject?.classname}
+                                  {subject?.sectionname}
                                 </td>
 
                                 {/* Delete button */}
+
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {showDeleteButton && (
                                     <button
                                       onClick={() =>
-                                        handleDelete(subject?.sr_no)
+                                        handleDelete(subject?.student_id)
                                       }
                                       className="text-red-600 hover:text-red-800 hover:bg-transparent"
                                     >
@@ -481,7 +490,7 @@ function ManageLCStudent() {
       {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className=" w-[90%] md:w-[44%] max-w-3xl bg-white rounded-md shadow-lg border border-gray-300">
+          <div className="w-[90%] md:w-[44%] max-w-3xl bg-white rounded-md shadow-lg border border-gray-300">
             <div className="flex justify-between items-center px-3 bg-gray-50 border-b border-gray-300">
               <h5 className="text-lg font-semibold pt-2">
                 School Leaving Details
@@ -492,45 +501,43 @@ function ManageLCStudent() {
               />
             </div>
             <div
-              className=" relative  h-1 w-[97%] mx-auto bg-red-700"
-              style={{
-                backgroundColor: "#C03078",
-              }}
+              className="relative h-1 w-[97%] mx-auto bg-red-700"
+              style={{ backgroundColor: "#C03078" }}
             ></div>
             <div className="p-5">
               <div className="flex items-center gap-x-5 mb-4">
-                <label htmlFor="newClassName" className="w-[90%] ">
+                <label htmlFor="newClassName" className="w-[90%]">
                   Last Date Of School
                 </label>
                 <div className="w-full bg-gray-200 p-2 rounded-md shadow-sm">
-                  {newClassName}
+                  {leavingCertificate.last_date}
                 </div>
               </div>
 
               <div className="flex items-center gap-x-5 mb-4">
-                <label htmlFor="newSubjectName" className="w-[90%] ">
+                <label htmlFor="newSubjectName" className="w-[90%]">
                   School Leaving Certificate No.
                 </label>
                 <div className="w-full bg-gray-200 p-2 rounded-md shadow-sm">
-                  {newSubjectName}
+                  {leavingCertificate.slc_no}
                 </div>
               </div>
 
               <div className="flex items-center gap-x-5 mb-4">
-                <label htmlFor="newExamName" className="w-[90%] ">
+                <label htmlFor="newExamName" className="w-[90%]">
                   School Leaving Certificate Issue Date
                 </label>
                 <div className="w-full bg-gray-200 p-2 rounded-md shadow-sm">
-                  {newExamName}
+                  {leavingCertificate.slc_issue_date}
                 </div>
               </div>
 
               <div className="flex items-center gap-x-5">
-                <label htmlFor="newMarksHeading" className="w-[90%] ">
+                <label htmlFor="newMarksHeading" className="w-[90%]">
                   Leaving Remark
                 </label>
                 <div className="w-full bg-gray-200 p-2 rounded-md shadow-sm">
-                  {newMarksHeading}
+                  {leavingCertificate.leaving_remark}
                 </div>
               </div>
             </div>

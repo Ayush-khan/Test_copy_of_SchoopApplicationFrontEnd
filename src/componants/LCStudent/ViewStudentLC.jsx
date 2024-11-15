@@ -7,7 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaUserGroup } from "react-icons/fa6";
 
-function ViewStudent() {
+function ViewStudentLC() {
   const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const location = useLocation();
@@ -100,101 +100,177 @@ function ViewStudent() {
   // // Convert class change and division change to non-functional
   // const handleClassChange = async (e) => {}; // Disable handler
   // const handleDivisionChange = (e) => {}; // Disable handler
-
   useEffect(() => {
-    if (student) {
-      setFormData({
-        first_name: student.first_name || " ",
-        mid_name: student.mid_name || "",
-        last_name: student.last_name || "",
-        house: student.house || "",
-        student_name: student.student_name || "",
-        dob: student.dob || "",
-        admission_date: student.admission_date || "",
-        stud_id_no: student.stud_id_no || "",
-        stu_aadhaar_no: student.stu_aadhaar_no || "",
-        gender: student.gender || "",
-        permant_add: student.permant_add || " ",
-        mother_tongue: student.mother_tongue || "",
-        birth_place: student.birth_place || "",
-        admission_class: student.admission_class || " ",
-        city: student.city || " ",
-        state: student.state || "",
-        roll_no: student.roll_no || "",
-        student_id: student.student_id || " ",
-        reg_id: student.reg_id || " ",
-        blood_group: student.blood_group || " ",
-        category: student.category || " ",
-        class_id: student?.get_class?.name || "",
-        section_id: student?.get_division?.name || "",
-        religion: student.religion || "",
-        caste: student.caste || "",
-        subcaste: student.subcaste || "",
-        transport_mode: student.transport_mode || " ",
-        vehicle_no: student.vehicle_no || "",
-        emergency_name: student.emergency_name || " ",
-        emergency_contact: student.emergency_contact || "",
-        emergency_add: student.emergency_add || "",
-        height: student.height || "",
-        weight: student.weight || "",
-        allergies: student.allergies || "",
-        nationality: student.nationality || "",
-        pincode: student.pincode || "",
-        image_name: student.image_name || "",
-        // Parent information
-        father_name: student?.parents?.father_name || " ",
-        father_occupation: student?.parents?.father_occupation || "",
-        f_office_add: student?.parents?.f_office_add || "  ",
-        f_blood_group: student.f_blood_group || "",
-
-        f_office_tel: student?.parents?.f_office_tel || "",
-        f_mobile: student?.parents?.f_mobile || "",
-        f_email: student?.parents?.f_email || "",
-        f_dob: student?.parents?.f_dob || " ",
-        m_dob: student?.parents?.m_dob || " ",
-        m_blood_group: student.m_blood_group || "",
-
-        parent_adhar_no: student?.parents?.parent_adhar_no || "",
-        mother_name: student?.parents?.mother_name || " ",
-        mother_occupation: student?.parents?.mother_occupation || "",
-        m_office_add: student?.parents?.m_office_add || " ",
-        m_office_tel: student?.parents?.m_office_tel || "",
-        m_mobile: student?.parents?.m_mobile || "",
-        m_emailid: student?.parents?.m_emailid || "",
-        m_adhar_no: student?.parents?.m_adhar_no || "",
-        udise_pen_no: student.udise_pen_no || " ",
-        user_id: student?.user_master?.user_id || " ",
-        SetToReceiveSMS: student.SetToReceiveSMS || "",
-        SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
-      });
-      if (student.student_image) {
-        setPhotoPreview(
-          // `${API_URL}/path/to/images/${student.teacher_image_name}`
-          `${student.student_image}`
+    const fetchStudentData = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          throw new Error("Token is missing");
+        }
+        const response = await axios.get(
+          `${API_URL}/api/get_leavingcertificatestudentinformation/${student?.student_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
+
+        if (response.data.success) {
+          const student = response.data.data.studentinformation[0]; // Assuming the first item is the required student
+
+          // Set form data from API response
+          setFormData({
+            first_name: student.first_name || " ",
+            mid_name: student.mid_name || "",
+            last_name: student.last_name || "",
+            house: student.house || "",
+            student_name: student.student_name || "",
+            dob: student.dob || "",
+            admission_date: student.admission_date || "",
+            stud_id_no: student.stud_id_no || "",
+            stu_aadhaar_no: student.stu_aadhaar_no || "",
+            gender: student.gender || "",
+            permant_add: student.permant_add || " ",
+            mother_tongue: student.mother_tongue || "",
+            birth_place: student.birth_place || "",
+            admission_class: student.admission_class || " ",
+            city: student.city || " ",
+            state: student.state || "",
+            roll_no: student.roll_no || "",
+            student_id: student.student_id || " ",
+            reg_id: student.reg_no || " ",
+            blood_group: student.blood_group || " ",
+
+            category: student.category || " ",
+            class_id: student.classname || "",
+            section_id: student.sectionname || "",
+            religion: student.religion || "",
+            caste: student.caste || "",
+            subcaste: student.subcaste || "",
+            transport_mode: student.transport_mode || " ",
+            vehicle_no: student.vehicle_no || "",
+            emergency_name: student.emergency_name || " ",
+            emergency_contact: student.emergency_contact || "",
+            emergency_add: student.emergency_add || "",
+            height: student.height || "",
+            weight: student.weight || "",
+            allergies: student.allergies || "",
+            nationality: student.nationality || "",
+            pincode: student.pincode || "",
+            image_name: student.image_name || "",
+            // Parent information
+            father_name: student.father_name || " ",
+            father_occupation: student.father_occupation || "",
+            f_office_add: student.f_office_add || "  ",
+            f_blood_group: student.f_blood_group || "",
+            f_office_tel: student.f_office_tel || "",
+            f_mobile: student.f_mobile || "",
+            f_email: student.f_email || "",
+            f_dob: student.f_dob || " ",
+            m_dob: student.m_dob || " ",
+            parent_adhar_no: student.parent_adhar_no || "",
+            mother_name: student.mother_name || " ",
+            mother_occupation: student.mother_occupation || "",
+            m_office_add: student.m_office_add || " ",
+            m_office_tel: student.m_office_tel || "",
+            m_mobile: student.m_mobile || "",
+            m_blood_group: student.m_blood_group || "",
+            m_emailid: student.m_emailid || "",
+            m_adhar_no: student.m_adhar_no || "",
+            udise_pen_no: student.udise_pen_no || " ",
+            user_id: student.UserId || " ",
+            SetToReceiveSMS: student.SetToReceiveSMS || "",
+            SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
+          });
+
+          // Set the student image preview if it exists
+          if (student.image_name) {
+            setPhotoPreview(student.studentimage || "");
+          }
+        } else {
+          toast.error("Error: " + response.data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching student data:", error);
+        toast.error("Error fetching student data");
       }
-    }
-  }, [student]);
+    };
+
+    fetchStudentData();
+  }, []);
+  //   useEffect(() => {
+  //     if (student) {
+  //       setFormData({
+  //         first_name: student.first_name || " ",
+  //         mid_name: student.mid_name || "",
+  //         last_name: student.last_name || "",
+  //         house: student.house || "",
+  //         student_name: student.student_name || "",
+  //         dob: student.dob || "",
+  //         admission_date: student.admission_date || "",
+  //         stud_id_no: student.stud_id_no || "",
+  //         stu_aadhaar_no: student.stu_aadhaar_no || "",
+  //         gender: student.gender || "",
+  //         permant_add: student.permant_add || " ",
+  //         mother_tongue: student.mother_tongue || "",
+  //         birth_place: student.birth_place || "",
+  //         admission_class: student.admission_class || " ",
+  //         city: student.city || " ",
+  //         state: student.state || "",
+  //         roll_no: student.roll_no || "",
+  //         student_id: student.student_id || " ",
+  //         reg_id: student.reg_id || " ",
+  //         blood_group: student.blood_group || " ",
+  //         category: student.category || " ",
+  //         class_id: student?.get_class?.name || "",
+  //         section_id: student?.get_division?.name || "",
+  //         religion: student.religion || "",
+  //         caste: student.caste || "",
+  //         subcaste: student.subcaste || "",
+  //         transport_mode: student.transport_mode || " ",
+  //         vehicle_no: student.vehicle_no || "",
+  //         emergency_name: student.emergency_name || " ",
+  //         emergency_contact: student.emergency_contact || "",
+  //         emergency_add: student.emergency_add || "",
+  //         height: student.height || "",
+  //         weight: student.weight || "",
+  //         allergies: student.allergies || "",
+  //         nationality: student.nationality || "",
+  //         pincode: student.pincode || "",
+  //         image_name: student.image_name || "",
+  //         // Parent information
+  //         father_name: student?.parents?.father_name || " ",
+  //         father_occupation: student?.parents?.father_occupation || "",
+  //         f_office_add: student?.parents?.f_office_add || "  ",
+  //         f_office_tel: student?.parents?.f_office_tel || "",
+  //         f_mobile: student?.parents?.f_mobile || "",
+  //         f_email: student?.parents?.f_email || "",
+  //         f_dob: student?.parents?.f_dob || " ",
+  //         m_dob: student?.parents?.m_dob || " ",
+  //         parent_adhar_no: student?.parents?.parent_adhar_no || "",
+  //         mother_name: student?.parents?.mother_name || " ",
+  //         mother_occupation: student?.parents?.mother_occupation || "",
+  //         m_office_add: student?.parents?.m_office_add || " ",
+  //         m_office_tel: student?.parents?.m_office_tel || "",
+  //         m_mobile: student?.parents?.m_mobile || "",
+  //         m_emailid: student?.parents?.m_emailid || "",
+  //         m_adhar_no: student?.parents?.m_adhar_no || "",
+  //         udise_pen_no: student.udise_pen_no || " ",
+  //         user_id: student?.user_master?.user_id || " ",
+  //         SetToReceiveSMS: student.SetToReceiveSMS || "",
+  //         SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
+  //       });
+  //       if (student.student_image) {
+  //         setPhotoPreview(
+  //           // `${API_URL}/path/to/images/${student.teacher_image_name}`
+  //           `${student.student_image}`
+  //         );
+  //       }
+  //     }
+  //   }, [student]);
 
   return (
-    // <div>
-    //   <h2>View Student</h2>
-    //   <form>
-    //     <div>
-    //       <label>First Name:</label>
-    //       <input type="text" value={formData.first_name} disabled />
-    //     </div>
-    //     <div>
-    //       <label>Middle Name:</label>
-    //       <input type="text" value={formData.mid_name} disabled />
-    //     </div>
-    //     <div>
-    //       <label>Last Name:</label>
-    //       <input type="text" value={formData.last_name} disabled />
-    //     </div>
-    //     {/* Add the rest of the form fields in a similar way */}
-    //   </form>
-    // </div>
     <div className=" w-[95%] mx-auto p-4">
       <ToastContainer />
       <div className="card p-3  rounded-md">
@@ -204,7 +280,7 @@ function ViewStudent() {
           </h5>
           <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-            onClick={() => navigate("/manageStudent")}
+            onClick={() => navigate("/manageStudentLC")}
           />
         </div>
         <div
@@ -1283,4 +1359,4 @@ function ViewStudent() {
   );
 }
 
-export default ViewStudent;
+export default ViewStudentLC;

@@ -55,7 +55,7 @@ function BonafiedCertificates() {
   const handleClassSelect = (selectedOption) => {
     setNameError("");
     setSelectedClass(selectedOption);
-    setclassIdForManage(selectedOption.value); // Assuming value is the class ID
+    setclassIdForManage(selectedOption ? selectedOption.value : null); // Set to null if cleared
   };
 
   const teacherOptions = departments.map((dept) => ({
