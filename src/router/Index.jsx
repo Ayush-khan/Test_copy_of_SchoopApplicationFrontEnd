@@ -154,6 +154,8 @@ import EditPercentage from "../componants/Certificates/PercentageCertificate/Edi
 import ManageLCStudent from "../componants/LCStudent/ManageLCStudent.jsx";
 import ViewStudentLC from "../componants/LCStudent/ViewStudentLC.jsx";
 import DeleteStudent from "../componants/DeleteStudent/DeleteStudent.jsx";
+import ViewDeletedStudent from "../componants/DeleteStudent/ViewDeletedStudent.jsx";
+import EditLCforDeleteStudent from "../componants/DeleteStudent/EditLCforDeleteStudent.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -257,7 +259,7 @@ function Index() {
           element={<PrivateRoute element={ManageLCStudent} />}
         />
         <Route
-          path="/StudentLC/view/:id"
+          path="/studentLC/view/:id"
           // path="#"
           element={<PrivateRoute element={ViewStudentLC} />}
         />
@@ -273,6 +275,16 @@ function Index() {
           path="/deleteStudent"
           // path="#"
           element={<PrivateRoute element={DeleteStudent} />}
+        />
+        <Route
+          path="/deletedStudent/view/:id"
+          // path="#"
+          element={<PrivateRoute element={ViewDeletedStudent} />}
+        />
+        <Route
+          path="/editLCforDeleteStudent/edit/:id"
+          // path="#"
+          element={<PrivateRoute element={EditLCforDeleteStudent} />}
         />
 
         {/* <Route

@@ -128,7 +128,7 @@ function DeleteStudent() {
 
       // Perform the API call
       const response = await axios.get(
-        `${API_URL}/api/get_leavingcertificatestudentlist`,
+        `${API_URL}/api/get_deletedstudentlist`,
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
@@ -143,12 +143,10 @@ function DeleteStudent() {
         console.log("Subjects data:", studentData); // Debugging output
       } else {
         setSubjects([]);
-        toast.error(
-          "No Leaving Certificate Student List found for the selected Class."
-        );
+        toast.error("No Deleted Students List found for the selected Class.");
       }
     } catch (error) {
-      console.error("Error fetching Leaving Certificate Student List:", error);
+      console.error("Error fetching Deleted Students List:", error);
       setError("Error fetching data. Please try again later.");
     }
   };
@@ -164,7 +162,7 @@ function DeleteStudent() {
     console.log("HandleView-->", subjectIsPassForView);
     setCurrentSection(subjectIsPassForView);
     navigate(
-      `/studentLC/view/${subjectIsPassForView?.student_id}`,
+      `/deletedStudent/view/${subjectIsPassForView?.student_id}`,
 
       {
         state: { student: subjectIsPassForView },
@@ -184,7 +182,7 @@ function DeleteStudent() {
     }
   };
 
-  const handleSubmitDelete = async () => {
+  const handleAddStudent = async () => {
     try {
       const token = localStorage.getItem("authToken");
       const subReportCardId = currentSection?.student_id; // Get the correct ID
@@ -206,20 +204,32 @@ function DeleteStudent() {
 
       handleSearch(); // Refresh the data (this seems like the method to refetch data)
       setShowDeleteModal(false); // Close the modal
-      toast.success("LC Student deleted successfully!");
+      toast.success("Student Added successfully!");
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
           `Error deleting LC Student : ${error.response.data.message}`
         );
       } else {
-        toast.error(`Error deleting LC Student : ${error.message}`);
+        toast.error(`Error in adding Student : ${error.message}`);
       }
-      console.error("Error deleting LC Student :", error);
+      console.error("Error in adding Student :", error);
     }
   };
 
-  const handleEdit = async (section) => {
+  const handleEditForm = (section) => {
+    setCurrentSection(section);
+    navigate(
+      `/editLCforDeleteStudent/edit/${section?.student_id}`,
+
+      {
+        state: { student: section },
+      }
+    );
+    // console.log("the currecne t section", currentSection);
+  };
+
+  const handleLCDetails = async (section) => {
     setCurrentSection(section);
     console.log("currentedit", section);
 
@@ -386,7 +396,7 @@ function DeleteStudent() {
                           {displayedSections.map((subject, index) => {
                             // Determine the status text and button visibility based on conditions
 
-                            let showDeleteButton = subject.IsDelete === "N"; // Show delete button if IsDelete is "N"
+                            // let showDeleteButton = subject.IsDelete === "N"; // Show delete button if IsDelete is "N"
 
                             return (
                               <tr
@@ -428,7 +438,7 @@ function DeleteStudent() {
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
-                                    onClick={() => handleEdit(subject)}
+                                    onClick={() => handleEditForm(subject)}
                                     className="text-blue-700 hover:text-blue-900 hover:bg-transparent "
                                   >
                                     <LuFileBadge2 className="font-bold text-xl" />
@@ -436,7 +446,7 @@ function DeleteStudent() {
                                 </td>{" "}
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
-                                    onClick={() => handleView(subject)}
+                                    onClick={() => handleLCDetails(subject)}
                                     className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                                   >
                                     <MdDescription className="font-bold text-xl" />
@@ -527,7 +537,7 @@ function DeleteStudent() {
                 <label htmlFor="newClassName" className="w-[90%]">
                   Last Date Of School
                 </label>
-                <div className="w-full bg-gray-200 p-2 rounded-md shadow-sm">
+                <div className="w-full bg-gray-200 p-2 h-8 rounded-md shadow-sm">
                   {leavingCertificate.last_date}
                 </div>
               </div>
@@ -536,7 +546,7 @@ function DeleteStudent() {
                 <label htmlFor="newSubjectName" className="w-[90%]">
                   School Leaving Certificate No.
                 </label>
-                <div className="w-full bg-gray-200 p-2 rounded-md shadow-sm">
+                <div className="w-full bg-gray-200 p-2 h-8 rounded-md shadow-sm">
                   {leavingCertificate.slc_no}
                 </div>
               </div>
@@ -545,7 +555,7 @@ function DeleteStudent() {
                 <label htmlFor="newExamName" className="w-[90%]">
                   School Leaving Certificate Issue Date
                 </label>
-                <div className="w-full bg-gray-200 p-2 rounded-md shadow-sm">
+                <div className="w-full bg-gray-200 p-2  h-8 rounded-md shadow-sm">
                   {leavingCertificate.slc_issue_date}
                 </div>
               </div>
@@ -554,7 +564,7 @@ function DeleteStudent() {
                 <label htmlFor="newMarksHeading" className="w-[90%]">
                   Leaving Remark
                 </label>
-                <div className="w-full bg-gray-200 p-2 rounded-md shadow-sm">
+                <div className="w-full bg-gray-200 p-2 h-8 rounded-md shadow-sm">
                   {leavingCertificate.leaving_remark}
                 </div>
               </div>
@@ -570,7 +580,7 @@ function DeleteStudent() {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Confirm Delete</h5>
+                  <h5 className="modal-title">Confirm Add Student</h5>
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -589,16 +599,16 @@ function DeleteStudent() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to delete this certificate of{" "}
+                  Are you sure you want to add this Student:{" "}
                   {` ${currestSubjectNameForDelete} `} ?
                 </div>
                 <div className=" flex justify-end p-3">
                   <button
                     type="button"
-                    className="btn btn-danger px-3 mb-2"
-                    onClick={handleSubmitDelete}
+                    className="btn btn-primary px-3 mb-2"
+                    onClick={handleAddStudent}
                   >
-                    Delete
+                    Add
                   </button>
                 </div>
               </div>
