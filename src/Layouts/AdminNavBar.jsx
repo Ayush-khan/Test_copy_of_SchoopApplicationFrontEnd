@@ -78,7 +78,7 @@ const AdminNavBar = () => {
           <NavDropdown.Item
             className="text-sm font-bold hover:text-black"
             as={Link}
-            to="#"
+            to="/deleteStudent"
           >
             Deleted Student Lists
           </NavDropdown.Item>

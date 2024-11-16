@@ -153,6 +153,7 @@ import EditSimpleBonafied from "../componants/Certificates/SimpleBonafied/EditSi
 import EditPercentage from "../componants/Certificates/PercentageCertificate/EditPercentage.jsx";
 import ManageLCStudent from "../componants/LCStudent/ManageLCStudent.jsx";
 import ViewStudentLC from "../componants/LCStudent/ViewStudentLC.jsx";
+import DeleteStudent from "../componants/DeleteStudent/DeleteStudent.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -260,11 +261,18 @@ function Index() {
           // path="#"
           element={<PrivateRoute element={ViewStudentLC} />}
         />
+        {/* Deleted Student Module */}
+        {/* LC Student */}
+        <Route
+          path="/manageStudentLC"
+          // path="#"
+          element={<PrivateRoute element={ManageLCStudent} />}
+        />
         {/* leaving_certificate */}
         <Route
-          path="/leavingCertificate"
+          path="/deleteStudent"
           // path="#"
-          element={<PrivateRoute element={ManageLC} />}
+          element={<PrivateRoute element={DeleteStudent} />}
         />
 
         {/* <Route
