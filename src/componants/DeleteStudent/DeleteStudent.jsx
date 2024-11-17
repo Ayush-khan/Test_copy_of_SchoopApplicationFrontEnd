@@ -178,7 +178,7 @@ function DeleteStudent() {
       setCurrestSubjectNameForDelete(classToDelete?.student_name); // Set subject name for display
       setShowDeleteModal(true); // Show the delete modal
     } else {
-      console.error("Bonafied certificate not found for deletion");
+      console.error("Deleted student not found");
     }
   };
 
@@ -188,32 +188,32 @@ function DeleteStudent() {
       const subReportCardId = currentSection?.student_id; // Get the correct ID
 
       if (!token || !subReportCardId) {
-        throw new Error("Token or Serial Number is missing");
+        throw new Error("Token or Student ID is missing");
       }
 
-      // Send the delete request to the backend
-      await axios.delete(
-        `${API_URL}/api/delete_deletestudentleaving/${subReportCardId}`,
+      // API call to update_adddeletedstudent
+      await axios.put(
+        `${API_URL}/api/update_adddeletedstudent/${subReportCardId}`,
+        {}, // No body needed for this request
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
+
           withCredentials: true,
         }
       );
 
-      handleSearch(); // Refresh the data (this seems like the method to refetch data)
+      // Success actions
+      handleSearch(); // Refresh the data
       setShowDeleteModal(false); // Close the modal
-      toast.success("Student Added successfully!");
+      toast.success("Student added successfully!");
     } catch (error) {
+      // Error handling
       if (error.response && error.response.data) {
-        toast.error(
-          `Error deleting LC Student : ${error.response.data.message}`
-        );
+        toast.error(`Error adding student: ${error.response.data.message}`);
       } else {
-        toast.error(`Error in adding Student : ${error.message}`);
+        toast.error(`Error in adding student: ${error.message}`);
       }
-      console.error("Error in adding Student :", error);
+      console.error("Error in adding student:", error);
     }
   };
 
@@ -269,8 +269,8 @@ function DeleteStudent() {
 
   const filteredSections = subjects.filter((section) => {
     // Convert the fields to lowercase for case-insensitive comparison
-    const subjectNameIs = section?.student_name.toLowerCase() || "";
-    const slcNoIs = section?.slc_no.toLowerCase() || "";
+    const subjectNameIs = section?.student_name?.toLowerCase() || "";
+    const slcNoIs = section?.roll_no?.toString() || ""; // Convert roll_no to a string
     const searchTermLower = searchTerm.toLowerCase();
 
     // Check if the search term is present in student_name or slc_no
@@ -288,7 +288,7 @@ function DeleteStudent() {
   return (
     <>
       {/* <ToastContainer /> */}
-      <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
+      <div className="md:mx-auto md:w-[80%] p-4 bg-white mt-4 ">
         <h3 className=" mt-1 text-[1.2em] lg:text-xl text-nowrap">
           Deleted Students
         </h3>
@@ -433,8 +433,7 @@ function DeleteStudent() {
                                     .replace(/\s+/g, " ")}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.classname}
-                                  {subject?.sectionname}
+                                  {`${subject?.classname} ${subject?.sectionname}`}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
@@ -454,7 +453,7 @@ function DeleteStudent() {
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
-                                    onClick={() => handleView(subject)}
+                                    // onClick={() => handleView(subject)}
                                     className="text-green-600 hover:text-green-800 hover:bg-transparent "
                                   >
                                     <PiCertificateBold className="font-bold text-xl" />

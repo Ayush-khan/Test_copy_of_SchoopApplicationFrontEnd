@@ -440,12 +440,12 @@ function ManageLC() {
                               }
                             }}
                             placeholder="Enter LC No."
-                            className="text-sm w-full h-9 mr-0 md:mr-8 px-2 py-1 border rounded-md"
+                            className="text-sm w-full h-9 mr-0 md:mr-8 px-2 py-1 border-1 border-gray-300 rounded-md"
                           />
                         </div>
                       </div>
 
-                      <div className="w-full md:w-[50%] border-4 gap-x-4  justify-between  my-1 md:my-4 flex md:flex-row">
+                      <div className="w-full md:w-[50%]  gap-x-4  justify-between  my-1 md:my-4 flex md:flex-row">
                         <label
                           className=" ml-0 md:ml-4 w-[59%] md:w-[55%]  text-md mt-1.5 "
                           htmlFor="studentSelect"

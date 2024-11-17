@@ -276,7 +276,7 @@ function ViewStudentLC() {
       <div className="card p-3  rounded-md">
         <div className="card-header mb-4 flex justify-between items-center">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-            View Student Information
+            View LC Student Information
           </h5>
           <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"

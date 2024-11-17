@@ -84,7 +84,9 @@ const EditLCforDeleteStudent = () => {
         if (!token) throw new Error("No authentication token found");
 
         const response = await axios.get(
-          `${API_URL}/api/get_getleavingcertificatedata/${student?.sr_no}`,
+          //   `${API_URL}/api/get_getleavingcertificatedata/${student?.student_id}`,
+          `${API_URL}/api/get_getleavingcertificatedata/${student?.slc_no}`,
+
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -920,7 +922,7 @@ const EditLCforDeleteStudent = () => {
         {/* <div className="card p-4 rounded-md "> */}
         <div className=" card-header mb-4 flex justify-between items-center  ">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-            Edit Leaving Certificate
+            Edit Deleted Student LC
           </h5>
 
           <RxCross1

@@ -156,6 +156,7 @@ import ViewStudentLC from "../componants/LCStudent/ViewStudentLC.jsx";
 import DeleteStudent from "../componants/DeleteStudent/DeleteStudent.jsx";
 import ViewDeletedStudent from "../componants/DeleteStudent/ViewDeletedStudent.jsx";
 import EditLCforDeleteStudent from "../componants/DeleteStudent/EditLCforDeleteStudent.jsx";
+import LeavingCertificate from "../componants/LeavingCertificate/LeavingCertificate.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -254,9 +255,9 @@ function Index() {
 
         {/* LC Student */}
         <Route
-          path="/manageStudentLC"
+          path="/leavingCertificate"
           // path="#"
-          element={<PrivateRoute element={ManageLCStudent} />}
+          element={<PrivateRoute element={ManageLC} />}
         />
         <Route
           path="/studentLC/view/:id"
