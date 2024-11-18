@@ -157,6 +157,7 @@ import DeleteStudent from "../componants/DeleteStudent/DeleteStudent.jsx";
 import ViewDeletedStudent from "../componants/DeleteStudent/ViewDeletedStudent.jsx";
 import EditLCforDeleteStudent from "../componants/DeleteStudent/EditLCforDeleteStudent.jsx";
 import LeavingCertificate from "../componants/LeavingCertificate/LeavingCertificate.jsx";
+import NoticeAndSms from "../componants/NoticeAndSms/NoticeAndSms.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -313,6 +314,11 @@ function Index() {
         <Route
           path="/staff/view/:id"
           element={<PrivateRoute element={ViewStaff} />}
+        />
+        {/*  Notice And Sms Module */}
+        <Route
+          path="/noticeAndSms"
+          element={<PrivateRoute element={NoticeAndSms} />}
         />
         {/* CareTacker */}
         <Route

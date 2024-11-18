@@ -236,7 +236,7 @@ const AdminNavBar = () => {
         {/* Other Items */}
         <NavDropdown.Item
           as={Link}
-          to="#"
+          to="/noticeAndSms"
           className="text-sm font-bold hover:text-black"
         >
           Notice/SMS
