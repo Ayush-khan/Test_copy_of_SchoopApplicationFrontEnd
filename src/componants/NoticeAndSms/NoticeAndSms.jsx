@@ -8,9 +8,12 @@ import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
-import CreateShortNotice from "./CreateNotice";
+
 import CreateShortSMS from "./CreateShortSms";
 import CreateNotice from "./CreateNotice";
+import { PiCertificateBold } from "react-icons/pi";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
+import { FaCheck } from "react-icons/fa";
 
 function NoticeAndSms() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -22,7 +25,6 @@ function NoticeAndSms() {
   const [classesforsubjectallot, setclassesforsubjectallot] = useState([]);
   const [subjects, setSubjects] = useState([]);
   // for allot subject tab
-  const [subjectsForAllotSubject, setSubjectsForAllotSubject] = useState([]);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -36,8 +38,6 @@ function NoticeAndSms() {
   const [teacherIdIs, setteacherIdIs] = useState("");
   const [teacherNameIs, setTeacherNameIs] = useState("");
 
-  const [classId, setclassId] = useState("");
-  const [classIdForManage, setclassIdForManage] = useState("");
   const [newDepartmentId, setNewDepartmentId] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [departments, setDepartments] = useState([]);
@@ -50,53 +50,21 @@ function NoticeAndSms() {
   //   for allot subject checkboxes
 
   const [error, setError] = useState(null);
-  const [nameError, setNameError] = useState(null);
-  const [division, setDivisions] = useState([]);
+
   // errors messages for allot subject tab
+  const [status, setStatus] = useState("All"); // For status dropdown
+  const [selectedDate, setSelectedDate] = useState(""); // For date picker
+  const [notices, setNotices] = useState([]); // To store fetched notices
 
   // for react-search of manage tab teacher Edit and select class
   const [selectedTeacher, setSelectedTeacher] = useState(null);
-  const [selectedClass, setSelectedClass] = useState(null);
   const pageSize = 10;
-  const handleTeacherSelect = (selectedOption) => {
-    setSelectedTeacher(selectedOption);
-    console.log("selectedTeacher", selectedTeacher);
-    setNewDepartmentId(selectedOption.value); // Assuming value is the teacher's ID
-    console.log("setNewDepartmentId", newDepartmentId);
-  };
 
-  const handleClassSelect = (selectedOption) => {
-    setSelectedClass(selectedOption);
-    setclassIdForManage(selectedOption.value); // Assuming value is the class ID
-  };
+  useEffect(() => {
+    handleSearch();
+    fetchClassNamesForAllotSubject();
+  }, []);
 
-  const teacherOptions = departments.map((dept) => ({
-    value: dept.reg_id,
-    label: dept.name,
-  }));
-  console.log("teacherOptions", teacherOptions);
-  const classOptions = classes.map((cls) => ({
-    value: cls.section_id,
-    label: `${cls?.get_class?.name}  ${cls.name}`,
-  }));
-
-  const fetchClassNames = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_class_section`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (Array.isArray(response.data)) {
-        setClasses(response.data);
-        console.log("the name and section", response.data);
-      } else {
-        setError("Unexpected data format");
-      }
-    } catch (error) {
-      console.error("Error fetching class and section names:", error);
-      setError("Error fetching class and section names");
-    }
-  };
   const fetchClassNamesForAllotSubject = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -118,120 +86,39 @@ function NoticeAndSms() {
     }
   };
 
-  const fetchDepartments = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      const response = await axios.get(`${API_URL}/api/get_teacher_list`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
-
-      setDepartments(response.data);
-      console.log(
-        "888888888888888888888888 this is the edit of get_teacher list in the subject allotement tab",
-        response.data
-      );
-    } catch (error) {
-      setError(error.message);
-    }
-  };
-
-  useEffect(() => {
-    fetchClassNames();
-    fetchDepartments();
-    fetchClassNamesForAllotSubject();
-  }, []);
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
-    if (!classIdForManage) {
-      setNameError("Please select the class.");
-      return;
-    }
     try {
-      console.log(
-        "for this section id in searching inside subject allotment",
-        classIdForManage
-      );
-
+      // Get token from local storage
       const token = localStorage.getItem("authToken");
 
-      // Clear the subjects state before making the request
-      setSubjects([]);
+      // Prepare query parameters
+      const params = {};
+      if (status) params.status = status; // Include status if selected
+      if (selectedDate) params.notice_date = selectedDate; // Include date if selected
 
-      const response = await axios.get(`${API_URL}/api/get_subject_Alloted`, {
+      // Make API request
+      const response = await axios.get(`${API_URL}/api/get_smsnoticelist`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: { section_id: classIdForManage },
+        params,
       });
 
-      console.log("The response of the subject allotment is: ", response.data);
-
-      if (response.data.length > 0) {
-        // After clearing the state, update with new data
-        setSubjects(response.data);
-
-        // Logging after state update
-        console.log("Updated subjects data", response.data);
-
-        setPageCount(Math.ceil(response.data.length / 10)); // Example pagination logic
+      // Handle response data
+      if (response.data?.data?.length > 0) {
+        setNotices(response.data.data); // Update notice list with response data
       } else {
-        setSubjects([]);
-        toast.error("No subjects found for the selected class and division.");
+        setNotices([]); // Clear notices if no data
+        toast.error("No notices found for the selected criteria.");
       }
     } catch (error) {
-      console.error("Error fetching subjects:", error);
-      setError("Error fetching subjects");
+      console.error("Error fetching SMS notices:", error);
+      toast.error("Error fetching SMS notices. Please try again.");
     }
   };
 
-  const handleSearchForsubjectAllot = async () => {
-    if (!classId) {
-      return;
-    }
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(
-        `${API_URL}/api/get_divisions_and_subjects/${classId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (response.data && response.data.divisions && response.data.subjects) {
-        setDivisions(response.data.divisions);
-        setSubjectsForAllotSubject(response.data.subjects);
-        console.log(
-          "this is get for api get_divisions_and_subjects ",
-          subjectsForAllotSubject
-        );
-        const formattedAllotments = response.data.divisions.map((division) => ({
-          section_id: division.section_id,
-          name: division.name,
-          subjects: response.data.subjects,
-        }));
-        setAllotSubjectTabData(formattedAllotments);
-        console.log("formatted Allotments", formattedAllotments);
-      } else {
-        toast.error("Unexpected data format");
-      }
-    } catch (error) {
-      toast.error(
-        "Failed to fetch data for Allot Subjected tab. Please try again."
-      );
-    }
-  };
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
-
-  useEffect(() => {
-    handleSearchForsubjectAllot();
-  }, [classId]);
 
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
@@ -382,17 +269,22 @@ function NoticeAndSms() {
     setShowDeleteModal(false);
   };
 
-  const filteredSections = subjects.filter((section) => {
-    // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
-    const teacherName = section?.get_teacher?.name?.toLowerCase() || "";
-    const subjectName = section?.get_subject?.name?.toLowerCase() || "";
+  const filteredSections = notices.filter((section) => {
+    // Convert the fields to lowercase for case-insensitive comparison
+    const teacherName = section?.classnames?.toLowerCase() || "";
+    const subjectName = section?.subject?.toLowerCase() || "";
+    const noticeDesc = section?.notice_type?.toLowerCase() || ""; // New field to filter
+    const teacher = section?.name?.toLowerCase() || ""; // Example for teacher's name, update as needed
 
-    // Check if the search term is present in either the teacher's name or the subject's name
+    // Check if the search term is present in any of the specified fields
     return (
       teacherName.includes(searchTerm.toLowerCase()) ||
-      subjectName.includes(searchTerm.toLowerCase())
+      subjectName.includes(searchTerm.toLowerCase()) ||
+      noticeDesc.includes(searchTerm.toLowerCase()) || // Check notice description
+      teacher.includes(searchTerm.toLowerCase()) // Check teacher name
     );
   });
+
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -445,39 +337,56 @@ function NoticeAndSms() {
             <div>
               <ToastContainer />
               <div className="mb-4">
-                <div className="md:w-[80%] mx-auto">
-                  <div className="form-group mt-4 w-full md:w-[80%] flex justify-start gap-x-1 md:gap-x-6">
+                <div className="w-full  md:w-[78%] mt-8  gap-x-0 md:gap-x-12 mx-auto   flex flex-col gap-y-2 md:gap-y-0 md:flex-row  ">
+                  <div className="w-full md:w-[50%] gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
                     <label
-                      htmlFor="classSection"
-                      className="w-1/4 pt-2 items-center text-center"
+                      className="text-md mt-1.5 mr-1 md:mr-0 w-[40%] md:w-[29%]"
+                      htmlFor="classSelect"
                     >
-                      Select Class <span className="text-red-500">*</span>
-                    </label>
-                    <div className="w-full">
-                      <Select
-                        value={selectedClass}
-                        onChange={handleClassSelect}
-                        options={classOptions}
-                        placeholder="Select Class"
-                        isSearchable
-                        isClearable
-                        className=" text-sm w-full md:w-[60%] item-center relative left-0 md:left-4"
+                      Select Date
+                    </label>{" "}
+                    <div className="w-full md:w-[60%]">
+                      <input
+                        type="date"
+                        id="date"
+                        className="border border-gray-300 rounded-md py-2 px-3 w-full focus:outline-none focus:ring focus:ring-indigo-200"
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
                       />
-                      {nameError && (
-                        <div className=" relative top-0.5 ml-1 text-danger text-xs">
-                          {nameError}
-                        </div>
-                      )}{" "}
                     </div>
+                  </div>
+
+                  <div className="w-full md:w-[45%]  gap-x-4  justify-between  my-1 md:my-4 flex md:flex-row">
+                    <label
+                      className=" ml-0 md:ml-4 w-full md:w-[30%]  text-md mt-1.5 "
+                      htmlFor="studentSelect"
+                    >
+                      Status
+                    </label>{" "}
+                    <div className="w-full">
+                      <select
+                        id="status"
+                        className="border border-gray-300 rounded-md py-2 px-3 w-full focus:outline-none focus:ring focus:ring-indigo-200"
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                      >
+                        <option value="All">All</option>
+                        <option value="Publish">Publish</option>
+                        <option value="Unpublish">Unpublish</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="mt-1">
                     <button
                       onClick={handleSearch}
                       type="button"
-                      className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                     >
                       Search
                     </button>
                   </div>
-                </div>
+                </div>{" "}
               </div>
 
               <div className="container mt-4">
@@ -511,52 +420,65 @@ function NoticeAndSms() {
                               S.No
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Class
+                              Type
                             </th>
-                            {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Division
-                              </th> */}
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Notice Date
+                            </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Subject
+                            </th>{" "}
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Class{" "}
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Teacher
+                              Created by
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Edit
+                              Edit/View
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Delete
+                            </th>
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Publish
                             </th>
                           </tr>
                         </thead>
                         <tbody>
                           {displayedSections.map((subject, index) => (
                             <tr
-                              key={subject.section_id}
+                              key={subject.notice_id}
                               className="text-gray-700 text-sm font-light"
                             >
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {index + 1}
                               </td>
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {`${subject?.get_class?.name} ${subject?.get_division?.name}`}
+                                {subject?.notice_type}
+                              </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {subject?.notice_date}
+                              </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {subject?.subject}
+                              </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {subject?.classnames}
                               </td>
                               {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.get_division?.name}
                                 </td> */}
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.get_subject?.name}
+                                {subject?.name}
                               </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.get_teacher?.name}
-                              </td>
+
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 <button
                                   onClick={() => handleEdit(subject)}
                                   className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                                 >
-                                  <FontAwesomeIcon icon={faEdit} />
+                                  <MdOutlineRemoveRedEye className="font-bold text-xl" />
                                 </button>
                               </td>
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
@@ -567,6 +489,16 @@ function NoticeAndSms() {
                                   className="text-red-600 hover:text-red-800 hover:bg-transparent "
                                 >
                                   <FontAwesomeIcon icon={faTrash} />
+                                </button>
+                              </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                <button
+                                  onClick={() =>
+                                    handleDelete(subject?.student_id)
+                                  }
+                                  className="text-green-500 hover:text-green-700 hover:bg-transparent"
+                                >
+                                  <FaCheck icon={faTrash} />
                                 </button>
                               </td>
                             </tr>
