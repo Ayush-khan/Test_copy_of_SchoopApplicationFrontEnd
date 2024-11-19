@@ -23,9 +23,10 @@ function NoticeAndSms() {
   const [activeTab, setActiveTab] = useState("Manage");
   const [classes, setClasses] = useState([]);
   const [classesforsubjectallot, setclassesforsubjectallot] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  // for allot subject tab
 
+  // for allot subject tab
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showPublish, setShowPublishModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
@@ -38,13 +39,9 @@ function NoticeAndSms() {
   const [teacherIdIs, setteacherIdIs] = useState("");
   const [teacherNameIs, setTeacherNameIs] = useState("");
 
-  const [newDepartmentId, setNewDepartmentId] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("");
-  const [departments, setDepartments] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
-  const [nameAvailable, setNameAvailable] = useState(true);
 
   const dropdownRef = useRef(null);
   //   for allot subject checkboxes
@@ -55,9 +52,11 @@ function NoticeAndSms() {
   const [status, setStatus] = useState("All"); // For status dropdown
   const [selectedDate, setSelectedDate] = useState(""); // For date picker
   const [notices, setNotices] = useState([]); // To store fetched notices
-
+  const [subject, setSubject] = useState("");
+  const [noticeDesc, setNoticeDesc] = useState("");
+  const [subjectError, setSubjectError] = useState("");
+  const [noticeDescError, setNoticeDescError] = useState("");
   // for react-search of manage tab teacher Edit and select class
-  const [selectedTeacher, setSelectedTeacher] = useState(null);
   const pageSize = 10;
 
   useEffect(() => {
@@ -106,6 +105,7 @@ function NoticeAndSms() {
       // Handle response data
       if (response.data?.data?.length > 0) {
         setNotices(response.data.data); // Update notice list with response data
+        setPageCount(Math.ceil(response.data.data.length / pageSize));
       } else {
         setNotices([]); // Clear notices if no data
         toast.error("No notices found for the selected criteria.");
@@ -124,71 +124,69 @@ function NoticeAndSms() {
     setCurrentPage(data.selected);
     // Handle page change logic
   };
-
-  const handleEdit = (section) => {
+  const handleView = (section) => {
     setCurrentSection(section);
     // console.log("the currecne t section", currentSection);
 
-    console.log("fdsfsdsd handleEdit", section);
-    setnewclassnames(section?.get_class?.name);
-    setnewSectionName(section?.get_division?.name);
-    setnewSubjectnName(section?.get_subject?.name);
-    setTeacherNameIs(section?.get_teacher?.name);
+    console.log("fdsfsdsd handleView", section);
+    setnewclassnames(section?.classnames);
+    setnewSectionName(section?.notice_date);
+    setnewSubjectnName(section?.subject);
+    setTeacherNameIs(section?.notice_desc);
     setteacherIdIs(section?.get_teacher?.teacher_id);
     console.log("teacerId and name is", teacherIdIs, teacherNameIs);
     // It's used for the dropdown of the tachers
-    // setnewTeacherAssign()
-    const selectedOption = departments.find(
-      (option) => option.value === section?.get_teacher?.teacher_id
-    );
-    setSelectedTeacher(selectedOption);
-    setShowEditModal(true);
+    setShowViewModal(true);
   };
 
   const handleDelete = (sectionId) => {
     console.log("inside delete of subjectallotmenbt____", sectionId);
     console.log("inside delete of subjectallotmenbt", classes);
-    const classToDelete = subjects.find((cls) => cls.subject_id === sectionId);
+    const classToDelete = notices.find((cls) => cls.unq_id === sectionId);
     // setCurrentClass(classToDelete);
     setCurrentSection({ classToDelete });
     console.log("the currecne t section", currentSection);
-    setCurrestSubjectNameForDelete(
-      currentSection?.classToDelete?.get_subject?.name
-    );
-    console.log(
-      "cureendtsungjeg",
-      currentSection?.classToDelete?.get_subject?.name
-    );
+    setCurrestSubjectNameForDelete(currentSection?.classToDelete?.notice_type);
+    console.log("cureendtsungjeg", currentSection?.classToDelete?.notice_type);
     console.log("currestSubjectNameForDelete", currestSubjectNameForDelete);
     setShowDeleteModal(true);
   };
+  const handleEdit = (section) => {
+    setCurrentSection(section);
+    setSubject(section?.subject || ""); // Pre-fill subject
+    setNoticeDesc(section?.notice_desc || ""); // Pre-fill notice description
+    setnewclassnames(section?.classnames);
+    setShowEditModal(true);
+  };
 
   const handleSubmitEdit = async () => {
-    console.log(
-      "inside the edit model of the subjectallotment",
-      currentSection.subject_id
-    );
-    console.log(
-      "inside the edit model of the subjectallotment",
-      currentSection
-    );
+    let hasError = false;
+
+    if (!subject.trim()) {
+      setSubjectError("Subject is required.");
+      hasError = true;
+    } else {
+      setSubjectError("");
+    }
+
+    if (!noticeDesc.trim()) {
+      setNoticeDescError("Notice description is required.");
+      hasError = true;
+    } else {
+      setNoticeDescError("");
+    }
+    if (hasError) return;
 
     try {
       const token = localStorage.getItem("authToken");
 
-      if (!token || !currentSection || !currentSection.subject_id) {
-        throw new Error("Subject ID is missing");
+      if (!token) {
+        throw new Error("Authentication token is missing");
       }
-      if (!nameAvailable) {
-        return;
-      }
-
-      console.log("the Subject ID***", currentSection.subject_id);
-      console.log("the teacher ID***", selectedDepartment);
 
       await axios.put(
-        `${API_URL}/api/update_subject_Alloted/${currentSection.subject_id}`,
-        { teacher_id: newDepartmentId },
+        `${API_URL}/api/update_smsnotice/${currentSection?.unq_id}`,
+        { subject, notice_desc: noticeDesc },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -197,24 +195,74 @@ function NoticeAndSms() {
         }
       );
 
-      toast.success("Subject Record updated successfully!");
+      toast.success("Notice updated successfully!");
       handleSearch();
+
       handleCloseModal();
-      // setSubjects([]);
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error updating subject Record: ${error.response.data.message}`
-        );
-      } else {
-        toast.error(`Error updating subject Record: ${error.message}`);
-      }
-      console.error("Error editing subject Record:", error);
-    } finally {
-      setShowEditModal(false);
+      toast.error("Error updating notice. Please try again.");
+      console.error(error);
     }
   };
 
+  const handlePublish = (section) => {
+    setCurrentSection(section);
+    // console.log("the currecne t section", currentSection);
+
+    console.log("fdsfsdsd handleEdit", section);
+
+    // It's used for the dropdown of the tachers
+    setShowPublishModal(true);
+  };
+  const handleSubmitPublish = async () => {
+    // Handle delete submission logic
+    try {
+      const token = localStorage.getItem("authToken");
+      console.log(
+        "the currecnt section inside the delte___",
+        currentSection?.classToDelete?.subject_id
+      );
+      console.log("the classes inside the delete", classes);
+      console.log(
+        "the current section insde the handlesbmitdelete",
+        currentSection.classToDelete
+      );
+      if (!token || !currentSection || !currentSection?.unq_id) {
+        throw new Error("Unique ID is missing");
+      }
+
+      await axios.put(
+        `${API_URL}/api/update_publishsmsnotice/${currentSection?.unq_id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      // fetchClassNames();
+      handleSearch();
+
+      setShowPublishModal(false);
+      // setSubjects([]);
+      toast.success(`${currestSubjectNameForDelete} Publish successfully!`);
+    } catch (error) {
+      if (error.response && error.response.data) {
+        toast.error(
+          `Error In Publishing ${currestSubjectNameForDelete}: ${error.response.data.message}`
+        );
+      } else {
+        toast.error(
+          `Error In Publishing ${currestSubjectNameForDelete}: ${error.message}`
+        );
+      }
+      console.error("Error In Publishing:", error);
+      // setError(error.message);
+    }
+    setShowPublishModal(false);
+  };
   const handleSubmitDelete = async () => {
     // Handle delete submission logic
     try {
@@ -228,16 +276,12 @@ function NoticeAndSms() {
         "the current section insde the handlesbmitdelete",
         currentSection.classToDelete
       );
-      if (
-        !token ||
-        !currentSection ||
-        !currentSection?.classToDelete?.subject_id
-      ) {
-        throw new Error("Subject ID is missing");
+      if (!token || !currentSection || !currentSection?.classToDelete?.unq_id) {
+        throw new Error("Unique ID is missing");
       }
 
       await axios.delete(
-        `${API_URL}/api/delete_subject_Alloted/${currentSection?.classToDelete?.subject_id}`,
+        `${API_URL}/api/delete_smsnotice/${currentSection?.classToDelete?.unq_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -251,20 +295,26 @@ function NoticeAndSms() {
 
       setShowDeleteModal(false);
       // setSubjects([]);
-      toast.success("subject deleted successfully!");
+      toast.success(`${currestSubjectNameForDelete} Deleted successfully!`);
     } catch (error) {
       if (error.response && error.response.data) {
-        toast.error(`Error deleting subject: ${error.response.data.message}`);
+        toast.error(
+          `Error In Deleting ${currestSubjectNameForDelete}: ${error.response.data.message}`
+        );
       } else {
-        toast.error(`Error deleting subject: ${error.message}`);
+        toast.error(
+          `Error In Deleting ${currestSubjectNameForDelete}: ${error.message}`
+        );
       }
-      console.error("Error deleting subject:", error);
+      console.error("Error In Deleting:", error);
       // setError(error.message);
     }
     setShowDeleteModal(false);
   };
 
   const handleCloseModal = () => {
+    setShowPublishModal(false);
+    setShowViewModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
@@ -463,9 +513,22 @@ function NoticeAndSms() {
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {subject?.subject}
                               </td>
+                              {/* CLass Column */}
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.classnames}
+                                <div className=" w-17  overflow-x-auto ">
+                                  {subject?.classnames
+                                    ?.split(",")
+                                    .map((classname, idx) => (
+                                      <span key={idx}>
+                                        {classname.trim()}
+                                        {idx <
+                                          subject.classnames.split(",").length -
+                                            1 && ", "}
+                                      </span>
+                                    ))}
+                                </div>
                               </td>
+
                               {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.get_division?.name}
                                 </td> */}
@@ -473,33 +536,49 @@ function NoticeAndSms() {
                                 {subject?.name}
                               </td>
 
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                {subject.publish === "Y" ? (
+                                  <button
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                    onClick={() => handleView(subject)}
+                                  >
+                                    <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                                  </button>
+                                ) : (
+                                  <button
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                    onClick={() => handleEdit(subject)}
+                                  >
+                                    <FontAwesomeIcon icon={faEdit} />
+                                  </button>
+                                )}
+                              </td>
+
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                <button
-                                  onClick={() => handleEdit(subject)}
-                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                >
-                                  <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                                </button>
+                                {subject.publish === "N" ? (
+                                  <button
+                                    onClick={() =>
+                                      handleDelete(subject?.unq_id)
+                                    }
+                                    className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                  >
+                                    <FontAwesomeIcon icon={faTrash} />
+                                  </button>
+                                ) : (
+                                  ""
+                                )}
                               </td>
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                <button
-                                  onClick={() =>
-                                    handleDelete(subject?.subject_id)
-                                  }
-                                  className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                >
-                                  <FontAwesomeIcon icon={faTrash} />
-                                </button>
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                <button
-                                  onClick={() =>
-                                    handleDelete(subject?.student_id)
-                                  }
-                                  className="text-green-500 hover:text-green-700 hover:bg-transparent"
-                                >
-                                  <FaCheck icon={faTrash} />
-                                </button>
+                                {subject.publish === "N" ? (
+                                  <button
+                                    onClick={() => handlePublish(subject)}
+                                    className="text-green-500 hover:text-green-700 hover:bg-transparent"
+                                  >
+                                    <FaCheck icon={faTrash} />
+                                  </button>
+                                ) : (
+                                  ""
+                                )}
                               </td>
                             </tr>
                           ))}
@@ -556,12 +635,88 @@ function NoticeAndSms() {
 
       {/* Edit Modal */}
       {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">Edit Notice/SMS</h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    onClick={handleCloseModal}
+                  />
+                </div>
+                <div
+                  className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{ backgroundColor: "#C03078" }}
+                ></div>
+                <div className="modal-body">
+                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
+                    <label htmlFor="className" className="w-1/2 mt-2">
+                      Class:
+                    </label>
+                    <div className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
+                      {newclassnames}
+                    </div>
+                  </div>
+                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
+                    <label htmlFor="subject" className="w-1/2 mt-2">
+                      Subject:
+                    </label>
+                    <input
+                      id="subject"
+                      type="text"
+                      maxLength={100}
+                      className="form-control shadow-md mb-2 w-full"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                    />
+                    {subjectError && (
+                      <p className="text-red-500 text-sm h-3">{subjectError}</p>
+                    )}
+                  </div>
+                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
+                    <label htmlFor="noticeDesc" className="w-1/2 mt-2">
+                      Description:
+                    </label>
+                    <textarea
+                      id="noticeDesc"
+                      rows="4"
+                      maxLength={1000}
+                      className="form-control shadow-md mb-2 w-full"
+                      value={noticeDesc}
+                      onChange={(e) => setNoticeDesc(e.target.value)}
+                    ></textarea>
+                    {noticeDescError && (
+                      <p className="h-3 relative -top-3 text-red-500 text-sm mt-2">
+                        {noticeDescError}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex justify-end p-3">
+                  <button
+                    type="button"
+                    className="btn btn-primary px-3 mb-2"
+                    onClick={handleSubmitEdit}
+                  >
+                    Update
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showViewModal && (
         <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
           <div className="modal show " style={{ display: "block" }}>
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Edit Allotment</h5>
+                  <h5 className="modal-title">View Notice/SMS</h5>
                   <RxCross1
                     className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -581,64 +736,60 @@ function NoticeAndSms() {
                     <label htmlFor="newSectionName" className="w-1/2 mt-2">
                       Class :{" "}
                     </label>
-                    <div className="font-bold form-control  shadow-md  mb-2">
+                    <div className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
                       {newclassnames}
                     </div>
                   </div>
+
                   <div className=" relative mb-3 flex justify-center  mx-4 gap-x-7">
                     <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Section:{" "}
+                      Notice Date:{" "}
                     </label>
-                    <span className="font-semibold form-control shadow-md mb-2">
+                    <span className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
                       {newSection}
                     </span>
                   </div>
-                  <div className=" relative  flex justify-start  mx-4 gap-x-7">
+                  <div className=" mb-3 relative  flex justify-start  mx-4 gap-x-7">
                     <label htmlFor="newSectionName" className="w-1/2 mt-2 ">
                       Subject:{" "}
                     </label>{" "}
-                    <span className="font-semibold form-control shadow-md mb-2 ">
+                    <span className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
                       {newSubject}
                     </span>
                   </div>
-                  <div className=" modal-body">
-                    <div
-                      ref={dropdownRef}
-                      className=" relative mb-3 flex justify-center mx-2 gap-4 "
-                    >
-                      <label
-                        htmlFor="newDepartmentId"
-                        className="w-1/2 mt-2 text-nowrap "
-                      >
-                        Teacher assigned <span className="text-red-500">*</span>
-                      </label>
-                      <Select
-                        className="w-full text-sm shadow-md"
-                        value={selectedTeacher} // Set the selected value
-                        onChange={handleTeacherSelect}
-                        options={teacherOptions} // Teacher options
-                        placeholder="Select"
-                        isSearchable
-                        isClearable
-                      />
-                    </div>
+                  {/* <div className=" relative  flex justify-start  mx-4 gap-x-7">
+                    <label htmlFor="newSectionName" className="w-1/2 mt-2 ">
+                      Description:{" "}
+                    </label>{" "}
+                    <span className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
+                      {teacherNameIs}
+                    </span>
+                  </div> */}
+                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
+                    <label htmlFor="noticeDesc" className="w-1/2 mt-2">
+                      Description:
+                    </label>
+                    <textarea
+                      id="noticeDesc"
+                      rows="4"
+                      maxLength={1000}
+                      readOnly
+                      className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                      value={noticeDesc}
+                      onChange={(e) => setNoticeDesc(e.target.value)}
+                    ></textarea>
+                    {noticeDescError && (
+                      <p className="h-3 relative -top-3 text-red-500 text-sm mt-2">
+                        {noticeDescError}
+                      </p>
+                    )}
                   </div>
-                </div>
-                <div className=" flex justify-end p-3">
-                  <button
-                    type="button"
-                    className="btn btn-primary px-3 mb-2"
-                    onClick={handleSubmitEdit}
-                  >
-                    Update
-                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       )}
-
       {/* Delete Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
@@ -665,7 +816,7 @@ function NoticeAndSms() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to delete this subject{" "}
+                  Are you sure you want to delete this{" "}
                   {` ${currestSubjectNameForDelete} `} ?
                 </div>
                 <div className=" flex justify-end p-3">
@@ -675,6 +826,50 @@ function NoticeAndSms() {
                     onClick={handleSubmitDelete}
                   >
                     Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {showPublish && (
+        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">Confirm Publish</h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    // className="btn-close text-red-600"
+                    onClick={handleCloseModal}
+                  />
+                  {console.log(
+                    "the currecnt section inside delete of the managesubjhect",
+                    currentSection
+                  )}
+                </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="modal-body">
+                  Are you sure you want to Publish this{" "}
+                  {` ${currestSubjectNameForDelete} `} ?
+                </div>
+                <div className=" flex justify-end p-3">
+                  <button
+                    type="button"
+                    className="btn btn-primary px-3 mb-2"
+                    onClick={handleSubmitPublish}
+                  >
+                    Publish
                   </button>
                 </div>
               </div>

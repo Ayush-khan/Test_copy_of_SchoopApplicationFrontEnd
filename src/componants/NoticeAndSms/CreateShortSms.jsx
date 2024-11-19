@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -7,20 +7,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 const CreateShortSMS = () => {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
-  const [classSection, setClassSection] = useState("");
-  const [ClassNameDropdown, setClassNameDropdown] = useState("");
-  const [allotSubjectTabData, setAllotSubjectTabData] = useState([]); //
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedDivisions, setSelectedDivisions] = useState([]);
-  const [selectedSubjects, setSelectedSubjects] = useState([]);
+
   const [divisionError, setDivisionError] = useState("");
 
-  const [classId, setclassId] = useState("");
   const [allClasses, setAllClasses] = useState([]);
-  const [error, setError] = useState(null);
-  const [departments, setDepartments] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
-
   const [subject, setSubject] = useState("");
   const [noticeDesc, setNoticeDesc] = useState("");
   const [selectedClasses, setSelectedClasses] = useState([]);
@@ -28,7 +18,6 @@ const CreateShortSMS = () => {
   const [noticeDescError, setNoticeDescError] = useState("");
   const [classError, setClassError] = useState("");
 
-  const [division, setDivisions] = useState([]);
   // Handle division checkbox change
   useEffect(() => {
     fetchClassNames();
