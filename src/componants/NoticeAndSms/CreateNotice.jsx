@@ -182,12 +182,14 @@ const CreateNotice = () => {
                           />
                           <span>Select All</span>
                         </label>
-                      </div>
+                      </div>{" "}
+                      {errors.classError && (
+                        <p className="relative top-2 col-span-3 text-red-500">
+                          {errors.classError}
+                        </p>
+                      )}
                     </div>
-                    {errors.classError && (
-                      <p className="text-red-500">{errors.classError}</p>
-                    )}
-                  </div>
+                  </div>{" "}
                   {/* Subject */}
                   <div className="w-full  md:w-[58%]  mb-4 flex flex-row justify-between gap-x-2 ">
                     <h5 className="px-2 lg:px-3 py-2 text-[1em] text-gray-700">
@@ -219,13 +221,14 @@ const CreateNotice = () => {
                         onChange={(e) => setNoticeDesc(e.target.value)}
                       />
                       {errors.noticeDescError && (
-                        <p className="text-red-500">{errors.noticeDescError}</p>
+                        <p className="relative -top-4 text-red-500">
+                          {errors.noticeDescError}
+                        </p>
                       )}
                     </div>
                   </div>
                   .{/* File Upload */}
-                  <h5 className="text-[1em] text-gray-700 px-2">Attachment:</h5>
-                  <div className="w-full  md:w-[58%]  mb-4 flex flex-row justify-between gap-x-2 ">
+                  <div className="w-full relative -top-14 md:w-[58%]  flex flex-row justify-between gap-x-2 ">
                     <h5 className="px-2 mt-2 lg:px-3 py-2 text-[1em] text-gray-700">
                       Upload Files
                     </h5>
@@ -236,7 +239,10 @@ const CreateNotice = () => {
                       onChange={handleFileUpload}
                     />
                   </div>
-                  <div className="  -top-6 w-full md:w-[57%] mx-auto relative right-0 md:right-10">
+                  <h5 className="relative -top-9 text-[1em] text-gray-700 px-2">
+                    Attachment:
+                  </h5>
+                  <div className="  -top-16 w-full md:w-[57%] mx-auto relative right-0 md:right-10">
                     <div className=" text-xs flex flex-col">
                       {uploadedFiles.map((file, index) => (
                         <div

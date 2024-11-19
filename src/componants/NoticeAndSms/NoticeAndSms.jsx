@@ -116,8 +116,12 @@ function NoticeAndSms() {
     }
   };
 
+  // Handle tab change with explicit logic for "Manage"
   const handleTabChange = (tab) => {
-    setActiveTab(tab);
+    if (tab === "Manage") {
+      handleSearch(); // Call handleSearch only when "Manage" tab is selected
+    }
+    setActiveTab(tab); // Update active tab state
   };
 
   const handlePageClick = (data) => {
@@ -340,7 +344,11 @@ function NoticeAndSms() {
     (currentPage + 1) * pageSize
   );
   // handle allot subject close model
-
+  //   useEffect(() => {
+  //     if (activeTab === "Manage") {
+  //       handleSearch();
+  //     }
+  //   }, [activeTab]); // Dependency array ensures it runs when activeTab changes
   //   This is tab
   const tabs = [
     { id: "Manage", label: "Manage" },
