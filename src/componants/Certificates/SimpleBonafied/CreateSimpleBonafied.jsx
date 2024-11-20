@@ -523,7 +523,7 @@ const CreateSimpleBonafied = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Simple Bonafide Certificate Downloaded successfully!");
+        toast.success("Simple Bonafide Certificate Created successfully!");
 
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
@@ -569,7 +569,7 @@ const CreateSimpleBonafied = () => {
     } catch (error) {
       console.error("Error:", error.response.data, error.response.sr_no);
       toast.error(
-        "An error occurred while Downloading the Simple Bonafide Certificate."
+        "An error occurred while Creating the Simple Bonafide Certificate."
       );
 
       if (error.response && error.response) {

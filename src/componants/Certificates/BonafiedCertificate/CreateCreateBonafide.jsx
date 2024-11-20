@@ -545,7 +545,7 @@ const CreateCreateBonafide = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Bonafide Certificate Downloaded successfully!");
+        toast.success("Bonafide Certificate Created successfully!");
 
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
@@ -592,9 +592,7 @@ const CreateCreateBonafide = () => {
       }
     } catch (error) {
       console.error("Error:", error.response.data, error.response.sr_no);
-      toast.error(
-        "An error occurred while Downloading the Bonafide Certificate."
-      );
+      toast.error("An error occurred while Creating the Bonafide Certificate.");
 
       if (error.response && error.response) {
         setBackendErrors(error.response || {});

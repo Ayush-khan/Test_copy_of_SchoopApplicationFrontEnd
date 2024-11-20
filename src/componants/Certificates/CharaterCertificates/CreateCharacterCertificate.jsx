@@ -515,7 +515,7 @@ const CreateCharacterCertificate = () => {
       );
 
       if (response.status === 200) {
-        toast.success("CharacterCertificate Downloaded successfully!");
+        toast.success("CharacterCertificate Created successfully!");
 
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
@@ -560,7 +560,7 @@ const CreateCharacterCertificate = () => {
     } catch (error) {
       console.error("Error:", error.response.data, error.response.sr_no);
       toast.error(
-        "An error occurred while Downloading the Character Certificate."
+        "An error occurred while Creating the Character Certificate."
       );
 
       if (error.response && error.response) {

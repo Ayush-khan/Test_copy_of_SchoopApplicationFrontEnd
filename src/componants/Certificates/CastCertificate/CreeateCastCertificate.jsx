@@ -2589,7 +2589,7 @@ const CreeateCastCertificate = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Cast Certificate Downloaded successfully!");
+        toast.success("Cast Certificate Created successfully!");
 
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
@@ -2649,7 +2649,7 @@ const CreeateCastCertificate = () => {
       }
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
-      toast.error("An error occurred while Downloading the Cast Certificate.");
+      toast.error("An error occurred while Creating the Cast Certificate.");
 
       if (error.response && error.response.data) {
         setBackendErrors(error.response.data);

@@ -439,7 +439,7 @@ const CreatePercentageCertificate = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Percentage Certificate Downloaded successfully!");
+        toast.success("Percentage Certificate Created successfully!");
         // Extract filename from Content-Disposition header
         const contentDisposition = response.headers["content-disposition"];
         let filename = "DownloadedFile.pdf"; // Fallback name
@@ -481,7 +481,7 @@ const CreatePercentageCertificate = () => {
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
       toast.error(
-        "An error occurred while Downloading the Percentage Certificate."
+        "An error occurred while Creating the Percentage Certificate."
       );
 
       if (error.response && error.response.data) {
