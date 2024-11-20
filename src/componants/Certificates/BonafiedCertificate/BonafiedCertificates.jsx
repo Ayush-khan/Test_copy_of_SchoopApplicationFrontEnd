@@ -647,7 +647,7 @@ function BonafiedCertificates() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to issue this certificate{" "}
+                  Are you sure you want to issue certificate of{" "}
                   {` ${currentSection?.stud_name} `} ?
                 </div>
                 <div className=" flex justify-end p-3">
@@ -691,7 +691,7 @@ function BonafiedCertificates() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to Download this certificate{" "}
+                  Are you sure you want to Download certificate of{" "}
                   {` ${currentSection?.stud_name} `} ?
                 </div>
                 <div className=" flex justify-end p-3">
@@ -736,7 +736,7 @@ function BonafiedCertificates() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to delete this certificate of{" "}
+                  Are you sure you want to delete certificate of{" "}
                   {` ${currestSubjectNameForDelete} `} ?
                 </div>
                 <div className=" flex justify-end p-3">

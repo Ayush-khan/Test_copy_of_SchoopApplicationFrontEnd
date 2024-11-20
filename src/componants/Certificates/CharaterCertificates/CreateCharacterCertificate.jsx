@@ -186,35 +186,51 @@ const CreateCharacterCertificate = () => {
   // Get today's date in YYYY-MM-DD format
   // Calculate today's date
   const today = new Date().toISOString().split("T")[0];
+  // State for loading indicators
+  const [loadingClasses, setLoadingClasses] = useState(false);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+
   useEffect(() => {
-    fetchInitialData(); // Fetch classes on component mount
-    fetchStudentNameWithClassId();
+    // Fetch both classes and student names on component mount
+    fetchInitialDataAndStudents();
   }, []);
 
-  const fetchInitialData = async () => {
-    // setLoading(true);
+  const fetchInitialDataAndStudents = async () => {
     try {
+      setLoadingClasses(true);
+      setLoadingStudents(true);
+
       const token = localStorage.getItem("authToken");
-      const classResponse = await axios.get(
-        `${API_URL}/api/getallClassWithStudentCount`,
-        {
+
+      // Fetch classes and students concurrently
+      const [classResponse, studentResponse] = await Promise.all([
+        axios.get(`${API_URL}/api/getallClassWithStudentCount`, {
           headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+        }),
+        axios.get(`${API_URL}/api/getStudentListBySectionData`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      // Set the fetched data
       setClassesforForm(classResponse.data || []);
+      setStudentNameWithClassId(studentResponse?.data?.data || []);
     } catch (error) {
-      toast.error("Error fetching initial data.");
+      toast.error("Error fetching data.");
+    } finally {
+      // Stop loading for both dropdowns
+      setLoadingClasses(false);
+      setLoadingStudents(false);
     }
-    // finally {
-    //   setLoading(false);
-    // }
   };
 
   const fetchStudentNameWithClassId = async (section_id = null) => {
-    // setLoading(true);
     try {
+      setLoadingStudents(true);
+
       const params = section_id ? { section_id } : {};
       const token = localStorage.getItem("authToken");
+
       const response = await axios.get(
         `${API_URL}/api/getStudentListBySectionData`,
         {
@@ -222,15 +238,30 @@ const CreateCharacterCertificate = () => {
           params,
         }
       );
+
       setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching students.");
+    } finally {
+      setLoadingStudents(false);
     }
-    // finally {
-    //   setLoading(false);
-    // }
   };
 
+  const handleClassSelect = (selectedOption) => {
+    setSelectedClass(selectedOption);
+    setSelectedStudent(null);
+    setSelectedStudentId(null);
+    setClassIdForSearch(selectedOption?.value);
+    fetchStudentNameWithClassId(selectedOption?.value);
+  };
+
+  const handleStudentSelect = (selectedOption) => {
+    setNameError(""); // Reset student error on selection
+    setSelectedStudent(selectedOption);
+    setSelectedStudentId(selectedOption?.value);
+  };
+
+  // Dropdown options
   const classOptions = useMemo(
     () =>
       classesforForm.map((cls) => ({
@@ -245,26 +276,10 @@ const CreateCharacterCertificate = () => {
     () =>
       studentNameWithClassId.map((stu) => ({
         value: stu.student_id,
-        label: `${stu?.first_name} ${stu?.mid_name} ${stu.last_name}`,
+        label: `${stu?.first_name} ${stu?.mid_name} ${stu?.last_name}`,
       })),
     [studentNameWithClassId]
   );
-
-  const handleClassSelect = (selectedOption) => {
-    // setNameErrorForClass(""); // Reset class error on selection
-    // setNameError("");
-    setSelectedClass(selectedOption);
-    setSelectedStudent(null);
-    setSelectedStudentId(null);
-    setClassIdForSearch(selectedOption.value);
-    fetchStudentNameWithClassId(selectedOption.value);
-  };
-
-  const handleStudentSelect = (selectedOption) => {
-    setNameError(""); // Reset student error on selection
-    setSelectedStudent(selectedOption);
-    setSelectedStudentId(selectedOption.value);
-  };
 
   const handleSearch = async () => {
     // Reset error messages
@@ -628,49 +643,56 @@ const CreateCharacterCertificate = () => {
         {/* Search Section */}
         <div className=" w-[95%] border-3  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg border border-gray-400 shadow-md mx-auto mt-10 p-6 ">
           <div className="w-[99%] flex md:flex-row justify-between items-center">
-            <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ">
-              <div className="w-full  gap-x-14 md:gap-x-6 md:justify-start  my-1 md:my-4 flex md:flex-row">
+            <div className="w-full flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+              <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
                 <label
-                  className="text-md mt-1.5 mr-1 md:mr-0 "
+                  className="text-md mt-1.5 mr-1 md:mr-0"
                   htmlFor="classSelect"
                 >
                   Class
-                </label>{" "}
-                <div className="w-full md:w-[50%] ">
+                </label>
+                <div className="w-full md:w-[50%]">
                   <Select
                     id="classSelect"
                     value={selectedClass}
                     onChange={handleClassSelect}
                     options={classOptions}
-                    placeholder="Select"
+                    placeholder={
+                      loadingClasses ? "Loading classes..." : "Select"
+                    }
                     isSearchable
                     isClearable
                     className="text-sm"
+                    isDisabled={loadingClasses}
                   />
                 </div>
               </div>
+
               <div className="w-full gap-x-6 relative left-0 md:-left-[5%] justify-between md:w-[98%] my-1 md:my-4 flex md:flex-row">
                 <label
-                  className=" md:w-[50%] text-md mt-1.5 "
+                  className="md:w-[50%] text-md mt-1.5"
                   htmlFor="studentSelect"
                 >
-                  Student Name <span className="text-red-500 ">*</span>
-                </label>{" "}
+                  Student Name <span className="text-red-500">*</span>
+                </label>
                 <div className="w-full md:w-[80%]">
                   <Select
                     id="studentSelect"
                     value={selectedStudent}
                     onChange={handleStudentSelect}
                     options={studentOptions}
-                    placeholder="Select"
+                    placeholder={
+                      loadingStudents ? "Loading students..." : "Select"
+                    }
                     isSearchable
                     isClearable
                     className="text-sm"
+                    isDisabled={loadingStudents}
                   />
                   {nameError && (
-                    <span className="h-8  relative  ml-1 text-danger text-xs">
+                    <div className="h-8 relative ml-1 text-danger text-xs">
                       {nameError}
-                    </span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -679,7 +701,7 @@ const CreateCharacterCertificate = () => {
                 type="search"
                 onClick={handleSearch}
                 style={{ backgroundColor: "#2196F3" }}
-                className={` my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary   text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
                   loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={loadingForSearch}
@@ -712,14 +734,6 @@ const CreateCharacterCertificate = () => {
                   "Search"
                 )}
               </button>
-
-              {/* <button
-                onClick={handleSearch}
-                type="button"
-                className="my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary"
-              >
-                Search
-              </button> */}
             </div>
           </div>
         </div>

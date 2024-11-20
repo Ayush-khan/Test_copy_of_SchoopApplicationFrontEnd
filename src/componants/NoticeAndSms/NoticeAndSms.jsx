@@ -14,6 +14,7 @@ import CreateNotice from "./CreateNotice";
 import { PiCertificateBold } from "react-icons/pi";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
+import { ImDownload } from "react-icons/im";
 
 function NoticeAndSms() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -56,6 +57,8 @@ function NoticeAndSms() {
   const [noticeDesc, setNoticeDesc] = useState("");
   const [subjectError, setSubjectError] = useState("");
   const [noticeDescError, setNoticeDescError] = useState("");
+  const [imageUrls, setImageUrls] = useState([]);
+
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
 
@@ -128,20 +131,170 @@ function NoticeAndSms() {
     setCurrentPage(data.selected);
     // Handle page change logic
   };
+
+  const fetchNoticeData = async (currentSection) => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) throw new Error("No authentication token found");
+
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/get_smsnoticedata/${currentSection?.unq_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const { imageurl } = response.data;
+      setImageUrls(imageurl); // Store image URLs for download links
+    } catch (error) {
+      console.error("Error fetching notice data:", error);
+    }
+  };
+
   const handleView = (section) => {
     setCurrentSection(section);
-    // console.log("the currecne t section", currentSection);
-
-    console.log("fdsfsdsd handleView", section);
     setnewclassnames(section?.classnames);
     setnewSectionName(section?.notice_date);
     setnewSubjectnName(section?.subject);
     setTeacherNameIs(section?.notice_desc);
     setteacherIdIs(section?.get_teacher?.teacher_id);
-    console.log("teacerId and name is", teacherIdIs, teacherNameIs);
-    // It's used for the dropdown of the tachers
     setShowViewModal(true);
+
+    if (section.notice_type === "NOTICE") {
+      fetchNoticeData(section); // Pass the current section directly
+    } else {
+      setImageUrls([]); // Clear image URLs if not a notice
+    }
   };
+  // Function to download files
+  {
+    imageUrls && imageUrls.length > 0 && (
+      <div className="relative mb-3 flex flex-col mx-4 gap-y-2">
+        <label className="mb-2 font-bold">Attachments:</label>
+        {imageUrls.map((url, index) => {
+          // Extract file name from the URL
+          const fileName = url.substring(url.lastIndexOf("/") + 1);
+          return (
+            <div
+              key={index}
+              className="flex flex-row text-[.6em] items-center gap-x-2"
+            >
+              {/* Display file name */}
+              <span>{fileName}</span>
+              <button
+                className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                onClick={
+                  () => downloadFile(url, fileName) // Pass both URL and fileName
+                }
+              >
+                <ImDownload />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  const downloadFile = async (fileUrl, fileName) => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) throw new Error("No authentication token found");
+
+      const response = await fetch(fileUrl, {
+        method: "GET",
+        headers: {
+          // Add headers if needed, e.g., Authorization
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // Convert the response into a Blob
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob); // Create a URL for the Blob
+      link.setAttribute("download", fileName); // Set the file name for download
+      document.body.appendChild(link); // Append the link to the DOM
+      link.click(); // Simulate a click to download the file
+      document.body.removeChild(link); // Remove the link from the DOM
+    } catch (error) {
+      console.error("Error downloading the file:", error);
+    }
+  };
+
+  //   const downloadFile = async (fileUrl, fileName) => {
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+
+  //       if (!token) throw new Error("No authentication token found");
+
+  //       const response = await fetch(fileUrl, {
+  //         method: "GET",
+  //         headers: {
+  //           // Add headers if needed, e.g., Authorization
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
+
+  //       if (!response.ok) {
+  //         throw new Error(`HTTP error! Status: ${response.status}`);
+  //       }
+
+  //       // Convert the response into a Blob
+  //       const blob = await response.blob();
+  //       const link = document.createElement("a");
+  //       link.href = URL.createObjectURL(blob); // Create a URL for the Blob
+  //       link.setAttribute("download", fileName); // Set the file name
+  //       document.body.appendChild(link); // Append the link to the DOM
+  //       link.click(); // Simulate a click to download the file
+  //       document.body.removeChild(link); // Remove the link from the DOM
+  //     } catch (error) {
+  //       console.error("Error downloading the file:", error);
+  //     }
+  //   };
+  //   const downloadFile = async (url, filename) => {
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+
+  //       if (!token) throw new Error("No authentication token found");
+
+  //       const response = await axios.get(
+  //         url,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //             // "Content-Type": "application/json",
+  //           },
+  //         },
+  //         {
+  //           responseType: "blob", // Ensures the response is treated as a binary file
+  //         }
+  //       );
+
+  //       // Create a URL for the downloaded file
+  //       const blob = new Blob([response.data], {
+  //         type: response.headers["content-type"],
+  //       });
+  //       const link = document.createElement("a");
+  //       link.href = URL.createObjectURL(blob);
+  //       link.download = filename || "certificate.pdf"; // Default name if filename is not provided
+  //       document.body.appendChild(link);
+  //       link.click();
+  //       document.body.removeChild(link);
+
+  //       // Revoke the object URL to release memory
+  //       URL.revokeObjectURL(link.href);
+  //     } catch (error) {
+  //       console.error("Error downloading file:", error);
+  //     }
+  //   };
 
   const handleDelete = (sectionId) => {
     console.log("inside delete of subjectallotmenbt____", sectionId);
@@ -157,6 +310,8 @@ function NoticeAndSms() {
   };
   const handleEdit = (section) => {
     setCurrentSection(section);
+    setCurrestSubjectNameForDelete(currentSection?.classToDelete?.notice_type);
+
     setSubject(section?.subject || ""); // Pre-fill subject
     setNoticeDesc(section?.notice_desc || ""); // Pre-fill notice description
     setnewclassnames(section?.classnames);
@@ -719,60 +874,51 @@ function NoticeAndSms() {
       )}
 
       {showViewModal && (
-        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
-          <div className="modal show " style={{ display: "block" }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal show" style={{ display: "block" }}>
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
                   <h5 className="modal-title">View Notice/SMS</h5>
                   <RxCross1
-                    className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
-                    // className="btn-close text-red-600"
                     onClick={handleCloseModal}
                   />
                 </div>
                 <div
-                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                  style={{
-                    backgroundColor: "#C03078",
-                  }}
+                  className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{ backgroundColor: "#C03078" }}
                 ></div>
                 <div className="modal-body">
-                  {/* Modal content for editing */}
-                  <div className=" relative mb-3 flex justify-center  mx-4 gap-x-7">
+                  {/* Class */}
+                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
                     <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Class :{" "}
+                      Class:{" "}
                     </label>
-                    <div className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
+                    <div className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
                       {newclassnames}
                     </div>
                   </div>
-
-                  <div className=" relative mb-3 flex justify-center  mx-4 gap-x-7">
+                  {/* Notice Date */}
+                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
                     <label htmlFor="newSectionName" className="w-1/2 mt-2">
                       Notice Date:{" "}
                     </label>
-                    <span className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
+                    <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
                       {newSection}
                     </span>
                   </div>
-                  <div className=" mb-3 relative  flex justify-start  mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2 ">
+                  {/* Subject */}
+                  <div className="mb-3 relative flex justify-start mx-4 gap-x-7">
+                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
                       Subject:{" "}
-                    </label>{" "}
-                    <span className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
+                    </label>
+                    <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
                       {newSubject}
                     </span>
                   </div>
-                  {/* <div className=" relative  flex justify-start  mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2 ">
-                      Description:{" "}
-                    </label>{" "}
-                    <span className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
-                      {teacherNameIs}
-                    </span>
-                  </div> */}
+                  {/* Description */}
                   <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
                     <label htmlFor="noticeDesc" className="w-1/2 mt-2">
                       Description:
@@ -782,22 +928,50 @@ function NoticeAndSms() {
                       rows="4"
                       maxLength={1000}
                       readOnly
-                      className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                      className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       value={noticeDesc}
-                      onChange={(e) => setNoticeDesc(e.target.value)}
                     ></textarea>
-                    {noticeDescError && (
-                      <p className="h-3 relative -top-3 text-red-500 text-sm mt-2">
-                        {noticeDescError}
-                      </p>
-                    )}
                   </div>
+
+                  {/* Download Links */}
+                  {/* Download Links */}
+
+                  {imageUrls && imageUrls.length > 0 && (
+                    <div className=" flex flex-row">
+                      <label className=" px-4 mb-2 ">Attachments:</label>
+
+                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
+                        {imageUrls.map((url, index) => {
+                          // Extracting file name from the URL
+                          const fileName = url.substring(
+                            url.lastIndexOf("/") + 1
+                          );
+                          return (
+                            <div
+                              key={index}
+                              className=" font-semibold flex flex-row text-[.58em] items-center gap-x-2"
+                            >
+                              {/* Display file name */}
+                              <span>{fileName}</span>
+                              <button
+                                className=" text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                onClick={() => downloadFile(url, fileName)}
+                              >
+                                <ImDownload className="font-2xl w-3 h-3" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </div>
       )}
+
       {/* Delete Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
