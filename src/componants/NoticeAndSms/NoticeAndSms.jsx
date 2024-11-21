@@ -58,6 +58,7 @@ function NoticeAndSms() {
   const [subjectError, setSubjectError] = useState("");
   const [noticeDescError, setNoticeDescError] = useState("");
   const [imageUrls, setImageUrls] = useState([]);
+  const [selectedFile, setSelectedFile] = useState([]);
 
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
@@ -146,7 +147,8 @@ function NoticeAndSms() {
           },
         }
       );
-      const { imageurl } = response.data;
+      const { imageurl } = response.data.data;
+      console.log("imageURL", imageurl);
       setImageUrls(imageurl); // Store image URLs for download links
     } catch (error) {
       console.error("Error fetching notice data:", error);
@@ -308,13 +310,43 @@ function NoticeAndSms() {
     console.log("currestSubjectNameForDelete", currestSubjectNameForDelete);
     setShowDeleteModal(true);
   };
-  const handleEdit = (section) => {
-    setCurrentSection(section);
-    setCurrestSubjectNameForDelete(currentSection?.classToDelete?.notice_type);
+  const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
 
-    setSubject(section?.subject || ""); // Pre-fill subject
-    setNoticeDesc(section?.notice_desc || ""); // Pre-fill notice description
-    setnewclassnames(section?.classnames);
+  const handleEdit = async (section) => {
+    setCurrentSection(section);
+    setSubject(section?.subject || "");
+    setNoticeDesc(section?.notice_desc || "");
+    setnewclassnames(section?.classnames || "");
+
+    if (section?.notice_type === "NOTICE") {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
+        const response = await axios.get(
+          `${API_URL}/api/get_smsnoticedata/${section.unq_id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (response.data.success) {
+          const noticedata = response.data.data.noticedata[0];
+          const imageUrls = response.data.data.imageurl || [];
+
+          setSubject(noticedata.subject || "");
+          setNoticeDesc(noticedata.notice_desc || "");
+          setnewclassnames(noticedata.classnames || "");
+          setPreselectedFiles(imageUrls); // Set preselected files
+        }
+      } catch (error) {
+        console.error("Error fetching notice data:", error);
+        toast.error("Failed to fetch notice data.");
+      }
+    } else {
+      setPreselectedFiles([]); // Clear preselected files for non-NOTICE types
+    }
+
     setShowEditModal(true);
   };
 
@@ -338,17 +370,20 @@ function NoticeAndSms() {
 
     try {
       const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Authentication token is missing");
 
-      if (!token) {
-        throw new Error("Authentication token is missing");
-      }
+      const formData = new FormData();
+      formData.append("subject", subject);
+      formData.append("notice_desc", noticeDesc);
+      if (selectedFile) formData.append("attachment", selectedFile);
 
-      await axios.put(
+      await axios.post(
         `${API_URL}/api/update_smsnotice/${currentSection?.unq_id}`,
-        { subject, notice_desc: noticeDesc },
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
           withCredentials: true,
         }
@@ -356,7 +391,6 @@ function NoticeAndSms() {
 
       toast.success("Notice updated successfully!");
       handleSearch();
-
       handleCloseModal();
     } catch (error) {
       toast.error("Error updating notice. Please try again.");
@@ -472,6 +506,12 @@ function NoticeAndSms() {
   };
 
   const handleCloseModal = () => {
+    setSubject("");
+    setNoticeDesc("");
+    setnewclassnames("");
+    setPreselectedFiles([]);
+    setUploadedFiles([]);
+    // removeUploadedFile;
     setShowPublishModal(false);
     setShowViewModal(false);
     setShowEditModal(false);
@@ -504,6 +544,23 @@ function NoticeAndSms() {
   //       handleSearch();
   //     }
   //   }, [activeTab]); // Dependency array ensures it runs when activeTab changes
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+
+  const handleFileUpload = (e) => {
+    const newFiles = Array.from(e.target.files);
+    setUploadedFiles([...uploadedFiles, ...newFiles]);
+  };
+
+  const removePreselectedFile = (index) => {
+    const updatedFiles = preselectedFiles.filter((_, i) => i !== index);
+    setPreselectedFiles(updatedFiles);
+  };
+
+  const removeUploadedFile = (index) => {
+    const updatedFiles = uploadedFiles.filter((_, i) => i !== index);
+    setUploadedFiles(updatedFiles);
+  };
+
   //   This is tab
   const tabs = [
     { id: "Manage", label: "Manage" },
@@ -823,6 +880,7 @@ function NoticeAndSms() {
                       {newclassnames}
                     </div>
                   </div>
+
                   <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
                     <label htmlFor="subject" className="w-1/2 mt-2">
                       Subject:
@@ -839,13 +897,14 @@ function NoticeAndSms() {
                       <p className="text-red-500 text-sm h-3">{subjectError}</p>
                     )}
                   </div>
+
                   <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
                     <label htmlFor="noticeDesc" className="w-1/2 mt-2">
                       Description:
                     </label>
                     <textarea
                       id="noticeDesc"
-                      rows="4"
+                      rows="2"
                       maxLength={1000}
                       className="form-control shadow-md mb-2 w-full"
                       value={noticeDesc}
@@ -857,7 +916,74 @@ function NoticeAndSms() {
                       </p>
                     )}
                   </div>
+
+                  {currentSection?.notice_type === "NOTICE" && (
+                    <>
+                      {/* File Upload */}
+                      <div className="modal-body">
+                        {/* Attachments */}
+
+                        <div className="  relative -top-5 w-full  flex flex-row justify-between gap-x-2 ">
+                          <label className="px-2 mt-2 lg:px-3 py-2 ">
+                            Upload Files
+                          </label>
+                          <input
+                            className="mt-3 relative right-0 md:right-[11%] text-xs bg-gray-50 "
+                            type="file"
+                            multiple
+                            onChange={handleFileUpload}
+                          />
+                        </div>
+                        <label className="px-2 block  mb-2">Attachment:</label>
+                        <div className="">
+                          {uploadedFiles.map((file, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-x-2"
+                            >
+                              <span className="bg-gray-100 border-1 text-[.8em] p-0.5 shadow-sm">
+                                {file.name}
+                              </span>
+                              <div>
+                                <RxCross1
+                                  className="text-xl relative  w-4 h-4 text-red-600 hover:cursor-pointer hover:bg-red-100"
+                                  type="button"
+                                  onClick={() => removeUploadedFile(index)}
+                                />
+                              </div>
+                            </div>
+                          ))}
+
+                          <div>
+                            {preselectedFiles.map((url, index) => {
+                              const fileName = url.substring(
+                                url.lastIndexOf("/") + 1
+                              );
+                              return (
+                                <div
+                                  key={index}
+                                  className="flex items-center gap-x-2"
+                                >
+                                  <span className="bg-gray-100 border-1 p-0.5 shadow-sm">
+                                    {fileName}
+                                  </span>
+                                  <RxCross1
+                                    className=" text-xl relative - w-4 h-4 text-red-600 hover:cursor-pointer hover:bg-red-100"
+                                    type="button"
+                                    onClick={() => removePreselectedFile(index)}
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Uploaded Files */}
+                    </>
+                  )}
                 </div>
+
                 <div className="flex justify-end p-3">
                   <button
                     type="button"
@@ -925,7 +1051,7 @@ function NoticeAndSms() {
                     </label>
                     <textarea
                       id="noticeDesc"
-                      rows="4"
+                      rows="2"
                       maxLength={1000}
                       readOnly
                       className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
