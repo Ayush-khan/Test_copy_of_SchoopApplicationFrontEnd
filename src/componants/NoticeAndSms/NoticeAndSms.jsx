@@ -7,11 +7,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
-import Select from "react-select";
+// import Select from "react-select";
+import { IoMdSend } from "react-icons/io";
 
 import CreateShortSMS from "./CreateShortSms";
 import CreateNotice from "./CreateNotice";
-import { PiCertificateBold } from "react-icons/pi";
+// import { PiCertificateBold } from "react-icons/pi";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
 import { ImDownload } from "react-icons/im";
@@ -90,28 +91,63 @@ function NoticeAndSms() {
   };
 
   // Listing tabs data for diffrente tabs
+  // const handleSearch = async () => {
+  //   try {
+  //     // Get token from local storage
+  //     const token = localStorage.getItem("authToken");
+
+  //     // Prepare query parameters
+  //     const params = {};
+  //     if (status) params.status = status; // Include status if selected
+  //     if (selectedDate) params.notice_date = selectedDate; // Include date if selected
+
+  //     // Make API request
+  //     const response = await axios.get(`${API_URL}/api/get_smsnoticelist`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //       params,
+  //     });
+
+  //     // Handle response data
+  //     if (response.data?.data?.length > 0) {
+  //       setNotices(response.data.data); // Update notice list with response data
+  //       setPageCount(Math.ceil(response.data.data.length / pageSize));
+  //     } else {
+  //       setNotices([]); // Clear notices if no data
+  //       toast.error("No notices found for the selected criteria.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching SMS notices:", error);
+  //     toast.error("Error fetching SMS notices. Please try again.");
+  //   }
+  // };
   const handleSearch = async () => {
     try {
-      // Get token from local storage
       const token = localStorage.getItem("authToken");
-
-      // Prepare query parameters
       const params = {};
-      if (status) params.status = status; // Include status if selected
-      if (selectedDate) params.notice_date = selectedDate; // Include date if selected
+      if (status) params.status = status;
+      if (selectedDate) params.notice_date = selectedDate;
 
-      // Make API request
       const response = await axios.get(`${API_URL}/api/get_smsnoticelist`, {
         headers: { Authorization: `Bearer ${token}` },
         params,
       });
 
-      // Handle response data
       if (response.data?.data?.length > 0) {
-        setNotices(response.data.data); // Update notice list with response data
-        setPageCount(Math.ceil(response.data.data.length / pageSize));
+        const smscount = response.data["0"]?.smscount || {};
+
+        const updatedNotices = response.data.data.map((notice) => {
+          const count = smscount[notice.unq_id] || 0;
+          return {
+            ...notice,
+            showSendButton: notice.publish === "Y" && count > 0,
+            count,
+          };
+        });
+
+        setNotices(updatedNotices); // Update the state with enriched data
+        setPageCount(Math.ceil(updatedNotices.length / pageSize));
       } else {
-        setNotices([]); // Clear notices if no data
+        setNotices([]);
         toast.error("No notices found for the selected criteria.");
       }
     } catch (error) {
@@ -561,6 +597,48 @@ function NoticeAndSms() {
     setUploadedFiles(updatedFiles);
   };
 
+  // const handleSend = (uniqueId) => {
+  //   // Logic to handle the send button click
+  //   console.log(`Sending SMS for Unique ID: ${uniqueId}`);
+  //   toast.success(`SMS sent for Unique ID: ${uniqueId}`);
+  // };
+  const handleSend = async (uniqueId) => {
+    try {
+      // Get auth token from localStorage
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        toast.error("Authentication token not found. Please log in again.");
+        return;
+      }
+
+      // Construct the API URL with the unique ID as a query parameter
+      // const apiUrl = `http://103.159.85.174:8500/api/save_sendsms/${uniqueId}`;
+
+      // Make the POST request
+      const response = await axios.post(
+        `${API_URL}/api/save_sendsms/${uniqueId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Handle success response
+      if (response.status === 200 && response.data.success) {
+        toast.success(`SMS sent successfully for Unique ID: ${uniqueId}`);
+        handleSearch();
+      } else {
+        toast.error("Failed to send SMS. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error sending SMS:", error);
+      toast.error("An error occurred while sending SMS. Please try again.");
+    }
+  };
+
   //   This is tab
   const tabs = [
     { id: "Manage", label: "Manage" },
@@ -785,10 +863,26 @@ function NoticeAndSms() {
                                     <FontAwesomeIcon icon={faTrash} />
                                   </button>
                                 ) : (
-                                  ""
+                                  " "
                                 )}
                               </td>
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {subject.showSendButton ? (
+                                  <div className="flex flex-col gap-y-0.5">
+                                    <span className="text-nowrap text-red-600 font-bold">{`${subject.count}`}</span>
+                                    <span className="text-bule-600 text-nowrap font-medium ">{`SMS Pending`}</span>
+                                    <button
+                                      className=" flex felx-row items-center justify-center p-2 gap-x-1 bg-blue-500 text-nowrap hover:bg-blue-600 text-white font-medium rounded-md"
+                                      //  onClick={() => handleEdit(subject)}
+                                      onClick={() => handleSend(subject.unq_id)}
+                                    >
+                                      Send <IoMdSend />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  " "
+                                )}
+
                                 {subject.publish === "N" ? (
                                   <button
                                     onClick={() => handlePublish(subject)}
@@ -797,7 +891,7 @@ function NoticeAndSms() {
                                     <FaCheck icon={faTrash} />
                                   </button>
                                 ) : (
-                                  ""
+                                  " "
                                 )}
                               </td>
                             </tr>
@@ -1075,10 +1169,10 @@ function NoticeAndSms() {
                           return (
                             <div
                               key={index}
-                              className=" font-semibold flex flex-row text-[.58em] items-center gap-x-2"
+                              className=" font-semibold flex flex-row text-[.58em]  items-center gap-x-2"
                             >
                               {/* Display file name */}
-                              <span>{fileName}</span>
+                              <span className="text-[.58em] ">{fileName}</span>
                               <button
                                 className=" text-blue-600 hover:text-blue-800 hover:bg-transparent"
                                 onClick={() => downloadFile(url, fileName)}
