@@ -277,35 +277,22 @@ function Sections() {
   const handleSubmitEdit = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
+
+    // Validate the new section name locally
     const validationErrors = validateSectionName(newSectionName);
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
+      setIsSubmitting(false); // Reset submitting state if validation fails
       return;
     }
 
     try {
       const token = localStorage.getItem("authToken");
-
       if (!token) {
         throw new Error("No authentication token or academic year found");
       }
-      // const nameCheckResponse = await axios.post(
-      //   `${API_URL}/api/check_section_name`,
-      //   { name: newSectionName },
-      //   {
-      //     headers: { Authorization: `Bearer ${token}` },
-      //     withCredentials: true,
-      //   }
-      // );
 
-      // if (nameCheckResponse.data?.exists === true) {
-      //   setNameError("Name already taken.");
-      //   setNameAvailable(false);
-      //   return;
-      // } else {
-      //   setNameError("");
-      //   setNameAvailable(true);
-      // }
+      // Send PUT request to update the section
       await axios.put(
         `${API_URL}/api/sections/${currentSection.department_id}`,
         { name: newSectionName },
@@ -317,16 +304,33 @@ function Sections() {
         }
       );
 
-      fetchSections();
-      handleCloseModal();
-      toast.success("Section Updated successfully!");
+      // Handle success response
+      fetchSections(); // Refresh section list
+      handleCloseModal(); // Close modal
+      toast.success("Section updated successfully!"); // Show success toast
+      setNameError(""); // Clear any previous name errors
     } catch (error) {
       console.error("Error editing section:", error);
-      if (error.response && error.response.data && error.response.data.errors) {
-        Object.values(error.response.data.errors).forEach((err) =>
-          toast.error(err)
-        );
+
+      // Handle validation errors from the server response
+      if (
+        error.response &&
+        error.response.status === 422 &&
+        error.response.data.errors
+      ) {
+        const errors = error.response.data.errors;
+
+        // Display error in toast and on-screen
+        if (errors.name) {
+          console.log("eroor", errors.name);
+          setNameError(errors.name); // Show the first error message on-screen
+          errors.name.forEach((err) => toast.error(err)); // Show all name errors in the toast
+        }
+
+        // Handle other field errors (if necessary)
+        // For example: Display description or other field errors in the UI
       } else {
+        // Handle other errors
         toast.error("Server error. Please try again later.");
       }
     } finally {
@@ -465,12 +469,13 @@ function Sections() {
             </div>
           </div> */}
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+            <div className="h-96 lg:h-96 overflow-y-auto lg:overflow-x-hidden">
+              {" "}
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
-                    <tr className="bg-gray-100">
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                    <tr className="bg-gray-200">
+                      <th className="px-2 text-center  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         S.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -701,7 +706,7 @@ function Sections() {
                     // onBlur={handleBlur}
                   />
                   <div className="absolute top-9 left-1/3 ">
-                    {!nameAvailable && (
+                    {nameError && (
                       <small className=" block text-danger text-xs">
                         {nameError}
                       </small>
