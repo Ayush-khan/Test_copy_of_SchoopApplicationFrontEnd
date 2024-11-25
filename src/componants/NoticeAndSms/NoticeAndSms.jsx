@@ -719,8 +719,8 @@ function NoticeAndSms() {
                         onChange={(e) => setStatus(e.target.value)}
                       >
                         <option value="All">All</option>
-                        <option value="Publish">Publish</option>
-                        <option value="Unpublish">Unpublish</option>
+                        <option value="Y">Publish</option>
+                        <option value="N">Unpublish</option>
                       </select>
                     </div>
                   </div>
@@ -970,7 +970,14 @@ function NoticeAndSms() {
                     <label htmlFor="className" className="w-1/2 mt-2">
                       Class:
                     </label>
-                    <div className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
+                    <div
+                      className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner break-words"
+                      style={{
+                        maxWidth: "262px", // Set maximum width for text wrapping
+                        height: "auto", // Allow height to grow dynamically
+                        wordWrap: "break-word", // Ensure text wraps within the box
+                      }}
+                    >
                       {newclassnames}
                     </div>
                   </div>
@@ -1058,7 +1065,7 @@ function NoticeAndSms() {
                                   key={index}
                                   className="flex items-center gap-x-2"
                                 >
-                                  <span className="bg-gray-100 border-1 p-0.5 shadow-sm">
+                                  <span className="bg-gray-100 border-1 p-0.5 text-[.8em] shadow-sm">
                                     {fileName}
                                   </span>
                                   <RxCross1
@@ -1116,7 +1123,15 @@ function NoticeAndSms() {
                     <label htmlFor="newSectionName" className="w-1/2 mt-2">
                       Class:{" "}
                     </label>
-                    <div className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
+
+                    <div
+                      className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner break-words"
+                      style={{
+                        maxWidth: "262px", // Set maximum width for text wrapping
+                        height: "auto", // Allow height to grow dynamically
+                        wordWrap: "break-word", // Ensure text wraps within the box
+                      }}
+                    >
                       {newclassnames}
                     </div>
                   </div>
@@ -1172,7 +1187,7 @@ function NoticeAndSms() {
                               className=" font-semibold flex flex-row text-[.58em]  items-center gap-x-2"
                             >
                               {/* Display file name */}
-                              <span className="text-[.58em] ">{fileName}</span>
+                              <span className=" ">{fileName}</span>
                               <button
                                 className=" text-blue-600 hover:text-blue-800 hover:bg-transparent"
                                 onClick={() => downloadFile(url, fileName)}
