@@ -450,10 +450,10 @@ const CreateNotice = () => {
                 <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl">
                   Create Notice
                 </h3>
-                <RxCross1
+                {/* <RxCross1
                   className="text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                   type="button"
-                />
+                /> */}
               </div>
               <div
                 className="relative mb-3 h-1 w-[97%] mx-auto"
@@ -557,7 +557,7 @@ const CreateNotice = () => {
                           Upload Files
                         </h5>
                         <input
-                          className="mt-3 relative right-0 md:right-[28%] text-xs bg-gray-50 "
+                          className="mt-3 relative  right-0 md:right-[25%] text-xs bg-gray-50 "
                           type="file"
                           multiple
                           onChange={handleFileUpload}
