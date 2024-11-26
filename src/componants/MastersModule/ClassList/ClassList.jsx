@@ -1231,11 +1231,27 @@ function ClassList() {
   };
   // Handle focus event
 
-  const filteredClasses = classes.filter(
-    (cls) =>
-      cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cls?.get_department?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredClasses = classes.filter(
+  //   (cls) =>
+  //     cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     cls?.get_department?.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+
+  const filteredClasses = classes.filter((cls, index) => {
+    const searchLower = searchTerm.toLowerCase();
+
+    return (
+      cls.name.toLowerCase().includes(searchLower) || // Filter by name
+      cls?.students_count?.toString().includes(searchLower) || // Filter by students_count
+      cls?.get_department?.name.toLowerCase().includes(searchLower) // Filter by department name
+    );
+  });
+
+  // Add serial numbers dynamically
+  // const classesWithSerialNumbers = filteredClasses.map((cls, index) => ({
+  //   ...cls,
+  //   serialNumber: index + 1, // Add serial number starting from 1
+  // }));
 
   const displayedClasses = filteredClasses.slice(
     currentPage * pageSize,
@@ -1243,6 +1259,7 @@ function ClassList() {
   );
   const handleChangeSectionName = (e) => {
     const { value } = e.target;
+    setNameError("");
     console.log("sectionNameis", sectionNameis, "value is", e.target.value);
 
     // setNameError("");
@@ -1256,6 +1273,7 @@ function ClassList() {
 
   const handleChangeDepartmentId = (e) => {
     const { value } = e.target;
+
     // setNewClassName(value);
     console.log(
       "sectionNameis",
@@ -1511,7 +1529,7 @@ function ClassList() {
 
                       // onChange={(e) => setNewClassName(e.target.value)}
                     />
-                    <div className="absolute top-9 left-1/3">
+                    <div className="absolute  top-9 left-1/3">
                       {!nameAvailable && (
                         <span className=" block text-danger text-xs">
                           {nameError}
@@ -1524,7 +1542,7 @@ function ClassList() {
                       )}
                     </div>
                   </div>
-                  <div className=" relative mb-3 flex justify-center  mx-4">
+                  <div className=" relative -top-1 mb-3 flex justify-center  mx-4">
                     <label htmlFor="newDepartmentId" className="w-1/2 mt-2">
                       Section <span className="text-red-500">*</span>
                     </label>
