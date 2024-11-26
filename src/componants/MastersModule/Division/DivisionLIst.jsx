@@ -128,18 +128,6 @@ function DivisionList() {
     (currentPage + 1) * pageSize
   );
 
-  // const validateSectionName = (name, departmentId) => {
-  //   const errors = {};
-  //   if (!name || name.trim() === "") {
-  //     errors.name = "The name field is required.";
-  //   } else if (name.length > 1) {
-  //     errors.name = "The name field must not exceed 1 character.";
-  //   }
-  //   if (!departmentId) {
-  //     errors.department_id = "The class is required.";
-  //   }
-  //   return errors;
-  // };
   const validateSectionName = (name, departmentId) => {
     const errors = {};
 
@@ -255,6 +243,7 @@ function DivisionList() {
   const handleSubmitEdit = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
+
     const validationErrors = validateSectionName(
       newSectionName,
       newDepartmentId
@@ -262,7 +251,6 @@ function DivisionList() {
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       setIsSubmitting(false); // Reset submitting state if validation fails
-
       return;
     }
 
@@ -271,24 +259,6 @@ function DivisionList() {
       if (!token || !currentSection || !currentSection.section_id) {
         throw new Error("No authentication token or section ID found");
       }
-
-      // const nameCheckResponse = await axios.post(
-      //   `${API_URL}/api/check_division_name`,
-      //   { name: newSectionName, class_id: newDepartmentId },
-      //   {
-      //     headers: { Authorization: `Bearer ${token}` },
-      //     withCredentials: true,
-      //   }
-      // );
-
-      // if (nameCheckResponse.data?.exists === true) {
-      //   setNameError("Name already taken.");
-      //   setNameAvailable(false);
-      //   return;
-      // } else {
-      //   setNameError("");
-      //   setNameAvailable(true);
-      // }
 
       await axios.put(
         `${API_URL}/api/getDivision/${currentSection.section_id}`,
@@ -304,17 +274,88 @@ function DivisionList() {
       toast.success("Division updated successfully!");
     } catch (error) {
       console.error("Error editing Division:", error);
-      if (error.response && error.response.data && error.response.data.errors) {
-        Object.values(error.response.data.errors).forEach((err) =>
-          toast.error(err)
-        );
+      console.log("erroris", error.response);
+      if (error.response && error.response.data.status === 422) {
+        const errors = error.response.data.errors;
+        console.log("error", errors);
+        // Handle name field error
+        if (errors.name) {
+          setFieldErrors((prev) => ({
+            ...prev,
+            name: errors.name, // Show the first error message for the name field
+          }));
+          errors.name.forEach((err) => toast.error(err)); // Show all errors in toast
+        }
+
+        // Handle other field errors if necessary
+        // Add similar handling for other fields if included in the backend error response
       } else {
+        // Handle other errors
         toast.error("Server error. Please try again later.");
       }
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
+
+  // const handleSubmitEdit = async () => {
+  //   if (isSubmitting) return; // Prevent re-submitting
+  //   setIsSubmitting(true);
+  //   const validationErrors = validateSectionName(
+  //     newSectionName,
+  //     newDepartmentId
+  //   );
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setFieldErrors(validationErrors);
+  //     setIsSubmitting(false); // Reset submitting state if validation fails
+
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token || !currentSection || !currentSection.section_id) {
+  //       throw new Error("No authentication token or section ID found");
+  //     }
+
+  //     await axios.put(
+  //       `${API_URL}/api/getDivision/${currentSection.section_id}`,
+  //       { name: newSectionName, class_id: newDepartmentId },
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         withCredentials: true,
+  //       }
+  //     );
+
+  //     fetchSections();
+  //     handleCloseModal();
+  //     toast.success("Division updated successfully!");
+  //   } catch (error) {
+  //     console.error("Error editing Division:", error);
+  //     if (
+  //       error.response &&
+  //       error.response.status === 422 &&
+  //       error.response.data.errors
+  //     ) {
+  //       const errors = error.response.data.errors;
+
+  //       // Display error in toast and on-screen
+  //       if (errors.name) {
+  //         console.log("eroor", errors.name);
+  //         setNameError(errors.name); // Show the first error message on-screen
+  //         errors.name.forEach((err) => toast.error(err)); // Show all name errors in the toast
+  //       }
+
+  //       // Handle other field errors (if necessary)
+  //       // For example: Display description or other field errors in the UI
+  //     } else {
+  //       // Handle other errors
+  //       toast.error("Server error. Please try again later.");
+  //     }
+  //   } finally {
+  //     setIsSubmitting(false); // Re-enable the button after the operation
+  //   }
+  // };
 
   const handleDelete = (id) => {
     const sectionToDelete = sections.find((sec) => sec.section_id === id);
@@ -426,7 +467,7 @@ function DivisionList() {
               <div className="bg-white rounded-lg shadow-xs ">
                 <table className="min-w-full leading-normal table-auto ">
                   <thead>
-                    <tr className="bg-gray-100">
+                    <tr className="bg-gray-200">
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         S.No
                       </th>

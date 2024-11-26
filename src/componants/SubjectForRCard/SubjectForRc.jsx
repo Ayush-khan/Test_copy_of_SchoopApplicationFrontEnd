@@ -31,6 +31,7 @@ function SubjectForRc() {
   const [nameError, setNameError] = useState("");
   const pageSize = 10;
   const [backendErrors, setBackendErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchSections = async () => {
     try {
@@ -156,6 +157,8 @@ function SubjectForRc() {
   };
 
   const handleSubmitAdd = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     // Validate both subject name and sequence number
     const validationErrors = validateSectionName(
       newSectionName,
@@ -163,6 +166,7 @@ function SubjectForRc() {
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
+      setIsSubmitting(false);
       return;
     }
     try {
@@ -185,6 +189,7 @@ function SubjectForRc() {
       if (checkNameResponse.data?.exists === true) {
         setNameError("The sequence has already been taken.");
         setNameAvailable(false);
+        setIsSubmitting(false);
         return;
       } else {
         setNameError("");
@@ -213,9 +218,13 @@ function SubjectForRc() {
       } else {
         toast.error("Server error. Please try again later.");
       }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     // Validate both subject name and sequence number
     const validationErrors = validateSectionName(
       newSectionName,
@@ -223,6 +232,7 @@ function SubjectForRc() {
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
+      setIsSubmitting(false);
       return;
     }
 
@@ -256,6 +266,8 @@ function SubjectForRc() {
       } else {
         toast.error("Server error. Please try again later.");
       }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -328,6 +340,8 @@ function SubjectForRc() {
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -363,6 +377,8 @@ function SubjectForRc() {
       } else {
         toast.error("Server error. Please try again later.");
       }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
   const handleChangeSequenceNumber = (e) => {
@@ -389,9 +405,13 @@ function SubjectForRc() {
     }));
   };
 
-  const filteredSections = sections.filter((section) =>
-    section.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSections = sections.filter((section) => {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    return (
+      section.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+      section.sequence.toString().toLowerCase().includes(lowerCaseSearchTerm)
+    );
+  });
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
@@ -465,7 +485,7 @@ function SubjectForRc() {
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
-                    <tr className="bg-gray-100">
+                    <tr className="bg-gray-200">
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         S.No
                       </th>
@@ -656,8 +676,9 @@ function SubjectForRc() {
                     className="btn btn-primary  px-3 mb-2"
                     style={{}}
                     onClick={handleSubmitAdd}
+                    disabled={isSubmitting}
                   >
-                    Add
+                    {isSubmitting ? "Saving..." : "Add"}
                   </button>
                 </div>
               </div>
@@ -757,8 +778,9 @@ function SubjectForRc() {
                   className="btn btn-primary px-3 mb-2 "
                   style={{}}
                   onClick={handleSubmitEdit}
+                  disabled={isSubmitting}
                 >
-                  Update
+                  {isSubmitting ? "Updating..." : "Update"}
                 </button>
               </div>
             </div>
@@ -802,8 +824,9 @@ function SubjectForRc() {
                   className="btn btn-danger px-3 mb-2"
                   style={{}}
                   onClick={handleSubmitDelete}
+                  disabled={isSubmitting}
                 >
-                  Delete
+                  {isSubmitting ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </div>

@@ -34,6 +34,7 @@ function SubjectList() {
     "Optional",
     "Co-Scholastic_hsc",
   ]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const pageSize = 10;
 
@@ -71,9 +72,18 @@ function SubjectList() {
   }, []);
 
   // Filter and paginate sections
-  const filteredSections = sections.filter((section) =>
-    section.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredSections = sections.filter((section) =>
+  //   section.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+
+  const filteredSections = sections.filter((section) => {
+    const searchLower = searchTerm.trim().toLowerCase();
+
+    return (
+      section?.subject_type?.toLowerCase().includes(searchLower) || // Filter by class name
+      section?.name?.toLowerCase().includes(searchLower) // Filter by division name
+    );
+  });
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
@@ -128,12 +138,15 @@ function SubjectList() {
   };
 
   const handleSubmitAdd = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     const validationErrors = validateSectionName(
       newSectionName,
       newDepartmentId
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
+      setIsSubmitting(false);
       return;
     }
     try {
@@ -154,6 +167,7 @@ function SubjectList() {
       if (checkNameResponse.data?.exists === true) {
         setNameError("Name and Subject Type is already taken.");
         setNameAvailable(false);
+        setIsSubmitting(false);
         return;
       } else {
         setNameError("");
@@ -185,16 +199,21 @@ function SubjectList() {
       } else {
         toast.error("Server error. Please try again later.");
       }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     const validationErrors = validateSectionName(
       newSectionName,
       newDepartmentId
     );
     if (Object.keys(validationErrors).length) {
       setFieldErrors(validationErrors);
+      setIsSubmitting(false);
       return;
     }
 
@@ -211,23 +230,23 @@ function SubjectList() {
       console.log("This is Edit data Name:", newSectionName);
       console.log("This is Edit data class_id:", newDepartmentId);
 
-      const nameCheckResponse = await axios.post(
-        `${API_URL}/api/check_subject_name`,
-        { name: newSectionName, subject_type: newDepartmentId },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
+      // const nameCheckResponse = await axios.post(
+      //   `${API_URL}/api/check_subject_name`,
+      //   { name: newSectionName, subject_type: newDepartmentId },
+      //   {
+      //     headers: { Authorization: `Bearer ${token}` },
+      //     withCredentials: true,
+      //   }
+      // );
 
-      if (nameCheckResponse.data?.exists === true) {
-        setNameError("Name and subject type is already taken.");
-        setNameAvailable(false);
-        return;
-      } else {
-        setNameError("");
-        setNameAvailable(true);
-      }
+      // if (nameCheckResponse.data?.exists === true) {
+      //   setNameError("Name and subject type is already taken.");
+      //   setNameAvailable(false);
+      //   return;
+      // } else {
+      //   setNameError("");
+      //   setNameAvailable(true);
+      // }
       await axios.put(
         `${API_URL}/api/subject/${currentSection.sm_id}`,
         { name: newSectionName, subject_type: newDepartmentId },
@@ -252,6 +271,8 @@ function SubjectList() {
       } else {
         toast.error("Server error. Please try again later.");
       }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -263,9 +284,10 @@ function SubjectList() {
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
       if (!token || !currentSection || !currentSection.sm_id) {
         throw new Error("subject ID is missing");
@@ -303,6 +325,8 @@ function SubjectList() {
       } else {
         toast.error("Server error. Please try again later.");
       }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -370,7 +394,7 @@ function SubjectList() {
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
-                    <tr className="bg-gray-100">
+                    <tr className="bg-gray-200">
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         S.No
                       </th>
@@ -551,8 +575,9 @@ function SubjectList() {
                       className="btn btn-primary px-3 mb-2"
                       style={{}}
                       onClick={handleSubmitAdd}
+                      disabled={isSubmitting}
                     >
-                      Add
+                      {isSubmitting ? "Saving..." : "Add"}
                     </button>
                   </div>
                 </div>
@@ -645,8 +670,9 @@ function SubjectList() {
                     className="btn btn-primary  px-3 mb-2"
                     style={{}}
                     onClick={handleSubmitEdit}
+                    disabled={isSubmitting}
                   >
-                    Update
+                    {isSubmitting ? "Updating..." : "Update"}
                   </button>
                 </div>
               </div>
@@ -690,8 +716,9 @@ function SubjectList() {
                     className="btn btn-danger px-3 mb-2"
                     style={{}}
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

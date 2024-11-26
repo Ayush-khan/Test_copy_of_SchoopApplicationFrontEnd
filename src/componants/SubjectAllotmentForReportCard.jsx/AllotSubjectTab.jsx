@@ -569,7 +569,7 @@ const AllotSubjectTab = () => {
                   }))}
                 />
                 {classError && (
-                  <p className="relative -top-4 -mb-3 text-red-500 text-sm">
+                  <p className="relative -top-4 left-4 -mb-3 text-red-500 text-sm">
                     {classError}
                   </p>
                 )}

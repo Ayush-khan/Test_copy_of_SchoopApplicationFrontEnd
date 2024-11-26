@@ -1255,7 +1255,6 @@
 
 // // This is the 100% working
 import { useState, useEffect, useRef } from "react";
-import { IoSettingsSharp } from "react-icons/io5";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -1264,12 +1263,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import { IoMdAdd } from "react-icons/io";
-import { CgAddR } from "react-icons/cg";
-import { FaRegSquarePlus } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
-import AllotSubjectTab from "./AllotSubjectTab"; // Import the new component
-import ManageSubjectsTab from "./ManageSubjectsTab.jsx";
+
 import AllotTeachersForCLass from "./AllotTeachersForCLass.jsx";
 import AllotTeachersTab from "./AllotTeachersTab.jsx";
 import Select from "react-select";
@@ -2151,7 +2146,7 @@ function ManageSubjectList() {
                         className=" text-sm w-full md:w-[60%] item-center relative left-0 md:left-4"
                       />
                       {nameError && (
-                        <div className=" relative top-0.5 ml-1 text-danger text-xs">
+                        <div className=" relative top-0.5 left-3  ml-1 text-danger text-xs">
                           {nameError}
                         </div>
                       )}{" "}
