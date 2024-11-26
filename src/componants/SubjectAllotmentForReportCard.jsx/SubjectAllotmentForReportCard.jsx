@@ -37,6 +37,7 @@ function SubjectAllotmentForReportCard() {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingForSearch, setIsSubmittingForSearch] = useState(false);
 
   const dropdownRef = useRef(null);
   //   for allot subject checkboxes
@@ -145,11 +146,12 @@ function SubjectAllotmentForReportCard() {
   }, []);
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
-    if (isSubmitting) return; // Prevent re-submitting
-    setIsSubmitting(true);
+    if (isSubmittingForSearch) return; // Prevent re-submitting
+    setIsSubmittingForSearch(true);
     if (!classIdForManage) {
+      setIsSubmittingForSearch(false);
       setNameError("Please select the class.");
-      setIsSubmitting(false);
+
       return;
     }
     try {
@@ -181,7 +183,7 @@ function SubjectAllotmentForReportCard() {
       console.error("Error fetching subjects:", error);
       setError("Error fetching subjects");
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmittingForSearch(false); // Re-enable the button after the operation
     }
   };
 
@@ -467,9 +469,9 @@ function SubjectAllotmentForReportCard() {
                       onClick={handleSearch}
                       type="button"
                       className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
-                      disabled={isSubmitting}
+                      disabled={isSubmittingForSearch}
                     >
-                      {isSubmitting ? "Searching..." : "Search"}
+                      {isSubmittingForSearch ? "Searching..." : "Search"}
                     </button>
                   </div>
                 </div>
@@ -501,7 +503,7 @@ function SubjectAllotmentForReportCard() {
                       <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
                         <table className="min-w-full leading-normal table-auto">
                           <thead>
-                            <tr className="bg-gray-100">
+                            <tr className="bg-gray-200">
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 S.No
                               </th>

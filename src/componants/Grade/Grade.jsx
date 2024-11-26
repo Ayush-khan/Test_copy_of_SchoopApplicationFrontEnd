@@ -39,8 +39,9 @@ function Grade() {
   const [selectedClasses, setSelectedClasses] = useState([]); // Store selected class_ids
   const [errorMessage, setErrorMessage] = useState("");
   const [academicYear, setAcademicYear] = useState("");
-  const [subjectType, setSubjectType] = useState("");
   const [classIdFor, setClassIdFor] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     fetchGrades();
     fetchClassNames();
@@ -139,11 +140,24 @@ function Grade() {
   };
 
   // Filter by both class_name and subject_type
-  const filteredSections = sections.filter(
-    (section) =>
-      section?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      section?.subject_type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSections = sections.filter((section) => {
+    const gradeName = section?.name?.toLowerCase() || "";
+    const className = section?.class?.name?.toLowerCase() || "";
+    const subjectType = section?.subject_type?.toLowerCase() || "";
+    const marksFrom = section?.mark_from?.toString() || "";
+    const marksUpto = section?.mark_upto?.toString() || "";
+    const comment = section?.comment?.toLowerCase() || "";
+
+    // Combine all fields for search
+    return (
+      gradeName.includes(searchTerm.toLowerCase()) ||
+      className.includes(searchTerm.toLowerCase()) ||
+      subjectType.includes(searchTerm.toLowerCase()) ||
+      marksFrom.includes(searchTerm) || // Numeric fields can be searched as strings
+      marksUpto.includes(searchTerm) || // Numeric fields can be searched as strings
+      comment.includes(searchTerm.toLowerCase())
+    );
+  });
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
@@ -163,10 +177,20 @@ function Grade() {
   ) => {
     const errors = {};
 
+    // if (!name || name.trim() === "") {
+    //   errors.name = "Please enter Grade name.";
+    // } else if (name.length > 3) {
+    //   errors.name = "The name field must not exceed 3 characters.";
+    // }
+    // Validate Grade Name (Only capital letters allowed)
+    // Validate Grade Name (Only uppercase letters and '+' allowed)
     if (!name || name.trim() === "") {
       errors.name = "Please enter Grade name.";
     } else if (name.length > 3) {
       errors.name = "The name field must not exceed 3 characters.";
+    } else if (!/^[A-Z\+]+$/.test(name)) {
+      // Regex to check for uppercase letters and '+'
+      errors.name = "The name field must contain uppercase letters ";
     }
 
     if (!departmentId) {
@@ -180,7 +204,9 @@ function Grade() {
     if (!endDate) {
       errors.endDate = "Marks upto is required.";
     }
-
+    if (startDate && endDate && parseFloat(startDate) > parseFloat(endDate)) {
+      errors.startDate = "Marks from cannot be greater than Marks upto.";
+    }
     // Validate if at least one class is selected
     if (!selectedClasses || selectedClasses.length === 0) {
       errors.selectedClasses = "Please select at least one class.";
@@ -234,6 +260,8 @@ function Grade() {
 
   // Handle form submit (Add)
   const handleSubmitAdd = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     const validationErrors = validateFormFields(
       newSectionName,
       newDepartmentId,
@@ -244,6 +272,7 @@ function Grade() {
 
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
+      setIsSubmitting(false);
       return;
     }
 
@@ -279,11 +308,15 @@ function Grade() {
     } catch (error) {
       console.error("Error adding Grade:", error);
       toast.error("Server error. Please try again later.");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
   console.log("selectedClasses", selectedClasses);
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     const validationErrors = validateFormFields(
       newSectionName,
       newDepartmentId,
@@ -294,10 +327,14 @@ function Grade() {
 
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
+      setIsSubmitting(false);
+
       return;
     }
 
     if (!setClassIdFor) {
+      setIsSubmitting(false);
+
       setErrorMessage("Please select at least one class.");
       return;
     }
@@ -330,6 +367,8 @@ function Grade() {
     } catch (error) {
       console.error("Error editing Grade:", error);
       toast.error("Server error. Please try again later.");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -340,6 +379,8 @@ function Grade() {
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -376,6 +417,8 @@ function Grade() {
       } else {
         toast.error("Server error. Please try again later.");
       }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
   // Handle checkbox change
@@ -483,7 +526,7 @@ function Grade() {
               <div className="bg-white rounded-lg shadow-xs ">
                 <table className="min-w-full leading-normal table-auto ">
                   <thead>
-                    <tr className="bg-gray-100">
+                    <tr className="bg-gray-200">
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         S.No
                       </th>
@@ -553,10 +596,12 @@ function Grade() {
                               {section?.mark_upto}
                             </p>
                           </td>
-                          <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.comment}
-                            </p>
+                          <td className="text-center  border border-gray-950 text-sm">
+                            <div className="overflow-y-auto max-w-full max-h-[90px] whitespace-pre-wrap">
+                              <p className="text-gray-900">
+                                {section?.comment}
+                              </p>
+                            </div>
                           </td>
 
                           {roleId === "M" ? (
@@ -675,7 +720,6 @@ function Grade() {
                         // style={{ background: "#F8F8F8" }}
                         id="sectionName"
                         value={newSectionName}
-                        placeholder="e.g A+ or A or B+"
                         onChange={handleChangeSectionName}
                         // onChange={}
                         // onBlur={handleBlur}
@@ -742,7 +786,6 @@ function Grade() {
                         id="marksFrom"
                         className="form-control shadow-md"
                         maxLength={3}
-                        placeholder="e.g 90"
                         value={startDate || ""} // Ensure startDate is not undefined
                         onChange={(e) => {
                           const value = e.target.value;
@@ -770,7 +813,6 @@ function Grade() {
                         type="text"
                         id="marksUpto"
                         maxLength={3} // Ensure a valid maxLength
-                        placeholder="e.g 100"
                         className="form-control shadow-md"
                         value={endDate || ""} // Ensure endDate is not undefined
                         onChange={(e) => {
@@ -871,8 +913,9 @@ function Grade() {
                       className="btn btn-primary px-3 mb-2 "
                       style={{}}
                       onClick={handleSubmitAdd}
+                      disabled={isSubmitting}
                     >
-                      Add
+                      {isSubmitting ? "Saving..." : "Add"}
                     </button>
                   </div>
                 </div>
@@ -933,7 +976,6 @@ function Grade() {
                       // style={{ background: "#F8F8F8" }}
                       id="sectionName"
                       value={newSectionName}
-                      placeholder="e.g A+ or A or B+"
                       onChange={handleChangeSectionName}
                       // onChange={}
                       // onBlur={handleBlur}
@@ -1000,7 +1042,6 @@ function Grade() {
                       id="marksFrom"
                       className="form-control shadow-md"
                       maxLength={3}
-                      placeholder="e.g 90"
                       value={startDate}
                       onChange={(e) => {
                         const value = e.target.value;
@@ -1035,7 +1076,6 @@ function Grade() {
                       type="text"
                       id="marksUpto"
                       maxLength={3}
-                      placeholder="e.g 100"
                       className="form-control shadow-md"
                       value={endDate}
                       onChange={(e) => {
@@ -1091,8 +1131,9 @@ function Grade() {
                     className="btn btn-primary px-3 mb-2 "
                     style={{}}
                     onClick={handleSubmitEdit}
+                    disabled={isSubmitting}
                   >
-                    Update
+                    {isSubmitting ? "Updating..." : "Update"}
                   </button>
                 </div>
               </div>
@@ -1136,8 +1177,9 @@ function Grade() {
                     className="btn btn-danger px-3 mb-2"
                     style={{}}
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

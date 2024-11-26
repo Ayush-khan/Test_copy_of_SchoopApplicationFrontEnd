@@ -129,8 +129,7 @@ function Exam() {
     departmentId,
     startDate,
     endDate,
-    openDay,
-    comment
+    openDay
   ) => {
     const errors = {};
     // const alphabetRegex = /^[A-Za-z]+$/;
@@ -155,10 +154,6 @@ function Exam() {
 
     if (!openDay) {
       errors.openDay = "Open day is required.";
-    }
-
-    if (!comment || comment.trim() === "") {
-      errors.comment = "Comment is required.";
     }
 
     return errors;
@@ -209,8 +204,7 @@ function Exam() {
       newDepartmentId,
       startDate,
       endDate,
-      openDay,
-      comment
+      openDay
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
@@ -256,8 +250,7 @@ function Exam() {
       newDepartmentId,
       startDate,
       endDate,
-      openDay,
-      comment
+      openDay
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
@@ -429,7 +422,7 @@ function Exam() {
               <div className="bg-white rounded-lg shadow-xs ">
                 <table className="min-w-full leading-normal table-auto ">
                   <thead>
-                    <tr className="bg-gray-100">
+                    <tr className="bg-gray-200">
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         S.No
                       </th>
@@ -466,10 +459,12 @@ function Exam() {
                               {section?.name}
                             </p>
                           </td>
-                          <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.comment}
-                            </p>
+                          <td className="text-center  border border-gray-950 text-sm">
+                            <div className="overflow-y-auto max-w-full max-h-[90px] whitespace-pre-wrap">
+                              <p className="text-gray-900">
+                                {section?.comment}
+                              </p>
+                            </div>
                           </td>
 
                           {roleId === "M" ? (
