@@ -1336,6 +1336,7 @@ function ManageSubjectList() {
     setNewDepartmentId(selectedOption.value); // Assuming value is the teacher's ID
     console.log("setNewDepartmentId", newDepartmentId);
   };
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleClassSelect = (selectedOption) => {
     setSelectedClass(selectedOption);
@@ -1470,8 +1471,11 @@ function ManageSubjectList() {
   }, []);
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     if (!classIdForManage) {
       setNameError("Please select the class.");
+      setIsSubmitting(false);
       return;
     }
     try {
@@ -1507,6 +1511,8 @@ function ManageSubjectList() {
     } catch (error) {
       console.error("Error fetching subjects:", error);
       setError("Error fetching subjects");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -1757,6 +1763,8 @@ function ManageSubjectList() {
   };
 
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     console.log(
       "inside the edit model of the subjectallotment",
       currentSection.subject_id
@@ -1773,6 +1781,7 @@ function ManageSubjectList() {
         throw new Error("Subject ID is missing");
       }
       if (!nameAvailable) {
+        setIsSubmitting(false);
         return;
       }
 
@@ -1804,11 +1813,14 @@ function ManageSubjectList() {
       }
       console.error("Error editing subject Record:", error);
     } finally {
+      setIsSubmitting(false);
       setShowEditModal(false);
     }
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     // Handle delete submission logic
     try {
       const token = localStorage.getItem("authToken");
@@ -1853,8 +1865,10 @@ function ManageSubjectList() {
       }
       console.error("Error deleting subject:", error);
       // setError(error.message);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDeleteModal(false);
     }
-    setShowDeleteModal(false);
   };
 
   const handleCloseModal = () => {
@@ -2155,8 +2169,9 @@ function ManageSubjectList() {
                       onClick={handleSearch}
                       type="button"
                       className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
+                      disabled={isSubmitting}
                     >
-                      Search
+                      {isSubmitting ? "Searching..." : "Search"}
                     </button>
                   </div>
                 </div>
@@ -2563,8 +2578,9 @@ function ManageSubjectList() {
                     type="button"
                     className="btn btn-primary px-3 mb-2"
                     onClick={handleSubmitEdit}
+                    disabled={isSubmitting}
                   >
-                    Update
+                    {isSubmitting ? "Updating..." : "Update"}
                   </button>
                 </div>
               </div>
@@ -2607,8 +2623,9 @@ function ManageSubjectList() {
                     type="button"
                     className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

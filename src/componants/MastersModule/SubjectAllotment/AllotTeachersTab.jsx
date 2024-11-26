@@ -1128,6 +1128,7 @@ const AllotTeachersTab = () => {
   const [divisionError, setDivisionError] = useState("");
   const [teacherError, setTeacherError] = useState("");
   const [subjectError, setSubjectError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchClassNames();
@@ -1286,6 +1287,8 @@ const AllotTeachersTab = () => {
   };
 
   const handleSave = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     let hasError = false;
 
     // Validate form fields
@@ -1306,7 +1309,10 @@ const AllotTeachersTab = () => {
       hasError = true;
     }
 
-    if (hasError) return; // If there are errors, don't proceed with the save.
+    if (hasError) {
+      setIsSubmitting(false);
+      return;
+    } // If there are errors, don't proceed with the save.
 
     try {
       const token = localStorage.getItem("authToken");
@@ -1334,6 +1340,8 @@ const AllotTeachersTab = () => {
       }, 3000);
     } catch (error) {
       toast.error("Error saving allotment");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -1473,8 +1481,9 @@ const AllotTeachersTab = () => {
                 type="button"
                 onClick={handleSave}
                 className="btn btn-primary"
+                disabled={isSubmitting}
               >
-                Save
+                {isSubmitting ? "Saving..." : "Save"}
               </button>
             </div>
           </div>

@@ -469,6 +469,7 @@ const AllotTeachersForClass = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate(); // Initialize useNavigate
   const [nameError, setNameError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   //   const [nameAvailable, setNameAvailable] = useState(true);
 
@@ -543,16 +544,19 @@ const AllotTeachersForClass = () => {
     setNameError(null); // Reset error when user selects a class
     console.log("selectedOption", selectedOption);
     setSelectedClass(selectedOption);
-    setClassId(selectedOption.classId); // Store the class_id
-    setSectionId(selectedOption.value); // Store the section_id
+    setClassId(selectedOption ? selectedOption.classId : null); // Store the class_id
+    setSectionId(selectedOption ? selectedOption.value : null); // Store the section_id
     console.log("Selected class_id:", selectedOption.classId);
     console.log("Selected section_id:", selectedOption.value);
   };
   // heavy code take time more
   const handleSearchForAllotTea = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     console.log("hfdskjlhjf", classId);
     if (!classId) {
       setNameError("Please select the class.");
+      setIsSubmitting(false);
       return;
     }
     setLoading(true);
@@ -593,6 +597,8 @@ const AllotTeachersForClass = () => {
       toast.error("Error fetching subjects");
     } finally {
       setLoading(false);
+
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -687,6 +693,8 @@ const AllotTeachersForClass = () => {
   console.log("The setSubject if teacher id is unselected", subjects);
   // heavy code here
   const handleSubmitForAllotTeacherTab = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
@@ -758,6 +766,7 @@ const AllotTeachersForClass = () => {
       toast.error("Error updating teacher allotment");
     } finally {
       setLoading(false);
+      setIsSubmitting(false);
     }
   };
   // light code is here
@@ -839,7 +848,7 @@ const AllotTeachersForClass = () => {
                 isClearable
               />
               {nameError && (
-                <div className=" relative top-0.5 ml-1 text-danger text-xs">
+                <div className=" relative left-4 top-0.5 ml-1 text-danger text-xs">
                   {nameError}
                 </div>
               )}{" "}
@@ -849,9 +858,11 @@ const AllotTeachersForClass = () => {
               onClick={handleSearchForAllotTea}
               type="button"
               className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
+              disabled={isSubmitting}
+
               //   disabled={loading}
             >
-              Browse
+              {isSubmitting ? "Browsing..." : "Browse"}
             </button>
           </div>
         </div>
@@ -914,8 +925,9 @@ const AllotTeachersForClass = () => {
                     onClick={handleSubmitForAllotTeacherTab}
                     type="button"
                     className="btn h-10 md:h-auto w-18 md:w-auto btn-primary"
+                    disabled={isSubmitting}
                   >
-                    Save
+                    {isSubmitting ? "Saving..." : "Save"}
                   </button>
                 </div>
               </div>

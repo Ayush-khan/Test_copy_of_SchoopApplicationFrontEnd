@@ -145,8 +145,11 @@ function SubjectAllotmentForReportCard() {
   }, []);
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     if (!classIdForManage) {
       setNameError("Please select the class.");
+      setIsSubmitting(false);
       return;
     }
     try {
@@ -177,6 +180,8 @@ function SubjectAllotmentForReportCard() {
     } catch (error) {
       console.error("Error fetching subjects:", error);
       setError("Error fetching subjects");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -462,8 +467,9 @@ function SubjectAllotmentForReportCard() {
                       onClick={handleSearch}
                       type="button"
                       className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
+                      disabled={isSubmitting}
                     >
-                      Search
+                      {isSubmitting ? "Searching..." : "Search"}
                     </button>
                   </div>
                 </div>

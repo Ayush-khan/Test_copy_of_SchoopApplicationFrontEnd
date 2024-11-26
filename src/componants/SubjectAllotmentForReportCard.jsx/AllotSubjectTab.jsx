@@ -361,6 +361,7 @@ const AllotSubjectTab = () => {
   const [subjectTypeError, setSubjectTypeError] = useState(null);
   const [subjectsIs, setSubjectsIs] = useState([]); // All subjects
   const [initialsubjectsIs, setInitialSubjectsIs] = useState([]); // All subjects
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [preCheckedSubjects, setPreCheckedSubjects] = useState([]); // Pre-selected subjects
 
@@ -468,6 +469,8 @@ const AllotSubjectTab = () => {
   };
 
   const handleSave = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     let hasError = false;
 
     // Validate form fields
@@ -484,7 +487,10 @@ const AllotSubjectTab = () => {
       hasError = true;
     }
 
-    if (hasError) return; // If there are errors, don't proceed with the save.
+    if (hasError) {
+      setIsSubmitting(false);
+      return;
+    } // If there are errors, don't proceed with the save.
 
     try {
       const token = localStorage.getItem("authToken");
@@ -533,6 +539,8 @@ const AllotSubjectTab = () => {
         console.error("Error with request:", error.message);
         toast.error("Error saving allotment");
       }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -569,7 +577,7 @@ const AllotSubjectTab = () => {
                   }))}
                 />
                 {classError && (
-                  <p className="relative -top-4 left-4 -mb-3 text-red-500 text-sm">
+                  <p className="relative -top-4 -mb-3 text-red-500 text-sm">
                     {classError}
                   </p>
                 )}
@@ -649,8 +657,9 @@ const AllotSubjectTab = () => {
                 type="button"
                 onClick={handleSave}
                 className="btn btn-primary"
+                disabled={isSubmitting}
               >
-                Save
+                {isSubmitting ? "Saving..." : "Save"}
               </button>
             </div>
           </div>
