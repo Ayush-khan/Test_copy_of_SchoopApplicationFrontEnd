@@ -120,7 +120,7 @@ import ShowRolesWithMenu from "../componants/RoleMangement/ShowRolesWithMenu.jsx
 import Roles from "../componants/RoleMangement/Roles.jsx";
 import ManageRoleAccess from "../componants/RoleMangement/ManageRoleAccess.jsx";
 import Menus from "../componants/RoleMangement/Menus.jsx";
-import DivisionList from "../componants/MastersModule/TableComponentsNikhilbhai/Division/DivisionLIst.jsx";
+import DivisionList from "../componants/MastersModule/Division/DivisionLIst.jsx";
 import SubjectList from "../componants/MastersModule/Subject/SubjectList.jsx";
 import ManageSubjectList from "../componants/MastersModule/SubjectAllotment/ManageSubjectList.jsx";
 import ManageStudent from "../componants/StudentModel/ManageStudent.jsx";
