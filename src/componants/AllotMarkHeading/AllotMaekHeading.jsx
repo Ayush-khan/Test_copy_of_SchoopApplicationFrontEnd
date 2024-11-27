@@ -421,9 +421,10 @@ function AllotMarksHeading() {
                     <button
                       onClick={handleSearch}
                       type="button"
+                      disabled={isSubmitting}
                       className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
                     >
-                      Search
+                      {isSubmitting ? "Searching..." : "Search"}
                     </button>
                   </div>
                 </div>
