@@ -30,6 +30,8 @@ function MarksHeading() {
   const [roleId, setRoleId] = useState("");
   const [classes, setClasses] = useState([]);
   const [sequence, setSequence] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const pageSize = 10;
   //   useEffect(() => {
   //     const fetchClassNames = async () => {
@@ -75,6 +77,8 @@ function MarksHeading() {
       });
 
       setSections(response.data);
+      setPageCount(Math.ceil(response.data.length / pageSize));
+
       console.log("this is the markheading get", sections);
     } catch (error) {
       setError(error.message);
@@ -109,17 +113,30 @@ function MarksHeading() {
   };
 
   // Filter and paginate sections
-  const filteredSections = sections.filter((section) =>
-    section.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSections = sections.filter((section) => {
+    const gradeName = section?.name?.toLowerCase() || ""; // Convert grade name to lowercase
+    const marksHeadingsId = section?.marks_headings_id?.toString() || ""; // Convert ID to string
+    const sequence = section?.sequence?.toString() || ""; // Convert sequence to string
+    const writtenExam = section?.written_exam?.toLowerCase() || ""; // Convert written_exam to lowercase
+
+    // Combine all fields for search
+    return (
+      gradeName.includes(searchTerm.toLowerCase()) || // Search by grade name
+      marksHeadingsId.includes(searchTerm) || // Search by marks_heading_id
+      sequence.includes(searchTerm) || // Search by sequence
+      writtenExam.includes(searchTerm.toLowerCase()) // Search by written_exam
+    );
+  });
+
+  // Calculate pagination
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
 
-  useEffect(() => {
-    setPageCount(Math.ceil(filteredSections.length / pageSize));
-  }, [filteredSections]);
+  // useEffect(() => {
+  //   setPageCount(Math.ceil(filteredSections.length / pageSize));
+  // }, [filteredSections]);
 
   // const validateSectionName = (name, writtenExam) => {
   //   const errors = {};
@@ -197,6 +214,8 @@ function MarksHeading() {
   };
 
   const handleSubmitAdd = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     const validationErrors = validateSectionName(
       newSectionName,
       newDepartmentId,
@@ -204,6 +223,8 @@ function MarksHeading() {
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
+      setIsSubmitting(false);
+
       return;
     }
 
@@ -262,10 +283,14 @@ function MarksHeading() {
         "Error adding Marks headings:",
         error?.response?.data?.message
       );
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     const validationErrors = validateSectionName(
       newSectionName,
       newDepartmentId,
@@ -273,6 +298,8 @@ function MarksHeading() {
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
+      setIsSubmitting(false);
+
       return;
     }
 
@@ -332,6 +359,8 @@ function MarksHeading() {
       } else {
         toast.error("Server error. Please try again later.");
       }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -344,6 +373,8 @@ function MarksHeading() {
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       // const academicYr = localStorage.getItem("academicYear");
@@ -381,6 +412,8 @@ function MarksHeading() {
       } else {
         toast.error("Server error. Please try again later.");
       }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -735,8 +768,9 @@ function MarksHeading() {
                       className="btn btn-primary px-3 mb-2 "
                       style={{}}
                       onClick={handleSubmitAdd}
+                      disabled={isSubmitting}
                     >
-                      Add
+                      {isSubmitting ? "Saving..." : "Save"}
                     </button>
                   </div>
                 </div>
@@ -869,8 +903,9 @@ function MarksHeading() {
                     className="btn btn-primary px-3 mb-2 "
                     style={{}}
                     onClick={handleSubmitEdit}
+                    disabled={isSubmitting}
                   >
-                    Update
+                    {isSubmitting ? "Updating..." : "Update"}
                   </button>
                 </div>
               </div>
@@ -914,8 +949,9 @@ function MarksHeading() {
                     className="btn btn-danger px-3 mb-2"
                     style={{}}
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

@@ -598,7 +598,7 @@ function Grade() {
                           </td>
                           <td className="text-center  border border-gray-950 text-sm">
                             <div className="overflow-y-auto max-w-full max-h-[90px] whitespace-pre-wrap">
-                              <p className="text-gray-900">
+                              <p className="text-gray-900 px-1">
                                 {section?.comment}
                               </p>
                             </div>

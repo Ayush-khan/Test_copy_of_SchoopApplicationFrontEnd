@@ -41,6 +41,7 @@ function AllotMarksHeading() {
   const [newMarksHeading, setNewMarksHeading] = useState("");
   const [highestMarks, setHighestMarks] = useState("");
   const [marksError, setMarksError] = useState(""); // Error for validation
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const pageSize = 10;
   useEffect(() => {
@@ -50,7 +51,7 @@ function AllotMarksHeading() {
   const handleClassSelect = (selectedOption) => {
     setNameError("");
     setSelectedClass(selectedOption);
-    setclassIdForManage(selectedOption.value); // Assuming value is the class ID
+    setclassIdForManage(selectedOption ? selectedOption.value : null); // Set to null if cleared
   };
 
   const teacherOptions = departments.map((dept) => ({
@@ -109,8 +110,12 @@ function AllotMarksHeading() {
 
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     if (!classIdForManage) {
       setNameError("Please select the class.");
+      setIsSubmitting(false);
+
       return;
     }
     try {
@@ -143,6 +148,8 @@ function AllotMarksHeading() {
     } catch (error) {
       console.error("Error fetching Allot Markheadings:", error);
       setError("Error fetching Allot Markheadings");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -201,6 +208,8 @@ function AllotMarksHeading() {
   };
 
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -230,10 +239,14 @@ function AllotMarksHeading() {
       // }
       if (!highestMarks) {
         setMarksError("Highest Marks is required.");
+        setIsSubmitting(false);
+
         return;
       }
       // If there's still an error message, stop the submission
       if (marksError) {
+        setIsSubmitting(false);
+
         return; // Halt submission if error exists
       }
       // Make the PUT request to update the subject type
@@ -269,10 +282,14 @@ function AllotMarksHeading() {
         );
       }
       console.error("Error editing Allot Markheadings record:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       const subReportCardId = currentSection?.allot_markheadings_id; // Get the correct ID
@@ -304,6 +321,8 @@ function AllotMarksHeading() {
         toast.error(`Error deleting Allot Markheadings: ${error.message}`);
       }
       console.error("Error deleting Allot Markheadings:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -313,16 +332,23 @@ function AllotMarksHeading() {
   };
 
   const filteredSections = subjects.filter((section) => {
-    // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
-    const subjectNameIs = section?.get_subject?.name?.toLowerCase() || "";
-    const markHeadingIs = section?.get_marksheading?.name?.toLowerCase() || "";
+    // Extract relevant fields from each section
+    const className = section?.get_class?.name?.toLowerCase() || ""; // Class name
+    const subjectName = section?.get_subject?.name?.toLowerCase() || ""; // Subject name
+    const examName = section?.get_exam?.name?.toLowerCase() || ""; // Exam name
+    const marksHeading = section?.get_marksheading?.name?.toLowerCase() || ""; // Marks Heading
+    const highestMarks = section?.highest_marks?.toString() || ""; // Highest Marks (convert to string for search)
 
-    // Check if the search term is present in either the teacher's name or the subject's name
+    // Check if the search term matches any of the fields
     return (
-      subjectNameIs.includes(searchTerm.toLowerCase()) ||
-      markHeadingIs.includes(searchTerm.toLowerCase())
+      className.includes(searchTerm.toLowerCase()) ||
+      subjectName.includes(searchTerm.toLowerCase()) ||
+      examName.includes(searchTerm.toLowerCase()) ||
+      marksHeading.includes(searchTerm.toLowerCase()) ||
+      highestMarks.includes(searchTerm)
     );
   });
+
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -625,8 +651,9 @@ function AllotMarksHeading() {
                     type="button"
                     className="btn btn-primary px-3 mb-2"
                     onClick={handleSubmitEdit}
+                    disabled={isSubmitting}
                   >
-                    Update
+                    {isSubmitting ? "Updating..." : "Update"}
                   </button>
                 </div>
               </div>
@@ -669,8 +696,9 @@ function AllotMarksHeading() {
                     type="button"
                     className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

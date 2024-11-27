@@ -510,6 +510,8 @@ const AllotMarksHeadingTab = () => {
   const [subjectError, setSubjectError] = useState("");
   const [marksHeadingError, setMarksHeadingError] = useState("");
   const [highestMarksError, setHighestMarksError] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navigate = useNavigate();
   // Fetch class list and exams on component mount
   useEffect(() => {
@@ -799,6 +801,8 @@ const AllotMarksHeadingTab = () => {
   };
 
   const handleSave = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     let hasError = false;
 
     // Validate form fields
@@ -836,7 +840,11 @@ const AllotMarksHeadingTab = () => {
     });
     setHighestMarksError(marksErrors);
 
-    if (hasError) return;
+    if (hasError) {
+      setIsSubmitting(false);
+
+      return;
+    }
 
     // Prepare data to send to API
     const marksData = selectedHeadings.map((heading) => ({
@@ -874,6 +882,8 @@ const AllotMarksHeadingTab = () => {
       // navigate("/allotMarksHeading"); // Replace '/your-target-route' with the desired route
     } catch (error) {
       toast.error("Error saving Allot Marks headings");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -1057,9 +1067,10 @@ const AllotMarksHeadingTab = () => {
             <div className=" flex float-end mt-6">
               <button
                 onClick={handleSave}
+                disabled={isSubmitting}
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
               >
-                Save
+                {isSubmitting ? "Saving..." : "Save"}
               </button>
             </div>
           </div>
