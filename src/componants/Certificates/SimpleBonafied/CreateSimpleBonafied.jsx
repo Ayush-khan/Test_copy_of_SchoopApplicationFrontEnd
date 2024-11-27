@@ -336,7 +336,9 @@ const CreateSimpleBonafied = () => {
             fetchedData?.studentinformation?.mid_name || ""
           } ${fetchedData?.studentinformation?.last_name || ""}`,
           dob: fetchedData.studentinformation.dob || "",
-          dob_words: convertDateToWords(fetchedData.studentinformation.dob),
+          dob_words: fetchedData.dobinwords || " ",
+
+          // dob_words: convertDateToWords(fetchedData.studentinformation.dob),
 
           date: today || "",
           father_name: fetchedData.studentinformation.father_name || "",

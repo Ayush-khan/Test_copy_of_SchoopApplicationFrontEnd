@@ -343,7 +343,7 @@ const CreateCreateBonafide = () => {
             fetchedData?.studentinformation?.mid_name || ""
           } ${fetchedData?.studentinformation?.last_name || ""}`,
           dob: fetchedData.studentinformation.dob || "",
-          dob_words: convertDateToWords(fetchedData.studentinformation.dob),
+          dob_words: fetchedData.dobinwords || " ",
 
           date: today || "",
           father_name: fetchedData.parentinformation.father_name || "",

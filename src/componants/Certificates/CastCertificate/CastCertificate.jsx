@@ -46,6 +46,8 @@ function CastCertificate() {
   const [newMarksHeading, setNewMarksHeading] = useState("");
   const [highestMarks, setHighestMarks] = useState("");
   const [marksError, setMarksError] = useState(""); // Error for validation
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navigate = useNavigate();
 
   const pageSize = 10;
@@ -115,8 +117,12 @@ function CastCertificate() {
 
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     if (!classIdForManage) {
       setNameError("Please select the class.");
+      setIsSubmitting(false);
+
       return;
     }
     try {
@@ -151,6 +157,8 @@ function CastCertificate() {
     } catch (error) {
       console.error("Error fetching Cast certificates Listing:", error);
       setError("Error fetching Cast certificates");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -180,6 +188,8 @@ function CastCertificate() {
   };
 
   const handleDownloadSumbit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       //  setLoading(true); // Show loading indicator if you have one
       const token = localStorage.getItem("authToken");
@@ -239,6 +249,8 @@ function CastCertificate() {
         toast.error(`Error in Downloading Cast Certificate: ${error.message}`);
       }
       console.error("Error in Downloading Cast Certificate:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
     //    finally {
     //      setLoading(false); // Stop loading indicator
@@ -265,6 +277,8 @@ function CastCertificate() {
   };
 
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -310,10 +324,14 @@ function CastCertificate() {
         );
       }
       console.error("Error Cast Certificate issue status:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       const subReportCardId = currentSection?.sr_no; // Get the correct ID
@@ -345,6 +363,8 @@ function CastCertificate() {
         toast.error(`Error deleting Cast Certificate: ${error.message}`);
       }
       console.error("Error deleting Cast Certificate:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -434,8 +454,9 @@ function CastCertificate() {
                       onClick={handleSearch}
                       type="button"
                       className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
+                      disabled={isSubmitting}
                     >
-                      Search
+                      {isSubmitting ? "Searching..." : "Search"}
                     </button>
                   </div>
                 </div>
@@ -467,7 +488,7 @@ function CastCertificate() {
                       <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
                         <table className="min-w-full leading-normal table-auto">
                           <thead>
-                            <tr className="bg-gray-100">
+                            <tr className="bg-gray-200">
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 S.No
                               </th>
@@ -663,8 +684,9 @@ function CastCertificate() {
                     style={{ backgroundColor: "#2196F3" }}
                     className="btn text-white px-3 mb-2"
                     onClick={handleSubmitEdit}
+                    disabled={isSubmitting}
                   >
-                    Issue
+                    {isSubmitting ? "Issuing..." : "Issue"}
                   </button>
                 </div>
               </div>
@@ -706,8 +728,9 @@ function CastCertificate() {
                     style={{ backgroundColor: "#2196F3" }}
                     className="btn text-white px-3 mb-2"
                     onClick={handleDownloadSumbit}
+                    disabled={isSubmitting}
                   >
-                    Download
+                    {isSubmitting ? "Downloading..." : "Download"}
                   </button>
                 </div>
               </div>
@@ -749,8 +772,9 @@ function CastCertificate() {
                     type="button"
                     className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

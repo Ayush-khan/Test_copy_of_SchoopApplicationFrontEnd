@@ -48,6 +48,7 @@ function PercentageCertificate() {
   const [highestMarks, setHighestMarks] = useState("");
   const [marksError, setMarksError] = useState(""); // Error for validation
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const pageSize = 10;
   useEffect(() => {
@@ -122,8 +123,12 @@ function PercentageCertificate() {
 
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     if (!classIdForManage) {
       setNameError("Please select the class.");
+      setIsSubmitting(false);
+
       return;
     }
     try {
@@ -158,6 +163,8 @@ function PercentageCertificate() {
     } catch (error) {
       console.error("Error fetching Percentage certificates Listing:", error);
       setError("Error Percentage certificates");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -186,6 +193,8 @@ function PercentageCertificate() {
   };
 
   const handleDownloadSumbit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       //  setLoading(true); // Show loading indicator if you have one
       const token = localStorage.getItem("authToken");
@@ -247,6 +256,8 @@ function PercentageCertificate() {
         );
       }
       console.error("Error in Downloading Percentage Certificate:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
     //    finally {
     //      setLoading(false); // Stop loading indicator
@@ -274,6 +285,8 @@ function PercentageCertificate() {
   };
 
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -317,10 +330,14 @@ function PercentageCertificate() {
         toast.error(`Error updating Percentage issue status: ${error.message}`);
       }
       console.error("Error Percentage issue status:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       const subReportCardId = currentSection?.sr_no; // Get the correct ID
@@ -352,6 +369,8 @@ function PercentageCertificate() {
         toast.error(`Error deleting Percentage: ${error.message}`);
       }
       console.error("Error deleting Percentage:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -442,8 +461,9 @@ function PercentageCertificate() {
                       onClick={handleSearch}
                       type="button"
                       className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
+                      disabled={isSubmitting}
                     >
-                      Search
+                      {isSubmitting ? "Searching..." : "Search"}
                     </button>
                   </div>
                 </div>
@@ -475,7 +495,7 @@ function PercentageCertificate() {
                       <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
                         <table className="min-w-full leading-normal table-auto">
                           <thead>
-                            <tr className="bg-gray-100">
+                            <tr className="bg-gray-200">
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 S.No
                               </th>
@@ -670,8 +690,9 @@ function PercentageCertificate() {
                     style={{ backgroundColor: "#2196F3" }}
                     className="btn text-white px-3 mb-2"
                     onClick={handleSubmitEdit}
+                    disabled={isSubmitting}
                   >
-                    Issue
+                    {isSubmitting ? "Issuing..." : "Issue"}
                   </button>
                 </div>
               </div>
@@ -713,8 +734,9 @@ function PercentageCertificate() {
                     style={{ backgroundColor: "#2196F3" }}
                     className="btn text-white px-3 mb-2"
                     onClick={handleDownloadSumbit}
+                    disabled={isSubmitting}
                   >
-                    Download
+                    {isSubmitting ? "Downloading..." : "Download"}
                   </button>
                 </div>
               </div>
@@ -756,8 +778,9 @@ function PercentageCertificate() {
                     type="button"
                     className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

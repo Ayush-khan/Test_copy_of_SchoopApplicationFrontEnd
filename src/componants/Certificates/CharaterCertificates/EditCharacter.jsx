@@ -70,7 +70,7 @@ const EditCharacter = () => {
             stud_name: fetchedData.stud_name || "",
             dob: fetchedData.dob || "",
             // dob_words: fetchedData.dob_words || "",
-            dob_words: convertDateToWords(fetchedData.dob),
+            dob_words: fetchedData.dob_words || " ",
 
             date: today || "",
             class_division: fetchedData.class_division || "",

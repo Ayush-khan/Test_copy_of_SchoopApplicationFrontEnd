@@ -50,6 +50,7 @@ function DeleteStudent() {
     leaving_remark: "",
   });
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const pageSize = 10;
   useEffect(() => {
@@ -119,6 +120,8 @@ function DeleteStudent() {
 
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     // Clear any existing error messages
     setNameError("");
 
@@ -148,6 +151,8 @@ function DeleteStudent() {
     } catch (error) {
       console.error("Error fetching Deleted Students List:", error);
       setError("Error fetching data. Please try again later.");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -183,6 +188,8 @@ function DeleteStudent() {
   };
 
   const handleAddStudent = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       const subReportCardId = currentSection?.student_id; // Get the correct ID
@@ -214,6 +221,8 @@ function DeleteStudent() {
         toast.error(`Error in adding student: ${error.message}`);
       }
       console.error("Error in adding student:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -230,6 +239,8 @@ function DeleteStudent() {
   };
 
   const handleLCDetails = async (section) => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     setCurrentSection(section);
     console.log("currentedit", section);
 
@@ -256,10 +267,12 @@ function DeleteStudent() {
     } catch (error) {
       console.error("Error fetching leaving certificate details:", error);
       setError("Error fetching leaving certificate details");
-    }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
 
-    // Show the edit modal
-    setShowEditModal(true);
+      // Show the edit modal
+      setShowEditModal(true);
+    }
   };
   const handleCloseModal = () => {
     setShowDownloadModal(false);
@@ -326,8 +339,9 @@ function DeleteStudent() {
                     onClick={handleSearch}
                     type="button"
                     className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
+                    disabled={isSubmitting}
                   >
-                    Search
+                    {isSubmitting ? "Searching..." : "Search"}
                   </button>
                 </div>
               </div>
@@ -359,7 +373,7 @@ function DeleteStudent() {
                     <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
                       <table className="min-w-full leading-normal table-auto">
                         <thead>
-                          <tr className="bg-gray-100">
+                          <tr className="bg-gray-200">
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               S.No
                             </th>{" "}
@@ -606,8 +620,9 @@ function DeleteStudent() {
                     type="button"
                     className="btn btn-primary px-3 mb-2"
                     onClick={handleAddStudent}
+                    disabled={isSubmitting}
                   >
-                    Add
+                    {isSubmitting ? "Saving..." : "Add"}
                   </button>
                 </div>
               </div>

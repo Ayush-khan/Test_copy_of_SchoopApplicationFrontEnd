@@ -49,6 +49,7 @@ function ManageLCStudent() {
     leaving_remark: "",
   });
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const pageSize = 10;
   useEffect(() => {
@@ -118,6 +119,8 @@ function ManageLCStudent() {
 
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     // Clear any existing error messages
     setNameError("");
 
@@ -149,6 +152,8 @@ function ManageLCStudent() {
     } catch (error) {
       console.error("Error fetching Leaving Certificate Student List:", error);
       setError("Error fetching data. Please try again later.");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -184,6 +189,8 @@ function ManageLCStudent() {
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       const subReportCardId = currentSection?.student_id; // Get the correct ID
@@ -215,6 +222,8 @@ function ManageLCStudent() {
         toast.error(`Error deleting LC Student : ${error.message}`);
       }
       console.error("Error deleting LC Student :", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -315,8 +324,9 @@ function ManageLCStudent() {
                     onClick={handleSearch}
                     type="button"
                     className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
+                    disabled={isSubmitting}
                   >
-                    Search
+                    {isSubmitting ? "Searching..." : "Search"}
                   </button>
                 </div>
               </div>
@@ -348,7 +358,7 @@ function ManageLCStudent() {
                     <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
                       <table className="min-w-full leading-normal table-auto">
                         <thead>
-                          <tr className="bg-gray-100">
+                          <tr className="bg-gray-200">
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               S.No
                             </th>{" "}
@@ -579,8 +589,9 @@ function ManageLCStudent() {
                     type="button"
                     className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

@@ -48,6 +48,7 @@ function CharacterCertificate() {
   const [highestMarks, setHighestMarks] = useState("");
   const [marksError, setMarksError] = useState(""); // Error for validation
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const pageSize = 10;
   useEffect(() => {
@@ -116,8 +117,12 @@ function CharacterCertificate() {
 
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     if (!classIdForManage) {
       setNameError("Please select the class.");
+      setIsSubmitting(false);
+
       return;
     }
     try {
@@ -152,6 +157,8 @@ function CharacterCertificate() {
     } catch (error) {
       console.error("Error fetching Character certificates Listing:", error);
       setError("Error fetching Character certificates");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -180,6 +187,8 @@ function CharacterCertificate() {
   };
 
   const handleDownloadSumbit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       //  setLoading(true); // Show loading indicator if you have one
       const token = localStorage.getItem("authToken");
@@ -241,6 +250,8 @@ function CharacterCertificate() {
         );
       }
       console.error("Error in Downloading Character Certificate:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
     //    finally {
     //      setLoading(false); // Stop loading indicator
@@ -320,10 +331,14 @@ function CharacterCertificate() {
         toast.error(`Error updating Character issue status: ${error.message}`);
       }
       console.error("Error Character issue status:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       const subReportCardId = currentSection?.sr_no; // Get the correct ID
@@ -353,6 +368,8 @@ function CharacterCertificate() {
         toast.error(`Error deleting Character: ${error.message}`);
       }
       console.error("Error deleting Character:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -443,8 +460,9 @@ function CharacterCertificate() {
                       onClick={handleSearch}
                       type="button"
                       className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
+                      disabled={isSubmitting}
                     >
-                      Search
+                      {isSubmitting ? "Searching..." : "Search"}
                     </button>
                   </div>
                 </div>
@@ -476,7 +494,7 @@ function CharacterCertificate() {
                       <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
                         <table className="min-w-full leading-normal table-auto">
                           <thead>
-                            <tr className="bg-gray-100">
+                            <tr className="bg-gray-200">
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 S.No
                               </th>
@@ -671,8 +689,9 @@ function CharacterCertificate() {
                     style={{ backgroundColor: "#2196F3" }}
                     className="btn text-white px-3 mb-2"
                     onClick={handleSubmitEdit}
+                    disabled={isSubmitting}
                   >
-                    Issue
+                    {isSubmitting ? "Issuing..." : "Issue"}
                   </button>
                 </div>
               </div>
@@ -714,8 +733,9 @@ function CharacterCertificate() {
                     style={{ backgroundColor: "#2196F3" }}
                     className="btn text-white px-3 mb-2"
                     onClick={handleDownloadSumbit}
+                    disabled={isSubmitting}
                   >
-                    Download
+                    {isSubmitting ? "Downloading..." : "Download"}
                   </button>
                 </div>
               </div>
@@ -757,8 +777,9 @@ function CharacterCertificate() {
                     type="button"
                     className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

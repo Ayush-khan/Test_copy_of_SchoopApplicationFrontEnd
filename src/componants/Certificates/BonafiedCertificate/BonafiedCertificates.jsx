@@ -46,6 +46,8 @@ function BonafiedCertificates() {
   const [newMarksHeading, setNewMarksHeading] = useState("");
   const [highestMarks, setHighestMarks] = useState("");
   const [marksError, setMarksError] = useState(""); // Error for validation
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navigate = useNavigate();
   const pageSize = 10;
   useEffect(() => {
@@ -114,8 +116,11 @@ function BonafiedCertificates() {
 
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     if (!classIdForManage) {
       setNameError("Please select the class.");
+      setIsSubmitting(false);
       return;
     }
     try {
@@ -150,6 +155,8 @@ function BonafiedCertificates() {
     } catch (error) {
       console.error("Error fetching Bonafied certificates Listing:", error);
       setError("Error fetching Bonafied certificates");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -179,6 +186,8 @@ function BonafiedCertificates() {
   };
 
   const handleDownloadSumbit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       //  setLoading(true); // Show loading indicator if you have one
       const token = localStorage.getItem("authToken");
@@ -238,6 +247,8 @@ function BonafiedCertificates() {
         );
       }
       console.error("Error in Downloading Bonafied Certificate:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
     //    finally {
     //      setLoading(false); // Stop loading indicator
@@ -265,6 +276,8 @@ function BonafiedCertificates() {
   };
 
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -308,10 +321,14 @@ function BonafiedCertificates() {
         toast.error(`Error updating Bonafied issue status: ${error.message}`);
       }
       console.error("Error Bonafied issue status:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       const subReportCardId = currentSection?.sr_no; // Get the correct ID
@@ -338,6 +355,8 @@ function BonafiedCertificates() {
         toast.error(`Error deleting Bonafied: ${error.message}`);
       }
       console.error("Error deleting Bonafied:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -426,9 +445,10 @@ function BonafiedCertificates() {
                     <button
                       onClick={handleSearch}
                       type="button"
+                      disabled={isSubmitting}
                       className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
                     >
-                      Search
+                      {isSubmitting ? "Searching..." : "Search"}
                     </button>
                   </div>
                 </div>
@@ -460,7 +480,7 @@ function BonafiedCertificates() {
                       <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
                         <table className="min-w-full leading-normal table-auto">
                           <thead>
-                            <tr className="bg-gray-100">
+                            <tr className="bg-gray-200">
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 S.No
                               </th>
@@ -656,8 +676,9 @@ function BonafiedCertificates() {
                     style={{ backgroundColor: "#2196F3" }}
                     className="btn text-white px-3 mb-2"
                     onClick={handleSubmitEdit}
+                    disabled={isSubmitting}
                   >
-                    Issue
+                    {isSubmitting ? "Issuing..." : "Issue"}
                   </button>
                 </div>
               </div>
@@ -700,8 +721,9 @@ function BonafiedCertificates() {
                     style={{ backgroundColor: "#2196F3" }}
                     className="btn text-white px-3 mb-2"
                     onClick={handleDownloadSumbit}
+                    disabled={isSubmitting}
                   >
-                    Download
+                    {isSubmitting ? "Downloading..." : "Download"}
                   </button>
                 </div>
               </div>
@@ -744,8 +766,9 @@ function BonafiedCertificates() {
                     type="button"
                     className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

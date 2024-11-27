@@ -552,16 +552,19 @@ const CreateNotice = () => {
                         </div>
                       </div>
                       .{/* File Upload */}
-                      <div className="w-full relative -top-14 md:w-[58%]  flex flex-row justify-between gap-x-2 ">
-                        <h5 className="px-2 mt-2 lg:px-3 py-2 text-[1em] text-gray-700">
+                      <div className="w-full relative -top-14 md:w-[85%]  flex flex-row justify-start gap-x-2 space-x-2 md:space-x-11 ">
+                        <h5 className="px-2 mt-2 lg:px-3 py-2 text-[1em] text-nowrap text-gray-700">
                           Upload Files
                         </h5>
                         <input
-                          className="mt-3 relative  right-0 md:right-[25%] text-xs bg-gray-50 "
+                          className="mt-3 text-xs "
                           type="file"
                           multiple
                           onChange={handleFileUpload}
-                        />
+                        />{" "}
+                        <span className="relative right-[7%] top-5 text-pink-500 text-[.7em]">
+                          (Each file must not exceed a maximum size of 2MB)
+                        </span>
                       </div>
                       <h5 className="relative -top-9 text-[1em] text-gray-700 px-2">
                         Attachment:

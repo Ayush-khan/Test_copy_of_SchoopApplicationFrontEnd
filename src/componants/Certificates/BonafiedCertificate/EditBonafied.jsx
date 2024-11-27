@@ -13,16 +13,11 @@ import { RxCross1 } from "react-icons/rx";
 const EditBonafied = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [nameError, setNameError] = useState("");
-  const [nameErrorForClass, setNameErrorForClass] = useState("");
   const [selectedClass, setSelectedClass] = useState(null);
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [loadingForSearch, setLoadingForSearch] = useState(false);
   const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
-
-  const [selectedActivities, setSelectedActivities] = useState([]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -75,9 +70,11 @@ const EditBonafied = () => {
           // Populate formData with the fetched data
           setFormData({
             sr_no: fetchedData.sr_no || "",
+            date: today || "", // Directly from the fetched data
+
             stud_name: fetchedData.stud_name || "",
             dob: fetchedData.dob || "",
-            dob_words: convertDateToWords(fetchedData.dob),
+            dob_words: fetchedData.dob_words || " ",
             issue_date_bonafide: fetchedData.issue_date_bonafide || "",
             father_name: fetchedData.father_name || "",
             class_division: fetchedData.class_division || "",

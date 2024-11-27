@@ -67,7 +67,9 @@ const EditSimpleBonafied = () => {
             sr_no: fetchedData.sr_no || "",
             stud_name: fetchedData.stud_name || "",
             dob: fetchedData.dob || "",
-            dob_words: convertDateToWords(fetchedData?.dob),
+            dob_words: fetchedData.dob_words || " ",
+
+            // dob_words: convertDateToWords(fetchedData?.dob),
             date: today || "",
             father_name: fetchedData.father_name || "",
             class_division: fetchedData.class_division || "",
