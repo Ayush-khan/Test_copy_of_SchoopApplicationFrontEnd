@@ -33,6 +33,8 @@ function NewStudentList() {
   //   variable to store the respone of the allot subject tab
   const [nameError, setNameError] = useState(null);
   //   const [selectedFile, setSelectedFile] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const pageSize = 10;
 
   // for react-search of manage tab teacher Edit and select class
@@ -65,7 +67,9 @@ function NewStudentList() {
   const handleClassSelect = (selectedOption) => {
     setNameError("");
     setSelectedClass(selectedOption);
-    setclassIdForManage(selectedOption.value); // Assuming value is the class ID
+    setclassIdForManage(selectedOption ? selectedOption.value : null); // Set to null if cleared
+
+    // setclassIdForManage(selectedOption.value); // Assuming value is the class ID
     setClassNameForBulkUpload(selectedOption.label);
     console.log("selected class name", selectedOption);
     setSectionIdForStudentList(selectedOption.value); //
@@ -89,8 +93,12 @@ function NewStudentList() {
   };
 
   const handleSearch = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     if (!classIdForManage) {
       setNameError("Please select Class.");
+      setIsSubmitting(false);
+
       //   toast.error("Please select Class!");
       return;
     }
@@ -116,6 +124,7 @@ function NewStudentList() {
       toast.error("Error fetching student details.");
     } finally {
       setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -239,6 +248,8 @@ function NewStudentList() {
     setUserIdset(e.target.value);
   };
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     // Handle delete submission logic
     try {
       const token = localStorage.getItem("authToken");
@@ -283,8 +294,10 @@ function NewStudentList() {
       }
       console.error("Error deleting Student:", error);
       // setError(error.message);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDeleteModal(false);
     }
-    setShowDeleteModal(false);
   };
 
   const handleCloseModal = () => {
@@ -393,7 +406,9 @@ function NewStudentList() {
     const studentFullName =
       `${section?.first_name} ${section?.mid_name} ${section?.last_name}`?.toLowerCase() ||
       "";
-    const UserId = section?.user?.user_id?.toLowerCase() || "";
+    const UserId =
+      `${section?.get_class?.name} ${section?.get_division?.name}`?.toLowerCase() ||
+      "";
 
     // Check if the search term is present in either the teacher's name or the subject's name
     return (
@@ -583,9 +598,10 @@ function NewStudentList() {
                       <button
                         onClick={handleSearch}
                         type="button"
+                        disabled={isSubmitting}
                         className="mr-0 md:mr-4 my-1 md:my-4 btn h-10  w-18 md:w-auto btn-primary "
                       >
-                        Search
+                        {isSubmitting ? "Searching..." : "Search"}
                       </button>
                     </div>
                   </div>
@@ -620,7 +636,7 @@ function NewStudentList() {
                     <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
                       <table className="min-w-full leading-normal table-auto">
                         <thead>
-                          <tr className="bg-gray-100">
+                          <tr className="bg-gray-200">
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               S.No
                             </th>
@@ -751,8 +767,9 @@ function NewStudentList() {
                     type="button"
                     className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

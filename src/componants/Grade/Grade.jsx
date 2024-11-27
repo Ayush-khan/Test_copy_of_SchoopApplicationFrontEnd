@@ -188,9 +188,10 @@ function Grade() {
       errors.name = "Please enter Grade name.";
     } else if (name.length > 3) {
       errors.name = "The name field must not exceed 3 characters.";
-    } else if (!/^[A-Z\+]+$/.test(name)) {
-      // Regex to check for uppercase letters and '+'
-      errors.name = "The name field must contain uppercase letters ";
+    } else if (!/^[A-Z0-9\+\-]+$/.test(name)) {
+      // Regex to check for uppercase letters, digits, '+' and '-'
+      errors.name =
+        "The name field must contain only capital letters, digits, '+' or '-'.";
     }
 
     if (!departmentId) {
@@ -199,11 +200,16 @@ function Grade() {
 
     if (!startDate) {
       errors.startDate = "Marks from is required.";
+    } else if (parseFloat(startDate) > 100) {
+      errors.startDate = "Marks from cannot be greater than 100.";
     }
 
     if (!endDate) {
       errors.endDate = "Marks upto is required.";
+    } else if (parseFloat(endDate) > 100) {
+      errors.endDate = "Marks upto cannot be greater than 100.";
     }
+
     if (startDate && endDate && parseFloat(startDate) > parseFloat(endDate)) {
       errors.startDate = "Marks from cannot be greater than Marks upto.";
     }
@@ -947,7 +953,7 @@ function Grade() {
                     backgroundColor: "#C03078",
                   }}
                 ></div>
-                <div className="modal-body">
+                <div className="modal-body ">
                   <div className=" relative  flex justify-center  mx-4">
                     <label htmlFor="class" className="w-1/2 mt-2">
                       Class <span className="text-red-500">*</span>
@@ -1060,7 +1066,7 @@ function Grade() {
                       }}
                     />
                   </div>
-                  <div className="w-[60%] relative -top-2 h-4 left-[35%]">
+                  <div className="w-[60%] relative -top-1 h-4 left-[35%]">
                     {fieldErrors.startDate && (
                       <span className="text-red-500 text-xs">
                         {fieldErrors.startDate}
@@ -1068,7 +1074,7 @@ function Grade() {
                     )}
                   </div>
 
-                  <div className="relative flex justify-center mx-4">
+                  <div className="relative top-1 flex justify-center mx-4">
                     <label htmlFor="marksUpto" className="w-1/2 mt-2">
                       Marks upto <span className="text-red-500">*</span>
                     </label>
@@ -1095,7 +1101,7 @@ function Grade() {
                       }}
                     />
                   </div>
-                  <div className="w-[60%] relative h-4 left-[35%]">
+                  <div className="w-[60%] relative  h-4 left-[35%]">
                     {fieldErrors.endDate && (
                       <span className="text-red-500 text-xs">
                         {fieldErrors.endDate}
@@ -1103,7 +1109,7 @@ function Grade() {
                     )}
                   </div>
 
-                  <div className=" relative  flex justify-center  mx-4">
+                  <div className=" relative top-2  flex justify-center  mx-4">
                     <label htmlFor="comment" className="w-1/2 mt-2">
                       Comment
                     </label>
