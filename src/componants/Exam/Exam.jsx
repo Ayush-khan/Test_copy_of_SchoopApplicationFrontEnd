@@ -323,12 +323,8 @@ function Exam() {
       }
     } catch (error) {
       console.error("Error deleting Exam:", error);
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        toast.error(error.response.data.message);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
       } else {
         toast.error("Server error. Please try again later.");
       }

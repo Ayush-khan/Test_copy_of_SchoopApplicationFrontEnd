@@ -264,10 +264,17 @@ function SubjectList() {
       toast.success("Subject updated successfully!");
     } catch (error) {
       console.error("Error editing subject:", error);
-      if (error.response && error.response.data && error.response.data.errors) {
-        Object.values(error.response.data.errors).forEach((err) =>
-          toast.error(err)
-        );
+      if (error.response && error.response.data.status === 422) {
+        const errors = error.response.data.errors;
+        console.log("error", errors);
+        // Handle name field error
+        if (errors.name) {
+          setFieldErrors((prev) => ({
+            ...prev,
+            name: errors.name, // Show the first error message for the name field
+          }));
+          errors.name.forEach((err) => toast.error(err)); // Show all errors in toast
+        }
       } else {
         toast.error("Server error. Please try again later.");
       }
@@ -316,12 +323,8 @@ function SubjectList() {
       }
     } catch (error) {
       console.error("Error deleting Subject:", error);
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        toast.error(error.response.data.message);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
       } else {
         toast.error("Server error. Please try again later.");
       }

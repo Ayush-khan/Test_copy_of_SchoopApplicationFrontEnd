@@ -385,17 +385,20 @@ function SubjectAllotmentForReportCard() {
   };
 
   const filteredSections = subjects.filter((section) => {
-    // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
-    const teacherName = section?.subject_type?.toLowerCase() || "";
+    // Convert values to lowercase for case-insensitive comparison
+    const className = section?.get_clases?.name?.toLowerCase() || ""; // Class name
     const subjectName =
-      section?.get_subjects_for_report_card?.name?.toLowerCase() || "";
+      section?.get_subjects_for_report_card?.name?.toLowerCase() || ""; // Subject name
+    const subjectType = section?.subject_type?.toLowerCase() || ""; // Subject type
 
-    // Check if the search term is present in either the teacher's name or the subject's name
+    // Check if the search term matches any of the fields
     return (
-      teacherName.includes(searchTerm.toLowerCase()) ||
-      subjectName.includes(searchTerm.toLowerCase())
+      className.includes(searchTerm.toLowerCase()) ||
+      subjectName.includes(searchTerm.toLowerCase()) ||
+      subjectType.includes(searchTerm.toLowerCase())
     );
   });
+
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -628,22 +631,36 @@ function SubjectAllotmentForReportCard() {
                 ></div>
                 <div className="modal-body">
                   {/* Modal content for editing */}
-                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
+                  <div className="relative flex justify-center mx-4 gap-x-7">
                     <label htmlFor="newClassName" className="w-1/2 mt-2">
                       Class:
                     </label>
-                    <div className="font-bold form-control shadow-md mb-2">
-                      {newclassnames}
-                    </div>
+                    <input
+                      type="text"
+                      maxLength={2}
+                      readOnly
+                      className="bg-gray-200 w-full p-2 rounded-md outline-none shadow-md mb-3"
+                      id="class"
+                      value={newclassnames}
+                    />{" "}
                   </div>
 
                   <div className="relative flex justify-start mx-4 gap-x-7">
                     <label htmlFor="newSubjectName" className="w-1/2 mt-2">
                       Subject:
                     </label>
-                    <span className="font-semibold form-control shadow-md mb-2">
-                      {newSubject}
-                    </span>
+                    <input
+                      type="text"
+                      maxLength={2}
+                      readOnly
+                      className="bg-gray-200 w-full p-2 rounded-md outline-none shadow-md "
+                      // style={{ background: "#F8F8F8" }}
+                      id="class"
+                      value={newSubject}
+                      // onChange={handleChangeSectionName}
+                      // onChange={}
+                      // onBlur={handleBlur}
+                    />{" "}
                   </div>
 
                   <div className="modal-body">
