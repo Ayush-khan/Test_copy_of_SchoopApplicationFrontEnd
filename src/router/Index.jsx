@@ -158,6 +158,10 @@ import ViewDeletedStudent from "../componants/DeleteStudent/ViewDeletedStudent.j
 import EditLCforDeleteStudent from "../componants/DeleteStudent/EditLCforDeleteStudent.jsx";
 import LeavingCertificate from "../componants/LeavingCertificate/LeavingCertificate.jsx";
 import NoticeAndSms from "../componants/NoticeAndSms/NoticeAndSms.jsx";
+import ExamTImeTable from "../componants/MastersModule/ExamTimeTable/ExamTImeTable.jsx";
+import CreateExamTimeTable from "../componants/MastersModule/ExamTimeTable/CreateExamTimeTable.jsx";
+import EditExamTimeTable from "../componants/MastersModule/ExamTimeTable/EditExamTimeTable.jsx";
+import ViewExamTimeTable from "../componants/MastersModule/ExamTimeTable/ViewExamTimeTable.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -424,6 +428,23 @@ function Index() {
         <Route
           path="/allotMarksHeading"
           element={<PrivateRoute element={AllotMarksHeading} />}
+        />
+        {/* Exam Time Table */}
+        <Route
+          path="/examTImeTable"
+          element={<PrivateRoute element={ExamTImeTable} />}
+        />
+        <Route
+          path="/creaExamTimeTable"
+          element={<PrivateRoute element={CreateExamTimeTable} />}
+        />
+        <Route
+          path="/examTimeTable/edit/:id"
+          element={<PrivateRoute element={EditExamTimeTable} />}
+        />
+        <Route
+          path="/examTimeTable/view/:id"
+          element={<PrivateRoute element={ViewExamTimeTable} />}
         />
 
         <Route path="/sections" element={<PrivateRoute element={Sections} />} />

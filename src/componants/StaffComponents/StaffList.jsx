@@ -279,8 +279,8 @@ function StaffList() {
     (currentPage + 1) * pageSize
   );
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>Error: {error}</p>;
 
   return (
     <>
@@ -355,82 +355,83 @@ function StaffList() {
                     </tr>
                   </thead>
                   <tbody>
-                    {displayedStaffs.map((staffItem, index) => (
-                      <tr
-                        key={staffItem.user_id}
-                        className={`${
-                          index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                        } hover:bg-gray-50`}
-                      >
-                        {console.log(
-                          "this is inside the staflist component in the table",
-                          staffItem
-                        )}
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {index + 1}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
+                    {displayedStaffs.length ? (
+                      displayedStaffs.map((staffItem, index) => (
+                        <tr
+                          key={staffItem.user_id}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50`}
+                        >
                           {console.log(
-                            "the teacher image",
-                            `${API_URL}${staffItem?.teacher_image_name}`
+                            "this is inside the staflist component in the table",
+                            staffItem
                           )}
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {index + 1}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
+                            {console.log(
+                              "the teacher image",
+                              `${API_URL}${staffItem?.teacher_image_name}`
+                            )}
 
-                          <img
-                            src={
-                              staffItem?.teacher_image_name
-                                ? `${API_URL}${staffItem?.teacher_image_name}`
-                                : "https://via.placeholder.com/50"
-                            }
-                            alt={staffItem?.name}
-                            className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
-                          />
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.employee_id}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.name}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.email}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.phone}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.designation}
-                          </p>
-                        </td>
+                            <img
+                              src={
+                                staffItem?.teacher_image_name
+                                  ? `${API_URL}${staffItem?.teacher_image_name}`
+                                  : "https://via.placeholder.com/50"
+                              }
+                              alt={staffItem?.name}
+                              className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
+                            />
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {staffItem?.employee_id}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {staffItem?.name}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {staffItem?.email}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {staffItem?.phone}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {staffItem?.designation}
+                            </p>
+                          </td>
 
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                            onClick={() => handleSubmitEdit(staffItem)}
-                          >
-                            <FontAwesomeIcon icon={faEdit} />
-                          </button>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                            onClick={() => handleDelete(staffItem)}
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                          </button>
-                        </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleSubmitEdit(staffItem)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                              onClick={() => handleDelete(staffItem)}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </td>
 
-                        {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                           <button
                             className="btn btn-primary btn-sm"
                             onClick={() => handleEdit(staffItem)}
@@ -446,17 +447,17 @@ function StaffList() {
                             <FontAwesomeIcon icon={faTrash} />
                           </button>
                         </td> */}
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                            onClick={() => handleView(staffItem)}
-                          >
-                            <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                            {/* <FontAwesomeIcon icon={faEdit} /> */}
-                          </button>
-                        </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleView(staffItem)}
+                            >
+                              <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                              {/* <FontAwesomeIcon icon={faEdit} /> */}
+                            </button>
+                          </td>
 
-                        {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                           <button
                             className="btn btn-success btn-sm"
                             onClick={() => handleView(staffItem)}
@@ -464,8 +465,15 @@ function StaffList() {
                             <MdOutlineRemoveRedEye />
                           </button>
                         </td> */}
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="9" className="text-center">
+                          No Staffs are found
+                        </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>

@@ -3,12 +3,18 @@ import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faTrash,
+  faPlus,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
+import { FaCheck } from "react-icons/fa";
 
 function ExamTImeTable() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -27,6 +33,11 @@ function ExamTImeTable() {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const pageSize = 10;
+  const [showDActiveModal, setShowDActiveModal] = useState(false);
+  const [currentStudentDataForActivate, setCurrentStudentDataForActivate] =
+    useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navigate = useNavigate();
   const fetchStaffs = async () => {
     try {
@@ -36,15 +47,15 @@ function ExamTImeTable() {
         throw new Error("No authentication token found");
       }
 
-      const response = await axios.get(`${API_URL}/api/staff_list`, {
+      const response = await axios.get(`${API_URL}/api/get_timetablelist`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         withCredentials: true,
       });
 
-      setStaffs(response.data);
-      setPageCount(Math.ceil(response.data.length / pageSize));
+      setStaffs(response.data.data);
+      setPageCount(Math.ceil(response.data.data.length / pageSize));
     } catch (error) {
       setError(error.message);
     } finally {
@@ -59,12 +70,71 @@ function ExamTImeTable() {
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
   };
+  const handleActiveAndInactive = (subjectIsPass) => {
+    console.log("handleActiveAndInactive-->", subjectIsPass.exam_tt_id);
+    const studentToActiveOrDeactive = staffs.find(
+      (cls) => cls.exam_tt_id === subjectIsPass.exam_tt_id
+    );
+    setCurrentStudentDataForActivate({ studentToActiveOrDeactive });
+    console.log("studentToActiveOrDeactive", studentToActiveOrDeactive);
+    setShowDActiveModal(true);
+  };
 
-  const handlePublish = () => {
-    setShowAddModal(true);
+  const handleActivateOrNot = async (staffItem) => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token || !staffItem?.exam_tt_id) {
+        throw new Error("Exam Timetable ID is missing");
+      }
+
+      // Determine API URL based on publish status
+      const apiUrl =
+        staffItem.publish === "Y"
+          ? `${API_URL}/api/update_unpublishtimetable/${staffItem.exam_tt_id}`
+          : `${API_URL}/api/update_publishtimetable/${staffItem.exam_tt_id}`;
+
+      // Send the PUT request
+      const response = await axios.put(
+        apiUrl,
+        {}, // Empty data object since no body is needed
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Refresh the list of staff to reflect the changes
+      fetchStaffs();
+
+      // Close the modal and show a success message
+      setShowDActiveModal(false);
+      toast.success(
+        response?.data?.message ||
+          "Exam Time Table Publish/Unpublish Operation successful"
+      );
+    } catch (error) {
+      // Handle errors and show appropriate error messages
+      if (error.response && error.response.data) {
+        toast.error(`Error: ${error.response.data.message}`);
+      } else {
+        toast.error(`Error: ${error.message}`);
+      }
+      console.error("Error in Publish/Unpublish operation:", error);
+    } finally {
+      // Re-enable the button and close the modal
+      setIsSubmitting(false);
+      setShowDActiveModal(false);
+    }
   };
 
   const handleCloseModal = () => {
+    setShowDActiveModal(false);
+
     setShowAddModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
@@ -73,43 +143,11 @@ function ExamTImeTable() {
     setCurrentStaff(null);
   };
 
-  const handleSubmitPublish = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      const response = await axios.post(
-        `${API_URL}/api/store_staff`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
-
-      if (response.status === 201) {
-        fetchStaffs(); // Refresh staff list after successful addition
-        handleCloseModal();
-        toast.success("Staff added successfully!");
-      } else {
-        toast.error("Failed to add staff");
-      }
-    } catch (error) {
-      console.error("Error adding staff:", error);
-      toast.error("Failed to add staff");
-    }
-  };
-
   const handleSubmitEdit = (staffItem) => {
     console.log("this is the )))))))))", staffItem.get_teacher);
     // navigate(`/editStaff/${staffItem.user_id}`
     navigate(
-      `/staff/edit/${staffItem.teacher_id}`,
+      `/examTImeTable/edit/${staffItem.exam_tt_id}`,
 
       {
         state: { staff: staffItem },
@@ -120,15 +158,15 @@ function ExamTImeTable() {
   const handleDelete = (staffCurrent) => {
     console.log("insise detelt");
     // const staffToDelete = staffs.find((staff) => staff.user_id === id);
-    console.log("this is staffUersid", staffCurrent.teacher_id);
-    setCurrentStaff(staffCurrent.teacher_id);
+    console.log("this is staffUersid", staffCurrent.exam_tt_id);
+    setCurrentStaff(staffCurrent.exam_tt_id);
     setCurrentStaffName(staffCurrent.name);
     setShowDeleteModal(true);
   };
   const handleView = async (staffItem) => {
     console.log("handleview is running on");
     navigate(
-      `/staff/view/${staffItem.teacher_id}`,
+      `/examTImeTable/view/${staffItem.exam_tt_id}`,
 
       {
         state: { staff: staffItem },
@@ -137,15 +175,17 @@ function ExamTImeTable() {
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
       if (!token || !currentStaff) {
-        throw new Error("Teacher ID is missing");
+        throw new Error("Exam Timetable ID is missing");
       }
 
       const response = await axios.delete(
-        `${API_URL}/api/teachers/${currentStaff}`,
+        `${API_URL}/api/delete_timetable/${currentStaff}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -157,27 +197,28 @@ function ExamTImeTable() {
       if (response.status === 200) {
         fetchStaffs(); // Refresh staff list after successful deletion
         handleCloseModal();
-        toast.success("Staff deleted successfully!");
+        toast.success("Exam timetable deleted successfully!");
       } else {
-        toast.error("Failed to delete staff");
+        toast.error("Failed to delete exam timetable");
       }
     } catch (error) {
-      console.error("Error deleting staff:", error);
-      toast.error("Failed to delete staff");
+      console.error("Error deleting exam timetable:", error);
+      toast.error("Failed to delete exam timetable");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
-  const filteredStaffs = staffs.filter((staff) =>
-    staff.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredStaffs = staffs.filter(
+    (staff) =>
+      staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      staff?.className?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const displayedStaffs = filteredStaffs.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
 
   return (
     <>
@@ -186,7 +227,7 @@ function ExamTImeTable() {
         <div className="card mx-auto lg:w-full shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Staff List
+              Exam Timetable
             </h3>
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -199,7 +240,7 @@ function ExamTImeTable() {
               </div>
               <button
                 className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                onClick={() => navigate("/CreateStaff")}
+                onClick={() => navigate("/creaExamTimeTable")}
               >
                 <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
                 Add
@@ -223,22 +264,11 @@ function ExamTImeTable() {
                         S.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Photo
+                        Class
                       </th>
+
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Employee Id
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Staff Name
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Email
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Phone no.
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Designation
+                        Exam
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Edit
@@ -247,137 +277,107 @@ function ExamTImeTable() {
                         Delete
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Publish
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         View
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {displayedStaffs.map((staffItem, index) => (
-                      <tr
-                        key={staffItem.user_id}
-                        className={`${
-                          index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                        } hover:bg-gray-50`}
-                      >
-                        {console.log(
-                          "this is inside the staflist component in the table",
-                          staffItem
-                        )}
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {index + 1}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
+                    {displayedStaffs.length ? (
+                      displayedStaffs.map((staffItem, index) => (
+                        <tr
+                          key={staffItem.user_id}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50`}
+                        >
                           {console.log(
-                            "the teacher image",
-                            `${API_URL}${staffItem?.teacher_image_name}`
+                            "this is inside the staflist component in the table",
+                            staffItem
                           )}
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {index + 1}
+                            </p>
+                          </td>
 
-                          <img
-                            src={
-                              staffItem?.teacher_image_name
-                                ? `${API_URL}${staffItem?.teacher_image_name}`
-                                : "https://via.placeholder.com/50"
-                            }
-                            alt={staffItem?.name}
-                            className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
-                          />
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.employee_id}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.name}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.email}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.phone}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.designation}
-                          </p>
-                        </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {staffItem?.exam}
+                            </p>
+                          </td>
 
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                            onClick={() => handleSubmitEdit(staffItem)}
-                          >
-                            <FontAwesomeIcon icon={faEdit} />
-                          </button>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                            onClick={() => handleDelete(staffItem)}
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                          </button>
-                        </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {staffItem?.name}
+                            </p>
+                          </td>
 
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                            onClick={() => handleView(staffItem)}
-                          >
-                            <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                            {/* <FontAwesomeIcon icon={faEdit} /> */}
-                          </button>
-                        </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleSubmitEdit(staffItem)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                              onClick={() => handleDelete(staffItem)}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </td>
+                          <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
+                            <button
+                              onClick={() => {
+                                setCurrentStudentDataForActivate({
+                                  studentToActiveOrDeactive: staffItem,
+                                });
+                                setShowDActiveModal(true);
+                              }}
+                              className={`font-bold hover:bg-none ${
+                                staffItem.publish === "Y"
+                                  ? "text-green-600 hover:text-green-800 hover:bg-transparent"
+                                  : "text-red-700 hover:text-red-900 hover:bg-transparent"
+                              }`}
+                            >
+                              {staffItem.publish === "Y" ? (
+                                <FaCheck className="text-xl" />
+                              ) : (
+                                <FontAwesomeIcon
+                                  icon={faXmark}
+                                  className="text-xl"
+                                />
+                              )}
+                            </button>
+                          </td>
 
-                        {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="btn btn-success btn-sm"
-                            onClick={() => handleView(staffItem)}
-                          >
-                            <MdOutlineRemoveRedEye />
-                          </button>
-                        </td> */}
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleView(staffItem)}
+                            >
+                              <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="9" className="text-center">
+                          No exam timetable are found
+                        </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
-            {/* <div className="flex justify-center py-4 md:w-full">
-              <ReactPaginate
-                previousLabel={"Previous"}
-                nextLabel={"Next"}
-                breakLabel={"..."}
-                breakClassName={"page-item"}
-                breakLinkClassName={"page-link"}
-                pageCount={pageCount}
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={5}
-                onPageChange={handlePageClick}
-                containerClassName={"flex space-x-1"}
-                pageClassName={"page-item"}
-                pageLinkClassName={
-                  "page-link px-1 md:px-3 py-1 text-blue-500 border border-gray-300 rounded-md hover:bg-blue-500 hover:text-white"
-                }
-                previousClassName={"page-item"}
-                previousLinkClassName={
-                  "page-link px-1 md:px-3 py-1 text-blue-500 border border-gray-300 rounded-md hover:bg-blue-500 hover:text-white"
-                }
-                nextClassName={"page-item"}
-                nextLinkClassName={
-                  "page-link  px-1 md:px-3 py-1 text-blue-500 border border-gray-300 rounded-md hover:bg-blue-500 hover:text-white"
-                }
-                activeClassName={"bg-blue-500 text-white"}
-              />
-            </div> */}
+
             <div className=" flex justify-center  pt-2 -mb-3  box-border  overflow-hidden">
               <ReactPaginate
                 previousLabel={"Previous"}
@@ -402,6 +402,56 @@ function ExamTImeTable() {
           </div>
         </div>
       </div>
+      {showDActiveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">Confirm Publish or Unpublish</h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    onClick={handleCloseModal}
+                  />
+                </div>
+                <div
+                  className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{ backgroundColor: "#C03078" }}
+                ></div>
+                <div className="modal-body">
+                  Are you sure you want to{" "}
+                  {currentStudentDataForActivate?.studentToActiveOrDeactive
+                    ?.publish === "Y"
+                    ? "Unpublish"
+                    : "Publish"}{" "}
+                  this exam timetable{" "}
+                  {` ${currentStudentDataForActivate?.studentToActiveOrDeactive?.name}`}
+                  ?
+                </div>
+                <div className="flex justify-end p-3">
+                  <button
+                    type="button"
+                    className="btn btn-primary px-3 mb-2"
+                    onClick={() =>
+                      handleActivateOrNot(
+                        currentStudentDataForActivate.studentToActiveOrDeactive
+                      )
+                    }
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting
+                      ? "Processing..."
+                      : currentStudentDataForActivate?.studentToActiveOrDeactive
+                          ?.publish === "Y"
+                      ? "Unpublish"
+                      : "Publish"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showDeleteModal && (
         <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
@@ -409,7 +459,7 @@ function ExamTImeTable() {
             <div className="modal-dialog  modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title  ">Delete Staff</h5>
+                  <h5 className="modal-title  ">Delete Exam Timetable</h5>
 
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -423,7 +473,10 @@ function ExamTImeTable() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  <p>Are you sure you want to delete: {currentStaffName}?</p>
+                  <p>
+                    Are you sure you want to delete this exam timetable:{" "}
+                    {currentStaffName}?
+                  </p>
                   {console.log("currestStaffDelete", currentStaff)}
                 </div>
                 <div className=" flex justify-end p-3">
@@ -431,8 +484,9 @@ function ExamTImeTable() {
                     type="button"
                     className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>
