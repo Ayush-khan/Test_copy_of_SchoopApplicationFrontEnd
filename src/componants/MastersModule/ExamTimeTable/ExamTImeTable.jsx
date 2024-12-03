@@ -211,8 +211,8 @@ function ExamTImeTable() {
 
   const filteredStaffs = staffs.filter(
     (staff) =>
-      staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      staff?.className?.toLowerCase().includes(searchTerm.toLowerCase())
+      staff.examname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      staff?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const displayedStaffs = filteredStaffs.slice(
@@ -305,13 +305,13 @@ function ExamTImeTable() {
 
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {staffItem?.exam}
+                              {staffItem?.name}
                             </p>
                           </td>
 
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {staffItem?.name}
+                              {staffItem?.examname}
                             </p>
                           </td>
 

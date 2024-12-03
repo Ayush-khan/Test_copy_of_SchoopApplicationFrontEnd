@@ -13,31 +13,36 @@ const CreateExamTimeTable = () => {
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [classIdForSearch, setClassIdForSearch] = useState(null);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [nameError, setNameError] = useState("");
   const [selectedClass, setSelectedClass] = useState(null);
-  const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
-
+  const [description, setDescription] = useState("");
   const navigate = useNavigate();
-
-  // for form
   const [errors, setErrors] = useState({});
-  const [backendErrors, setBackendErrors] = useState({});
-
   // State for loading indicators
   const [loadingClasses, setLoadingClasses] = useState(false);
   // const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingExams, setLoadingExams] = useState(false);
   const [classError, setClassError] = useState("");
   const [studentError, setStudentError] = useState("");
-
   const [dates, setDates] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [timetable, setTimetable] = useState([]);
+  const [schedule, setSchedule] = useState(
+    timetable.map((row) => ({
+      ...row,
+      errors: { noSubject: false, missingOption: false }, // Initialize error state for each row
+    }))
+  );
+  console.log("scheduleerror", schedule);
+  const updatedErrors = [...schedule]; // Clone the schedule to track errors
+  updatedErrors.forEach((row) => {
+    row.errors = row.errors || { noSubject: false, missingOption: false };
+  });
+  console.log("updatedErrors", updatedErrors);
   useEffect(() => {
     // Fetch both classes and exams when the component mounts
-    fetchSubjects();
+
     fetchClasses();
     fetchExams();
   }, []);
@@ -135,18 +140,6 @@ const CreateExamTimeTable = () => {
     [studentNameWithClassId]
   );
 
-  // Generate dates from start_date to end_date
-  const generateDates = (startDate, endDate) => {
-    const start = moment(startDate);
-    const end = moment(endDate);
-    const dateArray = [];
-
-    while (start <= end) {
-      dateArray.push(start.format("YYYY-MM-DD"));
-      start.add(1, "day");
-    }
-    return dateArray;
-  };
   // Handle search and fetch parent information
   const handleSearch = async () => {
     let valid = true;
@@ -177,23 +170,21 @@ const CreateExamTimeTable = () => {
 
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/exams/${selectedStudentId}`,
+        `${API_URL}/api/get_examdates/${selectedStudentId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      fetchSubjects();
+      if (response?.data?.data) {
+        const { dates, option, study_leave, subject_ids } = response.data.data;
 
-      if (response?.data) {
-        const { start_date, end_date } = response.data;
-        setParentInformation(response.data);
-
-        // Generate dates and initialize timetable rows
-        const dateRange = generateDates(start_date, end_date);
-        setDates(dateRange);
+        // Initialize timetable rows
+        setDates(dates);
         setTimetable(
-          dateRange.map((date) => ({
+          dates.map((date, index) => ({
             date,
-            subjects: Array(4).fill(""), // Initialize 4 empty subjects
+            subjects: subject_ids[index] || Array(4).fill(""), // Pre-fill subject_ids or empty
             option: "Select",
             studyLeave: false,
           }))
@@ -205,109 +196,295 @@ const CreateExamTimeTable = () => {
       setLoadingForSearch(false);
     }
   };
-
-  // Update timetable on changes
-  const updateTimetable = (index, field, value) => {
+  // Function to reset the table
+  const resetTimetable = () => {
+    setTimetable(
+      timetable.map((row) => ({
+        ...row,
+        subjects: Array(4).fill(""),
+        option: "Select",
+        studyLeave: false,
+      }))
+    );
+    setDescription("");
+  };
+  // Function to update timetable rows
+  const updateTimetable = (index, field, value, subIndex = null) => {
     const updatedTimetable = [...timetable];
-    updatedTimetable[index][field] = value;
 
-    // Clear subjects if studyLeave is checked
-    if (field === "studyLeave" && value) {
-      updatedTimetable[index].subjects = Array(4).fill("");
+    if (field === "subjects" && subIndex !== null) {
+      // Update the subject value
+      updatedTimetable[index].subjects[subIndex] = value;
+
+      // Uncheck study leave if any subject dropdown is selected
+      if (value !== "") {
+        updatedTimetable[index].studyLeave = false;
+      }
+    } else if (field === "studyLeave") {
+      // Update study leave checkbox
+      updatedTimetable[index].studyLeave = value;
+
+      // Clear subjects and options if study leave is checked
+      if (value) {
+        updatedTimetable[index].subjects = Array(4).fill("");
+        updatedTimetable[index].option = "Select";
+      }
+    } else {
+      // Update other fields like option
+      updatedTimetable[index][field] = value;
     }
 
     setTimetable(updatedTimetable);
   };
+  const prepareData = () => {
+    const preparedData = {};
 
-  // For FOrm
-  const validate = () => {
-    const newErrors = {};
+    timetable.forEach((row, rowIndex) => {
+      row.subjects.forEach((subject, subIndex) => {
+        const key = `subject_id${rowIndex + 1}${subIndex + 1}`; // Generate key
+        if (/^\d+$/.test(subject)) {
+          // If value is numeric
+          preparedData[key] = subject;
+        } else {
+          // If value is not numeric, set it as an empty string
+          preparedData[key] = "";
+        }
+      });
 
-    setErrors(newErrors);
-    return newErrors;
+      // Handle study leave checkbox value
+      const studyLeaveKey = `study_leave${rowIndex + 1}`;
+      preparedData[studyLeaveKey] = row.studyLeave ? "1" : "0";
+
+      // Add options value
+      const optionKey = `option${rowIndex + 1}`;
+      preparedData[optionKey] = row.option || "Select";
+    });
+
+    // Add description field at the end
+    preparedData.description = description; // Assuming `description` is the state variable for the input field
+
+    return preparedData;
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const validationErrors = validate();
-    const errorsToCheck = validationErrors || {};
+  const handleSubmit = async () => {
+    let hasError = false;
+    let warningRows = [];
+    const updatedErrors = [...schedule]; // Clone the schedule to track errors
+    console.log("updatedErrors", updatedErrors);
+    // Reset errors for all rows
+    updatedErrors.forEach((row) => {
+      row.errors = {
+        noSubject: false,
+        missingOption: false,
+      };
+    });
 
-    if (Object.keys(errorsToCheck).length > 0) {
-      setErrors(errorsToCheck);
+    schedule.forEach((row, index) => {
+      const hasSubjects = row.subjects.some((subject) => subject !== "");
+      const hasMultipleSubjects =
+        row.subjects.filter((subject) => subject !== "").length > 1;
+
+      // Check if no subject is selected and study leave is not marked
+      if (!hasSubjects && !row.studyLeave) {
+        updatedErrors[index].errors.noSubject = true;
+        hasError = true;
+      }
+
+      // Check if multiple subjects are selected but no option is chosen
+      if (hasMultipleSubjects && row.option === "Select") {
+        updatedErrors[index].errors.missingOption = true;
+        hasError = true;
+      }
+
+      // Track rows with incomplete data
+      if (!hasSubjects && row.studyLeave) {
+        warningRows.push(index + 1); // Add 1 for user-friendly row numbering
+      }
+    });
+
+    // Update state to display field-level errors
+    setSchedule(updatedErrors);
+
+    // Display errors
+    if (hasError) {
+      toast.error(
+        <div>
+          <strong>Error:</strong> Please resolve errors before saving.
+          <div className="text-right mt-2">
+            <button
+              className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-700"
+              onClick={() => toast.dismiss()}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      );
       return;
     }
 
+    // Show warning for unfilled rows
+    if (warningRows.length > 0) {
+      toast.warn(
+        <div>
+          <strong>Warning:</strong> Data for {warningRows.length} rows (
+          {warningRows.join(", ")}) are not filled.
+          <div className="text-right mt-2">
+            <button
+              className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-700"
+              onClick={() => toast.dismiss()}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      );
+      return; // Exit if user cancels
+    }
+
+    // Show loader
+    setLoading(true);
+
     try {
-      setLoading(true); // Start loading
-
       const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("No authentication token is found");
-      }
+      const formattedData = prepareData();
 
-      // Make an API call with the "blob" response type to download the PDF
       const response = await axios.post(
-        `${API_URL}/api/save_pdfsimplebonafide`,
-        formData,
+        `${API_URL}/api/save_timetable/${selectedStudentId}/${classIdForSearch}`,
+        formattedData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-          responseType: "blob", // Set response type to blob to handle PDF data
         }
       );
 
-      if (response.status === 200) {
-        toast.success("Simple Bonafide Certificate Created successfully!");
+      toast.success("Exam Time Table created successfully!");
+      setLoading(false);
 
-        // Extract filename from Content-Disposition header
-        const contentDisposition = response.headers["content-disposition"];
-        let filename = "DownloadedFile.pdf"; // Fallback name
-
-        if (contentDisposition) {
-          const match = contentDisposition.match(/filename="(.+?)"/);
-          if (match && match[1]) {
-            filename = match[1];
-          }
-        }
-        // Create a URL for the PDF blob and initiate download
-        const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        const link = document.createElement("a");
-        link.href = pdfUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Reset form data and selected values after successful submission
-
-        setSelectedClass(null); // Reset class selection
-        setSelectedStudent(null); // Reset student selection
-        setErrors({});
-        setBackendErrors({});
-        setTimeout(() => {
-          setParentInformation(null);
-        }, 3000);
-      }
+      // Navigate to /examTimeTable after a slight delay
+      setTimeout(() => {
+        navigate("/examTimeTable");
+      }, 500);
     } catch (error) {
-      console.error("Error:", error.response.data, error.response.sr_no);
-      toast.error(
-        "An error occurred while Creating the Simple Bonafide Certificate."
-      );
-
-      if (error.response && error.response) {
-        setBackendErrors(error.response || {});
-      } else {
-        toast.error(error.response.sr_no);
-      }
-    } finally {
-      setLoading(false); // Stop loading
+      toast.error("Error creating Exam Time Table.");
+      console.error(error);
+      setLoading(false);
     }
   };
 
+  //   const handleSubmit = async () => {
+  //   let hasError = false;
+  //   let warningRows = [];
+  //   const updatedErrors = [...schedule]; // Clone the schedule to track errors
+
+  //   // Reset errors for all rows
+  //   updatedErrors.forEach((row) => {
+  //     row.errors = {
+  //       noSubject: false,
+  //       missingOption: false,
+  //     };
+  //   });
+
+  //   // Validation logic
+  //   timetable.forEach((row, index) => {
+  //     const hasSubjects = row.subjects.some((subject) => subject !== "");
+  //     const hasMultipleSubjects =
+  //       row.subjects.filter((subject) => subject !== "").length > 1;
+
+  //     // Check if no subject is selected and study leave is not marked
+  //     if (!hasSubjects && !row.studyLeave) {
+  //       updatedErrors[index].errors.noSubject = true;
+  //       hasError = true;
+  //     }
+
+  //     // Check if multiple subjects are selected but no option is chosen
+  //     if (hasMultipleSubjects && row.option === "Select") {
+  //       updatedErrors[index].errors.missingOption = true;
+  //       hasError = true;
+  //     }
+
+  //     // Track rows with incomplete data
+  //     if (!hasSubjects && row.studyLeave) {
+  //       warningRows.push(index + 1); // Add 1 for user-friendly row numbering
+  //     }
+  //   });
+
+  //   // Update state to display field-level errors
+  //   setSchedule(updatedErrors);
+
+  //   // Error message for missing subjects
+  //   if (hasError) {
+  //     toast.error(
+  //       <div>
+  //         <strong>Error:</strong> Please resolve errors before saving.
+  //         <div className="text-right mt-2">
+  //           <button
+  //             className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-700"
+  //             onClick={() => toast.dismiss()}
+  //           >
+  //             OK
+  //           </button>
+  //         </div>
+  //       </div>
+  //     );
+  //     return;
+  //   }
+
+  //   // Warning message for unfilled rows
+  //   if (warningRows.length > 0) {
+  //     toast.warn(
+  //       <div>
+  //         <strong>Warning:</strong> Data for {warningRows.length} rows (
+  //         {warningRows.join(", ")}) are not filled. Do you still want to save the data?
+  //         <div className="text-right mt-2">
+  //           <button
+  //             className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-700"
+  //             onClick={() => toast.dismiss()}
+  //           >
+  //             OK
+  //           </button>
+  //         </div>
+  //       </div>
+  //     );
+  //     return; // Exit if user cancels
+  //   }
+
+  //   // Show loader
+  //   setLoading(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const formattedData = prepareData();
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/save_timetable/${selectedStudentId}/${classIdForSearch}`,
+  //       formattedData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
+
+  //     toast.success("Exam Time Table created successfully!");
+  //     setLoading(false);
+
+  //     // Navigate to /examTimeTable after a slight delay
+  //     setTimeout(() => {
+  //       navigate("/examTimeTable");
+  //     }, 500);
+  //   } catch (error) {
+  //     toast.error("Error creating Exam Time Table.");
+  //     console.error(error);
+  //     setLoading(false);
+  //   }
+  // };
+
   return (
-    <div className="w-[90%] mx-auto p-4 ">
+    <div className="w-full md:w-[80%] mx-auto p-4 ">
       <ToastContainer />
       <div className="card p-4 rounded-md ">
         <div className=" card-header mb-4 flex justify-between items-center ">
@@ -329,9 +506,8 @@ const CreateExamTimeTable = () => {
             backgroundColor: "#C03078",
           }}
         ></div>
-
         {/* Search Section */}
-        <div className=" w-full md:w-[70%] border-1 drop-shadow-sm  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg  mt-3 ml-0 md:ml-[2%]   p-2">
+        <div className=" w-full md:w-[75%] border-1 drop-shadow-sm  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg  mt-3 ml-0 md:ml-[2%]   p-2">
           <div className="w-[99%] flex md:flex-row justify-between items-center">
             <div className="w-full flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
               <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
@@ -430,115 +606,150 @@ const CreateExamTimeTable = () => {
             </div>
           </div>
         </div>
-
         {/* Form Section - Displayed when parentInformation is fetched */}
-        {parentInformation && (
-          <>
-            <table className="table-auto w-full border-collapse border border-gray-300">
-              <thead>
-                <tr>
-                  <th className="border p-2">Date</th>
-                  <th className="border p-2">Subject 1</th>
-                  <th className="border p-2">Subject 2</th>
-                  <th className="border p-2">Subject 3</th>
-                  <th className="border p-2">Subject 4</th>
-                  <th className="border p-2">Option</th>
-                  <th className="border p-2">Study Leave</th>
-                </tr>
-              </thead>
-              <tbody>
-                {timetable.map((row, index) => (
-                  <tr key={index}>
-                    <td className="border p-2">{row.date}</td>
-                    {row.subjects.map((subject, subIndex) => (
-                      <td className="border p-2" key={subIndex}>
-                        <select
-                          className="w-full border p-1"
-                          value={subject}
-                          onChange={(e) =>
-                            updateTimetable(index, "subjects", [
-                              ...row.subjects.slice(0, subIndex),
-                              e.target.value,
-                              ...row.subjects.slice(subIndex + 1),
-                            ])
-                          }
-                          disabled={row.studyLeave}
-                        >
-                          <option value="">Select</option>
-                          {subjects.map((sub) => (
-                            <option key={sub.sub_rc_master_id} value={sub.name}>
-                              {sub.name}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
+        {/* // Render the table */}
+        {timetable.length > 0 && (
+          <div className="w-full  mx-auto py-4 px-1 md:px-4">
+            <div className="card bg-gray-100 py-2 px-3 rounded-md">
+              {/* Responsive Table Wrapper */}
+              <div className="overflow-x-auto">
+                <table className="table-auto mt-4 w-full border-collapse border bg-gray-50 border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border p-2 font-semibold text-center">
+                        Date
+                      </th>
+                      <th className="border p-2 font-semibold text-center">
+                        Subject 1
+                      </th>
+                      <th className="border p-2 font-semibold text-center">
+                        Subject 2
+                      </th>
+                      <th className="border p-2 font-semibold text-center">
+                        Subject 3
+                      </th>
+                      <th className="border p-2 font-semibold text-center">
+                        Subject 4
+                      </th>
+                      <th className="border p-2 font-semibold text-center">
+                        Option
+                      </th>
+                      <th className="border p-2 font-semibold text-center">
+                        Study Leave
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {timetable.map((row, index) => (
+                      <tr key={index}>
+                        <td className="border p-2 text-center">{row.date}</td>
+                        {row.subjects.map((subject, subIndex) => (
+                          <td className="border p-2" key={subIndex}>
+                            <select
+                              className="w-full border p-1"
+                              value={subject}
+                              onChange={(e) =>
+                                updateTimetable(
+                                  index,
+                                  "subjects",
+                                  e.target.value,
+                                  subIndex
+                                )
+                              }
+                            >
+                              <option value="">Select</option>
+                              {subjects.map((sub) => (
+                                <option
+                                  key={sub.sub_rc_master_id}
+                                  value={sub.sub_rc_master_id}
+                                >
+                                  {sub.name}
+                                </option>
+                              ))}
+                            </select>
+                            {/* Inline Error for No Subject */}
+                            {row.errors?.noSubject && (
+                              <span className="text-red-500 text-xs">
+                                Subject is required
+                              </span>
+                            )}
+                          </td>
+                        ))}
+                        <td className="border p-2">
+                          <select
+                            className="w-full border p-1"
+                            value={row.option}
+                            onChange={(e) =>
+                              updateTimetable(index, "option", e.target.value)
+                            }
+                          >
+                            <option value="Select">Select</option>
+                            <option value="A">AND</option>
+                            <option value="O">OR</option>
+                          </select>
+                          {/* Inline Error for Missing Option */}
+                          {row.errors?.missingOption && (
+                            <span className="text-red-500 text-xs">
+                              Option is required for multiple subjects
+                            </span>
+                          )}
+                        </td>
+                        <td className="w-full md:w-[11%] border py-2 text-center">
+                          <input
+                            type="checkbox"
+                            checked={row.studyLeave}
+                            className="shadow-md w-4 h-4"
+                            onChange={(e) =>
+                              updateTimetable(
+                                index,
+                                "studyLeave",
+                                e.target.checked
+                              )
+                            }
+                          />
+                        </td>
+                      </tr>
                     ))}
-                    <td className="border p-2">
-                      <select
-                        className="w-full border p-1"
-                        value={row.option}
-                        onChange={(e) =>
-                          updateTimetable(index, "option", e.target.value)
-                        }
-                      >
-                        <option value="Select">Select</option>
-                        <option value="OR">OR</option>
-                        <option value="AND">AND</option>
-                      </select>
-                    </td>
-                    <td className="border p-2 text-center">
-                      <input
-                        type="checkbox"
-                        checked={row.studyLeave}
-                        onChange={(e) =>
-                          updateTimetable(index, "studyLeave", e.target.checked)
-                        }
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>{" "}
-            <div className="w-full border-4 text-right">
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                style={{ backgroundColor: "#2196F3" }}
-                className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={loading}
-              >
-                {loading ? (
-                  <span className="flex items-center">
-                    <svg
-                      className="animate-spin h-4 w-4 mr-2 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      ></path>
-                    </svg>
-                    Loading...
-                  </span>
-                ) : (
-                  "Generate PDF"
-                )}
-              </button>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Description Input */}
+              <div className="mt-4 ml-0 md:ml-5 flex flex-row gap-x-4">
+                <label
+                  htmlFor="description"
+                  className="block font-semibold text-[1em] mb-2 text-gray-700"
+                >
+                  Description:
+                </label>
+                <textarea
+                  type="text"
+                  id="description"
+                  maxLength={500}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="border-1 border-gray-600 p-2 w-[50%] shadow-md mb-2"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="my-4 flex flex-col md:flex-row gap-2 justify-center md:justify-end">
+                <button
+                  onClick={resetTimetable}
+                  className="bg-red-500 text-white font-bold py-2 px-4 rounded"
+                >
+                  Reset
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
+                >
+                  Submit
+                </button>
+              </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
