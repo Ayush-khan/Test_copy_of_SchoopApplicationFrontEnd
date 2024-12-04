@@ -288,49 +288,61 @@ function ExamTImeTable() {
                     {displayedStaffs.length ? (
                       displayedStaffs.map((staffItem, index) => (
                         <tr
-                          key={staffItem.user_id}
+                          key={staffItem.exam_id} // Use a unique key like `exam_id`
                           className={`${
                             index % 2 === 0 ? "bg-white" : "bg-gray-100"
                           } hover:bg-gray-50`}
                         >
-                          {console.log(
-                            "this is inside the staflist component in the table",
-                            staffItem
-                          )}
+                          {/* Serial Number */}
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {index + 1}
                             </p>
                           </td>
 
+                          {/* Name */}
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {staffItem?.name}
                             </p>
                           </td>
 
+                          {/* Exam Name */}
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {staffItem?.examname}
                             </p>
                           </td>
 
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                              onClick={() => handleSubmitEdit(staffItem)}
-                            >
-                              <FontAwesomeIcon icon={faEdit} />
-                            </button>
-                          </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                              onClick={() => handleDelete(staffItem)}
-                            >
-                              <FontAwesomeIcon icon={faTrash} />
-                            </button>
-                          </td>
+                          {/* Edit and Delete Buttons */}
+                          {staffItem.publish === "N" ? (
+                            <>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <button
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                  onClick={() => handleSubmitEdit(staffItem)}
+                                >
+                                  <FontAwesomeIcon icon={faEdit} />
+                                </button>
+                              </td>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <button
+                                  className="text-red-600 hover:text-red-800 hover:bg-transparent"
+                                  onClick={() => handleDelete(staffItem)}
+                                >
+                                  <FontAwesomeIcon icon={faTrash} />
+                                </button>
+                              </td>
+                            </>
+                          ) : (
+                            <>
+                              {/* Empty cells for alignment */}
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm"></td>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm"></td>
+                            </>
+                          )}
+
+                          {/* Publish Status */}
                           <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
                             <button
                               onClick={() => {
@@ -356,20 +368,25 @@ function ExamTImeTable() {
                             </button>
                           </td>
 
+                          {/* View Button */}
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                              onClick={() => handleView(staffItem)}
-                            >
-                              <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                            </button>
+                            {staffItem.publish === "Y" ? (
+                              <button
+                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                onClick={() => handleView(staffItem)}
+                              >
+                                <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                              </button>
+                            ) : (
+                              <></>
+                            )}
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
                         <td colSpan="9" className="text-center">
-                          No exam timetable are found
+                          No exam timetables are found
                         </td>
                       </tr>
                     )}

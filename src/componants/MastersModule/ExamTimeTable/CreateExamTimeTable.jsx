@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
+import Loader from "../../common/LoaderFinal/LoaderStyle";
 
 const CreateExamTimeTable = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -28,6 +29,8 @@ const CreateExamTimeTable = () => {
   const [dates, setDates] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [timetable, setTimetable] = useState([]);
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
+
   const [schedule, setSchedule] = useState(
     timetable.map((row) => ({
       ...row,
@@ -315,7 +318,7 @@ const CreateExamTimeTable = () => {
 
     // Validation 1: No subject selected across all rows
     if (!anySubjectSelected) {
-      errorMessage = `Please select at least one subject or mark study leave for any date.`;
+      errorMessage = `Please select at least one subject for any date.`;
       hasError = true;
     }
 
@@ -348,18 +351,21 @@ const CreateExamTimeTable = () => {
     // Display warning message
     if (warningRows.length > 0) {
       const remainingRows = warningRows.length;
+      // Disable the Submit button when warning is shown
+      setIsSubmitDisabled(true);
 
       // Show a modal-like toast for confirmation
       toast(
         <div>
           <strong className="text-pink-500">Warning:</strong> Data for{" "}
-          <strong className="">{remainingRows}</strong> rows are not filled. Do
-          you still want to save data?
+          <strong className="">{remainingRows}</strong> days are not selected.
+          Do you still want to save data?
           <div className="flex justify-end gap-2 mt-2 ">
             <button
               className="bg-red-500 text-[.9em] text-white px-2 py-1 rounded hover:bg-red-700"
               onClick={() => {
                 toast.dismiss(); // Dismiss the toast
+                setIsSubmitDisabled(false); // Enable the Submit button
               }}
             >
               Cancel
@@ -368,6 +374,8 @@ const CreateExamTimeTable = () => {
               className="bg-green-500 text-[.9em] text-white px-2 py-1 rounded hover:bg-green-700"
               onClick={() => {
                 toast.dismiss(); // Dismiss the toast
+                setIsSubmitDisabled(false); // Re-enable the Submit button after submission
+
                 submitData(preparedData); // Call the function to submit data
               }}
             >
@@ -701,76 +709,83 @@ const CreateExamTimeTable = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {timetable.map((row, index) => (
-                      <tr key={index}>
-                        <td className="border p-2 text-center">{row.date}</td>
-                        {row.subjects.map((subject, subIndex) => (
-                          <td className="border p-2" key={subIndex}>
+                    {loading ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-50  z-10">
+                        <Loader />{" "}
+                        {/* Replace this with your loader component */}
+                      </div>
+                    ) : (
+                      timetable.map((row, index) => (
+                        <tr key={index}>
+                          <td className="border p-2 text-center">{row.date}</td>
+                          {row.subjects.map((subject, subIndex) => (
+                            <td className="border p-2" key={subIndex}>
+                              <select
+                                className="w-full border p-1"
+                                value={subject}
+                                onChange={(e) =>
+                                  updateTimetable(
+                                    index,
+                                    "subjects",
+                                    e.target.value,
+                                    subIndex
+                                  )
+                                }
+                              >
+                                <option value="">Select</option>
+                                {subjects.map((sub) => (
+                                  <option
+                                    key={sub.sub_rc_master_id}
+                                    value={sub.sub_rc_master_id}
+                                  >
+                                    {sub.name}
+                                  </option>
+                                ))}
+                              </select>
+                              {/* Inline Error for No Subject */}
+                              {row.errors?.noSubject && (
+                                <span className="text-red-500 text-xs">
+                                  Subject is required
+                                </span>
+                              )}
+                            </td>
+                          ))}
+                          <td className="border p-2">
                             <select
                               className="w-full border p-1"
-                              value={subject}
+                              value={row.option}
                               onChange={(e) =>
-                                updateTimetable(
-                                  index,
-                                  "subjects",
-                                  e.target.value,
-                                  subIndex
-                                )
+                                updateTimetable(index, "option", e.target.value)
                               }
                             >
-                              <option value="">Select</option>
-                              {subjects.map((sub) => (
-                                <option
-                                  key={sub.sub_rc_master_id}
-                                  value={sub.sub_rc_master_id}
-                                >
-                                  {sub.name}
-                                </option>
-                              ))}
+                              <option value="Select">Select</option>
+                              <option value="A">AND</option>
+                              <option value="O">OR</option>
                             </select>
-                            {/* Inline Error for No Subject */}
-                            {row.errors?.noSubject && (
+                            {/* Inline Error for Missing Option */}
+                            {row.errors?.missingOption && (
                               <span className="text-red-500 text-xs">
-                                Subject is required
+                                Option is required for multiple subjects
                               </span>
                             )}
                           </td>
-                        ))}
-                        <td className="border p-2">
-                          <select
-                            className="w-full border p-1"
-                            value={row.option}
-                            onChange={(e) =>
-                              updateTimetable(index, "option", e.target.value)
-                            }
-                          >
-                            <option value="Select">Select</option>
-                            <option value="A">AND</option>
-                            <option value="O">OR</option>
-                          </select>
-                          {/* Inline Error for Missing Option */}
-                          {row.errors?.missingOption && (
-                            <span className="text-red-500 text-xs">
-                              Option is required for multiple subjects
-                            </span>
-                          )}
-                        </td>
-                        <td className="w-full md:w-[11%] border py-2 text-center">
-                          <input
-                            type="checkbox"
-                            checked={row.studyLeave}
-                            className="shadow-md w-4 h-4"
-                            onChange={(e) =>
-                              updateTimetable(
-                                index,
-                                "studyLeave",
-                                e.target.checked
-                              )
-                            }
-                          />
-                        </td>
-                      </tr>
-                    ))}
+                          <td className="w-full md:w-[11%] border py-2 text-center">
+                            <input
+                              type="checkbox"
+                              checked={row.studyLeave}
+                              className="shadow-md w-4 h-4"
+                              onChange={(e) =>
+                                updateTimetable(
+                                  index,
+                                  "studyLeave",
+                                  e.target.checked
+                                )
+                              }
+                            />
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -804,7 +819,10 @@ const CreateExamTimeTable = () => {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
+                  className={`bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 ${
+                    isSubmitDisabled ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={isSubmitDisabled}
                 >
                   Submit
                 </button>
