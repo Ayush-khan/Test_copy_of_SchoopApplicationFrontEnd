@@ -779,14 +779,6 @@ const CreateCreateBonafide = () => {
                 <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
                   Student Information
                 </h5>
-                {/* 
-                <RxCross1
-                  className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                  onClick={() => {
-                    setErrors({});
-                    navigate("/careTacker");
-                  }}
-                /> */}
               </div>
               <div
                 className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"

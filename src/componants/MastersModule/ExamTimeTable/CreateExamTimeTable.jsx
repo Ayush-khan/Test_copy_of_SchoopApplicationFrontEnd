@@ -265,54 +265,76 @@ const CreateExamTimeTable = () => {
 
     return preparedData;
   };
-
   const handleSubmit = async () => {
+    const preparedData = prepareData(); // Prepare data for validation
     let hasError = false;
     let warningRows = [];
-    const updatedErrors = [...schedule]; // Clone the schedule to track errors
-    console.log("updatedErrors", updatedErrors);
-    // Reset errors for all rows
-    updatedErrors.forEach((row) => {
-      row.errors = {
-        noSubject: false,
-        missingOption: false,
-      };
-    });
+    let errorMessage = "";
+    let anySubjectSelected = false;
 
-    schedule.forEach((row, index) => {
-      const hasSubjects = row.subjects.some((subject) => subject !== "");
+    // Clone the schedule errors state
+    const updatedErrors = timetable.map((row) => ({
+      noSubject: false,
+      missingOption: false,
+    }));
+
+    timetable.forEach((row, rowIndex) => {
+      const studyLeaveKey = `study_leave${rowIndex + 1}`;
+      const optionKey = `option${rowIndex + 1}`;
+      const hasStudyLeave = preparedData[studyLeaveKey] === "1";
+      const hasSubjects = Object.keys(preparedData).some(
+        (key) =>
+          key.startsWith(`subject_id${rowIndex + 1}`) &&
+          preparedData[key] !== ""
+      );
       const hasMultipleSubjects =
-        row.subjects.filter((subject) => subject !== "").length > 1;
+        Object.keys(preparedData).filter(
+          (key) =>
+            key.startsWith(`subject_id${rowIndex + 1}`) &&
+            preparedData[key] !== ""
+        ).length > 1;
+      const hasOptionSelected = preparedData[optionKey] !== "Select";
 
-      // Check if no subject is selected and study leave is not marked
-      if (!hasSubjects && !row.studyLeave) {
-        updatedErrors[index].errors.noSubject = true;
+      // Track if any subject is selected across rows
+      if (hasSubjects) {
+        anySubjectSelected = true;
+      }
+
+      // Validation 2: Multiple subjects selected but no option chosen
+      if (hasMultipleSubjects && !hasOptionSelected) {
+        updatedErrors[rowIndex].missingOption = true;
+        errorMessage = `Please select an option for multiple subjects on ${row.date}.`;
         hasError = true;
       }
 
-      // Check if multiple subjects are selected but no option is chosen
-      if (hasMultipleSubjects && row.option === "Select") {
-        updatedErrors[index].errors.missingOption = true;
-        hasError = true;
-      }
-
-      // Track rows with incomplete data
-      if (!hasSubjects && row.studyLeave) {
-        warningRows.push(index + 1); // Add 1 for user-friendly row numbering
+      // Track warning rows: No data for a row
+      if (!hasSubjects && !hasStudyLeave && !hasOptionSelected) {
+        warningRows.push(row.date);
       }
     });
 
-    // Update state to display field-level errors
-    setSchedule(updatedErrors);
+    // Validation 1: No subject selected across all rows
+    if (!anySubjectSelected) {
+      errorMessage = `Please select at least one subject or mark study leave for any date.`;
+      hasError = true;
+    }
 
-    // Display errors
+    // Update the state to reflect field-level errors
+    setSchedule(
+      schedule.map((row, index) => ({
+        ...row,
+        errors: updatedErrors[index],
+      }))
+    );
+
+    // Display error messages
     if (hasError) {
       toast.error(
         <div>
-          <strong>Error:</strong> Please resolve errors before saving.
+          <strong className="text-red-600">Error:</strong> {errorMessage}
           <div className="text-right mt-2">
             <button
-              className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-700"
+              className="bg-blue-500 text-[.9em] text-white px-3 py-1 rounded hover:bg-blue-700"
               onClick={() => toast.dismiss()}
             >
               OK
@@ -323,35 +345,55 @@ const CreateExamTimeTable = () => {
       return;
     }
 
-    // Show warning for unfilled rows
+    // Display warning message
     if (warningRows.length > 0) {
-      toast.warn(
+      const remainingRows = warningRows.length;
+
+      // Show a modal-like toast for confirmation
+      toast(
         <div>
-          <strong>Warning:</strong> Data for {warningRows.length} rows (
-          {warningRows.join(", ")}) are not filled.
-          <div className="text-right mt-2">
+          <strong className="text-pink-500">Warning:</strong> Data for{" "}
+          <strong className="">{remainingRows}</strong> rows are not filled. Do
+          you still want to save data?
+          <div className="flex justify-end gap-2 mt-2 ">
             <button
-              className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-700"
-              onClick={() => toast.dismiss()}
+              className="bg-red-500 text-[.9em] text-white px-2 py-1 rounded hover:bg-red-700"
+              onClick={() => {
+                toast.dismiss(); // Dismiss the toast
+              }}
             >
-              OK
+              Cancel
+            </button>
+            <button
+              className="bg-green-500 text-[.9em] text-white px-2 py-1 rounded hover:bg-green-700"
+              onClick={() => {
+                toast.dismiss(); // Dismiss the toast
+                submitData(preparedData); // Call the function to submit data
+              }}
+            >
+              Confirm
             </button>
           </div>
-        </div>
+        </div>,
+        {
+          autoClose: false, // Prevent auto-dismiss
+        }
       );
-      return; // Exit if user cancels
+      return;
     }
 
-    // Show loader
-    setLoading(true);
+    // If no errors or warnings, submit data
+    submitData(preparedData);
+  };
 
+  // Separate function to handle data submission
+  const submitData = async (preparedData) => {
+    setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
-      const formattedData = prepareData();
-
       const response = await axios.post(
         `${API_URL}/api/save_timetable/${selectedStudentId}/${classIdForSearch}`,
-        formattedData,
+        preparedData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -374,51 +416,73 @@ const CreateExamTimeTable = () => {
     }
   };
 
-  //   const handleSubmit = async () => {
+  // const handleSubmit = async () => {
+  //   const preparedData = prepareData(); // Prepare data for validation
   //   let hasError = false;
   //   let warningRows = [];
-  //   const updatedErrors = [...schedule]; // Clone the schedule to track errors
+  //   let errorMessage = "";
+  //   let anySubjectSelected = false;
 
-  //   // Reset errors for all rows
-  //   updatedErrors.forEach((row) => {
-  //     row.errors = {
-  //       noSubject: false,
-  //       missingOption: false,
-  //     };
-  //   });
+  //   // Clone the schedule errors state
+  //   const updatedErrors = timetable.map((row) => ({
+  //     noSubject: false,
+  //     missingOption: false,
+  //   }));
 
-  //   // Validation logic
-  //   timetable.forEach((row, index) => {
-  //     const hasSubjects = row.subjects.some((subject) => subject !== "");
+  //   timetable.forEach((row, rowIndex) => {
+  //     const studyLeaveKey = `study_leave${rowIndex + 1}`;
+  //     const optionKey = `option${rowIndex + 1}`;
+  //     const hasStudyLeave = preparedData[studyLeaveKey] === "1";
+  //     const hasSubjects = Object.keys(preparedData).some(
+  //       (key) =>
+  //         key.startsWith(`subject_id${rowIndex + 1}`) &&
+  //         preparedData[key] !== ""
+  //     );
   //     const hasMultipleSubjects =
-  //       row.subjects.filter((subject) => subject !== "").length > 1;
+  //       Object.keys(preparedData).filter(
+  //         (key) =>
+  //           key.startsWith(`subject_id${rowIndex + 1}`) &&
+  //           preparedData[key] !== ""
+  //       ).length > 1;
+  //     const hasOptionSelected = preparedData[optionKey] !== "Select";
 
-  //     // Check if no subject is selected and study leave is not marked
-  //     if (!hasSubjects && !row.studyLeave) {
-  //       updatedErrors[index].errors.noSubject = true;
+  //     // Track if any subject is selected across rows
+  //     if (hasSubjects) {
+  //       anySubjectSelected = true;
+  //     }
+
+  //     // Validation 2: Multiple subjects selected but no option chosen
+  //     if (hasMultipleSubjects && !hasOptionSelected) {
+  //       updatedErrors[rowIndex].missingOption = true;
+  //       errorMessage = `Please select an option for multiple subjects on ${row.date}.`;
   //       hasError = true;
   //     }
 
-  //     // Check if multiple subjects are selected but no option is chosen
-  //     if (hasMultipleSubjects && row.option === "Select") {
-  //       updatedErrors[index].errors.missingOption = true;
-  //       hasError = true;
-  //     }
-
-  //     // Track rows with incomplete data
-  //     if (!hasSubjects && row.studyLeave) {
-  //       warningRows.push(index + 1); // Add 1 for user-friendly row numbering
+  //     // Track warning rows: No data for a row
+  //     if (!hasSubjects && !hasStudyLeave && !hasOptionSelected) {
+  //       warningRows.push(row.date);
   //     }
   //   });
 
-  //   // Update state to display field-level errors
-  //   setSchedule(updatedErrors);
+  //   // Validation 1: No subject selected across all rows
+  //   if (!anySubjectSelected) {
+  //     errorMessage = `Please select at least one subject or mark study leave for any date.`;
+  //     hasError = true;
+  //   }
 
-  //   // Error message for missing subjects
+  //   // Update the state to reflect field-level errors
+  //   setSchedule(
+  //     schedule.map((row, index) => ({
+  //       ...row,
+  //       errors: updatedErrors[index],
+  //     }))
+  //   );
+
+  //   // Display error messages
   //   if (hasError) {
   //     toast.error(
   //       <div>
-  //         <strong>Error:</strong> Please resolve errors before saving.
+  //         <strong>Error:</strong> {errorMessage}
   //         <div className="text-right mt-2">
   //           <button
   //             className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-700"
@@ -432,12 +496,12 @@ const CreateExamTimeTable = () => {
   //     return;
   //   }
 
-  //   // Warning message for unfilled rows
+  //   // Display warning message
   //   if (warningRows.length > 0) {
   //     toast.warn(
   //       <div>
-  //         <strong>Warning:</strong> Data for {warningRows.length} rows (
-  //         {warningRows.join(", ")}) are not filled. Do you still want to save the data?
+  //         <strong>Warning:</strong> Data for the following days are not filled:{" "}
+  //         {warningRows.join(", ")}. Do you still want to save data?
   //         <div className="text-right mt-2">
   //           <button
   //             className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-700"
@@ -448,19 +512,16 @@ const CreateExamTimeTable = () => {
   //         </div>
   //       </div>
   //     );
-  //     return; // Exit if user cancels
+  //     return; // Stop here if user cancels
   //   }
 
-  //   // Show loader
+  //   // Submit data if no errors
   //   setLoading(true);
-
   //   try {
   //     const token = localStorage.getItem("authToken");
-  //     const formattedData = prepareData();
-
   //     const response = await axios.post(
   //       `${API_URL}/api/save_timetable/${selectedStudentId}/${classIdForSearch}`,
-  //       formattedData,
+  //       preparedData,
   //       {
   //         headers: {
   //           Authorization: `Bearer ${token}`,
@@ -728,7 +789,7 @@ const CreateExamTimeTable = () => {
                   maxLength={500}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="border-1 border-gray-600 p-2 w-[50%] shadow-md mb-2"
+                  className="border-1 border-gray-300 p-2 w-[50%] shadow-md mb-2"
                 />
               </div>
 
