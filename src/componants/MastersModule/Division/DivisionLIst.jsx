@@ -118,7 +118,7 @@ function DivisionList() {
       section?.name?.toLowerCase().includes(searchLower) // Filter by division name
     );
   });
-
+  console.log("filteredSections", filteredSections);
   // Filter and paginate sections
   // const filteredSections = sections.filter((section) =>
   //   section.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -127,7 +127,7 @@ function DivisionList() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
-
+  console.log("displayed sections", displayedSections);
   const validateSectionName = (name, departmentId) => {
     const errors = {};
 
@@ -496,7 +496,8 @@ function DivisionList() {
                         >
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {index + 1}
+                              {/* {index + 1} */}
+                              {currentPage * pageSize + index + 1}
                             </p>
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">

@@ -39,6 +39,9 @@ function ExamTImeTable() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
+  useEffect(() => {
+    fetchStaffs();
+  }, []);
   const fetchStaffs = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -55,7 +58,8 @@ function ExamTImeTable() {
       });
 
       setStaffs(response.data.data);
-      setPageCount(Math.ceil(response.data.data.length / pageSize));
+      setPageCount(Math.ceil(response?.data?.data.length / pageSize));
+      console.log("pageCount", pageCount);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -63,22 +67,7 @@ function ExamTImeTable() {
     }
   };
 
-  useEffect(() => {
-    fetchStaffs();
-  }, []);
   console.log("the response of the stafflist", staffs);
-  const handlePageClick = (data) => {
-    setCurrentPage(data.selected);
-  };
-  const handleActiveAndInactive = (subjectIsPass) => {
-    console.log("handleActiveAndInactive-->", subjectIsPass.exam_tt_id);
-    const studentToActiveOrDeactive = staffs.find(
-      (cls) => cls.exam_tt_id === subjectIsPass.exam_tt_id
-    );
-    setCurrentStudentDataForActivate({ studentToActiveOrDeactive });
-    console.log("studentToActiveOrDeactive", studentToActiveOrDeactive);
-    setShowDActiveModal(true);
-  };
 
   const handleActivateOrNot = async (staffItem) => {
     if (isSubmitting) return; // Prevent re-submitting
@@ -211,7 +200,7 @@ function ExamTImeTable() {
 
   const filteredStaffs = staffs.filter(
     (staff) =>
-      staff.examname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      staff?.examname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       staff?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -219,6 +208,14 @@ function ExamTImeTable() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
+
+  // Debug logs to ensure correct pagination
+  console.log("Filtered Staffs:", filteredStaffs.length);
+  console.log("Displayed Staffs:", displayedStaffs.length);
+
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
+  };
 
   return (
     <>
@@ -288,7 +285,7 @@ function ExamTImeTable() {
                     {displayedStaffs.length ? (
                       displayedStaffs.map((staffItem, index) => (
                         <tr
-                          key={staffItem.exam_id} // Use a unique key like `exam_id`
+                          key={staffItem.exam_tt_id} // Use a unique key like `exam_id`
                           className={`${
                             index % 2 === 0 ? "bg-white" : "bg-gray-100"
                           } hover:bg-gray-50`}
@@ -296,7 +293,8 @@ function ExamTImeTable() {
                           {/* Serial Number */}
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {index + 1}
+                              {/* {index + 1} */}
+                              {currentPage * pageSize + index + 1}
                             </p>
                           </td>
 

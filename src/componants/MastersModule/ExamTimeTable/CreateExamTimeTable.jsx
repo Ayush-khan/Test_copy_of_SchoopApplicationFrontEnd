@@ -385,6 +385,11 @@ const CreateExamTimeTable = () => {
         </div>,
         {
           autoClose: false, // Prevent auto-dismiss
+          closeButton: false, // Remove the cross button
+          onClose: () => {
+            // Ensure `setIsSubmitDisabled(false)` runs if the toast is closed manually
+            setIsSubmitDisabled(false);
+          },
         }
       );
       return;

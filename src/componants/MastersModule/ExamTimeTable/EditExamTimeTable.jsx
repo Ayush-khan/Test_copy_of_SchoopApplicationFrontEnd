@@ -109,7 +109,14 @@ const EditExamTimeTable = () => {
   };
 
   const resetTimetable = () => {
-    setTimetable([]);
+    setTimetable(
+      timetable.map((row) => ({
+        ...row,
+        subjects: Array(4).fill(""),
+        option: "Select",
+        studyLeave: false,
+      }))
+    );
     setDescription("");
   };
 
@@ -250,8 +257,14 @@ const EditExamTimeTable = () => {
         </div>,
         {
           autoClose: false, // Prevent auto-dismiss
+          closeButton: false, // Remove the cross button
+          onClose: () => {
+            // Ensure `setIsSubmitDisabled(false)` runs if the toast is closed manually
+            setIsSubmitDisabled(false);
+          },
         }
       );
+
       return;
     }
 
