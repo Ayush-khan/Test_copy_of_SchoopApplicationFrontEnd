@@ -340,7 +340,7 @@ const EditExamTimeTable = () => {
               <div className="overflow-x-auto">
                 <table className="table-auto mt-4 w-full border-collapse border bg-gray-50 border-gray-300">
                   <thead>
-                    <tr className="bg-gray-100">
+                    <tr className="bg-gray-200">
                       <th className="border p-2 font-semibold text-center">
                         Date
                       </th>
