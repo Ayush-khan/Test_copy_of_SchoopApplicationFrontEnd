@@ -199,7 +199,7 @@ const CreateExamTimeTable = () => {
       setLoadingForSearch(false);
     }
   };
-  // Function to reset the table gfh fgfds gds tyhhjr thh
+  // Function to reset the table gfh fgfds fdgh gds tyhhjr thh
   const resetTimetable = () => {
     setTimetable(
       timetable.map((row) => ({
