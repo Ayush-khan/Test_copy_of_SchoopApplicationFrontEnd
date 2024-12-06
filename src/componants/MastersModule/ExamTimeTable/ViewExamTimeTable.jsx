@@ -36,12 +36,17 @@ const ViewExamTimeTable = () => {
           }
         );
         const data = response.data;
+
         if (data?.success) {
-          setTimetable(data.exam_timetable_details || []);
+          const timetableDetails = data.exam_timetable_details || [];
+          setTimetable(timetableDetails);
           setExamDetails(data.classterm || {});
-          setDescription(
-            data.exam_timetable_details[0]?.description?.description || "-"
-          ); // Set description dynamically
+          setDescription(timetableDetails[0]?.description?.description || "-"); // Set description dynamically
+
+          // Check if timetableDetails array is empty
+          if (timetableDetails.length === 0) {
+            toast.error("No timetable data available.");
+          }
         } else {
           toast.error("Failed to fetch timetable data.");
         }
@@ -106,18 +111,7 @@ const ViewExamTimeTable = () => {
           </p>
         </div>
         <hr>
-        <div id="decorateAtag" class="text-[.8em] text-gray-600">
-          Powered by: 
-          <a
-            href="http://www.aceventura.in"
-            id="Atag"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-blue-600 no-underline text-xs"
-          >
-            Aceventura Solutions (http://www.aceventura.in)
-          </a>
-        </div>
+        
       </div>
     </div>
   `;
@@ -279,7 +273,7 @@ const ViewExamTimeTable = () => {
                 </table>
               </div>
             </div>
-            <div className="mt-4 ml-0 flex flex-row gap-x-4">
+            <div className="mt-4 mb-3 ml-0 flex flex-row gap-x-4">
               <label
                 htmlFor="description"
                 className="block font-semibold text-[1em] mb-2 text-gray-700"

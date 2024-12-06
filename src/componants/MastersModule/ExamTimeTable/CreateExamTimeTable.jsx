@@ -165,9 +165,9 @@ const CreateExamTimeTable = () => {
 
     if (!valid) {
       setLoadingForSearch(false);
-
       return;
     } // Stop if any validation fails
+
     try {
       setLoadingForSearch(true); // Start loading
 
@@ -178,9 +178,24 @@ const CreateExamTimeTable = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       fetchSubjects();
+
       if (response?.data?.data) {
         const { dates, option, study_leave, subject_ids } = response.data.data;
+
+        // Check if the response data arrays are all empty
+        if (
+          dates.length === 0 &&
+          option.length === 0 &&
+          study_leave.length === 0 &&
+          subject_ids.length === 0
+        ) {
+          toast.error("Data is not available for the selected Class and Exam.");
+          setDates([]);
+          setTimetable([]); // Reset timetable to avoid incorrect rendering
+          return;
+        }
 
         // Initialize timetable rows
         setDates(dates);
@@ -195,10 +210,12 @@ const CreateExamTimeTable = () => {
       }
     } catch (error) {
       console.error("Error fetching exam data:", error);
+      toast.error("An error occurred while fetching data.");
     } finally {
       setLoadingForSearch(false);
     }
   };
+
   // Function to reset the table
   const resetTimetable = () => {
     setTimetable(
@@ -620,7 +637,7 @@ const CreateExamTimeTable = () => {
                 >
                   Exam <span className="text-red-500">*</span>
                 </label>
-                <div className="w-full md:w-[60%]">
+                <div className="w-full md:w-[70%]">
                   <Select
                     id="studentSelect"
                     value={selectedStudent}

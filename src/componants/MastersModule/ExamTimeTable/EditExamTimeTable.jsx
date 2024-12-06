@@ -50,6 +50,14 @@ const EditExamTimeTable = () => {
 
         if (response?.data?.data) {
           const data = response.data.data;
+
+          if (data.length === 0) {
+            toast.error("Date is not available for this timetable.");
+            setTimetable([]); // Clear timetable to avoid incorrect rendering
+            setDescription(""); // Clear description
+            return;
+          }
+
           setTimetable(
             data.map((row) => ({
               date: row.date,
@@ -58,12 +66,14 @@ const EditExamTimeTable = () => {
               studyLeave: row.study_leave,
             }))
           );
+
           setDescription(response.data[0]?.description || "");
         }
 
         fetchSubjects();
       } catch (error) {
         console.error("Error fetching timetable data:", error);
+        toast.error("An error occurred while fetching timetable data.");
       } finally {
         setLoading(false);
       }
