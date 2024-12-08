@@ -420,6 +420,7 @@ function MarksHeading() {
       }
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDeleteModal(false);
     }
   };
 
@@ -544,7 +545,7 @@ function MarksHeading() {
                         >
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {index + 1}
+                              {currentPage * pageSize + index + 1}
                             </p>
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">

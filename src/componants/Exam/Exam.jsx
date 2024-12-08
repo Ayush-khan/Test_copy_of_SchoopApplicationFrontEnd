@@ -112,8 +112,8 @@ function Exam() {
   // Filter and paginate sections
   const filteredSections = sections.filter(
     (section) =>
-      section.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      section.comment.toLowerCase().includes(searchTerm.toLowerCase())
+      section?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      section?.comment?.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
@@ -132,28 +132,36 @@ function Exam() {
     openDay
   ) => {
     const errors = {};
-    // const alphabetRegex = /^[A-Za-z]+$/;
 
+    // Validation for name
     if (!name || name.trim() === "") {
-      errors.name = "Please enter exam name.";
+      errors.name = "Please enter exam name";
     } else if (name.length > 50) {
-      errors.name = "The name field must not exceed 50 character.";
+      errors.name = "The name field must not exceed 50 characters";
     }
 
+    // Validation for departmentId
     if (!departmentId) {
-      errors.department_id = "Please select a terms.";
+      errors.department_id = "Please select a terms";
     }
 
+    // Validation for startDate
     if (!startDate) {
-      errors.startDate = "Start date is required.";
+      errors.startDate = "Start date is required";
     }
 
+    // Validation for endDate
     if (!endDate) {
-      errors.endDate = "End date is required.";
+      errors.endDate = "End date is required";
+    } else if (startDate && new Date(endDate) < new Date(startDate)) {
+      errors.endDate = "End date should not be before the start date";
     }
 
+    // Validation for openDay
     if (!openDay) {
-      errors.openDay = "Open day is required.";
+      errors.openDay = "Open day is required";
+    } else if (startDate && new Date(openDay) < new Date(startDate)) {
+      errors.openDay = "Open day should not be before the start date";
     }
 
     return errors;
@@ -330,6 +338,7 @@ function Exam() {
       }
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDeleteModal(false);
     }
   };
 
@@ -414,7 +423,7 @@ function Exam() {
           ></div>
 
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden ">
+            <div className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll">
               <div className="bg-white rounded-lg shadow-xs ">
                 <table className="min-w-full leading-normal table-auto ">
                   <thead>
@@ -447,17 +456,17 @@ function Exam() {
                         >
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {index + 1}
+                              {currentPage * pageSize + index + 1}
                             </p>
                           </td>
                           <td className="text-center px-2  border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                            <p className="text-gray-900 whitespace-no-wrap   md:text-nowrap  relative top-2">
                               {section?.name}
                             </p>
                           </td>
-                          <td className="text-center  border border-gray-950 text-sm">
-                            <div className="overflow-y-auto max-w-full max-h-[90px] whitespace-pre-wrap">
-                              <p className="px-1 text-gray-900">
+                          <td className="text-center border border-gray-950 text-sm">
+                            <div className="overflow-x-auto overflow-y-auto max-h-[90px] whitespace-pre-wrap break-all">
+                              <p className="px-1 relative top-1 text-gray-900">
                                 {section?.comment}
                               </p>
                             </div>

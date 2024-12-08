@@ -5,7 +5,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import Loader from "../../common/LoaderFinal/LoaderStyle";
-import { useReactToPrint } from "react-to-print"; // Import the print hook
 import { FiPrinter } from "react-icons/fi";
 
 const ViewExamTimeTable = () => {

@@ -32,6 +32,7 @@ function SubjectForRc() {
   const pageSize = 10;
   const [backendErrors, setBackendErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nameErrorforName, setNameErrorforName] = useState("");
 
   const fetchSections = async () => {
     try {
@@ -159,6 +160,7 @@ function SubjectForRc() {
   const handleSubmitAdd = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
+
     // Validate both subject name and sequence number
     const validationErrors = validateSectionName(
       newSectionName,
@@ -169,12 +171,14 @@ function SubjectForRc() {
       setIsSubmitting(false);
       return;
     }
+
     try {
       const token = localStorage.getItem("authToken");
 
       if (!token) {
         throw new Error("No authentication token found");
       }
+
       console.log("Name is:", newSectionName);
 
       const checkNameResponse = await axios.post(
@@ -195,6 +199,7 @@ function SubjectForRc() {
         setNameError("");
         setNameAvailable(true);
       }
+
       await axios.post(
         `${API_URL}/api/subject_for_reportcard`,
         { name: newSectionName, sequence: newSequenceNumber },
@@ -211,10 +216,18 @@ function SubjectForRc() {
       toast.success("Subject added successfully!");
     } catch (error) {
       console.error("Error adding subject:", error);
-      if (error.response && error.response.data && error.response.data.errors) {
-        Object.values(error.response.data.errors).forEach((err) =>
-          toast.error(err)
-        );
+
+      if (error.response?.status === 422 && error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        console.log("errors", errors);
+
+        if (errors?.name && errors?.name?.length > 0) {
+          toast.error(errors.name[0]); // Display the specific "name should be unique" error
+          setNameErrorforName(errors.name[0]);
+        } else {
+          // Handle other validation errors if they exist
+          Object.values(errors).forEach((err) => toast.error(err[0]));
+        }
       } else {
         toast.error("Server error. Please try again later.");
       }
@@ -222,6 +235,7 @@ function SubjectForRc() {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
+
   const handleSubmitEdit = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
@@ -259,7 +273,18 @@ function SubjectForRc() {
       toast.success("Subject Updated successfully!");
     } catch (error) {
       console.error("Error editing Subject:", error);
+      if (error.response?.status === 422 && error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        console.log("errors", errors);
 
+        if (errors?.name && errors?.name?.length > 0) {
+          toast.error(errors.name[0]); // Display the specific "name should be unique" error
+          setNameErrorforName(errors.name[0]);
+        } else {
+          // Handle other validation errors if they exist
+          Object.values(errors).forEach((err) => toast.error(err[0]));
+        }
+      }
       if (error.response && error.response.data && error.response.data.errors) {
         // Store the errors in backendErrors state
         setBackendErrors(error.response.data.errors);
@@ -375,6 +400,7 @@ function SubjectForRc() {
       }
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDeleteModal(false);
     }
   };
   const handleChangeSequenceNumber = (e) => {
@@ -394,6 +420,7 @@ function SubjectForRc() {
   const handleChangeSectionName = (e) => {
     const { value } = e.target;
     setNewSectionName(value);
+    setNameErrorforName("");
 
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
@@ -511,7 +538,7 @@ function SubjectForRc() {
                         >
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {index + 1}
+                              {currentPage * pageSize + index + 1}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
@@ -634,6 +661,10 @@ function SubjectForRc() {
                           {fieldErrors.name}
                         </small>
                       )}
+
+                      <small className=" block text-danger text-xs ">
+                        {nameErrorforName}
+                      </small>
                     </div>
                   </div>
                   <div className=" relative mb-3 flex justify-center  mx-4">
@@ -732,6 +763,9 @@ function SubjectForRc() {
                         {fieldErrors.name}
                       </small>
                     )}
+                    <small className=" block text-danger text-xs ">
+                      {nameErrorforName}
+                    </small>
                   </div>
                 </div>
                 <div className=" relative mb-3 flex justify-center  mx-4">

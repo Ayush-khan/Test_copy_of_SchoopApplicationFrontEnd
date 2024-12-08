@@ -35,6 +35,7 @@ function Grade() {
   const [openDay, setOpenDay] = useState(""); // New state for Open Day
   const [comment, setComment] = useState(""); // New state for Comment
   const pageSize = 10;
+  const [nameErrorForGrade, setNameErrorForGrade] = useState(""); // New state for
   const [classes, setClasses] = useState([]);
   const [selectedClasses, setSelectedClasses] = useState([]); // Store selected class_ids
   const [errorMessage, setErrorMessage] = useState("");
@@ -185,9 +186,9 @@ function Grade() {
     // Validate Grade Name (Only capital letters allowed)
     // Validate Grade Name (Only uppercase letters and '+' allowed)
     if (!name || name.trim() === "") {
-      errors.name = "Please enter Grade name.";
+      errors.name = "Please enter Grade name";
     } else if (name.length > 3) {
-      errors.name = "The name field must not exceed 3 characters.";
+      errors.name = "The name field must not exceed 3 characters";
     } else if (!/^[A-Z0-9\+\-]+$/.test(name)) {
       // Regex to check for uppercase letters, digits, '+' and '-'
       errors.name =
@@ -195,27 +196,27 @@ function Grade() {
     }
 
     if (!departmentId) {
-      errors.department_id = "Please select a Subject Type.";
+      errors.department_id = "Please select a Subject Type";
     }
 
     if (!startDate) {
-      errors.startDate = "Marks from is required.";
+      errors.startDate = "Marks from is required";
     } else if (parseFloat(startDate) > 100) {
-      errors.startDate = "Marks from cannot be greater than 100.";
+      errors.startDate = "Marks from cannot be greater than 100";
     }
 
     if (!endDate) {
-      errors.endDate = "Marks upto is required.";
+      errors.endDate = "Marks upto is required";
     } else if (parseFloat(endDate) > 100) {
-      errors.endDate = "Marks upto cannot be greater than 100.";
+      errors.endDate = "Marks upto cannot be greater than 100";
     }
 
     if (startDate && endDate && parseFloat(startDate) > parseFloat(endDate)) {
-      errors.startDate = "Marks from cannot be greater than Marks upto.";
+      errors.startDate = "Marks from cannot be greater than Marks upto";
     }
     // Validate if at least one class is selected
     if (!selectedClasses || selectedClasses.length === 0) {
-      errors.selectedClasses = "Please select at least one class.";
+      errors.selectedClasses = "Please select at least one class";
     }
 
     return errors;
@@ -268,6 +269,7 @@ function Grade() {
   const handleSubmitAdd = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
+
     const validationErrors = validateFormFields(
       newSectionName,
       newDepartmentId,
@@ -284,6 +286,7 @@ function Grade() {
 
     if (selectedClasses.length === 0) {
       setErrorMessage("Please select at least one class.");
+      setIsSubmitting(false);
       return;
     }
 
@@ -292,7 +295,8 @@ function Grade() {
 
     try {
       const token = localStorage.getItem("authToken");
-      await axios.post(
+
+      const response = await axios.post(
         `${API_URL}/api/save_Grades`,
         {
           name: newSectionName,
@@ -309,11 +313,34 @@ function Grade() {
       );
 
       fetchGrades();
-      handleCloseModal();
-      toast.success("Grade added successfully!");
+
+      console.log("this is response", response);
+      console.log("this is response", response?.data?.status);
+      if (response?.data?.status === 400 && response?.data?.message) {
+        // Handle the "Grade already exists" error
+        const error = response?.data?.message;
+        console.log("error", error);
+        setNameErrorForGrade(error);
+
+        toast.error(response.data.message); // Display the specific error message
+      } else {
+        handleCloseModal();
+        toast.success("Grade added successfully!");
+      }
     } catch (error) {
       console.error("Error adding Grade:", error);
-      toast.error("Server error. Please try again later.");
+
+      if (error.response?.status === 400 && error.response?.data?.message) {
+        // Handle the "Grade already exists" error
+        console.log("nameErrorForGrade", nameErrorForGrade);
+
+        const error = error?.response?.data?.message;
+        console.log("error is that", error);
+        console.log("nameErrorForGrade", nameErrorForGrade);
+        toast.error(error); // Display the specific error message
+      } else {
+        toast.error("Server error. Please try again later.");
+      }
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -425,6 +452,7 @@ function Grade() {
       }
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDeleteModal(false);
     }
   };
   // Handle checkbox change
@@ -473,6 +501,7 @@ function Grade() {
 
   const handleChangeSectionName = (e) => {
     const { value } = e.target;
+    setNameErrorForGrade("");
     setNewSectionName(value);
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
@@ -528,28 +557,28 @@ function Grade() {
           ></div>
 
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden ">
-              <div className="bg-white rounded-lg shadow-xs ">
-                <table className="min-w-full leading-normal table-auto ">
+            <div className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll">
+              <div className="bg-white rounded-lg shadow-xs">
+                <table className="min-w-full leading-normal table-auto">
                   <thead>
                     <tr className="bg-gray-200">
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         S.No
                       </th>
-                      <th className=" -px-2  text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Grade name
+                      <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Grade Name
                       </th>
-                      <th className=" -px-2  text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Class
                       </th>
                       <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Subject Type
                       </th>
                       <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Marks form
+                        Marks From
                       </th>
                       <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Marks upto
+                        Marks Upto
                       </th>
                       <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Comment
@@ -573,86 +602,62 @@ function Grade() {
                         >
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {index + 1}
+                              {currentPage * pageSize + index + 1}
                             </p>
                           </td>
-                          <td className="text-center px-2  border border-gray-950 text-sm">
+                          <td className="text-center px-2 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section?.name}
                             </p>
                           </td>
-                          <td className="text-center px-2  border border-gray-950 text-sm">
+                          <td className="text-center px-2 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {`${section?.class?.name || ""} `}
                             </p>
                           </td>
-
-                          <td className="text-center px-2  border border-gray-950 text-sm">
+                          <td className="text-center px-2 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section?.subject_type}
                             </p>
                           </td>
-                          <td className="text-center px-2  border border-gray-950 text-sm">
+                          <td className="text-center px-2 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section?.mark_from}
                             </p>
                           </td>
-                          <td className="text-center px-2  border border-gray-950 text-sm">
+                          <td className="text-center px-2 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section?.mark_upto}
                             </p>
                           </td>
-                          <td className="text-center  border border-gray-950 text-sm">
-                            <div className="overflow-y-auto max-w-full max-h-[90px] whitespace-pre-wrap">
-                              <p className="text-gray-900 px-1">
+                          <td className="text-center border border-gray-950 text-sm">
+                            <div className="overflow-x-auto overflow-y-auto max-h-[90px] whitespace-pre-wrap break-all">
+                              <p className="px-1 relative top-1 text-gray-900">
                                 {section?.comment}
                               </p>
                             </div>
                           </td>
-
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-pink-600 hover:text-pink-800 hover:bg-transparent "
-                                // onClick={() => handleEdit(section)}
-                              >
-                                {/* <FontAwesomeIcon icon={faEdit} /> */}
-                              </button>{" "}
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                onClick={() => handleEdit(section)}
-                              >
-                                <FontAwesomeIcon icon={faEdit} />
-                              </button>{" "}
-                            </td>
-                          )}
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-green-600 hover:text-green-800 hover:bg-transparent "
-                                // onClick={() => handleDelete(section.section_id)}
-                              >
-                                {/* <FontAwesomeIcon icon={faTrash} /> */}
-                              </button>
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                onClick={() => handleDelete(section?.grade_id)}
-                              >
-                                <FontAwesomeIcon icon={faTrash} />
-                              </button>
-                            </td>
-                          )}
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                              onClick={() => handleEdit(section)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-red-600 hover:text-red-800 hover:bg-transparent"
+                              onClick={() => handleDelete(section?.grade_id)}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="5" className="text-center">
+                        <td colSpan="9" className="text-center">
                           No Grades are found...
                         </td>
                       </tr>
@@ -737,6 +742,11 @@ function Grade() {
                           {nameError}
                         </span>
                       )}
+
+                      <span className=" block text-danger text-xs">
+                        {nameErrorForGrade}
+                      </span>
+
                       {fieldErrors.name && (
                         <span className="text-danger text-xs">
                           {fieldErrors.name}

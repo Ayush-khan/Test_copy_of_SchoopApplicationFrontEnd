@@ -195,6 +195,7 @@ function ExamTImeTable() {
       toast.error("Failed to delete exam timetable");
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDeleteModal(false);
     }
   };
 

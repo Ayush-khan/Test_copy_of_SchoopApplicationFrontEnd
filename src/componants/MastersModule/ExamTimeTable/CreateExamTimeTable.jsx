@@ -598,7 +598,7 @@ const CreateExamTimeTable = () => {
           }}
         ></div>
         {/* Search Section */}
-        <div className=" w-full md:w-[75%] border-1 drop-shadow-sm  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg  mt-3 ml-0 md:ml-[2%]   p-2">
+        <div className=" w-full md:w-[79%] border-1 drop-shadow-sm  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg  mt-3 ml-0 md:ml-[2%]   p-2">
           <div className="w-[99%] flex md:flex-row justify-between items-center">
             <div className="w-full flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
               <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">

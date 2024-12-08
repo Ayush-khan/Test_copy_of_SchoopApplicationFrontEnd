@@ -352,6 +352,7 @@ import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import Loader from "../common/LoaderFinal/LoaderStyle";
 
 const AllotSubjectTab = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -364,6 +365,7 @@ const AllotSubjectTab = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [preCheckedSubjects, setPreCheckedSubjects] = useState([]); // Pre-selected subjects
+  const [loading, setLoading] = useState(false);
 
   // Error state variables
   const [classError, setClassError] = useState("");
@@ -471,6 +473,7 @@ const AllotSubjectTab = () => {
   const handleSave = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
+    setLoading(true);
     let hasError = false;
 
     // Validate form fields
@@ -488,6 +491,7 @@ const AllotSubjectTab = () => {
     }
 
     if (hasError) {
+      setLoading(false);
       setIsSubmitting(false);
       return;
     } // If there are errors, don't proceed with the save.
@@ -516,6 +520,7 @@ const AllotSubjectTab = () => {
       // Handle the response from the backend
       if (response.status === 200) {
         toast.success("Subjects allotted successfully");
+        setLoading(false);
         console.log("API Response:", response.data); // Log the response for debugging
 
         // Clear fields after successful submission
@@ -540,6 +545,7 @@ const AllotSubjectTab = () => {
         toast.error("Error saving allotment");
       }
     } finally {
+      setLoading(false);
       setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
@@ -559,109 +565,116 @@ const AllotSubjectTab = () => {
             style={{ backgroundColor: "#C03078" }}
           ></div>
           <div className="card-body w-full md:w-[85%] mx-auto">
-            {/* Select Class */}
-            <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
-              <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
-                Select Class <span className="text-red-500">*</span>
-              </label>
-              <div className="w-full relative">
-                <Select
-                  value={selectedClass}
-                  onChange={handleClassChange}
-                  placeholder="Select"
-                  className="w-full md:w-[50%] mb-3"
-                  isClearable
-                  options={classes.map((classObj) => ({
-                    value: classObj.class_id,
-                    label: classObj.name,
-                  }))}
-                />
-                {classError && (
-                  <p className="relative -top-4 -mb-3 text-red-500 text-sm">
-                    {classError}
-                  </p>
-                )}
+            {loading ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-50  z-10">
+                <Loader /> {/* Replace this with your loader component */}
               </div>
-            </div>
-
-            {/* Select Subject Type */}
-            <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
-              <label className="w-1/4 pt-2 text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
-                Subject Type <span className="text-red-500">*</span>
-              </label>
-              <div className="w-full">
-                <Select
-                  value={selectedSubjectType}
-                  onChange={handleSubjectTypeChange}
-                  placeholder="Select"
-                  className="w-full md:w-[50%]"
-                  isClearable
-                  isSearchable
-                  options={[
-                    { value: "Scholastic", label: "Scholastic" },
-                    { value: "Co-Scholastic", label: "Co-Scholastic" },
-                  ]}
-                />
-                {subjectTypeError && (
-                  <p className="absolute text-red-500 text-sm">
-                    {subjectTypeError}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Display subjects with checkboxes */}
-            <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
-              <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700 ">
-                Select Subjects <span className="text-red-500">*</span>
-              </label>
-              <div className="w-full">
-                <div className="relative gap-x-10 top-2 grid grid-cols-3 w-full">
-                  {subjectsIs.length > 0 ? (
-                    subjectsIs.map((subject) => (
-                      <div
-                        key={subject.sub_rc_master_id}
-                        className="flex items-center gap-x-2"
-                      >
-                        <label>
-                          <input
-                            type="checkbox"
-                            checked={preCheckedSubjects.includes(
-                              subject.sub_rc_master_id
-                            )}
-                            onChange={() =>
-                              handleCheckboxChange(subject.sub_rc_master_id)
-                            }
-                            className="mr-2"
-                          />
-                          {subject.name}
-                        </label>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="mt-2">No subjects available</p>
-                  )}
+            ) : (
+              <>
+                <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
+                  <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
+                    Select Class <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full relative">
+                    <Select
+                      value={selectedClass}
+                      onChange={handleClassChange}
+                      placeholder="Select"
+                      className="w-full md:w-[50%] mb-3"
+                      isClearable
+                      options={classes.map((classObj) => ({
+                        value: classObj.class_id,
+                        label: classObj.name,
+                      }))}
+                    />
+                    {classError && (
+                      <p className="relative -top-4 -mb-3 text-red-500 text-sm">
+                        {classError}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                {subjectError && (
-                  <p className="absolute text-red-500 text-sm">
-                    {subjectError}
-                  </p>
-                )}
-              </div>
-            </div>
 
-            {/* Save button */}
+                {/* Select Subject Type */}
+                <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
+                  <label className="w-1/4 pt-2 text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
+                    Subject Type <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full">
+                    <Select
+                      value={selectedSubjectType}
+                      onChange={handleSubjectTypeChange}
+                      placeholder="Select"
+                      className="w-full md:w-[50%]"
+                      isClearable
+                      isSearchable
+                      options={[
+                        { value: "Scholastic", label: "Scholastic" },
+                        { value: "Co-Scholastic", label: "Co-Scholastic" },
+                      ]}
+                    />
+                    {subjectTypeError && (
+                      <p className="absolute text-red-500 text-sm">
+                        {subjectTypeError}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
-            <div className="form-group flex justify-end mt-4">
-              <button
-                type="button"
-                onClick={handleSave}
-                className="btn btn-primary"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Saving..." : "Save"}
-              </button>
-            </div>
+                {/* Display subjects with checkboxes */}
+                <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
+                  <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700 ">
+                    Select Subjects <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full">
+                    <div className="relative gap-x-10 top-2 grid grid-cols-3 w-full">
+                      {subjectsIs.length > 0 ? (
+                        subjectsIs.map((subject) => (
+                          <div
+                            key={subject.sub_rc_master_id}
+                            className="flex items-center gap-x-2"
+                          >
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={preCheckedSubjects.includes(
+                                  subject.sub_rc_master_id
+                                )}
+                                onChange={() =>
+                                  handleCheckboxChange(subject.sub_rc_master_id)
+                                }
+                                className="mr-2"
+                              />
+                              {subject.name}
+                            </label>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="mt-2">No subjects available</p>
+                      )}
+                    </div>
+                    {subjectError && (
+                      <p className="absolute text-red-500 text-sm">
+                        {subjectError}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Save button */}
+
+                <div className="form-group flex justify-end mt-4">
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    className="btn btn-primary"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Saving..." : "Save"}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

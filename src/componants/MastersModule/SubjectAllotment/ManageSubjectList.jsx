@@ -2234,7 +2234,7 @@ function ManageSubjectList() {
                               className="text-gray-700 text-sm font-light"
                             >
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {index + 1}
+                                {currentPage * pageSize + index + 1}
                               </td>
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {`${subject?.get_class?.name} ${subject?.get_division?.name}`}
