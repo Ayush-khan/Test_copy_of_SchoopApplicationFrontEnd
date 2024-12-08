@@ -175,7 +175,7 @@ const AdminNavBar = () => {
             to="/StaffList"
             className="text-sm font-bold"
           >
-            Staff List
+            Manage Staff
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
@@ -187,7 +187,7 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
-            to="#"
+            to="/SubstituteTeacher"
             className="text-sm font-bold hover:text-black"
           >
             Substitute Teacher

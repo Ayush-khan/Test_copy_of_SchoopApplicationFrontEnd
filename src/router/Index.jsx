@@ -162,6 +162,7 @@ import ExamTImeTable from "../componants/MastersModule/ExamTimeTable/ExamTImeTab
 import CreateExamTimeTable from "../componants/MastersModule/ExamTimeTable/CreateExamTimeTable.jsx";
 import EditExamTimeTable from "../componants/MastersModule/ExamTimeTable/EditExamTimeTable.jsx";
 import ViewExamTimeTable from "../componants/MastersModule/ExamTimeTable/ViewExamTimeTable.jsx";
+import SubstituteTeacher from "../componants/SubstituteTeacher/SubstituteTeacher.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -318,6 +319,11 @@ function Index() {
         <Route
           path="/staff/view/:id"
           element={<PrivateRoute element={ViewStaff} />}
+        />
+        {/* Substitute Teacher */}
+        <Route
+          path="/SubstituteTeacher"
+          element={<PrivateRoute element={SubstituteTeacher} />}
         />
         {/*  Notice And Sms Module */}
         <Route
