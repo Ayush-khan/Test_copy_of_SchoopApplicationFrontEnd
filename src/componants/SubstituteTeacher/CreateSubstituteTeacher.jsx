@@ -8,7 +8,7 @@ import { RxCross1 } from "react-icons/rx";
 import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
 
-const SubstituteTeacher = () => {
+const CreateSubstituteTeacher = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -16,28 +16,60 @@ const SubstituteTeacher = () => {
     return today.toISOString().split("T")[0]; // Format as yyyy-MM-dd
   });
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
+  const [classIdForSearch, setClassIdForSearch] = useState(null);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
   const [description, setDescription] = useState("");
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  // State for loading indicators
+  // const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
   const [dates, setDates] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [subjects, setSubjects] = useState([]);
   const [timetable, setTimetable] = useState([]);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
+  const [schedule, setSchedule] = useState(
+    timetable.map((row) => ({
+      ...row,
+      errors: { noSubject: false, missingOption: false }, // Initialize error state for each row
+    }))
+  );
+  console.log("scheduleerror", schedule);
+  const updatedErrors = [...schedule]; // Clone the schedule to track errors
+  updatedErrors.forEach((row) => {
+    row.errors = row.errors || { noSubject: false, missingOption: false };
+  });
+  console.log("updatedErrors", updatedErrors);
   useEffect(() => {
     // Fetch both classes and exams when the component mounts
 
     fetchExams();
   }, []);
+
+  // Fetch subjects
+  const fetchSubjects = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(
+        `${API_URL}/api/get_subjectsofallstudents/${classIdForSearch}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setSubjects(response.data.data || []);
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
+    }
+  };
 
   const fetchExams = async () => {
     try {
@@ -161,6 +193,222 @@ const SubstituteTeacher = () => {
     setDescription("");
   };
   // Function to update timetable rows
+  const updateTimetable = (index, field, value, subIndex = null) => {
+    const updatedTimetable = [...timetable];
+
+    if (field === "subjects" && subIndex !== null) {
+      // Update the subject value
+      updatedTimetable[index].subjects[subIndex] = value;
+
+      // Uncheck study leave if any subject dropdown is selected
+      if (value !== "") {
+        updatedTimetable[index].studyLeave = false;
+      }
+    } else if (field === "studyLeave") {
+      // Update study leave checkbox
+      updatedTimetable[index].studyLeave = value;
+
+      // Clear subjects and options if study leave is checked
+      if (value) {
+        updatedTimetable[index].subjects = Array(4).fill("");
+        updatedTimetable[index].option = "Select";
+      }
+    } else {
+      // Update other fields like option
+      updatedTimetable[index][field] = value;
+    }
+
+    setTimetable(updatedTimetable);
+  };
+  const prepareData = () => {
+    const preparedData = {};
+
+    timetable.forEach((row, rowIndex) => {
+      row.subjects.forEach((subject, subIndex) => {
+        const key = `subject_id${rowIndex + 1}${subIndex + 1}`; // Generate key
+        if (/^\d+$/.test(subject)) {
+          // If value is numeric
+          preparedData[key] = subject;
+        } else {
+          // If value is not numeric, set it as an empty string
+          preparedData[key] = "";
+        }
+      });
+
+      // Handle study leave checkbox value
+      const studyLeaveKey = `study_leave${rowIndex + 1}`;
+      preparedData[studyLeaveKey] = row.studyLeave ? "1" : "0";
+
+      // Add options value
+      const optionKey = `option${rowIndex + 1}`;
+      preparedData[optionKey] = row.option || "Select";
+    });
+
+    // Add description field at the end
+    preparedData.description = description; // Assuming `description` is the state variable for the input field
+
+    return preparedData;
+  };
+  const handleSubmit = async () => {
+    const preparedData = prepareData(); // Prepare data for validation
+    let hasError = false;
+    let warningRows = [];
+    let errorMessage = "";
+    let anySubjectSelected = false;
+
+    // Clone the schedule errors state
+    const updatedErrors = timetable.map((row) => ({
+      noSubject: false,
+      missingOption: false,
+    }));
+
+    timetable.forEach((row, rowIndex) => {
+      const studyLeaveKey = `study_leave${rowIndex + 1}`;
+      const optionKey = `option${rowIndex + 1}`;
+      const hasStudyLeave = preparedData[studyLeaveKey] === "1";
+      const hasSubjects = Object.keys(preparedData).some(
+        (key) =>
+          key.startsWith(`subject_id${rowIndex + 1}`) &&
+          preparedData[key] !== ""
+      );
+      const hasMultipleSubjects =
+        Object.keys(preparedData).filter(
+          (key) =>
+            key.startsWith(`subject_id${rowIndex + 1}`) &&
+            preparedData[key] !== ""
+        ).length > 1;
+      const hasOptionSelected = preparedData[optionKey] !== "Select";
+
+      // Track if any subject is selected across rows
+      if (hasSubjects) {
+        anySubjectSelected = true;
+      }
+
+      // Validation 2: Multiple subjects selected but no option chosen
+      if (hasMultipleSubjects && !hasOptionSelected) {
+        updatedErrors[rowIndex].missingOption = true;
+        errorMessage = `Please select an option for multiple subjects on ${row.date}.`;
+        hasError = true;
+      }
+
+      // Track warning rows: No data for a row
+      if (!hasSubjects && !hasStudyLeave && !hasOptionSelected) {
+        warningRows.push(row.date);
+      }
+    });
+
+    // Validation 1: No subject selected across all rows
+    if (!anySubjectSelected) {
+      errorMessage = `Please select at least one subject for any date.`;
+      hasError = true;
+    }
+
+    // Update the state to reflect field-level errors
+    setSchedule(
+      schedule.map((row, index) => ({
+        ...row,
+        errors: updatedErrors[index],
+      }))
+    );
+
+    // Display error messages
+    if (hasError) {
+      toast.error(
+        <div>
+          <strong className="text-red-600">Error:</strong> {errorMessage}
+          <div className="text-right mt-2">
+            <button
+              className="bg-blue-500 text-[.9em] text-white px-3 py-1 rounded hover:bg-blue-700"
+              onClick={() => toast.dismiss()}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      );
+      return;
+    }
+
+    // Display warning message
+    if (warningRows.length > 0) {
+      const remainingRows = warningRows.length;
+      // Disable the Submit button when warning is shown
+      setIsSubmitDisabled(true);
+
+      // Show a modal-like toast for confirmation
+      toast(
+        <div>
+          <strong className="text-pink-500">Warning:</strong> Data for{" "}
+          <strong className="">{remainingRows}</strong> days are not selected.
+          Do you still want to save data?
+          <div className="flex justify-end gap-2 mt-2 ">
+            <button
+              className="bg-red-500 text-[.9em] text-white px-2 py-1 rounded hover:bg-red-700"
+              onClick={() => {
+                toast.dismiss(); // Dismiss the toast
+                setIsSubmitDisabled(false); // Enable the Submit button
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-green-500 text-[.9em] text-white px-2 py-1 rounded hover:bg-green-700"
+              onClick={() => {
+                toast.dismiss(); // Dismiss the toast
+                setIsSubmitDisabled(false); // Re-enable the Submit button after submission
+
+                submitData(preparedData); // Call the function to submit data
+              }}
+            >
+              Confirm
+            </button>
+          </div>
+        </div>,
+        {
+          autoClose: false, // Prevent auto-dismiss
+          closeButton: false, // Remove the cross button
+          onClose: () => {
+            // Ensure `setIsSubmitDisabled(false)` runs if the toast is closed manually
+            setIsSubmitDisabled(false);
+          },
+        }
+      );
+      return;
+    }
+
+    // If no errors or warnings, submit data
+    submitData(preparedData);
+  };
+
+  // Separate function to handle data submission
+  const submitData = async (preparedData) => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.post(
+        `${API_URL}/api/save_timetable/${selectedStudentId}/${classIdForSearch}`,
+        preparedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      toast.success("Exam Time Table created successfully!");
+      setLoading(false);
+
+      // Navigate to /examTimeTable after a slight delay
+      setTimeout(() => {
+        navigate("/examTimeTable");
+      }, 500);
+    } catch (error) {
+      toast.error("Error creating Exam Time Table.");
+      console.error(error);
+      setLoading(false);
+    }
+  };
 
   const handleDelete = () => {
     setShowDeleteModal(true);
@@ -217,105 +465,6 @@ const SubstituteTeacher = () => {
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
-  //   const handlePrint = () => {
-  //     // Prepare the content for printing
-  //     const printContent = `
-  //     <div class="flex items-center justify-center min-h-screen bg-white">
-  //       <div id="tableHeading" class="text-center w-3/4">
-  //         <h4 id="tableHeading5" class="text-xl text-center mb-0">
-  //           Substitution Timetable
-  //         </h4>
-  //         <table class="w-full border-collapse border border-black mx-auto mt-0">
-  //           <thead>
-  //             <tr class="bg-gray-100">
-  //               <th class="border border-black p-2 text-center font-semibold">Date</th>
-  //               <th class="border border-black p-2 text-center font-semibold">Period</th>
-  //               <th class="border border-black p-2 text-center font-semibold">Subject Name</th>
-  //               <th class="border border-black p-2 text-center font-semibold">Substitute Teacher</th>
-  //               <th class="border border-black p-2 text-center font-semibold">Class-Section</th>
-  //             </tr>
-  //           </thead>
-  //           <tbody>
-  //             ${timetable
-  //               .map(
-  //                 (row) => `
-  //                 <tr>
-  //                   <td class="border border-black p-2 text-center">${
-  //                     row.date || "-"
-  //                   }</td>
-  //                   <td class="border border-black p-2 text-center">${
-  //                     row.period || "-"
-  //                   }</td>
-  //                   <td class="border border-black p-2 text-center">${
-  //                     row.subjectName || "-"
-  //                   }</td>
-  //                   <td class="border border-black p-2 text-center">${
-  //                     row.subTeacher || "-"
-  //                   }</td>
-  //                   <td class="border border-black p-2 text-center">${
-  //                     row.className || "-"
-  //                   }-${row.sectionName || "-"}</td>
-
-  //                 </tr>
-  //               `
-  //               )
-  //               .join("")}
-  //           </tbody>
-  //         </table>
-  //       </div>
-  //     </div>
-  //   `;
-
-  //     // Open a new print window
-  //     const printWindow = window.open("", "", "height=800,width=1000");
-  //     printWindow.document.write(
-  //       `<html>
-  //       <head>
-  //         <title>Substitution Timetable</title>
-  //         <style>
-  //           @page {
-  //             margin: 0;
-  //           }
-  //           body {
-  //             margin: 0;
-  //             padding: 0;
-  //             font-family: Arial, sans-serif;
-  //           }
-  //           #tableHeading {
-  //             width: 70%;
-  //             margin: auto;
-  //             margin-top: 4em;
-  //           }
-  //           #tableHeading5 {
-  //             text-align: center;
-  //             margin-bottom: 5px;
-  //           }
-  //           table {
-  //             border-spacing: 0;
-  //             width: 100%;
-  //             margin: auto;
-  //           }
-  //           th {
-  //             background-color: #f9f9f9;
-  //           }
-  //           th, td {
-  //             border: 1px solid gray;
-  //             padding: 8px;
-  //             text-align: center;
-  //           }
-  //         </style>
-  //       </head>
-  //       <body>
-  //         ${printContent}
-  //       </body>
-  //     </html>`
-  //     );
-  //     printWindow.document.close();
-
-  //     // Trigger the print dialog
-  //     printWindow.print();
-  //   };
-
   return (
     <>
       <div className="w-full md:w-[80%] mx-auto p-4 ">
@@ -455,7 +604,7 @@ const SubstituteTeacher = () => {
                   Delete
                 </button>
                 <button
-                  //   onClick={handlePrint}
+                  onClick={resetTimetable}
                   className=" flex  flex-row justify-center align-middle items-center gap-x-1 bg-blue-500 hover:bg-blue-600 text-white  py-1 px-3 rounded"
                 >
                   <FiPrinter /> Print
@@ -571,4 +720,4 @@ const SubstituteTeacher = () => {
   );
 };
 
-export default SubstituteTeacher;
+export default CreateSubstituteTeacher;
