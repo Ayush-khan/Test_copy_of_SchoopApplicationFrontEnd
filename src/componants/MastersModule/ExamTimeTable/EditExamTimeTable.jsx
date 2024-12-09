@@ -465,14 +465,14 @@ const EditExamTimeTable = () => {
               <div className="my-4 flex flex-col md:flex-row gap-2 justify-center md:justify-end">
                 <button
                   onClick={resetTimetable}
-                  className="bg-red-500 text-white font-bold py-2 px-4 rounded"
+                  className={`bg-red-500 text-white py-1 px-3 rounded hover:bg-red-700`}
                 >
                   Reset
                 </button>
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  className={`bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 ${
+                  className={`bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded ${
                     isSubmitDisabled ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   disabled={isSubmitDisabled}
