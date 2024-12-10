@@ -8,6 +8,8 @@ import { RxCross1 } from "react-icons/rx";
 import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
 import CreateSubstituteTeacher from "./CreateSubstituteTeacher";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 const SubstituteTeacher = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -486,29 +488,29 @@ const SubstituteTeacher = () => {
 
               {timetable.length > 0 && (
                 <>
-                  <div className="my-4 pt-3 flex flex-col md:flex-row gap-1 justify-center md:justify-end">
+                  <div className="my-2 pt-3 flex flex-col md:flex-row gap-1 justify-center md:justify-end">
                     <button
                       type="button"
                       onClick={() => handleSubmitEdit({ timetable })}
-                      className="bg-blue-500 hover:bg-blue-600 text-white  py-1 px-3 rounded"
+                      className="bg-blue-500 hover:bg-blue-600 text-white   px-3 rounded"
                     >
-                      Edit
+                      Edit <FontAwesomeIcon icon={faEdit} />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDelete()}
-                      className={`bg-red-500 text-white py-1 px-3 rounded hover:bg-red-700 ${
+                      className={`bg-red-500 text-white  px-3 rounded hover:bg-red-700 ${
                         isSubmitDisabled ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                       disabled={isSubmitDisabled}
                     >
-                      Delete
+                      Delete <FontAwesomeIcon icon={faTrash} />
                     </button>
                     <button
                       onClick={handlePrint}
-                      className=" flex  flex-row justify-center align-middle items-center gap-x-1 bg-blue-500 hover:bg-blue-600 text-white  py-1 px-3 rounded"
+                      className=" flex  flex-row justify-center align-middle items-center gap-x-1 bg-blue-500 hover:bg-blue-600 text-white   px-3 rounded"
                     >
-                      <FiPrinter /> Print
+                      print <FiPrinter />
                     </button>
                   </div>
                   <div className=" md:w-[80%] w-full mx-auto pb-4 pt-2 px-1 md:px-4">

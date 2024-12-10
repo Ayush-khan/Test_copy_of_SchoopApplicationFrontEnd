@@ -14,6 +14,7 @@ const EditSubstituteTeacher = () => {
   const location = useLocation();
   const { staff } = location.state || {};
   const { teacherId, date } = staff.timetable[0] || {};
+  const [day, setDay] = useState("");
 
   // Log to verify the values
   console.log("Teacher ID:", teacherId);
@@ -41,73 +42,54 @@ const EditSubstituteTeacher = () => {
   const [teacherList, setTeacherList] = useState([]);
 
   useEffect(() => {
-    const fetchTimetableData = async () => {
-      try {
-        setLoading(true); // Start loading
-        const token = localStorage.getItem("authToken");
-        const response = await axios.get(
-          `${API_URL}/api/get_substituteteacherdata/${teacherId}/${date}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (response?.data?.success && response.data?.data?.length > 0) {
-          const substitutionData = response.data.data;
-
-          // Map response data into a usable structure for rendering
-          const timetableData = substitutionData.map((item) => ({
-            date: item?.date,
-            subject: item?.sname,
-            classSection: `${item?.c_name}-${item?.s_name}`, // Combine class and section
-            periodNo: item?.period,
-            teacherName: item?.sub_teacher,
-            teacherId: item?.teacher_id,
-            subTeacherId: item?.sub_teacher_id,
-            substituteTeacher: item.sub_teacher_id, // Prefill dropdown
-            classId: item?.class_id,
-            sectionId: item?.section_id,
-            subjectId: item?.subject_id,
-          }));
-
-          setTimetable(timetableData); // Save mapped data
-          toast.success("Substitution data fetched successfully!");
-        } else {
-          toast.error(
-            "No substitution data available for the selected teacher and date."
-          );
-          setTimetable([]); // Clear timetable to avoid incorrect rendering
-        }
-      } catch (error) {
-        console.error("Error fetching substitution data:", error);
-        toast.error("An error occurred while fetching substitution data.");
-      } finally {
-        setLoading(false); // Stop loading
-      }
-    };
-
-    fetchTimetableData();
-  }, [API_URL, teacherId, date]);
-
-  useEffect(() => {
     // Fetch both classes and exams when the component mounts
-
+    fetchTimetableData();
     fetchExams();
     fetchTeacherList();
   }, []);
 
-  // Fetch subjects
+  const fetchTimetableData = async () => {
+    try {
+      setLoading(true); // Start loading
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${API_URL}/api/get_substituteteacherdata/${teacherId}/${date}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-  const handleDateChange = (e) => {
-    const newDate = e.target.value;
-    const currentYear = new Date().getFullYear();
-    const selectedYear = new Date(newDate).getFullYear();
+      if (response?.data?.success && response.data?.data?.length > 0) {
+        const substitutionData = response.data.data;
 
-    // Allow only dates within the previous, current, and next years
-    if (selectedYear >= currentYear - 1 && selectedYear <= currentYear + 1) {
-      setSelectedDate(newDate);
-    } else {
-      alert("Please select a date within the allowed range.");
+        // Map response data into a usable structure for rendering
+        const timetableData = substitutionData.map((item) => ({
+          date: item?.date,
+          subject: item?.sname,
+          classSection: `${item?.c_name}-${item?.s_name}`, // Combine class and section
+          periodNo: item?.period,
+          teacherName: item?.sub_teacher,
+          teacherId: item?.teacher_id,
+          subTeacherId: item?.sub_teacher_id,
+          substituteTeacher: item.sub_teacher_id, // Prefill dropdown
+          classId: item?.class_id,
+          sectionId: item?.section_id,
+          subjectId: item?.subject_id,
+        }));
+        setDay(response?.data?.day_week);
+        setTimetable(timetableData); // Save mapped data
+        toast.success("Substitution data fetched successfully!");
+      } else {
+        toast.error(
+          "No substitution data available for the selected teacher and date."
+        );
+        setTimetable([]); // Clear timetable to avoid incorrect rendering
+      }
+    } catch (error) {
+      console.error("Error fetching substitution data:", error);
+      toast.error("An error occurred while fetching substitution data.");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -267,7 +249,7 @@ const EditSubstituteTeacher = () => {
             <>
               <div className="md:w-[65%] w-full mx-auto pb-3 pt-2 px-1 md:px-4">
                 <div className="card bg-gray-100 py-2 px-3 rounded-md">
-                  <h5 className="text-center text-blue-600">{`Timetable for `}</h5>
+                  <h5 className="text-center text-blue-600">{`Timetable for ${day} `}</h5>
                   <div className="overflow-x-auto">
                     <table className="table-auto w-full border-collapse border bg-gray-50 border-gray-300">
                       <thead>

@@ -36,66 +36,6 @@ const EditExamTimeTable = () => {
   });
   console.log("updatedErrors", updatedErrors);
   // Fetch exam timetable data
-  useEffect(() => {
-    const fetchTimetableData = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("authToken");
-        const response = await axios.get(
-          `${API_URL}/api/get_examtimetable/${staff?.exam_tt_id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (response?.data?.data) {
-          const data = response.data.data;
-
-          if (data.length === 0) {
-            toast.error("Date is not available for this timetable.");
-            setTimetable([]); // Clear timetable to avoid incorrect rendering
-            setDescription(""); // Clear description
-            return;
-          }
-
-          setTimetable(
-            data.map((row) => ({
-              date: row.date,
-              subjects: [...row.subject_rc_id, "", "", ""].slice(0, 4), // Ensure 4 subject slots
-              option: row.option || "Select",
-              studyLeave: row.study_leave,
-            }))
-          );
-
-          setDescription(response.data[0]?.description || "");
-        }
-
-        fetchSubjects();
-      } catch (error) {
-        console.error("Error fetching timetable data:", error);
-        toast.error("An error occurred while fetching timetable data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchSubjects = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        const response = await axios.get(
-          `${API_URL}/api/get_subjectsofallstudents/${staff?.class_id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setSubjects(response?.data?.data || []);
-      } catch (error) {
-        console.error("Error fetching subjects:", error);
-      }
-    };
-
-    fetchTimetableData();
-  }, [API_URL, staff]);
 
   const updateTimetable = (index, field, value, subIndex = null) => {
     const updatedTimetable = [...timetable];
