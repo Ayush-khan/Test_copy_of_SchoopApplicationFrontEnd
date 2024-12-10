@@ -25,8 +25,8 @@ const LoginForm = () => {
         // "http://127.0.0.1:8000/api/login",
         `${API_URL}/api/login`,
         {
-          email,
-          password,
+          user_id: email,
+          password: password,
         }
       );
       console.log("the message of the response of the login", response);
@@ -75,12 +75,12 @@ const LoginForm = () => {
           <div className={styles.inputWrapper}>
             <FontAwesomeIcon icon={faUser} className={styles.userIcon} />
             <input
-              type="email"
+              type="text"
               id="email"
               name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter Email"
+              placeholder="Enter User Id"
               required
             />
           </div>

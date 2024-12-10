@@ -135,6 +135,7 @@ const SubstituteTeacher = () => {
           className: item.c_name,
           sectionName: item.s_name,
           academicYear: item.academic_yr,
+          teacherId: item?.teacher_id,
         }));
         setSelectedDay(response?.data?.day_week);
 

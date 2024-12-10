@@ -27,9 +27,9 @@ const CreateSubstituteTeacher = () => {
   // const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
-  const [dates, setDates] = useState([]);
+  const [dates, setDates] = useState();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [day, setDay] = useState("");
   const [subjects, setSubjects] = useState([]);
   const [timetable, setTimetable] = useState([]);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
@@ -177,7 +177,8 @@ const CreateSubstituteTeacher = () => {
 
       if (response?.data?.success && response.data?.data?.length > 0) {
         const substitutionData = response.data.data;
-
+        setDay(response?.data?.data1?.day);
+        setDates(response?.data?.data1?.date);
         // Map response data into a usable structure for rendering
         const timetableData = substitutionData.map((item) => ({
           subject: item.subject,
@@ -219,9 +220,9 @@ const CreateSubstituteTeacher = () => {
       section_id: row.sectionId,
       subject_id: row.subjectId,
       period: row.periodNo,
-      date: row.date,
+      date: dates,
       teacher_id: row.teacherId,
-      substitute_teacher_id: row.substituteTeacher,
+      substitute_teacher_id: row.substituteTeacher || "",
     }));
 
     return { substitutions };
@@ -376,7 +377,7 @@ const CreateSubstituteTeacher = () => {
           <>
             <div className="md:w-[65%] w-full mx-auto pb-3 pt-2 px-1 md:px-4">
               <div className="card bg-gray-100 py-2 px-3 rounded-md">
-                <h5 className="text-center text-blue-600">{`Timetable for `}</h5>
+                <h5 className="text-center text-blue-600">{`Timetable for ${day}`}</h5>
                 <div className="overflow-x-auto">
                   <table className="table-auto w-full border-collapse border bg-gray-50 border-gray-300">
                     <thead>
