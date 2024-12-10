@@ -31,6 +31,7 @@ function MarksHeading() {
   const [classes, setClasses] = useState([]);
   const [sequence, setSequence] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nameErrorforName, setNameErrorforName] = useState("");
 
   const pageSize = 10;
   //   useEffect(() => {
@@ -277,12 +278,18 @@ function MarksHeading() {
       toast.success("Marks headings added successfully!");
     } catch (error) {
       console.error("Error adding Marks headings:", error);
+      if (error.response?.status === 422 && error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        console.log("errors", errors);
 
-      toast.error(error?.response?.data?.message);
-      console.error(
-        "Error adding Marks headings:",
-        error?.response?.data?.message
-      );
+        if (errors?.sequence && errors?.sequence?.length > 0) {
+          console.log("errors", errors.sequence);
+          // toast.error(errors.sequence[0]); // Display the specific "Sequence field should be unique" error
+          setNameErrorforName(errors.sequence[0]); // Update state with the specific error
+        }
+      } else {
+        toast.error("Server error. Please try again later.");
+      }
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -688,11 +695,10 @@ function MarksHeading() {
                         // onBlur={handleBlur}
                       />
                       <div className="absolute top-9 left-1/3">
-                        {!nameAvailable && (
-                          <span className=" block text-danger text-xs">
-                            {nameError}
-                          </span>
-                        )}
+                        <span className=" block text-danger text-xs">
+                          {nameErrorforName}
+                        </span>
+
                         {fieldErrors.name && (
                           <span className="text-danger text-xs">
                             {fieldErrors.name}

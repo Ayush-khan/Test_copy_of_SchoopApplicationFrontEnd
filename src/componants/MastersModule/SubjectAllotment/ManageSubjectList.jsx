@@ -1268,10 +1268,11 @@ import { RxCross1 } from "react-icons/rx";
 import AllotTeachersForCLass from "./AllotTeachersForCLass.jsx";
 import AllotTeachersTab from "./AllotTeachersTab.jsx";
 import Select from "react-select";
+import Loader from "../../common/LoaderFinal/LoaderStyle.jsx";
 function ManageSubjectList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const [classSection, setClassSection] = useState("");
   const [activeTab, setActiveTab] = useState("Manage");
@@ -1585,7 +1586,12 @@ function ManageSubjectList() {
     }
   };
   const handleTabChange = (tab) => {
-    setActiveTab(tab);
+    setActiveTab(tab); // Update the active tab state
+
+    // Call handleSearch only if the tab is "Manage"
+    if (tab === "Manage") {
+      handleSearch();
+    }
   };
 
   //   Logic for ALlot subject tab
@@ -1968,12 +1974,14 @@ function ManageSubjectList() {
   // };
   const handleSubmitAllotment = async () => {
     console.log("post start fdgh");
-
+    setLoading(true);
     // Validate required fields
     console.log("ClassNameDropdown", classId);
     let hasError = false;
     if (!classId) {
       setClassError("Please select a class");
+      setLoading(false);
+
       hasError = true;
 
       // return; // Exit early if validation fails
@@ -1997,8 +2005,10 @@ function ManageSubjectList() {
       // return; // Exit early if validation fails
     }
     if (hasError) {
+      setLoading(false);
       return;
     }
+
     try {
       const token = localStorage.getItem("authToken");
 
@@ -2041,7 +2051,6 @@ function ManageSubjectList() {
       // Handle successful response
       if (response.status === 201) {
         toast.success("Subject allotment details updated successfully");
-
         setTimeout(() => {
           setClassSection("");
           setClassNameDropdown("");
@@ -2051,7 +2060,7 @@ function ManageSubjectList() {
           setDivisions([]);
           setAllotSubjectTabData([]); // Clear the form or reset state
           setActiveTab("Manage"); // Set the active tab to "Manage" after 2 seconds
-        }, 3000); // Wait for 2 seconds
+        }, 500);
       } else {
         toast.error("Unexpected response from the server");
       }
@@ -2065,22 +2074,9 @@ function ManageSubjectList() {
         toast.error(`Error storing subject allotment: ${error.message}`);
       }
       console.error("Error storing subject allotment:", error);
+    } finally {
+      setLoading(false);
     }
-  };
-
-  //   sorting logic
-  const sortedSubjects = () => {
-    const { key, direction } = sortConfig;
-    const sortedData = [...subjects].sort((a, b) => {
-      if (a[key] < b[key]) {
-        return direction === "asc" ? -1 : 1;
-      }
-      if (a[key] > b[key]) {
-        return direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-    return sortedData;
   };
 
   return (
@@ -2352,68 +2348,77 @@ function ManageSubjectList() {
                             backgroundColor: "#C03078",
                           }}
                         ></div>
-                        <div className="card-body  w-full">
-                          <div className=" relative lg:overflow-x-hidden">
-                            <div className=" relative mb-4 flex gap-x-4">
-                              <h5 className="px-2 mt-2 lg:px-3 py-2 text-[1em] text-gray-700">
-                                Select divisions{" "}
-                                <span className="text-red-500">*</span>
-                              </h5>
-                              {division.map((div) => (
-                                <div key={div.section_id} className="pt-3">
-                                  <input
-                                    type="checkbox"
-                                    className="mr-0.5 shadow-lg "
-                                    checked={selectedDivisions.includes(
-                                      div.section_id
-                                    )}
-                                    onChange={() =>
-                                      handleDivisionChange(div.section_id)
-                                    }
-                                  />
-                                  <span className="  font-semibold text-gray-600 ">
-                                    {div.name}
-                                  </span>
-                                </div>
-                              ))}
 
-                              {divisionError && (
-                                <p className="  md:absolute md:top-9 md:left-[17%] text-red-500 text-xs">
-                                  {divisionError}
-                                </p>
-                              )}
+                        {loading ? (
+                          <tr>
+                            <div className=" absolute inset-0 py-8 h flex items-center justify-center bg-gray-50  z-10">
+                              <Loader /> {/* Replace with your loader */}
                             </div>
-
-                            <div className="flex">
-                              <h5 className="px-2 relative -top-2 lg:px-3 py-2 text-[1em] text-gray-700">
-                                Select subjects{" "}
-                                <span className="text-red-500">*</span>
-                              </h5>
-                              {/* <div className="relative gap-x-10 top-2 border-2 border-black  grid grid-cols-3  w-full"> */}
-
-                              <div className=" grid grid-cols-3 mx-4 w-[78%]">
-                                {subjectsForAllotSubject.map((subject) => (
-                                  <div key={subject.sm_id}>
-                                    <label>
+                          </tr>
+                        ) : (
+                          <>
+                            <div className="card-body  w-full">
+                              <div className=" relative lg:overflow-x-hidden">
+                                <div className=" relative mb-4 flex gap-x-4">
+                                  <h5 className="px-2 mt-2 lg:px-3 py-2 text-[1em] text-gray-700">
+                                    Select divisions{" "}
+                                    <span className="text-red-500">*</span>
+                                  </h5>
+                                  {division.map((div) => (
+                                    <div key={div.section_id} className="pt-3">
                                       <input
                                         type="checkbox"
-                                        className="mr-0.5 shadow-lg"
-                                        value={subject.sm_id}
-                                        checked={selectedSubjects.includes(
-                                          subject.sm_id
+                                        className="mr-0.5 shadow-lg "
+                                        checked={selectedDivisions.includes(
+                                          div.section_id
                                         )}
                                         onChange={() =>
-                                          handleSubjectChange(subject.sm_id)
+                                          handleDivisionChange(div.section_id)
                                         }
-                                        disabled={!selectedDivisions.length} // Disable if no division is selected
                                       />
-                                      <span className="font-semibold text-gray-600">
-                                        {subject.name}
+                                      <span className="  font-semibold text-gray-600 ">
+                                        {div.name}
                                       </span>
-                                    </label>
-                                  </div>
-                                ))}
-                                {/* {subjects.map((subject) => (
+                                    </div>
+                                  ))}
+
+                                  {divisionError && (
+                                    <p className="  md:absolute md:top-9 md:left-[17%] text-red-500 text-xs">
+                                      {divisionError}
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="flex">
+                                  <h5 className="px-2 relative -top-2 lg:px-3 py-2 text-[1em] text-gray-700">
+                                    Select subjects{" "}
+                                    <span className="text-red-500">*</span>
+                                  </h5>
+                                  {/* <div className="relative gap-x-10 top-2 border-2 border-black  grid grid-cols-3  w-full"> */}
+
+                                  <div className=" grid grid-cols-3 mx-4 w-[78%]">
+                                    {subjectsForAllotSubject.map((subject) => (
+                                      <div key={subject.sm_id}>
+                                        <label>
+                                          <input
+                                            type="checkbox"
+                                            className="mr-0.5 shadow-lg"
+                                            value={subject.sm_id}
+                                            checked={selectedSubjects.includes(
+                                              subject.sm_id
+                                            )}
+                                            onChange={() =>
+                                              handleSubjectChange(subject.sm_id)
+                                            }
+                                            disabled={!selectedDivisions.length} // Disable if no division is selected
+                                          />
+                                          <span className="font-semibold text-gray-600">
+                                            {subject.name}
+                                          </span>
+                                        </label>
+                                      </div>
+                                    ))}
+                                    {/* {subjects.map((subject) => (
                                   <div key={subject.sm_id}>
                                     <input
                                       type="checkbox"
@@ -2430,24 +2435,26 @@ function ManageSubjectList() {
                                     {subject.name}
                                   </div>
                                 ))} */}
+                                  </div>
+                                </div>
+                                {subjectError && (
+                                  <p className="absolute  left-[18%]  text-red-500 text-xs ">
+                                    {subjectError}
+                                  </p>
+                                )}
                               </div>
                             </div>
-                            {subjectError && (
-                              <p className="absolute  left-[18%]  text-red-500 text-xs ">
-                                {subjectError}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className=" flex justify-end p-3">
-                          <button
-                            type="button"
-                            className="btn btn-primary px-3 mb-2 "
-                            onClick={handleSubmitAllotment}
-                          >
-                            Save
-                          </button>
-                        </div>
+                            <div className=" flex justify-end p-3">
+                              <button
+                                type="button"
+                                className="btn btn-primary px-3 mb-2 "
+                                onClick={handleSubmitAllotment}
+                              >
+                                Save
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}

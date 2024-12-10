@@ -174,6 +174,17 @@ const SubstituteTeacher = () => {
   const handleDelete = () => {
     setShowDeleteModal(true);
   };
+  const handleSubmitEdit = (staffItem) => {
+    console.log("this is the )))))))))", staffItem);
+    // navigate(`/editStaff/${staffItem.user_id}`
+    navigate(
+      `/substituteTeacher/edit/${staffItem?.teacher_id}`,
+
+      {
+        state: { staff: staffItem },
+      }
+    );
+  };
   const handleSubmitDelete = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
@@ -236,7 +247,7 @@ const SubstituteTeacher = () => {
     <div class="flex items-center justify-center min-h-screen bg-white">
       <div id="tableHeading" class="text-center w-3/4">
         <h4 id="tableHeading5" class="text-xl text-center mb-0">
-          Substitution Timetable for ${selectedDay}
+          Substitution Timetable of ${selectedStudent.label}
         </h4>
         <table class="w-full border-collapse border border-black mx-auto mt-0">
           <thead>
@@ -245,7 +256,6 @@ const SubstituteTeacher = () => {
                          
                             <th class="border border-black p-2 text-center font-semibold">Period</th>
               <th class="border border-black p-2 text-center font-semibold">Subject</th>
-                            <th class="border border-black p-2 text-center font-semibold">Subject Teacher </th>
 
               <th class="border border-black p-2 text-center font-semibold">Substitute Teacher</th>
 
@@ -267,9 +277,7 @@ const SubstituteTeacher = () => {
                     row.subjectName || "-"
                   }  ${row.className || "-"}-${row.sectionName || "-"}
                   </td>
-                   <td class="border border-black p-2 text-center">${
-                     selectedStudent.label || ""
-                   }</td>
+                  
                   <td class="border border-black p-2 text-center">${
                     row.subTeacher || "-"
                   }</td>
@@ -480,7 +488,7 @@ const SubstituteTeacher = () => {
                   <div className="my-4 pt-3 flex flex-col md:flex-row gap-1 justify-center md:justify-end">
                     <button
                       type="button"
-                      onClick={() => handleDelete()}
+                      onClick={() => handleSubmitEdit({ timetable })}
                       className="bg-blue-500 hover:bg-blue-600 text-white  py-1 px-3 rounded"
                     >
                       Edit

@@ -356,7 +356,12 @@ function AllotMarksHeading() {
   );
 
   const handleTabChange = (tab) => {
-    setActiveTab(tab);
+    setActiveTab(tab); // Update the active tab state
+
+    // Call handleSearch only if the tab is "Manage"
+    if (tab === "Manage") {
+      handleSearch();
+    }
   };
   return (
     <>

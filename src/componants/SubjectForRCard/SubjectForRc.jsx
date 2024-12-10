@@ -222,12 +222,13 @@ function SubjectForRc() {
         console.log("errors", errors);
 
         if (errors?.name && errors?.name?.length > 0) {
-          toast.error(errors.name[0]); // Display the specific "name should be unique" error
+          // toast.error(errors.name[0]); // Display the specific "name should be unique" error
           setNameErrorforName(errors.name[0]);
-        } else {
-          // Handle other validation errors if they exist
-          Object.values(errors).forEach((err) => toast.error(err[0]));
         }
+        //  else {
+        //   // Handle other validation errors if they exist
+        //   // Object.values(errors).forEach((err) => toast.error(err[0]));
+        // }
       } else {
         toast.error("Server error. Please try again later.");
       }
@@ -278,12 +279,13 @@ function SubjectForRc() {
         console.log("errors", errors);
 
         if (errors?.name && errors?.name?.length > 0) {
-          toast.error(errors.name[0]); // Display the specific "name should be unique" error
+          // toast.error(errors.name[0]); // Display the specific "name should be unique" error
           setNameErrorforName(errors.name[0]);
-        } else {
-          // Handle other validation errors if they exist
-          Object.values(errors).forEach((err) => toast.error(err[0]));
         }
+        // else {
+        //   // Handle other validation errors if they exist
+        //   Object.values(errors).forEach((err) => toast.error(err[0]));
+        // }
       }
       if (error.response && error.response.data && error.response.data.errors) {
         // Store the errors in backendErrors state

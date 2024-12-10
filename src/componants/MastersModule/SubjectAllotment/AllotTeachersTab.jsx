@@ -1109,6 +1109,7 @@ import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import Loader from "../../common/LoaderFinal/LoaderStyle";
 
 const AllotTeachersTab = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -1129,6 +1130,7 @@ const AllotTeachersTab = () => {
   const [teacherError, setTeacherError] = useState("");
   const [subjectError, setSubjectError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchClassNames();
@@ -1287,6 +1289,8 @@ const AllotTeachersTab = () => {
   };
 
   const handleSave = async () => {
+    setLoading(true);
+
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
     let hasError = false;
@@ -1294,6 +1298,8 @@ const AllotTeachersTab = () => {
     // Validate form fields
     if (!selectedClass) {
       setClassError("Please select a class.");
+      setLoading(false);
+
       hasError = true;
     }
     if (!selectedDivision) {
@@ -1310,6 +1316,8 @@ const AllotTeachersTab = () => {
     }
 
     if (hasError) {
+      setLoading(false);
+
       setIsSubmitting(false);
       return;
     } // If there are errors, don't proceed with the save.
@@ -1337,10 +1345,12 @@ const AllotTeachersTab = () => {
         setSubjectError("");
         setSubjects([]);
         setPreSubjects([]);
-      }, 3000);
+      }, 500);
     } catch (error) {
       toast.error("Error saving allotment");
     } finally {
+      setLoading(false);
+
       setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
@@ -1368,124 +1378,136 @@ const AllotTeachersTab = () => {
             }}
           ></div>
           <div className="card-body w-full md:w-[85%] mx-auto">
-            <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
-              <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
-                Select Class <span className="text-red-500">*</span>
-              </label>
-              <div className="w-full">
-                <Select
-                  options={classes.map((cls) => ({
-                    value: cls.class_id,
-                    label: cls.name,
-                  }))}
-                  value={selectedClass}
-                  onChange={handleClassChange}
-                  placeholder="Select"
-                  styles={customSelectStyles}
-                  className="w-full md:w-[50%]"
-                  // isClearable
-                />
-                {classError && (
-                  <p className=" absolute text-red-500 text-xs">{classError}</p>
-                )}
-              </div>
-            </div>
-            <div className="form-group relative left-0 md:-left-4 flex justify-start  mt-4">
-              <label className="w-1/4 pt-2 items-center text-center   py-2 font-semibold text-[1em] text-gray-700">
-                Select Division <span className="text-red-500">*</span>
-              </label>
-              <div className="w-full  md:w-[39%]  ">
-                <select
-                  className="form-control "
-                  value={selectedDivision ? selectedDivision.value : ""}
-                  onChange={(e) =>
-                    handleDivisionChange({
-                      value: e.target.value,
-                      label: divisions.find(
-                        (div) => div.section_id == e.target.value
-                      )?.name,
-                    })
-                  }
-                  disabled={!selectedClass}
-                >
-                  <option value="">Select</option>
-                  {divisions.map((div) => (
-                    <option key={div.section_id} value={div.section_id}>
-                      {div.name}
-                    </option>
-                  ))}
-                </select>
-                {divisionError && (
-                  <p className="absolute text-red-500 text-xs">
-                    {divisionError}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
-              <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
-                Select Teacher <span className="text-red-500">*</span>
-              </label>
-              <div className="w-full">
-                <Select
-                  options={teachers}
-                  value={selectedTeacher}
-                  onChange={setSelectedTeacher}
-                  placeholder="Select"
-                  styles={customSelectStyles}
-                  isDisabled={!selectedDivision}
-                  isClearable
-                  className="w-full md:w-[50%]"
-                />
-                {teacherError && (
-                  <p className="absolute text-red-500 text-xs">
-                    {teacherError}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
-              <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700 ">
-                Select Subjects <span className="text-red-500">*</span>
-              </label>
-              <div className="w-full">
-                <div className="relative gap-x-10 top-2   grid grid-cols-3  w-full">
-                  {subjects.map((subject) => (
-                    <label
-                      key={subject.sm_id}
-                      // className="flex items-center cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        className="mr-0.5 shadow-lg"
-                        checked={preSubjects.some(
-                          (item) => item.sm_id === subject.sm_id
-                        )}
-                        onChange={() => handleSubjectChange(subject.sm_id)}
-                      />
-                      <span className="font-normal text-gray-600">
-                        {subject?.get_subject?.name}
-                      </span>
-                    </label>
-                  ))}
+            {loading ? (
+              <tr>
+                <div className=" absolute inset-0 py-8 h flex items-center justify-center bg-gray-50  z-10">
+                  <Loader /> {/* Replace with your loader */}
                 </div>
-                {subjectError && (
-                  <p className="relative top-3  text-red-500 text-xs ">
-                    {subjectError}
-                  </p>
-                )}
-              </div>
-            </div>{" "}
-            <div className="form-group flex justify-end mt-4">
-              <button
-                type="button"
-                onClick={handleSave}
-                className="btn btn-primary"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Saving..." : "Save"}
-              </button>
-            </div>
+              </tr>
+            ) : (
+              <>
+                <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
+                  <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
+                    Select Class <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full">
+                    <Select
+                      options={classes.map((cls) => ({
+                        value: cls.class_id,
+                        label: cls.name,
+                      }))}
+                      value={selectedClass}
+                      onChange={handleClassChange}
+                      placeholder="Select"
+                      styles={customSelectStyles}
+                      className="w-full md:w-[50%]"
+                      // isClearable
+                    />
+                    {classError && (
+                      <p className=" absolute text-red-500 text-xs">
+                        {classError}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="form-group relative left-0 md:-left-4 flex justify-start  mt-4">
+                  <label className="w-1/4 pt-2 items-center text-center   py-2 font-semibold text-[1em] text-gray-700">
+                    Select Division <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full  md:w-[39%]  ">
+                    <select
+                      className="form-control "
+                      value={selectedDivision ? selectedDivision.value : ""}
+                      onChange={(e) =>
+                        handleDivisionChange({
+                          value: e.target.value,
+                          label: divisions.find(
+                            (div) => div.section_id == e.target.value
+                          )?.name,
+                        })
+                      }
+                      disabled={!selectedClass}
+                    >
+                      <option value="">Select</option>
+                      {divisions.map((div) => (
+                        <option key={div.section_id} value={div.section_id}>
+                          {div.name}
+                        </option>
+                      ))}
+                    </select>
+                    {divisionError && (
+                      <p className="absolute text-red-500 text-xs">
+                        {divisionError}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
+                  <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
+                    Select Teacher <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full">
+                    <Select
+                      options={teachers}
+                      value={selectedTeacher}
+                      onChange={setSelectedTeacher}
+                      placeholder="Select"
+                      styles={customSelectStyles}
+                      isDisabled={!selectedDivision}
+                      isClearable
+                      className="w-full md:w-[50%]"
+                    />
+                    {teacherError && (
+                      <p className="absolute text-red-500 text-xs">
+                        {teacherError}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
+                  <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700 ">
+                    Select Subjects <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full">
+                    <div className="relative gap-x-10 top-2   grid grid-cols-3  w-full">
+                      {subjects.map((subject) => (
+                        <label
+                          key={subject.sm_id}
+                          // className="flex items-center cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            className="mr-0.5 shadow-lg"
+                            checked={preSubjects.some(
+                              (item) => item.sm_id === subject.sm_id
+                            )}
+                            onChange={() => handleSubjectChange(subject.sm_id)}
+                          />
+                          <span className="font-normal text-gray-600">
+                            {subject?.get_subject?.name}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    {subjectError && (
+                      <p className="relative top-3  text-red-500 text-xs ">
+                        {subjectError}
+                      </p>
+                    )}
+                  </div>
+                </div>{" "}
+                <div className="form-group flex justify-end mt-4">
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    className="btn btn-primary"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Saving..." : "Save"}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -450,9 +450,9 @@ import Select from "react-select";
 import makeAnimated from "react-select/animated";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Loader from "../../../componants/common/Loader"; // Add this dependency
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { RxCross1 } from "react-icons/rx";
+import Loader from "../../common/LoaderFinal/LoaderStyle";
 
 const animatedComponents = makeAnimated();
 
@@ -467,6 +467,8 @@ const AllotTeachersForClass = () => {
   const [error, setError] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingForSubmit, setLoadingForSubmit] = useState(false);
+
   const navigate = useNavigate(); // Initialize useNavigate
   const [nameError, setNameError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -693,9 +695,6 @@ const AllotTeachersForClass = () => {
   console.log("The setSubject if teacher id is unselected", subjects);
   // heavy code here
   const handleSubmitForAllotTeacherTab = async () => {
-    if (isSubmitting) return; // Prevent re-submitting
-    setIsSubmitting(true);
-    setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -741,6 +740,7 @@ const AllotTeachersForClass = () => {
       console.log("Final subject data for PUT request:", subjects);
       console.log("Formatted data for PUT request:", formattedData);
       // just convet the logic sectionId is become classId and classId is become sectionID
+      setLoadingForSubmit(true);
       const response = await axios.put(
         `${API_URL}/api/subject-allotments/${classId}/${sectionId}`, // Replace with actual classId and sectionId
         formattedData,
@@ -755,7 +755,7 @@ const AllotTeachersForClass = () => {
       toast.success("Teacher allotment updated successfully!");
       setTimeout(() => {
         setSubjects([]);
-      }, 3000);
+      }, 500);
 
       // setActiveTab("Manage");
 
@@ -765,8 +765,8 @@ const AllotTeachersForClass = () => {
       setError("Error updating teacher allotment");
       toast.error("Error updating teacher allotment");
     } finally {
+      setLoadingForSubmit(false);
       setLoading(false);
-      setIsSubmitting(false);
     }
   };
   // light code is here
@@ -897,40 +897,47 @@ const AllotTeachersForClass = () => {
             ></div>
 
             <div className="card-body w-full md:w-[85%] mx-auto ">
-              <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-                {subjects.map((subject, index) => (
-                  <div
-                    key={index}
-                    className="border-b border-gray-200 grid grid-cols-3 mx-10 gap-x-8"
-                  >
-                    <div className="relative mt-3 font-semibold text-gray-600">
-                      {subject.subject_name}
-                    </div>
-                    <div className="relative mt-2 col-span-2 text-[.9em]">
-                      <Select
-                        closeMenuOnSelect={false}
-                        components={animatedComponents}
-                        isMulti
-                        options={departments}
-                        value={subject.selectedTeachers}
-                        onChange={(selectedOptions) =>
-                          handleTeacherSelect(selectedOptions, index)
-                        }
-                      />
-                    </div>
+              {loadingForSubmit ? (
+                <tr>
+                  <div className=" absolute inset-0  flex items-center justify-center bg-gray-50  z-10">
+                    <Loader /> {/* Replace with your loader */}
                   </div>
-                ))}
-                <div className="flex justify-end p-3 mr-5">
-                  <button
-                    onClick={handleSubmitForAllotTeacherTab}
-                    type="button"
-                    className="btn h-10 md:h-auto w-18 md:w-auto btn-primary"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Saving..." : "Save"}
-                  </button>
+                </tr>
+              ) : (
+                <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+                  {subjects.map((subject, index) => (
+                    <div
+                      key={index}
+                      className="border-b border-gray-200 grid grid-cols-3 mx-10 gap-x-8"
+                    >
+                      <div className="relative mt-3 font-semibold text-gray-600">
+                        {subject.subject_name}
+                      </div>
+                      <div className="relative mt-2 col-span-2 text-[.9em]">
+                        <Select
+                          closeMenuOnSelect={false}
+                          components={animatedComponents}
+                          isMulti
+                          options={departments}
+                          value={subject.selectedTeachers}
+                          onChange={(selectedOptions) =>
+                            handleTeacherSelect(selectedOptions, index)
+                          }
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex justify-end p-3 mr-5">
+                    <button
+                      onClick={handleSubmitForAllotTeacherTab}
+                      type="button"
+                      className="btn h-10 md:h-auto w-18 md:w-auto btn-primary"
+                    >
+                      Save
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

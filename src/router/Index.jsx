@@ -163,6 +163,7 @@ import CreateExamTimeTable from "../componants/MastersModule/ExamTimeTable/Creat
 import EditExamTimeTable from "../componants/MastersModule/ExamTimeTable/EditExamTimeTable.jsx";
 import ViewExamTimeTable from "../componants/MastersModule/ExamTimeTable/ViewExamTimeTable.jsx";
 import SubstituteTeacher from "../componants/SubstituteTeacher/SubstituteTeacher.jsx";
+import EditSubstituteTeacher from "../componants/SubstituteTeacher/EditSubstituteTeacher.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -324,6 +325,10 @@ function Index() {
         <Route
           path="/SubstituteTeacher"
           element={<PrivateRoute element={SubstituteTeacher} />}
+        />
+        <Route
+          path="/substituteTeacher/edit/:id"
+          element={<PrivateRoute element={EditSubstituteTeacher} />}
         />
         {/*  Notice And Sms Module */}
         <Route
