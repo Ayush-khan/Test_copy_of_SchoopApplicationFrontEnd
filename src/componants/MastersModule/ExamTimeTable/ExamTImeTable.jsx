@@ -438,9 +438,9 @@ function ExamTImeTable() {
                   Are you sure you want to{" "}
                   {currentStudentDataForActivate?.studentToActiveOrDeactive
                     ?.publish === "Y"
-                    ? "Unpublish"
-                    : "Publish"}{" "}
-                  this exam timetable{" "}
+                    ? "unpublish"
+                    : "publish"}{" "}
+                  the exam timetable for class{" "}
                   {` ${currentStudentDataForActivate?.studentToActiveOrDeactive?.name}`}
                   ?
                 </div>
@@ -490,8 +490,8 @@ function ExamTImeTable() {
                 ></div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to delete this exam timetable:{" "}
-                    {currentStaffName}?
+                    Are you sure you want to delete the exam timetable for
+                    class: {currentStaffName}?
                   </p>
                   {console.log("currestStaffDelete", currentStaff)}
                 </div>

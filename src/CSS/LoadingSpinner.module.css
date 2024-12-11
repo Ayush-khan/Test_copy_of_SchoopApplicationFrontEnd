@@ -2,6 +2,7 @@
   width: 10px;
   height: 10px;
   border: 11.2px white double;
+  background-color: rgb(235, 75, 150);
   border-left-style: solid;
   border-radius: 50%;
   animation: spinner-aib1d7 0.75s infinite linear;

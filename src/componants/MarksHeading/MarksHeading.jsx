@@ -212,11 +212,14 @@ function MarksHeading() {
     setCurrentSection(null);
     setFieldErrors({});
     setNameError("");
+    setNameErrorforName("");
   };
 
   const handleSubmitAdd = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
+
+    // Validate input fields
     const validationErrors = validateSectionName(
       newSectionName,
       newDepartmentId,
@@ -225,7 +228,6 @@ function MarksHeading() {
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       setIsSubmitting(false);
-
       return;
     }
 
@@ -235,23 +237,6 @@ function MarksHeading() {
         throw new Error("No authentication token found");
       }
 
-      // const checkNameResponse = await axios.post(
-      //   `${API_URL}/api/check_division_name`,
-      //   { name: newSectionName, written_exam: newDepartmentId }, // Sending the written_exam value
-      //   {
-      //     headers: { Authorization: `Bearer ${token}` },
-      //     withCredentials: true,
-      //   }
-      // );
-
-      // if (checkNameResponse.data?.exists === true) {
-      //   setNameError("Name already taken.");
-      //   setNameAvailable(false);
-      //   return;
-      // } else {
-      //   setNameError("");
-      //   setNameAvailable(true);
-      // }
       console.log(
         "name:",
         newSectionName,
@@ -260,6 +245,7 @@ function MarksHeading() {
         "sequence:",
         sequence
       );
+
       await axios.post(
         `${API_URL}/api/save_Markheadings`,
         {
@@ -278,15 +264,22 @@ function MarksHeading() {
       toast.success("Marks headings added successfully!");
     } catch (error) {
       console.error("Error adding Marks headings:", error);
+
       if (error.response?.status === 422 && error.response?.data?.errors) {
         const errors = error.response.data.errors;
         console.log("errors", errors);
 
         if (errors?.sequence && errors?.sequence?.length > 0) {
           console.log("errors", errors.sequence);
-          // toast.error(errors.sequence[0]); // Display the specific "Sequence field should be unique" error
-          setNameErrorforName(errors.sequence[0]); // Update state with the specific error
+          setNameError(errors.sequence[0]); // Update state with the specific error
         }
+      } else if (
+        error.response?.status === 404 &&
+        error.response?.data?.message === "Marksheading already exists."
+      ) {
+        // Handle the case where the markheading name already exists
+        setNameErrorforName("Marksheading already exists.");
+        // toast.error("Marksheading name already exists."); // Display error to user
       } else {
         toast.error("Server error. Please try again later.");
       }
@@ -298,6 +291,8 @@ function MarksHeading() {
   const handleSubmitEdit = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
+
+    // Validate input fields
     const validationErrors = validateSectionName(
       newSectionName,
       newDepartmentId,
@@ -306,7 +301,6 @@ function MarksHeading() {
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       setIsSubmitting(false);
-
       return;
     }
 
@@ -316,23 +310,6 @@ function MarksHeading() {
         throw new Error("No authentication token or section ID found");
       }
 
-      // const nameCheckResponse = await axios.post(
-      //   `${API_URL}/api/check_division_name`,
-      //   { name: newSectionName, written_exam: newDepartmentId }, // Sending the written_exam value
-      //   {
-      //     headers: { Authorization: `Bearer ${token}` },
-      //     withCredentials: true,
-      //   }
-      // );
-
-      // if (nameCheckResponse.data?.exists === true) {
-      //   setNameError("Name already taken.");
-      //   setNameAvailable(false);
-      //   return;
-      // } else {
-      //   setNameError("");
-      //   setNameAvailable(true);
-      // }
       console.log(
         "name:",
         newSectionName,
@@ -341,6 +318,7 @@ function MarksHeading() {
         "sequence:",
         sequence
       );
+
       await axios.put(
         `${API_URL}/api/update_Markheadings/${currentSection?.marks_headings_id}`,
         {
@@ -359,20 +337,22 @@ function MarksHeading() {
       toast.success("Marks headings updated successfully!");
     } catch (error) {
       console.error("Error editing Marks headings:", error);
-      if (error.response && error.response.data.status === 422) {
+
+      if (error.response?.status === 422 && error.response?.data?.errors) {
         const errors = error.response.data.errors;
-        console.log("error", errors);
-        // Handle name field error
-        if (errors.name) {
-          setFieldErrors((prev) => ({
-            ...prev,
-            name: errors.name, // Show the first error message for the name field
-          }));
-          errors.name.forEach((err) => toast.error(err)); // Show all errors in toast
+        console.log("errors", errors);
+
+        // Handle "sequence" error
+        if (errors?.sequence && errors?.sequence?.length > 0) {
+          console.log("errors", errors.sequence);
+          setNameError(errors.sequence[0]); // Update state with the specific "sequence" error
         }
 
-        // Handle other field errors if necessary
-        // Add similar handling for other fields if included in the backend error response
+        // Handle "name" field error (unique name validation)
+        else if (errors?.name && errors?.name?.length > 0) {
+          console.log("errors", errors.name);
+          setNameErrorforName(errors.name[0]); // Update state with the specific "name" field error
+        }
       } else {
         toast.error("Server error. Please try again later.");
       }
@@ -433,6 +413,7 @@ function MarksHeading() {
 
   const handleChangeSectionName = (e) => {
     const { value } = e.target;
+    setNameErrorforName("");
     setNewSectionName(value);
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
@@ -441,6 +422,7 @@ function MarksHeading() {
   };
   const handleChangeDepartmentId = (e) => {
     const { value } = e.target;
+
     setClassName(value); // Update class name
     setNewDepartmentId(value); // Update department (written exam selection)
 
@@ -455,7 +437,7 @@ function MarksHeading() {
   };
   const handleChangeSequence = (e) => {
     const { value } = e.target;
-
+    setNameError("");
     // Only allow numbers with max length 2
     if (/^[0-9]{0,2}$/.test(value)) {
       setSequence(value);
@@ -728,7 +710,10 @@ function MarksHeading() {
                         // }}
                       />
                     </div>
-                    <div className=" w-[60%] relative h-4 -top-4 left-[35%] ">
+                    <div className=" w-[60%] relative h-4 -top-6 left-[35%] ">
+                      <span className=" block text-danger text-xs">
+                        {nameError}
+                      </span>
                       {fieldErrors.sequence && (
                         <span className="block text-danger text-xs">
                           {fieldErrors.sequence}
@@ -830,11 +815,9 @@ function MarksHeading() {
                       // onBlur={handleBlur}
                     />
                     <div className="absolute top-9 left-1/3 ">
-                      {!nameAvailable && (
-                        <span className=" block text-red-500 text-xs">
-                          {nameError}
-                        </span>
-                      )}
+                      <span className=" block text-danger text-xs">
+                        {nameErrorforName}
+                      </span>
 
                       {fieldErrors.name && (
                         <span className="text-danger text-xs">
@@ -865,7 +848,10 @@ function MarksHeading() {
                       // }}
                     />
                   </div>
-                  <div className=" w-[60%] relative h-4 -top-4 left-[35%] ">
+                  <div className=" w-[60%] relative h-4 -top-6 left-[35%] ">
+                    <span className=" block text-danger text-xs">
+                      {nameError}
+                    </span>{" "}
                     {fieldErrors.sequence && (
                       <span className="block text-danger text-xs">
                         {fieldErrors.sequence}

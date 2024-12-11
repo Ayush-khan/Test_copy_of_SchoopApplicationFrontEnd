@@ -491,6 +491,10 @@ import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
+import Loader from "../common/LoaderFinal/LoaderStyle";
+import LoadingSpinner from "../common/LoadingSpinner";
+import { FiLoader } from "react-icons/fi";
+import { LuLoader2 } from "react-icons/lu";
 
 const AllotMarksHeadingTab = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -903,176 +907,187 @@ const AllotMarksHeadingTab = () => {
           ></div>
           <div className="card-body w-full md:w-[85%] mx-auto">
             {/* Select Class */}
-            <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
-              <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
-                Select Class <span className="text-red-500">*</span>
-              </label>
-              <div className="w-full relative">
-                <Select
-                  value={selectedClass}
-                  onChange={handleClassChange}
-                  placeholder="Select"
-                  className="w-full md:w-[50%]  "
-                  isClearable
-                  options={classes.map((classObj) => ({
-                    value: classObj.class_id,
-                    label: classObj.name,
-                  }))}
-                />
-                {classError && (
-                  <p className="relative  -mb-3 text-red-500 text-sm">
-                    {classError}
-                  </p>
-                )}
+            {isSubmitting ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-50  z-10">
+                <Loader /> {/* Replace this with your loader component */}
               </div>
-            </div>
-            {/* Select Subject */}
-            <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
-              <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
-                Select Subject <span className="text-red-500">*</span>
-              </label>
-              <div className="w-full relative">
-                <Select
-                  value={selectedSubject}
-                  onChange={handleSubjectChange}
-                  placeholder="Select"
-                  className="w-full md:w-[50%] "
-                  isClearable
-                  options={subjects.map((subject) => ({
-                    value: subject?.sub_rc_master_id,
-                    label: subject?.get_subjects_for_report_card?.name,
-                  }))}
-                />
-                {subjectError && (
-                  <p className="relative  -mb-3 text-red-500 text-sm">
-                    {subjectError}
-                  </p>
-                )}
-              </div>
-            </div>
-            {/* Select Exam */}
-            <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
-              <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
-                Select Exam <span className="text-red-500">*</span>
-              </label>
-              <div className="w-full relative">
-                <Select
-                  value={selectedExam}
-                  onChange={handleExamChange}
-                  placeholder="Select"
-                  className="w-full md:w-[50%] "
-                  isClearable
-                  options={exams.map((exam) => ({
-                    value: exam.exam_id,
-                    label: exam.name,
-                  }))}
-                />
-                {examError && (
-                  <p className="relative  -mb-3 text-red-500 text-sm">
-                    {examError}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Marks Headings */}
-            <div className="mt-4 shadow-md  w-full md:w-[60%] ml-0 md:ml-4">
-              <div className="w-full overflow-x-auto">
-                {/* Sticky Header */}
-                <div className="w-full sticky top-0 bg-white  ">
-                  <div className="grid grid-cols-2 text-start ">
-                    <h6 className="text-gray-700 font-semibold py-2  pl-2">
-                      Marks Headings <span className="text-red-500">*</span>
-                    </h6>
-                    <h6 className="text-gray-700 font-semibold py-2 text-center pr-4">
-                      Highest Marks <span className="text-red-500">*</span>
-                    </h6>
+            ) : (
+              <>
+                <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
+                  <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
+                    Select Class <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full relative">
+                    <Select
+                      value={selectedClass}
+                      onChange={handleClassChange}
+                      placeholder="Select"
+                      className="w-full md:w-[50%]  "
+                      isClearable
+                      options={classes.map((classObj) => ({
+                        value: classObj.class_id,
+                        label: classObj.name,
+                      }))}
+                    />
+                    {classError && (
+                      <p className="relative  -mb-3 text-red-500 text-sm">
+                        {classError}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {/* Select Subject */}
+                <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
+                  <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
+                    Select Subject <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full relative">
+                    <Select
+                      value={selectedSubject}
+                      onChange={handleSubjectChange}
+                      placeholder="Select"
+                      className="w-full md:w-[50%] "
+                      isClearable
+                      options={subjects.map((subject) => ({
+                        value: subject?.sub_rc_master_id,
+                        label: subject?.get_subjects_for_report_card?.name,
+                      }))}
+                    />
+                    {subjectError && (
+                      <p className="relative  -mb-3 text-red-500 text-sm">
+                        {subjectError}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {/* Select Exam */}
+                <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
+                  <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
+                    Select Exam <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full relative">
+                    <Select
+                      value={selectedExam}
+                      onChange={handleExamChange}
+                      placeholder="Select"
+                      className="w-full md:w-[50%] "
+                      isClearable
+                      options={exams.map((exam) => ({
+                        value: exam.exam_id,
+                        label: exam.name,
+                      }))}
+                    />
+                    {examError && (
+                      <p className="relative  -mb-3 text-red-500 text-sm">
+                        {examError}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {/* Scrollable Content */}
-                {marksHeadingsData.length > 0 ? (
-                  <div className="max-h-64 overflow-y-auto">
-                    {marksHeadingsData.map((heading, index) => (
-                      <div
-                        key={heading.marks_headings_id}
-                        className="grid grid-cols-2 w-full text-center py-2"
-                      >
-                        <div className="flex items-center justify-start px-2">
-                          {/* Checkbox with consistent alignment */}
-                          <input
-                            type="checkbox"
-                            checked={heading.selected}
-                            onChange={() => handleMarksHeadingChange(index)}
-                            className="mr-2"
-                          />
-                          {/* Toggle checkbox when clicking on the label */}
-                          <label
-                            onClick={() => handleMarksHeadingChange(index)}
-                            className="cursor-pointer"
-                          >
-                            {heading.name}
-                          </label>
-                        </div>
-
-                        <div>
-                          <input
-                            type="text"
-                            maxLength={3}
-                            value={heading.highest_marks}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              // Allow only positive integers
-                              if (/^\d*$/.test(value)) {
-                                handleHighestMarksChange(
-                                  index,
-                                  value,
-                                  heading.marks_headings_id
-                                );
-                              }
-                            }}
-                            disabled={!heading.selected}
-                            placeholder="Highest marks"
-                            className={`border p-1 bg-gray-100 shadow-md rounded w-full md:w-1/2 text-start ${
-                              highestMarksError[heading.marks_headings_id]
-                                ? "border-red-500"
-                                : ""
-                            }`}
-                          />
-                          {/* Individual error message for each input based on marks_headings_id */}
-                          {highestMarksError[heading.marks_headings_id] && (
-                            <p className="h-1 text-red-500 text-xs">
-                              {highestMarksError[heading.marks_headings_id]}
-                            </p>
-                          )}
-                        </div>
+                {/* Marks Headings */}
+                <div className="mt-4 shadow-md  w-full md:w-[60%] ml-0 md:ml-4">
+                  <div className="w-full overflow-x-auto">
+                    {/* Sticky Header */}
+                    <div className="w-full sticky top-0 bg-white  ">
+                      <div className="grid grid-cols-2 text-start ">
+                        <h6 className="text-gray-700 font-semibold py-2  pl-2">
+                          Marks Headings <span className="text-red-500">*</span>
+                        </h6>
+                        <h6 className="text-gray-700 font-semibold py-2 text-center pr-4">
+                          Highest Marks <span className="text-red-500">*</span>
+                        </h6>
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Scrollable Content */}
+                    {marksHeadingsData.length > 0 ? (
+                      <div className="max-h-64 overflow-y-auto">
+                        {marksHeadingsData.map((heading, index) => (
+                          <div
+                            key={heading.marks_headings_id}
+                            className="grid grid-cols-2 w-full text-center py-2"
+                          >
+                            <div className="flex items-center justify-start px-2">
+                              {/* Checkbox with consistent alignment */}
+                              <input
+                                type="checkbox"
+                                checked={heading.selected}
+                                onChange={() => handleMarksHeadingChange(index)}
+                                className="mr-2"
+                              />
+                              {/* Toggle checkbox when clicking on the label */}
+                              <label
+                                onClick={() => handleMarksHeadingChange(index)}
+                                className="cursor-pointer"
+                              >
+                                {heading.name}
+                              </label>
+                            </div>
+
+                            <div>
+                              <input
+                                type="text"
+                                maxLength={3}
+                                value={heading.highest_marks}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  // Allow only positive integers
+                                  if (/^\d*$/.test(value)) {
+                                    handleHighestMarksChange(
+                                      index,
+                                      value,
+                                      heading.marks_headings_id
+                                    );
+                                  }
+                                }}
+                                disabled={!heading.selected}
+                                placeholder="Highest marks"
+                                className={`border p-1 bg-gray-100 shadow-md rounded w-full md:w-1/2 text-start ${
+                                  highestMarksError[heading.marks_headings_id]
+                                    ? "border-red-500"
+                                    : ""
+                                }`}
+                              />
+                              {/* Individual error message for each input based on marks_headings_id */}
+                              {highestMarksError[heading.marks_headings_id] && (
+                                <p className="h-1 text-red-500 text-xs">
+                                  {highestMarksError[heading.marks_headings_id]}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center text-blue-600">
+                        <div className="  bg-gray-100 text-black py-8 inset-0 flex items-center justify-center  z-10">
+                          <LoadingSpinner />{" "}
+                          {/* Replace this with your loader component */}
+                        </div>{" "}
+                      </p>
+                    )}
+
+                    {marksHeadingError && (
+                      <p className=" text-center text-red-500 text-xs">
+                        {marksHeadingError}
+                      </p>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-center text-blue-600">
-                    No marks headings available
-                  </p>
-                )}
+                </div>
 
-                {marksHeadingError && (
-                  <p className=" text-center text-red-500 text-xs">
-                    {marksHeadingError}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Save Button  */}
-            <div className=" flex float-end mt-6">
-              <button
-                onClick={handleSave}
-                disabled={isSubmitting}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-              >
-                {isSubmitting ? "Saving..." : "Save"}
-              </button>
-            </div>
+                {/* Save Button  */}
+                <div className=" flex float-end mt-6">
+                  <button
+                    onClick={handleSave}
+                    disabled={isSubmitting}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                  >
+                    {isSubmitting ? "Saving..." : "Save"}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

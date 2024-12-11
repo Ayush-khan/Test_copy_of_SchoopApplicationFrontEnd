@@ -1,223 +1,485 @@
-// 100% workking but not supporting
-// import { useEffect, useState } from "react";
-// import axios from "axios";
-// import { toast, ToastContainer } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
-// import { useNavigate, useLocation } from "react-router-dom";
-// import { RxCross1 } from "react-icons/rx";
-// import Loader from "../../common/LoaderFinal/LoaderStyle";
-// import { FiPrinter } from "react-icons/fi";
+import { useState, useEffect, useMemo } from "react";
+import axios from "axios";
+import Select from "react-select";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
+import { RxCross1 } from "react-icons/rx";
+import Loader from "../common/LoaderFinal/LoaderStyle";
+import { FiPrinter } from "react-icons/fi";
 
-// const ViewExamTimeTable = () => {
-//   const API_URL = import.meta.env.VITE_API_URL; // API base URL
-//   const location = useLocation();
-//   const { staff } = location.state || {};
-//   const [loading, setLoading] = useState(false);
-//   const [timetable, setTimetable] = useState([]);
-//   const [examDetails, setExamDetails] = useState({
-//     examname: "",
-//     classname: "",
-//   });
-//   const [description, setDescription] = useState("");
+const CreateSubstituteTeacher = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // Format as yyyy-MM-dd
+  });
+  const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
+  const [classIdForSearch, setClassIdForSearch] = useState(null);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingForSearch, setLoadingForSearch] = useState(false);
+  const [description, setDescription] = useState("");
+  const navigate = useNavigate();
+  const [errors, setErrors] = useState({});
+  // State for loading indicators
+  // const [loadingClasses, setLoadingClasses] = useState(false);
+  const [loadingExams, setLoadingExams] = useState(false);
+  const [studentError, setStudentError] = useState("");
+  const [dates, setDates] = useState();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [day, setDay] = useState("");
+  const [subjects, setSubjects] = useState([]);
+  const [timetable, setTimetable] = useState([]);
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [teacherList, setTeacherList] = useState([]);
+  const [schedule, setSchedule] = useState(
+    timetable.map((row) => ({
+      ...row,
+      errors: { noSubject: false, missingOption: false }, // Initialize error state for each row
+    }))
+  );
+  console.log("scheduleerror", schedule);
+  const updatedErrors = [...schedule]; // Clone the schedule to track errors
+  updatedErrors.forEach((row) => {
+    row.errors = row.errors || { noSubject: false, missingOption: false };
+  });
+  console.log("updatedErrors", updatedErrors);
+  useEffect(() => {
+    // Fetch both classes and exams when the component mounts
 
-//   const navigate = useNavigate();
+    fetchExams();
+    fetchTeacherList();
+  }, []);
 
-//   // Fetch timetable data on component mount
-//   useEffect(() => {
-//     const fetchTimetableData = async () => {
-//       try {
-//         const token = localStorage.getItem("authToken");
+  // Fetch subjects
 
-//         setLoading(true);
-//         const response = await axios.get(
-//           `${API_URL}/api/get_viewtimetable?exam_id=${staff?.exam_tt_id}`,
-//           {
-//             headers: { Authorization: `Bearer ${token}` },
-//           }
-//         );
-//         const data = response.data;
-//         if (data?.success) {
-//           setTimetable(data.exam_timetable_details || []);
-//           setExamDetails(data.classterm || {});
-//         } else {
-//           toast.error("Failed to fetch timetable data.");
-//         }
-//       } catch (error) {
-//         console.error("Error fetching timetable:", error);
-//         toast.error("An error occurred while fetching timetable data.");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
+  const handleDateChange = (e) => {
+    const newDate = e.target.value;
+    const currentYear = new Date().getFullYear();
+    const selectedYear = new Date(newDate).getFullYear();
 
-//     fetchTimetableData();
-//   }, [API_URL, staff?.exam_tt_id]);
+    // Allow only dates within the previous, current, and next years
+    if (selectedYear >= currentYear - 1 && selectedYear <= currentYear + 1) {
+      setSelectedDate(newDate);
+    } else {
+      alert("Please select a date within the allowed range.");
+    }
+  };
 
-//   // Print page functionality
-//   const handlePrint = () => {
-//     const headerContent = `
-//       <div style="font-size: 18px; text-align: center;">
-//         <p><strong>Timetable of ${examDetails.examname}</strong></p>
-//         <p><strong>Class ${examDetails.classname}</strong></p>
-//       </div>
-//     `;
+  const fetchExams = async () => {
+    try {
+      setLoadingExams(true);
+      const token = localStorage.getItem("authToken");
 
-//     const descriptionContent = `
-//       <div style="margin-top: 20px; font-size: 16px;">
-//         <strong>Description:</strong>
-//         <p>${description || "No description provided."}</p>
-//       </div>
-//     `;
+      const response = await axios.get(`${API_URL}/api/get_teacher_list`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("teacher", response);
+      setStudentNameWithClassId(response.data || []);
+    } catch (error) {
+      toast.error("Error fetching teachers");
+      console.error("Error fetching teachers:", error);
+    } finally {
+      setLoadingExams(false);
+    }
+  };
+  const fetchTeacherList = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
 
-//     const timetableContent = `
-//       <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-//         <thead>
-//           <tr>
-//             <th style="border: 1px solid #ddd; padding: 8px; text-align: center; background-color: #f4f4f4;">Date</th>
-//             <th style="border: 1px solid #ddd; padding: 8px; text-align: center; background-color: #f4f4f4;">Subjects</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           ${timetable
-//             .map(
-//               (row, index) => `
-//             <tr>
-//               <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${
-//                 row.date
-//               }</td>
-//               <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
-//                 ${
-//                   row.study_leave
-//                     ? `<span style="color: red;">${row.study_leave}</span>`
-//                     : row.subjects || "-"
-//                 }
-//               </td>
-//             </tr>
-//           `
-//             )
-//             .join("")}
-//         </tbody>
-//       </table>
-//     `;
+      const response = await axios.get(`${API_URL}/api/get_teacher_list`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-//     const printWindow = window.open("", "", "height=500,width=800");
-//     printWindow.document.write(`
-//       <html>
-//         <head>
-//           <title>Print Timetable</title>
-//           <style>
-//             body { font-family: Arial, sans-serif; margin: 20px; }
-//             table { border-collapse: collapse; width: 100%; }
-//             th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-//             th { background-color: #f4f4f4; }
-//             p { font-size: 16px; }
-//           </style>
-//         </head>
-//         <body>
-//           ${headerContent}
-//           ${timetableContent}
-//           ${descriptionContent}
-//         </body>
-//       </html>
-//     `);
-//     printWindow.document.close();
-//     printWindow.print();
-//   };
+      setTeacherList(response.data || []); // Store teacher list separately
+    } catch (error) {
+      toast.error("Error fetching teachers");
+      console.error("Error fetching teachers:", error);
+    }
+  };
+  const handleTeacherSelect = (index, selectedOption) => {
+    setTimetable((prevTimetable) =>
+      prevTimetable.map((row, i) =>
+        i === index ? { ...row, substituteTeacher: selectedOption?.value } : row
+      )
+    );
+  };
 
-//   return (
-//     <div className="w-full md:w-[80%] mx-auto p-4">
-//       <ToastContainer />
-//       <div className="card p-4 rounded-md">
-//         <div className="card-header mb-4 flex justify-between items-center">
-//           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-//             View Exam Timetable
-//           </h5>
-//           <RxCross1
-//             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-//             onClick={() => navigate("/examTimeTable")}
-//           />
-//         </div>
-//         <div
-//           className="relative w-full -top-6 h-1 mx-auto bg-red-700"
-//           style={{ backgroundColor: "#C03078" }}
-//         ></div>
-//         <div className="w-full text-sm md:text-[1.4em] text-opacity-90 font-semibold text-blue-700 flex flex-row justify-center items-center">
-//           Timetable of{" "}
-//           <span className="px-1 md:px-2">{examDetails.examname}</span> (Class{" "}
-//           <span className="text-pink-500 px-1 md:px-2">
-//             {examDetails.classname}
-//           </span>
-//           )
-//         </div>
-//         <div id="printable-area" className="w-full mx-auto py-4 px-1 md:px-4">
-//           <div className="card bg-gray-100 py-2 px-3 rounded-md">
-//             <div className="overflow-x-auto">
-//               <table className="table-auto mt-4 w-full border-collapse border bg-gray-50 border-gray-300">
-//                 <thead>
-//                   <tr className="bg-gray-100">
-//                     <th className="border p-2 font-semibold text-center">
-//                       Date
-//                     </th>
-//                     <th className="border p-2 font-semibold text-center">
-//                       Subjects
-//                     </th>
-//                   </tr>
-//                 </thead>
-//                 <tbody>
-//                   {loading ? (
-//                     <tr>
-//                       <td colSpan={2} className="text-center p-4">
-//                         <Loader />
-//                       </td>
-//                     </tr>
-//                   ) : (
-//                     timetable.map((row, index) => (
-//                       <tr key={index}>
-//                         <td className="border p-2 text-center">{row.date}</td>
-//                         <td
-//                           className={`border p-2 text-center ${
-//                             row.study_leave ? "text-red-500 font-semibold" : ""
-//                           }`}
-//                         >
-//                           {row.study_leave
-//                             ? row.study_leave
-//                             : row.subjects || "-"}
-//                         </td>
-//                       </tr>
-//                     ))
-//                   )}
-//                 </tbody>
-//               </table>
-//             </div>
-//             <div className="mt-4 ml-0 md:ml-5">
-//               <label
-//                 htmlFor="description"
-//                 className="block font-semibold text-[1em] mb-2 text-gray-700"
-//               >
-//                 Description:
-//               </label>
-//               <textarea
-//                 type="text"
-//                 id="description"
-//                 maxLength={500}
-//                 value={description}
-//                 onChange={(e) => setDescription(e.target.value)}
-//                 className="border border-gray-300 p-2 w-full shadow-md mb-2"
-//               />
-//             </div>
-//           </div>
-//         </div>
-//         <div className="mt-4 flex justify-end">
-//           <button
-//             onClick={handlePrint}
-//             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-//           >
-//             <FiPrinter />
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
+  const resetTeacherDropdown = () => {
+    // setTimetable((prevTimetable) =>
+    //   prevTimetable.map((row) => ({
+    //     ...row,
+    //     substituteTeacher: "", // Clear selected substitute teacher
+    //     teacherName: "", // Remove teacherName field
+    //   }))
+    // );
+    setTimetable([]);
+  };
 
-// export default ViewExamTimeTable;
+  const teacherOptions = useMemo(
+    () =>
+      teacherList.map((teacher) => ({
+        value: teacher.reg_id,
+        label: teacher.name,
+      })),
+    [teacherList]
+  );
+
+  const handleStudentSelect = (selectedOption) => {
+    setStudentError(""); // Reset error if student is selected
+    setSelectedStudent(selectedOption);
+    setSelectedStudentId(selectedOption?.value);
+  };
+
+  // Dropdown options
+
+  const studentOptions = useMemo(
+    () =>
+      studentNameWithClassId.map((teacher) => ({
+        value: teacher.reg_id,
+        label: teacher.name,
+      })),
+    [studentNameWithClassId]
+  );
+
+  // Handle search and fetch parent information
+  const handleSearch = async () => {
+    let valid = true;
+
+    // Check if selectedStudent is empty and set the error message
+    if (!selectedStudent) {
+      setStudentError("Please select a teacher.");
+      valid = false;
+    } else {
+      setStudentError(""); // Reset error if teacher is selected
+    }
+
+    if (!valid) {
+      setLoadingForSearch(false);
+      return; // Stop if any validation fails
+    }
+
+    try {
+      setLoadingForSearch(true); // Start loading
+
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${API_URL}/api/get_substituteteacher/${selectedStudentId}/${selectedDate}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response?.data?.success && response.data?.data?.length > 0) {
+        const substitutionData = response.data.data;
+        setDay(response?.data?.data1?.day);
+        setDates(response?.data?.data1?.date);
+        // Map response data into a usable structure for rendering
+        const timetableData = substitutionData.map((item) => ({
+          subject: item.subject,
+          classSection: `${item.c_name}-${item.s_name}`, // Combine class and section
+          periodNo: item?.period_no,
+          teacherName: item?.teacher_name,
+          classId: item?.class_id,
+          sectionId: item?.section_id,
+          subjectId: item?.sm_id,
+          date: item?.date,
+          teacherId: item?.teacher_id,
+        }));
+
+        setTimetable(timetableData);
+
+        toast.success("Substitution data fetched successfully!");
+      } else {
+        toast.error(
+          "No substitution data available for the selected teacher and date."
+        );
+        setTimetable([]); // Reset timetable to avoid incorrect rendering
+      }
+    } catch (error) {
+      console.error("Error fetching substitution data:", error);
+      toast.error("An error occurred while fetching substitution data.");
+    } finally {
+      setLoadingForSearch(false);
+    }
+  };
+
+  // Function to reset the table
+
+  // Function to update timetable rows
+  // Prepare data for submission
+  const prepareDataForSubmission = () => {
+    console.log("timetable is", timetable);
+    const substitutions = timetable.map((row) => ({
+      class_id: row.classId,
+      section_id: row.sectionId,
+      subject_id: row.subjectId,
+      period: row.periodNo,
+      date: dates,
+      teacher_id: row.teacherId,
+      substitute_teacher_id: row.substituteTeacher || "",
+    }));
+
+    return { substitutions };
+  };
+
+  // Handle Submit
+  const handleSubmit = async () => {
+    const preparedData = prepareDataForSubmission();
+    console.log("preparedData", preparedData);
+    // Validation: Ensure at least one substitute teacher is selected
+    const hasSubstitute = preparedData.substitutions.some(
+      (sub) => sub.substitute_teacher_id
+    );
+
+    if (!hasSubstitute) {
+      toast.error("Please select at least one substitute teacher.");
+      return;
+    }
+
+    // Show loader
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/save_substituteteacher`,
+        preparedData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      toast.success("Data submitted successfully!");
+      // Clear the timetable data
+      setTimetable([]);
+    } catch (error) {
+      toast.error("Failed to submit data. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    setShowEditModal(false);
+    setShowDeleteModal(false);
+  };
+  return (
+    <>
+      <div className="w-full  ">
+        <ToastContainer />
+
+        <div className=" w-full md:w-[79%] border-1 drop-shadow-sm  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg   ml-0 md:ml-[2%]   p-2">
+          <div className="w-[99%] flex md:flex-row justify-between items-center">
+            <div className="w-full flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+              <div className="w-full gap-x-2   justify-around md:w-[95%] my-1 md:my-4 flex md:flex-row">
+                <label
+                  className="md:w-[25%] text-md pl-0 md:pl-3 mt-1.5"
+                  htmlFor="studentSelect"
+                >
+                  Teacher <span className="text-red-500">*</span>
+                </label>
+                <div className=" w-full md:w-[70%]">
+                  <Select
+                    id="studentSelect"
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                    value={selectedStudent}
+                    onChange={handleStudentSelect}
+                    options={studentOptions}
+                    placeholder={loadingExams ? "Loading exams..." : "Select"}
+                    isSearchable
+                    isClearable
+                    className="text-sm"
+                    isDisabled={loadingExams}
+                  />
+                  {studentError && (
+                    <div className="h-8 relative ml-1 text-danger text-xs">
+                      {studentError}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="w-full gap-x-14 md:gap-x-6 md:justify-center my-1 md:my-4 flex md:flex-row">
+                <label
+                  className="text-md mt-1.5 mr-1 md:mr-0"
+                  htmlFor="classSelect"
+                >
+                  Date
+                </label>
+                <div className="w-full md:w-[50%]">
+                  <input
+                    id="dateInput"
+                    type="date"
+                    value={selectedDate} // Default to current date
+                    onChange={handleDateChange}
+                    onKeyDown={(e) => e.preventDefault()} // Prevent clearing the field
+                    min={`${new Date().getFullYear() - 1}-01-01`} // Min date: Jan 1 of previous year
+                    max={`${new Date().getFullYear() + 1}-12-31`} // Max date: Dec 31 of next year
+                    className=" w-full border-1 rounded px-2 py-2 border-gray-300"
+                    required
+                  />
+                </div>
+              </div>
+              <button
+                type="search"
+                onClick={handleSearch}
+                style={{ backgroundColor: "#2196F3" }}
+                className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                  loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={loadingForSearch}
+              >
+                {loadingForSearch ? (
+                  <span className="flex items-center">
+                    <svg
+                      className="animate-spin h-4 w-4 mr-2 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      ></path>
+                    </svg>
+                    Loading...
+                  </span>
+                ) : (
+                  "Search"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+        {/* Form Section - Displayed when parentInformation is fetched */}
+        {/* // Render the table */}
+
+        {timetable.length > 0 && (
+          <>
+            <div className="md:w-[65%] w-full mx-auto pb-3 pt-3 px-1 md:px-4">
+              <div className="card bg-gray-100 py-2 px-3 rounded-md">
+                <h5 className="text-center text-blue-600">{`Timetable for ${day}`}</h5>
+                <div className="overflow-x-auto">
+                  <table className="table-auto w-full border-collapse border bg-gray-50 border-gray-300">
+                    <thead>
+                      <tr className="bg-gray-200">
+                        <th className="border p-2 w-full md:w-[10%] font-semibold text-center">
+                          Period
+                        </th>
+                        <th className="border p-2 w-full md:w-[30%] font-semibold text-center">
+                          Subject
+                        </th>
+                        <th className="border-3 p-2  w-full md:w-[40%]  font-semibold text-center">
+                          Substitute Teacher
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {loading ? (
+                        <tr>
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-50  z-10">
+                            <Loader /> {/* Replace with your loader */}
+                          </div>
+                        </tr>
+                      ) : (
+                        timetable.map((row, index) => (
+                          <tr key={index}>
+                            <td className="border p-2 text-center">
+                              {row.periodNo}
+                            </td>
+                            <td className="border p-2 text-center">
+                              {row.subject} {row.classSection}
+                            </td>
+                            <td className="border p-2 text-center  ">
+                              <Select
+                                options={teacherOptions}
+                                menuPortalTarget={document.body}
+                                menuPosition="fixed"
+                                isClearable
+                                value={teacherOptions.find(
+                                  (option) =>
+                                    option.value === row?.substituteTeacher
+                                )}
+                                onChange={(selectedOption) =>
+                                  handleTeacherSelect(index, selectedOption)
+                                }
+                                placeholder="Select"
+                                className="text-sm"
+                                styles={{
+                                  control: (provided) => ({
+                                    ...provided,
+
+                                    fontSize: "0.75rem", // Smaller font for the control
+                                    minHeight: "30px", // Optional: Reduce height
+                                  }),
+                                  menu: (provided) => ({
+                                    ...provided,
+                                    // backgroundColor: "black",
+                                    fontSize: "0.75rem", // Smaller font for menu items
+                                  }),
+                                  option: (provided, state) => ({
+                                    ...provided,
+                                    fontSize: "0.95rem", // Smaller font for options
+                                    backgroundColor: state.isFocused
+                                      ? "#f0f0f0"
+                                      : "#fff",
+                                    color: "#333",
+                                  }),
+                                }}
+                              />
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div className="my-1 md:w-[65%] mx-auto w-full flex flex-col md:flex-row gap-1 justify-center md:justify-end ">
+              <button
+                type="button"
+                onClick={resetTeacherDropdown}
+                className={`bg-red-500 text-white py-1 px-3 rounded hover:bg-red-700`}
+                disabled={isSubmitDisabled}
+              >
+                Reset
+              </button>{" "}
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className={`bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded ${
+                  isSubmitDisabled ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={isSubmitDisabled}
+              >
+                Submit
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </>
+  );
+};
+
+export default CreateSubstituteTeacher;

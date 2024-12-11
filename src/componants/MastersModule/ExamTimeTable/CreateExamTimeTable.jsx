@@ -285,6 +285,138 @@ const CreateExamTimeTable = () => {
 
     return preparedData;
   };
+  // const handleSubmit = async () => {
+  //   const preparedData = prepareData(); // Prepare data for validation
+  //   let hasError = false;
+  //   let warningRows = [];
+  //   let errorMessage = "";
+  //   let anySubjectSelected = false;
+
+  //   // Clone the schedule errors state
+  //   const updatedErrors = timetable.map((row) => ({
+  //     noSubject: false,
+  //     missingOption: false,
+  //   }));
+
+  //   timetable.forEach((row, rowIndex) => {
+  //     const studyLeaveKey = `study_leave${rowIndex + 1}`;
+  //     const optionKey = `option${rowIndex + 1}`;
+  //     const hasStudyLeave = preparedData[studyLeaveKey] === "1";
+  //     const hasSubjects = Object.keys(preparedData).some(
+  //       (key) =>
+  //         key.startsWith(`subject_id${rowIndex + 1}`) &&
+  //         preparedData[key] !== ""
+  //     );
+  //     const hasMultipleSubjects =
+  //       Object.keys(preparedData).filter(
+  //         (key) =>
+  //           key.startsWith(`subject_id${rowIndex + 1}`) &&
+  //           preparedData[key] !== ""
+  //       ).length > 1;
+  //     const hasOptionSelected = preparedData[optionKey] !== "Select";
+
+  //     // Track if any subject is selected across rows
+  //     if (hasSubjects) {
+  //       anySubjectSelected = true;
+  //     }
+
+  //     // Validation 2: Multiple subjects selected but no option chosen
+  //     if (hasMultipleSubjects && !hasOptionSelected) {
+  //       updatedErrors[rowIndex].missingOption = true;
+  //       errorMessage = `Please select an option for multiple subjects on ${row.date}.`;
+  //       hasError = true;
+  //     }
+
+  //     // Track warning rows: No data for a row
+  //     if (!hasSubjects && !hasStudyLeave && !hasOptionSelected) {
+  //       warningRows.push(row.date);
+  //     }
+  //   });
+
+  //   // Validation 1: No subject selected across all rows
+  //   if (!anySubjectSelected) {
+  //     errorMessage = `Please select at least one subject for any date.`;
+  //     hasError = true;
+  //   }
+
+  //   // Update the state to reflect field-level errors
+  //   setSchedule(
+  //     schedule.map((row, index) => ({
+  //       ...row,
+  //       errors: updatedErrors[index],
+  //     }))
+  //   );
+
+  //   // Display error messages
+  //   if (hasError) {
+  //     toast.error(
+  //       <div>
+  //         <strong className="text-red-600">Error:</strong> {errorMessage}
+  //         <div className="text-right mt-2">
+  //           <button
+  //             className="bg-blue-500 text-[.9em] text-white px-3 py-1 rounded hover:bg-blue-700"
+  //             onClick={() => toast.dismiss()}
+  //           >
+  //             OK
+  //           </button>
+  //         </div>
+  //       </div>
+  //     );
+  //     return;
+  //   }
+
+  //   // Display warning message
+  //   if (warningRows.length > 0) {
+  //     const remainingRows = warningRows.length;
+  //     // Disable the Submit button when warning is shown
+  //     setIsSubmitDisabled(true);
+
+  //     // Show a modal-like toast for confirmation
+  //     toast(
+  //       <div>
+  //         <strong className="text-pink-500">Warning:</strong> Data for{" "}
+  //         <strong className="">{remainingRows}</strong> days are not selected.
+  //         Do you still want to save data?
+  //         <div className="flex justify-end gap-2 mt-2 ">
+  //           <button
+  //             className="bg-red-500 text-[.9em] text-white px-2 py-1 rounded hover:bg-red-700"
+  //             onClick={() => {
+  //               toast.dismiss(); // Dismiss the toast
+  //               setIsSubmitDisabled(false); // Enable the Submit button
+  //             }}
+  //           >
+  //             Cancel
+  //           </button>
+  //           <button
+  //             className="bg-green-500 text-[.9em] text-white px-2 py-1 rounded hover:bg-green-700"
+  //             onClick={() => {
+  //               toast.dismiss(); // Dismiss the toast
+  //               setIsSubmitDisabled(false); // Re-enable the Submit button after submission
+
+  //               submitData(preparedData); // Call the function to submit data
+  //             }}
+  //           >
+  //             Confirm
+  //           </button>
+  //         </div>
+  //       </div>,
+  //       {
+  //         autoClose: false, // Prevent auto-dismiss
+  //         closeButton: false, // Remove the cross button
+  //         onClose: () => {
+  //           // Ensure `setIsSubmitDisabled(false)` runs if the toast is closed manually
+  //           setIsSubmitDisabled(false);
+  //         },
+  //       }
+  //     );
+  //     return;
+  //   }
+
+  //   // If no errors or warnings, submit data
+  //   submitData(preparedData);
+  // };
+
+  // Separate function to handle data submission
   const handleSubmit = async () => {
     const preparedData = prepareData(); // Prepare data for validation
     let hasError = false;
@@ -296,6 +428,7 @@ const CreateExamTimeTable = () => {
     const updatedErrors = timetable.map((row) => ({
       noSubject: false,
       missingOption: false,
+      optionMismatch: false,
     }));
 
     timetable.forEach((row, rowIndex) => {
@@ -307,12 +440,12 @@ const CreateExamTimeTable = () => {
           key.startsWith(`subject_id${rowIndex + 1}`) &&
           preparedData[key] !== ""
       );
-      const hasMultipleSubjects =
-        Object.keys(preparedData).filter(
-          (key) =>
-            key.startsWith(`subject_id${rowIndex + 1}`) &&
-            preparedData[key] !== ""
-        ).length > 1;
+      const selectedSubjects = Object.keys(preparedData).filter(
+        (key) =>
+          key.startsWith(`subject_id${rowIndex + 1}`) &&
+          preparedData[key] !== ""
+      ).length;
+
       const hasOptionSelected = preparedData[optionKey] !== "Select";
 
       // Track if any subject is selected across rows
@@ -320,8 +453,31 @@ const CreateExamTimeTable = () => {
         anySubjectSelected = true;
       }
 
-      // Validation 2: Multiple subjects selected but no option chosen
-      if (hasMultipleSubjects && !hasOptionSelected) {
+      // Validation 1: "AND"/"OR" selected but no subject
+      if (hasOptionSelected && selectedSubjects === 0) {
+        updatedErrors[rowIndex].noSubject = true;
+        errorMessage = `Please select a subject for ${row.date}.`;
+        hasError = true;
+      }
+
+      // Validation 2: "AND"/"OR" selected but only one subject
+      if (
+        hasOptionSelected &&
+        selectedSubjects === 1 &&
+        (preparedData[optionKey] === "A" || preparedData[optionKey] === "O")
+      ) {
+        updatedErrors[rowIndex].optionMismatch = true;
+        errorMessage = `Please select at least two subjects for ${
+          row.date
+        } when select option ${
+          preparedData[optionKey] === "A" ? "AND" : "OR"
+        }.`;
+
+        hasError = true;
+      }
+
+      // Validation 3: Multiple subjects selected but no option chosen
+      if (selectedSubjects > 1 && !hasOptionSelected) {
         updatedErrors[rowIndex].missingOption = true;
         errorMessage = `Please select an option for multiple subjects on ${row.date}.`;
         hasError = true;
@@ -333,7 +489,7 @@ const CreateExamTimeTable = () => {
       }
     });
 
-    // Validation 1: No subject selected across all rows
+    // Validation 4: No subject selected across all rows
     if (!anySubjectSelected) {
       errorMessage = `Please select at least one subject for any date.`;
       hasError = true;
@@ -368,10 +524,8 @@ const CreateExamTimeTable = () => {
     // Display warning message
     if (warningRows.length > 0) {
       const remainingRows = warningRows.length;
-      // Disable the Submit button when warning is shown
-      setIsSubmitDisabled(true);
+      setIsSubmitDisabled(true); // Disable the Submit button when warning is shown
 
-      // Show a modal-like toast for confirmation
       toast(
         <div>
           <strong className="text-pink-500">Warning:</strong> Data for{" "}
@@ -381,8 +535,8 @@ const CreateExamTimeTable = () => {
             <button
               className="bg-red-500 text-[.9em] text-white px-2 py-1 rounded hover:bg-red-700"
               onClick={() => {
-                toast.dismiss(); // Dismiss the toast
-                setIsSubmitDisabled(false); // Enable the Submit button
+                toast.dismiss();
+                setIsSubmitDisabled(false);
               }}
             >
               Cancel
@@ -390,10 +544,9 @@ const CreateExamTimeTable = () => {
             <button
               className="bg-green-500 text-[.9em] text-white px-2 py-1 rounded hover:bg-green-700"
               onClick={() => {
-                toast.dismiss(); // Dismiss the toast
-                setIsSubmitDisabled(false); // Re-enable the Submit button after submission
-
-                submitData(preparedData); // Call the function to submit data
+                toast.dismiss();
+                setIsSubmitDisabled(false);
+                submitData(preparedData);
               }}
             >
               Confirm
@@ -401,12 +554,9 @@ const CreateExamTimeTable = () => {
           </div>
         </div>,
         {
-          autoClose: false, // Prevent auto-dismiss
-          closeButton: false, // Remove the cross button
-          onClose: () => {
-            // Ensure `setIsSubmitDisabled(false)` runs if the toast is closed manually
-            setIsSubmitDisabled(false);
-          },
+          autoClose: false,
+          closeButton: false,
+          onClose: () => setIsSubmitDisabled(false),
         }
       );
       return;
@@ -416,7 +566,6 @@ const CreateExamTimeTable = () => {
     submitData(preparedData);
   };
 
-  // Separate function to handle data submission
   const submitData = async (preparedData) => {
     setLoading(true);
     try {

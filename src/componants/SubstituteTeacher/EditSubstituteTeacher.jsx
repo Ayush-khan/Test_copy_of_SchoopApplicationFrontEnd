@@ -78,7 +78,7 @@ const EditSubstituteTeacher = () => {
         }));
         setDay(response?.data?.day_week);
         setTimetable(timetableData); // Save mapped data
-        toast.success("Substitution data fetched successfully!");
+        // toast.success("Substitution data fetched successfully!");
       } else {
         toast.error(
           "No substitution data available for the selected teacher and date."
