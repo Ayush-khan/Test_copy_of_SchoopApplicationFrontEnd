@@ -394,12 +394,12 @@ function SubjectList() {
           ></div>
 
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+            <div className="h-96 lg:h-96 w-full md:w-[88%] mx-auto w-overflow-y-scroll lg:overflow-x-hidden">
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
                     <tr className="bg-gray-200">
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         S.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -408,10 +408,10 @@ function SubjectList() {
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Type
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Edit
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Delete
                       </th>
                     </tr>
@@ -459,11 +459,11 @@ function SubjectList() {
                         </tr>
                       ))
                     ) : (
-                      <tr>
-                        <td colSpan="5" className="text-center">
-                          No subject found
-                        </td>
-                      </tr>
+                      <div className="absolute left-[5%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
+                          Please wait while data is loading...
+                        </div>
+                      </div>
                     )}
                   </tbody>
                 </table>

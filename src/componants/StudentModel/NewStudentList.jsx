@@ -301,9 +301,17 @@ function NewStudentList() {
   };
 
   const handleCloseModal = () => {
+    //  fetchInitialData();
+
     setShowEditModal(false);
     setShowDeleteModal(false);
     setShowDActiveModal(false);
+  };
+  const handleCloseModalForBulkUpload = () => {
+    setShowDisplayUpload(false);
+    setclassIdForManage(null);
+    setSelectedClass(null); // Clear the dropdown value
+    fetchAllStudents();
   };
 
   // for uplode portions
@@ -426,7 +434,7 @@ function NewStudentList() {
     <>
       {/* <ToastContainer /> */}
       {/* <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 "> */}
-      <div className="md:mx-auto md:w-[95%] p-4 bg-white mt-4 ">
+      <div className="md:mx-auto md:w-[85%] p-4 bg-white mt-4 ">
         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
           New Students List
         </h3>
@@ -447,9 +455,14 @@ function NewStudentList() {
               <div className="  w-[100%]  mx-auto ">
                 {showDisplayUpload ? (
                   <div className="max-w-full bg-white shadow-md rounded-lg border border-gray-300 mx-auto mt-10 p-6">
+                    <RxCross1
+                      className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                      onClick={handleCloseModalForBulkUpload}
+                    />
                     <h2 className="text-center text-2xl font-semibold mb-8 text-blue-600">
                       Upload Student Data from Excel Sheet
                     </h2>
+
                     <h5 className="  text-center mx-auto font-semibold mb-3 text-gray-500 ">
                       Class: {classNameForBulkUpload}
                     </h5>
@@ -637,7 +650,7 @@ function NewStudentList() {
                       <table className="min-w-full leading-normal table-auto">
                         <thead>
                           <tr className="bg-gray-200">
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               S.No
                             </th>
 
@@ -648,20 +661,17 @@ function NewStudentList() {
                               Class
                             </th>
 
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Edit
                             </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Delete
                             </th>
                           </tr>
                         </thead>
                         <tbody>
                           {displayedSections.map((subject, index) => (
-                            <tr
-                              key={subject.student_id}
-                              className="text-gray-700 text-sm font-light"
-                            >
+                            <tr key={subject.student_id} className=" text-sm ">
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {index + 1}
                               </td>

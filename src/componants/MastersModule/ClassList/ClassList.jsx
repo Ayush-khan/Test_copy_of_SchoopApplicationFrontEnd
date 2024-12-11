@@ -668,22 +668,22 @@ function ClassList() {
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
                     <tr className="bg-gray-200">
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 text-center w-full md:w-[10%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         S.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Class
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Total student
+                      <th className="px-2 w-full md:w-[16%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Total studen
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Section
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Edit
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Delete
                       </th>
                     </tr>
@@ -766,11 +766,14 @@ function ClassList() {
                         </tr>
                       ))
                     ) : (
-                      <tr>
-                        <td colSpan="5" className="text-center">
-                          No class found
-                        </td>
-                      </tr>
+                      <div className=" absolute left-[5%]  w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div
+                          colSpan="5"
+                          className=" text-center text-xl text-blue-700"
+                        >
+                          Please wait while data is loading...
+                        </div>
+                      </div>
                     )}
                   </tbody>
                 </table>

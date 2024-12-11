@@ -5,8 +5,8 @@ const Loader = () => (
   <div className="flex justify-center items-center h-full">
     <ThreeCircles
       visible={true}
-      height="100"
-      width="100"
+      height="50"
+      width="50"
       // color="#A04997"
       innerCircleColor="#974F9D"
       outerCircleColor="#C03078"

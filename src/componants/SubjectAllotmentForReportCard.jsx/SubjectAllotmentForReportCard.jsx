@@ -514,7 +514,7 @@ function SubjectAllotmentForReportCard() {
                         <table className="min-w-full leading-normal table-auto">
                           <thead>
                             <tr className="bg-gray-200">
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 S.No
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -529,10 +529,10 @@ function SubjectAllotmentForReportCard() {
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Subject Type
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Edit
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Delete
                               </th>
                             </tr>
@@ -541,7 +541,7 @@ function SubjectAllotmentForReportCard() {
                             {displayedSections.map((subject, index) => (
                               <tr
                                 key={subject.sub_rc_master_id}
-                                className="text-gray-700 text-sm font-light"
+                                className=" text-sm "
                               >
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {currentPage * pageSize + index + 1}

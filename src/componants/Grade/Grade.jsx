@@ -656,11 +656,11 @@ function Grade() {
                         </tr>
                       ))
                     ) : (
-                      <tr>
-                        <td colSpan="9" className="text-center">
-                          No Grades are found...
-                        </td>
-                      </tr>
+                      <div className=" relative left-[90%]  w-[200%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
+                          Please wait while data is loading...
+                        </div>
+                      </div>
                     )}
                   </tbody>
                 </table>

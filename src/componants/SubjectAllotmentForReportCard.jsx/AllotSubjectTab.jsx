@@ -650,7 +650,9 @@ const AllotSubjectTab = () => {
                           </div>
                         ))
                       ) : (
-                        <p className="mt-2">No subjects available</p>
+                        <p className="w-[180%] text-blue-700 ">
+                          Please wait while subjects are loading...
+                        </p>
                       )}
                     </div>
                     {subjectError && (

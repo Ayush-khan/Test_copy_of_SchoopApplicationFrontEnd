@@ -482,10 +482,10 @@ function AllotMarksHeading() {
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Highest Marks
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Edit
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Delete
                               </th>
                             </tr>
@@ -494,7 +494,7 @@ function AllotMarksHeading() {
                             {displayedSections.map((subject, index) => (
                               <tr
                                 key={subject.allot_markheadings_id}
-                                className="text-gray-700 text-sm font-light"
+                                className="text-sm "
                               >
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {currentPage * pageSize + index + 1}

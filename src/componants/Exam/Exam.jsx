@@ -437,10 +437,10 @@ function Exam() {
                       <th className="px-2 text-center lg:px-5 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Comment
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Edit
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Delete
                       </th>
                     </tr>
@@ -513,11 +513,11 @@ function Exam() {
                         </tr>
                       ))
                     ) : (
-                      <tr>
-                        <td colSpan="5" className="text-center">
-                          No Exams are found
-                        </td>
-                      </tr>
+                      <div className=" relative left-[48%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
+                          Please wait while data is loading...
+                        </div>
+                      </div>
                     )}
                   </tbody>
                 </table>

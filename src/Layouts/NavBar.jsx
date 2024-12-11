@@ -1099,7 +1099,7 @@ function NavBar() {
                         navigate("/dashboard");
                       }}
                       style={{ fontWeight: "700" }}
-                      className={`DashbordText text-[1rem] md:pt-0 my-auto  text-black  md:relative right-2  `}
+                      className={`hover:cursor-pointer   DashbordText text-[1rem] md:pt-0 my-auto  text-black  md:relative right-2  `}
                     >
                       <FaHome className="inline mr-1 relative bottom-0.5  hover:text-black" />
                       Dashboard
