@@ -400,7 +400,7 @@ const LeavingCertificate = () => {
           (subject) => subject.name
         );
 
-        console.log("allSubjectNames", allSubjectNames);
+        console.log("fetchedData", fetchedData);
         // Populate formData with the fetched data
         setFormData({
           sr_no: fetchedData.sr_no || "",
@@ -436,6 +436,7 @@ const LeavingCertificate = () => {
           state: fetchedData.studentinformation.state || "",
           mother_tongue: fetchedData.studentinformation.mother_tongue || "",
           dob: fetchedData.studentinformation.dob || "",
+          admission_class: fetchedData.studentinformation.admission_class || "",
           // dob_words: fetchedData.dobinwords || "", // Directly from fetched data
           dob_words: convertDateToWords(fetchedData.studentinformation.dob),
           attendance: fetchedData.total_attendance || "",
@@ -445,6 +446,7 @@ const LeavingCertificate = () => {
             fetchedData.studentinformation.father_image_name || null, // Assuming this is for a teacher image
           purpose: fetchedData.purpose || " ",
         });
+        console.log("setFOrmData", formData);
       } else {
         if (response.data && response.data.status === 403) {
           toast.error(
@@ -939,7 +941,7 @@ const LeavingCertificate = () => {
     }
 
     console.log("Validation passed, proceeding with submission");
-
+    console.log("formData", formData);
     // Format the form data before submission
     const formattedFormData = {
       reg_no: formData.reg_no || "",
@@ -1931,7 +1933,7 @@ const LeavingCertificate = () => {
                         id="admission_class"
                         maxLength={100}
                         name="admission_class"
-                        value={formData.admission_class}
+                        value={formData?.admission_class}
                         onChange={handleChange}
                         readOnly
                         className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
