@@ -1292,7 +1292,7 @@ function ManageSubjectList() {
   const [newSection, setnewSectionName] = useState("");
   const [newSubject, setnewSubjectnName] = useState("");
   const [newclassnames, setnewclassnames] = useState("");
-  const [teacherIdIs, setteacherIdIs] = useState("");
+  const [teacherIdIs, setteacherIdIs] = useState();
   const [teacherNameIs, setTeacherNameIs] = useState("");
   const [newTeacherAssign, setnewTeacherAssign] = useState("");
   const [ClassNameDropdown, setClassNameDropdown] = useState("");
@@ -1333,10 +1333,10 @@ function ManageSubjectList() {
   const [selectedClass, setSelectedClass] = useState(null);
   const handleTeacherSelect = (selectedOption) => {
     setSelectedTeacher(selectedOption);
-    console.log("selectedTeacher", selectedTeacher);
+
     setNewDepartmentId(selectedOption.value); // Assuming value is the teacher's ID
-    console.log("setNewDepartmentId", newDepartmentId);
   };
+  console.log("setSelectedTeacher before", selectedTeacher);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleClassSelect = (selectedOption) => {
@@ -1743,9 +1743,15 @@ function ManageSubjectList() {
     console.log("teacerId and name is", teacherIdIs, teacherNameIs);
     // It's used for the dropdown of the tachers
     // setnewTeacherAssign()
+    console.log("department is for teacher", departments);
+
+    console.log("sectionsis for teacher", section);
     const selectedOption = departments.find(
-      (option) => option.value === section?.get_teacher?.teacher_id
+      // (option) => option.value === section?.get_teacher?.teacher_id
+      (option) => option.value == section?.get_teachers?.teacher_id
     );
+    console.log("selectedOptions__In handleEdit", selectedOption);
+
     setSelectedTeacher(selectedOption);
     setShowEditModal(true);
   };
@@ -1755,7 +1761,7 @@ function ManageSubjectList() {
     console.log("inside delete of subjectallotmenbt", classes);
     const classToDelete = subjects.find((cls) => cls.subject_id === sectionId);
     // setCurrentClass(classToDelete);
-    setCurrentSection({ classToDelete });
+    setCurrentSection(classToDelete);
     console.log("the currecne t section", currentSection);
     setCurrestSubjectNameForDelete(
       currentSection?.classToDelete?.get_subject?.name
@@ -1837,18 +1843,14 @@ function ManageSubjectList() {
       console.log("the classes inside the delete", classes);
       console.log(
         "the current section insde the handlesbmitdelete",
-        currentSection.classToDelete
+        currentSection
       );
-      if (
-        !token ||
-        !currentSection ||
-        !currentSection?.classToDelete?.subject_id
-      ) {
+      if (!token || !currentSection || !currentSection?.subject_id) {
         throw new Error("Subject ID is missing");
       }
 
       await axios.delete(
-        `${API_URL}/api/delete_subject_Alloted/${currentSection?.classToDelete?.subject_id}`,
+        `${API_URL}/api/delete_subject_Alloted/${currentSection?.subject_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -1878,6 +1880,8 @@ function ManageSubjectList() {
   };
 
   const handleCloseModal = () => {
+    setSelectedTeacher(null);
+    setCurrentSection(null);
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
@@ -2225,7 +2229,7 @@ function ManageSubjectList() {
                         </thead>
                         <tbody>
                           {displayedSections.map((subject, index) => (
-                            <tr key={subject.section_id} className=" text-sm ">
+                            <tr key={subject?.subject_id} className=" text-sm ">
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {currentPage * pageSize + index + 1}
                               </td>
@@ -2620,7 +2624,7 @@ function ManageSubjectList() {
                 ></div>
                 <div className="modal-body">
                   Are you sure you want to delete this subject{" "}
-                  {` ${currestSubjectNameForDelete} `} ?
+                  {currentSection?.get_subject?.name}?
                 </div>
                 <div className=" flex justify-end p-3">
                   <button
