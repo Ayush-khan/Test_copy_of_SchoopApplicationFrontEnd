@@ -1,12 +1,14 @@
 /* Navbar items hover effect */
 .custom-nav-dropdown .nav-dropdown-title {
   color: black;
-  font-weight: 700;
+  font-weight: 900;
 }
 
 .custom-nav-dropdown:hover .nav-dropdown-title {
-  color: white;
-  background-color: #343a40;
+  /* color: white; */
+  color: #202830;
+  font-weight: 800;
+  /* background-color: #343a40; */
 }
 
 /* Submenus background color should stay the same */
@@ -36,10 +38,38 @@
   font-weight: 400;
   background-color: white; /* Default background color for dropdown */
 }
-
+/* subdropdown text effect when hover on it */
 .custom-nav-dropdown .dropdown-item:hover {
   color: white; /* Text turns white on hover */
-  background-color: #8495a7; /* Background turns dark on hover */
+  font-weight: 700;
+  border-right: 2px double rgb(207, 10, 102);
+  border-left: 2px double rgb(207, 10, 102);
+  background-color: #408cdd; /* Background turns dark on hover */
+}
+
+.nav-dropdown-titleSubUnder {
+  display: inline-block;
+  width: 98%;
+  margin: 0;
+
+  padding: 2px;
+  padding-left: 8px;
+  color: black;
+  /* border: 1px solid red; */
+  /* color: white; Text turns white on hover */
+  /* font-weight: 700; */
+
+  /* background-color: #000000; */
+}
+.nav-dropdown-titleSubUnder:hover {
+  /* color: white; */
+  /* font-weight: 800; */
+  color: white; /* Text turns white on hover */
+  font-weight: 700;
+  background-color: #408cdd;
+  border-right: 2px double rgb(207, 10, 102);
+  border-left: 2px double rgb(207, 10, 102);
+  /* background-color: #408cdd; */
 }
 
 /* Preventing dropdowns from opening on click */
@@ -52,5 +82,6 @@
   display: block;
   visibility: visible;
   opacity: 1;
+
   transition: all 0.3s ease-in-out;
 }

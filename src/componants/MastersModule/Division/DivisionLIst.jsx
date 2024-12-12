@@ -132,14 +132,16 @@ function DivisionList() {
     const errors = {};
 
     // Regular expression to match only alphabets
-    const alphabetRegex = /^[A-Za-z]+$/;
+    // const alphabetRegex = /^[A-Za-z]+$/;
 
     if (!name || name.trim() === "") {
       errors.name = "Please enter division name.";
-    } else if (!alphabetRegex.test(name)) {
-      errors.name = "The name field only contain alphabets.";
-    } else if (name.length > 1) {
-      errors.name = "The name field must not exceed 1 character.";
+    }
+    // else if (!alphabetRegex.test(name)) {
+    //   errors.name = "The name field only contain alphabets.";
+    // }
+    else if (name.length > 30) {
+      errors.name = "The name field must not exceed 30 character.";
     }
 
     if (!departmentId) {
@@ -623,7 +625,7 @@ function DivisionList() {
                       </label>
                       <input
                         type="text"
-                        maxLength={1}
+                        maxLength={30}
                         className="form-control shadow-md mb-2"
                         // style={{ background: "#F8F8F8" }}
                         id="sectionName"
@@ -736,7 +738,7 @@ function DivisionList() {
                     </label>
                     <input
                       type="text"
-                      maxLength={1}
+                      maxLength={30}
                       className="form-control shadow-md mb-2"
                       id="editSectionName"
                       value={newSectionName}

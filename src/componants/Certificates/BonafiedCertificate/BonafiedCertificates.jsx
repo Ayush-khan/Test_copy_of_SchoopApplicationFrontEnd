@@ -532,10 +532,7 @@ function BonafiedCertificates() {
                               }
 
                               return (
-                                <tr
-                                  key={subject.sr_no}
-                                  className="text-gray-700 text-sm font-light"
-                                >
+                                <tr key={subject.sr_no} className="text-sm ">
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {index + 1}
                                   </td>
