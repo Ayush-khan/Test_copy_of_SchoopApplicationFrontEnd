@@ -19,7 +19,7 @@ import { FaCheck } from "react-icons/fa";
 function ExamTImeTable() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
   const [staffs, setStaffs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -43,6 +43,8 @@ function ExamTImeTable() {
     fetchStaffs();
   }, []);
   const fetchStaffs = async () => {
+    setLoading(true);
+
     try {
       const token = localStorage.getItem("authToken");
 
@@ -283,7 +285,13 @@ function ExamTImeTable() {
                     </tr>
                   </thead>
                   <tbody>
-                    {displayedStaffs.length ? (
+                    {loading ? (
+                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
+                          Please wait while data is loading...
+                        </div>
+                      </div>
+                    ) : displayedStaffs.length ? (
                       displayedStaffs.map((staffItem, index) => (
                         <tr
                           key={staffItem.exam_tt_id} // Use a unique key like `exam_id`
@@ -383,9 +391,9 @@ function ExamTImeTable() {
                         </tr>
                       ))
                     ) : (
-                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                        <div className=" text-center text-xl text-blue-700">
-                          Please wait while data is loading...
+                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-red-700">
+                          Oops! No data found..
                         </div>
                       </div>
                     )}

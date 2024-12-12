@@ -12,7 +12,7 @@ import { RxCross1 } from "react-icons/rx";
 function Exam() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [sections, setSections] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -62,6 +62,8 @@ function Exam() {
 
   // Fetching all exams list
   const fetchExams = async () => {
+    setLoading(true);
+
     try {
       const token = localStorage.getItem("authToken");
 
@@ -446,7 +448,13 @@ function Exam() {
                     </tr>
                   </thead>
                   <tbody>
-                    {displayedSections.length ? (
+                    {loading ? (
+                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
+                          Please wait while data is loading...
+                        </div>
+                      </div>
+                    ) : displayedSections.length ? (
                       displayedSections.map((section, index) => (
                         <tr
                           key={section.section_id}
@@ -513,9 +521,9 @@ function Exam() {
                         </tr>
                       ))
                     ) : (
-                      <div className=" relative left-[48%] w-[100%]  text-center flex justify-center items-center mt-14">
-                        <div className=" text-center text-xl text-blue-700">
-                          Please wait while data is loading...
+                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-red-700">
+                          Oops! No data found..
                         </div>
                       </div>
                     )}

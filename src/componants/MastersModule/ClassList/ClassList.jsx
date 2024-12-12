@@ -13,7 +13,7 @@ function ClassList() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
   const [classes, setClasses] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -37,6 +37,8 @@ function ClassList() {
   const [backendErrors, setBackendErrors] = useState({});
   const [roleId, setRoleId] = useState("");
   const fetchClasses = async () => {
+    setLoading(true);
+
     try {
       const token = localStorage.getItem("authToken");
       const academicYr = localStorage.getItem("academicYear");
@@ -560,12 +562,6 @@ function ClassList() {
     );
   });
 
-  // Add serial numbers dynamically
-  // const classesWithSerialNumbers = filteredClasses.map((cls, index) => ({
-  //   ...cls,
-  //   serialNumber: index + 1, // Add serial number starting from 1
-  // }));
-
   const displayedClasses = filteredClasses.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -613,26 +609,6 @@ function ClassList() {
       <ToastContainer />
       <div className="container mt-4">
         <div className="card mx-auto lg:w-3/4 shadow-lg">
-          {/* <div className="card-header flex justify-between items-center">
-            <h3 className="text-gray-700 mt-1 text-md lg:text-xl">Classes</h3>
-            <div className=" box-border flex gap-x-2  justify-end md:h-10 ">
-              <div className=" ">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search"
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <button
-                className="btn btn-primary btn-sm h-9"
-                onClick={handleAdd}
-              >
-                <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
-                Add
-              </button>
-            </div>
-          </div> */}
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Class
@@ -690,7 +666,13 @@ function ClassList() {
                   </thead>
                   <tbody>
                     {console.log("classLIst module api", displayedClasses)}
-                    {displayedClasses.length ? (
+                    {loading ? (
+                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
+                          Please wait while data is loading...
+                        </div>
+                      </div>
+                    ) : displayedClasses.length ? (
                       displayedClasses.map((classItem, index) => (
                         <tr
                           key={classItem.class_id}
@@ -766,12 +748,9 @@ function ClassList() {
                         </tr>
                       ))
                     ) : (
-                      <div className=" absolute left-[5%]  w-[100%]  text-center flex justify-center items-center mt-14">
-                        <div
-                          colSpan="5"
-                          className=" text-center text-xl text-blue-700"
-                        >
-                          Please wait while data is loading...
+                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-red-700">
+                          Oops! No data found..
                         </div>
                       </div>
                     )}
