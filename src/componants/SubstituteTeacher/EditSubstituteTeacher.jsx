@@ -325,7 +325,7 @@ const EditSubstituteTeacher = () => {
                   </div>
                 </div>
               </div>
-              <div className="my-1 md:w-[80%] mx-auto w-full flex flex-col md:flex-row gap-1 justify-center md:justify-end ">
+              <div className="my-1 md:w-[65%] mx-auto w-full flex flex-col md:flex-row gap-1 justify-center md:justify-end ">
                 <button
                   type="button"
                   onClick={resetTeacherDropdown}

@@ -24,6 +24,7 @@ function ManageLC() {
   const [currentSection, setCurrentSection] = useState(null);
   const [currestSubjectNameForDelete, setCurrestSubjectNameForDelete] =
     useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // This is hold the allot subjet api response
   const [classIdForManage, setclassIdForManage] = useState("");
@@ -184,6 +185,8 @@ function ManageLC() {
   };
 
   const handleDownloadSumbit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       //  setLoading(true); // Show loading indicator if you have one
       const token = localStorage.getItem("authToken");
@@ -243,6 +246,8 @@ function ManageLC() {
         );
       }
       console.error("Error in Downloading Leaving Certificate:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
     //    finally {
     //      setLoading(false); // Stop loading indicator
@@ -263,6 +268,8 @@ function ManageLC() {
   };
 
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -308,10 +315,14 @@ function ManageLC() {
         );
       }
       console.error("Error Leaving Certificate issue status:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       const subReportCardId = currentSection?.sr_no; // Get the correct ID
@@ -337,6 +348,7 @@ function ManageLC() {
       handleSearch(); // Refresh the data (this seems like the method to refetch data)
       setShowDeleteModal(false); // Close the modal
       toast.success("Leaving Certificate deleted successfully!");
+      setCancellationReason("");
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
@@ -346,6 +358,9 @@ function ManageLC() {
         toast.error(`Error deleting Leaving Certificate: ${error.message}`);
       }
       console.error("Error deleting Leaving Certificate:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDeleteModal(false);
     }
   };
 
@@ -411,13 +426,13 @@ function ManageLC() {
                 <div className="md:w-[80%] mx-auto">
                   <div className="w-full md:w-[80%] flex md:flex-row justify-between items-center">
                     {/* LC Number Input */}
-                    <div className="w-full md:w-[98%] mt-4  gap-x-0 md:gap-x-12 mx-auto   flex flex-col gap-y-2 md:gap-y-0 md:flex-row ">
+                    <div className="w-full md:w-[98%] mt-4    gap-x-0 md:gap-x-12 mx-auto   flex flex-col gap-y-2 md:gap-y-0 md:flex-row ">
                       <div className="w-full md:w-[30%] gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
                         <label
                           className="text-md mt-1.5 mr-1 md:mr-0 w-[40%] md:w-[29%]"
                           htmlFor="classSelect"
                         >
-                          LC No. <span className="text-red-500">*</span>
+                          LC No.
                         </label>{" "}
                         <div className="w-full md:w-[50%]">
                           <input
@@ -436,14 +451,14 @@ function ManageLC() {
                         </div>
                       </div>
 
-                      <div className="w-full md:w-[50%]  gap-x-4  justify-between  my-1 md:my-4 flex md:flex-row">
+                      <div className="w-full md:w-[50%]   gap-x-4  justify-between  my-1 md:my-4 flex md:flex-row">
                         <label
-                          className=" ml-0 md:ml-4 w-[59%] md:w-[55%]  text-md mt-1.5 "
+                          className=" ml-0 md:ml-2 relative left-0 md:left-4  w-full md:w-[35%]  text-md mt-1.5 "
                           htmlFor="studentSelect"
                         >
-                          Select Class <span className="text-red-500 ">*</span>
+                          Select Class
                         </label>{" "}
-                        <div className="w-full">
+                        <div className="w-full md:w-[60%] ">
                           <Select
                             value={selectedClass}
                             onChange={handleClassSelect}
@@ -451,7 +466,7 @@ function ManageLC() {
                             placeholder="Select Class"
                             isSearchable
                             isClearable
-                            className="text-sm w-full md:w-[70%] item-center relative left-0 md:left-4"
+                            className="text-sm w-full item-center relative left-0 md:left-4"
                           />
                           {nameError && (
                             <div className="relative top-0.5 left-3 ml-1 text-danger text-xs">
@@ -464,7 +479,7 @@ function ManageLC() {
                       <button
                         onClick={handleSearch}
                         type="button"
-                        className="btn h-10 w-18 mt-1.5 md:w-auto relative  btn-primary "
+                        className="btn h-10 w-18 mt-0.5 md:w-auto relative  btn-primary "
                       >
                         Search
                       </button>
@@ -502,7 +517,7 @@ function ManageLC() {
                           <thead>
                             <tr className="bg-gray-200">
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                S.No
+                                Sr.No
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 LC No.
@@ -532,95 +547,108 @@ function ManageLC() {
                             </tr>
                           </thead>
                           <tbody>
-                            {displayedSections.map((subject, index) => {
-                              // Determine the status text and button visibility based on conditions
-                              let statusText = "";
-                              let showIssueButton = false;
-                              let showDeleteButton = false;
-                              let showEditButton = false;
-                              let showDownloadButton = false;
+                            {displayedSections.length ? (
+                              displayedSections.map((subject, index) => {
+                                // Determine the status text and button visibility based on conditions
+                                let statusText = "";
+                                let showIssueButton = false;
+                                let showDeleteButton = false;
+                                let showEditButton = false;
+                                let showDownloadButton = false;
 
-                              if (subject.IsDeleted === "Y") {
-                                statusText = "Deleted";
-                              } else if (subject.IsIssued === "Y") {
-                                statusText = "Issued";
-                                showEditButton = true;
-                                showDownloadButton = true;
-                              } else if (subject.IsGenerated === "Y") {
-                                statusText = "Generated";
-                                showIssueButton = true;
-                                showDeleteButton = true;
-                                showEditButton = true;
-                                showDownloadButton = true;
-                              }
+                                if (subject.IsDeleted === "Y") {
+                                  statusText = "Deleted";
+                                } else if (subject.IsIssued === "Y") {
+                                  statusText = "Issued";
+                                  showEditButton = true;
+                                  showDownloadButton = true;
+                                } else if (subject.IsGenerated === "Y") {
+                                  statusText = "Generated";
+                                  showIssueButton = true;
+                                  showDeleteButton = true;
+                                  showEditButton = true;
+                                  showDownloadButton = true;
+                                }
 
-                              return (
-                                <tr key={subject.sr_no} className=" text-sm ">
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {index + 1}
-                                  </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.sr_no}
-                                  </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.stud_name}
-                                  </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.classname} {subject?.sectionname}
-                                  </td>
-                                  {/* Status column */}
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {statusText}
-                                  </td>{" "}
-                                  {/* Download button */}
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {showDownloadButton && (
-                                      <button
-                                        onClick={() => handleDownload(subject)}
-                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                      >
-                                        <ImDownload />
-                                      </button>
-                                    )}
-                                  </td>
-                                  {/* Edit button */}
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {showEditButton && (
-                                      <button
-                                        onClick={() => handleEditForm(subject)}
-                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                      >
-                                        <FontAwesomeIcon icon={faEdit} />
-                                      </button>
-                                    )}
-                                  </td>
-                                  {/* Delete button */}
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {showDeleteButton && (
-                                      <button
-                                        onClick={() =>
-                                          handleDelete(subject?.sr_no)
-                                        }
-                                        className="text-red-600 hover:text-red-800 hover:bg-transparent"
-                                      >
-                                        <FontAwesomeIcon icon={faTrash} />
-                                      </button>
-                                    )}
-                                  </td>
-                                  {/* Issue button */}
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {showIssueButton && (
-                                      <button
-                                        onClick={() => handleEdit(subject)}
-                                        className="text-green-600 hover:text-green-800 hover:bg-transparent"
-                                      >
-                                        <ImCheckboxChecked />
-                                      </button>
-                                    )}
-                                  </td>
-                                </tr>
-                              );
-                            })}
+                                return (
+                                  <tr key={subject.sr_no} className=" text-sm ">
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {currentPage * pageSize + index + 1}
+                                    </td>
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {subject?.sr_no}
+                                    </td>
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {subject?.stud_name}
+                                    </td>
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {subject?.classname}{" "}
+                                      {subject?.sectionname}
+                                    </td>
+                                    {/* Status column */}
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {statusText}
+                                    </td>{" "}
+                                    {/* Download button */}
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {showDownloadButton && (
+                                        <button
+                                          onClick={() =>
+                                            handleDownload(subject)
+                                          }
+                                          className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                        >
+                                          <ImDownload />
+                                        </button>
+                                      )}
+                                    </td>
+                                    {/* Edit button */}
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {showEditButton && (
+                                        <button
+                                          onClick={() =>
+                                            handleEditForm(subject)
+                                          }
+                                          className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                        >
+                                          <FontAwesomeIcon icon={faEdit} />
+                                        </button>
+                                      )}
+                                    </td>
+                                    {/* Delete button */}
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {showDeleteButton && (
+                                        <button
+                                          onClick={() =>
+                                            handleDelete(subject?.sr_no)
+                                          }
+                                          className="text-red-600 hover:text-red-800 hover:bg-transparent"
+                                        >
+                                          <FontAwesomeIcon icon={faTrash} />
+                                        </button>
+                                      )}
+                                    </td>
+                                    {/* Issue button */}
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {showIssueButton && (
+                                        <button
+                                          onClick={() => handleEdit(subject)}
+                                          className="text-green-600 hover:text-green-800 hover:bg-transparent"
+                                        >
+                                          <ImCheckboxChecked />
+                                        </button>
+                                      )}
+                                    </td>
+                                  </tr>
+                                );
+                              })
+                            ) : (
+                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                <div className=" text-center text-xl text-red-700">
+                                  Oops! No data found..
+                                </div>
+                              </div>
+                            )}
                           </tbody>
                         </table>
                       </div>
@@ -694,8 +722,9 @@ function ManageLC() {
                     style={{ backgroundColor: "#2196F3" }}
                     className="btn text-white px-3 mb-2"
                     onClick={handleSubmitEdit}
+                    disabled={isSubmitting}
                   >
-                    Issue
+                    {isSubmitting ? "Issuing..." : "Issue"}
                   </button>
                 </div>
               </div>
@@ -738,8 +767,9 @@ function ManageLC() {
                     style={{ backgroundColor: "#2196F3" }}
                     className="btn text-white px-3 mb-2"
                     onClick={handleDownloadSumbit}
+                    disabled={isSubmitting}
                   >
-                    Download
+                    {isSubmitting ? "Downloading..." : "Download"}
                   </button>
                 </div>
               </div>

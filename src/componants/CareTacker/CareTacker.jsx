@@ -191,7 +191,7 @@ function CareTacker() {
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        S.No
+                        Sr.No
                       </th>
 
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -229,7 +229,7 @@ function CareTacker() {
                         )}
                         <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                           <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {index + 1}
+                            {currentPage * pageSize + index + 1}
                           </p>
                         </td>
                         <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">

@@ -14,7 +14,7 @@ import { RxCross1 } from "react-icons/rx";
 function StaffList() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
   const [staffs, setStaffs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -30,6 +30,7 @@ function StaffList() {
   const pageSize = 10;
   const navigate = useNavigate();
   const fetchStaffs = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -323,7 +324,7 @@ function StaffList() {
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        S.No
+                        Sr.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Photo
@@ -355,7 +356,13 @@ function StaffList() {
                     </tr>
                   </thead>
                   <tbody>
-                    {displayedStaffs.length ? (
+                    {loading ? (
+                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
+                          Please wait while data is loading...
+                        </div>
+                      </div>
+                    ) : displayedStaffs.length ? (
                       displayedStaffs.map((staffItem, index) => (
                         <tr
                           key={staffItem.user_id}
@@ -369,7 +376,7 @@ function StaffList() {
                           )}
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {index + 1}
+                              {currentPage * pageSize + index + 1}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
@@ -468,11 +475,11 @@ function StaffList() {
                         </tr>
                       ))
                     ) : (
-                      <tr>
-                        <td colSpan="9" className="text-center">
-                          No Staffs are found
-                        </td>
-                      </tr>
+                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-red-700">
+                          Oops! No data found..
+                        </div>
+                      </div>
                     )}
                   </tbody>
                 </table>

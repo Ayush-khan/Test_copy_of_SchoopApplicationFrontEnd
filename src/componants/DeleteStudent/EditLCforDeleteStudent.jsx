@@ -27,6 +27,7 @@ const EditLCforDeleteStudent = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { student } = location.state || {};
+  console.log("Student -->", student);
   const [formData, setFormData] = useState({
     sr_no: "",
     class_id: "",
@@ -85,7 +86,7 @@ const EditLCforDeleteStudent = () => {
 
         const response = await axios.get(
           //   `${API_URL}/api/get_getleavingcertificatedata/${student?.student_id}`,
-          `${API_URL}/api/get_getleavingcertificatedata/${student?.slc_no}`,
+          `${API_URL}/api/get_getleavingcertificatedata/${student?.student_id}`,
 
           {
             headers: { Authorization: `Bearer ${token}` },

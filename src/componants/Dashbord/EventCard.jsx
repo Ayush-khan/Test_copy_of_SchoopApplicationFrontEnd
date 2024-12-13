@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Styles from "./EventCard.module.css"; // Import CSS module
 import { MdOutlineArrowDropDown } from "react-icons/md";
+import LoadingSpinner from "../common/LoadingSpinner";
+import Loader from "../common/Loader";
 
 const EventCard = () => {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -10,6 +12,7 @@ const EventCard = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const currentYear = new Date().getFullYear();
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const months = [
     { value: 0, label: "January" },
@@ -28,6 +31,7 @@ const EventCard = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const token = localStorage.getItem("authToken");
         const academicYr = localStorage.getItem("academicYear");
@@ -58,6 +62,8 @@ const EventCard = () => {
       } catch (error) {
         setError(error.message);
         console.error("Error fetching events:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -97,73 +103,90 @@ const EventCard = () => {
         </select>
         {/* <MdOutlineArrowDropDown /> */}
       </div>
-      <div
-        className={`${Styles.eventsList} rounded-lg pb-20 sm:pb-20  bg-gray-100 px-2`}
-      >
-        {filteredEvents.map((event, index) => (
-          <div key={index} className={`${Styles.eventCard} rounded-lg `}>
-            <div
-              className={` h-full w-1/4  bg-gray-500   text-cyan-900 text-lg rounded-l-lg  flex flex-col items-center justify-between     `}
-              style={{ background: "#00FFFF", color: "#C3347D" }}
-            >
-              <span className=" relative top-4">
-                {new Date(event.start_date).getDate() + 1}{" "}
-                {new Date(event.start_date).toLocaleString("default", {
-                  month: "long",
-                })}
-              </span>
-              <br />
-              <span className=" relative bottom-4">{event.start_time}</span>
-            </div>
-
-            <div className={Styles.details}>
-              <h5
-                className="sm:text-xs"
-                style={{
-                  // fontSize: "1.1em",
-                  fontWeight: "550",
-                  // marginTop: "1em",
-                  color: "#00FFFF",
-                }}
-              >
-                {event.title}{" "}
-                <span
-                  style={{ color: "#C334A2" }}
-                >{` (class-${event.class_name})`}</span>
-              </h5>
-              <div className="mb-3">
+      {loading ? (
+        <p className="text-center relative top-[16%]  w-10 mt-10 mx-auto  ">
+          <Loader />
+        </p>
+      ) : (
+        <div
+          className={`${Styles.eventsList} rounded-lg pb-20 sm:pb-20  bg-gray-100 px-2`}
+        >
+          {filteredEvents.lenght ? (
+            filteredEvents.map((event, index) => (
+              <div key={index} className={`${Styles.eventCard} rounded-lg `}>
                 <div
-                  className={`${Styles.discription}{mb-0 p-0 text-sm  sm:mb-1 mt-0 text-gray-800}`}
-                  // dangerouslySetInnerHTML={{ __html: event.event_desc }}
+                  className={` h-full w-1/4  bg-gray-500   text-cyan-900 text-lg rounded-l-lg  flex flex-col items-center justify-between     `}
+                  style={{ background: "#00FFFF", color: "#C3347D" }}
                 >
-                  {event.event_desc}
+                  <span className=" relative top-4">
+                    {new Date(event.start_date).getDate() + 1}{" "}
+                    {new Date(event.start_date).toLocaleString("default", {
+                      month: "long",
+                    })}
+                  </span>
+                  <br />
+                  <span className=" relative bottom-4">{event.start_time}</span>
                 </div>
-                <p
-                  style={{
-                    fontSize: ".9em",
-                    color: "gray",
-                    marginTop: "2px",
-                    marginLeft: "5px",
-                    marginBottom: "-10px",
-                  }}
-                >
-                  {" "}
-                  {/* {new Date(event.end_date).getDate() + 1}{" "}
+
+                <div className={Styles.details}>
+                  <h5
+                    className="sm:text-xs"
+                    style={{
+                      // fontSize: "1.1em",
+                      fontWeight: "550",
+                      // marginTop: "1em",
+                      color: "#00FFFF",
+                    }}
+                  >
+                    {event.title}{" "}
+                    <span
+                      style={{ color: "#C334A2" }}
+                    >{` (class-${event.class_name})`}</span>
+                  </h5>
+                  <div className="mb-3">
+                    <div
+                      className={`${Styles.discription}{mb-0 p-0 text-sm  sm:mb-1 mt-0 text-gray-800}`}
+                      // dangerouslySetInnerHTML={{ __html: event.event_desc }}
+                    >
+                      {event.event_desc}
+                    </div>
+                    <p
+                      style={{
+                        fontSize: ".9em",
+                        color: "gray",
+                        marginTop: "2px",
+                        marginLeft: "5px",
+                        marginBottom: "-10px",
+                      }}
+                    >
+                      {" "}
+                      {/* {new Date(event.end_date).getDate() + 1}{" "}
                   {new Date(event.end_date).toLocaleString("default", {
                     month: "long",
                   })} */}
-                  {/* The event will conclude on March 8th, 2024, at 12:00 PM. */}
-                  {`The event will conclude on ${
-                    new Date(event.end_date).getDate() + 1
-                  } ${new Date(event.end_date).toLocaleString("default", {
-                    month: "long",
-                  })} at ${event.end_time}`}
+                      {/* The event will conclude on March 8th, 2024, at 12:00 PM. */}
+                      {`The event will conclude on ${
+                        new Date(event.end_date).getDate() + 1
+                      } ${new Date(event.end_date).toLocaleString("default", {
+                        month: "long",
+                      })} at ${event.end_time}`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="relative left-[1%] w-[100%] text-center flex justify-center items-center mt-10">
+              <div className="text-center text-lg text-red-700 font-bold">
+                <p className="text-xl mb-2">Oops! 😟</p>
+                <p className="text-lg">
+                  No data available for the selected class.
                 </p>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -565,7 +565,7 @@ function Grade() {
                   <thead>
                     <tr className="bg-gray-200">
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        S.No
+                        Sr.No
                       </th>
                       <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Grade Name

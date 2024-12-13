@@ -813,7 +813,7 @@ const AllotTeachersForClass = () => {
 
       <div className="mb-4">
         <div className="md:w-[80%] mx-auto">
-          <div className="form-group mt-4 w-full  md:w-[80%] flex justify-start gap-x-1 md:gap-x-6">
+          <div className="form-group mt-6 md:mt-10 w-full  md:w-[80%] flex justify-start gap-x-1 md:gap-x-6">
             <label
               htmlFor="classSection"
               className="w-1/4 pt-2 items-center text-center"

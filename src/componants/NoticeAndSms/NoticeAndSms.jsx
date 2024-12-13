@@ -44,6 +44,7 @@ function NoticeAndSms() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const dropdownRef = useRef(null);
   //   for allot subject checkboxes
@@ -121,6 +122,8 @@ function NoticeAndSms() {
   //   }
   // };
   const handleSearch = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       const params = {};
@@ -153,6 +156,8 @@ function NoticeAndSms() {
     } catch (error) {
       console.error("Error fetching SMS notices:", error);
       toast.error("Error fetching SMS notices. Please try again.");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -729,9 +734,10 @@ function NoticeAndSms() {
                     <button
                       onClick={handleSearch}
                       type="button"
+                      disabled={isSubmitting}
                       className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                     >
-                      Search
+                      {isSubmitting ? "Searching..." : "Search"}
                     </button>
                   </div>
                 </div>{" "}
@@ -765,7 +771,7 @@ function NoticeAndSms() {
                         <thead>
                           <tr className="bg-gray-200">
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              S.No
+                              Sr.No
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Type
@@ -794,105 +800,116 @@ function NoticeAndSms() {
                           </tr>
                         </thead>
                         <tbody>
-                          {displayedSections.map((subject, index) => (
-                            <tr key={subject.notice_id} className="text-sm ">
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {index + 1}
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.notice_type}
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.notice_date}
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.subject}
-                              </td>
-                              {/* CLass Column */}
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                <div className=" w-17  overflow-x-auto ">
-                                  {subject?.classnames
-                                    ?.split(",")
-                                    .map((classname, idx) => (
-                                      <span key={idx}>
-                                        {classname.trim()}
-                                        {idx <
-                                          subject.classnames.split(",").length -
-                                            1 && ", "}
-                                      </span>
-                                    ))}
-                                </div>
-                              </td>
+                          {displayedSections.length ? (
+                            displayedSections.map((subject, index) => (
+                              <tr key={subject.notice_id} className="text-sm ">
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {currentPage * pageSize + index + 1}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.notice_type}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.notice_date}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.subject}
+                                </td>
+                                {/* CLass Column */}
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  <div className=" w-17  overflow-x-auto ">
+                                    {subject?.classnames
+                                      ?.split(",")
+                                      .map((classname, idx) => (
+                                        <span key={idx}>
+                                          {classname.trim()}
+                                          {idx <
+                                            subject.classnames.split(",")
+                                              .length -
+                                              1 && ", "}
+                                        </span>
+                                      ))}
+                                  </div>
+                                </td>
 
-                              {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.get_division?.name}
                                 </td> */}
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.name}
-                              </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.name}
+                                </td>
 
-                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                {subject.publish === "Y" ? (
-                                  <button
-                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                    onClick={() => handleView(subject)}
-                                  >
-                                    <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                                  </button>
-                                ) : (
-                                  <button
-                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                    onClick={() => handleEdit(subject)}
-                                  >
-                                    <FontAwesomeIcon icon={faEdit} />
-                                  </button>
-                                )}
-                              </td>
-
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject.publish === "N" ? (
-                                  <button
-                                    onClick={() =>
-                                      handleDelete(subject?.unq_id)
-                                    }
-                                    className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                  >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                  </button>
-                                ) : (
-                                  " "
-                                )}
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject.showSendButton ? (
-                                  <div className="flex flex-col gap-y-0.5">
-                                    <span className="text-nowrap text-red-600 font-bold">{`${subject.count}`}</span>
-                                    <span className="text-bule-600 text-nowrap font-medium ">{`SMS Pending`}</span>
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                  {subject.publish === "Y" ? (
                                     <button
-                                      className=" flex felx-row items-center justify-center p-2 gap-x-1 bg-blue-500 text-nowrap hover:bg-blue-600 text-white font-medium rounded-md"
-                                      //  onClick={() => handleEdit(subject)}
-                                      onClick={() => handleSend(subject.unq_id)}
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                      onClick={() => handleView(subject)}
                                     >
-                                      Send <IoMdSend />
+                                      <MdOutlineRemoveRedEye className="font-bold text-xl" />
                                     </button>
-                                  </div>
-                                ) : (
-                                  " "
-                                )}
+                                  ) : (
+                                    <button
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                      onClick={() => handleEdit(subject)}
+                                    >
+                                      <FontAwesomeIcon icon={faEdit} />
+                                    </button>
+                                  )}
+                                </td>
 
-                                {subject.publish === "N" ? (
-                                  <button
-                                    onClick={() => handlePublish(subject)}
-                                    className="text-green-500 hover:text-green-700 hover:bg-transparent"
-                                  >
-                                    <FaCheck icon={faTrash} />
-                                  </button>
-                                ) : (
-                                  " "
-                                )}
-                              </td>
-                            </tr>
-                          ))}
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.publish === "N" ? (
+                                    <button
+                                      onClick={() =>
+                                        handleDelete(subject?.unq_id)
+                                      }
+                                      className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                    >
+                                      <FontAwesomeIcon icon={faTrash} />
+                                    </button>
+                                  ) : (
+                                    " "
+                                  )}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.showSendButton ? (
+                                    <div className="flex flex-col gap-y-0.5">
+                                      <span className="text-nowrap text-red-600 font-bold">{`${subject.count}`}</span>
+                                      <span className="text-bule-600 text-nowrap font-medium ">{`SMS Pending`}</span>
+                                      <button
+                                        className=" flex felx-row items-center justify-center p-2 gap-x-1 bg-blue-500 text-nowrap hover:bg-blue-600 text-white font-medium rounded-md"
+                                        //  onClick={() => handleEdit(subject)}
+                                        onClick={() =>
+                                          handleSend(subject.unq_id)
+                                        }
+                                      >
+                                        Send <IoMdSend />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    " "
+                                  )}
+
+                                  {subject.publish === "N" ? (
+                                    <button
+                                      onClick={() => handlePublish(subject)}
+                                      className="text-green-500 hover:text-green-700 hover:bg-transparent"
+                                    >
+                                      <FaCheck icon={faTrash} />
+                                    </button>
+                                  ) : (
+                                    " "
+                                  )}
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                              <div className=" text-center text-xl text-red-700">
+                                Oops! No data found..
+                              </div>
+                            </div>
+                          )}
                         </tbody>
                       </table>
                     </div>

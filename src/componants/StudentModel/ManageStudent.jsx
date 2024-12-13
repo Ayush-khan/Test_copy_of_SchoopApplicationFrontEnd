@@ -17,6 +17,7 @@ function ManageSubjectList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [classes, setClasses] = useState([]);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
@@ -137,9 +138,12 @@ function ManageSubjectList() {
   };
 
   const handleSearch = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     if (!classIdForManage && !selectedStudentId && !grNumber) {
       setNameError("Please select at least one of them.");
       toast.error("Please select at least one of them!");
+      setIsSubmitting(false);
       return;
     }
     setLoading(true);
@@ -170,6 +174,7 @@ function ManageSubjectList() {
       toast.error("Error fetching student details.");
     } finally {
       setLoading(false);
+      setIsSubmitting(false);
     }
   };
   // for role_id
@@ -248,6 +253,8 @@ function ManageSubjectList() {
   };
 
   const handleActivateOrNot = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -285,8 +292,10 @@ function ManageSubjectList() {
         toast.error(`Error activate or deactivate Student: ${error.message}`);
       }
       console.error("Error activate or deactivate Student:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDActiveModal(false);
     }
-    setShowDActiveModal(false);
   };
 
   const handleView = (subjectIsPassForView) => {
@@ -350,6 +359,8 @@ function ManageSubjectList() {
   const [errorMessage, setErrorMessage] = useState(""); // State to store error message
 
   const handleSubmitResetPassword = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -391,6 +402,8 @@ function ManageSubjectList() {
         setErrorMessage("Failed to update password. Please try again.");
         toast.error("Failed to update password. Please try again.");
       }
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -398,6 +411,7 @@ function ManageSubjectList() {
 
   // Handle input change for User ID
   const handleUserIdChange = (e) => {
+    setErrorMessage(""); // Clear previous error message
     setUserIdset(e.target.value);
   };
 
@@ -409,6 +423,8 @@ function ManageSubjectList() {
   // };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     // Handle delete submission logic
     try {
       const token = localStorage.getItem("authToken");
@@ -453,8 +469,10 @@ function ManageSubjectList() {
       }
       console.error("Error deleting Student:", error);
       // setError(error.message);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDeleteModal(false);
     }
-    setShowDeleteModal(false);
   };
 
   const handleCloseModal = () => {
@@ -464,19 +482,41 @@ function ManageSubjectList() {
     setShowDActiveModal(false);
   };
 
+  // const filteredSections = subjects.filter((section) => {
+  //   // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
+  //   const studentFullName =
+  //     `${section?.first_name} ${section?.mid_name} ${section?.last_name}`?.toLowerCase() ||
+  //     "";
+  //   const UserId = section?.user?.user_id?.toLowerCase() || "";
+
+  //   // Check if the search term is present in either the teacher's name or the subject's name
+  //   return (
+  //     studentFullName.includes(searchTerm.toLowerCase()) ||
+  //     UserId.includes(searchTerm.toLowerCase())
+  //   );
+  // });
+
   const filteredSections = subjects.filter((section) => {
-    // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
-    const studentFullName =
+    // Convert the search term to lowercase for case-insensitive comparison
+    const searchLower = searchTerm.toLowerCase();
+
+    // Get the student's full name, class name, and user ID for filtering
+    const studentName =
       `${section?.first_name} ${section?.mid_name} ${section?.last_name}`?.toLowerCase() ||
       "";
-    const UserId = section?.user?.user_id?.toLowerCase() || "";
+    const studentClass = section?.get_class?.name?.toLowerCase() || "";
+    const studentUserId = section?.user_master?.user_id?.toLowerCase() || "";
+    const studentRollNo = section?.roll_no?.toString().toLowerCase() || ""; // Convert roll number to string for comparison
 
-    // Check if the search term is present in either the teacher's name or the subject's name
+    // Check if the search term is present in Roll No, Name, Class, or UserId
     return (
-      studentFullName.includes(searchTerm.toLowerCase()) ||
-      UserId.includes(searchTerm.toLowerCase())
+      studentRollNo.includes(searchLower) ||
+      studentName.includes(searchLower) ||
+      studentClass.includes(searchLower) ||
+      studentUserId.includes(searchLower)
     );
   });
+
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -595,9 +635,10 @@ function ManageSubjectList() {
                   <button
                     onClick={handleSearch}
                     type="button"
+                    disabled={isSubmitting}
                     className=" my-1 md:my-4 btn h-10  w-18 md:w-auto btn-primary "
                   >
-                    Search
+                    {isSubmitting ? "Searching..." : "Search"}
                   </button>
                 </div>
               </div>
@@ -631,7 +672,7 @@ function ManageSubjectList() {
                         <thead>
                           <tr className="bg-gray-100">
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              S.No
+                              Sr.No
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Roll No
@@ -677,131 +718,141 @@ function ManageSubjectList() {
                           </tr>
                         </thead>
                         <tbody>
-                          {displayedSections.map((subject, index) => (
-                            <tr key={subject.student_id} className="text-sm ">
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {index + 1}
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.roll_no}
-                              </td>
-                              {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                          {displayedSections.length ? (
+                            displayedSections.map((subject, index) => (
+                              <tr key={subject.student_id} className="text-sm ">
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {currentPage * pageSize + index + 1}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.roll_no}
+                                </td>
+                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {subject?.photo}
                               </td>{" "} */}
-                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
-                                {console.log(
-                                  "the teacher image",
-                                  `${subject?.image_url}`
-                                )}
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
+                                  {console.log(
+                                    "the teacher image",
+                                    `${subject?.image_url}`
+                                  )}
 
-                                <img
-                                  src={
-                                    subject?.image_name
-                                      ? `${subject?.image_name}`
-                                      : "https://via.placeholder.com/50"
-                                  }
-                                  alt={subject?.name}
-                                  className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
-                                />
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {`${subject?.first_name ?? ""} ${
-                                  subject?.mid_name
-                                    ? subject.mid_name + " "
-                                    : ""
-                                }${subject?.last_name ?? ""}`.trim()}
-                              </td>
+                                  <img
+                                    src={
+                                      subject?.image_name
+                                        ? `${subject?.image_name}`
+                                        : "https://via.placeholder.com/50"
+                                    }
+                                    alt={subject?.name}
+                                    className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
+                                  />
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {`${subject?.first_name ?? ""} ${
+                                    subject?.mid_name
+                                      ? subject.mid_name + " "
+                                      : ""
+                                  }${subject?.last_name ?? ""}`.trim()}
+                                </td>
 
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
-                                {`${subject?.get_class?.name}${" "}${
-                                  subject?.get_division?.name
-                                }`}
-                              </td>
-                              {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
+                                  {`${subject?.get_class?.name}${" "}${
+                                    subject?.get_division?.name
+                                  }`}
+                                </td>
+                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {subject?.get_division?.name}
                               </td> */}
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.user_master?.user_id}
-                              </td>
-                              {(roleId === "A" || roleId === "M") && (
-                                <>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    <button
-                                      onClick={() => handleEdit(subject)}
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                    >
-                                      <FontAwesomeIcon icon={faEdit} />
-                                    </button>
-                                  </td>
-                                  {subject.isPromoted !== "Y" ? (
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.user_master?.user_id}
+                                </td>
+                                {(roleId === "A" || roleId === "M") && (
+                                  <>
                                     <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                       <button
-                                        onClick={() => handleDelete(subject)}
-                                        className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                        onClick={() => handleEdit(subject)}
+                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                                       >
-                                        <FontAwesomeIcon icon={faTrash} />
+                                        <FontAwesomeIcon icon={faEdit} />
                                       </button>
                                     </td>
-                                  ) : (
-                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject.isPromoted !== "Y" ? (
+                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                        <button
+                                          onClick={() => handleDelete(subject)}
+                                          className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                        >
+                                          <FontAwesomeIcon icon={faTrash} />
+                                        </button>
+                                      </td>
+                                    ) : (
+                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                        <button
+                                          // onClick={() => ()}
+                                          className="text-green-500-600 hover:text-green-800 hover:bg-transparent "
+                                        >
+                                          {/* <FontAwesomeIcon icon={faTrash} /> */}
+                                        </button>
+                                      </td>
+                                    )}
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
                                       <button
-                                        // onClick={() => ()}
-                                        className="text-green-500-600 hover:text-green-800 hover:bg-transparent "
+                                        onClick={() =>
+                                          handleActiveAndInactive(subject)
+                                        }
+                                        className={`  font-bold hover:bg-none ${
+                                          subject.isActive === "Y"
+                                            ? "text-green-600 hover:text-green-800 hover:bg-transparent"
+                                            : "text-red-700 hover:text-red-900  hover:bg-transparent"
+                                        }`}
                                       >
-                                        {/* <FontAwesomeIcon icon={faTrash} /> */}
+                                        {subject.isActive === "Y" ? (
+                                          <FaCheck className="text-xl" />
+                                        ) : (
+                                          <FontAwesomeIcon
+                                            icon={faXmark}
+                                            className="text-xl"
+                                          />
+                                        )}
                                       </button>
                                     </td>
-                                  )}
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
-                                    <button
-                                      onClick={() =>
-                                        handleActiveAndInactive(subject)
-                                      }
-                                      className={`  font-bold hover:bg-none ${
-                                        subject.isActive === "Y"
-                                          ? "text-green-600 hover:text-green-800 hover:bg-transparent"
-                                          : "text-red-700 hover:text-red-900  hover:bg-transparent"
-                                      }`}
-                                    >
-                                      {subject.isActive === "Y" ? (
-                                        <FaCheck className="text-xl" />
-                                      ) : (
-                                        <FontAwesomeIcon
-                                          icon={faXmark}
-                                          className="text-xl"
-                                        />
-                                      )}
-                                    </button>
-                                  </td>
-                                </>
-                              )}
+                                  </>
+                                )}
 
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                <button
-                                  onClick={() => handleView(subject)}
-                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                >
-                                  <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                                </button>
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                <button
-                                  onClick={() => handleCertificateView(subject)}
-                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                >
-                                  <TbFileCertificate className="font-bold text-xl" />
-                                </button>
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                <button
-                                  onClick={() => handleResetPassword(subject)}
-                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                >
-                                  <MdLockReset className="font-bold text-xl" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  <button
+                                    onClick={() => handleView(subject)}
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                  >
+                                    <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                                  </button>
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  <button
+                                    onClick={() =>
+                                      handleCertificateView(subject)
+                                    }
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                  >
+                                    <TbFileCertificate className="font-bold text-xl" />
+                                  </button>
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  <button
+                                    onClick={() => handleResetPassword(subject)}
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                  >
+                                    <MdLockReset className="font-bold text-xl" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                              <div className=" text-center text-xl text-red-700">
+                                Oops! No data found..
+                              </div>
+                            </div>
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -868,8 +919,9 @@ function ManageSubjectList() {
                     type="button"
                     className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>
@@ -943,8 +995,9 @@ function ManageSubjectList() {
                     type="button"
                     className="btn btn-primary px-3 mb-2"
                     onClick={handleSubmitResetPassword}
+                    disabled={isSubmitting}
                   >
-                    Reset
+                    {isSubmitting ? "Reseting..." : "Reset"}
                   </button>
                 </div>
               </div>
@@ -989,8 +1042,9 @@ function ManageSubjectList() {
                     type="button"
                     className="btn btn-primary px-3 mb-2"
                     onClick={handleActivateOrNot}
+                    disabled={isSubmitting}
                   >
-                    Active
+                    {isSubmitting ? "Activating..." : "Active"}
                   </button>
                 </div>
               </div>

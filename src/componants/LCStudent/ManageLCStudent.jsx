@@ -224,6 +224,7 @@ function ManageLCStudent() {
       console.error("Error deleting LC Student :", error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDeleteModal(false); // Close the modal
     }
   };
 
@@ -360,7 +361,7 @@ function ManageLCStudent() {
                         <thead>
                           <tr className="bg-gray-200">
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              S.No
+                              Sr.No
                             </th>{" "}
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               LC No
@@ -386,84 +387,92 @@ function ManageLCStudent() {
                           </tr>
                         </thead>
                         <tbody>
-                          {displayedSections.map((subject, index) => {
-                            // Determine the status text and button visibility based on conditions
+                          {displayedSections.length ? (
+                            displayedSections.map((subject, index) => {
+                              // Determine the status text and button visibility based on conditions
 
-                            let showDeleteButton = subject.IsDelete === "N"; // Show delete button if IsDelete is "N"
+                              let showDeleteButton = subject.IsDelete === "N"; // Show delete button if IsDelete is "N"
 
-                            return (
-                              <tr
-                                key={subject.sr_no}
-                                className=" text-sm font-light"
-                              >
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {index + 1}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.slc_no}
-                                </td>
-                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
-                                  {console.log(
-                                    "the teacher image",
-                                    `${subject?.image_name}`
-                                  )}
+                              return (
+                                <tr
+                                  key={subject.sr_no}
+                                  className=" text-sm font-light"
+                                >
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {currentPage * pageSize + index + 1}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject.slc_no}
+                                  </td>
+                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
+                                    {console.log(
+                                      "the teacher image",
+                                      `${subject?.image_name}`
+                                    )}
 
-                                  <img
-                                    src={
-                                      subject?.image_name
-                                        ? `${subject?.image_name}`
-                                        : "https://via.placeholder.com/50"
-                                    }
-                                    alt={subject?.name}
-                                    className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
-                                  />
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {`${subject?.first_name || ""} ${
-                                    subject?.mid_name || ""
-                                  } ${subject?.last_name || ""}`
-                                    .trim()
-                                    .replace(/\s+/g, " ")}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.classname}
-                                  {subject?.sectionname}
-                                </td>
-
-                                {/* Delete button */}
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {showDeleteButton && (
-                                    <button
-                                      onClick={() =>
-                                        handleDelete(subject?.student_id)
+                                    <img
+                                      src={
+                                        subject?.image_name
+                                          ? `${subject?.image_name}`
+                                          : "https://via.placeholder.com/50"
                                       }
-                                      className="text-red-600 hover:text-red-800 hover:bg-transparent"
-                                    >
-                                      <FontAwesomeIcon icon={faTrash} />
-                                    </button>
-                                  )}
-                                </td>
+                                      alt={subject?.name}
+                                      className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
+                                    />
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {`${subject?.first_name || ""} ${
+                                      subject?.mid_name || ""
+                                    } ${subject?.last_name || ""}`
+                                      .trim()
+                                      .replace(/\s+/g, " ")}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.classname}
+                                    {subject?.sectionname}
+                                  </td>
 
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  <button
-                                    onClick={() => handleEdit(subject)}
-                                    className="text-blue-500 hover:text-blue-600 hover:bg-transparent "
-                                  >
-                                    <MdDescription className="font-bold text-xl" />
-                                  </button>
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  <button
-                                    onClick={() => handleView(subject)}
-                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                  >
-                                    <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
+                                  {/* Delete button */}
+
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {showDeleteButton && (
+                                      <button
+                                        onClick={() =>
+                                          handleDelete(subject?.student_id)
+                                        }
+                                        className="text-red-600 hover:text-red-800 hover:bg-transparent"
+                                      >
+                                        <FontAwesomeIcon icon={faTrash} />
+                                      </button>
+                                    )}
+                                  </td>
+
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    <button
+                                      onClick={() => handleEdit(subject)}
+                                      className="text-blue-500 hover:text-blue-600 hover:bg-transparent "
+                                    >
+                                      <MdDescription className="font-bold text-xl" />
+                                    </button>
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    <button
+                                      onClick={() => handleView(subject)}
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                    >
+                                      <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          ) : (
+                            <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                              <div className=" text-center text-xl text-red-700">
+                                Oops! No data found..
+                              </div>
+                            </div>
+                          )}
                         </tbody>
                       </table>
                     </div>

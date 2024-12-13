@@ -1340,8 +1340,9 @@ function ManageSubjectList() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleClassSelect = (selectedOption) => {
+    setNameError("");
     setSelectedClass(selectedOption);
-    setclassIdForManage(selectedOption.value); // Assuming value is the class ID
+    setclassIdForManage(selectedOption ? selectedOption.value : null); // Assuming value is the class ID
   };
 
   const teacherOptions = departments.map((dept) => ({
@@ -2142,7 +2143,7 @@ function ManageSubjectList() {
               <ToastContainer />
               <div className="mb-4">
                 <div className="md:w-[80%] mx-auto">
-                  <div className="form-group mt-4 w-full md:w-[80%] flex justify-start gap-x-1 md:gap-x-6">
+                  <div className="form-group mt-6 md:mt-10 w-full md:w-[80%] flex justify-start gap-x-1 md:gap-x-6">
                     <label
                       htmlFor="classSection"
                       className="w-1/4 pt-2 items-center text-center"
@@ -2176,122 +2177,140 @@ function ManageSubjectList() {
                   </div>
                 </div>
               </div>
-
-              <div className="container mt-4">
-                <div className="card mx-auto lg:w-full shadow-lg">
-                  <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                    <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                      Manage Subjects List
-                    </h3>
-                    <div className="w-1/2 md:w-fit mr-1 ">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search "
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
+              {subjects.length > 0 && (
+                <div className="container mt-4">
+                  <div className="card mx-auto lg:w-full shadow-lg">
+                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                      <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                        Manage Subjects List
+                      </h3>
+                      <div className="w-1/2 md:w-fit mr-1 ">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Search "
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                    style={{
-                      backgroundColor: "#C03078",
-                    }}
-                  ></div>
+                    <div
+                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+                      style={{
+                        backgroundColor: "#C03078",
+                      }}
+                    ></div>
 
-                  <div className="card-body w-full">
-                    <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-                      <table className="min-w-full leading-normal table-auto">
-                        <thead>
-                          <tr className="bg-gray-200">
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              S.No
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Class
-                            </th>
-                            {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                    <div className="card-body w-full">
+                      <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+                        <table className="min-w-full leading-normal table-auto">
+                          <thead>
+                            <tr className="bg-gray-200">
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Sr.No
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Class
+                              </th>
+                              {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Division
                               </th> */}
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Subject
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Teacher
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Edit
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Delete
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {displayedSections.map((subject, index) => (
-                            <tr key={subject?.subject_id} className=" text-sm ">
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {currentPage * pageSize + index + 1}
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {`${subject?.get_class?.name} ${subject?.get_division?.name}`}
-                              </td>
-                              {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Subject
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Teacher
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Edit
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Delete
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {isSubmitting ? (
+                              <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                <div className=" text-center text-xl text-blue-700">
+                                  Please wait while data is loading...
+                                </div>
+                              </div>
+                            ) : displayedSections.length ? (
+                              displayedSections.map((subject, index) => (
+                                <tr
+                                  key={subject?.subject_id}
+                                  className=" text-sm "
+                                >
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {currentPage * pageSize + index + 1}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {`${subject?.get_class?.name} ${subject?.get_division?.name}`}
+                                  </td>
+                                  {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.get_division?.name}
                                 </td> */}
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.get_subject?.name}
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.get_teacher?.name}
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                <button
-                                  onClick={() => handleEdit(subject)}
-                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                >
-                                  <FontAwesomeIcon icon={faEdit} />
-                                </button>
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                <button
-                                  onClick={() =>
-                                    handleDelete(subject?.subject_id)
-                                  }
-                                  className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                >
-                                  <FontAwesomeIcon icon={faTrash} />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div className=" flex justify-center pt-2 -mb-3">
-                      <ReactPaginate
-                        previousLabel={"Previous"}
-                        nextLabel={"Next"}
-                        breakLabel={"..."}
-                        pageCount={pageCount}
-                        onPageChange={handlePageClick}
-                        marginPagesDisplayed={1}
-                        pageRangeDisplayed={1}
-                        containerClassName={"pagination"}
-                        pageClassName={"page-item"}
-                        pageLinkClassName={"page-link"}
-                        previousClassName={"page-item"}
-                        previousLinkClassName={"page-link"}
-                        nextClassName={"page-item"}
-                        nextLinkClassName={"page-link"}
-                        breakClassName={"page-item"}
-                        breakLinkClassName={"page-link"}
-                        activeClassName={"active"}
-                      />
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.get_subject?.name}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.get_teacher?.name}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    <button
+                                      onClick={() => handleEdit(subject)}
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                    >
+                                      <FontAwesomeIcon icon={faEdit} />
+                                    </button>
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    <button
+                                      onClick={() =>
+                                        handleDelete(subject?.subject_id)
+                                      }
+                                      className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                    >
+                                      <FontAwesomeIcon icon={faTrash} />
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                <div className=" text-center text-xl text-red-700">
+                                  Oops! No data found..
+                                </div>
+                              </div>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className=" flex justify-center pt-2 -mb-3">
+                        <ReactPaginate
+                          previousLabel={"Previous"}
+                          nextLabel={"Next"}
+                          breakLabel={"..."}
+                          pageCount={pageCount}
+                          onPageChange={handlePageClick}
+                          marginPagesDisplayed={1}
+                          pageRangeDisplayed={1}
+                          containerClassName={"pagination"}
+                          pageClassName={"page-item"}
+                          pageLinkClassName={"page-link"}
+                          previousClassName={"page-item"}
+                          previousLinkClassName={"page-link"}
+                          nextClassName={"page-item"}
+                          nextLinkClassName={"page-link"}
+                          breakClassName={"page-item"}
+                          breakLinkClassName={"page-link"}
+                          activeClassName={"active"}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 

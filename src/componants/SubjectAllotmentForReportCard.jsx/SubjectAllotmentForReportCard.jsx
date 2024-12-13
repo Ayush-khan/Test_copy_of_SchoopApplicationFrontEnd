@@ -515,7 +515,7 @@ function SubjectAllotmentForReportCard() {
                           <thead>
                             <tr className="bg-gray-200">
                               <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                S.No
+                                Sr.No
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Class
@@ -538,46 +538,57 @@ function SubjectAllotmentForReportCard() {
                             </tr>
                           </thead>
                           <tbody>
-                            {displayedSections.map((subject, index) => (
-                              <tr
-                                key={subject.sub_rc_master_id}
-                                className=" text-sm "
-                              >
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {currentPage * pageSize + index + 1}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_clases?.name}
-                                </td>
-                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                            {displayedSections.length ? (
+                              displayedSections.map((subject, index) => (
+                                <tr
+                                  key={subject.sub_rc_master_id}
+                                  className=" text-sm "
+                                >
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {currentPage * pageSize + index + 1}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.get_clases?.name}
+                                  </td>
+                                  {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.get_division?.name}
                                 </td> */}
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_subjects_for_report_card?.name}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.subject_type}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  <button
-                                    onClick={() => handleEdit(subject)}
-                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                  >
-                                    <FontAwesomeIcon icon={faEdit} />
-                                  </button>
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  <button
-                                    onClick={() =>
-                                      handleDelete(subject?.sub_reportcard_id)
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {
+                                      subject?.get_subjects_for_report_card
+                                        ?.name
                                     }
-                                    className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                  >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.subject_type}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    <button
+                                      onClick={() => handleEdit(subject)}
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                    >
+                                      <FontAwesomeIcon icon={faEdit} />
+                                    </button>
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    <button
+                                      onClick={() =>
+                                        handleDelete(subject?.sub_reportcard_id)
+                                      }
+                                      className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                    >
+                                      <FontAwesomeIcon icon={faTrash} />
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                <div className=" text-center text-xl text-red-700">
+                                  Oops! No data found..
+                                </div>
+                              </div>
+                            )}
                           </tbody>
                         </table>
                       </div>

@@ -464,7 +464,7 @@ function AllotMarksHeading() {
                           <thead>
                             <tr className="bg-gray-200">
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                S.No
+                                Sr.No
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Class
@@ -491,53 +491,61 @@ function AllotMarksHeading() {
                             </tr>
                           </thead>
                           <tbody>
-                            {displayedSections.map((subject, index) => (
-                              <tr
-                                key={subject.allot_markheadings_id}
-                                className="text-sm "
-                              >
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {currentPage * pageSize + index + 1}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_class?.name}
-                                </td>
+                            {displayedSections.length ? (
+                              displayedSections.map((subject, index) => (
+                                <tr
+                                  key={subject.allot_markheadings_id}
+                                  className="text-sm "
+                                >
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {currentPage * pageSize + index + 1}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.get_class?.name}
+                                  </td>
 
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_subject?.name}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_exam?.name}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.get_marksheading?.name}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.highest_marks}
-                                </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.get_subject?.name}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.get_exam?.name}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.get_marksheading?.name}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.highest_marks}
+                                  </td>
 
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  <button
-                                    onClick={() => handleEdit(subject)}
-                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                  >
-                                    <FontAwesomeIcon icon={faEdit} />
-                                  </button>
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  <button
-                                    onClick={() =>
-                                      handleDelete(
-                                        subject?.allot_markheadings_id
-                                      )
-                                    }
-                                    className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                  >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    <button
+                                      onClick={() => handleEdit(subject)}
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                    >
+                                      <FontAwesomeIcon icon={faEdit} />
+                                    </button>
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    <button
+                                      onClick={() =>
+                                        handleDelete(
+                                          subject?.allot_markheadings_id
+                                        )
+                                      }
+                                      className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                    >
+                                      <FontAwesomeIcon icon={faTrash} />
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                <div className=" text-center text-xl text-red-700">
+                                  Oops! No data found..
+                                </div>
+                              </div>
+                            )}
                           </tbody>
                         </table>
                       </div>
