@@ -153,7 +153,7 @@ function CareTacker() {
   return (
     <>
       <ToastContainer />
-      <div className="container md:mt-4">
+      <div className="w-full md:w-[77%] mx-auto  md:mt-4">
         <div className="card mx-auto lg:w-full shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
@@ -184,8 +184,8 @@ function CareTacker() {
             }}
           ></div>
 
-          <div className="card-body w-full box-border">
-            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+          <div className="card-body  w-full box-border">
+            <div className="h-96 lg:h-96 overflow-y-scroll  lg:overflow-x-hidden">
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>

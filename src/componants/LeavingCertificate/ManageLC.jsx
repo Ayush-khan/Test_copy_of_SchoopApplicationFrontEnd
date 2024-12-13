@@ -489,7 +489,7 @@ function ManageLC() {
               </div>
 
               {subjects.length > 0 && (
-                <div className="container mt-4">
+                <div className="w-full md:w-[85%] mx-auto mt-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
@@ -511,12 +511,12 @@ function ManageLC() {
                       }}
                     ></div>
 
-                    <div className="card-body w-full">
+                    <div className="card-body   w-full">
                       <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
                         <table className="min-w-full leading-normal table-auto">
                           <thead>
                             <tr className="bg-gray-200">
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Sr.No
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -532,16 +532,16 @@ function ManageLC() {
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Status
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Download
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Edit
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Delete
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Issue
                               </th>
                             </tr>

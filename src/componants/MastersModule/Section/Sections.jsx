@@ -476,7 +476,7 @@ function Sections() {
           <div className="card-body w-full">
             <div className="h-96 lg:h-96 overflow-y-auto lg:overflow-x-hidden">
               {" "}
-              <div className="bg-white rounded-lg shadow-xs  w-[80%] mx-auto">
+              <div className="bg-white rounded-lg shadow-xs  w-full md:w-[80%] mx-auto">
                 <table className="min-w-full  leading-normal table-auto">
                   <thead>
                     <tr className="bg-gray-200">

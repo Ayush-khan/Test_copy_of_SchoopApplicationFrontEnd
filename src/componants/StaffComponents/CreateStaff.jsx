@@ -26,7 +26,7 @@
 //     email: "",
 //     aadhar_card_no: "",
 //     role: "",
-//     employeeId: "",
+//     employee_id: "",
 //     teacher_image_name: null,
 
 //     special_sub: "",
@@ -51,7 +51,7 @@
 //     if (!/\S+@\S+\.\S+/.test(formData.email))
 //       newErrors.email = "Email address is invalid";
 //     if (!formData.role) newErrors.role = "Role is required";
-//     if (!formData.employeeId) newErrors.employeeId = "Employee ID is required";
+//     if (!formData.employee_id) newErrors.employee_id = "Employee ID is required";
 //     if (formData.academic_qual.length === 0)
 //       newErrors.academic_qual =
 //         "Please select at least one academic qualification";
@@ -735,7 +735,7 @@
 //             </div> */}
 //             <div>
 //               <label
-//                 htmlFor="employeeId"
+//                 htmlFor="employee_id"
 //                 className="block font-bold  text-xs mb-2"
 //               >
 //                 Employee ID <span className="text-red-500">*</span>
@@ -743,16 +743,16 @@
 //               <input
 //                 type="tel"
 //                 maxLength={5}
-//                 id="employeeId"
-//                 name="employeeId"
-//                 value={formData.employeeId}
+//                 id="employee_id"
+//                 name="employee_id"
+//                 value={formData.employee_id}
 //                 onChange={handleChange}
 //                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
 //                 required
 //               />
-//               {errors.employeeId && (
+//               {errors.employee_id && (
 //                 <span className="text-red-500 text-xs">
-//                   {errors.employeeId}
+//                   {errors.employee_id}
 //                 </span>
 //               )}
 //             </div>
@@ -823,7 +823,7 @@
 //     email: "",
 //     aadhar_card_no: "",
 //     role: "",
-//     employeeId: "",
+//     employee_id: "",
 //     teacher_image_name: null,
 
 //     special_sub: "",
@@ -868,7 +868,7 @@
 //     if (!formData.role) newErrors.role = "Role is required";
 
 //     // Validate employee ID
-//     if (!formData.employeeId) newErrors.employeeId = "Employee ID is required";
+//     if (!formData.employee_id) newErrors.employee_id = "Employee ID is required";
 
 //     // Validate experience
 //     if (!formData.experience) newErrors.experience = "Experience is required";
@@ -1584,7 +1584,7 @@
 //             </div> */}
 //             <div>
 //               <label
-//                 htmlFor="employeeId"
+//                 htmlFor="employee_id"
 //                 className="block font-bold  text-xs mb-2"
 //               >
 //                 Employee ID <span className="text-red-500">*</span>
@@ -1592,16 +1592,16 @@
 //               <input
 //                 type="tel"
 //                 maxLength={5}
-//                 id="employeeId"
-//                 name="employeeId"
-//                 value={formData.employeeId}
+//                 id="employee_id"
+//                 name="employee_id"
+//                 value={formData.employee_id}
 //                 onChange={handleChange}
 //                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
 //                 required
 //               />
-//               {errors.employeeId && (
+//               {errors.employee_id && (
 //                 <span className="text-red-500 text-xs">
-//                   {errors.employeeId}
+//                   {errors.employee_id}
 //                 </span>
 //               )}
 //             </div>
@@ -1670,7 +1670,7 @@ function CreateStaff() {
     email: "",
     aadhar_card_no: "",
     role: "",
-    employeeId: "",
+    employee_id: "",
     teacher_image_name: null,
     special_sub: "",
   });
@@ -2419,7 +2419,7 @@ function CreateStaff() {
             </div> */}
             <div>
               <label
-                htmlFor="employeeId"
+                htmlFor="employee_id"
                 className="block font-bold  text-xs mb-2"
               >
                 Employee ID <span className="text-red-500">*</span>
@@ -2427,16 +2427,16 @@ function CreateStaff() {
               <input
                 type="tel"
                 maxLength={5}
-                id="employeeId"
-                name="employeeId"
-                value={formData.employeeId}
+                id="employee_id"
+                name="employee_id"
+                value={formData.employee_id}
                 onChange={handleChange}
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                 required
               />
-              {errors.employeeId && (
+              {errors.employee_id && (
                 <span className="text-red-500 text-xs">
-                  {errors.employeeId}
+                  {errors.employee_id}
                 </span>
               )}
             </div>
