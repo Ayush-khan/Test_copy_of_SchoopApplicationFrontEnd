@@ -1,540 +1,21 @@
-import React from "react";
-import { NavDropdown, Nav } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import { IoIosHelpCircleOutline } from "react-icons/io";
-// import "./styles.css";
-import "./AdminNavBar.css"; // Attach the CSS file
-
-const AdminNavBar = () => {
-  return (
-    <>
-      {/* Role Dropdown */}
-      <NavDropdown
-        title={
-          <span className="nav-dropdown-title custom-dropdown ">Role</span>
-        }
-        // title="Role"
-        style={{ color: "black", fontWeight: "700" }}
-        className="pr-0 mr-0 w-fit"
-      >
-        <NavDropdown.Item as={Link} to="/roles">
-          Manage Role
-        </NavDropdown.Item>
-        <NavDropdown.Item as={Link} to="/menus">
-          Manage Menu
-        </NavDropdown.Item>
-        <NavDropdown.Item as={Link} to="/show_roles">
-          Manage Access
-        </NavDropdown.Item>
-      </NavDropdown>
-
-      {/* My Actions Dropdown */}
-      <NavDropdown
-        title={<span className="nav-dropdown-title">My Actions</span>}
-        // title="My Actions"
-        style={{ color: "black", fontWeight: "700" }}
-        className="pr-0 mr-0 w-fit"
-      >
-        {/* Students Sub-dropdown */}
-        <NavDropdown
-          className="dropend"
-          id="students-dropdown"
-          title={<span className="nav-dropdown-title">Students</span>}
-          // title="Students"
-          style={{
-            color: "gray",
-            fontWeight: "400",
-            display: "block",
-          }}
-        >
-          <NavDropdown.Item
-            as={Link}
-            to="/newStudentList"
-            className="text-sm font-bold hover:text-black"
-          >
-            New Student List
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            className="text-sm font-bold hover:text-black"
-            as={Link}
-            to="/manageStudent"
-          >
-            Manage Students
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            className="text-sm font-bold hover:text-black"
-            as={Link}
-            to="/manageStudentLC"
-          >
-            LC Students
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            className="text-sm font-bold hover:text-black"
-            as={Link}
-            to="/deleteStudent"
-          >
-            Deleted Students Lists
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            className="text-sm font-bold hover:text-black"
-            as={Link}
-            to="#"
-          >
-            Promote Students
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            className="text-sm font-bold hover:text-black"
-            as={Link}
-            to="#"
-          >
-            Send User Id to Parents
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            className="text-sm font-bold hover:text-black"
-            as={Link}
-            to="#"
-          >
-            Sibling Mapping
-          </NavDropdown.Item>
-          <NavDropdown.Item>Edit Student</NavDropdown.Item>
-          <NavDropdown.Item>Delete Student</NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="/myprofile"
-            className="text-sm font-bold hover:text-black"
-          >
-            User Profile
-          </NavDropdown.Item>
-        </NavDropdown>
-
-        {/* Certificate Sub-dropdown */}
-        <NavDropdown
-          className="dropend pr-0 mr-0"
-          id="certificate-dropdown"
-          // title="Certificate"
-          title={<span className="nav-dropdown-title">Certificate</span>}
-          style={{
-            color: "gray",
-            fontWeight: "400",
-            display: "block",
-          }}
-        >
-          <NavDropdown.Item
-            as={Link}
-            to="/bonafiedCertificates"
-            // to="#"
-            className="text-sm font-bold"
-          >
-            Bonafide Certificate
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            // to="#"
-            to="/castCertificate"
-            className="text-sm font-bold hover:text-black"
-          >
-            Caste Certificate
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="/characterCertificate"
-            className="text-sm font-bold hover:text-black"
-          >
-            Character Certificate
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="/percentageCertificate"
-            className="text-sm font-bold hover:text-black"
-          >
-            Percentage Certificate
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="/simpleBonafied"
-            className="text-sm font-bold hover:text-black"
-          >
-            Simple Bonafide Certificate
-          </NavDropdown.Item>
-        </NavDropdown>
-
-        {/* Staff Sub-dropdown */}
-        <NavDropdown
-          className="dropend pr-0 mr-0"
-          id="staff-dropdown"
-          title={<span className="nav-dropdown-title">Staff</span>}
-          // title=""
-          style={{
-            color: "gray",
-            fontWeight: "400",
-            display: "block",
-          }}
-        >
-          <NavDropdown.Item
-            as={Link}
-            to="/StaffList"
-            className="text-sm font-bold"
-          >
-            Manage Staff
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="/careTacker"
-            // to="#"
-            className="text-sm font-bold hover:text-black"
-          >
-            Manage Caretaker
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="/SubstituteTeacher"
-            className="text-sm font-bold hover:text-black"
-          >
-            Substitute Teacher
-          </NavDropdown.Item>
-        </NavDropdown>
-
-        {/* Leaving Certificate Sub-dropdown */}
-        <NavDropdown.Item
-          as={Link}
-          to="/leavingCertificate"
-          className="text-sm font-bold hover:text-black"
-        >
-          Leaving Certificate
-        </NavDropdown.Item>
-        {/* Leave Sub-dropdown */}
-        <NavDropdown
-          className="dropend pr-0 mr-0"
-          id="leave-dropdown"
-          title={<span className="nav-dropdown-title">Leave</span>}
-          // title=""
-          style={{
-            color: "gray",
-            fontWeight: "400",
-            display: "block",
-          }}
-        >
-          <NavDropdown.Item as={Link} to="#" className="text-sm font-bold">
-            Leave Allocation
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="#"
-            className="text-sm font-bold hover:text-black"
-          >
-            Leave Allocation to All Staff
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="#"
-            className="text-sm font-bold hover:text-black"
-          >
-            Leave Application
-          </NavDropdown.Item>
-        </NavDropdown>
-
-        {/* Other Items */}
-        <NavDropdown.Item
-          as={Link}
-          to="/noticeAndSms"
-          className="text-sm font-bold hover:text-black"
-        >
-          Notice/SMS
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Event
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Holiday List
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="/allotClassTeacher"
-          className="text-sm font-bold hover:text-black"
-        >
-          Allot Class Teachers
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Allot Department Coordinator
-        </NavDropdown.Item>
-      </NavDropdown>
-
-      {/* ID Card Dropdown */}
-      <NavDropdown
-        title={<span className="nav-dropdown-title">ID Card</span>}
-        // title=""
-        style={{ color: "black", fontWeight: "700" }}
-      >
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Student ID Card
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Teacher ID Card
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Pending Student ID Card
-        </NavDropdown.Item>
-      </NavDropdown>
-
-      {/* View Dropdown */}
-
-      <NavDropdown
-        // title=""
-        title={<span className="nav-dropdown-title">View</span>}
-        style={{ color: "black", fontWeight: "700" }}
-      >
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Leaving Certificate
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Notices/SMS for Staff
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Book Availability
-        </NavDropdown.Item>
-      </NavDropdown>
-
-      {/* Reports Dropdown */}
-      <NavDropdown
-        // title=""
-        title={<span className="nav-dropdown-title">Reports</span>}
-        style={{ color: "black", fontWeight: "700" }}
-      >
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Balance Leave
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Consolidated Leave
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Student Report
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Student Contact Details Report
-        </NavDropdown.Item>
-      </NavDropdown>
-
-      {/* Ticket Dropdown */}
-      <NavDropdown
-        // title=""
-        title={<span className="nav-dropdown-title">Ticket</span>}
-        style={{ color: "black", fontWeight: "700" }}
-      >
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          T1
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          T2
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          T3
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          T4
-        </NavDropdown.Item>
-      </NavDropdown>
-
-      {/* Masters Dropdown */}
-      <NavDropdown
-        // title=""
-        title={<span className="nav-dropdown-title">Masters</span>}
-        style={{ color: "black", fontWeight: "700" }}
-      >
-        <NavDropdown.Item
-          as={Link}
-          to="/sections"
-          className="text-sm font-bold hover:text-black"
-        >
-          Section
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="/classlist"
-          className="text-sm font-bold hover:text-black"
-        >
-          Class
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="/divisionlist"
-          className="text-sm font-bold hover:text-black"
-        >
-          Division
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="/subjectlist"
-          className="text-sm font-bold hover:text-black"
-        >
-          Subjects
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="/managesubject"
-          className="text-sm font-bold hover:text-black"
-        >
-          Subjects Allotment
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          StudentWise Subject Allotment for HSC
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="/subjectforReportcard"
-          className="text-sm font-bold hover:text-black"
-        >
-          Subject for Report Card
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="/managesubjectforreportcard"
-          className="text-sm font-bold hover:text-black"
-        >
-          Subject allotment for report card
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="/Exams"
-          className="text-sm font-bold hover:text-black"
-        >
-          Exams
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="/grades"
-          // to="#"
-          className="text-sm font-bold hover:text-black"
-        >
-          Grades
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          // to="/grades"
-          to="/marksHeading"
-          className="text-sm font-bold hover:text-black"
-        >
-          Marks heading
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="/allotMarksHeading"
-          // to="/allotMarksHeading"
-          className="text-sm font-bold hover:text-black"
-        >
-          Allot Marks heading
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="/examTimeTable"
-          // to="/allotMarksHeading"
-          className="text-sm font-bold hover:text-black"
-        >
-          Exam Timetable{" "}
-        </NavDropdown.Item>
-      </NavDropdown>
-
-      {/* Help */}
-      <div
-        onClick={() => {
-          /* navigate(""); */
-        }}
-        style={{ fontWeight: "700", fontSize: "1rem", color: "black" }}
-        className="my-auto text-gray-600 cursor-pointer hover:text-gray-900 md:relative left-2"
-      >
-        <IoIosHelpCircleOutline className="inline mr-1 relative bottom-0.5 hover:text-black " />
-        Help
-      </div>
-    </>
-  );
-};
-
-export default AdminNavBar;
-
-// working
-// import { NavDropdown } from "react-bootstrap";
+// import React from "react";
+// import { NavDropdown, Nav } from "react-bootstrap";
 // import { Link } from "react-router-dom";
-// import "./AdminNavBar.css"; // Attach the CSS file
 // import { IoIosHelpCircleOutline } from "react-icons/io";
+// // import "./styles.css";
+// import "./AdminNavBar.css"; // Attach the CSS file
 
 // const AdminNavBar = () => {
 //   return (
 //     <>
 //       {/* Role Dropdown */}
 //       <NavDropdown
-//         title={<span className="nav-dropdown-title">Role</span>}
-//         className="custom-nav-dropdown"
+//         title={
+//           <span className="nav-dropdown-title custom-dropdown ">Role</span>
+//         }
+//         // title="Role"
+//         style={{ color: "black", fontWeight: "700" }}
+//         className="pr-0 mr-0 w-fit"
 //       >
 //         <NavDropdown.Item as={Link} to="/roles">
 //           Manage Role
@@ -550,122 +31,250 @@ export default AdminNavBar;
 //       {/* My Actions Dropdown */}
 //       <NavDropdown
 //         title={<span className="nav-dropdown-title">My Actions</span>}
-//         className="custom-nav-dropdown"
+//         // title="My Actions"
+//         style={{ color: "black", fontWeight: "700" }}
+//         className="pr-0 mr-0 w-fit"
 //       >
 //         {/* Students Sub-dropdown */}
 //         <NavDropdown
-//           title={<span className="nav-dropdown-titleSubUnder">Students</span>}
-//           // style={{ display:"flex", flexDirection:"row", justifyContent:"space-between",border:"2px solid green",color: "green", fontWeight: "900" }}
-
-//           className="dropend custom-submenu"
+//           className="dropend"
+//           id="students-dropdown"
+//           title={<span className="nav-dropdown-title">Students</span>}
+//           // title="Students"
+//           style={{
+//             color: "gray",
+//             fontWeight: "400",
+//             display: "block",
+//           }}
 //         >
-//           <NavDropdown.Item as={Link} to="/newStudentList">
+//           <NavDropdown.Item
+//             as={Link}
+//             to="/newStudentList"
+//             className="text-sm font-bold hover:text-black"
+//           >
 //             New Student List
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="/manageStudent">
+//           <NavDropdown.Item
+//             className="text-sm font-bold hover:text-black"
+//             as={Link}
+//             to="/manageStudent"
+//           >
 //             Manage Students
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="/manageStudentLC">
+//           <NavDropdown.Item
+//             className="text-sm font-bold hover:text-black"
+//             as={Link}
+//             to="/manageStudentLC"
+//           >
 //             LC Students
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="/deleteStudent">
+//           <NavDropdown.Item
+//             className="text-sm font-bold hover:text-black"
+//             as={Link}
+//             to="/deleteStudent"
+//           >
 //             Deleted Students Lists
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="#">
+//           <NavDropdown.Item
+//             className="text-sm font-bold hover:text-black"
+//             as={Link}
+//             to="#"
+//           >
 //             Promote Students
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="#">
+//           <NavDropdown.Item
+//             className="text-sm font-bold hover:text-black"
+//             as={Link}
+//             to="#"
+//           >
 //             Send User Id to Parents
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="#">
+//           <NavDropdown.Item
+//             className="text-sm font-bold hover:text-black"
+//             as={Link}
+//             to="#"
+//           >
 //             Sibling Mapping
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="/myprofile">
+//           <NavDropdown.Item>Edit Student</NavDropdown.Item>
+//           <NavDropdown.Item>Delete Student</NavDropdown.Item>
+//           <NavDropdown.Item
+//             as={Link}
+//             to="/myprofile"
+//             className="text-sm font-bold hover:text-black"
+//           >
 //             User Profile
 //           </NavDropdown.Item>
 //         </NavDropdown>
 
 //         {/* Certificate Sub-dropdown */}
 //         <NavDropdown
-//           title={
-//             <span className="nav-dropdown-titleSubUnder">Certificate</span>
-//           }
-//           className="dropend custom-submenu"
+//           className="dropend pr-0 mr-0"
+//           id="certificate-dropdown"
+//           // title="Certificate"
+//           title={<span className="nav-dropdown-title">Certificate</span>}
+//           style={{
+//             color: "gray",
+//             fontWeight: "400",
+//             display: "block",
+//           }}
 //         >
-//           <NavDropdown.Item as={Link} to="/bonafiedCertificates">
+//           <NavDropdown.Item
+//             as={Link}
+//             to="/bonafiedCertificates"
+//             // to="#"
+//             className="text-sm font-bold"
+//           >
 //             Bonafide Certificate
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="/castCertificate">
+//           <NavDropdown.Item
+//             as={Link}
+//             // to="#"
+//             to="/castCertificate"
+//             className="text-sm font-bold hover:text-black"
+//           >
 //             Caste Certificate
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="/characterCertificate">
+//           <NavDropdown.Item
+//             as={Link}
+//             to="/characterCertificate"
+//             className="text-sm font-bold hover:text-black"
+//           >
 //             Character Certificate
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="/percentageCertificate">
+//           <NavDropdown.Item
+//             as={Link}
+//             to="/percentageCertificate"
+//             className="text-sm font-bold hover:text-black"
+//           >
 //             Percentage Certificate
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="/simpleBonafied">
+//           <NavDropdown.Item
+//             as={Link}
+//             to="/simpleBonafied"
+//             className="text-sm font-bold hover:text-black"
+//           >
 //             Simple Bonafide Certificate
 //           </NavDropdown.Item>
 //         </NavDropdown>
 
 //         {/* Staff Sub-dropdown */}
 //         <NavDropdown
-//           title={<span className="nav-dropdown-titleSubUnder">Staff</span>}
-//           className="dropend custom-submenu"
+//           className="dropend pr-0 mr-0"
+//           id="staff-dropdown"
+//           title={<span className="nav-dropdown-title">Staff</span>}
+//           // title=""
+//           style={{
+//             color: "gray",
+//             fontWeight: "400",
+//             display: "block",
+//           }}
 //         >
-//           <NavDropdown.Item as={Link} to="/StaffList">
+//           <NavDropdown.Item
+//             as={Link}
+//             to="/StaffList"
+//             className="text-sm font-bold"
+//           >
 //             Manage Staff
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="/careTacker">
+//           <NavDropdown.Item
+//             as={Link}
+//             to="/careTacker"
+//             // to="#"
+//             className="text-sm font-bold hover:text-black"
+//           >
 //             Manage Caretaker
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="/SubstituteTeacher">
+//           <NavDropdown.Item
+//             as={Link}
+//             to="/SubstituteTeacher"
+//             className="text-sm font-bold hover:text-black"
+//           >
 //             Substitute Teacher
 //           </NavDropdown.Item>
 //         </NavDropdown>
 
+//         {/* Leaving Certificate Sub-dropdown */}
+//         <NavDropdown.Item
+//           as={Link}
+//           to="/leavingCertificate"
+//           className="text-sm font-bold hover:text-black"
+//         >
+//           Leaving Certificate
+//         </NavDropdown.Item>
 //         {/* Leave Sub-dropdown */}
 //         <NavDropdown
-//           title={<span className="nav-dropdown-titleSubUnder">Leave</span>}
-//           className="dropend custom-submenu"
+//           className="dropend pr-0 mr-0"
+//           id="leave-dropdown"
+//           title={<span className="nav-dropdown-title">Leave</span>}
+//           // title=""
+//           style={{
+//             color: "gray",
+//             fontWeight: "400",
+//             display: "block",
+//           }}
 //         >
-//           <NavDropdown.Item as={Link} to="#">
+//           <NavDropdown.Item as={Link} to="#" className="text-sm font-bold">
 //             Leave Allocation
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="#">
+//           <NavDropdown.Item
+//             as={Link}
+//             to="#"
+//             className="text-sm font-bold hover:text-black"
+//           >
 //             Leave Allocation to All Staff
 //           </NavDropdown.Item>
-//           <NavDropdown.Item as={Link} to="#">
+//           <NavDropdown.Item
+//             as={Link}
+//             to="#"
+//             className="text-sm font-bold hover:text-black"
+//           >
 //             Leave Application
 //           </NavDropdown.Item>
 //         </NavDropdown>
 
 //         {/* Other Items */}
-//         <NavDropdown.Item as={Link} to="/leavingCertificate">
-//           Leaving Certificate
-//         </NavDropdown.Item>
-//         <NavDropdown.Item as={Link} to="/noticeAndSms">
+//         <NavDropdown.Item
+//           as={Link}
+//           to="/noticeAndSms"
+//           className="text-sm font-bold hover:text-black"
+//         >
 //           Notice/SMS
 //         </NavDropdown.Item>
-//         <NavDropdown.Item as={Link} to="#">
+//         <NavDropdown.Item
+//           as={Link}
+//           to="#"
+//           className="text-sm font-bold hover:text-black"
+//         >
 //           Event
 //         </NavDropdown.Item>
-//         <NavDropdown.Item as={Link} to="#">
+//         <NavDropdown.Item
+//           as={Link}
+//           to="#"
+//           className="text-sm font-bold hover:text-black"
+//         >
 //           Holiday List
 //         </NavDropdown.Item>
-//         <NavDropdown.Item as={Link} to="/allotClassTeacher">
+//         <NavDropdown.Item
+//           as={Link}
+//           to="/allotClassTeacher"
+//           className="text-sm font-bold hover:text-black"
+//         >
 //           Allot Class Teachers
 //         </NavDropdown.Item>
-//         <NavDropdown.Item as={Link} to="#">
+//         <NavDropdown.Item
+//           as={Link}
+//           to="#"
+//           className="text-sm font-bold hover:text-black"
+//         >
 //           Allot Department Coordinator
 //         </NavDropdown.Item>
 //       </NavDropdown>
+
 //       {/* ID Card Dropdown */}
 //       <NavDropdown
 //         title={<span className="nav-dropdown-title">ID Card</span>}
 //         // title=""
-//         className="custom-nav-dropdown"
 //         style={{ color: "black", fontWeight: "700" }}
 //       >
 //         <NavDropdown.Item
@@ -696,7 +305,6 @@ export default AdminNavBar;
 //       <NavDropdown
 //         // title=""
 //         title={<span className="nav-dropdown-title">View</span>}
-//         className="custom-nav-dropdown"
 //         style={{ color: "black", fontWeight: "700" }}
 //       >
 //         <NavDropdown.Item
@@ -726,7 +334,6 @@ export default AdminNavBar;
 //       <NavDropdown
 //         // title=""
 //         title={<span className="nav-dropdown-title">Reports</span>}
-//         className="custom-nav-dropdown"
 //         style={{ color: "black", fontWeight: "700" }}
 //       >
 //         <NavDropdown.Item
@@ -763,7 +370,6 @@ export default AdminNavBar;
 //       <NavDropdown
 //         // title=""
 //         title={<span className="nav-dropdown-title">Ticket</span>}
-//         className="custom-nav-dropdown"
 //         style={{ color: "black", fontWeight: "700" }}
 //       >
 //         <NavDropdown.Item
@@ -800,7 +406,6 @@ export default AdminNavBar;
 //       <NavDropdown
 //         // title=""
 //         title={<span className="nav-dropdown-title">Masters</span>}
-//         className="custom-nav-dropdown"
 //         style={{ color: "black", fontWeight: "700" }}
 //       >
 //         <NavDropdown.Item
@@ -916,6 +521,401 @@ export default AdminNavBar;
 // };
 
 // export default AdminNavBar;
+
+// working
+import { NavDropdown } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import "./AdminNavBar.css"; // Attach the CSS file
+import { IoIosHelpCircleOutline } from "react-icons/io";
+
+const AdminNavBar = () => {
+  return (
+    <>
+      {/* Role Dropdown */}
+      <NavDropdown
+        title={<span className="nav-dropdown-title">Role</span>}
+        className="custom-nav-dropdown"
+      >
+        <NavDropdown.Item as={Link} to="/roles">
+          Manage Role
+        </NavDropdown.Item>
+        <NavDropdown.Item as={Link} to="/menus">
+          Manage Menu
+        </NavDropdown.Item>
+        <NavDropdown.Item as={Link} to="/show_roles">
+          Manage Access
+        </NavDropdown.Item>
+      </NavDropdown>
+
+      {/* My Actions Dropdown */}
+      <NavDropdown
+        title={<span className="nav-dropdown-title">My Actions</span>}
+        className="custom-nav-dropdown"
+      >
+        {/* Students Sub-dropdown */}
+        <NavDropdown
+          title={<span className="nav-dropdown-titleSubUnder">Students</span>}
+          // style={{ display:"flex", flexDirection:"row", justifyContent:"space-between",border:"2px solid green",color: "green", fontWeight: "900" }}
+
+          className="dropend custom-submenu"
+        >
+          <NavDropdown.Item as={Link} to="/newStudentList">
+            New Student List
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/manageStudent">
+            Manage Students
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/manageStudentLC">
+            LC Students
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/deleteStudent">
+            Deleted Students Lists
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="#">
+            Promote Students
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="#">
+            Send User Id to Parents
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="#">
+            Sibling Mapping
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/myprofile">
+            User Profile
+          </NavDropdown.Item>
+        </NavDropdown>
+
+        {/* Certificate Sub-dropdown */}
+        <NavDropdown
+          title={
+            <span className="nav-dropdown-titleSubUnder">Certificate</span>
+          }
+          className="dropend custom-submenu"
+        >
+          <NavDropdown.Item as={Link} to="/bonafiedCertificates">
+            Bonafide Certificate
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/castCertificate">
+            Caste Certificate
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/characterCertificate">
+            Character Certificate
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/percentageCertificate">
+            Percentage Certificate
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/simpleBonafied">
+            Simple Bonafide Certificate
+          </NavDropdown.Item>
+        </NavDropdown>
+
+        {/* Staff Sub-dropdown */}
+        <NavDropdown
+          title={<span className="nav-dropdown-titleSubUnder">Staff</span>}
+          className="dropend custom-submenu"
+        >
+          <NavDropdown.Item as={Link} to="/StaffList">
+            Manage Staff
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/careTacker">
+            Manage Caretaker
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/SubstituteTeacher">
+            Substitute Teacher
+          </NavDropdown.Item>
+        </NavDropdown>
+
+        {/* Leave Sub-dropdown */}
+        <NavDropdown
+          title={<span className="nav-dropdown-titleSubUnder">Leave</span>}
+          className="dropend custom-submenu"
+        >
+          <NavDropdown.Item as={Link} to="#">
+            Leave Allocation
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="#">
+            Leave Allocation to All Staff
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="#">
+            Leave Application
+          </NavDropdown.Item>
+        </NavDropdown>
+
+        {/* Other Items */}
+        <NavDropdown.Item as={Link} to="/leavingCertificate">
+          Leaving Certificate
+        </NavDropdown.Item>
+        <NavDropdown.Item as={Link} to="/noticeAndSms">
+          Notice/SMS
+        </NavDropdown.Item>
+        <NavDropdown.Item as={Link} to="#">
+          Event
+        </NavDropdown.Item>
+        <NavDropdown.Item as={Link} to="#">
+          Holiday List
+        </NavDropdown.Item>
+        <NavDropdown.Item as={Link} to="/allotClassTeacher">
+          Allot Class Teachers
+        </NavDropdown.Item>
+        <NavDropdown.Item as={Link} to="#">
+          Allot Department Coordinator
+        </NavDropdown.Item>
+      </NavDropdown>
+      {/* ID Card Dropdown */}
+      <NavDropdown
+        title={<span className="nav-dropdown-title">ID Card</span>}
+        // title=""
+        className="custom-nav-dropdown"
+        style={{ color: "black", fontWeight: "700" }}
+      >
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          Student ID Card
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          Teacher ID Card
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          Pending Student ID Card
+        </NavDropdown.Item>
+      </NavDropdown>
+
+      {/* View Dropdown */}
+
+      <NavDropdown
+        // title=""
+        title={<span className="nav-dropdown-title">View</span>}
+        className="custom-nav-dropdown"
+        style={{ color: "black", fontWeight: "700" }}
+      >
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          Leaving Certificate
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          Notices/SMS for Staff
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          Book Availability
+        </NavDropdown.Item>
+      </NavDropdown>
+
+      {/* Reports Dropdown */}
+      <NavDropdown
+        // title=""
+        title={<span className="nav-dropdown-title">Reports</span>}
+        className="custom-nav-dropdown"
+        style={{ color: "black", fontWeight: "700" }}
+      >
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          Balance Leave
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          Consolidated Leave
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          Student Report
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          Student Contact Details Report
+        </NavDropdown.Item>
+      </NavDropdown>
+
+      {/* Ticket Dropdown */}
+      <NavDropdown
+        // title=""
+        title={<span className="nav-dropdown-title">Ticket</span>}
+        className="custom-nav-dropdown"
+        style={{ color: "black", fontWeight: "700" }}
+      >
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          T1
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          T2
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          T3
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          T4
+        </NavDropdown.Item>
+      </NavDropdown>
+
+      {/* Masters Dropdown */}
+      <NavDropdown
+        // title=""
+        title={<span className="nav-dropdown-title">Masters</span>}
+        className="custom-nav-dropdown"
+        style={{ color: "black", fontWeight: "700" }}
+      >
+        <NavDropdown.Item
+          as={Link}
+          to="/sections"
+          className="text-sm font-bold hover:text-black"
+        >
+          Section
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="/classlist"
+          className="text-sm font-bold hover:text-black"
+        >
+          Class
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="/divisionlist"
+          className="text-sm font-bold hover:text-black"
+        >
+          Division
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="/subjectlist"
+          className="text-sm font-bold hover:text-black"
+        >
+          Subjects
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="/managesubject"
+          className="text-sm font-bold hover:text-black"
+        >
+          Subjects Allotment
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          StudentWise Subject Allotment for HSC
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="/subjectforReportcard"
+          className="text-sm font-bold hover:text-black"
+        >
+          Subject for Report Card
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="/managesubjectforreportcard"
+          className="text-sm font-bold hover:text-black"
+        >
+          Subject allotment for report card
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="/Exams"
+          className="text-sm font-bold hover:text-black"
+        >
+          Exams
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="/grades"
+          // to="#"
+          className="text-sm font-bold hover:text-black"
+        >
+          Grades
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          // to="/grades"
+          to="/marksHeading"
+          className="text-sm font-bold hover:text-black"
+        >
+          Marks heading
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="/allotMarksHeading"
+          // to="/allotMarksHeading"
+          className="text-sm font-bold hover:text-black"
+        >
+          Allot Marks heading
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
+          to="/examTimeTable"
+          // to="/allotMarksHeading"
+          className="text-sm font-bold hover:text-black"
+        >
+          Exam Timetable{" "}
+        </NavDropdown.Item>
+      </NavDropdown>
+
+      {/* Help */}
+      <div
+        onClick={() => {
+          /* navigate(""); */
+        }}
+        style={{ fontWeight: "700", fontSize: "1rem", color: "black" }}
+        className="my-auto text-gray-600 cursor-pointer hover:text-gray-900 md:relative left-2"
+      >
+        <IoIosHelpCircleOutline className="inline mr-1 relative bottom-0.5 hover:text-black " />
+        Help
+      </div>
+    </>
+  );
+};
+
+export default AdminNavBar;
 
 // import React from "react";
 // import { NavDropdown, Nav } from "react-bootstrap";

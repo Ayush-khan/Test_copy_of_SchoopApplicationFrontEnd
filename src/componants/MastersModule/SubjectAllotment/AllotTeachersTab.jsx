@@ -1385,9 +1385,9 @@ const AllotTeachersTab = () => {
                 </div>
               </tr>
             ) : (
-              <>
-                <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
-                  <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
+              <div className="">
+                <div className=" form-group flex justify-center gap-x-1 md:gap-x-6">
+                  <label className="w-1/4 pt-2 relative right-0 md:right-2.5 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
                     Select Class <span className="text-red-500">*</span>
                   </label>
                   <div className="w-full">
@@ -1410,8 +1410,8 @@ const AllotTeachersTab = () => {
                     )}
                   </div>
                 </div>
-                <div className="form-group relative left-0 md:-left-4 flex justify-start  mt-4">
-                  <label className="w-1/4 pt-2 items-center text-center   py-2 font-semibold text-[1em] text-gray-700">
+                <div className=" form-group  gap-x-1 relative  left-0 md:-left-5 flex justify-start  mt-4">
+                  <label className="w-1/4 pt-2  items-center text-center   py-2 font-semibold text-[1em] text-gray-700">
                     Select Division <span className="text-red-500">*</span>
                   </label>
                   <div className="w-full  md:w-[39%]  ">
@@ -1442,8 +1442,8 @@ const AllotTeachersTab = () => {
                     )}
                   </div>
                 </div>
-                <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
-                  <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
+                <div className=" form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
+                  <label className="w-1/4 relative right-0 md:right-0.5 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700">
                     Select Teacher <span className="text-red-500">*</span>
                   </label>
                   <div className="w-full">
@@ -1464,8 +1464,8 @@ const AllotTeachersTab = () => {
                     )}
                   </div>
                 </div>
-                <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
-                  <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700 ">
+                <div className=" form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
+                  <label className="w-1/4  pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700 ">
                     Select Subjects <span className="text-red-500">*</span>
                   </label>
                   <div className="w-full">
@@ -1506,7 +1506,7 @@ const AllotTeachersTab = () => {
                     {isSubmitting ? "Saving..." : "Save"}
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
