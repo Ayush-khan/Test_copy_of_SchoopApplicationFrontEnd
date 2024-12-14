@@ -147,8 +147,8 @@ function CareTacker() {
     (currentPage + 1) * pageSize
   );
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>Error: {error}</p>;
 
   return (
     <>
@@ -216,78 +216,92 @@ function CareTacker() {
                     </tr>
                   </thead>
                   <tbody>
-                    {displayedStaffs.map((staffItem, index) => (
-                      <tr
-                        key={staffItem.user_id}
-                        className={`${
-                          index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                        } hover:bg-gray-50`}
-                      >
-                        {console.log(
-                          "this is inside the staflist component in the table",
-                          staffItem
-                        )}
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {currentPage * pageSize + index + 1}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.name}{" "}
-                            {staffItem?.isDelete == "Y" && (
-                              <span className="text-red-500">
-                                (Left school)
-                              </span>
-                            )}
-                          </p>
-                        </td>
+                    {loading ? (
+                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
+                          Please wait while data is loading...
+                        </div>
+                      </div>
+                    ) : displayedStaffs.length ? (
+                      displayedStaffs.map((staffItem, index) => (
+                        <tr
+                          key={staffItem.user_id}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50`}
+                        >
+                          {console.log(
+                            "this is inside the staflist component in the table",
+                            staffItem
+                          )}
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {currentPage * pageSize + index + 1}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {staffItem?.name}{" "}
+                              {staffItem?.isDelete == "Y" && (
+                                <span className="text-red-500">
+                                  (Left school)
+                                </span>
+                              )}
+                            </p>
+                          </td>
 
-                        {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                           <p className="text-gray-900 whitespace-no-wrap relative top-2">
                             {staffItem?.name}
                           </p>
                         </td> */}
 
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.phone}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staffItem?.designation}
-                          </p>
-                        </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {staffItem?.phone}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {staffItem?.designation}
+                            </p>
+                          </td>
 
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                            onClick={() => handleSubmitEdit(staffItem)}
-                          >
-                            <FontAwesomeIcon icon={faEdit} />
-                          </button>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                            onClick={() => handleDelete(staffItem)}
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                          </button>
-                        </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleSubmitEdit(staffItem)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                              onClick={() => handleDelete(staffItem)}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </td>
 
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                            onClick={() => handleView(staffItem)}
-                          >
-                            <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                            {/* <FontAwesomeIcon icon={faEdit} /> */}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleView(staffItem)}
+                            >
+                              <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                              {/* <FontAwesomeIcon icon={faEdit} /> */}
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-red-700">
+                          Oops! No data found..
+                        </div>
+                      </div>
+                    )}
                   </tbody>
                 </table>
               </div>

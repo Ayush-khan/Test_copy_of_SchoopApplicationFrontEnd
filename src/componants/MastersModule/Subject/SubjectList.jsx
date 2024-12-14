@@ -394,7 +394,7 @@ function SubjectList() {
           ></div>
 
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 w-full md:w-[88%] mx-auto w-overflow-y-scroll lg:overflow-x-hidden">
+            <div className="h-96 lg:h-96 w-full md:w-[80%] mx-auto w-overflow-y-scroll lg:overflow-x-hidden">
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
@@ -408,10 +408,10 @@ function SubjectList() {
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Type
                       </th>
-                      <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 w-full md:w-[12%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Edit
                       </th>
-                      <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 w-full md:w-[12%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Delete
                       </th>
                     </tr>

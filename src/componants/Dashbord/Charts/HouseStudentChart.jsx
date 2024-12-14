@@ -44,10 +44,70 @@ const HouseStudentChart = () => {
     fetchClassNames();
   }, []);
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setLoading(true);
+  //     setError("");
+
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+  //       const academicYr = localStorage.getItem("academicYear");
+  //       console.log("academic year", academicYr);
+  //       console.log("token is", token);
+
+  //       if (!token) {
+  //         throw new Error("No authentication token or academic year found");
+  //       }
+  //       const response = await axios.get(`${API_URL}/api/getHouseViseStudent`, {
+  //         params: {
+  //           class_name: newDepartmentId,
+  //           // "X-Academic-Year": academicYr,
+  //           "X-Academic-Year": "2022-2023",
+  //         },
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "X-Academic-Year": "2022-2023",
+  //         },
+  //       });
+
+  //       const data = response.data;
+
+  //       // Transforming data into the structure needed for the pie charts
+  //       const transformedData = data.reduce((acc, curr) => {
+  //         if (!acc[curr.class_section]) {
+  //           acc[curr.class_section] = [];
+  //         }
+  //         acc[curr.class_section].push({
+  //           name: curr.house_name || "No House",
+  //           value: curr.student_counts,
+  //         });
+  //         return acc;
+  //       }, {});
+
+  //       setSectionsData(transformedData);
+
+  //       // Extract unique house names
+  //       const uniqueHouseNames = [
+  //         ...new Set(data.map((item) => item.house_name || "No House")),
+  //       ];
+  //       setHouseNames(uniqueHouseNames);
+  //     } catch (error) {
+  //       setError("Error fetching class data");
+  //       console.error("Error fetching class data:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [newDepartmentId]);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError("");
+      setSectionsData({}); // Reset data before the API call
+      setHouseNames([]); // Reset house names before the API call
 
       try {
         const token = localStorage.getItem("authToken");
@@ -56,12 +116,12 @@ const HouseStudentChart = () => {
         console.log("token is", token);
 
         if (!token) {
-          throw new Error("No authentication token or academic year found");
+          throw new Error("No authentication token found");
         }
+
         const response = await axios.get(`${API_URL}/api/getHouseViseStudent`, {
           params: {
             class_name: newDepartmentId,
-            // "X-Academic-Year": academicYr,
             "X-Academic-Year": "2022-2023",
           },
           headers: {
@@ -71,6 +131,12 @@ const HouseStudentChart = () => {
         });
 
         const data = response.data;
+
+        if (!data || !data.length) {
+          setError("No data returned from API");
+          console.warn("No data returned from API");
+          return; // Exit early if data is empty
+        }
 
         // Transforming data into the structure needed for the pie charts
         const transformedData = data.reduce((acc, curr) => {
@@ -101,32 +167,53 @@ const HouseStudentChart = () => {
 
     fetchData();
   }, [newDepartmentId]);
+
   const handleChangeDepartmentId = (e) => {
     const { value } = e.target;
 
     setNewDepartmentId(value);
   };
 
+  // const renderPieChart = (section) => (
+  //   <ResponsiveContainer width={227} height={118}>
+  //     <PieChart>
+  //       <Pie
+  //         dataKey="value"
+  //         startAngle={180}
+  //         endAngle={0}
+  //         data={sectionsData[section]}
+  //         cx="48%"
+  //         cy="100%"
+  //         outerRadius={80}
+  //         fill="#8884d8"
+  //         label
+  //       >
+  //         {sectionsData[section]?.map((entry, index) => (
+  //           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+  //         ))}
+  //       </Pie>
+  //     </PieChart>
+  //   </ResponsiveContainer>
+  // );
+
   const renderPieChart = (section) => (
-    <ResponsiveContainer width={227} height={118}>
-      <PieChart>
-        <Pie
-          dataKey="value"
-          startAngle={180}
-          endAngle={0}
-          data={sectionsData[section]}
-          cx="48%"
-          cy="100%"
-          outerRadius={80}
-          fill="#8884d8"
-          label
-        >
-          {sectionsData[section]?.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-          ))}
-        </Pie>
-      </PieChart>
-    </ResponsiveContainer>
+    <PieChart width={157} height={118}>
+      <Pie
+        dataKey="value"
+        startAngle={180}
+        endAngle={0}
+        data={sectionsData[section]}
+        cx="48%"
+        cy="80%"
+        outerRadius={50}
+        fill="#8884d8"
+        label
+      >
+        {sectionsData[section]?.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+        ))}
+      </Pie>
+    </PieChart>
   );
 
   return (
@@ -184,10 +271,10 @@ const HouseStudentChart = () => {
           {Object.keys(sectionsData).map((section) => (
             <div
               key={section}
-              className="flex flex-col justify-center items-center gap-y-8 w-full px-4 box-border"
+              className="flex   flex-col justify-center items-center gap-y-8 w-full px-4 box-border"
               style={{ alignItems: "center" }}
             >
-              <p className="text-gray-400 font-bold text-md mb-0 pb-0">{`Section-${section}`}</p>
+              <p className="text-gray-400 relative top-5 font-bold text-md mb-0 pb-0">{`Section-${section}`}</p>
               {renderPieChart(section)}
               <ul className=" list-disc grid grid-cols-2 gap-x-6 mr-6 text-xs font-bold text-center">
                 {sectionsData[section]?.map((entry, index) => (

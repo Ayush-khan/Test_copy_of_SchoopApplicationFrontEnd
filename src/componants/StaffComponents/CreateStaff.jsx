@@ -1650,9 +1650,12 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import ImageCropper from "../common/ImageUploadAndCrop.jsx";
+import Loader from "../common/LoaderFinal/LoaderStyle.jsx";
 
 function CreateStaff() {
   const API_URL = import.meta.env.VITE_API_URL;
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     birthday: "",
@@ -1675,6 +1678,7 @@ function CreateStaff() {
     special_sub: "",
   });
   const [errors, setErrors] = useState({});
+  const [employeeIdBackendError, setEmployeeIdBackendError] = useState("");
   const [backendErrors, setBackendErrors] = useState({});
   const [photoPreview, setPhotoPreview] = useState(null);
   const navigate = useNavigate();
@@ -1759,7 +1763,9 @@ function CreateStaff() {
   const handleChange = (event) => {
     const { name, value, checked } = event.target;
     let newValue = value;
-
+    if (name === "employee_id") {
+      setEmployeeIdBackendError("");
+    }
     if (name === "experience") {
       newValue = newValue.replace(/[^0-9]/g, "");
     } else if (name === "aadhar_card_no") {
@@ -1825,6 +1831,59 @@ function CreateStaff() {
     }));
   };
 
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   const validationErrors = validate();
+  //   const errorsToCheck = validationErrors || {};
+
+  //   if (Object.keys(errorsToCheck).length > 0) {
+  //     setErrors(errorsToCheck);
+  //     Object.values(errorsToCheck).forEach((error) => {
+  //       toast.error(error);
+  //     });
+  //     return;
+  //   }
+
+  //   const formattedFormData = {
+  //     ...formData,
+  //     birthday: formatDateString(formData.birthday),
+  //     date_of_joining: formatDateString(formData.date_of_joining),
+  //     teacher_image_name: String(formData.teacher_image_name),
+  //   };
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token is found");
+  //     }
+  //     const response = await axios.post(
+  //       `${API_URL}/api/store_staff`,
+  //       formattedFormData,
+  //       {
+  //         headers: {
+  //           "Content-Type": "multipart/form-data",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.status === 201) {
+  //       toast.success("Teacher created successfully!");
+  //       setTimeout(() => {
+  //         navigate("/StaffList");
+  //       }, 3000);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error.message);
+  //     toast.error("An error occurred while creating the teacher.");
+
+  //     if (error.response && error.response.data && error.response.data.errors) {
+  //       setBackendErrors(error.response.data.errors || {});
+  //     } else {
+  //       toast.error(error.message);
+  //     }
+  //   }
+  // };
   const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = validate();
@@ -1835,6 +1894,7 @@ function CreateStaff() {
       Object.values(errorsToCheck).forEach((error) => {
         toast.error(error);
       });
+      // setLoading(false);
       return;
     }
 
@@ -1846,6 +1906,7 @@ function CreateStaff() {
     };
 
     try {
+      setLoading(true);
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("No authentication token is found");
@@ -1865,17 +1926,39 @@ function CreateStaff() {
         toast.success("Teacher created successfully!");
         setTimeout(() => {
           navigate("/StaffList");
-        }, 3000);
+        }, 500);
       }
     } catch (error) {
       console.error("Error:", error.message);
       toast.error("An error occurred while creating the teacher.");
 
-      if (error.response && error.response.data && error.response.data.errors) {
-        setBackendErrors(error.response.data.errors || {});
+      if (error.response && error.response.data) {
+        const { errors, message } = error.response.data;
+
+        // If validation errors exist, show them
+        if (errors) {
+          Object.entries(errors).forEach(([field, messages]) => {
+            messages.forEach((msg) => {
+              console.log(`${field}: ${msg}`);
+              // toast.error(`${field}: ${msg}`);
+            });
+          });
+
+          // Set backend validation errors to state
+          setBackendErrors(errors || {});
+          console.log("setbackednErrors", backendErrors);
+          console.log("employeeId backednerro", backendErrors?.employee_id[0]);
+          setEmployeeIdBackendError(backendErrors?.employee_id[0]);
+        } else if (message) {
+          // Show the backend message if no detailed errors are provided
+          // setEmployeeIdBackendError(message);
+          // toast.error(message);
+        }
       } else {
         toast.error(error.message);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1909,11 +1992,17 @@ function CreateStaff() {
           onSubmit={handleSubmit}
           className="  md:mx-5 overflow-x-hidden shadow-md p-2 bg-gray-50"
         >
-          <div className=" flex flex-col gap-4 md:grid  md:grid-cols-3 md:gap-x-14 md:mx-10 gap-y-1">
-            <div className=" mx-auto      ">
-              <ImageCropper onImageCropped={handleImageCropped} />
+          {" "}
+          {loading ? (
+            <div className=" inset-0 flex items-center justify-center bg-gray-50  z-10">
+              <Loader /> {/* Replace this with your loader component */}
+            </div>
+          ) : (
+            <div className=" flex flex-col gap-4 md:grid  md:grid-cols-3 md:gap-x-14 md:mx-10 gap-y-1">
+              <div className=" mx-auto      ">
+                <ImageCropper onImageCropped={handleImageCropped} />
 
-              {/* <label htmlFor="photo" className="block font-bold  text-xs mb-2">
+                {/* <label htmlFor="photo" className="block font-bold  text-xs mb-2">
                 Photo
                 {photoPreview ? (
                   <img
@@ -1926,7 +2015,7 @@ function CreateStaff() {
                 )}
                 <ImageCropper onImageCropped={handleImageCropped} />
               </label> */}
-              {/* <input
+                {/* <input
                 type="file"
                 id="photo"
                 name="photo"
@@ -1934,185 +2023,188 @@ function CreateStaff() {
                 onChange={handleFileChange}
                 className="input-field text-xs box-border mt-2 bg-black text-white  "
               /> */}
-            </div>
-            <div className="col-span-1">
-              <label
-                htmlFor="academic_qual"
-                className="block font-bold  text-xs mb-2"
-              >
-                Academic Qualification <span className="text-red-500">*</span>
-              </label>
-              <div className="flex flex-wrap ">
-                {[
-                  "Hsc",
-                  "DCE",
-                  "B.A",
-                  "B.Com",
-                  "B.Sc",
-                  "BCS",
-                  "BCA",
-                  "B.LIS",
-                  "BPharm",
-                  "BE",
-                  "B.Music n Dance",
-                  "M.A",
-                  "MSE",
-                  "M.Com",
-                  "M.Sc",
-                  "MCA",
-                  "M.LIS",
-                  "M.Phil",
-                  "MBA",
-                  "PGDBM",
-                ].map((qualification) => (
-                  <label
-                    key={qualification}
-                    className="flex items-center mr-4 text-sm font-md"
-                  >
-                    <input
-                      type="checkbox"
-                      name="academic_qual"
-                      value={qualification}
-                      checked={formData.academic_qual.includes(qualification)}
-                      onChange={handleChange}
-                      className="mr-1 "
-                    />
-                    {qualification}
-                  </label>
-                ))}
               </div>
-              {errors.academic_qual && (
-                <span className="text-red-500 text-xs">
-                  {errors.academic_qual}
-                </span>
-              )}
-            </div>
+              <div className="col-span-1">
+                <label
+                  htmlFor="academic_qual"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Academic Qualification <span className="text-red-500">*</span>
+                </label>
+                <div className="flex flex-wrap ">
+                  {[
+                    "Hsc",
+                    "DCE",
+                    "B.A",
+                    "B.Com",
+                    "B.Sc",
+                    "BCS",
+                    "BCA",
+                    "B.LIS",
+                    "BPharm",
+                    "BE",
+                    "B.Music n Dance",
+                    "M.A",
+                    "MSE",
+                    "M.Com",
+                    "M.Sc",
+                    "MCA",
+                    "M.LIS",
+                    "M.Phil",
+                    "MBA",
+                    "PGDBM",
+                  ].map((qualification) => (
+                    <label
+                      key={qualification}
+                      className="flex items-center mr-4 text-sm font-md"
+                    >
+                      <input
+                        type="checkbox"
+                        name="academic_qual"
+                        value={qualification}
+                        checked={formData.academic_qual.includes(qualification)}
+                        onChange={handleChange}
+                        className="mr-1 "
+                      />
+                      {qualification}
+                    </label>
+                  ))}
+                </div>
+                {errors.academic_qual && (
+                  <span className="text-red-500 text-xs">
+                    {errors.academic_qual}
+                  </span>
+                )}
+              </div>
 
-            <div>
-              <label
-                htmlFor="address"
-                className="block font-bold  text-xs mb-2"
-              >
-                Address <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                type="text"
-                maxLength={200}
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                className="input-field resize block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-                rows="4"
-                required
-              />
-            </div>
-
-            <div className=" ">
-              <label
-                htmlFor="staffName"
-                className="block font-bold  text-xs mb-2"
-              >
-                Staff Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                maxLength={100}
-                id="staffName"
-                name="name"
-                pattern="^[^\d].*"
-                title="Name should not start with a number"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Name"
-                className="block  border w-full border-gray-300 rounded-md py-1 px-3  bg-white shadow-inner"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="trained"
-                className="block font-bold  text-xs mb-2"
-              >
-                Training Status <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="trained"
-                name="trained"
-                value={formData.trained}
-                onChange={handleChange}
-                required
-                title="Please enter Training Status "
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-              >
-                <option className="bg-gray-300" value="">
-                  Select
-                </option>{" "}
-                <option value="trained-PGT">trained-PGT</option>
-                <option value="trained-TGT">trained-TGT</option>{" "}
-                <option value="trained-PRT">trained-PRT</option>
-                <option value="NTT">NTT</option>
-                <option value="ECCE">ECCE</option>
-                <option value="Untrained">Untrained</option>
-                <option value="NA">NA</option>
-                {/* Add training status options here */}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="phone" className="block font-bold  text-xs mb-2">
-                Phone <span className="text-red-500">*</span>
-              </label>
-              <div className="flex ">
-                <span className=" rounded-l-md pt-1 bg-gray-200 text-black font-bold px-2 pointer-events-none ml-1">
-                  +91
-                </span>
-                <input
+              <div>
+                <label
+                  htmlFor="address"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Address <span className="text-red-500">*</span>
+                </label>
+                <textarea
                   type="text"
-                  id="phone"
-                  name="phone"
-                  pattern="\d{10}"
-                  maxLength="10"
-                  title="Please enter only 10 digit number "
-                  value={formData.phone}
+                  maxLength={200}
+                  id="address"
+                  name="address"
+                  value={formData.address}
                   onChange={handleChange}
-                  className="input-field block w-full border border-gray-300 outline-none  rounded-r-md py-1 px-3 bg-white shadow-inner "
+                  className="input-field resize block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                  rows="4"
                   required
                 />
               </div>
-              {backendErrors.phone && (
-                <span className="error">{backendErrors.phone[0]}</span>
-              )}
-              {errors.phone && (
-                <span className="text-red-500 text-xs">{errors.phone}</span>
-              )}
-            </div>
 
-            <div>
-              <label
-                htmlFor="birthday"
-                className="block font-bold text-xs mb-2"
-              >
-                Date of Birth <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                id="birthday"
-                max={MAX_DATE}
-                name="birthday"
-                value={formData.birthday}
-                onChange={handleChange}
-                className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-                required
-              />
-              {errors.birthday && (
-                <div className="text-red-500 text-xs mt-1">
-                  {errors.birthday}
+              <div className=" ">
+                <label
+                  htmlFor="staffName"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Staff Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  maxLength={100}
+                  id="staffName"
+                  name="name"
+                  pattern="^[^\d].*"
+                  title="Name should not start with a number"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Name"
+                  className="block  border w-full border-gray-300 rounded-md py-1 px-3  bg-white shadow-inner"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="trained"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Training Status <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="trained"
+                  name="trained"
+                  value={formData.trained}
+                  onChange={handleChange}
+                  required
+                  title="Please enter Training Status "
+                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                >
+                  <option className="bg-gray-300" value="">
+                    Select
+                  </option>{" "}
+                  <option value="trained-PGT">trained-PGT</option>
+                  <option value="trained-TGT">trained-TGT</option>{" "}
+                  <option value="trained-PRT">trained-PRT</option>
+                  <option value="NTT">NTT</option>
+                  <option value="ECCE">ECCE</option>
+                  <option value="Untrained">Untrained</option>
+                  <option value="NA">NA</option>
+                  {/* Add training status options here */}
+                </select>
+              </div>
+              <div>
+                <label
+                  htmlFor="phone"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Phone <span className="text-red-500">*</span>
+                </label>
+                <div className="flex ">
+                  <span className=" rounded-l-md pt-1 bg-gray-200 text-black font-bold px-2 pointer-events-none ml-1">
+                    +91
+                  </span>
+                  <input
+                    type="text"
+                    id="phone"
+                    name="phone"
+                    pattern="\d{10}"
+                    maxLength="10"
+                    title="Please enter only 10 digit number "
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="input-field block w-full border border-gray-300 outline-none  rounded-r-md py-1 px-3 bg-white shadow-inner "
+                    required
+                  />
                 </div>
-              )}
-            </div>
+                {backendErrors.phone && (
+                  <span className="error">{backendErrors.phone[0]}</span>
+                )}
+                {errors.phone && (
+                  <span className="text-red-500 text-xs">{errors.phone}</span>
+                )}
+              </div>
 
-            {/* <div>
+              <div>
+                <label
+                  htmlFor="birthday"
+                  className="block font-bold text-xs mb-2"
+                >
+                  Date of Birth <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  id="birthday"
+                  max={MAX_DATE}
+                  name="birthday"
+                  value={formData.birthday}
+                  onChange={handleChange}
+                  className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                  required
+                />
+                {errors.birthday && (
+                  <div className="text-red-500 text-xs mt-1">
+                    {errors.birthday}
+                  </div>
+                )}
+              </div>
+
+              {/* <div>
               <label
                 htmlFor=" birthday"
                 className="block font-bold  text-xs mb-2"
@@ -2134,270 +2226,273 @@ function CreateStaff() {
                 <span className="text-red-500 text-xs">{errors.birthday}</span>
               )}
             </div> */}
-            <div>
-              <label
-                htmlFor="experience"
-                className="block font-bold  text-xs mb-2"
-              >
-                Experience <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                maxLength={2}
-                id="experience"
-                name="experience"
-                value={formData.experience}
-                placeholder="In year"
-                onChange={handleChange}
-                required
-                title="Only enter digits in year like 1 or 5"
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block font-bold  text-xs mb-2">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                maxLength={51}
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-                required
-                placeholder="example@email.com"
-                title="Please enter a valid email address that ends with @gmail.com"
-              />
-
-              {backendErrors.email && (
-                <span className="error text-red-500 text-xs">
-                  {backendErrors.email[0]}
-                </span>
-              )}
-              {errors.email && (
-                <span className="error text-red-500 text-xs">
-                  {errors.email}
-                </span>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="date_of_joining"
-                className="block font-bold  text-xs mb-2"
-              >
-                Date Of Joining <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                id="date_of_joining"
-                max={today}
-                name="date_of_joining"
-                value={formData.date_of_joining}
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-                required
-              />
-              {errors.date_of_joining && (
-                <span className="text-red-500 text-xs">
-                  {errors.date_of_joining}
-                </span>
-              )}
-            </div>
-            <div className="">
-              <label htmlFor="sex" className="block font-bold  text-xs mb-2">
-                Gender <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="sex"
-                name="sex"
-                // maxLength="6"
-                value={formData.sex}
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-                required
-              >
-                <option className=" bg-gray-300" value="">
-                  Select
-                </option>
-                <option value="M">Male</option>
-                <option value="F">Female</option>
-                <option value="O">Other</option>
-              </select>
-              {errors.sex && (
-                <span className="text-red-500 text-xs">{errors.sex}</span>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="aadhar_card_no"
-                className="block font-bold  text-xs mb-2"
-              >
-                Aadhaar Card No. <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                maxLength={12}
-                id="aadhar_card_no"
-                name="aadhar_card_no"
-                value={formData.aadhar_card_no}
-                pattern="\d{12}"
-                title="Aadhaar Card Number must be exactly 12 digits Number"
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-              />{" "}
-              {backendErrors.aadhar_card_no && (
-                <span className="text-red-500 text-xs">
-                  {backendErrors.aadhar_card_no[0]}
-                </span>
-              )}
-              {errors.aadhar_card_no && (
-                <span className="text-red-500 text-xs">
-                  {errors.aadhar_card_no}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="designation"
-                className="block font-bold  text-xs mb-2"
-              >
-                Designation <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                maxLength={30}
-                id="designation"
-                name="designation"
-                value={formData.designation}
-                onChange={handleChange}
-                // required
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-              {errors.designation && (
-                <span className="text-red-500 text-xs">
-                  {errors.designation}
-                </span>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="blood_group"
-                className="block font-bold  text-xs mb-2"
-              >
-                Blood Group
-              </label>
-              <select
-                id="blood_group"
-                name="blood_group"
-                value={formData.blood_group}
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-              >
-                <option className="bg-gray-300" value="">
-                  Select
-                </option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="role" className="block font-bold  text-xs mb-2">
-                Role <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-                required
-              >
-                <option className="bg-gray-300" value="">
-                  Select
-                </option>
-                <option value="A">Admin</option>
-                <option value="B">Bus</option>
-                <option value="E">Data Entry</option>
-                <option value="F">Finance</option>
-                <option value="L">Librarian</option>
-                <option value="M">Management</option>
-                <option value="N">Printer</option>
-                <option value="O">owner</option>
-                <option value="R">Support</option>
-                <option value="T">Teacher</option>
-                <option value="X">Support Staff</option>
-                <option value="Y">Security</option>
-              </select>
-              {errors.role && (
-                <span className="text-red-500 text-xs">{errors.role}</span>
-              )}
-            </div>
-            <div>
               <div>
                 <label
-                  htmlFor="professional_qual"
+                  htmlFor="experience"
                   className="block font-bold  text-xs mb-2"
                 >
-                  Professional Qualification
+                  Experience <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  maxLength={2}
+                  id="experience"
+                  name="experience"
+                  value={formData.experience}
+                  placeholder="In year"
+                  onChange={handleChange}
+                  required
+                  title="Only enter digits in year like 1 or 5"
+                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  maxLength={51}
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                  required
+                  placeholder="example@email.com"
+                  title="Please enter a valid email address that ends with @gmail.com"
+                />
+
+                {backendErrors.email && (
+                  <span className="error text-red-500 text-xs">
+                    {backendErrors.email[0]}
+                  </span>
+                )}
+                {errors.email && (
+                  <span className="error text-red-500 text-xs">
+                    {errors.email}
+                  </span>
+                )}
+              </div>
+              <div>
+                <label
+                  htmlFor="date_of_joining"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Date Of Joining <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  id="date_of_joining"
+                  max={today}
+                  name="date_of_joining"
+                  value={formData.date_of_joining}
+                  onChange={handleChange}
+                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                  required
+                />
+                {errors.date_of_joining && (
+                  <span className="text-red-500 text-xs">
+                    {errors.date_of_joining}
+                  </span>
+                )}
+              </div>
+              <div className="">
+                <label htmlFor="sex" className="block font-bold  text-xs mb-2">
+                  Gender <span className="text-red-500">*</span>
                 </label>
                 <select
-                  id="professional_qual"
-                  name="professional_qual"
-                  value={formData.professional_qual}
+                  id="sex"
+                  name="sex"
+                  // maxLength="6"
+                  value={formData.sex}
+                  onChange={handleChange}
+                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                  required
+                >
+                  <option className=" bg-gray-300" value="">
+                    Select
+                  </option>
+                  <option value="M">Male</option>
+                  <option value="F">Female</option>
+                  <option value="O">Other</option>
+                </select>
+                {errors.sex && (
+                  <span className="text-red-500 text-xs">{errors.sex}</span>
+                )}
+              </div>
+              <div>
+                <label
+                  htmlFor="aadhar_card_no"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Aadhaar Card No. <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  maxLength={12}
+                  id="aadhar_card_no"
+                  name="aadhar_card_no"
+                  value={formData.aadhar_card_no}
+                  pattern="\d{12}"
+                  title="Aadhaar Card Number must be exactly 12 digits Number"
+                  onChange={handleChange}
+                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                />{" "}
+                {backendErrors.aadhar_card_no && (
+                  <span className="text-red-500 text-xs">
+                    {backendErrors.aadhar_card_no[0]}
+                  </span>
+                )}
+                {errors.aadhar_card_no && (
+                  <span className="text-red-500 text-xs">
+                    {errors.aadhar_card_no}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="designation"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Designation <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  maxLength={30}
+                  id="designation"
+                  name="designation"
+                  value={formData.designation}
+                  onChange={handleChange}
+                  // required
+                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                />
+                {errors.designation && (
+                  <span className="text-red-500 text-xs">
+                    {errors.designation}
+                  </span>
+                )}
+              </div>
+              <div>
+                <label
+                  htmlFor="blood_group"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Blood Group
+                </label>
+                <select
+                  id="blood_group"
+                  name="blood_group"
+                  value={formData.blood_group}
                   onChange={handleChange}
                   className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                 >
                   <option className="bg-gray-300" value="">
                     Select
                   </option>
-                  <option value="D.Ed">D.Ed</option>
-                  <option value="B.Ed">B.Ed</option>
-                  <option value="B.P.Ed">B.P.Ed</option>
-                  <option value="M.P.Ed">M.P.Ed</option>
-                  <option value="M.Ed">M.Ed</option>
-                  <option value="NA">NA</option>
-                  {/* Add professional qualification options here */}
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
                 </select>
               </div>
-            </div>
+              <div>
+                <label htmlFor="role" className="block font-bold  text-xs mb-2">
+                  Role <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                  required
+                >
+                  <option className="bg-gray-300" value="">
+                    Select
+                  </option>
+                  <option value="A">Admin</option>
+                  <option value="B">Bus</option>
+                  <option value="E">Data Entry</option>
+                  <option value="F">Finance</option>
+                  <option value="L">Librarian</option>
+                  <option value="M">Management</option>
+                  <option value="N">Printer</option>
+                  <option value="O">owner</option>
+                  <option value="R">Support</option>
+                  <option value="T">Teacher</option>
+                  <option value="X">Support Staff</option>
+                  <option value="Y">Security</option>
+                </select>
+                {errors.role && (
+                  <span className="text-red-500 text-xs">{errors.role}</span>
+                )}
+              </div>
+              <div>
+                <div>
+                  <label
+                    htmlFor="professional_qual"
+                    className="block font-bold  text-xs mb-2"
+                  >
+                    Professional Qualification
+                  </label>
+                  <select
+                    id="professional_qual"
+                    name="professional_qual"
+                    value={formData.professional_qual}
+                    onChange={handleChange}
+                    className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                  >
+                    <option className="bg-gray-300" value="">
+                      Select
+                    </option>
+                    <option value="D.Ed">D.Ed</option>
+                    <option value="B.Ed">B.Ed</option>
+                    <option value="B.P.Ed">B.P.Ed</option>
+                    <option value="M.P.Ed">M.P.Ed</option>
+                    <option value="M.Ed">M.Ed</option>
+                    <option value="NA">NA</option>
+                    {/* Add professional qualification options here */}
+                  </select>
+                </div>
+              </div>
 
-            <div>
-              <label
-                htmlFor="religion"
-                className="block font-bold  text-xs mb-2"
-              >
-                Religion
-              </label>
-              <select
-                id="religion"
-                name="religion"
-                value={formData.religion}
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-              >
-                <option className="bg-gray-300" value="">
-                  Select
-                </option>{" "}
-                <option value="Hindu">Hindu</option>
-                <option value="Christian">Christian</option>{" "}
-                <option value="Muslim">Muslim</option>
-                <option value="Sikh">Sikh</option>
-                <option value="Jain">Jain</option>
-                <option value="Buddhist">Buddhist</option>
-                <option value="NA">NA</option>
-                {/* Add training status options here */}
-              </select>
-            </div>
-            {/* <div>
+              <div>
+                <label
+                  htmlFor="religion"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Religion
+                </label>
+                <select
+                  id="religion"
+                  name="religion"
+                  value={formData.religion}
+                  onChange={handleChange}
+                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                >
+                  <option className="bg-gray-300" value="">
+                    Select
+                  </option>{" "}
+                  <option value="Hindu">Hindu</option>
+                  <option value="Christian">Christian</option>{" "}
+                  <option value="Muslim">Muslim</option>
+                  <option value="Sikh">Sikh</option>
+                  <option value="Jain">Jain</option>
+                  <option value="Buddhist">Buddhist</option>
+                  <option value="NA">NA</option>
+                  {/* Add training status options here */}
+                </select>
+              </div>
+              {/* <div>
               <label
                 htmlFor="religion"
                 className="block font-bold  text-xs mb-2"
@@ -2417,59 +2512,63 @@ function CreateStaff() {
                 className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
               />
             </div> */}
-            <div>
-              <label
-                htmlFor="employee_id"
-                className="block font-bold  text-xs mb-2"
-              >
-                Employee ID <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                maxLength={5}
-                id="employee_id"
-                name="employee_id"
-                value={formData.employee_id}
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-                required
-              />
-              {errors.employee_id && (
+              <div>
+                <label
+                  htmlFor="employee_id"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Employee ID <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  maxLength={5}
+                  id="employee_id"
+                  name="employee_id"
+                  value={formData.employee_id}
+                  onChange={handleChange}
+                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                  required
+                />
+                {errors.employee_id && (
+                  <span className="text-red-500 text-xs">
+                    {errors.employee_id}
+                  </span>
+                )}
                 <span className="text-red-500 text-xs">
-                  {errors.employee_id}
+                  {employeeIdBackendError}
                 </span>
-              )}
-            </div>
+              </div>
 
-            <div>
-              <label
-                htmlFor="special_sub"
-                className="block font-bold  text-xs mb-2"
-              >
-                Special Subject
-              </label>
-              <input
-                type="text"
-                maxLength={30}
-                id="special_sub"
-                name="special_sub"
-                value={formData.special_sub}
-                onChange={handleChange}
-                placeholder="Special Subject for D.Ed/B.Ed"
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-            </div>
+              <div>
+                <label
+                  htmlFor="special_sub"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Special Subject
+                </label>
+                <input
+                  type="text"
+                  maxLength={30}
+                  id="special_sub"
+                  name="special_sub"
+                  value={formData.special_sub}
+                  onChange={handleChange}
+                  placeholder="Special Subject for D.Ed/B.Ed"
+                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                />
+              </div>
 
-            <div className="col-span-3  text-right">
-              <button
-                type="submit"
-                style={{ backgroundColor: "#2196F3" }}
-                className=" text-white font-bold py-1 border-1 border-blue-500 px-4 rounded"
-              >
-                Create Staff
-              </button>
+              <div className="col-span-3  text-right">
+                <button
+                  type="submit"
+                  style={{ backgroundColor: "#2196F3" }}
+                  className=" text-white font-bold py-1 border-1 border-blue-500 px-4 rounded"
+                >
+                  Create Staff
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </form>
       </div>
     </div>

@@ -173,7 +173,7 @@ const CreateExamTimeTable = () => {
 
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/get_examdates/${selectedStudentId}`,
+        `${API_URL}/api/get_examdates/${classIdForSearch}/${selectedStudentId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -207,6 +207,32 @@ const CreateExamTimeTable = () => {
             studyLeave: false,
           }))
         );
+      }
+
+      // Check for backend-specific error message
+      console.log("ress", response.data.success);
+      const sucessmessage = response.data.success;
+      if (response.data.success == sucessmessage) {
+        const { message, status } = response.data;
+
+        // Log the full error details for debugging
+        console.log("Error details:", response.data);
+
+        // Check if the response has a status and message
+        if (message) {
+          if (status === 400) {
+            setDates([]);
+            setTimetable([]);
+            // Handle specific case for status 400 (e.g., Exam Timetable already created)
+            toast.error(message); // This will display: "Exam Timetable is already created for this class!!"
+          } else {
+            // Handle other cases if needed
+            toast.error(message); // Display general error message from the backend
+          }
+        } else {
+          // If no message exists, show a fallback error message
+          toast.error("An unknown error occurred.");
+        }
       }
     } catch (error) {
       console.error("Error fetching exam data:", error);

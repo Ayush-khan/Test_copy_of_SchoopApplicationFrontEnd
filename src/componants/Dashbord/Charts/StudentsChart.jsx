@@ -1,7 +1,6 @@
 // Arranged the classs for accending order and make changes in the secions PCM and PCB etc baranches
 // SECOND TRY FOR IMPLEMENTING THE CLASS FOR 11 AND 12 LIKE PCM AND MATHS
 import { useState, useEffect } from "react";
-import Style from "../Charts/StudentStyle.module.css";
 import {
   BarChart,
   Bar,
@@ -10,11 +9,9 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  CartesianGrid,
   LabelList,
 } from "recharts";
 import axios from "axios";
-import LoadingSpinner from "../../common/LoadingSpinner";
 import Loader from "../../common/Loader";
 
 const StudentsChart = () => {
@@ -50,6 +47,82 @@ const StudentsChart = () => {
     return () => window.removeEventListener("resize", updateBarCategoryGap);
   }, []);
 
+  // useEffect(() => {
+  //   setLoading(true);
+
+  //   const fetchData = async () => {
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+  //       const academicYear = localStorage.getItem("academicYear");
+  //       if (!token) {
+  //         throw new Error("No authentication token found");
+  //       }
+
+  //       const response = await axios.get(
+  //         `${API_URL}/api/getClassDivisionTotalStudents`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //             "X-Academic-Year": academicYear,
+  //           },
+  //         }
+  //       );
+  //       console.log("The response response of charts", response.data);
+
+  //       // Process the data to aggregate sections under each class
+
+  //       const apiData = response?.data.reduce((acc, item) => {
+  //         const existingClass = acc.find(
+  //           (entry) => entry.class === item.class_name
+  //         );
+  //         const students = isNaN(parseInt(item.total_students, 10))
+  //           ? 0
+  //           : parseInt(item.total_students, 10);
+
+  //         if (existingClass) {
+  //           existingClass[`Section-${item.section_name}`] = students;
+  //         } else {
+  //           acc.push({
+  //             class: item.class_name,
+  //             [`Section-${item.section_name}`]: students,
+  //           });
+  //         }
+  //         return acc;
+  //       }, []);
+
+  //       // Sort data by class name
+  //       const classOrder = [
+  //         "Nursery",
+  //         "LKG",
+  //         "UKG",
+  //         "1",
+  //         "2",
+  //         "3",
+  //         "4",
+  //         "5",
+  //         "6",
+  //         "7",
+  //         "8",
+  //         "9",
+  //         "10",
+  //         "11",
+  //         "12",
+  //       ];
+  //       const sortedData = apiData.sort(
+  //         (a, b) => classOrder.indexOf(a.class) - classOrder.indexOf(b.class)
+  //       );
+
+  //       setData(sortedData);
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
   useEffect(() => {
     setLoading(true);
 
@@ -70,7 +143,15 @@ const StudentsChart = () => {
             },
           }
         );
+
         console.log("The response response of charts", response.data);
+
+        if (!response?.data?.length) {
+          // Handle empty data case
+          console.warn("API returned no data.");
+          setData([]); // Set an empty array if there's no data
+          return;
+        }
 
         // Process the data to aggregate sections under each class
         const apiData = response.data.reduce((acc, item) => {

@@ -913,78 +913,79 @@ const AllotMarksHeadingTab = () => {
               </div>
             ) : (
               <>
-                <div className="form-group flex justify-center gap-x-1 md:gap-x-6">
-                  <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
-                    Select Class <span className="text-red-500">*</span>
-                  </label>
-                  <div className="w-full relative">
-                    <Select
-                      value={selectedClass}
-                      onChange={handleClassChange}
-                      placeholder="Select"
-                      className="w-full md:w-[50%]  "
-                      isClearable
-                      options={classes.map((classObj) => ({
-                        value: classObj.class_id,
-                        label: classObj.name,
-                      }))}
-                    />
-                    {classError && (
-                      <p className="relative  -mb-3 text-red-500 text-sm">
-                        {classError}
-                      </p>
-                    )}
+                <div className="pr-0 md:pr-6 ">
+                  <div className="form-group flex justify-center gap-x-1 md:gap-x-8">
+                    <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
+                      Select Class <span className="text-red-500">*</span>
+                    </label>
+                    <div className="w-full relative">
+                      <Select
+                        value={selectedClass}
+                        onChange={handleClassChange}
+                        placeholder="Select"
+                        className="w-full md:w-[50%]  "
+                        isClearable
+                        options={classes.map((classObj) => ({
+                          value: classObj.class_id,
+                          label: classObj.name,
+                        }))}
+                      />
+                      {classError && (
+                        <p className="relative  -mb-3 text-red-500 text-sm">
+                          {classError}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {/* Select Subject */}
+                  <div className="form-group pl-1.5 flex justify-center gap-x-1 md:gap-x-6 mt-4">
+                    <label className="w-1/4  pt-2 text-center font-semibold text-gray-700">
+                      Select Subject <span className="text-red-500">*</span>
+                    </label>
+                    <div className="w-full relative">
+                      <Select
+                        value={selectedSubject}
+                        onChange={handleSubjectChange}
+                        placeholder="Select"
+                        className="w-full md:w-[50%] "
+                        isClearable
+                        options={subjects.map((subject) => ({
+                          value: subject?.sub_rc_master_id,
+                          label: subject?.get_subjects_for_report_card?.name,
+                        }))}
+                      />
+                      {subjectError && (
+                        <p className="relative  -mb-3 text-red-500 text-sm">
+                          {subjectError}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {/* Select Exam */}
+                  <div className="form-group flex justify-center gap-x-1 md:gap-x-8 mt-4">
+                    <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
+                      Select Exam <span className="text-red-500">*</span>
+                    </label>
+                    <div className="w-full relative">
+                      <Select
+                        value={selectedExam}
+                        onChange={handleExamChange}
+                        placeholder="Select"
+                        className="w-full md:w-[50%] "
+                        isClearable
+                        options={exams.map((exam) => ({
+                          value: exam.exam_id,
+                          label: exam.name,
+                        }))}
+                      />
+                      {examError && (
+                        <p className="relative  -mb-3 text-red-500 text-sm">
+                          {examError}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
-                {/* Select Subject */}
-                <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
-                  <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
-                    Select Subject <span className="text-red-500">*</span>
-                  </label>
-                  <div className="w-full relative">
-                    <Select
-                      value={selectedSubject}
-                      onChange={handleSubjectChange}
-                      placeholder="Select"
-                      className="w-full md:w-[50%] "
-                      isClearable
-                      options={subjects.map((subject) => ({
-                        value: subject?.sub_rc_master_id,
-                        label: subject?.get_subjects_for_report_card?.name,
-                      }))}
-                    />
-                    {subjectError && (
-                      <p className="relative  -mb-3 text-red-500 text-sm">
-                        {subjectError}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {/* Select Exam */}
-                <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
-                  <label className="w-1/4 pt-2 text-center font-semibold text-gray-700">
-                    Select Exam <span className="text-red-500">*</span>
-                  </label>
-                  <div className="w-full relative">
-                    <Select
-                      value={selectedExam}
-                      onChange={handleExamChange}
-                      placeholder="Select"
-                      className="w-full md:w-[50%] "
-                      isClearable
-                      options={exams.map((exam) => ({
-                        value: exam.exam_id,
-                        label: exam.name,
-                      }))}
-                    />
-                    {examError && (
-                      <p className="relative  -mb-3 text-red-500 text-sm">
-                        {examError}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
                 {/* Marks Headings */}
                 <div className="mt-4 shadow-md  w-full md:w-[60%] ml-0 md:ml-4">
                   <div className="w-full overflow-x-auto">

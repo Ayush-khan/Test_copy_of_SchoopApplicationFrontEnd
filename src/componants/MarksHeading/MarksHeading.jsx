@@ -500,7 +500,7 @@ function MarksHeading() {
           ></div>
 
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden ">
+            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full md:w-[94%] mx-auto ">
               <div className="bg-white rounded-lg shadow-xs ">
                 <table className="min-w-full leading-normal table-auto ">
                   <thead>

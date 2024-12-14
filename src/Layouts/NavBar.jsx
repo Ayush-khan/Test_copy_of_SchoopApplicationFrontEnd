@@ -507,8 +507,7 @@ import { LuSchool } from "react-icons/lu";
 import { RxHamburgerMenu } from "react-icons/rx";
 import Sidebar from "./Sidebar";
 import RecursiveDropdown from "./RecursiveDropdown";
-import { Translate } from "react-bootstrap-icons";
-import { IoIosHelpCircleOutline } from "react-icons/io";
+
 import AdminNavBar from "./AdminNavBar";
 import { toast } from "react-toastify";
 import "./styles.css";
@@ -1017,7 +1016,7 @@ function NavBar() {
               //   />
               // }
               className="  w-18 border-2 rounded-full border-white px-2 lg:px-4 ml-2 hover:rounded-lg "
-              menuAlign="left"
+              // menuAlign="left"
             >
               <NavDropdown.Item>
                 <div
