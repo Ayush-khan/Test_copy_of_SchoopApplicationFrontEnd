@@ -255,22 +255,23 @@ function EditStaff() {
       teacher_image_name: croppedImageData,
     }));
   };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const validationErrors = validate();
-    const errorsToCheck = validationErrors || {};
-    // Check if there are any errors
 
-    if (Object.keys(errorsToCheck).length > 0) {
-      setErrors(errorsToCheck);
-      Object.values(errorsToCheck).forEach((error) => {
-        toast.error(error);
+    // Prevent double submissions
+    if (loading) return;
+
+    // Validate the form data
+    const validationErrors = validate();
+    if (validationErrors && Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      Object.values(validationErrors).forEach((error) => {
+        toast.error(error); // Display validation errors
       });
       return;
     }
 
-    // Convert formData to the format expected by the API
+    // Format form data for API
     const formattedFormData = {
       ...formData,
       academic_qual: formData.academic_qual, // Ensure this is an array
@@ -279,12 +280,13 @@ function EditStaff() {
     };
 
     try {
-      setLoading(true);
+      setLoading(true); // Start loading state
       const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error("No authentication token is found");
+        throw new Error("No authentication token found");
       }
-      console.log("the inseid edata of edit staff", formattedFormData);
+
+      console.log("Submitting data:", formattedFormData);
       const response = await axios.put(
         `${API_URL}/api/teachers/${staff.teacher_id}`,
         formattedFormData,
@@ -296,6 +298,7 @@ function EditStaff() {
         }
       );
 
+      // Handle successful response
       if (response.status === 200) {
         toast.success("Teacher updated successfully!");
         setTimeout(() => {
@@ -303,37 +306,124 @@ function EditStaff() {
         }, 500);
       }
     } catch (error) {
-      toast.error("An error occurred while updating the teacher.");
-      console.error("Error:", error.response?.data || error.message);
+      console.error(
+        "Error updating teacher:",
+        error.response?.data || error.message
+      );
+
+      // Handle backend errors
       if (error.response && error.response.data) {
         const { errors, message } = error.response.data;
 
-        // If validation errors exist, show them
+        // Show validation errors from the backend
         if (errors) {
           Object.entries(errors).forEach(([field, messages]) => {
             messages.forEach((msg) => {
-              console.log(`${field}: ${msg}`);
-              // toast.error(`${field}: ${msg}`);
+              console.log(`${field}: ${msg}`); // Show field-specific error
             });
           });
 
-          // Set backend validation errors to state
-          setBackendErrors(errors || {});
-          console.log("setbackednErrors", backendErrors);
-          console.log("employeeId backednerro", backendErrors?.employee_id[0]);
-          setEmployeeIdBackendError(backendErrors?.employee_id[0]);
+          // Set backend validation errors for specific fields
+          setBackendErrors(errors);
+          setEmployeeIdBackendError(errors?.employee_id?.[0] || ""); // Handle `employee_id` error
         } else if (message) {
-          // Show the backend message if no detailed errors are provided
-          // setEmployeeIdBackendError(message);
+          // Show generic backend error message
           // toast.error(message);
         }
       } else {
-        toast.error(error.message);
+        toast.error("An unexpected error occurred.");
       }
     } finally {
-      setLoading(false);
+      setLoading(false); // End loading state
     }
   };
+
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   const validationErrors = validate();
+  //   const errorsToCheck = validationErrors || {};
+  //   // Check if there are any errors
+
+  //   if (Object.keys(errorsToCheck).length > 0) {
+  //     setErrors(errorsToCheck);
+  //     Object.values(errorsToCheck).forEach((error) => {
+  //       toast.error(error);
+  //     });
+  //     return;
+  //   }
+
+  //   // Convert formData to the format expected by the API
+  //   const formattedFormData = {
+  //     ...formData,
+  //     academic_qual: formData.academic_qual, // Ensure this is an array
+  //     experience: String(formData.experience), // Ensure this is a string
+  //     teacher_image_name: String(formData.teacher_image_name),
+  //   };
+
+  //   try {
+  //     setLoading(true);
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token is found");
+  //     }
+  //     console.log("the inseid edata of edit staff", formattedFormData);
+  //     const response = await axios.put(
+  //       `${API_URL}/api/teachers/${staff.teacher_id}`,
+  //       formattedFormData,
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       toast.success("Teacher updated successfully!");
+  //       setTimeout(() => {
+  //         navigate("/StaffList");
+  //       }, 500);
+  //     }
+  //   } catch (error) {
+  //     // toast.error("An error occurred while updating the teacher.");
+  //     // console.error("Error:", error.response?.data || error.message);
+  //     if (error.response && error.response.data) {
+  //       const { errors, message } = error.response.data;
+
+  //       // If validation errors exist, show them
+  //       if (error.response && error.response.data) {
+  //         const { errors, message } = error.response.data;
+
+  //         // If validation errors exist, show them
+  //         if (errors) {
+  //           Object.entries(errors).forEach(([field, messages]) => {
+  //             messages.forEach((msg) => {
+  //               console.log(`${field}: ${msg}`);
+  //               // toast.error(`${field}: ${msg}`);
+  //             });
+  //           });
+
+  //           // Set backend validation errors to state
+  //           setBackendErrors(errors || {});
+  //           console.log("setbackednErrors", backendErrors);
+  //           console.log(
+  //             "employeeId backednerro",
+  //             backendErrors?.employee_id[0]
+  //           );
+  //           setEmployeeIdBackendError(backendErrors?.employee_id[0]);
+  //         } else if (message) {
+  //           // Show the backend message if no detailed errors are provided
+  //           // setEmployeeIdBackendError(message);
+  //           // toast.error(message);
+  //         }
+  //       } else {
+  //         toast.error(error.message);
+  //       }
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <div className="container mx-auto p-4 ">

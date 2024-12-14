@@ -402,7 +402,12 @@ function StaffList() {
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {staffItem?.name}
+                              {staffItem?.name}{" "}
+                              {staffItem?.isDelete == "Y" && (
+                                <span className="text-red-500">
+                                  (Left school)
+                                </span>
+                              )}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">

@@ -37,6 +37,7 @@ function CreateCareTacker() {
   const today = new Date().toISOString().split("T")[0];
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [employeeIdBackendError, setEmployeeIdBackendError] = useState("");
 
   // Validation functions
 
@@ -140,7 +141,9 @@ function CreateCareTacker() {
   const handleChange = (event) => {
     const { name, value } = event.target;
     let newValue = value;
-
+    if (name === "employee_id") {
+      setEmployeeIdBackendError("");
+    }
     // Input sanitization for specific fields
     if (name === "experience") {
       newValue = newValue.replace(/[^0-9]/g, ""); // Only allow numbers in experience
@@ -274,22 +277,29 @@ function CreateCareTacker() {
       console.error("Error:", error.message);
 
       if (error.response && error.response.data) {
-        // If backend validation errors are present
-        const backendErrors = error.response.data;
+        const { errors, message } = error.response.data;
 
-        // Format backend errors to match the state structure
-        const formattedBackendErrors = {};
-        Object.keys(backendErrors).forEach((key) => {
-          formattedBackendErrors[key] = backendErrors[key][0]; // Use the first error message in the array
-        });
+        // If validation errors exist, show them
+        if (errors) {
+          Object.entries(errors).forEach(([field, messages]) => {
+            messages.forEach((msg) => {
+              console.log(`${field}: ${msg}`);
+              // toast.error(`${field}: ${msg}`);
+            });
+          });
 
-        // Merge backend errors with current state errors
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          ...formattedBackendErrors,
-        }));
+          // Set backend validation errors to state
+          setBackendErrors(errors || {});
+          console.log("setbackednErrors", backendErrors);
+          console.log("employeeId backednerro", backendErrors?.employee_id[0]);
+          setEmployeeIdBackendError(backendErrors?.employee_id[0]);
+        } else if (message) {
+          // Show the backend message if no detailed errors are provided
+          // setEmployeeIdBackendError(message);
+          // toast.error(message);
+        }
       } else {
-        toast.error("An error occurred while creating the Care tacker.");
+        toast.error(error.message);
       }
     } finally {
       setLoading(false);
@@ -627,11 +637,15 @@ function CreateCareTacker() {
                   onChange={handleChange}
                   className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                 />
-                {backendErrors.employee_id && (
+                {/* {backendErrors.employee_id && (
                   <span className="text-red-500 text-xs ml-2">
                     {backendErrors.employee_id}
                   </span>
-                )}
+                )} */}
+                <span className="text-red-500 text-xs">
+                  {employeeIdBackendError}
+                </span>
+
                 {errors.employee_id && (
                   <span className="text-red-500 text-xs ml-2">
                     {errors.employee_id}

@@ -715,6 +715,9 @@ const EditExamTimeTable = () => {
   // };
 
   // Separate function to handle data submission
+
+  // working 100% but warning message wrong
+
   const handleSubmit = async () => {
     const preparedData = prepareData(); // Prepare data for validation
     console.log("prepareData", preparedData);
@@ -733,6 +736,8 @@ const EditExamTimeTable = () => {
       const hasSubjects = preparedData.data[rowIndex].subjects.some(
         (subject) => subject !== ""
       );
+      const hasStudyLeave = preparedData.data[rowIndex].studyLeave === "1";
+
       const subjectCount = preparedData.data[rowIndex].subjects.filter(
         (subject) => subject !== ""
       ).length;
@@ -762,7 +767,7 @@ const EditExamTimeTable = () => {
       }
 
       // Track warning rows: No data for a row
-      if (!hasSubjects && !hasOptionSelected) {
+      if (!hasSubjects && !hasStudyLeave && !hasOptionSelected) {
         warningRows.push(row.date);
       }
     });
@@ -799,7 +804,7 @@ const EditExamTimeTable = () => {
       );
       return;
     }
-
+    console.log("waringRows", warningRows);
     // Display warning message
     if (warningRows.length > 0) {
       const remainingRows = warningRows.length;

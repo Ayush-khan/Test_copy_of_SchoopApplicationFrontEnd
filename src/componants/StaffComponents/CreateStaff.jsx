@@ -1929,8 +1929,8 @@ function CreateStaff() {
         }, 500);
       }
     } catch (error) {
-      console.error("Error:", error.message);
-      toast.error("An error occurred while creating the teacher.");
+      // console.error("Error:", error.message);
+      // toast.error("An error occurred while creating the teacher.");
 
       if (error.response && error.response.data) {
         const { errors, message } = error.response.data;

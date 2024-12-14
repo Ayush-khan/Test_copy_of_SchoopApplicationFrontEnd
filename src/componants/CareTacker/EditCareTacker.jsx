@@ -7,6 +7,8 @@ import Loader from "../common/LoaderFinal/LoaderStyle";
 
 function EditCareTacker() {
   const API_URL = import.meta.env.VITE_API_URL;
+  const [employeeIdBackendError, setEmployeeIdBackendError] = useState("");
+
   const [formData, setFormData] = useState({
     name: "",
     birthday: "",
@@ -174,7 +176,9 @@ function EditCareTacker() {
   const handleChange = (event) => {
     const { name, value } = event.target;
     let newValue = value;
-
+    if (name === "employee_id") {
+      setEmployeeIdBackendError("");
+    }
     // Input sanitization for specific fields
     if (name === "experience") {
       newValue = newValue.replace(/[^0-9]/g, ""); // Only allow numbers in experience
@@ -308,12 +312,29 @@ function EditCareTacker() {
       }
     } catch (error) {
       console.error("Error:", error.message);
-      toast.error("An error occurred while updating the Care tacker.");
+      // toast.error("An error occurred while updating the Care tacker.");
 
+      // Handle backend errors
       if (error.response && error.response.data) {
-        setBackendErrors(error.response.data || {});
+        const { errors, message } = error.response.data;
+
+        // Show validation errors from the backend
+        if (errors) {
+          Object.entries(errors).forEach(([field, messages]) => {
+            messages.forEach((msg) => {
+              console.log(`${field}: ${msg}`); // Show field-specific error
+            });
+          });
+
+          // Set backend validation errors for specific fields
+          setBackendErrors(errors);
+          setEmployeeIdBackendError(errors?.employee_id?.[0] || ""); // Handle `employee_id` error
+        } else if (message) {
+          // Show generic backend error message
+          // toast.error(message);
+        }
       } else {
-        toast.error(error.message);
+        toast.error("An unexpected error occurred.");
       }
     } finally {
       setLoading(false);
@@ -656,6 +677,9 @@ function EditCareTacker() {
                     {errors.employee_id}
                   </span>
                 )}
+                <span className="text-red-500 text-xs">
+                  {employeeIdBackendError}
+                </span>
               </div>
               <div>
                 <label
