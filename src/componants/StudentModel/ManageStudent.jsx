@@ -167,7 +167,10 @@ function ManageSubjectList() {
         });
       }
 
-      const studentList = response?.data?.students || [];
+      // const studentList = response?.data?.students || [];
+      // Handle singular or plural student key
+      const studentList =
+        response?.data?.students || response?.data?.student || [];
       setSubjects(studentList);
       setPageCount(Math.ceil(studentList.length / pageSize)); // Set page count based on response size
     } catch (error) {
