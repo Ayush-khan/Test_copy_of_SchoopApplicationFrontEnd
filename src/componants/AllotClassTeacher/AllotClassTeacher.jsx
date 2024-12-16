@@ -185,10 +185,20 @@ function AllotClassTeacher() {
     console.log("the handleEdit ", section);
     // setTeacherId(" ");
     // Set the teacher object for prefill (value and label)
-    setSelectedTeacher({
-      value: section?.get_teacher?.teacher_id,
-      label: section?.get_teacher?.name, // Ensure the name field is available
-    });
+    // Set the teacher object for prefill (value and label)
+    if (section?.get_teacher?.teacher_id && section?.get_teacher?.name) {
+      setSelectedTeacher({
+        value: section?.get_teacher?.teacher_id,
+        label: section?.get_teacher?.name,
+      });
+    } else {
+      setSelectedTeacher(null); // Handle cases where teacher is not assigned
+    }
+
+    // setSelectedTeacher({
+    //   value: section?.get_teacher?.teacher_id,
+    //   label: section?.get_teacher?.name, // Ensure the name field is available
+    // });
 
     setShowEditModal(true);
     setFieldErrors({});
@@ -681,18 +691,10 @@ function AllotClassTeacher() {
                     <Select
                       className="w-full text-sm"
                       options={teachers}
-                      defaultValue={teacherId} // Pre-fill the selected teacher
+                      value={selectedTeacher} // Pre-fill with the selected teacher
                       isClearable
-                      // value={selectedTeacher} // Pre-fill the selected teacher
                       onChange={handleTeacherChange}
                     />
-                    {/* <Select
-                      className="w-full text-sm"
-                      options={teachers}
-                      value={selectedTeacher} // Pre-fill the selected teacher
-                      isClearable
-                      onChange={handleTeacherChange}
-                    /> */}
 
                     <div className="absolute top-9 left-1/3">
                       {fieldErrors.teacher_id && (

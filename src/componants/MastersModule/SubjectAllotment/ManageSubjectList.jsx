@@ -1744,16 +1744,19 @@ function ManageSubjectList() {
     console.log("teacerId and name is", teacherIdIs, teacherNameIs);
     // It's used for the dropdown of the tachers
     // setnewTeacherAssign()
-    console.log("department is for teacher", departments);
 
     console.log("sectionsis for teacher", section);
-    const selectedOption = departments.find(
-      // (option) => option.value === section?.get_teacher?.teacher_id
-      (option) => option.value == section?.get_teachers?.teacher_id
-    );
-    console.log("selectedOptions__In handleEdit", selectedOption);
 
-    setSelectedTeacher(selectedOption);
+    if (section?.get_teacher?.teacher_id && section?.get_teacher?.name) {
+      setSelectedTeacher({
+        value: section?.get_teacher?.teacher_id,
+        label: section?.get_teacher?.name,
+      });
+    } else {
+      setSelectedTeacher(null); // Handle cases where teacher is not assigned
+    }
+    console.log("setSelectedTeacher after is----->***", selectedTeacher);
+    // setSelectedTeacher(selectedOption);
     setShowEditModal(true);
   };
 

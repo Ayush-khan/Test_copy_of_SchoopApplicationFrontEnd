@@ -352,6 +352,37 @@ function NewStudentList() {
     setUploadStatus(""); // Clear any previous success
     setErrorMessageUrl("");
   };
+  const downloadCsv = async (relativeUrl) => {
+    try {
+      // Use the provided relativeUrl directly
+      const response = await fetch(relativeUrl);
+
+      // Handle HTTP errors
+      if (!response.ok) {
+        throw new Error(`HTTP Error! Status: ${response.status}`);
+      }
+
+      // Convert response to Blob
+      const blob = await response.blob();
+      const filename = "rejected_rows.csv"; // Desired file name
+
+      // Create a temporary link and trigger download
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up the URL object
+      window.URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error("Error downloading the file:", error.message);
+      alert(
+        "Failed to download the file. Please check the URL or your network connection."
+      );
+    }
+  };
 
   // Function to upload the selected CSV file
   const handleUpload = async () => {
@@ -391,13 +422,17 @@ function NewStudentList() {
 
       const showErrorForUploading = error?.response?.data?.message;
       const showErrorForUploadingUrl = error?.response?.data?.invalid_rows;
+      console.log("showErrorForUploadingURL", showErrorForUploading);
       setErrorMessage(
         !showErrorForUploading
           ? "Failed to upload file. Please try again..."
           : `Error-Message: ${showErrorForUploading}.`
       );
-      setErrorMessageUrl(`${API_URL}${showErrorForUploadingUrl}`);
-      console.log("showerrormessage url", errorMessageUrl);
+      // const fullURLFOrErrorMessage = `${API_URL}${showErrorForUploadingUrl}`;
+      const fullURLFOrErrorMessage = `${showErrorForUploadingUrl}`;
+
+      setErrorMessageUrl(fullURLFOrErrorMessage);
+      console.log("showerrormessage Full url", errorMessageUrl);
 
       toast.error(
         !showErrorForUploading
@@ -543,7 +578,7 @@ function NewStudentList() {
                           application. Their userid and password will be sent as
                           email at the email id's provided.
                         </p>
-                        <div className="text-xs  flex flex-col justify-around  ">
+                        {/* <div className="text-xs  flex flex-col justify-around  ">
                           <span>
                             {errorMessage && (
                               <p style={{ color: "red" }}>{errorMessage}</p>
@@ -563,6 +598,30 @@ function NewStudentList() {
                                   document.body.appendChild(link);
                                   link.click();
                                   document.body.removeChild(link);
+                                }}
+                              >
+                                <span className="underline text-blue-500 hover:text-blue-800 mr-2">
+                                  Download CSV to see errors.
+                                </span>
+                              </a>
+                            )}
+                          </span>
+                        </div> */}
+                        <div className="text-xs flex flex-col justify-around">
+                          <span>
+                            {errorMessage && (
+                              <p style={{ color: "red" }}>{errorMessage}</p>
+                            )}
+                          </span>
+                          <span className="mb-2">
+                            {errorMessageUrl && (
+                              <a
+                                href="#"
+                                style={{ color: "red" }}
+                                className="text-xs"
+                                onClick={(e) => {
+                                  e.preventDefault(); // Prevent the default link behavior
+                                  downloadCsv(errorMessageUrl); // Call the function to download the file
                                 }}
                               >
                                 <span className="underline text-blue-500 hover:text-blue-800 mr-2">

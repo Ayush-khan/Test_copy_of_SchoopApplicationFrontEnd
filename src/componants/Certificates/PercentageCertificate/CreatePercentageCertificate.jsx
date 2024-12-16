@@ -340,7 +340,7 @@ const CreatePercentageCertificate = () => {
       total,
       stud_id: formData.stud_id,
       class: formattedMarks,
-      date: today,
+      date: formData.date,
     };
 
     return submissionData;

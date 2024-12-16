@@ -25,6 +25,7 @@
 .custom-submenu .dropdown-item {
   color: white; /* Text color inside dropdown */
   background-color: #89939e; /* Background remains dark */
+  /* border: 2px solid black; */
 }
 
 .custom-submenu .dropdown-item:hover {
@@ -36,6 +37,7 @@
 .custom-nav-dropdown .dropdown-item {
   color: black;
   font-weight: 400;
+
   background-color: white; /* Default background color for dropdown */
 }
 /* subdropdown text effect when hover on it */
