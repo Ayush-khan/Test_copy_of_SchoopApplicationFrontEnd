@@ -86,7 +86,7 @@ const EditLCforDeleteStudent = () => {
 
         const response = await axios.get(
           //   `${API_URL}/api/get_getleavingcertificatedata/${student?.student_id}`,
-          `${API_URL}/api/get_getleavingcertificatedata/${student?.student_id}`,
+          `${API_URL}/api/get_getleavingcertificatedata/${student?.slc_no}`,
 
           {
             headers: { Authorization: `Bearer ${token}` },

@@ -59,6 +59,8 @@ function ManageSubjectList() {
   const [userIdset, setUserIdset] = useState("");
   const [passwordError, setPasswordError] = useState(""); // For password error
   const [userIdError, setUserIdError] = useState(""); // For userId error
+  const [loadingClasses, setLoadingClasses] = useState(false);
+  const [loadingStudents, setLoadingStudents] = useState(false);
 
   // Custom styles for the close button
 
@@ -71,57 +73,47 @@ function ManageSubjectList() {
     [classes]
   );
 
+  // const studentOptions = useMemo(
+  //   () =>
+  //     studentNameWithClassId.map((stu) => ({
+  //       value: stu.student_id,
+  //       label: `${stu?.first_name} ${stu?.mid_name} ${stu.last_name}`,
+  //     })),
+  //   [studentNameWithClassId]
+  // );
   const studentOptions = useMemo(
     () =>
-      studentNameWithClassId.map((stu) => ({
-        value: stu.student_id,
-        label: `${stu?.first_name} ${stu?.mid_name} ${stu.last_name}`,
-      })),
+      studentNameWithClassId
+        .map((stu) => ({
+          value: stu.student_id,
+          label: [stu?.first_name, stu?.mid_name, stu?.last_name]
+            .filter((namePart) => namePart)
+            .join(" "),
+        }))
+        .filter((option) => option.label), // Remove items with empty labels
     [studentNameWithClassId]
   );
 
-  const handleClassSelect = (selectedOption) => {
-    setNameError("");
-    setSelectedClass(selectedOption);
-    setclassIdForManage(selectedOption.value); // Assuming value is the class ID
-    fetchStudentNameWithClassId(selectedOption.value); // Fetch students for selected class
-    setSectionIdForStudentList(selectedOption.value); //
-  };
+  // const handleClassSelect = (selectedOption) => {
+  //   setNameError("");
+  //   setSelectedClass(selectedOption);
+  // setclassIdForManage(selectedOption ? selectedOption.value : null); // Assuming value is the class ID
+  // // fetchStudentNameWithClassId(selectedOption ? selectedOption.value : null); // Fetch students for selected class
+  // setSectionIdForStudentList(selectedOption ? selectedOption.value : null); //
+  // };
 
-  const handleStudentSelect = (selectedOption) => {
-    setNameError("");
-    setSelectedStudent(selectedOption);
-    setSelectedStudentId(selectedOption.value);
-  };
-
-  const handleGrChange = (e) => {
-    const numericInput = e.target.value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
-    setGrNumber(numericInput);
-  };
-
-  // Fetch initial data (classes with student count) and display loader while loading
-  const fetchInitialData = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("authToken");
-      const classResponse = await axios.get(
-        `${API_URL}/api/getallClassWithStudentCount`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setClasses(classResponse.data || []);
-    } catch (error) {
-      toast.error("Error fetching initial data.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch student list based on class ID
+  // const handleStudentSelect = (selectedOption) => {
+  //   setNameError("");
+  //   setSelectedStudent(selectedOption);
+  //   setSelectedStudentId(selectedOption ? selectedOption.value : null);
+  // };
   const fetchStudentNameWithClassId = async (section_id = null) => {
-    setLoading(true);
     try {
+      setLoadingStudents(true);
+
       const params = section_id ? { section_id } : {};
       const token = localStorage.getItem("authToken");
+
       const response = await axios.get(
         `${API_URL}/api/getStudentListBySectionData`,
         {
@@ -129,13 +121,128 @@ function ManageSubjectList() {
           params,
         }
       );
+
       setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching students.");
     } finally {
-      setLoading(false);
+      setLoadingStudents(false);
     }
   };
+  const handleClassSelect = (selectedOption) => {
+    setSelectedClass(selectedOption);
+    setSelectedStudent(null);
+    setSelectedStudentId(null);
+    setclassIdForManage(selectedOption ? selectedOption.value : null); // Assuming value is the class ID
+    // fetchStudentNameWithClassId(selectedOption ? selectedOption.value : null); // Fetch students for selected class
+    setSectionIdForStudentList(selectedOption ? selectedOption.value : null); //
+    // setClassIdForSearch(selectedOption?.value);
+    fetchStudentNameWithClassId(selectedOption?.value);
+  };
+
+  const handleStudentSelect = (selectedOption) => {
+    setNameError(""); // Reset student error on selection
+    setSelectedStudent(selectedOption);
+    setSelectedStudentId(selectedOption?.value);
+  };
+  const handleGrChange = (e) => {
+    const numericInput = e.target.value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+    setGrNumber(numericInput);
+  };
+  useEffect(() => {
+    // Fetch both classes and student names on component mount
+    fetchInitialDataAndStudents();
+    fetchDataRoleId();
+  }, []);
+
+  const fetchInitialDataAndStudents = async () => {
+    try {
+      setLoadingClasses(true);
+      setLoadingStudents(true);
+
+      const token = localStorage.getItem("authToken");
+
+      // Fetch classes and students concurrently
+      const [classResponse, studentResponse] = await Promise.all([
+        axios.get(`${API_URL}/api/getallClassWithStudentCount`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${API_URL}/api/getStudentListBySectionData`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      // Set the fetched data
+      setClasses(classResponse.data || []);
+      setStudentNameWithClassId(studentResponse?.data?.data || []);
+    } catch (error) {
+      toast.error("Error fetching data.");
+    } finally {
+      // Stop loading for both dropdowns
+      setLoadingClasses(false);
+      setLoadingStudents(false);
+    }
+  };
+
+  //  const fetchStudentNameWithClassId = async (section_id = null) => {
+  //    try {
+  //      setLoadingStudents(true);
+
+  //      const params = section_id ? { section_id } : {};
+  //      const token = localStorage.getItem("authToken");
+
+  //      const response = await axios.get(
+  //        `${API_URL}/api/getStudentListBySectionData`,
+  //        {
+  //          headers: { Authorization: `Bearer ${token}` },
+  //          params,
+  //        }
+  //      );
+
+  //      setStudentNameWithClassId(response?.data?.data || []);
+  //    } catch (error) {
+  //      toast.error("Error fetching students.");
+  //    } finally {
+  //      setLoadingStudents(false);
+  //    }
+  //  };
+  // Fetch initial data (classes with student count) and display loader while loading
+  // const fetchInitialData = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const classResponse = await axios.get(
+  //       `${API_URL}/api/getallClassWithStudentCount`,
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
+  //     setClasses(classResponse.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching initial data.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // // Fetch student list based on class ID
+  // const fetchStudentNameWithClassId = async (section_id = null) => {
+  //   setLoading(true);
+  //   try {
+  //     const params = section_id ? { section_id } : {};
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await axios.get(
+  //       `${API_URL}/api/getStudentListBySectionData`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         params,
+  //       }
+  //     );
+  //     setStudentNameWithClassId(response?.data?.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching students.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleSearch = async () => {
     if (isSubmitting) return; // Prevent re-submitting
@@ -204,11 +311,11 @@ function ManageSubjectList() {
       console.error("Error fetching data:", error);
     }
   };
-  useEffect(() => {
-    fetchInitialData(); // Fetch classes once when the component mounts
-    fetchStudentNameWithClassId(classOptions.value);
-    fetchDataRoleId();
-  }, []);
+  // useEffect(() => {
+  //   // fetchInitialData(); // Fetch classes once when the component mounts
+  //   // fetchStudentNameWithClassId(classOptions.value);
+  //   // fetchDataRoleId();
+  // }, []);
 
   // Handle pagination
   const handlePageClick = (data) => {
@@ -574,9 +681,13 @@ function ManageSubjectList() {
                         value={selectedClass}
                         onChange={handleClassSelect}
                         options={classOptions}
-                        placeholder="Select "
+                        // placeholder="Select "
                         isSearchable
                         isClearable
+                        placeholder={
+                          loadingClasses ? "Loading classes..." : "Select"
+                        }
+                        isDisabled={loadingClasses}
                         className="text-sm"
                       />
                       {/* {nameError && (
@@ -598,10 +709,14 @@ function ManageSubjectList() {
                         value={selectedStudent}
                         onChange={handleStudentSelect}
                         options={studentOptions}
-                        placeholder="Select "
+                        // placeholder="Select "
                         isSearchable
                         isClearable
                         className="text-sm"
+                        isDisabled={loadingStudents}
+                        placeholder={
+                          loadingStudents ? "Loading students..." : "Select"
+                        }
                         // isClearable={() => {
                         //   setSelectedStudentId("");
                         // }}

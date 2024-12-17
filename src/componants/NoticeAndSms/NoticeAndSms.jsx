@@ -197,6 +197,7 @@ function NoticeAndSms() {
   };
 
   const handleView = (section) => {
+    console.log("view data", section);
     setCurrentSection(section);
     setnewclassnames(section?.classnames);
     setnewSectionName(section?.notice_date);
@@ -1178,7 +1179,7 @@ function NoticeAndSms() {
                       maxLength={1000}
                       readOnly
                       className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      value={noticeDesc}
+                      value={teacherNameIs}
                     ></textarea>
                   </div>
 

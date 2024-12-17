@@ -124,13 +124,24 @@ const CreatePercentageCertificate = () => {
   };
 
   // Dropdown options
+  // const classOptions = useMemo(
+  //   () =>
+  //     classesforForm.map((cls) => ({
+  //       value: cls.section_id,
+  //       label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+  //       key: `${cls.class_id}-${cls.section_id}`,
+  //     })),
+  //   [classesforForm]
+  // );
   const classOptions = useMemo(
     () =>
-      classesforForm.map((cls) => ({
-        value: cls.section_id,
-        label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
-        key: `${cls.class_id}-${cls.section_id}`,
-      })),
+      classesforForm
+        .filter((cls) => cls.class_id > 123) // Filter out values less than or equal to 107
+        .map((cls) => ({
+          value: cls.section_id,
+          label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+          key: `${cls.class_id}-${cls.section_id}`,
+        })),
     [classesforForm]
   );
 

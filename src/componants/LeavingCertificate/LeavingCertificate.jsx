@@ -29,7 +29,7 @@ const LeavingCertificate = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     sr_no: "",
-    reg_no: "",
+    grn_no: "",
     date: "",
     first_name: "",
     mid_name: "",
@@ -340,8 +340,8 @@ const LeavingCertificate = () => {
     // // If there are validation errors, exit the function
     // if (hasError) return;
     setFormData({
-      reg_no: "",
-      issue_date: "",
+      grn_no: "",
+      date: "",
       stud_id_no: "",
       stu_aadhaar_no: "",
       first_name: "",
@@ -405,7 +405,7 @@ const LeavingCertificate = () => {
         setFormData({
           sr_no: fetchedData.sr_no || "",
           class_id_for_subj: fetchedData.studentinformation.class_id || "",
-          reg_no: fetchedData.studentinformation.reg_no || "",
+          grn_no: fetchedData.studentinformation.reg_no || "",
           date: today || "", // Directly from the fetched data
           subjectsFor: fetchedData.classsubject || [],
           academicStudent: fetchedData.academicStudent || [],
@@ -469,7 +469,7 @@ const LeavingCertificate = () => {
   //   const newErrors = {};
 
   //   // Validate General Register No
-  //   if (!formData.reg_no) newErrors.reg_no = "General Register No is required";
+  //   if (!formData.grn_no) newErrors.grn_no = "General Register No is required";
 
   //   // Validate Date
   //   if (!formData.date) newErrors.date = "Date is required";
@@ -564,8 +564,8 @@ const LeavingCertificate = () => {
 
     // Required fields validation
     const requiredFields = [
-      "reg_no",
-      "issue_date",
+      "grn_no",
+      "date",
       "first_name",
 
       "stud_id_no",
@@ -728,8 +728,8 @@ const LeavingCertificate = () => {
 
     // Reset form data to ensure it updates with fresh data
     setFormData({
-      reg_no: "",
-      issue_date: "",
+      grn_no: "",
+      date: "",
       stud_id_no: "",
       stu_aadhaar_no: "",
       first_name: "",
@@ -790,8 +790,8 @@ const LeavingCertificate = () => {
           academic_yr: selectedAcademicYear, // Make sure to retain the selected academic year
           sr_no: fetchedData.sr_no || "",
           class_id_for_subj: fetchedData.studentinformation.class_id || "",
-          reg_no: fetchedData.studentinformation.reg_no || "",
-          issue_date: today || "",
+          grn_no: fetchedData.studentinformation.reg_no || "",
+          date: today || "",
           subjectsFor: fetchedData.classsubject || [],
           academicStudent: fetchedData.academicStudent || [],
           selectedSubjects: (fetchedData.classsubject || []).map(
@@ -818,7 +818,8 @@ const LeavingCertificate = () => {
           state: fetchedData.studentinformation.state || "",
           mother_tongue: fetchedData.studentinformation.mother_tongue || "",
           dob: fetchedData.studentinformation.dob || "",
-          dob_words: convertDateToWords(fetchedData.studentinformation.dob),
+          // dob_words: convertDateToWords(fetchedData.studentinformation.dob),
+          dob_words: fetchedData.dobinwords || " ",
           attendance: fetchedData.total_attendance || "",
           nationality: fetchedData.studentinformation.nationality || "",
           stu_aadhaar_no: fetchedData.studentinformation.stu_aadhaar_no || "",
@@ -944,8 +945,8 @@ const LeavingCertificate = () => {
     console.log("formData", formData);
     // Format the form data before submission
     const formattedFormData = {
-      reg_no: formData.reg_no || "",
-      issue_date: formatDateString(formData.issue_date),
+      grn_no: formData.grn_no || "",
+      issue_date: formatDateString(formData.date),
       stud_id_no: formData.stud_id_no || "",
       stu_aadhaar_no: formData.stu_aadhaar_no || "",
       first_name: formData.first_name || "",
@@ -1022,7 +1023,7 @@ const LeavingCertificate = () => {
         // Reset form data
         setFormData({
           sr_no: "",
-          reg_no: "",
+          grn_no: "",
           date: "",
           first_name: "",
           mid_name: "",
@@ -1291,7 +1292,7 @@ const LeavingCertificate = () => {
                     </div>
                     <div>
                       <label
-                        htmlFor="reg_no"
+                        htmlFor="grn_no"
                         className="block font-bold text-xs mb-2"
                       >
                         General Register No.{" "}
@@ -1299,17 +1300,17 @@ const LeavingCertificate = () => {
                       </label>
                       <input
                         type="text"
-                        id="reg_no"
-                        name="reg_no"
+                        id="grn_no"
+                        name="grn_no"
                         maxLength={10}
-                        value={formData.reg_no}
+                        value={formData.grn_no}
                         onChange={handleChange}
                         readOnly
                         className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
-                      {errors.reg_no && (
+                      {errors.grn_no && (
                         <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.reg_no}
+                          {errors.grn_no}
                         </span>
                       )}
                     </div>
@@ -1323,14 +1324,14 @@ const LeavingCertificate = () => {
                       <input
                         type="date"
                         id="date"
-                        name="issue_date"
-                        value={formData.issue_date}
+                        name="date"
+                        value={formData.date}
                         onChange={handleChange}
                         className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                       />
-                      {errors.issue_date && (
+                      {errors.date && (
                         <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.issue_date}
+                          {errors.date}
                         </span>
                       )}
                     </div>

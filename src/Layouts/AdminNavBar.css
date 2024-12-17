@@ -53,9 +53,12 @@
   display: inline-block;
   width: 98%;
   margin: 0;
-
+  /* position: relative;
+  left: 8px; */
+  /* border: 2px solid black; */
   /* padding: 2px; */
-  padding-left: 8px;
+  padding: 2px 8px 2px 8px;
+  margin-bottom: -18px;
   color: black;
   /* border: 1px solid red; */
   /* color: white; Text turns white on hover */
