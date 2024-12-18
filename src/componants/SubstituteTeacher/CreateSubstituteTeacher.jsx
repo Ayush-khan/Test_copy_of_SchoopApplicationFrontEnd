@@ -879,6 +879,9 @@ const CreateSubstituteTeacher = () => {
                                     backgroundColor: state.isFocused
                                       ? "rgba(59, 130, 246, 0.1)"
                                       : "white",
+                                    color: state.isSelected
+                                      ? "black"
+                                      : "inherit", // Ensures selected value is black
                                   }),
                                 }}
                               />

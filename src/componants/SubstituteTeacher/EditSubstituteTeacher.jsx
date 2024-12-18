@@ -325,7 +325,7 @@ const EditSubstituteTeacher = () => {
                               <td className="border p-2 text-center">
                                 {row.subject} {row.classSection}
                               </td>
-                              <td className="border p-2 text-center  ">
+                              <td className="border p-2 text-center">
                                 <Select
                                   options={row.substituteOptions || []}
                                   menuPortalTarget={document.body}
@@ -343,7 +343,6 @@ const EditSubstituteTeacher = () => {
                                   styles={{
                                     control: (provided) => ({
                                       ...provided,
-
                                       fontSize: "0.75rem",
                                       minHeight: "30px",
                                     }),
@@ -357,6 +356,9 @@ const EditSubstituteTeacher = () => {
                                       backgroundColor: state.isFocused
                                         ? "rgba(59, 130, 246, 0.1)"
                                         : "white",
+                                      color: state.isSelected
+                                        ? "blue"
+                                        : "inherit", // Ensures selected value is black
                                     }),
                                   }}
                                 />
