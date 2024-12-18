@@ -857,7 +857,7 @@ function ManageSubjectList() {
                                   <img
                                     src={
                                       subject?.image_name
-                                        ? `${subject?.image_name}`
+                                        ? `${API_URL}/${subject?.image_name}`
                                         : "https://via.placeholder.com/50"
                                     }
                                     alt={subject?.name}

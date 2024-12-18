@@ -438,7 +438,7 @@ const LeavingCertificate = () => {
           dob: fetchedData.studentinformation.dob || "",
           admission_class: fetchedData.studentinformation.admission_class || "",
           // dob_words: fetchedData.dobinwords || "", // Directly from fetched data
-          dob_words: convertDateToWords(fetchedData.studentinformation.dob),
+          dob_words: fetchedData.dobinwords || " ",
           attendance: fetchedData.total_attendance || "",
           nationality: fetchedData.studentinformation.nationality || "",
           stu_aadhaar_no: fetchedData.studentinformation.stu_aadhaar_no || "",
@@ -969,6 +969,7 @@ const LeavingCertificate = () => {
       leaving_date: formatDateString(formData.leaving_date),
       standard_studying: formData.standard_studying || "",
       last_exam: formData.last_exam || "",
+      state: formData.state || "",
       subjects: formData.selectedSubjects || [], // Ensure it's an array of subject names
       promoted_to: formData.promoted_to || "",
       attendance: formData.attendance || "",
@@ -2132,6 +2133,7 @@ const LeavingCertificate = () => {
                       <input
                         type="text"
                         id="attendance"
+                        maxLength={7}
                         name="attendance"
                         value={formData.attendance}
                         onChange={handleChange}
@@ -2155,6 +2157,7 @@ const LeavingCertificate = () => {
                         type="text"
                         id="fee_month"
                         name="fee_month"
+                        maxLength={50}
                         value={formData.fee_month}
                         onChange={handleChange}
                         className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -2175,6 +2178,7 @@ const LeavingCertificate = () => {
                       </label>
                       <input
                         type="text"
+                        maxLength={20}
                         id="standard_studying"
                         name="standard_studying"
                         value={formData.standard_studying}
@@ -2230,6 +2234,7 @@ const LeavingCertificate = () => {
                         type="text"
                         id="conduct"
                         name="conduct"
+                        maxLength={100}
                         value={formData.conduct}
                         onChange={handleChange}
                         className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -2252,6 +2257,7 @@ const LeavingCertificate = () => {
                         type="text"
                         id="remark"
                         name="remark"
+                        maxLength={100}
                         value={formData.remark}
                         onChange={handleChange}
                         className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"

@@ -14,6 +14,8 @@ function CareTacker() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
   const [staffs, setStaffs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -108,6 +110,8 @@ function CareTacker() {
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -135,6 +139,9 @@ function CareTacker() {
     } catch (error) {
       console.error("Error deleting CareTacker:", error);
       toast.error("Failed to delete CareTacker");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDeleteModal(false);
     }
   };
 
@@ -359,8 +366,9 @@ function CareTacker() {
                     type="button"
                     className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

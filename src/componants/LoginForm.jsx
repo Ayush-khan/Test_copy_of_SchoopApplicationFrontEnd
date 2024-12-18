@@ -50,6 +50,9 @@ const LoginForm = () => {
     } catch (error) {
       const newErrors = {};
       if (error.response) {
+        if (error.response.status === 403) {
+          newErrors.api = "User not allowed";
+        }
         if (error.response.status === 404) {
           newErrors.email = "Invalid username";
         } else if (error.response.status === 401) {

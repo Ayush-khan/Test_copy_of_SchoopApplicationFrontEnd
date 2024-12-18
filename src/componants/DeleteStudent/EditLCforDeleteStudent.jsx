@@ -1786,6 +1786,7 @@ const EditLCforDeleteStudent = () => {
                 <input
                   type="text"
                   id="attendance"
+                  maxLength={7}
                   name="attendance"
                   value={formData.attendance}
                   onChange={handleChange}
@@ -1809,6 +1810,7 @@ const EditLCforDeleteStudent = () => {
                   type="text"
                   id="fee_month"
                   name="fee_month"
+                  maxLength={50}
                   value={formData.fee_month}
                   onChange={handleChange}
                   className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -1830,6 +1832,7 @@ const EditLCforDeleteStudent = () => {
                 <input
                   type="text"
                   id="standard_studying"
+                  maxLength={20}
                   name="standard_studying"
                   value={formData.standard_studying}
                   onChange={handleChange}
@@ -1883,6 +1886,7 @@ const EditLCforDeleteStudent = () => {
                 <input
                   type="text"
                   id="conduct"
+                  maxLength={100}
                   name="conduct"
                   value={formData.conduct}
                   onChange={handleChange}
@@ -1903,6 +1907,7 @@ const EditLCforDeleteStudent = () => {
                 </label>
                 <input
                   type="text"
+                  maxLength={100}
                   id="remark"
                   name="remark"
                   value={formData.remark}

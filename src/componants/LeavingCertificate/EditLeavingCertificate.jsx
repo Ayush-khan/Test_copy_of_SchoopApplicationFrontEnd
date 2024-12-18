@@ -1783,6 +1783,7 @@ const EditLeavingCertificate = () => {
                 <input
                   type="text"
                   id="attendance"
+                  maxLength={7}
                   name="attendance"
                   value={formData.attendance}
                   onChange={handleChange}
@@ -1805,6 +1806,7 @@ const EditLeavingCertificate = () => {
                 <input
                   type="text"
                   id="fee_month"
+                  maxLength={50}
                   name="fee_month"
                   value={formData.fee_month}
                   onChange={handleChange}
@@ -1828,6 +1830,7 @@ const EditLeavingCertificate = () => {
                   type="text"
                   id="standard_studying"
                   name="standard_studying"
+                  maxLength={20}
                   value={formData.standard_studying}
                   onChange={handleChange}
                   className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -1881,6 +1884,7 @@ const EditLeavingCertificate = () => {
                   type="text"
                   id="conduct"
                   name="conduct"
+                  maxLength={100}
                   value={formData.conduct}
                   onChange={handleChange}
                   className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -1901,6 +1905,7 @@ const EditLeavingCertificate = () => {
                 <input
                   type="text"
                   id="remark"
+                  maxLength={100}
                   name="remark"
                   value={formData.remark}
                   onChange={handleChange}
