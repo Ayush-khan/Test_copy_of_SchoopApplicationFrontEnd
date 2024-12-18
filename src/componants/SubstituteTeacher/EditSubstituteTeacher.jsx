@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
@@ -11,6 +11,7 @@ import { useLocation } from "react-router-dom";
 
 const EditSubstituteTeacher = () => {
   const API_URL = import.meta.env.VITE_API_URL;
+  const hasFetched = useRef(false);
   const location = useLocation();
   const { staff } = location.state || {};
   const { teacherId, date } = staff.timetable[0] || {};
@@ -92,6 +93,49 @@ const EditSubstituteTeacher = () => {
       setLoading(false); // Stop loading
     }
   };
+
+  // Fetch substitution teacher list for a specific period and teacher
+  const fetchSubstitutionTeachers = async (periodNo, teacherId) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${API_URL}/api/get_substituteteacherclasswise/${periodNo}/${teacherId}/${selectedDate}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return response?.data?.data || [];
+    } catch (error) {
+      console.error("Error fetching substitution teachers:", error);
+      toast.error("Failed to fetch substitute teachers.");
+      return [];
+    }
+  };
+  // Fetch substitution teachers for each period
+
+  useEffect(() => {
+    const fetchSubstituteOptions = async () => {
+      const updatedTimetable = await Promise.all(
+        timetable.map(async (row) => {
+          const substituteOptions = await fetchSubstitutionTeachers(
+            row.periodNo,
+            row.teacherId
+          );
+          return {
+            ...row,
+            substituteOptions: substituteOptions.map((teacher) => ({
+              value: teacher.teacher_id,
+              label: teacher.name,
+            })),
+          };
+        })
+      );
+      setTimetable(updatedTimetable);
+    };
+
+    if (timetable.length > 0 && !hasFetched.current) {
+      hasFetched.current = true; // Mark as fetched
+      fetchSubstituteOptions();
+    }
+  }, [timetable]); // Only run if the timetable changes
 
   const fetchExams = async () => {
     try {
@@ -283,11 +327,11 @@ const EditSubstituteTeacher = () => {
                               </td>
                               <td className="border p-2 text-center  ">
                                 <Select
-                                  options={teacherOptions}
+                                  options={row.substituteOptions || []}
                                   menuPortalTarget={document.body}
                                   menuPosition="fixed"
                                   isClearable
-                                  value={teacherOptions.find(
+                                  value={row.substituteOptions?.find(
                                     (option) =>
                                       option.value === row.substituteTeacher
                                   )}
@@ -295,10 +339,11 @@ const EditSubstituteTeacher = () => {
                                     handleTeacherSelect(index, selectedOption)
                                   }
                                   placeholder="Select"
-                                  className="text-sm"
+                                  className="text-sm text-black"
                                   styles={{
                                     control: (provided) => ({
                                       ...provided,
+
                                       fontSize: "0.75rem",
                                       minHeight: "30px",
                                     }),
@@ -310,9 +355,8 @@ const EditSubstituteTeacher = () => {
                                       ...provided,
                                       fontSize: "0.95rem",
                                       backgroundColor: state.isFocused
-                                        ? "#f0f0f0"
-                                        : "#fff",
-                                      color: "#333",
+                                        ? "rgba(59, 130, 246, 0.1)"
+                                        : "white",
                                     }),
                                   }}
                                 />

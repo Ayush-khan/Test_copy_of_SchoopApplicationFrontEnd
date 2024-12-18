@@ -186,7 +186,7 @@
 //     const options = teacherList.reduce((acc, teacher) => {
 //       const periodNo = teacher.periodNo; // Assuming teacherList contains `periodNo`
 //       if (!acc[periodNo]) acc[periodNo] = [];
-//       acc[periodNo].push({ value: teacher.reg_id, label: teacher.name });
+//       acc[periodNo].push({ value: teacher.teacher_id, label: teacher.name });
 //       return acc;
 //     }, {});
 
@@ -393,7 +393,9 @@
 
 // export default CreateSubstituteTeacher;
 
+// 100% working directory
 import { useState, useEffect, useMemo } from "react";
+import { useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
@@ -405,6 +407,7 @@ import { FiPrinter } from "react-icons/fi";
 
 const CreateSubstituteTeacher = () => {
   const API_URL = import.meta.env.VITE_API_URL;
+  const hasFetched = useRef(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
@@ -505,6 +508,14 @@ const CreateSubstituteTeacher = () => {
     );
   };
 
+  const teacherOptions = useMemo(
+    () =>
+      teacherList.map((teacher) => ({
+        value: teacher.reg_id,
+        label: teacher.name,
+      })),
+    [teacherList]
+  );
   const resetTeacherDropdown = () => {
     // setTimetable((prevTimetable) =>
     //   prevTimetable.map((row) => ({
@@ -515,16 +526,6 @@ const CreateSubstituteTeacher = () => {
     // );
     setTimetable([]);
   };
-
-  const teacherOptions = useMemo(
-    () =>
-      teacherList.map((teacher) => ({
-        value: teacher.reg_id,
-        label: teacher.name,
-      })),
-    [teacherList]
-  );
-
   const handleStudentSelect = (selectedOption) => {
     setStudentError(""); // Reset error if student is selected
     setSelectedStudent(selectedOption);
@@ -541,6 +542,49 @@ const CreateSubstituteTeacher = () => {
       })),
     [studentNameWithClassId]
   );
+
+  // Fetch substitution teacher list for a specific period and teacher
+  const fetchSubstitutionTeachers = async (periodNo, teacherId) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${API_URL}/api/get_substituteteacherclasswise/${periodNo}/${teacherId}/${selectedDate}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return response?.data?.data || [];
+    } catch (error) {
+      console.error("Error fetching substitution teachers:", error);
+      toast.error("Failed to fetch substitute teachers.");
+      return [];
+    }
+  };
+  // Fetch substitution teachers for each period
+
+  useEffect(() => {
+    const fetchSubstituteOptions = async () => {
+      const updatedTimetable = await Promise.all(
+        timetable.map(async (row) => {
+          const substituteOptions = await fetchSubstitutionTeachers(
+            row.periodNo,
+            row.teacherId
+          );
+          return {
+            ...row,
+            substituteOptions: substituteOptions.map((teacher) => ({
+              value: teacher.teacher_id,
+              label: teacher.name,
+            })),
+          };
+        })
+      );
+      setTimetable(updatedTimetable);
+    };
+
+    if (timetable.length > 0 && !hasFetched.current) {
+      hasFetched.current = true; // Mark as fetched
+      fetchSubstituteOptions();
+    }
+  }, [timetable]); // Only run if the timetable changes
 
   // Handle search and fetch parent information
   const handleSearch = async () => {
@@ -804,15 +848,15 @@ const CreateSubstituteTeacher = () => {
                             <td className="border p-2 text-center">
                               {row.subject} {row.classSection}
                             </td>
-                            <td className="border p-2 text-center  ">
+                            <td className="border p-2 text-center">
                               <Select
-                                options={teacherOptions}
+                                options={row.substituteOptions || []}
                                 menuPortalTarget={document.body}
                                 menuPosition="fixed"
                                 isClearable
-                                value={teacherOptions.find(
+                                value={row.substituteOptions?.find(
                                   (option) =>
-                                    option.value === row?.substituteTeacher
+                                    option.value === row.substituteTeacher
                                 )}
                                 onChange={(selectedOption) =>
                                   handleTeacherSelect(index, selectedOption)
@@ -822,22 +866,19 @@ const CreateSubstituteTeacher = () => {
                                 styles={{
                                   control: (provided) => ({
                                     ...provided,
-
-                                    fontSize: "0.75rem", // Smaller font for the control
-                                    minHeight: "30px", // Optional: Reduce height
+                                    fontSize: "0.75rem",
+                                    minHeight: "30px",
                                   }),
                                   menu: (provided) => ({
                                     ...provided,
-                                    // backgroundColor: "black",
-                                    fontSize: "0.75rem", // Smaller font for menu items
+                                    fontSize: "0.75rem",
                                   }),
                                   option: (provided, state) => ({
                                     ...provided,
-                                    fontSize: "0.95rem", // Smaller font for options
+                                    fontSize: "0.95rem",
                                     backgroundColor: state.isFocused
-                                      ? "#f0f0f0"
-                                      : "#fff",
-                                    color: "#333",
+                                      ? "rgba(59, 130, 246, 0.1)"
+                                      : "white",
                                   }),
                                 }}
                               />
