@@ -556,7 +556,7 @@ function ManageLC() {
                                 let showEditButton = false;
                                 let showDownloadButton = false;
 
-                                if (subject.IsDeleted === "Y") {
+                                if (subject.IsDelete === "Y") {
                                   statusText = "Deleted";
                                 } else if (subject.IsIssued === "Y") {
                                   statusText = "Issued";
