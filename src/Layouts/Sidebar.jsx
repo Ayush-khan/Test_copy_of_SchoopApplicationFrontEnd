@@ -226,13 +226,16 @@ export default function Sidebar({ isSidebar, setIsSidebar }) {
             <li key={index} className="text-sm text-center underline-none">
               <Link
                 to={tab}
-                className=" overflow-hidden relative -left-2 block  py-2 rounded-md bg-blue-500 text-white hover:bg-blue-700 transition duration-300"
+                // className=" overflow-hidden relative -left-2 block  py-2 rounded-md bg-blue-500 text-white hover:bg-blue-700 transition duration-300"
+                className=" overflow-hidden relative -left-2 block no-underline font-bold text-[.7em] py-2 rounded-md bg-blue-500 text-white hover:bg-blue-700 transition duration-300"
               >
-                {tab}
+                {/* {tab} */}
+                {tab.split("/").pop()}
               </Link>
             </li>
           ))}
         </ul>
+
         <RxCross2
           className="absolute right-2 top-2 text-2xl text-red-500 hover:cursor-pointer"
           onClick={() => setIsSidebar(false)}
