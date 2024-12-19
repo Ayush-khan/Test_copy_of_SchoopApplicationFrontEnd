@@ -1175,10 +1175,8 @@ function EditOfNewStudentList() {
                 onChange={handleChange}
                 // onBlur={handleBlur}
               />
-              {errors.dateOfBirth && (
-                <p className="text-[12px] text-red-500 mb-1">
-                  {errors.dateOfBirth}
-                </p>
+              {errors.dob && (
+                <p className="text-[12px] text-red-500 mb-1">{errors.dob}</p>
               )}
             </div>
             <div className="mt-2">
