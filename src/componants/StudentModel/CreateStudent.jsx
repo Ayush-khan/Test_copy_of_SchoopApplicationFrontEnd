@@ -290,6 +290,34 @@ function Form() {
   }, [selectedClass, API_URL]);
 
   // Logic for the preselect readio button
+  // useEffect(() => {
+  //   if (student) {
+  //     // Set form data from student object...
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       f_mobile: student.parents?.f_mobile || "",
+  //       f_email: student.parents?.f_email || "",
+  //       m_mobile: student.parents?.m_mobile || "",
+  //       m_emailid: student.parents?.m_emailid || "",
+  //       SetToReceiveSMS: student.SetToReceiveSMS || "",
+  //       SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
+  //     }));
+
+  //     // Initializing selectedUsername based on conditions
+  //     const userId = student.user_master?.user_id;
+  //     if (userId === student.parents?.f_mobile) {
+  //       setSelectedUsername("FatherMob");
+  //     } else if (userId === student.parents?.m_mobile) {
+  //       setSelectedUsername("MotherMob");
+  //     } else if (userId === student.parents?.f_email) {
+  //       setSelectedUsername("Father");
+  //     } else if (userId === student.parents?.m_emailid) {
+  //       setSelectedUsername("Mother");
+  //     }
+  //   }
+  // }, [student]);
+
+  // This one is check extra for the sms:
   useEffect(() => {
     if (student) {
       // Set form data from student object...
@@ -304,8 +332,32 @@ function Form() {
       }));
 
       // Initializing selectedUsername based on conditions
-      const userId = student.user_master?.user_id;
-      if (userId === student.parents?.f_mobile) {
+      // const userId = student.user_master?.user_id;
+      // console.log("master user_id", userId);
+      // if (userId === student.parents?.f_mobile) {
+      //   setSelectedUsername("FatherMob");
+      // } else if (userId === student.parents?.m_mobile) {
+      //   setSelectedUsername("MotherMob");
+      // } else if (userId === student.parents?.f_email) {
+      //   setSelectedUsername("Father");
+      // } else if (userId === student.parents?.m_emailid) {
+      //   setSelectedUsername("Mother");
+      // } else if (userId === undefined) {
+      //   setSelectedUsername("");
+      //   console.log("run conditon when userid is undefined");
+      // }
+      // const userId = student.user_master?.user_id;
+      const userId = student.user_master?.user_id
+        ? student.user_master.user_id
+        : null;
+      console.log("master user_id", userId);
+
+      // Check if userId is undefined and exit early
+      if (userId === null) {
+        setSelectedUsername("");
+        console.log("User ID is undefined, skipping conditions");
+        return;
+      } else if (userId === student.parents?.f_mobile) {
         setSelectedUsername("FatherMob");
       } else if (userId === student.parents?.m_mobile) {
         setSelectedUsername("MotherMob");
@@ -313,6 +365,27 @@ function Form() {
         setSelectedUsername("Father");
       } else if (userId === student.parents?.m_emailid) {
         setSelectedUsername("Mother");
+      } else {
+        setSelectedUsername("");
+        console.log("User ID does not match any condition");
+      }
+
+      // Set 'SetToReceiveSMS' based on mobile number matching
+      if (student.SetToReceiveSMS === student.parents?.f_mobile) {
+        setFormData((prev) => ({
+          ...prev,
+          SetToReceiveSMS: "Father",
+        }));
+      } else if (student.SetToReceiveSMS === student.parents?.m_mobile) {
+        setFormData((prev) => ({
+          ...prev,
+          SetToReceiveSMS: "Mother",
+        }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          SetToReceiveSMS: "",
+        }));
       }
     }
   }, [student]);

@@ -29,6 +29,22 @@ const LoginForm = () => {
           password: password,
         }
       );
+      console.log(
+        "responseerror",
+        response.data.success,
+        "and ",
+        response.data.status
+      );
+      const userNotAllowed = {};
+      if (response.data.success === false && response.data.status === 403) {
+        userNotAllowed.onlyAdminAllowError = response.data.message;
+        setErrors(userNotAllowed);
+        console.log("userNotAllowed", userNotAllowed);
+        console.log("setErros", errors.onlyAdminAllowError);
+
+        return;
+      }
+
       console.log("the message of the response of the login", response);
 
       //  {"message": "Login successfully",
@@ -38,21 +54,21 @@ const LoginForm = () => {
       //     "role_id": "",
       //     "academic_yr": "2023-2024",
       //     "institutename": "St. Arnold's Central School"}
+      if (response.status === 200) {
+        localStorage.setItem("authToken", response.data.token);
 
-      localStorage.setItem("authToken", response.data.token);
-
-      const sessionData = {
-        user: response.data.data,
-        settings: response.data.settings,
-      };
-      sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
-      navigate("/dashboard");
+        const sessionData = {
+          user: response.data.data,
+          settings: response.data.settings,
+        };
+        sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
+        navigate("/dashboard");
+      } else {
+        return;
+      }
     } catch (error) {
       const newErrors = {};
       if (error.response) {
-        if (error.response.status === 403) {
-          newErrors.api = "User not allowed";
-        }
         if (error.response.status === 404) {
           newErrors.email = "Invalid username";
         } else if (error.response.status === 401) {
@@ -107,9 +123,20 @@ const LoginForm = () => {
             />
           </div>
           {errors.password && (
-            <span className={styles.error}>{errors.password}</span>
+            <div
+              className={`${styles.error} text-center w-[90%] mx-auto  text-nowrap text-xs`}
+            >
+              {errors.password}
+            </div>
           )}
         </div>
+        {errors.onlyAdminAllowError && (
+          <div
+            className={`${styles.error} text-center w-[90%] mx-auto relative -top-4 text-nowrap text-xs`}
+          >
+            {errors.onlyAdminAllowError}
+          </div>
+        )}
 
         {errors.api && (
           <span
