@@ -220,17 +220,32 @@ export default function Sidebar({ isSidebar, setIsSidebar }) {
           Recent Tabs
         </h2>
 
-        <ul className="space-y-2">
+        <ul className="space-y-1">
           {console.log("tabvisitednow", tabVisits)}
           {tabVisits.map((tab, index) => (
-            <li key={index} className="text-sm text-center underline-none">
+            <li
+              key={index}
+              className="text-sm w-[132%] relative -left-6    text-center underline-none"
+            >
               <Link
                 to={tab}
-                // className=" overflow-hidden relative -left-2 block  py-2 rounded-md bg-blue-500 text-white hover:bg-blue-700 transition duration-300"
-                className=" overflow-hidden relative -left-2 block no-underline font-bold text-[.7em] py-2 rounded-md bg-blue-500 text-white hover:bg-blue-700 transition duration-300"
+                className="overflow-hidden block no-underline font-semibold text-[.9em] py-2 rounded-md bg-blue-500 text-white hover:bg-blue-700 hover:font-bold transition duration-300"
               >
-                {/* {tab} */}
-                {tab.split("/").pop()}
+                {tab
+                  .split("/")
+                  .map((segment, index, arr) => {
+                    const isLastSegmentNumeric =
+                      !isNaN(segment) && index === arr.length - 1;
+                    return isLastSegmentNumeric
+                      ? `-${segment}` // Add a dash before numeric ID
+                      : `${segment.charAt(0).toUpperCase()}${segment
+                          .slice(1)
+                          .toLowerCase()}`;
+                  })
+                  .join("")}
+                {/* Remove any leading dash */}
+                {/* {tab.split("/").pop().charAt(0).toUpperCase() +
+                  tab.split("/").pop().slice(1).toLowerCase()} */}
               </Link>
             </li>
           ))}

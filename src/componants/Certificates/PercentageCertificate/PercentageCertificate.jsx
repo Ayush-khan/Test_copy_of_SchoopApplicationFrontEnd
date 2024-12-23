@@ -183,7 +183,7 @@ function PercentageCertificate() {
   const handleEditForm = (section) => {
     setCurrentSection(section);
     navigate(
-      `/studentPercentage/edit/${section?.sr_no}`,
+      `/stud_Percent/edit/${section?.sr_no}`,
 
       {
         state: { student: section },

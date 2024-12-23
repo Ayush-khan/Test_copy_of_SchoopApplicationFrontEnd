@@ -813,28 +813,28 @@ const AdminNavBar = () => {
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
-          to="/classlist"
+          to="/classes"
           className="text-sm font-bold hover:text-black"
         >
           Class
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
-          to="/divisionlist"
+          to="/division"
           className="text-sm font-bold hover:text-black"
         >
           Division
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
-          to="/subjectlist"
+          to="/subjects"
           className="text-sm font-bold hover:text-black"
         >
           Subjects
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
-          to="/managesubject"
+          to="/subject_allotment"
           className="text-sm font-bold hover:text-black"
         >
           Subjects Allotment
@@ -885,7 +885,7 @@ const AdminNavBar = () => {
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
-          to="/allotMarksHeading"
+          to="/allot_Marks_Heading"
           // to="/allotMarksHeading"
           className="text-sm font-bold hover:text-black"
         >
@@ -893,7 +893,7 @@ const AdminNavBar = () => {
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
-          to="/examTimeTable"
+          to="/exam_TimeTable"
           // to="/allotMarksHeading"
           className="text-sm font-bold hover:text-black"
         >

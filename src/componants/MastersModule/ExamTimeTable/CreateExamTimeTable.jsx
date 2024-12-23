@@ -612,7 +612,7 @@ const CreateExamTimeTable = () => {
 
       // Navigate to /examTimeTable after a slight delay
       setTimeout(() => {
-        navigate("/examTimeTable");
+        navigate("/exam_TImeTable");
       }, 500);
     } catch (error) {
       toast.error("Error creating Exam Time Table.");
@@ -762,7 +762,7 @@ const CreateExamTimeTable = () => {
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               setErrors({});
-              navigate("/examTImeTable");
+              navigate("/exam_TImeTable");
             }}
           />
         </div>
@@ -922,7 +922,7 @@ const CreateExamTimeTable = () => {
                           {row.subjects.map((subject, subIndex) => (
                             <td className="border p-2" key={subIndex}>
                               <select
-                                className="w-full border p-1"
+                                className="w-full text-xs border p-1 text-xs"
                                 value={subject}
                                 onChange={(e) =>
                                   updateTimetable(
@@ -953,7 +953,7 @@ const CreateExamTimeTable = () => {
                           ))}
                           <td className="border p-2">
                             <select
-                              className="w-full border p-1"
+                              className="w-full  border p-1 text-xs"
                               value={row.option}
                               onChange={(e) =>
                                 updateTimetable(index, "option", e.target.value)

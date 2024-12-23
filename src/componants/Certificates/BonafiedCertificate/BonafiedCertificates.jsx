@@ -176,7 +176,7 @@ function BonafiedCertificates() {
   const handleEditForm = (section) => {
     setCurrentSection(section);
     navigate(
-      `/studentBonafied/edit/${section?.sr_no}`,
+      `/bonafied/edit/${section?.sr_no}`,
 
       {
         state: { student: section },

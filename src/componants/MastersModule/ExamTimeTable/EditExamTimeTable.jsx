@@ -876,7 +876,7 @@ const EditExamTimeTable = () => {
 
       // Navigate to /examTimeTable after a slight delay
       setTimeout(() => {
-        navigate("/examTimeTable");
+        navigate("/exam_TImeTable");
       }, 500);
     } catch (error) {
       toast.error("Error updating Exam Time Table.");
@@ -899,7 +899,7 @@ const EditExamTimeTable = () => {
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               setErrors({});
-              navigate("/examTImeTable");
+              navigate("/exam_TImeTable");
             }}
           />
         </div>

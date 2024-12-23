@@ -181,7 +181,7 @@ const SubstituteTeacher = () => {
     console.log("this is the )))))))))", staffItem);
     // navigate(`/editStaff/${staffItem.user_id}`
     navigate(
-      `/substituteTeacher/edit/${staffItem?.teacher_id}`,
+      `/substitute/edit/${selectedStudentId}`,
 
       {
         state: { staff: staffItem },

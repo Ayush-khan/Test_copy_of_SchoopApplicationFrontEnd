@@ -177,7 +177,7 @@ function CharacterCertificate() {
   const handleEditForm = (section) => {
     setCurrentSection(section);
     navigate(
-      `/studentCharacter/edit/${section?.sr_no}`,
+      `/stud_char/edit/${section?.sr_no}`,
 
       {
         state: { student: section },

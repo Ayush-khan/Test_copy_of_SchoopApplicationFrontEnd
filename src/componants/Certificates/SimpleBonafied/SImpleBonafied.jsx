@@ -172,7 +172,7 @@ function SImpleBonafied() {
   const handleEditForm = (section) => {
     setCurrentSection(section);
     navigate(
-      `/studentSimpleBonafied/edit/${section?.sr_no}`,
+      `/sm_Bonafied/edit/${section?.sr_no}`,
 
       {
         state: { student: section },

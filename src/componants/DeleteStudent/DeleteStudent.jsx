@@ -229,7 +229,7 @@ function DeleteStudent() {
   const handleEditForm = (section) => {
     setCurrentSection(section);
     navigate(
-      `/editLCforDeleteStudent/edit/${section?.student_id}`,
+      `/deletedStudent/edit/${section?.student_id}`,
 
       {
         state: { student: section },

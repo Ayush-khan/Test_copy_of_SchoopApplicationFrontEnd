@@ -212,7 +212,7 @@ function Index() {
           element={<PrivateRoute element={BonafiedCertificates} />}
         />
         <Route
-          path="/studentBonafied/edit/:id"
+          path="/bonafied/edit/:id"
           // path="#"
           element={<PrivateRoute element={EditBonafied} />}
         />
@@ -233,7 +233,7 @@ function Index() {
           element={<PrivateRoute element={PercentageCertificate} />}
         />
         <Route
-          path="/studentPercentage/edit/:id"
+          path="/stud_Percent/edit/:id"
           // path="#"
           element={<PrivateRoute element={EditPercentage} />}
         />
@@ -244,7 +244,7 @@ function Index() {
           element={<PrivateRoute element={CharacterCertificate} />}
         />
         <Route
-          path="/studentCharacter/edit/:id"
+          path="/stud_Char/edit/:id"
           // path="#"
           element={<PrivateRoute element={EditCharacter} />}
         />
@@ -255,7 +255,7 @@ function Index() {
           element={<PrivateRoute element={SImpleBonafied} />}
         />
         <Route
-          path="/studentSimpleBonafied/edit/:id"
+          path="/sm_Bonafied/edit/:id"
           // path="#"
           element={<PrivateRoute element={EditSimpleBonafied} />}
         />
@@ -290,7 +290,7 @@ function Index() {
           element={<PrivateRoute element={ViewDeletedStudent} />}
         />
         <Route
-          path="/editLCforDeleteStudent/edit/:id"
+          path="/deletedStudent/edit/:id"
           // path="#"
           element={<PrivateRoute element={EditLCforDeleteStudent} />}
         />
@@ -327,7 +327,7 @@ function Index() {
           element={<PrivateRoute element={SubstituteTeacher} />}
         />
         <Route
-          path="/substituteTeacher/edit/:id"
+          path="/substitute/edit/:id"
           element={<PrivateRoute element={EditSubstituteTeacher} />}
         />
         {/*  Notice And Sms Module */}
@@ -364,24 +364,21 @@ function Index() {
           path="/myprofile"
           element={<PrivateRoute element={UserProfile} />}
         />
-        <Route
-          path="/classlist"
-          element={<PrivateRoute element={ClassList} />}
-        />
+        <Route path="/classes" element={<PrivateRoute element={ClassList} />} />
 
         {/* Division module */}
         <Route
-          path="/divisionlist"
+          path="/division"
           element={<PrivateRoute element={DivisionList} />}
         />
         {/* Division module */}
         <Route
-          path="/subjectlist"
+          path="/subjects"
           element={<PrivateRoute element={SubjectList} />}
         />
         {/* SubjectAllotment module */}
         <Route
-          path="/managesubject"
+          path="/subject_allotment"
           element={<PrivateRoute element={ManageSubjectList} />}
         />
         {/* SubjectForReportCard module */}
@@ -437,12 +434,12 @@ function Index() {
         />
         {/* AllotMarksHeading module */}
         <Route
-          path="/allotMarksHeading"
+          path="/allot_Marks_Heading"
           element={<PrivateRoute element={AllotMarksHeading} />}
         />
         {/* Exam Time Table */}
         <Route
-          path="/examTImeTable"
+          path="/exam_TImeTable"
           element={<PrivateRoute element={ExamTImeTable} />}
         />
         <Route

@@ -195,7 +195,7 @@ const ViewExamTimeTable = () => {
           </h5>
           <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-            onClick={() => navigate("/examTimeTable")}
+            onClick={() => navigate("/exam_TImeTable")}
           />
         </div>
         <div
