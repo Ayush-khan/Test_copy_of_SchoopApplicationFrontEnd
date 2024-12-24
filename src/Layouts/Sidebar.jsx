@@ -216,10 +216,15 @@ export default function Sidebar({ isSidebar, setIsSidebar }) {
             : "relative transform translate-x-0 transition-all duration-500"
         }`}
       >
-        <h2 className="text-lg font-semibold pt-1 bg-gray-200 pr-2">
+        <h2 className="text-[1.1em] font-semibold pt-2 bg-gray-200 text-gray-900 pr-2">
           Recent Tabs
         </h2>
-
+        <div
+          className=" relative w-[100%]  left-2 mb-2 h-1  mx-auto bg-red-700"
+          style={{
+            backgroundColor: "#C03078",
+          }}
+        ></div>
         <ul className="space-y-1">
           {console.log("tabvisitednow", tabVisits)}
           {tabVisits.map((tab, index) => (
@@ -229,7 +234,7 @@ export default function Sidebar({ isSidebar, setIsSidebar }) {
             >
               <Link
                 to={tab}
-                className="overflow-hidden block no-underline font-semibold text-[.9em] py-2 rounded-md bg-blue-500 text-white hover:bg-blue-700 hover:font-bold transition duration-300"
+                className="overflow-hidden block no-underline font-semibold text-[.9em] py-2 rounded-md bg-blue-500 text-pink-200 hover:text-pink-100 hover:bg-blue-600 shadow-md hover:drop-shadow-lg hover:font-bold transition duration-300"
               >
                 {tab
                   .split("/")
@@ -252,7 +257,7 @@ export default function Sidebar({ isSidebar, setIsSidebar }) {
         </ul>
 
         <RxCross2
-          className="absolute right-2 top-2 text-2xl text-red-500 hover:cursor-pointer"
+          className="absolute right-2 top-3 text-xl text-red-500 hover:cursor-pointer"
           onClick={() => setIsSidebar(false)}
         />
       </div>

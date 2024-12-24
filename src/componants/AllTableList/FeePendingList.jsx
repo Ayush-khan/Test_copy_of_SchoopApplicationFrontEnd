@@ -46,8 +46,8 @@ function FeePendingList() {
     fetchStaffBirthday();
   }, []);
   console.log("the staffbirthlis", staffBirthday);
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="container mt-4 ">
@@ -65,9 +65,15 @@ function FeePendingList() {
             }}
           />
         </div>
+        <div
+          className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+          style={{
+            backgroundColor: "#C03078",
+          }}
+        ></div>
 
         <div className="card-body w-full">
-          <div className=" h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden ">
+          <div className="bg-white rounded-lg shadow-xs  w-full md:w-[80%] mx-auto">
             <div className="bg-white rounded-lg  shadow-xs ">
               <table className="min-w-full leading-normal table-auto">
                 <thead>
@@ -87,35 +93,49 @@ function FeePendingList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {staffBirthday.map((staff, index) => (
-                    <tr
-                      key={index}
-                      className={`${
-                        index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                      } hover:bg-gray-50  `}
-                    >
-                      <td className=" sm:px-0.5 text-center lg:px-1   border  border-gray-950   text-sm">
-                        <p className="text-gray-900 whitespace-no-wrap text-center relative top-2 ">
-                          {index + 1}
-                        </p>
-                      </td>
-                      <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
-                        <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                          {staff.installment}
-                        </p>
-                      </td>
-                      {/* <td className="sm:px-0.5 text-center lg:px-3 py-2 text-center border border-gray-950  text-sm">
+                  {loading ? (
+                    <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                      <div className=" text-center text-xl text-blue-700">
+                        Please wait while data is loading...
+                      </div>
+                    </div>
+                  ) : staffBirthday.length ? (
+                    staffBirthday.map((staff, index) => (
+                      <tr
+                        key={index}
+                        className={`${
+                          index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                        } hover:bg-gray-50  `}
+                      >
+                        <td className=" sm:px-0.5 text-center lg:px-1   border  border-gray-950   text-sm">
+                          <p className="text-gray-900 whitespace-no-wrap text-center relative top-2 ">
+                            {index + 1}
+                          </p>
+                        </td>
+                        <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
+                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                            {staff.installment}
+                          </p>
+                        </td>
+                        {/* <td className="sm:px-0.5 text-center lg:px-3 py-2 text-center border border-gray-950  text-sm">
                           <p className="text-gray-900 whitespace-no-wrap">
                             {staff.birthday}
                           </p>
                         </td> */}
-                      <td className="px-2 text-center lg:px-3  border border-gray-950  text-sm">
-                        <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                          {staff.pending_fee}
-                        </p>
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="px-2 text-center lg:px-3  border border-gray-950  text-sm">
+                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                            {staff.pending_fee}
+                          </p>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                      <div className=" text-center text-xl text-red-700">
+                        Oops! No data found..
+                      </div>
+                    </div>
+                  )}
                 </tbody>
               </table>
             </div>

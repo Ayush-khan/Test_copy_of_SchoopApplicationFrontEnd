@@ -47,9 +47,6 @@ function StaffBirthdayTabList() {
     fetchStaffBirthday();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
-
   return (
     <>
       {/* <div
@@ -75,6 +72,12 @@ function StaffBirthdayTabList() {
               }}
             />
           </div>
+          <div
+            className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+            style={{
+              backgroundColor: "#C03078",
+            }}
+          ></div>
 
           <div className="card-body w-full">
             <div className=" h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden ">
@@ -85,7 +88,7 @@ function StaffBirthdayTabList() {
                       <th className=" px-0.5 text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                         S.No
                       </th>
-                      <th className="text-start px-2  lg:px-2 py-2   border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                      <th className="text-center px-2  lg:px-2 py-2   border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                         Name
                       </th>
                       {/* <th className="sm:px-0.5 lg:px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
@@ -100,43 +103,57 @@ function StaffBirthdayTabList() {
                     </tr>
                   </thead>
                   <tbody>
-                    {staffBirthday.map((staff, index) => (
-                      <tr
-                        key={staff.teacher_id}
-                        className={`${
-                          index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                        } hover:bg-gray-50  `}
-                      >
-                        <td className=" sm:px-0.5 text-center lg:px-1   border  border-gray-950   text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap text-center relative top-2 ">
-                            {index + 1}
-                          </p>
-                        </td>
-                        <td className="text-start px-2 lg:px-2  border border-gray-950  text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staff.name}
-                          </p>
-                        </td>
-                        {/* <td className="sm:px-0.5 text-center lg:px-3 py-2 text-center border border-gray-950  text-sm">
+                    {loading ? (
+                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
+                          Please wait while data is loading...
+                        </div>
+                      </div>
+                    ) : staffBirthday.length ? (
+                      staffBirthday.map((staff, index) => (
+                        <tr
+                          key={staff.teacher_id}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50  `}
+                        >
+                          <td className=" sm:px-0.5 text-center lg:px-1   border  border-gray-950   text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap text-center relative top-2 ">
+                              {index + 1}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {staff.name}
+                            </p>
+                          </td>
+                          {/* <td className="sm:px-0.5 text-center lg:px-3 py-2 text-center border border-gray-950  text-sm">
                           <p className="text-gray-900 whitespace-no-wrap">
                             {staff.birthday}
                           </p>
                         </td> */}
-                        <td className="px-2 text-center lg:px-3  border border-gray-950  text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staff.phone}
-                          </p>
-                        </td>
-                        <td
-                          className="text-start sm:text-start px-2 lg:px-3  border border-gray-950 text-sm  "
-                          style={{ textAlign: "middle" }}
-                        >
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2 ">
-                            {staff.email}
-                          </p>
-                        </td>
-                      </tr>
-                    ))}
+                          <td className="px-2 text-center lg:px-3  border border-gray-950  text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {staff.phone}
+                            </p>
+                          </td>
+                          <td
+                            className="text-start sm:text-start px-2 lg:px-3  border border-gray-950 text-sm  "
+                            style={{ textAlign: "middle" }}
+                          >
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2 ">
+                              {staff.email}
+                            </p>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-red-700">
+                          Oops! No data found..
+                        </div>
+                      </div>
+                    )}
                   </tbody>
                 </table>
               </div>

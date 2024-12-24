@@ -45,8 +45,8 @@ function TickitingCountList() {
     fetchStaffBirthday();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>Error: {error}</p>;
   // date formate funcions
   function formatDate(dateString) {
     const date = new Date(dateString);
@@ -88,6 +88,12 @@ function TickitingCountList() {
               }}
             />
           </div>
+          <div
+            className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+            style={{
+              backgroundColor: "#C03078",
+            }}
+          ></div>
 
           <div className="card-body w-full">
             <div className=" h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden ">
@@ -98,13 +104,13 @@ function TickitingCountList() {
                       <th className="px-0.5 lg:px-1 py-2 text-center  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                         S.No
                       </th>
-                      <th className=" px-0.5 lg:px-2 py-2 text-start  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                      <th className=" px-0.5 lg:px-2 py-2 text-center  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                         Name
                       </th>
                       {/* <th className="lg:px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                         Date Of Birth
                       </th> */}
-                      <th className=" px-0.5 lg:px-3 py-2 text-start border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                      <th className=" px-0.5 lg:px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                         Title
                       </th>
                       <th className="px-0.5 lg:px-3 py-2 border text-center border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
@@ -116,64 +122,78 @@ function TickitingCountList() {
                     </tr>
                   </thead>
                   <tbody>
-                    {staffBirthday.map((staff, index) => {
-                      const { formattedDate, formattedTime } = formatDate(
-                        staff.raised_on
-                      );
-                      return (
-                        <tr
-                          key={staff.teacher_id}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50  `}
-                        >
-                          <td className="px-0.5 lg:px-1 text-center  border  border-gray-950   text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap text-center relative top-2 ">
-                              {index + 1}
-                            </p>
-                          </td>
+                    {loading ? (
+                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
+                          Please wait while data is loading...
+                        </div>
+                      </div>
+                    ) : staffBirthday.length ? (
+                      staffBirthday.map((staff, index) => {
+                        const { formattedDate, formattedTime } = formatDate(
+                          staff.raised_on
+                        );
+                        return (
+                          <tr
+                            key={staff.teacher_id}
+                            className={`${
+                              index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-50  `}
+                          >
+                            <td className="px-0.5 lg:px-1 text-center  border  border-gray-950   text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap text-center relative top-2 ">
+                                {index + 1}
+                              </p>
+                            </td>
 
-                          <td className="px-0.5 lg:px-2  border border-gray-950  text-sm ">
-                            <p
-                              className="text-gray-900 whitespace-no-wrap  relative top-2"
-                              style={{ textTransform: "capitalize" }}
-                            >
-                              {staff.first_name.charAt(0).toUpperCase() +
-                                staff.first_name.slice(1).toLowerCase()}{" "}
-                              {staff.mid_name.charAt(0).toUpperCase() +
-                                staff.mid_name.slice(1).toLowerCase()}
-                              {staff.last_name.charAt(0).toUpperCase() +
-                                staff.last_name.slice(1).toLowerCase()}
-                              {/* {staff.last_name.slice(0).toLowerCase()} */}
-                            </p>
-                          </td>
-                          {/* <td className="lg:px-3 py-2 text-center border border-gray-950  text-sm">
+                            <td className="px-0.5 lg:px-2  border border-gray-950  text-sm ">
+                              <p
+                                className="text-gray-900 whitespace-no-wrap  relative top-2"
+                                style={{ textTransform: "capitalize" }}
+                              >
+                                {staff.first_name.charAt(0).toUpperCase() +
+                                  staff.first_name.slice(1).toLowerCase()}{" "}
+                                {staff.mid_name.charAt(0).toUpperCase() +
+                                  staff.mid_name.slice(1).toLowerCase()}
+                                {staff.last_name.charAt(0).toUpperCase() +
+                                  staff.last_name.slice(1).toLowerCase()}
+                                {/* {staff.last_name.slice(0).toLowerCase()} */}
+                              </p>
+                            </td>
+                            {/* <td className="lg:px-3 py-2 text-center border border-gray-950  text-sm">
                           <p className="text-gray-900 whitespace-no-wrap">
                             {staff.birthday}
                           </p>
                         </td> */}
-                          <td className="px-0.5 lg:px-3  text-start border border-gray-950  text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {staff.title}
-                            </p>
-                          </td>
-                          <td className="px-0.5 lg:px-3 text-center border border-gray-950   text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {formattedDate}{" "}
-                              <span className=" font-semibold text-blue-500 ">
-                                {formattedTime}
-                              </span>
-                              {/* {staff.description} */}
-                            </p>
-                          </td>
-                          <td className="px-0.5 lg:px-4  border border-gray-950  text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {staff.description}
-                            </p>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                            <td className="px-0.5 lg:px-3  text-start border border-gray-950  text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {staff.title}
+                              </p>
+                            </td>
+                            <td className="px-0.5 lg:px-3 text-center border border-gray-950   text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {formattedDate}{" "}
+                                <span className=" font-semibold text-blue-500 ">
+                                  {formattedTime}
+                                </span>
+                                {/* {staff.description} */}
+                              </p>
+                            </td>
+                            <td className="px-0.5 lg:px-4  border border-gray-950  text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {staff.description}
+                              </p>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-red-700">
+                          Oops! No data found..
+                        </div>
+                      </div>
+                    )}
                   </tbody>
                 </table>
               </div>
