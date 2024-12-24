@@ -218,6 +218,7 @@ export default function Sidebar({ isSidebar, setIsSidebar }) {
       >
         <h2 className="text-[1.1em] font-semibold pt-2 bg-gray-200 text-gray-900 pr-2">
           Recent Tabs
+          {/* fjsd */}
         </h2>
         <div
           className=" relative w-[100%]  left-2 mb-2 h-1  mx-auto bg-red-700"
