@@ -49,11 +49,14 @@ const SubstituteTeacher = () => {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/get_teacher_list`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_teachersubstitutionlist`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       console.log("teacher", response);
-      setStudentNameWithClassId(response.data || []);
+      setStudentNameWithClassId(response.data?.data || []);
     } catch (error) {
       toast.error("Error fetching teachers");
       console.error("Error fetching teachers:", error);
@@ -91,7 +94,7 @@ const SubstituteTeacher = () => {
   const studentOptions = useMemo(
     () =>
       studentNameWithClassId.map((teacher) => ({
-        value: teacher.reg_id,
+        value: teacher.teacher_id,
         label: teacher.name,
       })),
     [studentNameWithClassId]
