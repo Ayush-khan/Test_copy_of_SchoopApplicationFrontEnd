@@ -242,41 +242,44 @@ function NoticeAndSms() {
     );
   }
 
-  const downloadFile = async (fileUrl, fileName) => {
-    try {
-      const token = localStorage.getItem("authToken");
+  // // Usage
+  // downloadFile(fileUrl, fileName);
 
-      if (!token) throw new Error("No authentication token found");
+  // const downloadFile = async (fileUrl, fileName) => {
+  //   try {
+  //     const token = localStorage.getItem("authToken");
 
-      const response = await fetch(
-        // `https://sms.evolvu.in/storage/app/public/notice/${fileUrl}`,
-        `${fileUrl}`,
+  //     if (!token) throw new Error("No authentication token found");
 
-        {
-          method: "GET",
-          headers: {
-            // Add headers if needed, e.g., Authorization
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  //     const response = await fetch(
+  //       // `https://sms.evolvu.in/storage/app/public/notice/${fileUrl}`,
+  //       `${fileUrl}`,
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+  //       {
+  //         method: "GET",
+  //         headers: {
+  //           // Add headers if needed, e.g., Authorization
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      // Convert the response into a Blob
-      const blob = await response.blob();
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob); // Create a URL for the Blob
-      link.setAttribute("download", fileName); // Set the file name for download
-      document.body.appendChild(link); // Append the link to the DOM
-      link.click(); // Simulate a click to download the file
-      document.body.removeChild(link); // Remove the link from the DOM
-    } catch (error) {
-      console.error("Error downloading the file:", error);
-    }
-  };
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! Status: ${response.status}`);
+  //     }
+
+  //     // Convert the response into a Blob
+  //     const blob = await response.blob();
+  //     const link = document.createElement("a");
+  //     link.href = URL.createObjectURL(blob); // Create a URL for the Blob
+  //     link.setAttribute("download", fileName); // Set the file name for download
+  //     document.body.appendChild(link); // Append the link to the DOM
+  //     link.click(); // Simulate a click to download the file
+  //     document.body.removeChild(link); // Remove the link from the DOM
+  //   } catch (error) {
+  //     console.error("Error downloading the file:", error);
+  //   }
+  // };
 
   //   const downloadFile = async (fileUrl, fileName) => {
   //     try {
@@ -308,42 +311,42 @@ function NoticeAndSms() {
   //       console.error("Error downloading the file:", error);
   //     }
   //   };
-  //   const downloadFile = async (url, filename) => {
-  //     try {
-  //       const token = localStorage.getItem("authToken");
+  const downloadFile = async (url, filename) => {
+    try {
+      const token = localStorage.getItem("authToken");
 
-  //       if (!token) throw new Error("No authentication token found");
+      if (!token) throw new Error("No authentication token found");
 
-  //       const response = await axios.get(
-  //         url,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //             // "Content-Type": "application/json",
-  //           },
-  //         },
-  //         {
-  //           responseType: "blob", // Ensures the response is treated as a binary file
-  //         }
-  //       );
+      const response = await axios.get(
+        url,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            // "Content-Type": "application/json",
+          },
+        },
+        {
+          responseType: "blob", // Ensures the response is treated as a binary file
+        }
+      );
 
-  //       // Create a URL for the downloaded file
-  //       const blob = new Blob([response.data], {
-  //         type: response.headers["content-type"],
-  //       });
-  //       const link = document.createElement("a");
-  //       link.href = URL.createObjectURL(blob);
-  //       link.download = filename || "certificate.pdf"; // Default name if filename is not provided
-  //       document.body.appendChild(link);
-  //       link.click();
-  //       document.body.removeChild(link);
+      // Create a URL for the downloaded file
+      const blob = new Blob([response.data], {
+        type: response.headers["content-type"],
+      });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename || "certificate.pdf"; // Default name if filename is not provided
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-  //       // Revoke the object URL to release memory
-  //       URL.revokeObjectURL(link.href);
-  //     } catch (error) {
-  //       console.error("Error downloading file:", error);
-  //     }
-  //   };
+      // Revoke the object URL to release memory
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  };
 
   const handleDelete = (sectionId) => {
     console.log("inside delete of subjectallotmenbt____", sectionId);
@@ -436,10 +439,10 @@ function NoticeAndSms() {
       // }
       // Append newly uploaded files
       uploadedFiles.forEach((file) => formData.append("userfile[]", file));
-      console.log("preselectedFiles", preselectedFiles);
+      console.log("filenottobedeleted[]", preselectedFiles);
       // Append preselected files (assuming preselectedFiles contains their URLs or identifiers)
       preselectedFiles.forEach((fileUrl) =>
-        formData.append("userfile[]", fileUrl)
+        formData.append("filenottobedeleted[]", fileUrl)
       );
 
       console.log("formated data of the edit sms part", formData);
