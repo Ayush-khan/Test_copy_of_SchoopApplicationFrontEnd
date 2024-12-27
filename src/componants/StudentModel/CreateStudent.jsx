@@ -119,7 +119,7 @@ function Form() {
     allergies: "",
     nationality: "",
     pincode: "",
-    image_name: "",
+    image_name: null,
     // student_id: "",
     reg_no: " ",
     // Parent fields
@@ -211,7 +211,7 @@ function Form() {
         allergies: student.allergies || "",
         nationality: student.nationality || "",
         pincode: student.pincode || "",
-        image_name: student.image_name || "",
+        image_name: student.image_name || null,
         // Parent information
         f_dob: student?.parents?.f_dob || " ",
         m_dob: student?.parents?.m_dob || " ",
@@ -259,10 +259,10 @@ function Form() {
       setSelectedClass(student.class_id || ""); // Set the selected class
       setSelectedDivision(student.section_id || ""); // Set the selected division
 
-      if (student.image_name) {
+      if (student?.image_name) {
         setPhotoPreview(
           // `${API_URL}/path/to/images/${student.teacher_image_name}`
-          `${student.image_name}`
+          `/https://sms.evolvu.in/storage/app/public/student_images/${student.image_name}`
         );
       }
     }

@@ -69,7 +69,7 @@ function ViewStudent() {
     allergies: "",
     nationality: "",
     pincode: "",
-    image_name: "",
+    image_name: null,
     student_id: "",
     reg_id: " ",
     // Parent fields
@@ -140,7 +140,7 @@ function ViewStudent() {
         allergies: student.allergies || "",
         nationality: student.nationality || "",
         pincode: student.pincode || "",
-        image_name: student.image_name || "",
+        image_name: student.image_name || null,
         // Parent information
         father_name: student?.parents?.father_name || " ",
         father_occupation: student?.parents?.father_occupation || "",
@@ -167,15 +167,15 @@ function ViewStudent() {
         SetToReceiveSMS: student.SetToReceiveSMS || "",
         SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
       });
-      if (student.student_image) {
+      if (student?.image_name) {
         setPhotoPreview(
           // `${API_URL}/path/to/images/${student.teacher_image_name}`
-          `${student.student_image}`
+          `https://sms.evolvu.in/storage/app/public/student_images/${student.image_name}`
         );
       }
     }
   }, [student]);
-
+  console.log("setPhotoPreview", photoPreview);
   return (
     // <div>
     //   <h2>View Student</h2>

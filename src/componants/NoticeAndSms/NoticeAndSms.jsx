@@ -311,41 +311,58 @@ function NoticeAndSms() {
   //       console.error("Error downloading the file:", error);
   //     }
   //   };
-  const downloadFile = async (url, filename) => {
-    try {
-      const token = localStorage.getItem("authToken");
+  // const downloadFile = async (url, filename) => {
+  //   try {
+  //     const token = localStorage.getItem("authToken");
 
-      if (!token) throw new Error("No authentication token found");
+  //     if (!token) throw new Error("No authentication token found");
+  //     console.log("fileName", filename, "FileURL", url);
+  //     const response = await axios.get(
+  //       url,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           // "Content-Type": "application/json",
+  //         },
+  //       },
+  //       {
+  //         responseType: "blob", // Ensures the response is treated as a binary file
+  //       }
+  //     );
 
-      const response = await axios.get(
-        url,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            // "Content-Type": "application/json",
-          },
-        },
-        {
-          responseType: "blob", // Ensures the response is treated as a binary file
-        }
-      );
+  //     // Create a URL for the downloaded file
+  //     const blob = new Blob([response.data], {
+  //       type: response.headers["content-type"],
+  //     });
+  //     const link = document.createElement("a");
+  //     link.href = URL.createObjectURL(blob);
+  //     link.download = filename || "certificate.pdf"; // Default name if filename is not provided
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
 
-      // Create a URL for the downloaded file
-      const blob = new Blob([response.data], {
-        type: response.headers["content-type"],
-      });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = filename || "certificate.pdf"; // Default name if filename is not provided
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  //     // Revoke the object URL to release memory
+  //     URL.revokeObjectURL(link.href);
+  //   } catch (error) {
+  //     console.error("Error downloading file:", error);
+  //   }
+  // };
+  const downloadFile = (fileUrl, fileName) => {
+    const baseUrl = "https://sms.evolvu.in/"; // Base URL
+    const fullUrl = `${baseUrl}${fileUrl}`; // Construct the full file URL
 
-      // Revoke the object URL to release memory
-      URL.revokeObjectURL(link.href);
-    } catch (error) {
-      console.error("Error downloading file:", error);
-    }
+    // Create an anchor element
+    const link = document.createElement("a");
+    link.href = fullUrl; // Set the file URL
+    link.target = "none"; // Open in a new tab (optional)
+    link.download = fileName || "downloaded_file.pdf"; // Use the provided file name or a default name
+    document.body.appendChild(link); // Append the link to the DOM
+
+    // Trigger the click to download the file
+    link.click();
+
+    // Clean up the DOM
+    document.body.removeChild(link); // Remove the link after the click
   };
 
   const handleDelete = (sectionId) => {

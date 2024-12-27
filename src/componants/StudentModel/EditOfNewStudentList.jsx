@@ -260,14 +260,15 @@ function EditOfNewStudentList() {
       setSelectedClass(student.class_id || ""); // Set the selected class
       setSelectedDivision(student.section_id || ""); // Set the selected division
 
-      if (student.image_name) {
+      if (student?.image_name) {
         setPhotoPreview(
           // `${API_URL}/path/to/images/${student.teacher_image_name}`
-          `${student.image_name}`
+          `https://sms.evolvu.in/storage/app/public/student_images/${student.image_name}`
         );
       }
     }
   }, [student, API_URL]);
+  console.log("setPhotoPreview", photoPreview);
   // for fecting data for parent informations
   const [classesforForm, setClassesforForm] = useState([]);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);

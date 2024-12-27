@@ -1285,38 +1285,56 @@ function NewStudentList() {
     setUploadStatus(""); // Clear any previous success
     setErrorMessageUrl("");
   };
-  const downloadCsv = async (relativeUrl) => {
-    try {
-      // Use the provided relativeUrl directly
-      const response = await fetch(relativeUrl);
+  // const downloadCsv = async (relativeUrl) => {
+  //   console.log("relativeUrl", relativeUrl);
+  //   try {
+  //     // Use the provided relativeUrl directly
+  //     const response = await fetch(relativeUrl);
 
-      // Handle HTTP errors
-      if (!response.ok) {
-        throw new Error(`HTTP Error! Status: ${response.status}`);
-      }
+  //     // Handle HTTP errors
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP Error! Status: ${response.status}`);
+  //     }
 
-      // Convert response to Blob
-      const blob = await response.blob();
-      const filename = "rejected_rows.csv"; // Desired file name
+  //     // Convert response to Blob
+  //     const blob = await response.blob();
+  //     const filename = "rejected_rows.csv"; // Desired file name
 
-      // Create a temporary link and trigger download
-      const link = document.createElement("a");
-      link.href = window.URL.createObjectURL(blob);
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  //     // Create a temporary link and trigger download
+  //     const link = document.createElement("a");
+  //     link.href = window.URL.createObjectURL(blob);
+  //     link.setAttribute("download", filename);
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
 
-      // Clean up the URL object
-      window.URL.revokeObjectURL(link.href);
-    } catch (error) {
-      console.error("Error downloading the file:", error.message);
-      alert(
-        "Failed to download the file. Please check the URL or your network connection."
-      );
-    }
+  //     // Clean up the URL object
+  //     window.URL.revokeObjectURL(link.href);
+  //   } catch (error) {
+  //     console.error("Error downloading the file:", error.message);
+  //     alert(
+  //       "Failed to download the file. Please check the URL or your network connection."
+  //     );
+  //   }
+  // };
+
+  const downloadCsv = (fileUrl) => {
+    const baseUrl = "https://sms.evolvu.in/"; // Base URL
+    const fullUrl = `${baseUrl}${fileUrl}`; // Construct the full file URL
+
+    // Create an anchor element
+    const link = document.createElement("a");
+    link.href = fullUrl; // Set the file URL
+    link.target = "none"; // Open in a new tab (optional)
+    link.download = ""; // Use the provided file name or a default name
+    document.body.appendChild(link); // Append the link to the DOM
+
+    // Trigger the click to download the file
+    link.click();
+
+    // Clean up the DOM
+    document.body.removeChild(link); // Remove the link after the click
   };
-
   // Function to upload the selected CSV file
   const handleUpload = async () => {
     if (!selectedFile) {
