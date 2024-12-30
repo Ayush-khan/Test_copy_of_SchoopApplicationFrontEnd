@@ -1245,6 +1245,10 @@ function NewStudentList() {
     setclassIdForManage(null);
     setSelectedClass(null); // Clear the dropdown value
     fetchAllStudents();
+    setSelectedFile(null);
+    setErrorMessage(""); // Clear any previous error
+    setUploadStatus(""); // Clear any previous success
+    setErrorMessageUrl("");
   };
 
   // for uplode portions
@@ -1329,34 +1333,62 @@ function NewStudentList() {
   //   }
   // };
 
-  const downloadCsv = (fileUrl, fileName = "download.csv") => {
-    console.log("fileUrl", fileUrl);
+  const downloadCsv = async (fileUrl) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      console.log("the response of the namechack api____");
 
-    // Base URL for the file
-    const baseUrl = "https://sms.evolvu.in/storage/app/public/csv_rejected/";
-    const fullUrl = `${baseUrl}${fileUrl}`; // Construct the full file URL
-
-    // Fetch the file contents using fetch API
-    fetch(fullUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+      // Adjust classIdForManage dynamically if needed
+      const response = await axios.get(
+        `${API_URL}/api/download_csv_rejected/${fileUrl}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+        {
+          responseType: "blob", // Important for handling binary data
         }
-        return response.blob(); // Get the file content as a blob
-      })
-      .then((blob) => {
-        // Create a temporary download link
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob); // Create a blob URL for the file
-        link.download = fileName; // Set the file name for download
-        document.body.appendChild(link); // Add the link to the DOM
-        link.click(); // Programmatically click the link
-        document.body.removeChild(link); // Clean up by removing the link
-      })
-      .catch((error) => {
-        console.error("Error downloading the file:", error);
-      });
+      );
+
+      // Trigger download using a hidden link element
+      triggerFileDownload(response.data, "student_list_template.csv");
+    } catch (error) {
+      console.error("Error downloading template:", error);
+    }
   };
+
+  //  const downloadCsv = (fileUrl, fileName = "download.csv") => {
+  //    console.log("fileUrl", fileUrl);
+
+  //    // Base URL for the file
+  //    const baseUrl = "https://sms.evolvu.in/storage/app/public/csv_rejected/";
+  //    const fullUrl = `${baseUrl}${fileUrl}`; // Construct the full file URL
+
+  //    // Fetch the file contents using fetch API
+  //    fetch(fullUrl)
+  //      .then((response) => {
+  //        if (!response.ok) {
+  //          throw new Error(`HTTP error! Status: ${response.status}`);
+  //        }
+  //        return response.blob(); // Get the file content as a blob
+  //      })
+  //      .then((blob) => {
+  //        // Create a temporary download link
+  //        const link = document.createElement("a");
+  //        link.href = URL.createObjectURL(blob); // Create a blob URL for the file
+  //        link.download = fileName; // Set the file name for download
+  //        document.body.appendChild(link); // Add the link to the DOM
+  //        link.click(); // Programmatically click the link
+  //        document.body.removeChild(link); // Clean up by removing the link
+  //      })
+  //      .catch((error) => {
+  //        console.error("Error downloading the file:", error);
+  //      });
+  //  };
 
   // Function to upload the selected CSV file
 
