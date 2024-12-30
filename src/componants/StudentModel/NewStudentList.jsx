@@ -1251,9 +1251,20 @@ function NewStudentList() {
   // Function to download the CSV template
   const handleDownloadTemplate = async () => {
     try {
+      const token = localStorage.getItem("authToken");
+      console.log("the response of the namechack api____");
+
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
       // Adjust classIdForManage dynamically if needed
       const response = await axios.get(
         `${API_URL}/api/students/download-template/${classIdForManage}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
         {
           responseType: "blob", // Important for handling binary data
         }
@@ -1318,24 +1329,37 @@ function NewStudentList() {
   //   }
   // };
 
-  const downloadCsv = (fileUrl) => {
-    const baseUrl = "https://sms.evolvu.in/"; // Base URL
+  const downloadCsv = (fileUrl, fileName = "download.csv") => {
+    console.log("fileUrl", fileUrl);
+
+    // Base URL for the file
+    const baseUrl = "https://sms.evolvu.in/storage/app/public/csv_rejected/";
     const fullUrl = `${baseUrl}${fileUrl}`; // Construct the full file URL
 
-    // Create an anchor element
-    const link = document.createElement("a");
-    link.href = fullUrl; // Set the file URL
-    link.target = "none"; // Open in a new tab (optional)
-    link.download = ""; // Use the provided file name or a default name
-    document.body.appendChild(link); // Append the link to the DOM
-
-    // Trigger the click to download the file
-    link.click();
-
-    // Clean up the DOM
-    document.body.removeChild(link); // Remove the link after the click
+    // Fetch the file contents using fetch API
+    fetch(fullUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.blob(); // Get the file content as a blob
+      })
+      .then((blob) => {
+        // Create a temporary download link
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob); // Create a blob URL for the file
+        link.download = fileName; // Set the file name for download
+        document.body.appendChild(link); // Add the link to the DOM
+        link.click(); // Programmatically click the link
+        document.body.removeChild(link); // Clean up by removing the link
+      })
+      .catch((error) => {
+        console.error("Error downloading the file:", error);
+      });
   };
+
   // Function to upload the selected CSV file
+
   const handleUpload = async () => {
     if (!selectedFile) {
       setErrorMessage("Please select a file first.");
