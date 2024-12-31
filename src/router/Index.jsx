@@ -164,6 +164,7 @@ import EditExamTimeTable from "../componants/MastersModule/ExamTimeTable/EditExa
 import ViewExamTimeTable from "../componants/MastersModule/ExamTimeTable/ViewExamTimeTable.jsx";
 import SubstituteTeacher from "../componants/SubstituteTeacher/SubstituteTeacher.jsx";
 import EditSubstituteTeacher from "../componants/SubstituteTeacher/EditSubstituteTeacher.jsx";
+import SetLateTime from "../componants/SetLateTime/SetLateTime.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -351,6 +352,12 @@ function Index() {
         <Route
           path="/CareTacker/view/:id"
           element={<PrivateRoute element={ViewCareTacker} />}
+        />
+
+        {/* Set Late Time module */}
+        <Route
+          path="/SetLateTime"
+          element={<PrivateRoute element={SetLateTime} />}
         />
         <Route
           path="/eventcard"

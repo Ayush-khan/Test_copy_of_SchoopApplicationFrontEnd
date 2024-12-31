@@ -623,6 +623,9 @@ const AdminNavBar = () => {
           <NavDropdown.Item as={Link} to="/SubstituteTeacher">
             Substitute Teacher
           </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/SetLateTime">
+            Set Late Time
+          </NavDropdown.Item>
         </NavDropdown>
 
         {/* Leave Sub-dropdown */}
