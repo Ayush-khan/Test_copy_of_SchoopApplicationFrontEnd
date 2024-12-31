@@ -117,27 +117,18 @@ function SetLateTime() {
     );
   });
   console.log("filteredSections", filteredSections);
-  // Filter and paginate sections
-  // const filteredSections = sections.filter((section) =>
-  //   section.name.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
+
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
-  console.log("displayed sections", displayedSections);
+  console.log("displayed Late Time", displayedSections);
   const validateSectionName = (name, departmentId) => {
     const errors = {};
-
-    // Regular expression to match only alphabets
-    // const alphabetRegex = /^[A-Za-z]+$/;
 
     if (!name || name.trim() === "") {
       errors.name = "Please Select Late Time.";
     }
-    // else if (!alphabetRegex.test(name)) {
-    //   errors.name = "The name field only contain alphabets.";
-    // }
 
     if (!departmentId) {
       errors.department_id = "Please Select Teacher Category.";
@@ -222,9 +213,9 @@ function SetLateTime() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Division added successfully!");
+      toast.success("Late Time added successfully!");
     } catch (error) {
-      console.error("Error adding Division:", error);
+      console.error("Error adding Late Time:", error);
       if (error.response && error.response.data && error.response.data.errors) {
         Object.values(error.response.data.errors).forEach((err) =>
           toast.error(err)
@@ -254,7 +245,7 @@ function SetLateTime() {
     try {
       const token = localStorage.getItem("authToken");
       if (!token || !currentSection || !currentSection.section_id) {
-        throw new Error("No authentication token or section ID found");
+        throw new Error("No authentication token or teacher ID found");
       }
 
       await axios.put(
@@ -268,9 +259,9 @@ function SetLateTime() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Division updated successfully!");
+      toast.success("Late Time updated successfully!");
     } catch (error) {
-      console.error("Error editing Division:", error);
+      console.error("Error editing Late Time:", error);
       console.log("erroris", error.response);
       if (error.response && error.response.data.status === 422) {
         const errors = error.response.data.errors;
@@ -309,7 +300,7 @@ function SetLateTime() {
       const academicYr = localStorage.getItem("academicYear");
 
       if (!token || !currentSection || !currentSection.section_id) {
-        throw new Error("Division ID is missing");
+        throw new Error("Teacher ID is missing");
       }
 
       const response = await axios.delete(
@@ -327,19 +318,19 @@ function SetLateTime() {
         fetchSections();
         setShowDeleteModal(false);
         setCurrentSection(null);
-        toast.success("Division deleted successfully!");
+        toast.success("Late Time deleted successfully!");
       } else {
-        toast.error(response.data.message || "Failed to delete Division");
+        toast.error(response.data.message || "Failed to delete Late Time");
       }
     } catch (error) {
-      console.error("Error deleting Division:", error);
+      console.error("Error deleting Late Time:", error);
       if (error.response && error.response.data && error.response.data.error) {
         toast.error(error.response.data.error);
       } else {
         toast.error("Server error. Please try again later.");
       }
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
       setShowDeleteModal(false);
     }
   };
@@ -534,7 +525,6 @@ function SetLateTime() {
           </div>
         </div>
 
-        {/* Modal for adding a new section */}
         {showAddModal && (
           <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
             <div
@@ -552,7 +542,6 @@ function SetLateTime() {
                     <RxCross1
                       className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                       type="button"
-                      // className="btn-close text-red-600"
                       onClick={handleCloseModal}
                     />
                   </div>
@@ -652,7 +641,6 @@ function SetLateTime() {
           </div>
         )}
 
-        {/* Modal for editing a section */}
         {showEditModal && (
           <div
             className="modal"
@@ -758,7 +746,6 @@ function SetLateTime() {
           </div>
         )}
 
-        {/* Modal for confirming deletion */}
         {showDeleteModal && (
           <div
             className="modal"
