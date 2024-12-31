@@ -551,7 +551,7 @@ const CreateSubstituteTeacher = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/get_substituteteacherclasswise/${periodNo}/${teacherId}/${selectedDate}`,
+        `${API_URL}/api/get_substituteteacherclasswise/${teacherId}/${periodNo}/${selectedDate}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       return response?.data?.data || [];
@@ -569,7 +569,7 @@ const CreateSubstituteTeacher = () => {
         timetable.map(async (row) => {
           const substituteOptions = await fetchSubstitutionTeachers(
             row.periodNo,
-            row.teacherId
+            row.ClassName
           );
           return {
             ...row,
@@ -632,6 +632,7 @@ const CreateSubstituteTeacher = () => {
           subjectId: item?.sm_id,
           date: item?.date,
           teacherId: item?.teacher_id,
+          ClassName: item?.c_name,
         }));
 
         setTimetable(timetableData);
