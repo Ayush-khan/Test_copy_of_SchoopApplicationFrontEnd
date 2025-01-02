@@ -130,6 +130,7 @@ function ManageSubjectList() {
     }
   };
   const handleClassSelect = (selectedOption) => {
+    setNameError("");
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
@@ -146,6 +147,7 @@ function ManageSubjectList() {
     setSelectedStudentId(selectedOption?.value);
   };
   const handleGrChange = (e) => {
+    setNameError("");
     const numericInput = e.target.value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
     setGrNumber(numericInput);
   };
