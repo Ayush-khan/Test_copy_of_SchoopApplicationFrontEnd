@@ -30,6 +30,9 @@ const PromotedStudent = () => {
     useState(null);
   const [nameError, setNameError] = useState("");
   const [nameErrorForClass, setNameErrorForClass] = useState("");
+  const [nameErrorForStudent, setNameErrorForStudent] = useState("");
+  const [nameErrorForClassForStudent, setNameErrorForClassForStudent] =
+    useState("");
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedClassForStudent, setSelectedClassForStudent] = useState(null);
   const [parentInformation, setParentInformation] = useState(null);
@@ -168,7 +171,7 @@ const PromotedStudent = () => {
     fetchStudentNameWithClassId(selectedOption?.value);
   };
   const handleClassSelectForStudent = (selectedOption) => {
-    setNameErrorForClass("");
+    setNameErrorForClassForStudent("");
     setSelectedClassForStudent(selectedOption);
     setSelectedStudentForStudent(null);
     setSelectedStudentIdForStudent(null);
@@ -182,7 +185,7 @@ const PromotedStudent = () => {
     setSelectedStudentId(selectedOption?.value);
   };
   const handleStudentSelectForStudent = (selectedOption) => {
-    setNameError(""); // Reset student error on selection
+    setNameErrorForStudent(""); // Reset student error on selection
     setSelectedStudentForStudent(selectedOption);
     setSelectedStudentIdForStudent(selectedOption?.value);
   };
@@ -226,7 +229,7 @@ const PromotedStudent = () => {
 
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-
+  console.log("seletedStudents[]", selectedStudents);
   const handleSelectAll = () => {
     setSelectAll(!selectAll);
     if (!selectAll) {
@@ -270,6 +273,13 @@ const PromotedStudent = () => {
     // Reset form data and selected values after successful submission
 
     try {
+      setParentInformation(null);
+      setSelectedStudentForStudent(null);
+      setSelectedStudentForStudent([]);
+      setSelectedClassForStudent(null);
+      setSelectedClassForStudent([]);
+      setSelectedStudents([]);
+
       setLoadingForSearch(true); // Start loading
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
@@ -306,20 +316,27 @@ const PromotedStudent = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const validationErrors = validate();
-    const errorsToCheck = validationErrors || {};
 
-    if (Object.keys(errorsToCheck).length > 0) {
-      setErrors(errorsToCheck);
-      return;
+    let hasError = false;
+
+    // Validate if `selectedStudents` array is empty
+
+    // Validate if `selectedClassForStudent` or `selectedStudentForStudent` are missing
+    if (!selectedClassForStudent) {
+      setNameErrorForClassForStudent("Please select a class.");
+      hasError = true;
+    }
+    if (!selectedStudentForStudent) {
+      setNameErrorForStudent("Please select a student.");
+      hasError = true;
     }
 
-    const formattedFormData = {
-      ...formData,
-      dob: formatDateString(formData.dob),
-      date: formatDateString(formData.date),
-    };
-
+    // Exit if there are validation errors
+    if (hasError) return;
+    if (selectedStudents.length === 0) {
+      toast.error("Please select at least one student to promote.");
+      return;
+    }
     try {
       setLoading(true); // Start loading
 
@@ -328,60 +345,51 @@ const PromotedStudent = () => {
         throw new Error("No authentication token is found");
       }
 
-      // Make an API call with the "blob" response type to download the PDF
+      // Prepare data for the API request
+      const postData = {
+        selector: selectedStudents,
+        tclass_id: selectedClassForStudent.value, // Replace with actual target class ID
+        tsection_id: selectedStudentForStudent.value, // Replace with actual target section ID
+      };
+
+      // Make the API call
       const response = await axios.post(
-        `${API_URL}/api/save_pdfbonafide`,
-        formattedFormData,
+        `${API_URL}/api/promotestudents`,
+        postData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          responseType: "blob", // Set response type to blob to handle PDF data
         }
       );
 
+      // Handle successful response
       if (response.status === 200) {
-        toast.success("Bonafide Certificate Created successfully!");
-
-        // Extract filename from Content-Disposition header
-        const contentDisposition = response.headers["content-disposition"];
-        let filename = "DownloadedFile.pdf"; // Fallback name
-
-        if (contentDisposition) {
-          const match = contentDisposition.match(/filename="(.+?)"/);
-          if (match && match[1]) {
-            filename = match[1];
-          }
-        }
-
-        // Create a URL for the PDF blob and initiate download
-        const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        const link = document.createElement("a");
-        link.href = pdfUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Reset form data and selected values after successful submission
-
+        toast.success("Students promoted successfully!");
         setSelectedClass(null); // Reset class selection
+        // setSelectedClassForStudent(null);
+        // selectedStudentForStudent(null);
+
         setSelectedStudent(null); // Reset student selection
+        setSelectedStudents([]); // Clear selected students
         setErrors({});
+        setSelectedStudentForStudent(null);
+        setSelectedStudentForStudent([]);
+        setSelectedClassForStudent(null);
+        setSelectedClassForStudent([]);
         setBackendErrors({});
         setTimeout(() => {
           setParentInformation(null);
-        }, 3000);
+        }, 500);
       }
     } catch (error) {
-      console.error("Error:", error.response.data, error.response.sr_no);
-      toast.error("An error occurred while Creating the Bonafide Certificate.");
+      console.error("Error:", error.response?.data);
 
-      if (error.response && error.response) {
-        setBackendErrors(error.response || {});
-      } else {
-        toast.error(error.response.sr_no);
+      // Display error message
+      toast.error("An error occurred while promoting students.");
+
+      if (error.response && error.response.data) {
+        setBackendErrors(error.response.data || {});
       }
     } finally {
       setLoading(false); // Stop loading
@@ -532,7 +540,7 @@ const PromotedStudent = () => {
                       Loading...
                     </span>
                   ) : (
-                    "Search"
+                    "Browse"
                   )}
                 </button>
               </div>
@@ -577,9 +585,9 @@ const PromotedStudent = () => {
                             }}
                           />
 
-                          {nameErrorForClass && (
+                          {nameErrorForClassForStudent && (
                             <div className="h-8 relative ml-1 text-danger text-xs">
-                              {nameErrorForClass}
+                              {nameErrorForClassForStudent}
                             </div>
                           )}
                         </div>
@@ -610,9 +618,9 @@ const PromotedStudent = () => {
                             }}
                             // isDisabled={loadingStudents}
                           />
-                          {nameError && (
+                          {nameErrorForStudent && (
                             <div className="h-8 relative ml-1 text-danger text-xs">
-                              {nameError}
+                              {nameErrorForStudent}
                             </div>
                           )}
                         </div>
@@ -648,7 +656,7 @@ const PromotedStudent = () => {
                       <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full mx-auto">
                         <div className="bg-white rounded-lg shadow-xs">
                           <table className="min-w-full leading-normal table-auto">
-                            <thead className="sticky top-0 z-5 bg-gray-300 ">
+                            <thead className=" bg-gray-300 ">
                               <tr className="bg-gray-200">
                                 <th className="px-2 text-center w-full md:w-[10%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                   Sr.No
