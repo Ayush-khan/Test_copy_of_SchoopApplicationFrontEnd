@@ -165,6 +165,7 @@ import ViewExamTimeTable from "../componants/MastersModule/ExamTimeTable/ViewExa
 import SubstituteTeacher from "../componants/SubstituteTeacher/SubstituteTeacher.jsx";
 import EditSubstituteTeacher from "../componants/SubstituteTeacher/EditSubstituteTeacher.jsx";
 import SetLateTime from "../componants/SetLateTime/SetLateTime.jsx";
+import PromotedStudent from "../componants/StudentModel/PromotedStudent/PromotedStudent.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -304,6 +305,12 @@ function Index() {
           path="/studentLC/edit/:id"
           // path="#"
           element={<PrivateRoute element={EditLeavingCertificate} />}
+        />
+
+        <Route
+          path="/PromoteStudent"
+          // path="#"
+          element={<PrivateRoute element={PromotedStudent} />}
         />
         {/* Staff endPoints */}
         <Route

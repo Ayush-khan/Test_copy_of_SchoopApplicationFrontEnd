@@ -199,8 +199,14 @@ function ViewStaff() {
                   {field.label}
                 </label>
                 {formData[field.name] ? (
-                  <p className="input-field w-full border  border-gray-300 rounded-md py-1 px-3 bg-gray-300 ">
-                    {field.value || formData[field.name]}
+                  <p className="input-field w-full border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
+                    {field.name === "Gender"
+                      ? formData[field.name] === "M"
+                        ? "Male"
+                        : formData[field.name] === "F"
+                        ? "Female"
+                        : formData[field.name]
+                      : field.value || formData[field.name]}
                   </p>
                 ) : (
                   <p className="input-field w-full border pointer-events-none cursor-none border-gray-300 rounded-md py-3 px-3 bg-gray-300 ">

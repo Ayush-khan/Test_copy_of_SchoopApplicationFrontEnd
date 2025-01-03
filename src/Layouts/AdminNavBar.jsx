@@ -571,7 +571,7 @@ const AdminNavBar = () => {
           <NavDropdown.Item as={Link} to="/deleteStudent">
             Deleted Students Lists
           </NavDropdown.Item>
-          <NavDropdown.Item as={Link} to="#">
+          <NavDropdown.Item as={Link} to="/PromoteStudent">
             Promote Students
           </NavDropdown.Item>
           <NavDropdown.Item as={Link} to="#">
