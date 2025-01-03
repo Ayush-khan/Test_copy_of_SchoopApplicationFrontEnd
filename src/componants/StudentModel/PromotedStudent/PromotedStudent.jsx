@@ -279,7 +279,7 @@ const PromotedStudent = () => {
       setSelectedClassForStudent(null);
       setSelectedClassForStudent([]);
       setSelectedStudents([]);
-
+      setSelectAll(false);
       setLoadingForSearch(true); // Start loading
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
@@ -377,6 +377,7 @@ const PromotedStudent = () => {
         setSelectedStudentForStudent([]);
         setSelectedClassForStudent(null);
         setSelectedClassForStudent([]);
+        setSelectAll(null);
         setBackendErrors({});
         setTimeout(() => {
           setParentInformation(null);
