@@ -14,6 +14,8 @@ const PromotedStudent = () => {
   const [selectedStudentForStudent, setSelectedStudentForStudent] =
     useState(null);
   const [classesforForm, setClassesforForm] = useState([]);
+  const [classesforFormForStudent, setClassesforFormForStudent] = useState([]);
+
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [
     studentNameWithClassIdForStudent,
@@ -50,6 +52,7 @@ const PromotedStudent = () => {
   useEffect(() => {
     // Fetch both classes and student names on component mount
     fetchInitialDataAndStudents();
+    fetchInitialDataAndStudentsForStudent();
   }, []);
 
   const fetchInitialDataAndStudents = async () => {
@@ -77,7 +80,31 @@ const PromotedStudent = () => {
       setLoadingStudents(false);
     }
   };
+  const fetchInitialDataAndStudentsForStudent = async () => {
+    try {
+      setLoadingClasses(true);
+      setLoadingStudents(true);
 
+      const token = localStorage.getItem("authToken");
+
+      // Fetch classes and students concurrently
+      const [classResponse] = await Promise.all([
+        axios.get(`${API_URL}/api/nextclassacademicyear`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      // Set the fetched data
+      setClassesforFormForStudent(classResponse.data.data || []);
+      //   setStudentNameWithClassId(studentResponse?.data?.data || []);
+    } catch (error) {
+      toast.error("Error fetching Class data.");
+    } finally {
+      // Stop loading for both dropdowns
+      setLoadingClasses(false);
+      setLoadingStudents(false);
+    }
+  };
   const fetchStudentNameWithClassId = async (section_id = null) => {
     console.log("fetchStudentNameWithClassId is run");
 
@@ -114,13 +141,13 @@ const PromotedStudent = () => {
       const token = localStorage.getItem("authToken");
 
       const response = await axios.get(
-        `${API_URL}/api/get_divisions/${section_id}`,
+        `${API_URL}/api/nextsectionacademicyear/${section_id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      setStudentNameWithClassIdForStudent(response?.data?.divisions || []);
+      setStudentNameWithClassIdForStudent(response?.data?.data || []);
       console.log(
         "Response of fetchStudentNameWithClassIdForStudent is ",
         response?.data?.divisions
@@ -169,6 +196,15 @@ const PromotedStudent = () => {
         key: `${cls.class_id}`,
       })),
     [classesforForm]
+  );
+  const classOptionsForStudent = useMemo(
+    () =>
+      classesforFormForStudent.map((cls) => ({
+        value: cls.class_id,
+        label: `${cls.name}`,
+        key: `${cls.class_id}`,
+      })),
+    [classesforFormForStudent]
   );
 
   const studentOptions = useMemo(
@@ -525,7 +561,7 @@ const PromotedStudent = () => {
                             id="classSelect"
                             value={selectedClassForStudent}
                             onChange={handleClassSelectForStudent}
-                            options={classOptions}
+                            options={classOptionsForStudent}
                             placeholder={
                               loadingClasses ? "Loading classes..." : "Select"
                             }
@@ -586,7 +622,7 @@ const PromotedStudent = () => {
                 </div>
                 {/* Student Table */}
                 <div className="container mt-4">
-                  <div className="card mx-auto lg:w-[89%] shadow-lg">
+                  <div className="card mx-auto lg:w-[85%] shadow-lg">
                     <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
                       <h6 className="text-gray-700 mt-1   text-nowrap">
                         Select Students
@@ -612,7 +648,7 @@ const PromotedStudent = () => {
                       <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full mx-auto">
                         <div className="bg-white rounded-lg shadow-xs">
                           <table className="min-w-full leading-normal table-auto">
-                            <thead className="sticky top-0 bg-gray-200 z-10">
+                            <thead className="sticky top-0 z-5 bg-gray-300 ">
                               <tr className="bg-gray-200">
                                 <th className="px-2 text-center w-full md:w-[10%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                   Sr.No
@@ -629,7 +665,7 @@ const PromotedStudent = () => {
                                 <th className="px-2 w-full md:w-[19%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                   Roll Number
                                 </th>
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                <th className="px-2 w-full md:w-[52%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                   Name
                                 </th>
                               </tr>
@@ -692,6 +728,45 @@ const PromotedStudent = () => {
                             </tbody>
                           </table>
                         </div>
+                      </div>
+                      <div className="col-span-3 my-2 mt-4 text-right">
+                        <button
+                          type="submit"
+                          onClick={handleSubmit}
+                          style={{ backgroundColor: "#2196F3" }}
+                          className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                            loading ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                          disabled={loading}
+                        >
+                          {loading ? (
+                            <span className="flex items-center">
+                              <svg
+                                className="animate-spin h-4 w-4 mr-2 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                ></path>
+                              </svg>
+                              Updating...
+                            </span>
+                          ) : (
+                            "Update"
+                          )}
+                        </button>
                       </div>
                     </div>
                   </div>
