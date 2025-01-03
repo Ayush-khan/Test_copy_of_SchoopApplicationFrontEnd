@@ -8,6 +8,8 @@ import { RxCross1 } from "react-icons/rx";
 
 const PromotedStudent = () => {
   const API_URL = import.meta.env.VITE_API_URL;
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedStudentForStudent, setSelectedStudentForStudent] =
     useState(null);
@@ -77,6 +79,8 @@ const PromotedStudent = () => {
   };
 
   const fetchStudentNameWithClassId = async (section_id = null) => {
+    console.log("fetchStudentNameWithClassId is run");
+
     try {
       setLoadingStudents(true);
 
@@ -91,6 +95,10 @@ const PromotedStudent = () => {
       );
 
       setStudentNameWithClassId(response?.data?.divisions || []);
+      console.log(
+        "Response of fetchStudentNameWithClassId is",
+        response?.data?.divisions
+      );
     } catch (error) {
       toast.error("Error fetching Divisions.");
     } finally {
@@ -98,6 +106,7 @@ const PromotedStudent = () => {
     }
   };
   const fetchStudentNameWithClassIdForStudent = async (section_id = null) => {
+    console.log("fetchStudentNameWithClassIdForStudent is run");
     try {
       setLoadingStudents(true);
 
@@ -112,6 +121,10 @@ const PromotedStudent = () => {
       );
 
       setStudentNameWithClassIdForStudent(response?.data?.divisions || []);
+      console.log(
+        "Response of fetchStudentNameWithClassIdForStudent is ",
+        response?.data?.divisions
+      );
     } catch (error) {
       toast.error("Error fetching Divisions.");
     } finally {
@@ -172,7 +185,7 @@ const PromotedStudent = () => {
         value: stu.section_id,
         label: `${stu?.name}`,
       })),
-    [studentNameWithClassId]
+    [studentNameWithClassIdForStudent]
   );
 
   const [selectedStudents, setSelectedStudents] = useState([]);
@@ -339,6 +352,22 @@ const PromotedStudent = () => {
     }
   };
 
+  const filteredParents = parentInformation
+    ? parentInformation.filter((student) => {
+        const searchLower = searchTerm.toLowerCase();
+
+        return (
+          (student.roll_no !== null &&
+            student.roll_no.toString().toLowerCase().includes(searchLower)) || // Filter by roll number
+          `${student.first_name || ""} ${student.mid_name || ""} ${
+            student.last_name || ""
+          }`
+            .toLowerCase()
+            .includes(searchLower) // Filter by full name
+        );
+      })
+    : [];
+
   return (
     <div>
       <ToastContainer />
@@ -355,8 +384,12 @@ const PromotedStudent = () => {
         ></div>
         <div className="     w-full md:container mt-4">
           {/* Search Section */}
-          <div className=" w-full md:w-[75%] border-1 flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg    mx-auto mt-1 p-2 ">
-            <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center">
+          <div className=" w-full md:w-[95%] border-1 flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg    mx-auto mt-1 p-2 ">
+            <h6 className=" w-[20%] float-start text-nowrap text-blue-600 mt-2.5">
+              Promote From :
+            </h6>
+
+            <div className="w-full  flex md:flex-row justify-between items-center">
               <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                 <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
                   <label
@@ -377,6 +410,12 @@ const PromotedStudent = () => {
                       isSearchable
                       isClearable
                       className="text-sm"
+                      styles={{
+                        menu: (provided) => ({
+                          ...provided,
+                          zIndex: 1050, // Set your desired z-index value
+                        }),
+                      }}
                       isDisabled={loadingClasses}
                     />
                     {nameErrorForClass && (
@@ -407,6 +446,12 @@ const PromotedStudent = () => {
                       isSearchable
                       isClearable
                       className="text-sm"
+                      styles={{
+                        menu: (provided) => ({
+                          ...provided,
+                          zIndex: 1050, // Set your desired z-index value
+                        }),
+                      }}
                       isDisabled={loadingStudents}
                     />
                     {nameError && (
@@ -462,20 +507,10 @@ const PromotedStudent = () => {
           {parentInformation && (
             <div className="w-full md:container mx-auto py-4 px-4">
               <div className="card px-3 rounded-md">
-                <div className="card-header mb-4 flex justify-between items-center">
-                  <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-                    Student Information
-                  </h5>
-                </div>
-                <div
-                  className="relative w-full -top-6 h-1 mx-auto bg-red-700"
-                  style={{ backgroundColor: "#C03078" }}
-                ></div>
-                <p className="text-[.9em] md:absolute md:right-5 md:top-[14%] text-gray-500">
-                  <span className="text-red-500">*</span> indicates mandatory
-                  information
-                </p>
-                <div className=" w-full md:w-[75%] border-1 flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg    mx-auto mt-1 p-2 ">
+                <div className=" w-full md:w-[82%] border-2 border-gray-200 flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg    mx-auto mt-4 p-2 ">
+                  <h6 className=" w-[20%] float-start text-nowrap text-blue-600 mt-2.5">
+                    Promote To :
+                  </h6>
                   <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center">
                     <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                       <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
@@ -496,9 +531,16 @@ const PromotedStudent = () => {
                             }
                             isSearchable
                             isClearable
-                            className="text-sm"
                             isDisabled={loadingClasses}
+                            className="text-sm"
+                            styles={{
+                              menu: (provided) => ({
+                                ...provided,
+                                zIndex: 1050, // Set your desired z-index value
+                              }),
+                            }}
                           />
+
                           {nameErrorForClass && (
                             <div className="h-8 relative ml-1 text-danger text-xs">
                               {nameErrorForClass}
@@ -524,6 +566,12 @@ const PromotedStudent = () => {
                             isSearchable
                             isClearable
                             className="text-sm"
+                            styles={{
+                              menu: (provided) => ({
+                                ...provided,
+                                zIndex: 1050, // Set your desired z-index value
+                              }),
+                            }}
                             // isDisabled={loadingStudents}
                           />
                           {nameError && (
@@ -537,44 +585,118 @@ const PromotedStudent = () => {
                   </div>
                 </div>
                 {/* Student Table */}
-                <table className="w-full mt-4 border border-gray-300">
-                  <thead>
-                    <tr className="bg-gray-200 text-left">
-                      <th className="px-4 py-2">Select</th>
-                      <th className="px-4 py-2">Roll Number</th>
-                      <th className="px-4 py-2">Name</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {parentInformation.map((student) => (
-                      <tr
-                        key={student.student_id}
-                        className="hover:bg-gray-100"
-                      >
-                        <td className="px-4 py-2">
+                <div className="container mt-4">
+                  <div className="card mx-auto lg:w-[89%] shadow-lg">
+                    <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
+                      <h6 className="text-gray-700 mt-1   text-nowrap">
+                        Select Students
+                      </h6>
+                      <div className="box-border flex md:gap-x-2  ">
+                        <div className=" w-1/2 md:w-fit mr-1">
                           <input
-                            type="checkbox"
-                            checked={selectedStudents.includes(
-                              student.student_id
-                            )}
-                            onChange={() =>
-                              handleCheckboxChange(student.student_id)
-                            }
+                            type="text"
+                            className="form-control"
+                            placeholder="Search"
+                            onChange={(e) => setSearchTerm(e.target.value)}
                           />
-                        </td>
-                        <td className="px-4 py-2">
-                          {student.roll_no === 0 ? "0" : student.roll_no || ""}
-                        </td>
-                        <td className="px-4 py-2">
-                          {student.first_name} {student.mid_name}{" "}
-                          {student.last_name}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {/* Selected Students */}
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className=" relative w-[97%] h-1  mx-auto bg-red-700"
+                      style={{
+                        backgroundColor: "#C03078",
+                      }}
+                    ></div>
+                    <div className="card-body w-full ">
+                      <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full mx-auto">
+                        <div className="bg-white rounded-lg shadow-xs">
+                          <table className="min-w-full leading-normal table-auto">
+                            <thead className="sticky top-0 bg-gray-200 z-10">
+                              <tr className="bg-gray-200">
+                                <th className="px-2 text-center w-full md:w-[10%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Sr.No
+                                </th>
+                                <th className="px-2 text-center w-full md:w-[14%]  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectAll}
+                                    onChange={handleSelectAll}
+                                    className="cursor-pointer"
+                                  />{" "}
+                                  Select All
+                                </th>
+                                <th className="px-2 w-full md:w-[19%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Roll Number
+                                </th>
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Name
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {filteredParents.length ? (
+                                filteredParents.map((student, index) => (
+                                  <tr
+                                    key={student.student_id}
+                                    className={`${
+                                      index % 2 === 0
+                                        ? "bg-white"
+                                        : "bg-gray-100"
+                                    } hover:bg-gray-50`}
+                                  >
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        {index + 1}
+                                      </p>
+                                    </td>
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        <input
+                                          type="checkbox"
+                                          checked={selectedStudents.includes(
+                                            student.student_id
+                                          )}
+                                          onChange={() =>
+                                            handleCheckboxChange(
+                                              student.student_id
+                                            )
+                                          }
+                                          className="cursor-pointer"
+                                        />
+                                      </p>
+                                    </td>
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        {student.roll_no === 0
+                                          ? "0"
+                                          : student.roll_no || ""}
+                                      </p>
+                                    </td>
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        {student.first_name || ""}{" "}
+                                        {student.mid_name || ""}{" "}
+                                        {student.last_name || ""}{" "}
+                                      </p>
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                  <div className=" text-center text-xl text-red-700">
+                                    Oops! No data found..
+                                  </div>
+                                </div>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                ;{/* Selected Students */}
                 {selectedStudents.length > 0 && (
                   <div className="mt-4">
                     <p className="text-gray-600">
