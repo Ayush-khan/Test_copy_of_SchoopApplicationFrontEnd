@@ -256,6 +256,8 @@ const PromotedStudent = () => {
     // Reset error messages
     setNameError("");
     setNameErrorForClass("");
+    setNameErrorForClassForStudent("");
+    setNameErrorForStudent("");
     setErrors({}); // Clears all field-specific errors
 
     let hasError = false;
@@ -322,21 +324,21 @@ const PromotedStudent = () => {
     // Validate if `selectedStudents` array is empty
 
     // Validate if `selectedClassForStudent` or `selectedStudentForStudent` are missing
-    if (!selectedClassForStudent) {
+    if (!selectedClassForStudent.value) {
       setNameErrorForClassForStudent("Please select a class.");
       hasError = true;
     }
-    if (!selectedStudentForStudent) {
+    if (!selectedStudentForStudent.value) {
       setNameErrorForStudent("Please select a student.");
       hasError = true;
     }
-
-    // Exit if there are validation errors
-    if (hasError) return;
     if (selectedStudents.length === 0) {
       toast.error("Please select at least one student to promote.");
-      return;
+      hasError = true;
     }
+    // Exit if there are validation errors
+    if (hasError) return;
+
     try {
       setLoading(true); // Start loading
 
@@ -377,6 +379,8 @@ const PromotedStudent = () => {
         setSelectedStudentForStudent([]);
         setSelectedClassForStudent(null);
         setSelectedClassForStudent([]);
+        setNameErrorForClassForStudent("");
+        setNameErrorForStudent("");
         setSelectAll(null);
         setBackendErrors({});
         setTimeout(() => {
