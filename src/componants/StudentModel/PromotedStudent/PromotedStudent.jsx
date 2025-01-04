@@ -661,8 +661,8 @@ const PromotedStudent = () => {
                       <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full mx-auto">
                         <div className="bg-white rounded-lg shadow-xs">
                           <table className="min-w-full leading-normal table-auto">
-                            <thead className=" bg-gray-300 ">
-                              <tr className="bg-gray-200">
+                            <thead className=" ">
+                              <tr className="bg-gray-200 ">
                                 <th className="px-2 text-center w-full md:w-[10%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                   Sr.No
                                 </th>
