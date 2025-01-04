@@ -741,8 +741,16 @@ const PromotedStudent = () => {
                             </tbody>
                           </table>
                         </div>
+                      </div>{" "}
+                      <div className="text-center">
+                        <p className="text-blue-500 font-semibold mt-1">
+                          Selected Students:{" "}
+                          <h6 className=" inline text-pink-600">
+                            {selectedStudents.length}
+                          </h6>
+                        </p>
                       </div>
-                      <div className="col-span-3 my-2 mt-4 text-right">
+                      <div className="col-span-3 mb-2  text-right">
                         <button
                           type="submit"
                           onClick={handleSubmit}
@@ -785,13 +793,6 @@ const PromotedStudent = () => {
                   </div>
                 </div>
                 ;{/* Selected Students */}
-                {selectedStudents.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-gray-600">
-                      Selected Students: {selectedStudents.length}
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           )}
