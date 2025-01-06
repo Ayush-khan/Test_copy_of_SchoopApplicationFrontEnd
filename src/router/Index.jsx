@@ -166,6 +166,7 @@ import SubstituteTeacher from "../componants/SubstituteTeacher/SubstituteTeacher
 import EditSubstituteTeacher from "../componants/SubstituteTeacher/EditSubstituteTeacher.jsx";
 import SetLateTime from "../componants/SetLateTime/SetLateTime.jsx";
 import PromotedStudent from "../componants/StudentModel/PromotedStudent/PromotedStudent.jsx";
+import SendUserIdToParent from "../componants/SendUserIdToParent/SendUserIdToParent.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -306,11 +307,18 @@ function Index() {
           // path="#"
           element={<PrivateRoute element={EditLeavingCertificate} />}
         />
-
+        {/* Promote Student Module */}
         <Route
           path="/PromoteStudent"
           // path="#"
           element={<PrivateRoute element={PromotedStudent} />}
+        />
+        {/* SendUserIdToParent Module */}
+        <Route
+          path="/SendUserIdToParent"
+          // path="#"
+
+          element={<PrivateRoute element={SendUserIdToParent} />}
         />
         {/* Staff endPoints */}
         <Route
