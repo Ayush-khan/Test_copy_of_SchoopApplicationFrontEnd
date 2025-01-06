@@ -259,18 +259,47 @@ const SendUserIdToParent = () => {
     }
   };
 
+  //   const filteredParents = parentInformation
+  //     ? parentInformation.filter((student) => {
+  //         const searchLower = searchTerm.toLowerCase();
+
+  //         return (
+  //           (student.roll_no !== null &&
+  //             student.roll_no.toString().toLowerCase().includes(searchLower)) || // Filter by roll number
+  //           `${student.first_name || ""} ${student.mid_name || ""} ${
+  //             student.last_name || ""
+  //           }`
+  //             .toLowerCase()
+  //             .includes(searchLower) // Filter by full name
+  //         );
+  //       })
+  //     : [];
   const filteredParents = parentInformation
     ? parentInformation.filter((student) => {
         const searchLower = searchTerm.toLowerCase();
 
         return (
+          // Filter by roll number
           (student.roll_no !== null &&
-            student.roll_no.toString().toLowerCase().includes(searchLower)) || // Filter by roll number
+            student.roll_no.toString().toLowerCase().includes(searchLower)) ||
+          // Filter by father's email
+          (student.parents?.f_email &&
+            student.parents.f_email.toLowerCase().includes(searchLower)) ||
+          // Filter by mother's email
+          (student.parents?.m_emailid &&
+            student.parents.m_emailid.toLowerCase().includes(searchLower)) ||
+          // Filter by user master table (user ID)
+          (student?.user_master?.user_id !== null &&
+            student?.user_master?.user_id
+              .toString()
+              .toLowerCase()
+              .includes(searchLower)) ||
+          // Filter by full name
           `${student.first_name || ""} ${student.mid_name || ""} ${
             student.last_name || ""
           }`
             .toLowerCase()
-            .includes(searchLower) // Filter by full name
+            .includes(searchLower)
         );
       })
     : [];
@@ -291,10 +320,11 @@ const SendUserIdToParent = () => {
         ></div>
         <div className="     w-full md:container mt-4">
           {/* Search Section */}
-          <div className=" w-full md:w-[95%] border-1 flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg    mx-auto mt-1 p-2 ">
+          <div className="pt-2 md:pt-4"></div>
+          <div className="pt-8 w-full md:w-[50%]  relative ml-0 md:ml-[10%]  border-1 flex justify-start flex-col md:flex-row gap-x-1  bg-white rounded-lg    mt-2 md:mt-6 p-2 ">
             <h6 className=" w-[20%] float-start text-nowrap text-blue-600 mt-2.5"></h6>
 
-            <div className="w-full  flex md:flex-row justify-between items-center">
+            <div className="w-full    flex md:flex-row justify-start items-center">
               <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                 <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
                   <label
@@ -303,7 +333,7 @@ const SendUserIdToParent = () => {
                   >
                     Class <span className="text-red-500">*</span>
                   </label>
-                  <div className="w-full md:w-[50%]">
+                  <div className="w-full md:w-[57%]">
                     <Select
                       id="classSelect"
                       value={selectedClass}
@@ -371,10 +401,9 @@ const SendUserIdToParent = () => {
               </div>
             </div>
           </div>
-
           {/* Form Section - Displayed when parentInformation is fetched */}
           {parentInformation && (
-            <div className="w-full md:container mx-auto py-4 px-4">
+            <div className="w-full md:container mx-auto py-4 px-4 mt-8">
               <div className="card mx-auto w-full shadow-lg">
                 <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
                   <h6 className="text-gray-700 mt-1   text-nowrap">
