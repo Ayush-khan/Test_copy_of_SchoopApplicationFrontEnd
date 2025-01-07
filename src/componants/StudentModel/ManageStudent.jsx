@@ -186,69 +186,10 @@ function ManageSubjectList() {
     }
   };
 
-  //  const fetchStudentNameWithClassId = async (section_id = null) => {
-  //    try {
-  //      setLoadingStudents(true);
-
-  //      const params = section_id ? { section_id } : {};
-  //      const token = localStorage.getItem("authToken");
-
-  //      const response = await axios.get(
-  //        `${API_URL}/api/getStudentListBySectionData`,
-  //        {
-  //          headers: { Authorization: `Bearer ${token}` },
-  //          params,
-  //        }
-  //      );
-
-  //      setStudentNameWithClassId(response?.data?.data || []);
-  //    } catch (error) {
-  //      toast.error("Error fetching students.");
-  //    } finally {
-  //      setLoadingStudents(false);
-  //    }
-  //  };
-  // Fetch initial data (classes with student count) and display loader while loading
-  // const fetchInitialData = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     const classResponse = await axios.get(
-  //       `${API_URL}/api/getallClassWithStudentCount`,
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-  //     setClasses(classResponse.data || []);
-  //   } catch (error) {
-  //     toast.error("Error fetching initial data.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // // Fetch student list based on class ID
-  // const fetchStudentNameWithClassId = async (section_id = null) => {
-  //   setLoading(true);
-  //   try {
-  //     const params = section_id ? { section_id } : {};
-  //     const token = localStorage.getItem("authToken");
-  //     const response = await axios.get(
-  //       `${API_URL}/api/getStudentListBySectionData`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params,
-  //       }
-  //     );
-  //     setStudentNameWithClassId(response?.data?.data || []);
-  //   } catch (error) {
-  //     toast.error("Error fetching students.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleSearch = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
+    setSubjects([]);
     if (!classIdForManage && !selectedStudentId && !grNumber) {
       setNameError("Please select at least one of them.");
       toast.error("Please select at least one of them!");
@@ -258,23 +199,40 @@ function ManageSubjectList() {
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
-      let response;
-      if (selectedStudentId) {
-        response = await axios.get(
-          `${API_URL}/api/students/${selectedStudentId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      } else if (grNumber) {
-        response = await axios.get(
-          `${API_URL}/api/student_by_reg_no/${grNumber}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      } else if (selectedClass) {
-        response = await axios.get(`${API_URL}/api/getStudentListBySection`, {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { section_id: selectedClass.value },
-        });
-      }
+      // let response;
+
+      const queryParams = {};
+
+      // Dynamically build query params
+      if (classIdForManage) queryParams.section_id = classIdForManage;
+      if (selectedStudentId) queryParams.student_id = selectedStudentId;
+      if (grNumber) queryParams.reg_no = grNumber;
+
+      // Make the API call only if queryParams has at least one key
+      // if (Object.keys(queryParams).length === 0) {
+      //   throw new Error("No valid search parameters.");
+      // }
+
+      const response = await axios.get(`${API_URL}/api/get_students`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: queryParams,
+      });
+      // if (selectedStudentId) {
+      //   response = await axios.get(
+      //     `${API_URL}/api/students/${selectedStudentId}`,
+      //     { headers: { Authorization: `Bearer ${token}` } }
+      //   );
+      // } else if (grNumber) {
+      //   response = await axios.get(
+      //     `${API_URL}/api/student_by_reg_no/${grNumber}`,
+      //     { headers: { Authorization: `Bearer ${token}` } }
+      //   );
+      // } else if (selectedClass) {
+      //   response = await axios.get(`${API_URL}/api/getStudentListBySection`, {
+      //     headers: { Authorization: `Bearer ${token}` },
+      //     params: { section_id: selectedClass.value },
+      //   });
+      // }
 
       // const studentList = response?.data?.students || [];
       // Handle singular or plural student key
