@@ -1870,8 +1870,8 @@ function ManageSubjectList() {
       // setSubjects([]);
       toast.success("subject deleted successfully!");
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(`Error deleting subject: ${error.response.data.message}`);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
       } else {
         toast.error(`Error deleting subject: ${error.message}`);
       }

@@ -213,15 +213,11 @@ const SendUserIdToParent = () => {
       };
 
       // Make the API call
-      const response = await axios.post(
-        `${API_URL}/api/promotestudents`,
-        postData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.post(`${API_URL}/api/`, postData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       // Handle successful response
       if (response.status === 200) {
