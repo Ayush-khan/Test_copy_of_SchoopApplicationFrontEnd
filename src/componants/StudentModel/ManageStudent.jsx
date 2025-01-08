@@ -241,8 +241,8 @@ function ManageSubjectList() {
       setSubjects(studentList);
       setPageCount(Math.ceil(studentList.length / pageSize)); // Set page count based on response size
     } catch (error) {
-      console.log("error", error.response.data.error);
-      toast.error(error.response.data.error || "student not found..!");
+      console.log("error", error.response.data.message);
+      toast.error(error.response.data.message || "student not found!");
     } finally {
       setLoading(false);
       setIsSubmitting(false);
