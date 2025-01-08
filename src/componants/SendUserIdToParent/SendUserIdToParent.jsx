@@ -197,14 +197,14 @@ const SendUserIdToParent = () => {
     // Validate if `selectedStudents` array is empty
 
     // Validate if `selectedClassForStudent` or `selectedStudentForStudent` are missing
-    if (!selectedClassForStudent.value) {
-      setNameErrorForClassForStudent("Please select a class.");
-      hasError = true;
-    }
-    if (!selectedStudentForStudent.value) {
-      setNameErrorForStudent("Please select a student.");
-      hasError = true;
-    }
+    // if (!selectedClassForStudent.value) {
+    //   setNameErrorForClassForStudent("Please select a class.");
+    //   hasError = true;
+    // }
+    // if (!selectedStudentForStudent.value) {
+    //   setNameErrorForStudent("Please select a student.");
+    //   hasError = true;
+    // }
     if (selectedStudents.length === 0) {
       toast.error(
         "Please select at least one student to send their User ID to the parents."
@@ -230,11 +230,15 @@ const SendUserIdToParent = () => {
       };
 
       // Make the API call
-      const response = await axios.post(`${API_URL}/api/`, postData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.post(
+        `${API_URL}/api/send_user_id_toparents`,
+        postData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       // Handle successful response
       if (response.status === 200) {
