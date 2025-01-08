@@ -634,7 +634,7 @@ const AdminNavBar = () => {
           title={<span className="nav-dropdown-titleSubUnder">Leave</span>}
           className="dropend custom-submenu"
         >
-          <NavDropdown.Item as={Link} to="#">
+          <NavDropdown.Item as={Link} to="/LeaveAllocation">
             Leave Allocation
           </NavDropdown.Item>
           <NavDropdown.Item as={Link} to="#">

@@ -164,7 +164,7 @@ function LeaveAllocation() {
     const errors = {};
 
     // Validate Staff Name
-    if (!name || name.trim() === "") {
+    if (!name) {
       //name.trim()
       errors.name = "Please enter a valid Staff name.";
       // toast.error("Name is required.")
@@ -196,7 +196,7 @@ function LeaveAllocation() {
   const handleEdit = (section) => {
     setCurrentSection(section);
     setNewStaffName(section.staff_id);
-    setLeaveType(section.leave_type_id);
+    setNewLeaveType(section.leave_type_id);
     console.log("set staf leave", section.leave_type_id);
     setNewLeaveAllocated(section.leaves_allocated);
     setShowEditModal(true);
@@ -211,6 +211,11 @@ function LeaveAllocation() {
     setShowEditModal(false);
     setShowDeleteModal(false);
     setCurrentSection(null);
+
+    setNewStaffName();
+    setNewLeaveType();
+
+    setNewLeaveAllocated();
     setFieldErrors({});
     setNameError("");
   };
@@ -789,38 +794,30 @@ function LeaveAllocation() {
                     </div>
                   </div>
                   <div className="relative mb-3 flex justify-center mx-4">
-                    <label htmlFor="editLeaveType" className="w-1/2 mt-2">
+                    <label htmlFor="leaveType" className="w-1/2 mt-2">
                       Leave Type<span className="text-red-500">*</span>
                     </label>
                     <select
-                      id="editLeaveType"
+                      id="leaveType"
                       className="form-control shadow-md"
                       value={newLeaveType}
                       onChange={handleChangeLeaveType}
                     >
-                      {console.log("leave new ttype", newLeaveType)}
                       <option value="">Select</option>
-                      {console.log("leave type", leaveType)}
-                      {Array.isArray(leaveType) && leaveType.length > 0 ? (
+                      {leaveType.length === 0 ? (
+                        <option>No Leave Type Available</option>
+                      ) : (
                         leaveType.map((leave) => (
                           <option
                             key={leave.leave_type_id}
-                            value={leave.leave_type_id || ""}
+                            value={leave.leave_type_id}
+                            className="max-h-20 overflow-y-scroll"
                           >
                             {leave.name}
                           </option>
                         ))
-                      ) : (
-                        <option>No Leave Type Available</option>
                       )}
                     </select>
-                    <div className="absolute top-9 left-1/3">
-                      {fieldErrors.leave_type_id && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.leave_type_id}
-                        </span>
-                      )}
-                    </div>
                   </div>
 
                   <div className=" relative mb-3 flex justify-center  mx-4">

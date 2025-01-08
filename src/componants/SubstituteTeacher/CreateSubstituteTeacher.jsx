@@ -719,8 +719,6 @@ const CreateSubstituteTeacher = () => {
   return (
     <>
       <div className="w-full  ">
-        <ToastContainer />
-
         <div className=" w-full md:w-[79%] border-1 drop-shadow-sm  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg   ml-0 md:ml-[2%]   p-2">
           <div className="w-[99%] flex md:flex-row justify-between items-center">
             <div className="w-full flex flex-col gap-y-2 md:gap-y-0 md:flex-row">

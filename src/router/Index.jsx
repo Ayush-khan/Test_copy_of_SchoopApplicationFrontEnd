@@ -167,6 +167,7 @@ import EditSubstituteTeacher from "../componants/SubstituteTeacher/EditSubstitut
 import SetLateTime from "../componants/SetLateTime/SetLateTime.jsx";
 import PromotedStudent from "../componants/StudentModel/PromotedStudent/PromotedStudent.jsx";
 import SendUserIdToParent from "../componants/SendUserIdToParent/SendUserIdToParent.jsx";
+import LeaveAllocation from "../componants/Leave/LeaveAllocation.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -336,6 +337,11 @@ function Index() {
         <Route
           path="/staff/view/:id"
           element={<PrivateRoute element={ViewStaff} />}
+        />
+        {/* LeaveAllocation */}
+        <Route
+          path="/LeaveAllocation"
+          element={<PrivateRoute element={LeaveAllocation} />}
         />
         {/* Substitute Teacher */}
         <Route
