@@ -305,7 +305,7 @@ function SubjectAllotmentForReportCard() {
       }
 
       // Send the delete request to the backend
-      await axios.delete(
+      const response = await axios.delete(
         `${API_URL}/api/get_sub_report_allotted/${subReportCardId}`,
         {
           headers: {
@@ -315,12 +315,23 @@ function SubjectAllotmentForReportCard() {
         }
       );
 
-      handleSearch(); // Refresh the data (this seems like the method to refetch data)
+      // Handle successful deletion
+      console.log("responsedata", response.data);
+      if (response.data && response.data.status == 400) {
+        const errorMessage = response.data.message || "Delete failed.";
+        console.log("inside the delete", response.data);
+        toast.error(errorMessage);
+      } else {
+        toast.success("Subject deleted successfully!");
+        handleSearch(); // Refresh the data (this seems like the method to refetch data)
+      }
+
       setShowDeleteModal(false); // Close the modal
-      toast.success("Subject deleted successfully!");
+
+      setShowDeleteModal(false); // Close the modal
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(`Error deleting subject: ${error.response.data.message}`);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
       } else {
         toast.error(`Error deleting subject: ${error.message}`);
       }
