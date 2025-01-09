@@ -420,7 +420,7 @@ const SendUserIdToParent = () => {
           </div>
           {/* Form Section - Displayed when parentInformation is fetched */}
           {parentInformation && (
-            <div className="w-full md:container mx-auto py-4 px-4 mt-8">
+            <div className="w-full md:container mx-auto py-4 px-4 ">
               <div className="card mx-auto w-full shadow-lg">
                 <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
                   <h6 className="text-gray-700 mt-1   text-nowrap">
