@@ -1,8 +1,8 @@
-// with unique name validations on server api complete for testing.
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Select from "react-select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
@@ -53,9 +53,13 @@ function LeaveAllocation() {
       console.log(" all staff names", response.data);
 
       if (Array.isArray(response.data.data)) {
-        setStaffNames(response.data.data);
+        const options = response.data.data.map((staff) => ({
+          value: staff.teacher_id,
+          label: staff.name,
+        }));
+        setStaffNames(options);
       } else {
-        setError("Unexpected data format.");
+        setNameError("Unexpected data format.");
       }
     } catch (error) {
       toast.error("Error fetching Staff Names.", error);
@@ -153,7 +157,9 @@ function LeaveAllocation() {
     const searchLower = searchTerm.toLowerCase();
     return (
       section.teachername.toLowerCase().includes(searchLower) || // Filter by teacher name
-      section.leavename.toLowerCase().includes(searchLower) // Filter by leave type
+      section.leavename.toLowerCase().includes(searchLower) || // Filter by leave type
+      section.balance_leave.toLowerCase().includes(searchLower) ||
+      section.leaves_allocated.toLowerCase().includes(searchLower)
     );
   });
   const displayedSections = filteredSections.slice(
@@ -166,13 +172,13 @@ function LeaveAllocation() {
     // Validate Staff Name
     if (!name) {
       //name.trim()
-      errors.name = "Please enter a valid Staff name.";
+      errors.name = "Please select Staff name.";
       // toast.error("Name is required.")
     }
 
     // Validate Leave Type ID
     if (!leave_type_id || isNaN(Number(leave_type_id))) {
-      errors.leave_type_id = "Please select a valid Leave Type.";
+      errors.leave_type_id = "Please select Leave Type.";
       // toast.error("Leave type is required.")
     }
 
@@ -196,9 +202,11 @@ function LeaveAllocation() {
   const handleEdit = (section) => {
     setCurrentSection(section);
     setNewStaffName(section.staff_id);
+    console.log("set stff ", section.staff_id);
     setNewLeaveType(section.leave_type_id);
     console.log("set staf leave", section.leave_type_id);
     setNewLeaveAllocated(section.leaves_allocated);
+    console.log("set leave alloctaed", section.leaves_allocated);
     setShowEditModal(true);
   };
 
@@ -211,10 +219,8 @@ function LeaveAllocation() {
     setShowEditModal(false);
     setShowDeleteModal(false);
     setCurrentSection(null);
-
     setNewStaffName();
     setNewLeaveType();
-
     setNewLeaveAllocated();
     setFieldErrors({});
     setNameError("");
@@ -223,13 +229,18 @@ function LeaveAllocation() {
   const handleSubmitAdd = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+    setNameAvailable(false);
+    setNameError("");
     const validationErrors = validateSectionName(
       newStaffName,
       newLeaveType,
       newLeaveAllocated
     );
+
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
+      console.log("setFieldErrors", fieldErrors);
+
       setIsSubmitting(false);
       return;
     }
@@ -294,21 +305,31 @@ function LeaveAllocation() {
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
+      console.log("setFieldErrors", fieldErrors);
       setIsSubmitting(false); // Reset submitting state if validation fails
       return;
     }
 
     try {
       const token = localStorage.getItem("authToken");
-      if (!token || !currentSection || !currentSection.staff_id) {
-        throw new Error("No authentication token or section ID found");
+      if (
+        !token ||
+        !currentSection ||
+        !currentSection.staff_id ||
+        !currentSection.leave_type_id
+      ) {
+        throw new Error("No authentication token or required IDs found");
       }
 
-      await axios.put(
-        ` ${API_URL}/api/update_leaveallocation/${currentSection.staff_id}/${currentSection.leave_type_id}`,
+      console.log("Preparing to update with:", {
+        staff_id: newStaffName,
+        leave_type_id: newLeaveType,
+        leaves_allocated: newLeaveAllocated,
+      });
+
+      const response = await axios.put(
+        `${API_URL}/api/update_leaveallocation/${currentSection?.staff_id}/${currentSection?.leave_type_id}`,
         {
-          staff_id: newStaffName,
-          leave_type_id: newLeaveType,
           leaves_allocated: newLeaveAllocated,
         },
         {
@@ -317,28 +338,25 @@ function LeaveAllocation() {
         }
       );
 
+      console.log("Update response:", response.data);
+      console.log("Sections fetched after update:", sections);
+
       fetchSections();
       handleCloseModal();
       toast.success("Staff Leave updated successfully!");
     } catch (error) {
       console.error("Error editing Staff Leave:", error);
-      console.log("erroris", error.response);
+      console.log("Error details:", error.response?.data || error.message);
       if (error.response && error.response.data.status === 422) {
         const errors = error.response.data.errors;
-        console.log("error", errors);
-        // Handle name field error
         if (errors.staff_id) {
           setFieldErrors((prev) => ({
             ...prev,
-            staff_id: errors.staff_id, // Show the first error message for the name field
+            staff_id: errors.staff_id,
           }));
-          errors.staff_id.forEach((err) => toast.error(err)); // Show all errors in toast
+          errors.staff_id.forEach((err) => toast.error(err));
         }
-
-        // Handle other field errors if necessary
-        // Add similar handling for other fields if included in the backend error response
       } else {
-        // Handle other errors
         toast.error("Server error. Please try again later.");
       }
     } finally {
@@ -403,14 +421,25 @@ function LeaveAllocation() {
     }
   };
 
-  const handleChangeStaffName = (e) => {
-    const { value } = e.target;
-    setNameError(""); // Clear any previous name error
-    setNewStaffName(value); // Update staff name state
-    setFieldErrors((prevErrors) => ({
-      ...prevErrors,
-      name: validateSectionName(value, newLeaveType, newLeaveAllocated).name, // Validate name when staff name changes
-    }));
+  const handleChangeStaffName = (selectedOption) => {
+    if (selectedOption) {
+      setNameError(""); // Clear any previous name error
+      setNewStaffName(selectedOption.value); // Update staff name state
+      setFieldErrors((prevErrors) => ({
+        ...prevErrors,
+        name: validateSectionName(
+          selectedOption.value,
+          newLeaveType,
+          newLeaveAllocated
+        ).name, // Validate name when staff name changes
+      }));
+    } else {
+      setNewStaffName(""); // Clear staff name when selection is cleared
+      setFieldErrors((prevErrors) => ({
+        ...prevErrors,
+        name: "", // Clear validation errors if any
+      }));
+    }
   };
 
   const handleChangeLeaveType = (e) => {
@@ -645,34 +674,37 @@ function LeaveAllocation() {
                   ></div>
                   {/* <hr className="font-bold"></hr> */}
                   <div className="modal-body">
-                    <div className="relative mb-3 flex justify-center mx-4">
+                    <div className="relative mb-4 flex justify-center mx-4">
                       <label htmlFor="staffName" className="w-1/2 mt-2">
                         Staff Name<span className="text-red-500">*</span>
                       </label>
-                      <select
+                      <Select
                         id="staffName"
-                        className="form-control shadow-md"
-                        value={newStaffName}
-                        onChange={handleChangeStaffName}
-                      >
-                        <option value="">Select</option>
-                        {staffNames.length === 0 ? (
-                          <option value="">No Staff Available</option>
-                        ) : (
-                          staffNames.map((staff) => (
-                            <option
-                              key={staff.teacher_id}
-                              value={staff.teacher_id}
-                              className="max-h-20 overflow-y-scroll"
-                            >
-                              {staff.name}
-                            </option>
-                          ))
+                        options={staffNames}
+                        value={staffNames.find(
+                          (staff) => staff.value === newStaffName
                         )}
-                      </select>
+                        onChange={handleChangeStaffName}
+                        placeholder="Select"
+                        className=" shadow-md w-full"
+                        isSearchable
+                        isClearable
+                      />
+                      <div className="absolute top-9 left-1/3">
+                        {!nameAvailable && (
+                          <span className="block text-danger text-xs">
+                            {nameError}
+                          </span>
+                        )}
+                        {fieldErrors.name && (
+                          <span className="text-danger text-xs">
+                            {fieldErrors.name}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="relative mb-3 flex justify-center mx-4">
+                    <div className="relative mb-4 flex justify-center mx-4">
                       <label htmlFor="leaveType" className="w-1/2 mt-2">
                         Leave Type<span className="text-red-500">*</span>
                       </label>
@@ -697,6 +729,13 @@ function LeaveAllocation() {
                           ))
                         )}
                       </select>
+                      <div className="absolute top-9 left-1/3">
+                        {fieldErrors.leave_type_id && (
+                          <span className="text-danger text-xs">
+                            {fieldErrors.leave_type_id}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div className=" relative mb-3 flex justify-center  mx-4">
@@ -709,6 +748,13 @@ function LeaveAllocation() {
                         value={newLeaveAllocated}
                         onChange={handleChangeLeaveAllocated}
                       />
+                      <div className="absolute top-9 left-1/3">
+                        {fieldErrors.leaves_allocated && (
+                          <span className="text-danger text-xs">
+                            {fieldErrors.leaves_allocated}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -756,7 +802,7 @@ function LeaveAllocation() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  <div className=" relative mb-3 flex justify-center  mx-4">
+                  <div className="relative mb-3 flex justify-center mx-4">
                     <label htmlFor="editStaffName" className="w-1/2 mt-2">
                       Staff Name <span className="text-red-500">*</span>
                     </label>
@@ -765,6 +811,7 @@ function LeaveAllocation() {
                       className="form-control shadow-md"
                       value={newStaffName}
                       onChange={handleChangeStaffName}
+                      disabled // Makes the select element readonly
                     >
                       {Array.isArray(staffNames) && staffNames.length > 0 ? (
                         staffNames.map((staff) => (
@@ -779,16 +826,10 @@ function LeaveAllocation() {
                         <option>No Staff Available</option>
                       )}
                     </select>
-                    <div className="absolute top-9 left-1/3 ">
-                      {!nameAvailable && (
-                        <span className=" block text-red-500 text-xs">
-                          {nameError}
-                        </span>
-                      )}
-
-                      {fieldErrors.teacher_id && (
+                    <div className="absolute top-9 left-1/3">
+                      {fieldErrors.name && (
                         <span className="text-danger text-xs">
-                          {fieldErrors.teacher_id}
+                          {fieldErrors.name}
                         </span>
                       )}
                     </div>
@@ -802,6 +843,7 @@ function LeaveAllocation() {
                       className="form-control shadow-md"
                       value={newLeaveType}
                       onChange={handleChangeLeaveType}
+                      disabled // Makes the select element readonly
                     >
                       <option value="">Select</option>
                       {leaveType.length === 0 ? (
@@ -818,6 +860,13 @@ function LeaveAllocation() {
                         ))
                       )}
                     </select>
+                    <div className="absolute top-9 left-1/3">
+                      {fieldErrors.leave_type_id && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.leave_type_id}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className=" relative mb-3 flex justify-center  mx-4">
@@ -830,6 +879,13 @@ function LeaveAllocation() {
                       value={newLeaveAllocated}
                       onChange={handleChangeLeaveAllocated}
                     />
+                    <div className="absolute top-9 left-1/3">
+                      {fieldErrors.leaves_allocated && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.leaves_allocated}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className=" flex justify-end p-3">

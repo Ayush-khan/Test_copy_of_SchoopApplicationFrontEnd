@@ -213,7 +213,7 @@ const CreateExamTimeTable = () => {
       console.log("ress", response.data.success);
       const sucessmessage = response.data.success;
       if (response.data.success == sucessmessage) {
-        const { message, status } = response.data;
+        const { message, status, success } = response.data;
 
         // Log the full error details for debugging
         console.log("Error details:", response.data);
@@ -225,9 +225,13 @@ const CreateExamTimeTable = () => {
             setTimetable([]);
             // Handle specific case for status 400 (e.g., Exam Timetable already created)
             toast.error(message); // This will display: "Exam Timetable is already created for this class!!"
-          } else {
+          } else if (status == 200 && success == true) {
             // Handle other cases if needed
-            toast.error(message); // Display general error message from the backend
+            toast.success(
+              "For Create Exam Timetable Data loaded successfully!"
+            ); // Display general error message from the backend
+          } else {
+            toast.error(message);
           }
         } else {
           // If no message exists, show a fallback error message
