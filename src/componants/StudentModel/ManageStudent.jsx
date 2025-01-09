@@ -212,11 +212,13 @@ function ManageSubjectList() {
       // if (Object.keys(queryParams).length === 0) {
       //   throw new Error("No valid search parameters.");
       // }
-
+      // previour api:
+      // https://sms.evolvu.in/public/api/getStudentListBySection?section_id=440
       const response = await axios.get(`${API_URL}/api/get_students`, {
         headers: { Authorization: `Bearer ${token}` },
         params: queryParams,
       });
+
       // if (selectedStudentId) {
       //   response = await axios.get(
       //     `${API_URL}/api/students/${selectedStudentId}`,

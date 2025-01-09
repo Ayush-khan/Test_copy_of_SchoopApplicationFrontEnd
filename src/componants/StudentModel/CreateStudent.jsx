@@ -606,6 +606,27 @@ function Form() {
     const newErrors = {};
 
     // Validate required fields
+
+    // Check if a username or SMS receiver is required
+    // const isUsernameRequired =
+    //   formData?.SetEmailIDAsUsername === "Father" ||
+    //   formData?.SetEmailIDAsUsername === "Mother" ||
+    //   formData?.SetEmailIDAsUsername === "FatherMob" ||
+    //   formData?.SetEmailIDAsUsername === "MotherMob";
+
+    // const isSmsReceiverRequired =
+    //   formData?.SetToReceiveSMS === "Father" ||
+    //   formData?.SetToReceiveSMS === "Mother" ||
+    //   formData?.SetToReceiveSMS === "FatherMob" ||
+    //   formData?.SetToReceiveSMS === "MotherMob";
+
+    // // Validate required fields
+    // if (!formData?.SetEmailIDAsUsername && isUsernameRequired) {
+    //   newErrors.SetEmailIDAsUsername = "Username is required";
+    // }
+    // if (!formData?.SetToReceiveSMS && isSmsReceiverRequired) {
+    //   newErrors.SetToReceiveSMS = "Receive SMS name is required";
+    // }
     if (!formData?.SetEmailIDAsUsername)
       newErrors.SetEmailIDAsUsername = "User name is required";
     if (!formData?.SetToReceiveSMS)
@@ -2213,7 +2234,10 @@ function Form() {
                     name="receiveSms"
                     value="Father"
                     id="receiveSmsmob"
-                    checked={formData.SetToReceiveSMS === "Father"}
+                    checked={
+                      formData.SetToReceiveSMS === "Father" ||
+                      formData.SetToReceiveSMS == formData.f_mobile
+                    }
                     onChange={() => handleReceiveSmsSelection("Father")}
                   />
                   <label htmlFor="receiveSmsmob">
@@ -2493,7 +2517,10 @@ function Form() {
                     name="receiveSms"
                     value="Mother"
                     id="receiveSmsmobMother"
-                    checked={formData.SetToReceiveSMS === "Mother"}
+                    checked={
+                      formData.SetToReceiveSMS === "Mother" ||
+                      formData.SetToReceiveSMS == formData.m_mobile
+                    }
                     onChange={() => handleReceiveSmsSelection("Mother")}
                   />
                   <label htmlFor="receiveSmsmobMother">

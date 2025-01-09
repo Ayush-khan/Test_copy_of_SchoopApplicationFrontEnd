@@ -2331,7 +2331,10 @@ function EditOfNewStudentList() {
                   name="receiveSms"
                   value="Father"
                   id="receiveSmsmob"
-                  checked={formData.SetToReceiveSMS === "Father"}
+                  checked={
+                    formData.SetToReceiveSMS === "Father" ||
+                    formData.SetToReceiveSMS == formData.f_mobile
+                  }
                   onChange={() => handleReceiveSmsSelection("Father")}
                 />
                 <label htmlFor="receiveSmsmob">
@@ -2626,7 +2629,10 @@ function EditOfNewStudentList() {
                   name="receiveSms"
                   value="Mother"
                   id="receiveSmsmobMother"
-                  checked={formData.SetToReceiveSMS === "Mother"}
+                  checked={
+                    formData.SetToReceiveSMS === "Mother" ||
+                    formData.SetToReceiveSMS == formData.m_mobile
+                  }
                   onChange={() => handleReceiveSmsSelection("Mother")}
                 />
                 <label htmlFor="receiveSmsmobMother">
