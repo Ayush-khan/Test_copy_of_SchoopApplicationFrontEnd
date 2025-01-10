@@ -293,10 +293,11 @@ const CreatePercentageCertificate = () => {
   const handleMarksChange = (id, value) => {
     // Update the errors state based on validation
     if (!value) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        [id]: "Marks are required.",
-      }));
+      console.log("marka", value);
+      // setErrors((prevErrors) => ({
+      //   ...prevErrors,
+      //   [id]: "Marks are required.",
+      // }));
     } else if (!/^\d+$/.test(value)) {
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -320,15 +321,35 @@ const CreatePercentageCertificate = () => {
     setMarks((prevMarks) => {
       const updatedMarks = { ...prevMarks, [id]: numericValue };
 
-      // Calculate total
-      const totalMarks = Object.values(updatedMarks).reduce(
-        (acc, mark) => acc + mark,
+      // IDs for "Standard Mathematics" and "Basic Mathematics"
+      const standardMathId = 3; // c_sm_id for "MATHEMATICS STANDARD"
+      const basicMathId = 7; // c_sm_id for "BASIC MATHEMATICS"
+
+      // Check if both have values
+      const hasBothMaths =
+        updatedMarks[standardMathId] > 0 || updatedMarks[basicMathId] > 0;
+      console.log("hasBothMaths", hasBothMaths);
+      // Calculate total marks
+      let totalMarks = Object.entries(updatedMarks).reduce(
+        (acc, [key, mark]) => {
+          // Exclude one math subject if both are present
+          if (hasBothMaths && parseInt(key, 10) === basicMathId) {
+            return acc;
+          }
+          return acc + mark;
+        },
         0
       );
+
+      // Adjust subject count
+      let subjectCount = formData.classsubject?.length || 0;
+      if (hasBothMaths) {
+        subjectCount -= 1; // Reduce count by 1 if both math subjects are present
+      }
+
       setTotal(totalMarks);
 
-      // Calculate percentage if there are subjects
-      const subjectCount = formData.classsubject?.length || 0;
+      // Calculate percentage
       const calculatedPercentage =
         subjectCount > 0 ? (totalMarks / (subjectCount * 100)) * 100 : 0;
       setPercentage(calculatedPercentage.toFixed(2));
@@ -336,6 +357,55 @@ const CreatePercentageCertificate = () => {
       return updatedMarks;
     });
   };
+
+  // working write
+  // const handleMarksChange = (id, value) => {
+  //   // Update the errors state based on validation
+  //   if (!value) {
+  //     setErrors((prevErrors) => ({
+  //       ...prevErrors,
+  //       [id]: "Marks are required.",
+  //     }));
+  //   } else if (!/^\d+$/.test(value)) {
+  //     setErrors((prevErrors) => ({
+  //       ...prevErrors,
+  //       [id]: "Marks should be numeric.",
+  //     }));
+  //   } else if (value.length > 3) {
+  //     setErrors((prevErrors) => ({
+  //       ...prevErrors,
+  //       [id]: "Marks cannot exceed 3 characters.",
+  //     }));
+  //   } else {
+  //     // Remove the error if input is valid
+  //     setErrors((prevErrors) => ({
+  //       ...prevErrors,
+  //       [id]: "",
+  //     }));
+  //   }
+
+  //   // Convert value to an integer if valid
+  //   const numericValue = parseInt(value, 10) || 0;
+  //   setMarks((prevMarks) => {
+  //     const updatedMarks = { ...prevMarks, [id]: numericValue };
+
+  //     // Calculate total
+  //     const totalMarks = Object.values(updatedMarks).reduce(
+  //       (acc, mark) => acc + mark,
+  //       0
+  //     );
+  //     setTotal(totalMarks);
+
+  //     // Calculate percentage if there are subjects
+  //     const subjectCount = formData.classsubject?.length || 0;
+
+  //     const calculatedPercentage =
+  //       subjectCount > 0 ? (totalMarks / (subjectCount * 100)) * 100 : 0;
+  //     setPercentage(calculatedPercentage.toFixed(2));
+
+  //     return updatedMarks;
+  //   });
+  // };
 
   const prepareSubmissionData = () => {
     const formattedMarks = Object.entries(marks).map(([id, mark]) => ({
@@ -390,11 +460,51 @@ const CreatePercentageCertificate = () => {
     //     ] = `${subject.name} marks cannot exceed 3 characters.`;
     //   }
     // });
-    // Validate marks for each subject
+
     formData.classsubject?.forEach((subject) => {
       const markValue = marks[subject.c_sm_id];
-      console.log("marks", markValue);
 
+      // Identify IDs for "MATHEMATICS STANDARD" and "BASIC MATHEMATICS"
+      const standardMathId = 3; // c_sm_id for "MATHEMATICS STANDARD"
+      const basicMathId = 7; // c_sm_id for "BASIC MATHEMATICS"
+
+      // Special validation for "MATHEMATICS STANDARD" and "BASIC MATHEMATICS"
+      if (
+        subject.c_sm_id === standardMathId ||
+        subject.c_sm_id === basicMathId
+      ) {
+        const standardMathValue = marks[standardMathId];
+        const basicMathValue = marks[basicMathId];
+
+        // If both are empty
+        if (!standardMathValue && !basicMathValue) {
+          newErrors[
+            standardMathId
+          ] = `Either "standard maths" or "basic maths" marks are required.`;
+          newErrors[
+            basicMathId
+          ] = `Either "standard maths" or "basic maths" marks are required.`;
+        }
+
+        // If both are filled
+        if (
+          standardMathValue &&
+          basicMathValue &&
+          (standardMathValue !== "" || basicMathValue !== "")
+        ) {
+          newErrors[
+            standardMathId
+          ] = `Only one of "standard maths" or "basic maths" can be filled.`;
+          newErrors[
+            basicMathId
+          ] = `Only one of "standard maths" or "basic maths" can be filled.`;
+        }
+
+        // Skip further validation for these two fields here
+        return;
+      }
+
+      // General validation for other fields
       if (markValue === undefined || markValue === "" || markValue === 0) {
         newErrors[subject.c_sm_id] = `Marks are required.`;
       } else if (isNaN(markValue)) {
@@ -403,9 +513,25 @@ const CreatePercentageCertificate = () => {
         newErrors[
           subject.c_sm_id
         ] = `${subject.name} Marks should not exceed 100.`;
-        //  `${subject.name} Marks should not exceed 100.
       }
     });
+
+    // Validate marks for each subject
+    // formData.classsubject?.forEach((subject) => {
+    //   const markValue = marks[subject.c_sm_id];
+    //   console.log("marks", markValue);
+
+    //   if (markValue === undefined || markValue === "" || markValue === 0) {
+    //     newErrors[subject.c_sm_id] = `Marks are required.`;
+    //   } else if (isNaN(markValue)) {
+    //     newErrors[subject.c_sm_id] = `Marks should be numeric.`;
+    //   } else if (parseFloat(markValue) > 100 || parseFloat(markValue) < 1) {
+    //     newErrors[
+    //       subject.c_sm_id
+    //     ] = `${subject.name} Marks should not exceed 100.`;
+    //     //  `${subject.name} Marks should not exceed 100.
+    //   }
+    // });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
