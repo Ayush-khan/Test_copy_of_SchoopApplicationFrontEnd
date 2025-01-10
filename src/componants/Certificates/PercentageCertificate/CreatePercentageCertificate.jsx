@@ -318,41 +318,56 @@ const CreatePercentageCertificate = () => {
 
     // Convert value to an integer if valid
     const numericValue = parseInt(value, 10) || 0;
+
     setMarks((prevMarks) => {
       const updatedMarks = { ...prevMarks, [id]: numericValue };
 
-      // IDs for "Standard Mathematics" and "Basic Mathematics"
-      const standardMathId = 3; // c_sm_id for "MATHEMATICS STANDARD"
-      const basicMathId = 7; // c_sm_id for "BASIC MATHEMATICS"
+      // Extract Standard and Basic Math IDs dynamically from formData.classsubject
+      const standardMathId = formData.classsubject?.find(
+        (subject) => subject.name === "MATHEMATICS STANDARD"
+      )?.c_sm_id;
+      const basicMathId = formData.classsubject?.find(
+        (subject) => subject.name === "BASIC MATHEMATICS"
+      )?.c_sm_id;
 
-      // Check if both have values
-      const hasBothMaths =
-        updatedMarks[standardMathId] > 0 || updatedMarks[basicMathId] > 0;
-      console.log("hasBothMaths", hasBothMaths);
-      // Calculate total marks
+      // Check if both Standard and Basic Mathematics are present
+      const hasBothMaths = standardMathId == 3 && basicMathId == 7;
+
+      // Calculate total marks, excluding Basic Mathematics if both are present
       let totalMarks = Object.entries(updatedMarks).reduce(
         (acc, [key, mark]) => {
-          // Exclude one math subject if both are present
-          if (hasBothMaths && parseInt(key, 10) === basicMathId) {
-            return acc;
+          // Exclude "BASIC MATHEMATICS" from total if both subjects have marks
+          if (hasBothMaths && key === basicMathId) {
+            return acc; // Skip adding marks for Basic Math
           }
-          return acc + mark;
+          return acc + (mark || 0); // Add marks for other subjects
         },
         0
       );
 
       // Adjust subject count
       let subjectCount = formData.classsubject?.length || 0;
+
       if (hasBothMaths) {
-        subjectCount -= 1; // Reduce count by 1 if both math subjects are present
+        subjectCount -= 1; // Decrease count by 1 if both math subjects are present
       }
 
+      // Set the total marks
       setTotal(totalMarks);
 
       // Calculate percentage
       const calculatedPercentage =
         subjectCount > 0 ? (totalMarks / (subjectCount * 100)) * 100 : 0;
       setPercentage(calculatedPercentage.toFixed(2));
+
+      console.log(
+        "totalMarks",
+        totalMarks,
+        "subjectCount",
+        subjectCount,
+        "calculatedPercentage",
+        calculatedPercentage
+      );
 
       return updatedMarks;
     });
