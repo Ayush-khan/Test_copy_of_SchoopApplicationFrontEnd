@@ -830,6 +830,18 @@ function EditOfNewStudentList() {
       [name]: newValue,
     }));
 
+    // Clear backend errors for specific fields on change
+    if (
+      name === "stud_id_no" ||
+      name === "stu_aadhaar_no" ||
+      name === "udise_pen_no" ||
+      name === "reg_no"
+    ) {
+      setBackendErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: undefined, // Remove the backend error for the field
+      }));
+    }
     // Validate field on change
     let fieldErrors = {};
     if (name === "f_mobile") {
@@ -1028,6 +1040,7 @@ function EditOfNewStudentList() {
       console.log("formadata parent_id is exit", formData.parent_id);
     }
     try {
+      setBackendErrors({});
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("No authentication token found");
@@ -1492,6 +1505,11 @@ function EditOfNewStudentList() {
                 onChange={handleChange}
                 // onBlur={handleBlur}
               />
+              {backendErrors.reg_no && (
+                <p className="text-[12px] text-red-500 mb-1">
+                  {backendErrors.reg_no}
+                </p>
+              )}
               {errors.reg_no && (
                 <p className="text-[12px] text-red-500 mb-1">{errors.reg_no}</p>
               )}
@@ -1594,6 +1612,11 @@ function EditOfNewStudentList() {
                 onChange={handleChange}
                 // onBlur={handleBlur}
               />
+              {backendErrors.stud_id_no && (
+                <p className="text-[12px] text-red-500 mb-1">
+                  {backendErrors.stud_id_no}
+                </p>
+              )}
             </div>
             <div className="mt-2">
               <label
@@ -1638,6 +1661,11 @@ function EditOfNewStudentList() {
                   onChange={handleChange}
                   // onBlur={handleBlur}
                 />
+                {backendErrors.udise_pen_no && (
+                  <p className="text-[12px] text-red-500 mb-1">
+                    {backendErrors.udise_pen_no}
+                  </p>
+                )}
               </div>
             )}
             {/* Address Information */}

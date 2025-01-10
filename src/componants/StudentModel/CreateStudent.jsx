@@ -727,6 +727,19 @@ function Form() {
       [name]: newValue,
     }));
 
+    // Clear backend errors for specific fields on change
+    if (
+      name === "stud_id_no" ||
+      name === "stu_aadhaar_no" ||
+      name === "udise_pen_no" ||
+      name === "reg_no"
+    ) {
+      setBackendErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: undefined, // Remove the backend error for the field
+      }));
+    }
+
     // Validate field on change
     let fieldErrors = {};
     if (name === "f_mobile") {
@@ -1011,7 +1024,7 @@ function Form() {
     // Object.keys(formData).forEach((key) => {
     //   formattedFormData.append(key, formData[key]);
     // });
-
+    setBackendErrors({});
     try {
       setLoading(true); // Start loading state
 
@@ -1043,6 +1056,7 @@ function Form() {
       console.error("Error:", error.response?.data || error.message);
       if (error.response && error.response.data && error.response.data.errors) {
         setBackendErrors(error.response.data.errors || {});
+        console.log("setBackendErrors", backendErrors);
       } else {
         toast.error(error.message);
       }
@@ -1490,6 +1504,11 @@ function Form() {
                   onChange={handleChange}
                   // onBlur={handleBlur}
                 />
+                {backendErrors.reg_no && (
+                  <p className="text-[12px] text-red-500 mb-1">
+                    {backendErrors.reg_no}
+                  </p>
+                )}
                 {errors.reg_no && (
                   <p className="text-[12px] text-red-500 mb-1">
                     {errors.reg_no}
@@ -1595,6 +1614,11 @@ function Form() {
                   onChange={handleChange}
                   // onBlur={handleBlur}
                 />
+                {backendErrors.stud_id_no && (
+                  <p className="text-[12px] text-red-500 mb-1">
+                    {backendErrors.stud_id_no}
+                  </p>
+                )}
               </div>
               <div className="mt-2">
                 <label
@@ -1613,7 +1637,11 @@ function Form() {
                   onChange={handleChange}
                   // onBlur={handleBlur}
                 />
-
+                {backendErrors.stu_aadhaar_no && (
+                  <p className="text-[12px] text-red-500 mb-1">
+                    {backendErrors.stu_aadhaar_no}
+                  </p>
+                )}
                 {errors.stu_aadhaar_no && (
                   <p className="text-[12px] text-red-500 mb-1">
                     {errors.stu_aadhaar_no}
@@ -1638,6 +1666,11 @@ function Form() {
                     onChange={handleChange}
                     // onBlur={handleBlur}
                   />
+                  {backendErrors.udise_pen_no && (
+                    <p className="text-[12px] text-red-500 mb-1">
+                      {backendErrors.udise_pen_no}
+                    </p>
+                  )}
                 </div>
               )}
               {/* Address Information */}
