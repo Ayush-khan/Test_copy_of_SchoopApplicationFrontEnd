@@ -309,7 +309,10 @@ const LeavingCertificate = () => {
     () =>
       studentNameWithClassId.map((stu) => ({
         value: stu.student_id,
-        label: `${stu?.first_name} ${stu?.mid_name} ${stu?.last_name}`,
+        label:
+          `${stu?.first_name || ""} ${stu?.mid_name || ""} ${
+            stu?.last_name || ""
+          }`.trim() || "",
       })),
     [studentNameWithClassId]
   );

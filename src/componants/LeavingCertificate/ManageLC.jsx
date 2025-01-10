@@ -66,7 +66,8 @@ function ManageLC() {
   }));
   console.log("teacherOptions", teacherOptions);
   const classOptions = classes.map((cls) => ({
-    value: `${cls?.get_class?.name}-${cls.name}`,
+    // value: `${cls?.get_class?.name}-${cls.name}`,
+    value: `${cls.class_id}`,
     label: `${cls?.get_class?.name} ${cls.name}`,
   }));
 
