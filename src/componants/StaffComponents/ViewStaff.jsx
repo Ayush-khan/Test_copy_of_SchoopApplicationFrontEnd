@@ -77,7 +77,7 @@ function ViewStaff() {
           T: "Teacher",
           X: "Support Staff",
           Y: "Security",
-          p: "Principle",
+          P: "Principle",
         };
 
         // Ensure the mapping uses the correct role_id and displays full name

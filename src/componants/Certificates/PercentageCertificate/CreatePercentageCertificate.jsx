@@ -340,7 +340,7 @@ const CreatePercentageCertificate = () => {
           if (hasBothMaths && key === basicMathId) {
             return acc; // Skip adding marks for Basic Math
           }
-          return acc + (mark || 0); // Add marks for other subjects
+          return acc + mark; // Add marks for other subjects
         },
         0
       );
