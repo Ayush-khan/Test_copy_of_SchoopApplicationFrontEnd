@@ -16,6 +16,7 @@ function LeaveApplicaton() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [currentLeave, setCurrentLeave] = useState(null);
   const [currentLeaveName, setCurrentLeaveName] = useState(null);
@@ -90,6 +91,8 @@ function LeaveApplicaton() {
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -117,6 +120,9 @@ function LeaveApplicaton() {
       console.error("Error deleting staff:", error);
       toast.error("Failed to delete staff");
       toast.error(error.response.data.error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDeleteModal(false);
     }
   };
   const formatDate = (dateString) => {
@@ -163,7 +169,7 @@ function LeaveApplicaton() {
   return (
     <>
       <ToastContainer />
-      <div className="container md:mt-4">
+      <div className="md:container w-full md:w-2/3 md:mx-auto md:mt-4">
         <div className="card mx-auto lg:w-full shadow-lg mt-4">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
@@ -199,7 +205,7 @@ function LeaveApplicaton() {
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
-                    <tr className="bg-gray-100">
+                    <tr className="bg-gray-200">
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Sr.No
                       </th>
@@ -368,8 +374,9 @@ function LeaveApplicaton() {
                     type="button"
                     className="btn btn-danger px-3 mb-2"
                     onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
                   >
-                    Delete
+                    {isSubmitting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>

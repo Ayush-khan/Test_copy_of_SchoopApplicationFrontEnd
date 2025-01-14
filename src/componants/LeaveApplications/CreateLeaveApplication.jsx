@@ -7,6 +7,8 @@ import { ToastContainer, toast } from "react-toastify";
 const CreateLeaveApplication = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
     staff_name: "",
     leave_type_id: "",
@@ -56,10 +58,6 @@ const CreateLeaveApplication = () => {
     if (!formData.leave_end_date) {
       newErrors.leave_end_date = "Leave end date is required";
     }
-
-    // if (!formData.reason) {
-    //   newErrors.reason = "Reason for leave is required";
-    // }
 
     const daysError = validateDays(formData.no_of_days);
     if (daysError) {
@@ -190,13 +188,18 @@ const CreateLeaveApplication = () => {
   };
 
   const handleSubmit = async (event) => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     event.preventDefault();
     const validationErrors = validate();
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      setIsSubmitting(false); // Reset submitting state if validation fails
+
       Object.values(validationErrors).forEach((error) => {
-        toast.error(error);
+        console.log("error", error);
+        // toast.error(error);
       });
       return;
     }
@@ -240,7 +243,7 @@ const CreateLeaveApplication = () => {
       toast.error("Error submitting leave application");
       console.error("Error:", error);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -266,7 +269,7 @@ const CreateLeaveApplication = () => {
   return (
     <div className="container mx-auto min-h-screen flex items-center justify-center mt-3 ">
       <ToastContainer />
-      <div className="card p-4 rounded-md w-[66%] ">
+      <div className="card p-4 rounded-md w-[60%] ">
         <div className=" card-header mb-4 flex justify-between items-center">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             Create Leave Application
@@ -286,7 +289,7 @@ const CreateLeaveApplication = () => {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <p className="  md:absolute md:right-10  md:top-[16%]  text-gray-500  ">
+        <p className="  md:absolute md:right-10  md:top-[15%]  text-gray-500  ">
           <span className="text-red-500">*</span>indicates mandatory information
         </p>
 
@@ -294,9 +297,9 @@ const CreateLeaveApplication = () => {
           onSubmit={handleSubmit}
           className="flex items-center justify-center overflow-x-hidden shadow-md p-3 bg-gray-50 space-y-2" //min-h-screen flex items-center justify-center overflow-x-hidden shadow-md p-4 bg-gray-50
         >
-          <div className="w-full max-w-3xl rounded-lg mt-0">
-            <div className="flex flex-col mt-0 md:grid md:grid-cols-2 md:gap-x-0 md:gap-y-4">
-              <label htmlFor="staffName" className="w-1/2 mt-2 ml-7">
+          <div className="modal-body">
+            <div className=" relative mb-3 flex justify-center  mx-4">
+              <label htmlFor="sectionName" className="w-1/2 mt-2">
                 Staff Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -308,18 +311,21 @@ const CreateLeaveApplication = () => {
                 title="Name should not start with a number"
                 required
                 value={formData.staff_name}
-                // onChange={handleChange}
-                // placeholder="Name"
-                className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                 readOnly
+                className="w-full bg-gray-200 no-underline p-1.5 shadow-md mb-2 pl-2 "
+                // className="w-full form-control shadow-md mb-2"
               />
-              {errors.staff_name && (
-                <span className="text-red-500 text-xs mt-1">
-                  {errors.staff_name}
-                </span>
-              )}
-              <label htmlFor="leavetype" className="w-1/2 mt-2 ml-7">
-                Leave Type<span className="text-red-500">*</span>
+              <div className="absolute top-9 left-1/3">
+                {errors.staff_name && (
+                  <span className="text-danger text-xs">
+                    {errors.staff_name}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="relative mb-3 flex justify-center mx-4">
+              <label htmlFor="departmentId" className="w-1/2 mt-2">
+                Leave Type <span className="text-red-500">*</span>
               </label>
               <select
                 id="leave_type"
@@ -327,12 +333,11 @@ const CreateLeaveApplication = () => {
                 value={formData.leave_type_id}
                 onChange={handleChangeLeaveType}
                 required
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                className="form-control shadow-md"
               >
                 <option className="bg-gray-300" value="">
-                  Select
+                  Select{" "}
                 </option>
-
                 {leaveType.length === 0 ? (
                   <option>No Options</option>
                 ) : (
@@ -347,14 +352,20 @@ const CreateLeaveApplication = () => {
                   ))
                 )}
               </select>
-              {errors.leave_type_id && (
-                <span className="text-red-500 text-xs">
-                  .{errors.leave_type_id}
-                </span>
-              )}
-              <label htmlFor="leavestartdate" className="w-1/2 mt-2 ml-7">
+              <div className="absolute top-9 left-1/3">
+                {errors.leave_type_id && (
+                  <span className="text-danger text-xs">
+                    {errors.leave_type_id}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 relative mb-3 flex justify-center  mx-4">
+              <label htmlFor="startDate" className="w-1/2 mt-2">
                 Leave Start Date <span className="text-red-500">*</span>
               </label>
+
               <input
                 type="date"
                 id="leave_start_date"
@@ -363,17 +374,22 @@ const CreateLeaveApplication = () => {
                 value={formData.leave_start_date}
                 onChange={handleChange}
                 max={formData.leave_end_date || ""}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                 required
+                className="form-control shadow-md"
               />
-              {errors.leave_start_date && (
-                <span className="text-red-500 text-xs mt-1">
-                  {errors.leave_start_date}
-                </span>
-              )}
-              <label htmlFor="leaveenddate" className="w-1/2 mt-2 ml-7">
-                Leave End Date<span className="text-red-500">*</span>
+              <div className="absolute top-9 left-1/3">
+                {errors.leave_start_date && (
+                  <span className="text-danger text-xs">
+                    {errors.leave_start_date}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="mt-4 relative mb-3 flex justify-center  mx-4">
+              <label htmlFor="endDate" className="w-1/2 mt-2">
+                Leave End Date <span className="text-red-500">*</span>
               </label>
+
               <input
                 type="date"
                 id="leave_end_date"
@@ -382,16 +398,20 @@ const CreateLeaveApplication = () => {
                 value={formData.leave_end_date}
                 onChange={handleChange}
                 min={formData.leave_start_date || ""}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                 required
+                className="form-control shadow-md"
               />
-              {errors.leave_end_date && (
-                <span className="text-red-500 text-xs mt-1">
-                  {errors.leave_end_date}
-                </span>
-              )}
-              <label htmlFor="days" className="w-1/2 mt-2 ml-7">
-                No. of Days <span className="text-red-500">*</span>
+              <div className="absolute top-9 left-1/3 ">
+                {errors.leave_end_date && (
+                  <span className="text-danger text-xs">
+                    {errors.leave_end_date}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="mt-4 relative mb-3 flex justify-center  mx-4">
+              <label htmlFor="openDay" className="w-1/2 mt-2">
+                No. of days<span className="text-red-500">*</span>
               </label>
               <input
                 type="number" // Change to "number" to support decimals
@@ -401,14 +421,18 @@ const CreateLeaveApplication = () => {
                 step="0.5" // Allows decimals (e.g., 0.5, 1.75)
                 min="0.5" // Ensures that 0.01 or more is entered
                 onChange={handleChange}
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                className="form-control shadow-md mb-2"
               />
-              {errors.no_of_days && (
-                <span className="text-red-500 text-xs mt-1">
-                  {errors.no_of_days}
-                </span>
-              )}
-              <label htmlFor="reason" className="w-1/2 mt-2 ml-7">
+              <div className="absolute top-9 left-1/3 ">
+                {errors.no_of_days && (
+                  <span className="text-danger text-xs">
+                    {errors.no_of_days}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className=" relative mb-3 flex justify-center  mx-4">
+              <label htmlFor="comment" className="w-1/2 mt-2">
                 Reason
               </label>
               <textarea
@@ -418,22 +442,31 @@ const CreateLeaveApplication = () => {
                 name="reason"
                 value={formData.reason}
                 onChange={handleChange}
-                className="input-field resize block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                 rows="2"
-              />
-              {errors.reason && (
-                <div className="text-red-500 text-xs mt-1">{errors.reason}</div>
-              )}
+                className="form-control shadow-md mb-2"
+              />{" "}
             </div>
             <div className="col-span-3 text-right mt-4">
               <button
                 className="mr-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700"
                 onClick={handleSubmit}
                 // disabled={loadingForSearch}
+                disabled={isSubmitting}
               >
-                Save
+                {isSubmitting ? "Saving..." : "Save"}
               </button>
-              {/* <button
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default CreateLeaveApplication;
+
+{
+  /* <button
                 className="mr-2 bg-red-500 text-white py-1 px-3 rounded hover:bg-red-700"
                 onClick={() => navigate("/createLeaveApplication")}
                 // disabled={loadingForSearch}
@@ -446,13 +479,162 @@ const CreateLeaveApplication = () => {
                 // disabled={loadingForSearch}
               >
                 Back
-              </button> */}
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
+              </button> */
+}
 
-export default CreateLeaveApplication;
+//     <div className="w-full max-w-3xl rounded-lg mt-0">
+//   <div className="flex flex-col mt-0 md:grid md:grid-cols-2 md:gap-x-0 md:gap-y-4">
+//     <label htmlFor="staffName" className="w-1/2 mt-2 ml-7">
+//       Staff Name <span className="text-red-500">*</span>
+//     </label>
+//     <input
+//       type="text"
+//       maxLength={100}
+//       id="staff_name"
+//       name="staff_name"
+//       pattern="^[^\d].*"
+//       title="Name should not start with a number"
+//       required
+//       value={formData.staff_name}
+//       // onChange={handleChange}
+//       // placeholder="Name"
+//       className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+//       readOnly
+//     />
+//     <div className="absolute top-48 left-[50%] mt-3">
+//      {errors.staff_name && (
+//         <span className="text-red-500 text-xs">
+//           {errors.staff_name}
+//         </span>
+//       )}
+//     </div>
+//     <label htmlFor="leavetype" className="w-1/2 mt-2 ml-7">
+//       Leave Type<span className="text-red-500">*</span>
+//     </label>
+//     <select
+//       id="leave_type"
+//       name="leave_type"
+//       value={formData.leave_type_id}
+//       onChange={handleChangeLeaveType}
+//       required
+//       className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner mt-2"
+//     >
+//       <option className="bg-gray-300" value="">
+//         Select
+//       </option>
+
+//       {leaveType.length === 0 ? (
+//         <option>No Options</option>
+//       ) : (
+//         leaveType.map((leave) => (
+//           <option
+//             key={leave.leave_type_id}
+//             value={leave.leave_type_id}
+//             className="max-h-20 overflow-y-scroll"
+//           >
+//             {leave.name}
+//           </option>
+//         ))
+//       )}
+//     </select>
+//     <div className="absolute top-48 left-[50%] mt-3">
+//      {/* {errors.leave_type_id && (
+//         <span className="text-red-500 text-xs">
+//           {errors.leave_type_id}
+//         </span>
+//       )} */}
+//     </div>
+//     <label htmlFor="leavestartdate" className="w-1/2 mt-2 ml-7">
+//       Leave Start Date <span className="text-red-500">*</span>
+//     </label>
+//     <input
+//       type="date"
+//       id="leave_start_date"
+//       // max={today}
+//       name="leave_start_date"
+//       value={formData.leave_start_date}
+//       onChange={handleChange}
+//       max={formData.leave_end_date || ""}
+//       className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner mt-2"
+//       required
+//     />
+//     <div className="absolute top-60 left-[50%] mt-4">
+//      {/* {errors.leave_start_date && (
+//         <span className="text-red-500 text-xs">
+//           {errors.leave_start_date}
+//         </span>
+//       )} */}
+//     </div>
+
+//     <label htmlFor="leaveenddate" className="w-1/2 mt-2 ml-7">
+//       Leave End Date<span className="text-red-500">*</span>
+//     </label>
+//     <input
+//       type="date"
+//       id="leave_end_date"
+//       // max={today}
+//       name="leave_end_date"
+//       value={formData.leave_end_date}
+//       onChange={handleChange}
+//       min={formData.leave_start_date || ""}
+//       className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner mt-2"
+//       required
+//     />
+//     <div className="absolute top-48 left-[50%] mt-3">
+//      {/* {errors.leave_end_date && (
+//         <span className="text-red-500 text-xs">
+//           {errors.leave_end_date}
+//         </span>
+//       )} */}
+//     </div>
+//     <label htmlFor="days" className="w-1/2 mt-2 ml-7">
+//       No. of Days <span className="text-red-500">*</span>
+//     </label>
+//     <input
+//       type="number" // Change to "number" to support decimals
+//       id="no_of_days"
+//       name="no_of_days"
+//       value={formData.no_of_days}
+//       step="0.5" // Allows decimals (e.g., 0.5, 1.75)
+//       min="0.5" // Ensures that 0.01 or more is entered
+//       onChange={handleChange}
+//       className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner mt-2"
+//     />
+//       <div className="absolute top-48 left-[50%] mt-3">
+//      {/* {errors.no_of_days && (
+//         <span className="text-red-500 text-xs">
+//           {errors.no_of_days}
+//         </span>
+//       )} */}
+//     </div>
+//     <label htmlFor="reason" className="w-1/2 mt-2 ml-7">
+//       Reason
+//     </label>
+//     <textarea
+//       type="text"
+//       maxLength={200}
+//       id="reason"
+//       name="reason"
+//       value={formData.reason}
+//       onChange={handleChange}
+//       className="input-field resize block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner mt-2"
+//       rows="2"
+//     />
+//     <div className="absolute top-48 left-[50%] mt-3">
+//      {errors.reason && (
+//         <span className="text-red-500 text-xs">
+//           {errors.reason}
+//         </span>
+//       )}
+//     </div>
+//   </div>
+//   <div className="col-span-3 text-right mt-4">
+//     <button
+//       className="mr-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700"
+//       onClick={handleSubmit}
+//       // disabled={loadingForSearch}
+//     >
+//       Save
+//     </button>
+//   </div>
+// </div>
