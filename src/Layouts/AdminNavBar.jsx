@@ -637,10 +637,10 @@ const AdminNavBar = () => {
           <NavDropdown.Item as={Link} to="/LeaveAllocation">
             Leave Allocation
           </NavDropdown.Item>
-          <NavDropdown.Item as={Link} to="#">
+          <NavDropdown.Item as={Link} to="/leaveAllocationtoAllStaff">
             Leave Allocation to All Staff
           </NavDropdown.Item>
-          <NavDropdown.Item as={Link} to="#">
+          <NavDropdown.Item as={Link} to="/LeaveApplication">
             Leave Application
           </NavDropdown.Item>
         </NavDropdown>

@@ -168,6 +168,11 @@ import SetLateTime from "../componants/SetLateTime/SetLateTime.jsx";
 import PromotedStudent from "../componants/StudentModel/PromotedStudent/PromotedStudent.jsx";
 import SendUserIdToParent from "../componants/SendUserIdToParent/SendUserIdToParent.jsx";
 import LeaveAllocation from "../componants/Leave/LeaveAllocation.jsx";
+import LeaveApplication from "../componants/LeaveApplications/LeaveApplication.jsx";
+import CreateLeaveApplication from "../componants/LeaveApplications/CreateLeaveApplication.jsx";
+import EditLeaveApplication from "../componants/LeaveApplications/EditLeaveApplication.jsx";
+import ViewLeaveApplication from "../componants/LeaveApplications/ViewLeaveApplication.jsx";
+import LeaveAllocationtoAllStaff from "../componants/LeaveApplications/LeaveAllocationtoAllStaff.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -342,6 +347,28 @@ function Index() {
         <Route
           path="/LeaveAllocation"
           element={<PrivateRoute element={LeaveAllocation} />}
+        />
+        {/* Leave applications */}
+        <Route
+          path="/LeaveApplication"
+          element={<PrivateRoute element={LeaveApplication} />}
+        />
+
+        <Route
+          path="/createLeaveApplication"
+          element={<PrivateRoute element={CreateLeaveApplication} />}
+        />
+        <Route
+          path="/leaveApplication/edit/:id"
+          element={<PrivateRoute element={EditLeaveApplication} />}
+        />
+        <Route
+          path="/leaveApplication/view/:id"
+          element={<PrivateRoute element={ViewLeaveApplication} />}
+        />
+        <Route
+          path="/leaveAllocationtoAllStaff"
+          element={<PrivateRoute element={LeaveAllocationtoAllStaff} />}
         />
         {/* Substitute Teacher */}
         <Route
