@@ -46,13 +46,9 @@ const SiblingMapping = () => {
   const customStyles = {
     option: (provided, state) => ({
       ...provided,
-      fontSize: "0.775rem", // Tailwind equivalent for `text-sm`
-      padding: "0.5rem", // Tailwind equivalent for `p-2`
-      color: state.isSelected ? "white" : "black",
-      backgroundColor: state.isSelected ? "rgba(59, 130, 246, 1)" : "white", // Tailwind equivalent for `bg-blue-500`
-      "&:hover": {
-        backgroundColor: "rgba(59, 130, 246, 0.1)", // Tailwind equivalent for hover `bg-blue-100`
-      },
+      fontSize: "0.8rem",
+      backgroundColor: state.isFocused ? "rgba(59, 130, 246, 0.1)" : "white",
+      color: state.isSelected ? "blue" : "inherit", // Ensures selected value is black
     }),
     menu: (provided) => ({
       ...provided,
@@ -61,27 +57,24 @@ const SiblingMapping = () => {
   };
 
   const [formData, setFormData] = useState({
-    sr_no: "",
-    stud_name: "",
-    dob: "",
-    date: "",
+    stud_name: "", // Combined name with class and division
     father_name: "",
-    class_division: "",
-    professional_qual: "",
-    trained: "",
-    experience: "",
-    sex: "",
-    blood_group: "",
-    religion: "",
-    dob_words: "",
-    nationality: "",
-    phone: "",
-    email: "",
-    aadhar_card_no: "",
-    stud_id: "",
-
-    purpose: " ",
-    teacher_image_name: null,
+    mother_name: "", // Added mother's name
+    father_email: "",
+    father_phone: "",
+    mother_email: "",
+    mother_phone: "",
+    user_id: "", // User ID set as Parent (Father Phone here)
+  });
+  const [formDataForSecond, setFormDataForSecond] = useState({
+    stud_name: "", // Combined name with class and division
+    father_name: "",
+    mother_name: "", // Added mother's name
+    father_email: "",
+    father_phone: "",
+    mother_email: "",
+    mother_phone: "",
+    user_id: "", // User ID set as Parent (Father Phone here)
   });
 
   // for form
@@ -307,63 +300,55 @@ const SiblingMapping = () => {
     // If there are validation errors, exit the function
     // if (hasError) return;
     // Reset form data and selected values after successful submission
+    setParentInformation(null);
     setFormData({
-      sr_no: "",
-      stud_name: "",
+      stud_name: "", // Combined name with class and division
       father_name: "",
-      dob: "",
-      dob_words: "",
-      date: "",
-      class_division: "",
-      purpose: "",
-      nationality: "",
-
-      // Add other fields here if needed
+      mother_name: "", // Added mother's name
+      father_email: "",
+      father_phone: "",
+      mother_email: "",
+      mother_phone: "",
+      user_id: "", // User ID set as Parent (Father Phone here)
     });
     try {
       setLoadingForSearch(true); // Start loading
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(
-        `${API_URL}/api/get_srnobonafide/${selectedStudent1}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/get_students`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { student_id: selectedStudent1 }, // Pass query parameters here
+      });
 
       // Check if data was received and update the form state
-      if (response?.data?.data) {
-        const fetchedData = response?.data?.data; // Extract the data
-        setParentInformation(response?.data?.data); // Assuming response data contains form data
+      if (response?.data?.students) {
+        const fetchedData = response?.data?.students; // Extract the data
+        setParentInformation(fetchedData); // Assuming response data contains form data
+        console.log("fetchedData", fetchedData);
 
-        // Populate formData with the fetched data
-        setFormData({
-          sr_no: fetchedData.sr_no || "",
-          stud_name: `${fetchedData?.studentinformation?.first_name || ""} ${
-            fetchedData?.studentinformation?.mid_name || ""
-          } ${fetchedData?.studentinformation?.last_name || ""}`,
-          dob: fetchedData.studentinformation.dob || "",
-          dob_words: fetchedData.dobinwords || " ",
+        // Check if the fetchedData array is not empty
+        if (fetchedData && fetchedData.length > 0) {
+          const student = fetchedData[0]; // Access the first student in the array (or handle multiple students if needed)
 
-          date: today || "",
-          father_name: fetchedData.parentinformation.father_name || "",
-          class_division:
-            `${fetchedData.classname.name}-${fetchedData.sectionname.name}` ||
-            "",
-          professional_qual: fetchedData.professional_qual || "",
-          trained: fetchedData.trained || "",
-          experience: fetchedData.experience || "",
-          sex: fetchedData.sex || "",
-          blood_group: fetchedData.blood_group || "",
-          religion: fetchedData.religion || "",
-          // address: fetchedData.studentinformation.address || "",
-          nationality: fetchedData.studentinformation.nationality || "",
-          phone: fetchedData.phone || "",
-          email: fetchedData.email || "",
-          aadhar_card_no: fetchedData.aadhar_card_no || "",
-          stud_id: fetchedData.studentinformation.student_id || "",
-          teacher_image_name: fetchedData.teacher_image_name || null,
-          special_sub: fetchedData.special_sub || "",
-        });
+          // Populate formData with the fetched student data
+          setFormData({
+            stud_name: `${student?.first_name || ""} ${
+              student?.mid_name || ""
+            } ${student?.last_name || ""} (${student?.get_class?.name || ""}-${
+              student?.get_division?.name || ""
+            })`, // Combined name with class and division
+            father_name: student?.parents?.father_name || "",
+            mother_name: student?.parents?.mother_name || "", // Mother's name
+            father_email: student?.parents?.f_email || "",
+            father_phone: student?.parents?.f_mobile || "",
+            mother_email: student?.parents?.m_emailid || "",
+            mother_phone: student?.parents?.m_mobile || "",
+            user_id: student?.user_master?.user_id || "", // User ID set as Parent (Father Email here)
+          });
+        } else {
+          console.error("No students found in the response.");
+        }
+
+        console.log("setFormData", formData);
       } else {
         console.log("reponse", response.data.status);
         if (response.data && response.data.status === 403) {
@@ -396,64 +381,54 @@ const SiblingMapping = () => {
       toast.error("Please select Student Name.!");
       return;
     }
+    setParentInformationForSecond(null); // Assuming response data contains form data
 
-    setFormData({
-      sr_no: "",
-      stud_name: "",
+    setFormDataForSecond({
+      stud_name: "", // Combined name with class and division
       father_name: "",
-      dob: "",
-      dob_words: "",
-      date: "",
-      class_division: "",
-      purpose: "",
-      nationality: "",
-
-      // Add other fields here if needed
+      mother_name: "", // Added mother's name
+      father_email: "",
+      father_phone: "",
+      mother_email: "",
+      mother_phone: "",
+      user_id: "", // User ID set as Parent (Father Phone here)
     });
     try {
       setLoadingForSearchForSecond(true); // Start loading
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(
-        `${API_URL}/api/get_srnobonafide/${selectedStudent1}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/get_students`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { student_id: selectedStudent1 }, // Pass query parameters here
+      });
 
       // Check if data was received and update the form state
-      if (response?.data?.data) {
-        const fetchedData = response?.data?.data; // Extract the data
-        setParentInformationForSecond(response?.data?.data); // Assuming response data contains form data
+      if (response?.data?.students) {
+        const fetchedData = response?.data?.students; // Extract the data
+        setParentInformationForSecond(fetchedData); // Assuming response data contains form data
+        console.log("fetchedData", fetchedData);
 
-        // Populate formData with the fetched data
-        setFormData({
-          sr_no: fetchedData.sr_no || "",
-          stud_name: `${fetchedData?.studentinformation?.first_name || ""} ${
-            fetchedData?.studentinformation?.mid_name || ""
-          } ${fetchedData?.studentinformation?.last_name || ""}`,
-          dob: fetchedData.studentinformation.dob || "",
-          dob_words: fetchedData.dobinwords || " ",
+        // Check if the fetchedData array is not empty
+        if (fetchedData && fetchedData.length > 0) {
+          const student = fetchedData[0]; // Access the first student in the array (or handle multiple students if needed)
 
-          date: today || "",
-          father_name: fetchedData.parentinformation.father_name || "",
-          class_division:
-            `${fetchedData.classname.name}-${fetchedData.sectionname.name}` ||
-            "",
-          professional_qual: fetchedData.professional_qual || "",
-          trained: fetchedData.trained || "",
-          experience: fetchedData.experience || "",
-          sex: fetchedData.sex || "",
-          blood_group: fetchedData.blood_group || "",
-          religion: fetchedData.religion || "",
-          // address: fetchedData.studentinformation.address || "",
-          nationality: fetchedData.studentinformation.nationality || "",
-          phone: fetchedData.phone || "",
-          email: fetchedData.email || "",
-          aadhar_card_no: fetchedData.aadhar_card_no || "",
-          stud_id: fetchedData.studentinformation.student_id || "",
-          teacher_image_name: fetchedData.teacher_image_name || null,
-          special_sub: fetchedData.special_sub || "",
-        });
+          // Populate formData with the fetched student data
+          setFormDataForSecond({
+            stud_name: `${student?.first_name || ""} ${
+              student?.mid_name || ""
+            } ${student?.last_name || ""} (${student?.get_class?.name || ""}-${
+              student?.get_division?.name || ""
+            })`, // Combined name with class and division
+            father_name: student?.parents?.father_name || "",
+            mother_name: student?.parents?.mother_name || "", // Mother's name
+            father_email: student?.parents?.f_email || "",
+            father_phone: student?.parents?.f_mobile || "",
+            mother_email: student?.parents?.m_emailid || "",
+            mother_phone: student?.parents?.m_mobile || "",
+            user_id: student?.user_master?.user_id || "", // User ID set as Parent (Father Email here)
+          });
+        } else {
+          console.error("No students found in the response.");
+        }
       } else {
         console.log("reponse", response.data.status);
         if (response.data && response.data.status === 403) {
@@ -738,7 +713,7 @@ const SiblingMapping = () => {
                           }
                           isSearchable
                           isClearable
-                          className="text-[.9em]"
+                          className="text-[.8em]"
                           styles={customStyles} // Apply custom styles
                           isDisabled={loadingClasses}
                         />
@@ -763,7 +738,7 @@ const SiblingMapping = () => {
                           }
                           isSearchable
                           isClearable
-                          className="text-[.9em]"
+                          className="text-[.8em]"
                           styles={customStyles} // Apply custom styles
                           isDisabled={loadingStudents}
                         />
@@ -781,7 +756,7 @@ const SiblingMapping = () => {
               {/* Form Section - Displayed when parentInformation is fetched */}
 
               {loadingForSearch ? (
-                <div className="flex justify-center items-center h-28">
+                <div className="flex justify-center items-center h-44">
                   <LoaderStyle />
                 </div>
               ) : (
@@ -804,8 +779,114 @@ const SiblingMapping = () => {
 
                       <form
                         onSubmit={handleSubmit}
-                        className="  border-1 overflow-x-hidden shadow-md p-2 bg-gray-100 mb-4"
-                      ></form>
+                        className="flex flex-col justify-center items-center overflow-x-hidden shadow-md p-2 bg-gray-50 mb-4"
+                      >
+                        <div className="flex  flex-col w-full   md:mx-10 pt-6 pb-6  px-6">
+                          {/* Student Name */}
+                          <div className="flex   flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="stud_name"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Student Name :
+                            </label>
+                            <p className="text-gray-700  relative top-2 md:w-[60%] ">
+                              {formData.stud_name || ""}
+                            </p>
+                          </div>
+
+                          {/* Father's Name */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="father_name"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Father's Name :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formData.father_name || ""}
+                            </p>
+                          </div>
+
+                          {/* Mother's Name */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="mother_name"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Mother's Name :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formData.mother_name || ""}
+                            </p>
+                          </div>
+
+                          {/* Father's Email */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="father_email"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Father's Email :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formData.father_email || ""}
+                            </p>
+                          </div>
+
+                          {/* Father's Phone */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="father_phone"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Father's Phone :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formData.father_phone || ""}
+                            </p>
+                          </div>
+
+                          {/* Mother's Email */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="mother_email"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Mother's Email :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formData.mother_email || ""}
+                            </p>
+                          </div>
+
+                          {/* Mother's Phone */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="mother_phone"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Mother's Phone :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formData.mother_phone || ""}
+                            </p>
+                          </div>
+
+                          {/* User ID */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="user_id"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              User ID :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formData.user_id || ""}
+                            </p>
+                          </div>
+                        </div>
+                      </form>
                     </div>
                   </div>
                 )
@@ -835,7 +916,7 @@ const SiblingMapping = () => {
                           }
                           isSearchable
                           isClearable
-                          className="text-[.9em]"
+                          className="text-[.8em]"
                           styles={customStyles} // Apply custom styles
                           isDisabled={loadingClassesForSecond}
                         />
@@ -862,7 +943,7 @@ const SiblingMapping = () => {
                           }
                           isSearchable
                           isClearable
-                          className="text-[.9em]"
+                          className="text-[.8em]"
                           styles={customStyles} // Apply custom styles
                           isDisabled={loadingStudentsForSecond}
                         />
@@ -880,7 +961,7 @@ const SiblingMapping = () => {
               {/* Form Section - Displayed when parentInformation is fetched */}
 
               {loadingForSearchForSecond ? (
-                <div className="flex justify-center items-center h-28">
+                <div className="flex justify-center items-center h-44">
                   <LoaderStyle />
                 </div>
               ) : (
@@ -903,8 +984,114 @@ const SiblingMapping = () => {
 
                       <form
                         onSubmit={handleSubmit}
-                        className="  border-1 overflow-x-hidden shadow-md p-2 bg-gray-100 mb-4"
-                      ></form>
+                        className="flex flex-col justify-center items-center overflow-x-hidden shadow-md p-2 bg-gray-50 mb-4"
+                      >
+                        <div className="flex  flex-col w-full   md:mx-10 pt-6 pb-6  px-6">
+                          {/* Student Name */}
+                          <div className="flex   flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="stud_name"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Student Name :
+                            </label>
+                            <p className="text-gray-700  relative top-2 md:w-[60%] ">
+                              {formDataForSecond.stud_name || ""}
+                            </p>
+                          </div>
+
+                          {/* Father's Name */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="father_name"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Father's Name :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formDataForSecond.father_name || ""}
+                            </p>
+                          </div>
+
+                          {/* Mother's Name */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="mother_name"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Mother's Name :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formDataForSecond.mother_name || ""}
+                            </p>
+                          </div>
+
+                          {/* Father's Email */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="father_email"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Father's Email :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formDataForSecond.father_email || ""}
+                            </p>
+                          </div>
+
+                          {/* Father's Phone */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="father_phone"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Father's Phone :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formDataForSecond.father_phone || ""}
+                            </p>
+                          </div>
+
+                          {/* Mother's Email */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="mother_email"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Mother's Email :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formDataForSecond.mother_email || ""}
+                            </p>
+                          </div>
+
+                          {/* Mother's Phone */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="mother_phone"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              Mother's Phone :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formDataForSecond.mother_phone || ""}
+                            </p>
+                          </div>
+
+                          {/* User ID */}
+                          <div className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
+                            <label
+                              htmlFor="user_id"
+                              className="block font-semibold text-[1em] md:w-1/3 text-gray-700"
+                            >
+                              User ID :
+                            </label>
+                            <p className="text-gray-700 relative top-2  md:w-[60%] ">
+                              {formDataForSecond.user_id || ""}
+                            </p>
+                          </div>
+                        </div>
+                      </form>
                     </div>
                   </div>
                 )
