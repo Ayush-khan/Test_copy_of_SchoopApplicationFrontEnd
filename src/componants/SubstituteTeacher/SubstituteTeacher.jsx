@@ -373,7 +373,7 @@ const SubstituteTeacher = () => {
           ></div>
           <ul className="grid grid-cols-2 gap-x-10 relative -left-6 md:left-0 md:flex md:flex-row -top-2">
             {/* Tab Navigation */}
-            {["Manage", "CreateExamTimetable"].map((tab) => (
+            {["Manage", "CreateSubstituteTeacher"].map((tab) => (
               <li
                 key={tab}
                 className={`md:-ml-7 shadow-md ${
@@ -575,7 +575,7 @@ const SubstituteTeacher = () => {
             </>
           )}
 
-          {activeTab === "CreateExamTimetable" && (
+          {activeTab === "CreateSubstituteTeacher" && (
             <div>
               <CreateSubstituteTeacher />
             </div>

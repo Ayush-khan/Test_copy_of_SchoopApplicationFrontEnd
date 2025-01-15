@@ -173,6 +173,7 @@ import CreateLeaveApplication from "../componants/LeaveApplications/CreateLeaveA
 import EditLeaveApplication from "../componants/LeaveApplications/EditLeaveApplication.jsx";
 import ViewLeaveApplication from "../componants/LeaveApplications/ViewLeaveApplication.jsx";
 import LeaveAllocationtoAllStaff from "../componants/LeaveApplications/LeaveAllocationtoAllStaff.jsx";
+import SiblingMapping from "../componants/SiblingMapping/SiblingMapping.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -325,6 +326,11 @@ function Index() {
           // path="#"
 
           element={<PrivateRoute element={SendUserIdToParent} />}
+        />
+        {/* Sibling Mapping Module */}
+        <Route
+          path="/SiblingMapping"
+          element={<PrivateRoute element={SiblingMapping} />}
         />
         {/* Staff endPoints */}
         <Route

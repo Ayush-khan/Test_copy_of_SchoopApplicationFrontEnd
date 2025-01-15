@@ -12,7 +12,7 @@
 //   const API_URL = import.meta.env.VITE_API_URL;
 //   const [selectedStudent, setSelectedStudent] = useState(null);
 //   const [classesforForm, setClassesforForm] = useState([]);
-//   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
+//   const [, setStudentNameWithClassId] = useState([]);
 //   const [classIdForSearch, setClassIdForSearch] = useState(null);
 //   const [selectedStudentId, setSelectedStudentId] = useState(null);
 //   const [nameError, setNameError] = useState("");
@@ -2145,7 +2145,9 @@ const CreeateCastCertificate = () => {
     () =>
       classesforForm.map((cls) => ({
         value: cls.section_id,
-        label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+        label: `${cls?.get_class?.name || ""} ${cls.name || ""} (${
+          cls.students_count || ""
+        })`,
         key: `${cls.class_id}-${cls.section_id}`,
       })),
     [classesforForm]
@@ -2155,7 +2157,9 @@ const CreeateCastCertificate = () => {
     () =>
       studentNameWithClassId.map((stu) => ({
         value: stu.student_id,
-        label: `${stu?.first_name} ${stu?.mid_name} ${stu?.last_name}`,
+        label: `${stu?.first_name || ""} ${stu?.mid_name || ""} ${
+          stu?.last_name || ""
+        }`,
       })),
     [studentNameWithClassId]
   );

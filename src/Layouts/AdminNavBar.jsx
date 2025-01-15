@@ -578,7 +578,7 @@ const AdminNavBar = () => {
           <NavDropdown.Item as={Link} to="/SendUserIdToParent">
             Send User Id to Parents
           </NavDropdown.Item>
-          <NavDropdown.Item as={Link} to="#">
+          <NavDropdown.Item as={Link} to="/SiblingMapping">
             Sibling Mapping
           </NavDropdown.Item>
           <NavDropdown.Item as={Link} to="/myprofile">
