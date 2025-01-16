@@ -692,8 +692,8 @@ const SiblingMapping = () => {
           <div className="w-full  flex flex-col md:flex-row">
             <div className="     w-full md:container ">
               {/* Search Section */}
-              <div className=" w-[95%] border-3  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg border border-gray-400 shadow-md mx-auto mt-6 p-6 ">
-                <div className="w-[99%] flex md:flex-row justify-between items-center">
+              <div className=" w-[95%] border-1  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg  border-gray-300 shadow-md  mx-auto mt-6 p-6 mb-4 ">
+                <div className="w-[99%] flex md:flex-row justify-between items-center ">
                   <div className="w-full flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                     <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
                       <label
@@ -893,7 +893,8 @@ const SiblingMapping = () => {
               )}
             </div>
             <div className="     w-full md:container ">
-              <div className=" w-[95%] border-3  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg border border-gray-400 shadow-md mx-auto mt-6 p-6 ">
+              <div className=" w-[95%] border-1  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg  border-gray-300 shadow-md  mx-auto mt-6 p-6 mb-4 ">
+                {" "}
                 <div className="w-[99%] flex md:flex-row justify-between items-center">
                   <div className="w-full flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                     <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
