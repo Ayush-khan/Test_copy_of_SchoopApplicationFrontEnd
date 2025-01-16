@@ -131,6 +131,7 @@ function Form() {
     f_email: "",
     f_dob: " ",
     m_dob: " ",
+    has_specs: "",
     parent_adhar_no: "",
     mother_name: "",
     mother_occupation: "",
@@ -230,6 +231,8 @@ function Form() {
         m_emailid: student?.parents?.m_emailid || "",
         m_adhar_no: student?.parents?.m_adhar_no || "",
         udise_pen_no: student.udise_pen_no || " ",
+        has_specs: student.has_specs || " ",
+
         // Preferences
         SetToReceiveSMS: student.SetToReceiveSMS || "",
         SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
@@ -2028,7 +2031,7 @@ function Form() {
                       type="radio"
                       id="yes"
                       name="has_specs"
-                      checked={formData.has_specs === "Y"}
+                      checked={formData.has_specs == "Y"}
                       value="Y"
                       onChange={handleChange}
                       // onBlur={handleBlur}
@@ -2042,9 +2045,7 @@ function Form() {
                       type="radio"
                       id="no"
                       name="has_specs"
-                      checked={
-                        formData.has_specs === "N" || !formData.has_specs
-                      }
+                      checked={formData.has_specs == "N"}
                       value="N"
                       onChange={handleChange}
                       // onBlur={handleBlur}
