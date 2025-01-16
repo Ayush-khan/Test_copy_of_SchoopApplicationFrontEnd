@@ -293,16 +293,31 @@ const CreatePercentageCertificate = () => {
 
     setErrors((prevErrors) => ({ ...prevErrors, [name]: fieldErrors[name] }));
   };
-
+  // it's 100% working but when i remove values from the field then it pass bydefault there 0
   const handleMarksChange = (id, value) => {
     // Update the errors state based on validation
-    if (!value) {
-      console.log("marka", value);
-      // setErrors((prevErrors) => ({
-      //   ...prevErrors,
-      //   [id]: "Marks are required.",
-      // }));
-    } else if (!/^\d+$/.test(value)) {
+
+    if (value === "") {
+      // If the input is cleared, remove the error and set the value as empty
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [id]: "",
+      }));
+
+      setMarks((prevMarks) => {
+        const updatedMarks = { ...prevMarks, [id]: "" }; // Keep the mark as an empty string
+        calculateTotals(updatedMarks); // Recalculate totals with updated marks
+        return updatedMarks;
+      });
+    }
+    // if (!value) {
+    //   console.log("marka", value);
+    //   // setErrors((prevErrors) => ({
+    //   //   ...prevErrors,
+    //   //   [id]: "Marks are required.",
+    //   // }));
+    // }
+    else if (!/^\d+$/.test(value)) {
       setErrors((prevErrors) => ({
         ...prevErrors,
         [id]: "Marks should be numeric.",
@@ -325,7 +340,7 @@ const CreatePercentageCertificate = () => {
 
     setMarks((prevMarks) => {
       const updatedMarks = { ...prevMarks, [id]: numericValue };
-
+      console.log("updatedMarks", updatedMarks);
       // Extract Standard and Basic Math IDs dynamically from formData.classsubject
       const standardMathId = formData.classsubject?.find(
         (subject) => subject.name === "MATHEMATICS STANDARD"
@@ -377,6 +392,52 @@ const CreatePercentageCertificate = () => {
     });
   };
 
+  // Function to calculate total marks and percentage
+  const calculateTotals = (marks) => {
+    // Extract Standard and Basic Math IDs dynamically from formData.classsubject
+    const standardMathId = formData.classsubject?.find(
+      (subject) => subject.name === "MATHEMATICS STANDARD"
+    )?.c_sm_id;
+    const basicMathId = formData.classsubject?.find(
+      (subject) => subject.name === "BASIC MATHEMATICS"
+    )?.c_sm_id;
+
+    // Check if both Standard and Basic Mathematics are present
+    const hasBothMaths = standardMathId == 3 && basicMathId == 7;
+
+    // Calculate total marks, excluding Basic Mathematics if both are present
+    let totalMarks = Object.entries(marks).reduce((acc, [key, mark]) => {
+      if (hasBothMaths && key == basicMathId) {
+        return acc; // Skip Basic Math
+      }
+      return acc + (parseInt(mark, 10) || 0); // Add mark if valid, else add 0
+    }, 0);
+
+    // Adjust subject count
+    let subjectCount = formData.classsubject?.length || 0;
+
+    if (hasBothMaths) {
+      subjectCount -= 1; // Decrease count by 1 if both math subjects are present
+    }
+
+    // Set the total marks
+    setTotal(totalMarks);
+
+    // Calculate percentage
+    const calculatedPercentage =
+      subjectCount > 0 ? (totalMarks / (subjectCount * 100)) * 100 : 0;
+    setPercentage(calculatedPercentage.toFixed(2));
+
+    console.log(
+      "totalMarks",
+      totalMarks,
+      "subjectCount",
+      subjectCount,
+      "calculatedPercentage",
+      calculatedPercentage
+    );
+  };
+
   // working write
   // const handleMarksChange = (id, value) => {
   //   // Update the errors state based on validation
@@ -425,13 +486,13 @@ const CreatePercentageCertificate = () => {
   //     return updatedMarks;
   //   });
   // };
-
+  console.log("marks", marks);
   const prepareSubmissionData = () => {
     const formattedMarks = Object.entries(marks).map(([id, mark]) => ({
       c_sm_id: parseInt(id),
-      marks: parseInt(mark),
+      marks: parseInt(mark) || "",
     }));
-
+    console.log("prepareSubmissionData", prepareSubmissionData);
     const submissionData = {
       roll_no: formData.roll_no,
       stud_name: formData.stud_name,
