@@ -71,7 +71,7 @@ function ViewStudent() {
     pincode: "",
     image_name: null,
     student_id: "",
-    reg_id: " ",
+    reg_no: " ",
     // Parent fields
     father_name: "",
     father_occupation: "",
@@ -89,6 +89,9 @@ function ViewStudent() {
     m_mobile: "",
     m_emailid: "",
     m_adhar_no: "",
+    m_blood_group: "",
+    f_blood_group: "",
+    has_specs: "",
     udise_pen_no: "",
     user_id: "",
     // Preferences
@@ -122,7 +125,7 @@ function ViewStudent() {
         state: student.state || "",
         roll_no: student.roll_no || "",
         student_id: student.student_id || " ",
-        reg_id: student.reg_id || " ",
+        reg_no: student.reg_no || " ",
         blood_group: student.blood_group || " ",
         category: student.category || " ",
         class_id: student?.get_class?.name || "",
@@ -145,14 +148,15 @@ function ViewStudent() {
         father_name: student?.parents?.father_name || " ",
         father_occupation: student?.parents?.father_occupation || "",
         f_office_add: student?.parents?.f_office_add || "  ",
-        f_blood_group: student.f_blood_group || "",
+        f_blood_group: student?.parents?.f_blood_group || "",
 
         f_office_tel: student?.parents?.f_office_tel || "",
         f_mobile: student?.parents?.f_mobile || "",
         f_email: student?.parents?.f_email || "",
         f_dob: student?.parents?.f_dob || " ",
         m_dob: student?.parents?.m_dob || " ",
-        m_blood_group: student.m_blood_group || "",
+        m_blood_group: student?.parents?.m_blood_group || "",
+        has_specs: student.has_specs || " ",
 
         parent_adhar_no: student?.parents?.parent_adhar_no || "",
         mother_name: student?.parents?.mother_name || " ",
@@ -513,7 +517,7 @@ function ViewStudent() {
               <input
                 type="text"
                 disabled
-                value={formData.reg_id}
+                value={formData.reg_no}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
@@ -878,7 +882,7 @@ function ViewStudent() {
                   <input
                     type="radio"
                     id="yes"
-                    checked={formData.has_specs === "Y"}
+                    checked={formData.has_specs == "Y"}
                     value="Y"
 
                     // onBlur={handleBlur}
@@ -891,7 +895,7 @@ function ViewStudent() {
                   <input
                     type="radio"
                     id="no"
-                    checked={formData.has_specs === "N" || !formData.has_specs}
+                    checked={formData.has_specs == "N"}
                     value="N"
                     // onBlur={handleBlur}
                   />
