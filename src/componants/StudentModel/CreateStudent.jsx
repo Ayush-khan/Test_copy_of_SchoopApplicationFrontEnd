@@ -116,6 +116,8 @@ function Form() {
     transport_mode: " ",
     height: "",
     weight: "",
+    m_blood_group: "",
+    f_blood_group: "",
     allergies: "",
     nationality: "",
     pincode: "",
@@ -232,6 +234,8 @@ function Form() {
         m_adhar_no: student?.parents?.m_adhar_no || "",
         udise_pen_no: student.udise_pen_no || " ",
         has_specs: student.has_specs || " ",
+        m_blood_group: student?.parents?.m_blood_group || " ",
+        f_blood_group: student?.parents?.f_blood_group || " ",
 
         // Preferences
         SetToReceiveSMS: student.SetToReceiveSMS || "",
@@ -1055,13 +1059,17 @@ function Form() {
         }, 500);
       }
     } catch (error) {
-      toast.error("An error occurred while updating the student.");
       console.error("Error:", error.response?.data || error.message);
       if (error.response && error.response.data && error.response.data.errors) {
         setBackendErrors(error.response.data.errors || {});
+        toast.error(
+          "Some fields contain duplicate data. Please ensure all values are unique."
+        );
         console.log("setBackendErrors", backendErrors);
       } else {
-        toast.error(error.message);
+        toast.error(
+          error.message || "Backdend error occur while updating data"
+        );
       }
     } finally {
       setLoading(false); // End loading state
@@ -2396,8 +2404,8 @@ function Form() {
                 </label>
                 <select
                   id="bloodGroup"
-                  name="m_blood"
-                  value={formData.m_blood}
+                  name="m_blood_group"
+                  value={formData.m_blood_group}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
                   // onBlur={handleBlur}
