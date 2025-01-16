@@ -27,35 +27,35 @@
 //     <Routes>
 //       <Route
 //         path="/student-create"
-//         element={<PrivateRoute element={CreateStudent} />}
+//         element={<PrivateRoute element={<CreateStudent/>} />}
 //       />
 //       <Route
 //         path="/student-list"
-//         element={<PrivateRoute element={StudentList} />}
+//         element={<PrivateRoute element={<StudentList/>} />}
 //       />
 //       <Route
 //         path="/student/:id/edit"
-//         element={<PrivateRoute element={StudentEdit} />}
+//         element={<PrivateRoute element={<StudentEdit/>} />}
 //       />
 //       <Route
 //         path="/student-demo-table"
-//         element={<PrivateRoute element={DemoTable} />}
+//         element={<PrivateRoute element={<DemoTable/>} />}
 //       />
-//       <Route path="/eventcard" element={<PrivateRoute element={EventCard} />} />
+//       <Route path="/eventcard" element={<PrivateRoute element={<EventCard/>} />} />
 //       <Route
 //         path="/dashboard"
-//         element={<PrivateRoute element={AdminDashboard} />}
+//         element={<PrivateRoute element={<AdminDashboard/>} />}
 //       />
 
-//       <Route path="/navbar" element={<PrivateRoute element={NavBar} />} />
+//       <Route path="/navbar" element={<PrivateRoute element={<NavBar/>} />} />
 //       <Route
 //         path="/myprofile"
-//         element={<PrivateRoute element={UserProfile} />}
+//         element={<PrivateRoute element={<UserProfile/>} />}
 //       />
 
 //       {/* Nikhil bhai pages */}
-//       <Route path="/classlist" element={<PrivateRoute element={ClassList} />} />
-//       <Route path="/sections" element={<PrivateRoute element={Sections} />} />
+//       <Route path="/classlist" element={<PrivateRoute element={<ClassList/>} />} />
+//       <Route path="/sections" element={<PrivateRoute element={<Sections/>} />} />
 //       <Route path="/" element={<LandingPage />} />
 //       <Route path="/login" element={<Login />} />
 //       <Route path="/notification" element={<NotificationPage />} />
@@ -68,18 +68,18 @@
 //       <Route path="/changepassword" element={<ChangePassword />} />
 //       <Route
 //         path="/ticktinglist"
-//         element={<PrivateRoute element={TickitingCountList} />}
+//         element={<PrivateRoute element={<TickitingCountList/>} />}
 //       />
 //       <Route
 //         path="/feependinglist"
-//         element={<PrivateRoute element={FeePendingList} />}
+//         element={<PrivateRoute element={<FeePendingList/>} />}
 //       />
 //       <Route
 //         path="/staffbirthlist"
-//         element={<PrivateRoute element={StaffBirthdayTabList} />}
+//         element={<PrivateRoute element={<StaffBirthdayTabList/>} />}
 //       />
 //       {/* Page Not FOund Routes */}
-//       <Route path="*" element={<PrivateRoute element={PageNotFounde} />} />
+//       <Route path="*" element={<PrivateRoute element={<PageNotFounde/>} />} />
 //     </Routes>
 //   );
 // }
@@ -183,357 +183,363 @@ function Index() {
       <Route path="/notification" element={<NotificationPage />} />
       <Route path="/" element={<MainLayout />}>
         {/* Role Management */}
-        <Route path="/menus" element={<PrivateRoute element={Menus} />} />
-        <Route path="/roles" element={<PrivateRoute element={Roles} />} />
+        <Route path="/menus" element={<PrivateRoute element={<Menus />} />} />
+        <Route path="/roles" element={<PrivateRoute element={<Roles />} />} />
         <Route
           path="/show_roles"
-          element={<PrivateRoute element={ShowRolesWithMenu} />}
+          element={<PrivateRoute element={<ShowRolesWithMenu />} />}
         />
         <Route
           path="//manage-role-access/:roleId"
-          element={<PrivateRoute element={ManageRoleAccess} />}
+          element={<PrivateRoute element={<ManageRoleAccess />} />}
         />
 
         {/* <Route
           path="/TestForAllfunctionlity"
           // path="#"
-          element={<PrivateRoute element={TestForAllfunctionlity} />}
+          element={<PrivateRoute element={<TestForAllfunctionlity/>} />}
         /> */}
         <Route
           path="/student-create"
-          element={<PrivateRoute element={CreateStudent} />}
+          element={<PrivateRoute element={<CreateStudent />} />}
         />
         <Route
           path="/student-list"
-          element={<PrivateRoute element={StudentList} />}
+          element={<PrivateRoute element={<StudentList />} />}
         />
         <Route
           path="/student/:id/edit"
-          element={<PrivateRoute element={StudentEdit} />}
+          element={<PrivateRoute element={<StudentEdit />} />}
         />
         <Route
           path="/student-demo-table"
-          element={<PrivateRoute element={DemoTable} />}
+          element={<PrivateRoute element={<DemoTable />} />}
         />
         {/* All Certificates  */}
         <Route
           path="/bonafiedCertificates"
           // path="#"
-          element={<PrivateRoute element={BonafiedCertificates} />}
+          element={<PrivateRoute element={<BonafiedCertificates />} />}
         />
         <Route
           path="/bonafied/edit/:id"
           // path="#"
-          element={<PrivateRoute element={EditBonafied} />}
+          element={<PrivateRoute element={<EditBonafied />} />}
         />
         {/* Cast certificate fsd */}
         <Route
           path="/castCertificate"
           // path="#"
-          element={<PrivateRoute element={CastCertificate} />}
+          element={<PrivateRoute element={<CastCertificate />} />}
         />
         <Route
           path="/studentCast/edit/:id"
           // path="#"
-          element={<PrivateRoute element={EditCastCertificate} />}
+          element={<PrivateRoute element={<EditCastCertificate />} />}
         />
         <Route
           path="/percentageCertificate"
           // path="#"
-          element={<PrivateRoute element={PercentageCertificate} />}
+          element={<PrivateRoute element={<PercentageCertificate />} />}
         />
         <Route
           path="/stud_Percent/edit/:id"
           // path="#"
-          element={<PrivateRoute element={EditPercentage} />}
+          element={<PrivateRoute element={<EditPercentage />} />}
         />
         {/* CharacterCertifiacte */}
         <Route
           path="/characterCertificate"
           // path="#"
-          element={<PrivateRoute element={CharacterCertificate} />}
+          element={<PrivateRoute element={<CharacterCertificate />} />}
         />
         <Route
           path="/stud_Char/edit/:id"
           // path="#"
-          element={<PrivateRoute element={EditCharacter} />}
+          element={<PrivateRoute element={<EditCharacter />} />}
         />
         {/* Simple Bonafied */}
         <Route
           path="/simpleBonafied"
           // path="#"
-          element={<PrivateRoute element={SImpleBonafied} />}
+          element={<PrivateRoute element={<SImpleBonafied />} />}
         />
         <Route
           path="/sm_Bonafied/edit/:id"
           // path="#"
-          element={<PrivateRoute element={EditSimpleBonafied} />}
+          element={<PrivateRoute element={<EditSimpleBonafied />} />}
         />
 
         {/* LC Student */}
         <Route
           path="/leavingCertificate"
           // path="#"
-          element={<PrivateRoute element={ManageLC} />}
+          element={<PrivateRoute element={<ManageLC />} />}
         />
         <Route
           path="/studentLC/view/:id"
           // path="#"
-          element={<PrivateRoute element={ViewStudentLC} />}
+          element={<PrivateRoute element={<ViewStudentLC />} />}
         />
         {/* Deleted Student Module */}
         {/* LC Student */}
         <Route
           path="/manageStudentLC"
           // path="#"
-          element={<PrivateRoute element={ManageLCStudent} />}
+          element={<PrivateRoute element={<ManageLCStudent />} />}
         />
         {/* leaving_certificate */}
         <Route
           path="/deleteStudent"
           // path="#"
-          element={<PrivateRoute element={DeleteStudent} />}
+          element={<PrivateRoute element={<DeleteStudent />} />}
         />
         <Route
           path="/deletedStudent/view/:id"
           // path="#"
-          element={<PrivateRoute element={ViewDeletedStudent} />}
+          element={<PrivateRoute element={<ViewDeletedStudent />} />}
         />
         <Route
           path="/deletedStudent/edit/:id"
           // path="#"
-          element={<PrivateRoute element={EditLCforDeleteStudent} />}
+          element={<PrivateRoute element={<EditLCforDeleteStudent />} />}
         />
 
         {/* <Route
           path="/student/edit/:id"
-          element={<PrivateRoute element={CreateStudent} />}
+          element={<PrivateRoute element={<CreateStudent/>} />}
         /> */}
         <Route
           path="/studentLC/edit/:id"
           // path="#"
-          element={<PrivateRoute element={EditLeavingCertificate} />}
+          element={<PrivateRoute element={<EditLeavingCertificate />} />}
         />
         {/* Promote Student Module */}
         <Route
           path="/PromoteStudent"
           // path="#"
-          element={<PrivateRoute element={PromotedStudent} />}
+          element={<PrivateRoute element={<PromotedStudent />} />}
         />
         {/* SendUserIdToParent Module */}
         <Route
           path="/SendUserIdToParent"
           // path="#"
 
-          element={<PrivateRoute element={SendUserIdToParent} />}
+          element={<PrivateRoute element={<SendUserIdToParent />} />}
         />
         {/* Sibling Mapping Module */}
         <Route
           path="/SiblingMapping"
-          element={<PrivateRoute element={SiblingMapping} />}
+          element={<PrivateRoute element={<SiblingMapping />} />}
         />
         {/* Staff endPoints */}
         <Route
           path="/StaffList"
-          element={<PrivateRoute element={StaffList} />}
+          element={<PrivateRoute element={<StaffList />} />}
         />
         <Route
           path="/CreateStaff"
-          element={<PrivateRoute element={CreateStaff} />}
+          element={<PrivateRoute element={<CreateStaff />} />}
         />
         <Route
           path="/staff/edit/:id"
-          element={<PrivateRoute element={EditStaff} />}
+          element={<PrivateRoute element={<EditStaff />} />}
         />
         <Route
           path="/staff/view/:id"
-          element={<PrivateRoute element={ViewStaff} />}
+          element={<PrivateRoute element={<ViewStaff />} />}
         />
         {/* LeaveAllocation */}
         <Route
           path="/LeaveAllocation"
-          element={<PrivateRoute element={LeaveAllocation} />}
+          element={<PrivateRoute element={<LeaveAllocation />} />}
         />
         {/* Leave applications */}
         <Route
           path="/LeaveApplication"
-          element={<PrivateRoute element={LeaveApplication} />}
+          element={<PrivateRoute element={<LeaveApplication />} />}
         />
 
         <Route
           path="/createLeaveApplication"
-          element={<PrivateRoute element={CreateLeaveApplication} />}
+          element={<PrivateRoute element={<CreateLeaveApplication />} />}
         />
         <Route
           path="/leaveApplication/edit/:id"
-          element={<PrivateRoute element={EditLeaveApplication} />}
+          element={<PrivateRoute element={<EditLeaveApplication />} />}
         />
         <Route
           path="/leaveApplication/view/:id"
-          element={<PrivateRoute element={ViewLeaveApplication} />}
+          element={<PrivateRoute element={<ViewLeaveApplication />} />}
         />
         <Route
           path="/leaveAllocationtoAllStaff"
-          element={<PrivateRoute element={LeaveAllocationtoAllStaff} />}
+          element={<PrivateRoute element={<LeaveAllocationtoAllStaff />} />}
         />
         {/* Substitute Teacher */}
         <Route
           path="/SubstituteTeacher"
-          element={<PrivateRoute element={SubstituteTeacher} />}
+          element={<PrivateRoute element={<SubstituteTeacher />} />}
         />
         <Route
           path="/substitute/edit/:id"
-          element={<PrivateRoute element={EditSubstituteTeacher} />}
+          element={<PrivateRoute element={<EditSubstituteTeacher />} />}
         />
         {/*  Notice And Sms Module */}
         <Route
           path="/noticeAndSms"
-          element={<PrivateRoute element={NoticeAndSms} />}
+          element={<PrivateRoute element={<NoticeAndSms />} />}
         />
         {/* CareTacker */}
         <Route
           path="/careTacker"
-          element={<PrivateRoute element={CareTacker} />}
+          element={<PrivateRoute element={<CareTacker />} />}
         />
         <Route
           path="/CreateCareTacker"
-          element={<PrivateRoute element={CreateCareTacker} />}
+          element={<PrivateRoute element={<CreateCareTacker />} />}
         />
         <Route
           path="/CareTacker/edit/:id"
-          element={<PrivateRoute element={EditCareTacker} />}
+          element={<PrivateRoute element={<EditCareTacker />} />}
         />
         <Route
           path="/CareTacker/view/:id"
-          element={<PrivateRoute element={ViewCareTacker} />}
+          element={<PrivateRoute element={<ViewCareTacker />} />}
         />
 
         {/* Set Late Time module */}
         <Route
           path="/SetLateTime"
-          element={<PrivateRoute element={SetLateTime} />}
+          element={<PrivateRoute element={<SetLateTime />} />}
         />
         <Route
           path="/eventcard"
-          element={<PrivateRoute element={EventCard} />}
+          element={<PrivateRoute element={<EventCard />} />}
         />
         <Route
           path="/dashboard"
-          element={<PrivateRoute element={AdminDashboard} />}
+          element={<PrivateRoute element={<AdminDashboard />} />}
         />
         <Route
           path="/myprofile"
-          element={<PrivateRoute element={UserProfile} />}
+          element={<PrivateRoute element={<UserProfile />} />}
         />
-        <Route path="/classes" element={<PrivateRoute element={ClassList} />} />
+        <Route
+          path="/classes"
+          element={<PrivateRoute element={<ClassList />} />}
+        />
 
         {/* Division module */}
         <Route
           path="/division"
-          element={<PrivateRoute element={DivisionList} />}
+          element={<PrivateRoute element={<DivisionList />} />}
         />
         {/* Division module */}
         <Route
           path="/subjects"
-          element={<PrivateRoute element={SubjectList} />}
+          element={<PrivateRoute element={<SubjectList />} />}
         />
         {/* SubjectAllotment module */}
         <Route
           path="/subject_allotment"
-          element={<PrivateRoute element={ManageSubjectList} />}
+          element={<PrivateRoute element={<ManageSubjectList />} />}
         />
         {/* SubjectForReportCard module */}
         <Route
           path="/subjectforReportcard"
-          element={<PrivateRoute element={SubjectForRc} />}
+          element={<PrivateRoute element={<SubjectForRc />} />}
         />
         {/* SubjectAllotmentForReportCard module */}
         <Route
           path="/managesubjectforreportcard"
-          element={<PrivateRoute element={SubjectAllotmentForReportCard} />}
+          element={<PrivateRoute element={<SubjectAllotmentForReportCard />} />}
         />
         {/* Student module */}
         <Route
           path="/manageStudent"
-          element={<PrivateRoute element={ManageStudent} />}
+          element={<PrivateRoute element={<ManageStudent />} />}
         />
         <Route
           path="/newStudentList"
-          element={<PrivateRoute element={NewStudentList} />}
+          element={<PrivateRoute element={<NewStudentList />} />}
         />
         {/* <Route
           path="/student-create"
-          element={<PrivateRoute element={CreateStudent} />}
+          element={<PrivateRoute element={<CreateStudent/>} />}
         /> */}
         <Route
           path="/student/edit/:id"
-          element={<PrivateRoute element={CreateStudent} />}
+          element={<PrivateRoute element={<CreateStudent />} />}
         />
         <Route
           path="/student/view/:id"
-          element={<PrivateRoute element={ViewStudent} />}
+          element={<PrivateRoute element={<ViewStudent />} />}
         />
         <Route
           path="/newStudetEdit/edit/:id"
-          element={<PrivateRoute element={EditOfNewStudentList} />}
+          element={<PrivateRoute element={<EditOfNewStudentList />} />}
         />
 
         {/* AllotClassTeacher */}
         <Route
           path="/allotClassTeacher"
-          element={<PrivateRoute element={AllotClassTeacher} />}
+          element={<PrivateRoute element={<AllotClassTeacher />} />}
         />
         {/* ExamMdule */}
-        <Route path="/exams" element={<PrivateRoute element={Exam} />} />
+        <Route path="/exams" element={<PrivateRoute element={<Exam />} />} />
         {/* Grade Module */}
-        <Route path="/grades" element={<PrivateRoute element={Grade} />} />
+        <Route path="/grades" element={<PrivateRoute element={<Grade />} />} />
         {/* MarksHeading Moudle */}
 
         <Route
           path="/marksHeading"
-          element={<PrivateRoute element={MarksHeading} />}
+          element={<PrivateRoute element={<MarksHeading />} />}
         />
         {/* AllotMarksHeading module */}
         <Route
           path="/allot_Marks_Heading"
-          element={<PrivateRoute element={AllotMarksHeading} />}
+          element={<PrivateRoute element={<AllotMarksHeading />} />}
         />
         {/* Exam Time Table */}
         <Route
           path="/exam_TImeTable"
-          element={<PrivateRoute element={ExamTImeTable} />}
+          element={<PrivateRoute element={<ExamTImeTable />} />}
         />
         <Route
           path="/creaExamTimeTable"
-          element={<PrivateRoute element={CreateExamTimeTable} />}
+          element={<PrivateRoute element={<CreateExamTimeTable />} />}
         />
         <Route
           path="/examTimeTable/edit/:id"
-          element={<PrivateRoute element={EditExamTimeTable} />}
+          element={<PrivateRoute element={<EditExamTimeTable />} />}
         />
         <Route
           path="/examTimeTable/view/:id"
-          element={<PrivateRoute element={ViewExamTimeTable} />}
+          element={<PrivateRoute element={<ViewExamTimeTable />} />}
         />
 
-        <Route path="/sections" element={<PrivateRoute element={Sections} />} />
+        <Route
+          path="/sections"
+          element={<PrivateRoute element={<Sections />} />}
+        />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />
         <Route
           path="/ticktinglist"
-          element={<PrivateRoute element={TickitingCountList} />}
+          element={<PrivateRoute element={<TickitingCountList />} />}
         />
         <Route
           path="/feependinglist"
-          element={<PrivateRoute element={FeePendingList} />}
+          element={<PrivateRoute element={<FeePendingList />} />}
         />
         <Route
           path="/staffbirthlist"
-          element={<PrivateRoute element={StaffBirthdayTabList} />}
+          element={<PrivateRoute element={<StaffBirthdayTabList />} />}
         />
       </Route>
       {/* Page Not FOund Routes */}
-      <Route path="*" element={<PrivateRoute element={PageNotFounde} />} />
+      <Route path="*" element={<PrivateRoute element={<PageNotFounde />} />} />
     </Routes>
   );
 }

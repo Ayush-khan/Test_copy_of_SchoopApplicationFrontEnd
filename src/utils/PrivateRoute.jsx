@@ -17,12 +17,26 @@
 // }
 
 // export default authManage
-
 import { Navigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
-const PrivateRoute = ({ element: Element }) => {
+const PrivateRoute = ({ element }) => {
   const isAuthenticated = !!localStorage.getItem("authToken");
-  return isAuthenticated ? <Element /> : <Navigate to="/" />;
+  return isAuthenticated ? element : <Navigate to="/" />;
+};
+
+// Prop validation
+PrivateRoute.propTypes = {
+  element: PropTypes.element.isRequired,
 };
 
 export default PrivateRoute;
+
+// import { Navigate } from "react-router-dom";
+
+// const PrivateRoute = ({ element: Element }) => {
+//   const isAuthenticated = !!localStorage.getItem("authToken");
+//   return isAuthenticated ? <Element /> : <Navigate to="/" />;
+// };
+
+// export default PrivateRoute;

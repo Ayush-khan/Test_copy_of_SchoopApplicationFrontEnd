@@ -1065,12 +1065,16 @@ function EditOfNewStudentList() {
         }, 3000);
       }
     } catch (error) {
-      toast.error("An error occurred while updating the student.");
       console.error("Error:", error.response?.data || error.message);
       if (error.response && error.response.data && error.response.data.errors) {
         setBackendErrors(error.response.data.errors || {});
+        toast.error(
+          "Some fields contain duplicate data. Please ensure all values are unique."
+        );
       } else {
-        toast.error(error.message);
+        toast.error(
+          error.message || "Backdend error occur while updating data"
+        );
       }
     }
   };

@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 // import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Styles from "./EventCard.module.css"; // Import CSS module
-import { MdOutlineArrowDropDown } from "react-icons/md";
-import LoadingSpinner from "../common/LoadingSpinner";
 import Loader from "../common/Loader";
 
 const EventCard = () => {
@@ -28,47 +26,49 @@ const EventCard = () => {
     { value: 10, label: "November" },
     { value: 11, label: "December" },
   ];
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      // const academicYr = localStorage.getItem("academicYear");
+      // console.log("academic year", academicYr);
+      console.log("token is", token);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem("authToken");
-        const academicYr = localStorage.getItem("academicYear");
-        console.log("academic year", academicYr);
-        console.log("token is", token);
-
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
-
-        const response = await axios.get(
-          // `http://127.0.0.1:8000/api/events`,
-          `${API_URL}/api/events`,
-          {
-            params: {
-              month: selectedMonth + 1, // API expects 1-based month index
-              year: currentYear,
-            },
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "X-Academic-Year": academicYr,
-              // "X-Academic-Year": "2023-2024",
-            },
-          }
-        );
-
-        setEvents(response.data);
-      } catch (error) {
-        setError(error.message);
-        console.error("Error fetching events:", error);
-      } finally {
-        setLoading(false);
+      if (!token) {
+        throw new Error("No authentication token found");
       }
-    };
 
+      const response = await axios.get(
+        // `http://127.0.0.1:8000/api/events`,
+        `${API_URL}/api/events`,
+        {
+          params: {
+            month: selectedMonth + 1, // API expects 1-based month index
+            year: currentYear,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            // "X-Academic-Year": academicYr,
+            // "X-Academic-Year": "2023-2024",
+          },
+        }
+      );
+
+      setEvents(response?.data);
+    } catch (error) {
+      setError(error.message);
+      console.error("Error fetching events:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchData();
   }, [selectedMonth]); // Fetch when selectedMonth changes
+  useEffect(() => {
+    // Fetch data on initial load
+    fetchData();
+  }, []); // Empty dependency array ensures this runs only once on initial render
 
   const handleMonthChange = (e) => {
     setSelectedMonth(parseInt(e.target.value, 10));
