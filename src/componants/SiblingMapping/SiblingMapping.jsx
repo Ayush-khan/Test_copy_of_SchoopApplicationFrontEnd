@@ -55,7 +55,15 @@ const SiblingMapping = () => {
       zIndex: 50, // To ensure proper stacking
     }),
   };
-
+  const [selectedParent, setSelectedParent] = useState("");
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (!selectedParent) {
+      alert("Please select a form before submitting!");
+      return;
+    }
+    console.log("Form submitted for:", selectedParent);
+  };
   const [formData, setFormData] = useState({
     stud_name: "", // Combined name with class and division
     father_name: "",
@@ -779,9 +787,9 @@ const SiblingMapping = () => {
 
                       <form
                         onSubmit={handleSubmit}
-                        className="flex flex-col justify-center items-center overflow-x-hidden shadow-md p-2 bg-gray-50 mb-4"
+                        className="flex flex-col justify-center items-center overflow-x-hidden shadow-md p-2 pt-0 bg-gray-50 mb-4 "
                       >
-                        <div className="flex  flex-col w-full   md:mx-10 pt-6 pb-6  px-6">
+                        <div className="flex  flex-col w-full   md:mx-10  pb-6  px-6">
                           {/* Student Name */}
                           <div className="flex   flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
                             <label
@@ -885,6 +893,23 @@ const SiblingMapping = () => {
                               {formData.user_id || ""}
                             </p>
                           </div>
+
+                          {/* Radio Button */}
+                          <div className="flex flex-row items-center gap-x-4 mt-4">
+                            <input
+                              type="radio"
+                              id="parent1"
+                              name="setAsParent"
+                              value="form1"
+                              className="w-4 h-4"
+                              checked={selectedParent === "form1"} // Controlled component
+                              onChange={() => setSelectedParent("form1")}
+                              required
+                            />
+                            <label htmlFor="parent1" className="text-gray-700">
+                              Set this as parent
+                            </label>
+                          </div>
                         </div>
                       </form>
                     </div>
@@ -985,9 +1010,9 @@ const SiblingMapping = () => {
 
                       <form
                         onSubmit={handleSubmit}
-                        className="flex flex-col justify-center items-center overflow-x-hidden shadow-md p-2 bg-gray-50 mb-4"
+                        className="flex flex-col justify-center items-center overflow-x-hidden shadow-md p-2 pt-0 bg-gray-50 mb-4"
                       >
-                        <div className="flex  flex-col w-full   md:mx-10 pt-6 pb-6  px-6">
+                        <div className="flex  flex-col w-full   md:mx-10  pb-6  px-6">
                           {/* Student Name */}
                           <div className="flex   flex-col md:flex-row md:items-center gap-y-2 gap-x-8">
                             <label
@@ -1090,6 +1115,22 @@ const SiblingMapping = () => {
                             <p className="text-gray-700 relative top-2  md:w-[60%] ">
                               {formDataForSecond.user_id || ""}
                             </p>
+                          </div>
+                          {/* Radio Button */}
+                          <div className="flex flex-row items-center gap-x-4 mt-4">
+                            <input
+                              type="radio"
+                              id="parent2"
+                              name="setAsParent"
+                              value="form2"
+                              className="w-4 h-4"
+                              checked={selectedParent === "form2"} // Controlled component
+                              onChange={() => setSelectedParent("form2")}
+                              required
+                            />
+                            <label htmlFor="parent2" className="text-gray-700">
+                              Set this as parent
+                            </label>
                           </div>
                         </div>
                       </form>

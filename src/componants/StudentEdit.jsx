@@ -6,7 +6,7 @@ import NavBar from "../Layouts/NavBar";
 function StudentEdit() {
   let { id } = useParams();
   const navigate = useNavigate(); // Move useNavigate to the correct place
-  const token = "your-auth-token"; // Replace with actual token or fetch from context/state
+  // const token = "your-auth-token"; // Replace with actual token or fetch from context/state
   const API_URL = import.meta.env.VITE_API_URL; // Base URL for your API
   const [formData, setFormData] = useState({
     first_name: "",

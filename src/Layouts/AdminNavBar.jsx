@@ -709,13 +709,6 @@ const AdminNavBar = () => {
           to="#"
           className="text-sm font-bold hover:text-black"
         >
-          Leaving Certificate
-        </NavDropdown.Item>
-        <NavDropdown.Item
-          as={Link}
-          to="#"
-          className="text-sm font-bold hover:text-black"
-        >
           Notices/SMS for Staff
         </NavDropdown.Item>
         <NavDropdown.Item
