@@ -300,6 +300,8 @@ const SiblingMapping = () => {
     setParentInformation(null);
     setFormData({
       stud_name: "", // Combined name with class and division
+      parent_id: "",
+
       father_name: "",
       mother_name: "", // Added mother's name
       father_email: "",
@@ -337,6 +339,8 @@ const SiblingMapping = () => {
             mother_name: student?.parents?.mother_name || "", // Mother's name
             father_email: student?.parents?.f_email || "",
             father_phone: student?.parents?.f_mobile || "",
+            parent_id: student?.parents?.parent_id || "",
+
             mother_email: student?.parents?.m_emailid || "",
             mother_phone: student?.parents?.m_mobile || "",
             user_id: student?.user_master?.user_id || "", // User ID set as Parent (Father Email here)
@@ -377,6 +381,7 @@ const SiblingMapping = () => {
     setParentInformationForSecond(null); // Assuming response data contains form data
 
     setFormDataForSecond({
+      parent_id: "",
       stud_name: "", // Combined name with class and division
       father_name: "",
       mother_name: "", // Added mother's name
@@ -414,6 +419,8 @@ const SiblingMapping = () => {
             father_name: student?.parents?.father_name || "",
             mother_name: student?.parents?.mother_name || "", // Mother's name
             father_email: student?.parents?.f_email || "",
+            parent_id: student?.parents?.parent_id || "",
+
             father_phone: student?.parents?.f_mobile || "",
             mother_email: student?.parents?.m_emailid || "",
             mother_phone: student?.parents?.m_mobile || "",
@@ -450,32 +457,32 @@ const SiblingMapping = () => {
     // Clear the error message when a selection is made
     setRadioButtonError("");
   };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // Validate if class and student are selected
+
+    // Validation checks
     if (selectedStudentId === selectedStudentIdForSecond) {
       toast.error(
         "🚫 Both students cannot be the same. Please select different students!",
         {
-          // position: "rigt-center",
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          // theme: "colored",
         }
       );
       return;
     }
+
     let hasError = false;
-    if (!selectedStudentIdForSecond) {
-      setNameErrorForSecond("Please select a student.");
-      hasError = true;
-    }
+
     if (!selectedStudentId) {
       setNameError("Please select a student.");
+      hasError = true;
+    }
+    if (!selectedStudentIdForSecond) {
+      setNameErrorForSecond("Please select a student.");
       hasError = true;
     }
     if (!selectedParent) {
@@ -488,24 +495,29 @@ const SiblingMapping = () => {
       return;
     }
 
-    const formattedFormData = {
-      ...formData,
-      dob: formatDateString(formData.dob),
-      date: formatDateString(formData.date),
+    // Prepare the data format as per requirement
+    const requestData = {
+      operation: "create",
+      set_as_parent: selectedParent, // Example: "2" if parent 2 is selected
+      student_id1: selectedStudentId,
+      student_id2: selectedStudentIdForSecond,
+      parent_id1: formData?.parent_id || " ", // Ensure these are set properly
+      parent_id2: formDataForSecond?.parent_id || " ",
     };
 
+    console.log("Request Data:", requestData);
+
     try {
-      setLoading(true); // Start loading
+      setLoading(true);
 
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("No authentication token is found");
       }
 
-      // Make an API call with the "blob" response type to download the PDF
       const response = await axios.post(
-        `${API_URL}/api/save_pdfbonafide`,
-        formattedFormData,
+        `${API_URL}/api/save_siblingmapping`,
+        requestData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -515,43 +527,143 @@ const SiblingMapping = () => {
 
       if (response.status === 200) {
         toast.success("Student Mapping successfully!");
-        // Reset form data and selected values after successful submission
-        setFormData({
-          sr_no: "",
-          stud_name: "",
-          father_name: "",
-          dob: "",
-          dob_words: "",
-          date: "",
-          class_division: "",
-          purpose: "",
-          nationality: "",
 
-          // Add other fields here if needed
-        });
-        setSelectedClass(null); // Reset class selection
-        setSelectedStudent(null); // Reset student selection
-        setSelectedClassForSecond(null); // Reset class selection
-        setSelectedStudentForSecond(null); // Reset student selection
-        setNameErrorForSecond("");
-        setNameErrorForClassForSecond("");
-        setRadioButtonError("");
+        // Reset form data and selections
+        setSelectedStudent(null);
+        setSelectedStudentForSecond(null);
+        setSelectedClass(null);
+        setSelectedClassForSecond(null);
         setSelectedParent("");
-        setErrors({});
-        setBackendErrors({});
-        setTimeout(() => {
-          setParentInformation(null);
-          setParentInformationForSecond(null);
-        }, 3000);
+        setParentInformation(null);
+        setParentInformationForSecond(null);
+        setNameError("");
+        setNameErrorForSecond("");
+        setRadioButtonError("");
       }
     } catch (error) {
-      console.log("error", error.response.data.message);
-
-      toast.error(error.response.data.message || "student not found!");
+      toast.error(error.response?.data?.error || "An error occurred!");
+      console.error("Error:", error.response || error.message);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
+  const reset = () => {
+    setSelectedStudent(null);
+    setSelectedStudentForSecond(null);
+    setSelectedClass(null);
+    setSelectedClassForSecond(null);
+    setSelectedParent("");
+    setParentInformation(null);
+    setParentInformationForSecond(null);
+    setNameError("");
+    setNameErrorForSecond("");
+    setRadioButtonError("");
+  };
+  const handleNavigation = () => {
+    navigate("/dashboard");
+  };
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   // Validate if class and student are selected
+  //   if (selectedStudentId === selectedStudentIdForSecond) {
+  //     toast.error(
+  //       "🚫 Both students cannot be the same. Please select different students!",
+  //       {
+  //         // position: "rigt-center",
+  //         autoClose: 5000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         // theme: "colored",
+  //       }
+  //     );
+  //     return;
+  //   }
+  //   let hasError = false;
+  //   if (!selectedStudentIdForSecond) {
+  //     setNameErrorForSecond("Please select a student.");
+  //     hasError = true;
+  //   }
+  //   if (!selectedStudentId) {
+  //     setNameError("Please select a student.");
+  //     hasError = true;
+  //   }
+  //   if (!selectedParent) {
+  //     setRadioButtonError(
+  //       "Please select any one of 'Set this as parent' option."
+  //     );
+  //     hasError = true;
+  //   }
+  //   if (hasError) {
+  //     return;
+  //   }
+  //   console.log("selectedParent", selectedParent);
+
+  //   const formattedFormData = {
+  //     ...formData,
+  //     dob: formatDateString(formData.dob),
+  //     date: formatDateString(formData.date),
+  //   };
+
+  //   try {
+  //     setLoading(true); // Start loading
+
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token is found");
+  //     }
+
+  //     // Make an API call with the "blob" response type to download the PDF
+  //     const response = await axios.post(
+  //       `${API_URL}/api/save_siblingmapping`,
+  //       formattedFormData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       toast.success("Student Mapping successfully!");
+  //       // Reset form data and selected values after successful submission
+  //       setFormData({
+  //         sr_no: "",
+  //         stud_name: "",
+  //         father_name: "",
+  //         dob: "",
+  //         dob_words: "",
+  //         date: "",
+  //         class_division: "",
+  //         purpose: "",
+  //         nationality: "",
+
+  //         // Add other fields here if needed
+  //       });
+  //       setSelectedClass(null); // Reset class selection
+  //       setSelectedStudent(null); // Reset student selection
+  //       setSelectedClassForSecond(null); // Reset class selection
+  //       setSelectedStudentForSecond(null); // Reset student selection
+  //       setNameErrorForSecond("");
+  //       setNameErrorForClassForSecond("");
+  //       setRadioButtonError("");
+  //       setSelectedParent("");
+  //       setErrors({});
+  //       setBackendErrors({});
+  //       setTimeout(() => {
+  //         setParentInformation(null);
+  //         setParentInformationForSecond(null);
+  //       }, 3000);
+  //     }
+  //   } catch (error) {
+  //     console.log("error", error.response.data.message);
+
+  //     toast.error(error.response.data.message || "student not found!");
+  //   } finally {
+  //     setLoading(false); // Stop loading
+  //   }
+  // };
 
   return (
     <div>
@@ -559,10 +671,17 @@ const SiblingMapping = () => {
 
       <div className=" w-full md:w-[95%] mt-4 mx-auto">
         <div className="card mx-auto lg:w-[100%] shadow-lg">
-          <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
-            <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+          <div className=" w-full  p-2 px-3 bg-gray-100 flex justify-between items-center ">
+            <h3 className=" w-full text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Sibling Mapping
             </h3>
+            {/* <div className="flex justify-between p-3"> */}
+            <RxCross1
+              className=" relative top-0.5  text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+              type="button"
+              onClick={handleNavigation}
+            />
+            {/* </div> */}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10"></div>
           </div>
           <div
@@ -776,8 +895,8 @@ const SiblingMapping = () => {
                               name="setAsParent"
                               value="form1"
                               className="w-4 h-4"
-                              checked={selectedParent === "form1"} // Controlled component
-                              onChange={() => handleChange("form1")}
+                              checked={selectedParent === "1"} // Controlled component
+                              onChange={() => handleChange("1")}
                               required
                             />
                             <label htmlFor="parent1" className="text-gray-700">
@@ -1003,8 +1122,8 @@ const SiblingMapping = () => {
                               name="setAsParent"
                               value="form2"
                               className="w-4 h-4"
-                              checked={selectedParent === "form2"} // Controlled component
-                              onChange={() => handleChange("form2")}
+                              checked={selectedParent === "2"} // Controlled component
+                              onChange={() => handleChange("2")}
                               required
                             />
                             <label htmlFor="parent2" className="text-gray-700">
@@ -1025,6 +1144,15 @@ const SiblingMapping = () => {
             </div>
           </div>
           <div className="w-[98%] mx-auto mb-2  text-right">
+            <button
+              type="reset"
+              onClick={reset}
+              className={` bg-red-500 mr-2 text-white font-bold py-1 border-1 border-red-500 px-4 rounded ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              Reset
+            </button>
             <button
               type="submit"
               onClick={handleSubmit}
