@@ -24,7 +24,7 @@ const SiblingMapping = () => {
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [selectedStudentIdForSecond, setSelectedStudentIdForSecond] =
     useState(null);
-
+  const [radioButtonError, setRadioButtonError] = useState("");
   const [nameError, setNameError] = useState("");
   const [nameErrorForClass, setNameErrorForClass] = useState("");
   const [nameErrorForSecond, setNameErrorForSecond] = useState("");
@@ -287,6 +287,8 @@ const SiblingMapping = () => {
     // Reset error messages
     setNameError("");
     setNameErrorForClass("");
+    setRadioButtonError("");
+    setSelectedParent("");
     setErrors({}); // Clears all field-specific errors
 
     if (!selectedStudent1) {
@@ -294,19 +296,6 @@ const SiblingMapping = () => {
       toast.error("Please select Student Name.!");
       return;
     }
-    // Validate if class and student are selected
-    // let hasError = false;
-    // if (!selectedClass) {
-    //   setNameErrorForClass("Please select a class.");
-    //   hasError = true;
-    // }
-    // if (!selectedStudent) {
-    //   setNameError("Please select a student.");
-    //   hasError = true;
-    // }
-
-    // If there are validation errors, exit the function
-    // if (hasError) return;
     // Reset form data and selected values after successful submission
     setParentInformation(null);
     setFormData({
@@ -355,25 +344,19 @@ const SiblingMapping = () => {
         } else {
           console.error("No students found in the response.");
         }
-
-        console.log("setFormData", formData);
       } else {
         console.log("reponse", response.data.status);
-        if (response.data && response.data.status === 403) {
-          toast.error(
-            "Bonafide Certificate Already Generated. Please go to manage to download the Bonafide Certificate."
-          );
-        } else {
-          // Show a generic error message if the error is not a 403
-          toast.error("No data found for the selected student.");
-        }
-        // toast.error("No data found for the selected student.");
       }
     } catch (error) {
-      console.log("error is", error);
-      // toast.error(error.message);
-      // Check if response has a 403 status and the specific error message
-      console.log("error is", error.response);
+      console.log("error", error.response.data.message);
+      if (
+        error.response.data.message ==
+        "No student found matching the search criteria."
+      ) {
+        toast.error("student information not found!");
+      } else {
+        toast.error(error.response.data.message || "student not found!");
+      }
     } finally {
       setLoadingForSearch(false);
     }
@@ -382,6 +365,8 @@ const SiblingMapping = () => {
     // Reset error messages
     setNameErrorForSecond("");
     setNameErrorForClassForSecond("");
+    setRadioButtonError("");
+    setSelectedParent("");
     setErrors({}); // Clears all field-specific errors
 
     if (!selectedStudent1) {
@@ -439,139 +424,20 @@ const SiblingMapping = () => {
         }
       } else {
         console.log("reponse", response.data.status);
-        if (response.data && response.data.status === 403) {
-          toast.error(
-            "Bonafide Certificate Already Generated. Please go to manage to download the Bonafide Certificate."
-          );
-        } else {
-          // Show a generic error message if the error is not a 403
-          toast.error("No data found for the selected student.");
-        }
-        // toast.error("No data found for the selected student.");
       }
     } catch (error) {
-      console.log("error is", error);
-      // toast.error(error.message);
-      // Check if response has a 403 status and the specific error message
-      console.log("error is", error.response);
+      console.log("error", error.response.data.message);
+      if (
+        error.response.data.message ==
+        "No student found matching the search criteria."
+      ) {
+        toast.error("student information not found!");
+      } else {
+        toast.error(error.response.data.message || "student not found!");
+      }
     } finally {
       setLoadingForSearchForSecond(false);
     }
-  };
-  // For FOrm
-  const validate = () => {
-    const newErrors = {};
-
-    // Validate name
-    if (!formData.stud_name) newErrors.stud_name = "This field is required";
-    else if (!/^[^\d].*/.test(formData.stud_name))
-      newErrors.stud_name = "Name should not start with a number";
-
-    // Validate name
-    if (!formData.father_name) newErrors.father_name = "This field is required";
-    else if (!/^[^\d].*/.test(formData.father_name))
-      newErrors.father_name = "Name should not start with a number";
-    // Validate academic qualifications (now a single text input)
-    if (!formData.class_division)
-      newErrors.class_division = "This field is required";
-    if (!formData.sr_no) newErrors.sr_no = "This field is required";
-
-    // Validate dob
-    if (!formData.dob) newErrors.dob = "This field is required";
-    if (!formData.father_name) newErrors.father_name = "This field is required";
-
-    // Validate date of joining
-    if (!formData.date) newErrors.date = "This field is required";
-
-    // Validate Employee Id
-    if (!formData.purpose) newErrors.purpose = "This field is required";
-    // Validate address
-    if (!formData.dob_words) newErrors.dob_words = "This field is required";
-    if (!formData.nationality) newErrors.nationality = "This field is required";
-
-    setErrors(newErrors);
-    return newErrors;
-  };
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    let newValue = value;
-
-    if (name === "dob") {
-      setFormData((prev) => ({
-        ...prev,
-        dob: value,
-        dob_words: convertDateToWords(value),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-    // Update formData for the field
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: newValue,
-    }));
-
-    // Field-specific validation
-    let fieldErrors = {};
-
-    // Name validation
-    if (name === "stud_name") {
-      if (!newValue) fieldErrors.stud_name = "Name is required";
-      else if (/^\d/.test(newValue))
-        fieldErrors.stud_name = "Name should not start with a number";
-    }
-    if (name === "father_name") {
-      if (!newValue) fieldErrors.father_name = "Name is required";
-      else if (/^\d/.test(newValue))
-        fieldErrors.father_name = "Name should not start with a number";
-    }
-
-    // Academic Qualification validation
-    if (name === "class_division") {
-      if (!newValue)
-        fieldErrors.class_division = "Class and Division is required";
-    }
-
-    // Date of Birth validation
-    if (name === "dob") {
-      if (!newValue) fieldErrors.dob = "Date of Birth is required";
-    }
-    // serial number
-
-    if (name === "sr_no") {
-      if (!newValue) fieldErrors.sr_no = "Serial number is required";
-    }
-    if (name === "father_name") {
-      if (!newValue) fieldErrors.father_name = "Father Name is required";
-    }
-
-    // Date of Joining validation
-    if (name === "date") {
-      if (!newValue) fieldErrors.date = " Date is required";
-    }
-
-    // Employee ID validation
-    if (name === "purpose") {
-      if (!newValue) fieldErrors.purpose = "Purpose  is required";
-    }
-
-    // Address validation
-    if (name === "dob_words") {
-      if (!newValue)
-        fieldErrors.dob_words = "  Birth date in words is required";
-    }
-    if (name === "nationality") {
-      if (!newValue) fieldErrors.nationality = "Nationality is required";
-    }
-
-    // Update the errors state with the new field errors
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [name]: fieldErrors[name],
-    }));
   };
 
   const formatDateString = (dateString) => {
@@ -579,14 +445,46 @@ const SiblingMapping = () => {
     const [year, month, day] = dateString.split("-");
     return `${year}-${month}-${day}`;
   };
+  const handleChange = (value) => {
+    setSelectedParent(value);
+    // Clear the error message when a selection is made
+    setRadioButtonError("");
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const validationErrors = validate();
-    const errorsToCheck = validationErrors || {};
-
-    if (Object.keys(errorsToCheck).length > 0) {
-      setErrors(errorsToCheck);
+    // Validate if class and student are selected
+    if (selectedStudentId === selectedStudentIdForSecond) {
+      toast.error(
+        "🚫 Both students cannot be the same. Please select different students!",
+        {
+          // position: "rigt-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          // theme: "colored",
+        }
+      );
+      return;
+    }
+    let hasError = false;
+    if (!selectedStudentIdForSecond) {
+      setNameErrorForSecond("Please select a student.");
+      hasError = true;
+    }
+    if (!selectedStudentId) {
+      setNameError("Please select a student.");
+      hasError = true;
+    }
+    if (!selectedParent) {
+      setRadioButtonError(
+        "Please select any one of 'Set this as parent' option."
+      );
+      hasError = true;
+    }
+    if (hasError) {
       return;
     }
 
@@ -612,34 +510,11 @@ const SiblingMapping = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          responseType: "blob", // Set response type to blob to handle PDF data
         }
       );
 
       if (response.status === 200) {
-        toast.success("Bonafide Certificate Created successfully!");
-
-        // Extract filename from Content-Disposition header
-        const contentDisposition = response.headers["content-disposition"];
-        let filename = "DownloadedFile.pdf"; // Fallback name
-
-        if (contentDisposition) {
-          const match = contentDisposition.match(/filename="(.+?)"/);
-          if (match && match[1]) {
-            filename = match[1];
-          }
-        }
-
-        // Create a URL for the PDF blob and initiate download
-        const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        const link = document.createElement("a");
-        link.href = pdfUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
+        toast.success("Student Mapping successfully!");
         // Reset form data and selected values after successful submission
         setFormData({
           sr_no: "",
@@ -658,6 +533,10 @@ const SiblingMapping = () => {
         setSelectedStudent(null); // Reset student selection
         setSelectedClassForSecond(null); // Reset class selection
         setSelectedStudentForSecond(null); // Reset student selection
+        setNameErrorForSecond("");
+        setNameErrorForClassForSecond("");
+        setRadioButtonError("");
+        setSelectedParent("");
         setErrors({});
         setBackendErrors({});
         setTimeout(() => {
@@ -666,14 +545,9 @@ const SiblingMapping = () => {
         }, 3000);
       }
     } catch (error) {
-      console.error("Error:", error.response.data, error.response.sr_no);
-      toast.error("An error occurred while Creating the Bonafide Certificate.");
+      console.log("error", error.response.data.message);
 
-      if (error.response && error.response) {
-        setBackendErrors(error.response || {});
-      } else {
-        toast.error(error.response.sr_no);
-      }
+      toast.error(error.response.data.message || "student not found!");
     } finally {
       setLoading(false); // Stop loading
     }
@@ -903,12 +777,17 @@ const SiblingMapping = () => {
                               value="form1"
                               className="w-4 h-4"
                               checked={selectedParent === "form1"} // Controlled component
-                              onChange={() => setSelectedParent("form1")}
+                              onChange={() => handleChange("form1")}
                               required
                             />
                             <label htmlFor="parent1" className="text-gray-700">
                               Set this as parent
-                            </label>
+                            </label>{" "}
+                            {radioButtonError && (
+                              <div className="  ml-1 text-danger text-xs">
+                                {radioButtonError}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </form>
@@ -1125,12 +1004,17 @@ const SiblingMapping = () => {
                               value="form2"
                               className="w-4 h-4"
                               checked={selectedParent === "form2"} // Controlled component
-                              onChange={() => setSelectedParent("form2")}
+                              onChange={() => handleChange("form2")}
                               required
                             />
                             <label htmlFor="parent2" className="text-gray-700">
                               Set this as parent
                             </label>
+                            {radioButtonError && (
+                              <div className=" ml-1 text-danger text-xs">
+                                {radioButtonError}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </form>
