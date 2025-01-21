@@ -5,6 +5,9 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
+import { FaCheck } from "react-icons/fa";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 const SubjectAllotmentHSC = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -402,7 +405,7 @@ const SubjectAllotmentHSC = () => {
     <div>
       <ToastContainer />
 
-      <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
+      <div className="md:mx-auto md:w-[85%] p-4 bg-white mt-4 ">
         <div className=" w-full    flex justify-between items-center ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Subjects For Higher Secondary Class
@@ -559,163 +562,160 @@ const SubjectAllotmentHSC = () => {
                       backgroundColor: "#C03078",
                     }}
                   ></div>
-                  <div className="w-full mt-4">
-                    <div className="card mx-auto lg:w-full shadow-lg">
-                      <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
-                        <h6 className="text-gray-700 mt-1 text-nowrap">
-                          Select Students
-                        </h6>
-                      </div>
-
-                      <div className="flex justify-between items-center mt-4 px-4">
-                        {/* Subject Group Header Dropdown */}
-                        <div>
-                          <label className="block mb-2">Subject Group</label>
-                          <select
-                            className="px-2 py-1 border rounded-md"
-                            value={subjectGroup}
-                            onChange={(e) => setSubjectGroup(e.target.value)}
-                          >
-                            <option value="">Select</option>
-                            {subjectGroups.map((group) => (
-                              <option
-                                key={group.sub_group_id}
-                                value={group.sub_group_id}
+                  <div className="w-full ">
+                    <div className="card-body w-full">
+                      <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full mx-auto">
+                        <table className="min-w-full leading-normal table-auto">
+                          <thead>
+                            <tr className="bg-gray-200 ">
+                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                                Sr.No
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                                Student Name
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                                Subject Group
+                                <div>
+                                  <select
+                                    className="px-2 py-1 border rounded-md"
+                                    value={subjectGroup}
+                                    onChange={(e) =>
+                                      setSubjectGroup(e.target.value)
+                                    }
+                                  >
+                                    <option value="">Select</option>
+                                    {subjectGroups.map((group) => (
+                                      <option
+                                        key={group.sub_group_id}
+                                        value={group.sub_group_id}
+                                      >
+                                        {group.sub_group_name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <button
+                                    className="text-green-500  px-2 py-1 ml-2 rounded-md hover:bg-white"
+                                    onClick={handleApplySubjectGroup}
+                                  >
+                                    <FaCheck className="text-md" />
+                                  </button>
+                                  <button
+                                    className=" text-red-500 px-2 py-1 ml-2 rounded-md hover:bg-white"
+                                    onClick={handleRemoveSubjectGroup}
+                                  >
+                                    <FontAwesomeIcon
+                                      icon={faXmark}
+                                      className="text-md"
+                                    />
+                                  </button>
+                                </div>
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                                Optional Subject
+                                <div className=" w-full ">
+                                  <select
+                                    className="px-2 py-1 border rounded-md"
+                                    value={optionalSubject}
+                                    onChange={(e) =>
+                                      setOptionalSubject(e.target.value)
+                                    }
+                                  >
+                                    <option value="">Select</option>
+                                    {optionalSubjects.map((subject) => (
+                                      <option
+                                        key={subject.sm_id}
+                                        value={subject.sm_id}
+                                      >
+                                        {subject.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <button
+                                    className="text-green-500  px-2 py-1 ml-2 rounded-md hover:bg-white"
+                                    onClick={handleApplyOptionalSubject}
+                                  >
+                                    <FaCheck className="text-md" />
+                                  </button>
+                                  <button
+                                    className=" text-red-500 px-2 py-1 ml-2 rounded-md hover:bg-white"
+                                    onClick={handleRemoveOptionalSubject}
+                                  >
+                                    <FontAwesomeIcon
+                                      icon={faXmark}
+                                      className="text-md"
+                                    />
+                                  </button>
+                                </div>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {studentsData.map((student, index) => (
+                              <tr
+                                key={student.student_id}
+                                className={
+                                  index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                                }
                               >
-                                {group.sub_group_name}
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            className="bg-green-500 text-white px-2 py-1 ml-2 rounded-md"
-                            onClick={handleApplySubjectGroup}
-                          >
-                            Apply
-                          </button>
-                          <button
-                            className="bg-red-500 text-white px-2 py-1 ml-2 rounded-md"
-                            onClick={handleRemoveSubjectGroup}
-                          >
-                            Remove
-                          </button>
-                        </div>
-
-                        {/* Optional Subject Header Dropdown */}
-                        <div>
-                          <label className="block mb-2">Optional Subject</label>
-                          <select
-                            className="px-2 py-1 border rounded-md"
-                            value={optionalSubject}
-                            onChange={(e) => setOptionalSubject(e.target.value)}
-                          >
-                            <option value="">Select</option>
-                            {optionalSubjects.map((subject) => (
-                              <option key={subject.sm_id} value={subject.sm_id}>
-                                {subject.name}
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            className="bg-green-500 text-white px-2 py-1 ml-2 rounded-md"
-                            onClick={handleApplyOptionalSubject}
-                          >
-                            Apply
-                          </button>
-                          <button
-                            className="bg-red-500 text-white px-2 py-1 ml-2 rounded-md"
-                            onClick={handleRemoveOptionalSubject}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="card-body w-full">
-                        <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full mx-auto">
-                          <table className="min-w-full leading-normal table-auto">
-                            <thead>
-                              <tr className="bg-gray-200">
-                                <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
-                                  Sr.No
-                                </th>
-                                <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
-                                  Student Name
-                                </th>
-                                <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
-                                  Subject Group
-                                </th>
-                                <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
-                                  Optional Subject
-                                </th>
+                                <td className="text-center px-2 lg:px-3 border text-sm">
+                                  {index + 1}
+                                </td>
+                                <td className="text-center px-2 lg:px-3 border text-sm">
+                                  {`${student.first_name} ${
+                                    student.mid_name || ""
+                                  } ${student.last_name}`}
+                                </td>
+                                <td className="text-center px-2 lg:px-3 border text-sm">
+                                  <select
+                                    className="px-2 py-1 border rounded-md"
+                                    value={student.sub_group_id || ""}
+                                    onChange={(e) =>
+                                      handleStudentDropdownChange(
+                                        student.student_id,
+                                        "sub_group_id",
+                                        e.target.value
+                                      )
+                                    }
+                                  >
+                                    <option value="">Select</option>
+                                    {subjectGroups.map((group) => (
+                                      <option
+                                        key={group.sub_group_id}
+                                        value={group.sub_group_id}
+                                      >
+                                        {group.sub_group_name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </td>
+                                <td className="text-center px-2 lg:px-3 border text-sm">
+                                  <select
+                                    className="px-2 py-1 border rounded-md"
+                                    value={student.opt_subject_id || ""}
+                                    onChange={(e) =>
+                                      handleStudentDropdownChange(
+                                        student.student_id,
+                                        "opt_subject_id",
+                                        e.target.value
+                                      )
+                                    }
+                                  >
+                                    <option value="">Select</option>
+                                    {optionalSubjects.map((subject) => (
+                                      <option
+                                        key={subject.sm_id}
+                                        value={subject.sm_id}
+                                      >
+                                        {subject.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </td>
                               </tr>
-                            </thead>
-                            <tbody>
-                              {studentsData.map((student, index) => (
-                                <tr
-                                  key={student.student_id}
-                                  className={
-                                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                                  }
-                                >
-                                  <td className="text-center px-2 lg:px-3 border text-sm">
-                                    {index + 1}
-                                  </td>
-                                  <td className="text-center px-2 lg:px-3 border text-sm">
-                                    {`${student.first_name} ${
-                                      student.mid_name || ""
-                                    } ${student.last_name}`}
-                                  </td>
-                                  <td className="text-center px-2 lg:px-3 border text-sm">
-                                    <select
-                                      className="px-2 py-1 border rounded-md"
-                                      value={student.sub_group_id || ""}
-                                      onChange={(e) =>
-                                        handleStudentDropdownChange(
-                                          student.student_id,
-                                          "sub_group_id",
-                                          e.target.value
-                                        )
-                                      }
-                                    >
-                                      <option value="">Select</option>
-                                      {subjectGroups.map((group) => (
-                                        <option
-                                          key={group.sub_group_id}
-                                          value={group.sub_group_id}
-                                        >
-                                          {group.sub_group_name}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </td>
-                                  <td className="text-center px-2 lg:px-3 border text-sm">
-                                    <select
-                                      className="px-2 py-1 border rounded-md"
-                                      value={student.opt_subject_id || ""}
-                                      onChange={(e) =>
-                                        handleStudentDropdownChange(
-                                          student.student_id,
-                                          "opt_subject_id",
-                                          e.target.value
-                                        )
-                                      }
-                                    >
-                                      <option value="">Select</option>
-                                      {optionalSubjects.map((subject) => (
-                                        <option
-                                          key={subject.sm_id}
-                                          value={subject.sm_id}
-                                        >
-                                          {subject.name}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
                     </div>
                   </div>
