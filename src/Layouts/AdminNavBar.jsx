@@ -838,7 +838,7 @@ const AdminNavBar = () => {
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
-          to="#"
+          to="/SubjectAllotmentHSC"
           className="text-sm font-bold hover:text-black"
         >
           StudentWise Subject Allotment for HSC

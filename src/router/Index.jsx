@@ -174,6 +174,7 @@ import EditLeaveApplication from "../componants/LeaveApplications/EditLeaveAppli
 import ViewLeaveApplication from "../componants/LeaveApplications/ViewLeaveApplication.jsx";
 import LeaveAllocationtoAllStaff from "../componants/LeaveApplications/LeaveAllocationtoAllStaff.jsx";
 import SiblingMapping from "../componants/SiblingMapping/SiblingMapping.jsx";
+import SubjectAllotmentHSC from "../componants/MastersModule/SubjectAllotmentForHSC/SubjectAllotmentHSC.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -444,6 +445,11 @@ function Index() {
         <Route
           path="/subject_allotment"
           element={<PrivateRoute element={<ManageSubjectList />} />}
+        />
+        {/* Subject Allotment for HSC */}
+        <Route
+          path="/SubjectAllotmentHSC"
+          element={<PrivateRoute element={<SubjectAllotmentHSC />} />}
         />
         {/* SubjectForReportCard module */}
         <Route
