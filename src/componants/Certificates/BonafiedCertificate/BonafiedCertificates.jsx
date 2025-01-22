@@ -123,6 +123,7 @@ function BonafiedCertificates() {
       setIsSubmitting(false);
       return;
     }
+    setSearchTerm("");
     try {
       console.log(
         "for this sectiong id in seaching inside AllotMarksHeadingTab",
@@ -381,6 +382,9 @@ function BonafiedCertificates() {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    if (tab === "Manage") {
+      handleSearch();
+    }
   };
   return (
     <>

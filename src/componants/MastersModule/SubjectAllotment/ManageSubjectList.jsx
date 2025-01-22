@@ -1480,6 +1480,7 @@ function ManageSubjectList() {
       setIsSubmitting(false);
       return;
     }
+    setSearchTerm("");
     try {
       console.log(
         "for this section id in searching inside subject allotment",

@@ -1036,6 +1036,7 @@ function NewStudentList() {
       return;
     }
     setLoading(true);
+    setSearchTerm("");
     try {
       const token = localStorage.getItem("authToken");
       let response;

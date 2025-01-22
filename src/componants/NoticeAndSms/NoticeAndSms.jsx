@@ -124,6 +124,7 @@ function NoticeAndSms() {
   const handleSearch = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
+    setSearchTerm("");
     try {
       const token = localStorage.getItem("authToken");
       const params = {};

@@ -255,6 +255,7 @@ const PromotedStudent = () => {
   const handleSearch = async () => {
     // Reset error messages
     setNameError("");
+    setSearchTerm("");
     setNameErrorForClass("");
     setNameErrorForClassForStudent("");
     setNameErrorForStudent("");
@@ -792,7 +793,6 @@ const PromotedStudent = () => {
                     </div>
                   </div>
                 </div>
-                ;{/* Selected Students */}
               </div>
             </div>
           )}

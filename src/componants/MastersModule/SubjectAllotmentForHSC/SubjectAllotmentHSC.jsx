@@ -190,6 +190,7 @@ const SubjectAllotmentHSC = () => {
   const handleSearch = async () => {
     // Reset error messages
     setNameError("");
+    setSearchTerm("");
     setNameErrorForClass("");
     setNameErrorForClassForStudent("");
     setNameErrorForStudent("");

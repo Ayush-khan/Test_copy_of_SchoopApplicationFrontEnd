@@ -132,6 +132,7 @@ function ManageLC() {
     }
 
     // API call
+    setSearchTerm("");
     try {
       const response = await axios.get(
         `${API_URL}/api/get_leavingcertificatelist`,
@@ -386,6 +387,9 @@ function ManageLC() {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    if (tab === "Manage") {
+      handleSearch();
+    }
   };
   return (
     <>

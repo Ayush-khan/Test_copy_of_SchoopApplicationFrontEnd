@@ -118,6 +118,7 @@ function AllotMarksHeading() {
 
       return;
     }
+    setSearchTerm("");
     try {
       console.log(
         "for this sectiong id in seaching inside AllotMarksHeadingTab",

@@ -123,7 +123,7 @@ function ManageLCStudent() {
     setIsSubmitting(true);
     // Clear any existing error messages
     setNameError("");
-
+    setSearchTerm("");
     try {
       const token = localStorage.getItem("authToken");
       const params = classIdForManage ? { section_id: classIdForManage } : {};

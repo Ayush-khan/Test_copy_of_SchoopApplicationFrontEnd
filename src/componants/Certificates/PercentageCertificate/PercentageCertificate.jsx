@@ -131,6 +131,7 @@ function PercentageCertificate() {
 
       return;
     }
+    setSearchTerm("");
     try {
       console.log(
         "for this sectiong id in seaching inside AllotMarksHeadingTab",
@@ -396,6 +397,9 @@ function PercentageCertificate() {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    if (tab === "Manage") {
+      handleSearch();
+    }
   };
   return (
     <>
