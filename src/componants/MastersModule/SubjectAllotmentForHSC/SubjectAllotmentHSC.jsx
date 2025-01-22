@@ -597,22 +597,34 @@ const SubjectAllotmentHSC = () => {
                                       </option>
                                     ))}
                                   </select>
-                                  <div className="flex  my-1 ">
-                                    <button
-                                      className="text-green-500  px-2 py-1  rounded-md hover:bg-white"
-                                      onClick={handleApplySubjectGroup}
-                                    >
-                                      <FaCheck className="text-md" />
-                                    </button>
-                                    <button
-                                      className=" text-red-500 px-2 py-1  rounded-md hover:bg-white"
-                                      onClick={handleRemoveSubjectGroup}
-                                    >
-                                      <FontAwesomeIcon
-                                        icon={faXmark}
-                                        className="text-md"
-                                      />
-                                    </button>
+                                  <div className="flex my-1">
+                                    <div className="relative group">
+                                      <button
+                                        className="text-green-500 px-2 py-1 rounded-md hover:bg-white"
+                                        onClick={handleApplySubjectGroup}
+                                      >
+                                        <FaCheck className="text-md" />
+                                      </button>
+                                      {/* Tooltip */}
+                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-green-500  text-white text-[.8em] rounded-md py-1 px-2">
+                                        Apply
+                                      </div>
+                                    </div>
+                                    <div className="relative group ml-2">
+                                      <button
+                                        className="text-red-500 px-2 py-1 rounded-md hover:bg-white"
+                                        onClick={handleRemoveSubjectGroup}
+                                      >
+                                        <FontAwesomeIcon
+                                          icon={faXmark}
+                                          className="text-md"
+                                        />
+                                      </button>
+                                      {/* Tooltip */}
+                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-red-500 text-white text-[.8em] rounded-md py-1 px-2">
+                                        Remove
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
                               </th>
@@ -636,22 +648,34 @@ const SubjectAllotmentHSC = () => {
                                       </option>
                                     ))}
                                   </select>
-                                  <div className="flex  my-1 ">
-                                    <button
-                                      className="text-green-500  px-2 py-1  rounded-md hover:bg-white"
-                                      onClick={handleApplyOptionalSubject}
-                                    >
-                                      <FaCheck className="text-md" />
-                                    </button>
-                                    <button
-                                      className=" text-red-500 px-2 py-1  rounded-md hover:bg-white"
-                                      onClick={handleRemoveOptionalSubject}
-                                    >
-                                      <FontAwesomeIcon
-                                        icon={faXmark}
-                                        className="text-md"
-                                      />
-                                    </button>
+                                  <div className="flex my-1">
+                                    <div className="relative group">
+                                      <button
+                                        className="text-green-500 px-2 py-1 rounded-md hover:bg-white"
+                                        onClick={handleApplyOptionalSubject}
+                                      >
+                                        <FaCheck className="text-md" />
+                                      </button>
+                                      {/* Tooltip */}
+                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-green-500  text-white text-[.8em] rounded-md py-1 px-2">
+                                        Apply
+                                      </div>
+                                    </div>
+                                    <div className="relative group ml-2">
+                                      <button
+                                        className="text-red-500 px-2 py-1 rounded-md hover:bg-white"
+                                        onClick={handleRemoveOptionalSubject}
+                                      >
+                                        <FontAwesomeIcon
+                                          icon={faXmark}
+                                          className="text-md"
+                                        />
+                                      </button>
+                                      {/* Tooltip */}
+                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-red-500 text-white text-[.8em] rounded-md py-1 px-2">
+                                        Remove
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
                               </th>
