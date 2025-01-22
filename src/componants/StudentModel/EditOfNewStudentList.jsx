@@ -1746,7 +1746,7 @@ function EditOfNewStudentList() {
               <input
                 type="text"
                 id="pincode"
-                maxLength={11}
+                maxLength={6}
                 name="pincode"
                 value={formData.pincode}
                 className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
