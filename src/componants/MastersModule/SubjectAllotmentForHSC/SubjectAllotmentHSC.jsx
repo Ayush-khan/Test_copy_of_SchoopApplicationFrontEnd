@@ -255,20 +255,22 @@ const SubjectAllotmentHSC = () => {
     // Validate if `selectedStudents` array is empty
 
     // Validate if `selectedClassForStudent` or `selectedStudentForStudent` are missing
-    if (!selectedClassForStudent.value) {
-      setNameErrorForClassForStudent("Please select a class.");
-      hasError = true;
-    }
-    if (!selectedStudentForStudent.value) {
-      setNameErrorForStudent("Please select a student.");
-      hasError = true;
-    }
-    if (selectedStudents.length === 0) {
-      toast.error("Please select at least one student to promote.");
-      hasError = true;
-    }
+    // if (!selectedClass.value) {
+    //   setNameErrorForClassForStudent("Please select a class.");
+    //   hasError = true;
+    // }
+    // if (!setSelectedStudentId) {
+    //   setNameErrorForStudent("Please select division.");
+    //   hasError = true;
+    // }
+    // if (selectedStudents.length === 0) {
+    //   toast.error("Please select at least one student to promote.");
+    //   hasError = true;
+    // }
     // Exit if there are validation errors
-    if (hasError) return;
+    // if (hasError){
+    //     console.log()
+    //     return};
 
     try {
       setLoading(true); // Start loading
@@ -279,16 +281,16 @@ const SubjectAllotmentHSC = () => {
       }
 
       // Prepare data for the API request
-      const postData = {
-        selector: selectedStudents,
-        tclass_id: selectedClassForStudent.value, // Replace with actual target class ID
-        tsection_id: selectedStudentForStudent.value, // Replace with actual target section ID
-      };
-
+      //   const postData = {
+      //     selector: selectedStudents,
+      //     tclass_id: selectedClassForStudent.value, // Replace with actual target class ID
+      //     tsection_id: selectedStudentForStudent.value, // Replace with actual target section ID
+      //   };
+      console.log("students Data submissions", studentsData);
       // Make the API call
       const response = await axios.post(
-        `${API_URL}/api/promotestudents`,
-        postData,
+        `${API_URL}/api/save_subjectforhsc`,
+        studentsData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -298,7 +300,7 @@ const SubjectAllotmentHSC = () => {
 
       // Handle successful response
       if (response.status === 200) {
-        toast.success("Students promoted successfully!");
+        toast.success("Subject allotment for HSC has been successfully added!");
         setOptionalSubject("");
         setSubjectGroup("");
         setSelectedClass(null); // Reset class selection
@@ -322,7 +324,7 @@ const SubjectAllotmentHSC = () => {
       console.error("Error:", error.response?.data);
 
       // Display error message
-      toast.error("An error occurred while promoting students.");
+      toast.error("An error occurred while allot subjects for HSC.");
 
       if (error.response && error.response.data) {
         setBackendErrors(error.response.data || {});
@@ -391,6 +393,19 @@ const SubjectAllotmentHSC = () => {
   };
   const handleCloseModal = () => {
     setShowAddModal(false);
+  };
+  const reset = () => {
+    setParentInformation([]); // Assuming response data contains form data
+    setStudentsData([]);
+    setOptionalSubject("");
+    setSubjectGroup("");
+    setSelectedStudent(null);
+
+    setSelectedClass(null);
+
+    setParentInformation(null);
+
+    setNameError("");
   };
   return (
     <div>
@@ -565,8 +580,8 @@ const SubjectAllotmentHSC = () => {
                   ></div>
                   <div className="w-full ">
                     <div className="card-body w-full">
-                      <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full mx-auto">
-                        <table className="min-w-full leading-normal table-auto">
+                      <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full border-b border-gray-200  mx-auto">
+                        <table className="min-w-full leading-normal table-auto ">
                           <thead>
                             <tr className="bg-gray-200 ">
                               <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
@@ -757,10 +772,57 @@ const SubjectAllotmentHSC = () => {
                         </table>
                       </div>
                     </div>
+                    <div className=" w-[97%] mx-auto  justify-center mb-2  text-right">
+                      <button
+                        type="reset"
+                        onClick={reset}
+                        className={` bg-red-500 mr-2 text-white font-bold py-1 border-1 border-red-500 px-4 rounded ${
+                          loading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                      >
+                        Reset
+                      </button>
+                      <button
+                        type="submit"
+                        onClick={handleSubmit}
+                        style={{ backgroundColor: "#2196F3" }}
+                        className={`text-white font-bold items-center  py-1 border-1 border-blue-500 px-4 rounded ${
+                          loading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <span className="flex items-center">
+                            <svg
+                              className="animate-spin h-4 w-4 mr-2 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              ></path>
+                            </svg>
+                            Saving...
+                          </span>
+                        ) : (
+                          "Save"
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-              ;{/* Selected Students */}
             </div>
           )}
         </div>
