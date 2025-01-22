@@ -7,11 +7,13 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { FaCheck } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
 
 const SubjectAllotmentHSC = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedStudentForStudent, setSelectedStudentForStudent] =
@@ -85,7 +87,7 @@ const SubjectAllotmentHSC = () => {
       });
       setOptionalSubjects(response.data.data || []);
     } catch (err) {
-      setError("Error fetching optional subjects");
+      toast.error("Error fetching optional subjects");
     }
   };
   const fetchInitialDataAndStudents = async () => {
@@ -156,17 +158,6 @@ const SubjectAllotmentHSC = () => {
     setSelectedStudent(selectedOption);
     setSelectedStudentId(selectedOption?.value);
   };
-
-  // Dropdown options
-  //   const classOptions = useMemo(
-  //     () =>
-  //       classesforForm.map((cls) => ({
-  //         value: cls.class_id,
-  //         label: `${cls.name}`,
-  //         key: `${cls.class_id}`,
-  //       })),
-  //     [classesforForm]
-  //   );
   const classOptions = useMemo(
     () =>
       classesforForm
@@ -202,6 +193,8 @@ const SubjectAllotmentHSC = () => {
     setNameErrorForClass("");
     setNameErrorForClassForStudent("");
     setNameErrorForStudent("");
+    setOptionalSubject("");
+    setSubjectGroup("");
     setErrors({}); // Clears all field-specific errors
 
     let hasError = false;
@@ -306,13 +299,13 @@ const SubjectAllotmentHSC = () => {
       // Handle successful response
       if (response.status === 200) {
         toast.success("Students promoted successfully!");
+        setOptionalSubject("");
+        setSubjectGroup("");
         setSelectedClass(null); // Reset class selection
-        // setSelectedClassForStudent(null);
-        // selectedStudentForStudent(null);
-
         setSelectedStudent(null); // Reset student selection
         setSelectedStudents([]); // Clear selected students
         setErrors({});
+
         setSelectedStudentForStudent(null);
         setSelectedStudentForStudent([]);
         setSelectedClassForStudent(null);
@@ -342,54 +335,47 @@ const SubjectAllotmentHSC = () => {
   const handleNavigation = () => {
     navigate("/dashboard");
   };
-  //   const filteredParents = parentInformation
-  //     ? parentInformation.filter((student) => {
-  //         const searchLower = searchTerm.toLowerCase();
 
-  //         return (
-  //           (student.roll_no !== null &&
-  //             student.roll_no.toString().toLowerCase().includes(searchLower)) || // Filter by roll number
-  //           `${student.first_name || ""} ${student.mid_name || ""} ${
-  //             student.last_name || ""
-  //           }`
-  //             .toLowerCase()
-  //             .includes(searchLower) // Filter by full name
-  //         );
-  //       })
-  //     : [];
+  const filteredStudents = studentsData
+    ? studentsData.filter((student) =>
+        `${student.first_name || ""} ${student.mid_name || ""} ${
+          student.last_name || ""
+        }`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   const handleApplySubjectGroup = () => {
-    if (subjectGroup) {
-      const updatedStudents = studentsData.map((student) => ({
-        ...student,
-        sub_group_id: subjectGroup,
-      }));
-      setStudentsData(updatedStudents);
-    }
+    const updatedStudents = studentsData.map((student) => ({
+      ...student,
+      sub_group_id: subjectGroup, // Apply the selected subject group to all students
+    }));
+    setStudentsData(updatedStudents);
   };
 
   const handleRemoveSubjectGroup = () => {
+    setSubjectGroup("");
     const updatedStudents = studentsData.map((student) => ({
       ...student,
-      sub_group_id: null,
+      sub_group_id: "",
     }));
     setStudentsData(updatedStudents);
   };
 
   const handleApplyOptionalSubject = () => {
-    if (optionalSubject) {
-      const updatedStudents = studentsData.map((student) => ({
-        ...student,
-        opt_subject_id: optionalSubject,
-      }));
-      setStudentsData(updatedStudents);
-    }
+    const updatedStudents = studentsData.map((student) => ({
+      ...student,
+      opt_subject_id: optionalSubject, // Apply the selected optional subject to all students
+    }));
+    setStudentsData(updatedStudents);
   };
 
   const handleRemoveOptionalSubject = () => {
+    setOptionalSubject("");
     const updatedStudents = studentsData.map((student) => ({
       ...student,
-      opt_subject_id: null,
+      opt_subject_id: "",
     }));
     setStudentsData(updatedStudents);
   };
@@ -400,7 +386,12 @@ const SubjectAllotmentHSC = () => {
     );
     setStudentsData(updatedStudents);
   };
-
+  const handleAdd = () => {
+    setShowAddModal(true);
+  };
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+  };
   return (
     <div>
       <ToastContainer />
@@ -525,7 +516,7 @@ const SubjectAllotmentHSC = () => {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                         ></path>
                       </svg>
-                      Loading...
+                      Browsing...
                     </span>
                   ) : (
                     "Browse"
@@ -537,16 +528,16 @@ const SubjectAllotmentHSC = () => {
 
           {/* Form Section - Displayed when parentInformation is fetched */}
           {parentInformation && (
-            <div className="w-full md:container mx-auto py-4 px-4">
+            <div className="w-full md:container mx-auto pb-4 px-4">
               {/* Student Table */}
               <div className="  w-full  mt-4">
                 <div className="card mx-auto lg:w-full shadow-lg">
                   <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
-                    <h6 className="text-gray-700 mt-1   text-nowrap">
-                      Select Students
+                    <h6 className=" text-gray-700 mt-1   text-nowrap">
+                      Allot Subjects For Students
                     </h6>
-                    <div className="box-border flex md:gap-x-2  ">
-                      <div className=" w-1/2 md:w-fit mr-1">
+                    <div className="box-border  flex justify-end md:gap-x-2  ">
+                      <div className=" w-full md:w-[50%] mr-1">
                         <input
                           type="text"
                           className="form-control"
@@ -554,6 +545,16 @@ const SubjectAllotmentHSC = () => {
                           onChange={(e) => setSearchTerm(e.target.value)}
                         />
                       </div>
+                      <button
+                        className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
+                        onClick={handleAdd}
+                      >
+                        <MdOutlineRemoveRedEye className=" inline-block mb-1 mr-1  font-bold text-xl text-pink-200" />
+                        <span className="text-xs font-medium">
+                          Subjects Info
+                          {/* Subject Combination Details */}
+                        </span>
+                      </button>
                     </div>
                   </div>
                   <div
@@ -569,16 +570,18 @@ const SubjectAllotmentHSC = () => {
                           <thead>
                             <tr className="bg-gray-200 ">
                               <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
-                                Sr.No
+                                <p className="relative -top-2.5 "> Sr.No</p>
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
-                                Student Name
+                              <th className="px-2 text-center  lg:px-3 py-2 border text-sm font-semibold">
+                                <p className="relative -top-2.5 ">
+                                  Student Name
+                                </p>
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold ">
                                 Subject Group
-                                <div>
+                                <div className=" flex ">
                                   <select
-                                    className="px-2 py-1 border rounded-md"
+                                    className="px-2 w-full  py-1 my-1 border rounded-md"
                                     value={subjectGroup}
                                     onChange={(e) =>
                                       setSubjectGroup(e.target.value)
@@ -594,28 +597,30 @@ const SubjectAllotmentHSC = () => {
                                       </option>
                                     ))}
                                   </select>
-                                  <button
-                                    className="text-green-500  px-2 py-1 ml-2 rounded-md hover:bg-white"
-                                    onClick={handleApplySubjectGroup}
-                                  >
-                                    <FaCheck className="text-md" />
-                                  </button>
-                                  <button
-                                    className=" text-red-500 px-2 py-1 ml-2 rounded-md hover:bg-white"
-                                    onClick={handleRemoveSubjectGroup}
-                                  >
-                                    <FontAwesomeIcon
-                                      icon={faXmark}
-                                      className="text-md"
-                                    />
-                                  </button>
+                                  <div className="flex  my-1 ">
+                                    <button
+                                      className="text-green-500  px-2 py-1  rounded-md hover:bg-white"
+                                      onClick={handleApplySubjectGroup}
+                                    >
+                                      <FaCheck className="text-md" />
+                                    </button>
+                                    <button
+                                      className=" text-red-500 px-2 py-1  rounded-md hover:bg-white"
+                                      onClick={handleRemoveSubjectGroup}
+                                    >
+                                      <FontAwesomeIcon
+                                        icon={faXmark}
+                                        className="text-md"
+                                      />
+                                    </button>
+                                  </div>
                                 </div>
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
                                 Optional Subject
-                                <div className=" w-full ">
+                                <div className=" w-full md:w-[85%] mx-auto flex  ">
                                   <select
-                                    className="px-2 py-1 border rounded-md"
+                                    className="px-2 w-full md:w-[78%] mx-auto py-1 my-1 border rounded-md"
                                     value={optionalSubject}
                                     onChange={(e) =>
                                       setOptionalSubject(e.target.value)
@@ -631,89 +636,99 @@ const SubjectAllotmentHSC = () => {
                                       </option>
                                     ))}
                                   </select>
-                                  <button
-                                    className="text-green-500  px-2 py-1 ml-2 rounded-md hover:bg-white"
-                                    onClick={handleApplyOptionalSubject}
-                                  >
-                                    <FaCheck className="text-md" />
-                                  </button>
-                                  <button
-                                    className=" text-red-500 px-2 py-1 ml-2 rounded-md hover:bg-white"
-                                    onClick={handleRemoveOptionalSubject}
-                                  >
-                                    <FontAwesomeIcon
-                                      icon={faXmark}
-                                      className="text-md"
-                                    />
-                                  </button>
+                                  <div className="flex  my-1 ">
+                                    <button
+                                      className="text-green-500  px-2 py-1  rounded-md hover:bg-white"
+                                      onClick={handleApplyOptionalSubject}
+                                    >
+                                      <FaCheck className="text-md" />
+                                    </button>
+                                    <button
+                                      className=" text-red-500 px-2 py-1  rounded-md hover:bg-white"
+                                      onClick={handleRemoveOptionalSubject}
+                                    >
+                                      <FontAwesomeIcon
+                                        icon={faXmark}
+                                        className="text-md"
+                                      />
+                                    </button>
+                                  </div>
                                 </div>
                               </th>
                             </tr>
                           </thead>
                           <tbody>
-                            {studentsData.map((student, index) => (
-                              <tr
-                                key={student.student_id}
-                                className={
-                                  index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                                }
-                              >
-                                <td className="text-center px-2 lg:px-3 border text-sm">
-                                  {index + 1}
-                                </td>
-                                <td className="text-center px-2 lg:px-3 border text-sm">
-                                  {`${student.first_name} ${
-                                    student.mid_name || ""
-                                  } ${student.last_name}`}
-                                </td>
-                                <td className="text-center px-2 lg:px-3 border text-sm">
-                                  <select
-                                    className="px-2 py-1 border rounded-md"
-                                    value={student.sub_group_id || ""}
-                                    onChange={(e) =>
-                                      handleStudentDropdownChange(
-                                        student.student_id,
-                                        "sub_group_id",
-                                        e.target.value
-                                      )
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    {subjectGroups.map((group) => (
-                                      <option
-                                        key={group.sub_group_id}
-                                        value={group.sub_group_id}
-                                      >
-                                        {group.sub_group_name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </td>
-                                <td className="text-center px-2 lg:px-3 border text-sm">
-                                  <select
-                                    className="px-2 py-1 border rounded-md"
-                                    value={student.opt_subject_id || ""}
-                                    onChange={(e) =>
-                                      handleStudentDropdownChange(
-                                        student.student_id,
-                                        "opt_subject_id",
-                                        e.target.value
-                                      )
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    {optionalSubjects.map((subject) => (
-                                      <option
-                                        key={subject.sm_id}
-                                        value={subject.sm_id}
-                                      >
-                                        {subject.name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </td>
-                              </tr>
-                            ))}
+                            {filteredStudents.length ? (
+                              filteredStudents.map((student, index) => (
+                                <tr
+                                  key={student.student_id}
+                                  className={
+                                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                                  }
+                                >
+                                  <td className="text-center px-2 lg:px-3 border text-sm">
+                                    {index + 1}
+                                  </td>
+                                  <td className="text-center px-2 lg:px-3 border text-sm">
+                                    {`${student.first_name} ${
+                                      student.mid_name || ""
+                                    } ${student.last_name}`}
+                                  </td>
+                                  <td className="text-center px-2 lg:px-3 border text-sm">
+                                    <select
+                                      className="px-2 w-full md:w-[80%] py-1 border rounded-md"
+                                      value={student.sub_group_id || ""}
+                                      onChange={(e) =>
+                                        handleStudentDropdownChange(
+                                          student.student_id,
+                                          "sub_group_id",
+                                          e.target.value
+                                        )
+                                      }
+                                    >
+                                      <option value="">Select</option>
+                                      {subjectGroups.map((group) => (
+                                        <option
+                                          key={group.sub_group_id}
+                                          value={group.sub_group_id}
+                                        >
+                                          {group.sub_group_name}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </td>
+                                  <td className="text-center px-2 lg:px-3 border text-sm ">
+                                    <select
+                                      className="px-2 w-full md:w-[80%] py-2 my-2 border rounded-md"
+                                      value={student.opt_subject_id || ""}
+                                      onChange={(e) =>
+                                        handleStudentDropdownChange(
+                                          student.student_id,
+                                          "opt_subject_id",
+                                          e.target.value
+                                        )
+                                      }
+                                    >
+                                      <option value="">Select</option>
+                                      {optionalSubjects.map((subject) => (
+                                        <option
+                                          key={subject.sm_id}
+                                          value={subject.sm_id}
+                                        >
+                                          {subject.name}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                <div className=" text-center text-xl text-red-700">
+                                  Oops! No data found..
+                                </div>
+                              </div>
+                            )}
                           </tbody>
                         </table>
                       </div>
@@ -726,6 +741,98 @@ const SubjectAllotmentHSC = () => {
           )}
         </div>
       </div>
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg w-[50%] max-w-5xl max-h-full overflow-auto">
+            <div className="flex justify-between items-center px-4 py-2.5 border-b border-gray-200">
+              <h6 className="text-lg font-bold text-gray-600 mt-1">
+                Subject Combination Details
+              </h6>
+              <RxCross1
+                className="text-3xl  text-red-600 cursor-pointer hover:bg-red-100 p-1 rounded-full"
+                onClick={handleCloseModal}
+              />
+            </div>
+            <div className="h-1 w-[98%] mx-auto bg-[#C03078] mb-3"></div>
+            <div className="px-6 pb-6">
+              <table className="w-full table-auto border-collapse border border-gray-400 shadow-md">
+                <thead className="bg-gray-200 text-gray-700  ">
+                  <tr>
+                    <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                      PCM
+                    </th>
+                    <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                      PCB
+                    </th>
+                    <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                      Commerce
+                    </th>
+                    <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                      Arts
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="text-center ">
+                  <tr>
+                    <td className="border border-gray-300 px-4 py-2">
+                      English
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      English
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      English
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      English
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 px-4 py-2">
+                      Physics
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      Physics
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      Accountancy
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      History
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 px-4 py-2">
+                      Chemistry
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      Chemistry
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      Business Studies
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      Geography
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 px-4 py-2">Maths</td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      Biology
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      Economics
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      Economics
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
