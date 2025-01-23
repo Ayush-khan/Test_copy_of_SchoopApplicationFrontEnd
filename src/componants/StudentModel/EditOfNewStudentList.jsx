@@ -816,7 +816,9 @@ function EditOfNewStudentList() {
 
   const validate = () => {
     const newErrors = {};
-
+    if (!formData.category || formData.category === "Select") {
+      newErrors.category = "Category selection is required";
+    }
     // Validate required fields
     // Validate required fields
     if (!formData?.SetEmailIDAsUsername)
@@ -850,9 +852,7 @@ function EditOfNewStudentList() {
     if (!formData.religion || formData.religion === "Select") {
       newErrors.religion = "Religion selection is required";
     }
-    if (!formData.category || formData.category === "Select") {
-      newErrors.category = "Category selection is required";
-    }
+
     if (!formData.class_id || formData.class_id === "Select") {
       newErrors.class_id = "Class selection is required";
     }
