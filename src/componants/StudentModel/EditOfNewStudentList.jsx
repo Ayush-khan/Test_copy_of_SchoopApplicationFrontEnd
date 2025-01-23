@@ -232,8 +232,8 @@ function EditOfNewStudentList() {
         m_adhar_no: student?.parents?.m_adhar_no || "",
         udise_pen_no: student.udise_pen_no || " ",
         // Preferences
-        SetToReceiveSMS: student.SetToReceiveSMS || "",
-        SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
+        SetToReceiveSMS: "",
+        SetEmailIDAsUsername: "",
 
         // Base64 Image (optional)
         // student_image: student.student_image || "",
@@ -242,20 +242,20 @@ function EditOfNewStudentList() {
       // Set the initial state for father's and mother's mobile preferences based on prefilled data
       // Update the state for username and SMS based on the prefilled data
       // Set initial state for mobile and email preferences based on prefilled data
-      setFatherMobileSelected({
-        setUsername: student.SetEmailIDAsUsername === "FatherMob",
-        receiveSms: student.SetToReceiveSMS === "FatherMob",
-      });
-      setMotherMobileSelected({
-        setUsername: student.SetEmailIDAsUsername === "MotherMob",
-        receiveSms: student.SetToReceiveSMS === "MotherMob",
-      });
-      setFatherEmailSelected({
-        setUsername: student.SetEmailIDAsUsername === "Father",
-      });
-      setMotherEmailSelected({
-        setUsername: student.SetEmailIDAsUsername === "Mother",
-      });
+      // setFatherMobileSelected({
+      //   setUsername: student.SetEmailIDAsUsername === "FatherMob",
+      //   receiveSms: student.SetToReceiveSMS === "FatherMob",
+      // });
+      // setMotherMobileSelected({
+      //   setUsername: student.SetEmailIDAsUsername === "MotherMob",
+      //   receiveSms: student.SetToReceiveSMS === "MotherMob",
+      // });
+      // setFatherEmailSelected({
+      //   setUsername: student.SetEmailIDAsUsername === "Father",
+      // });
+      // setMotherEmailSelected({
+      //   setUsername: student.SetEmailIDAsUsername === "Mother",
+      // });
 
       setSelectedClass(student.class_id || ""); // Set the selected class
       setSelectedDivision(student.section_id || ""); // Set the selected division
@@ -327,7 +327,7 @@ function EditOfNewStudentList() {
     () =>
       classesforForm.map((cls) => ({
         value: cls.section_id,
-        label: `${cls?.get_class?.name} ${cls.name}`,
+        label: `${cls?.get_class?.name || " "} ${cls.name || " "}`,
         key: `${cls.class_id}-${cls.section_id}`, // Add key here for uniqueness
       })),
     [classesforForm]
@@ -338,7 +338,9 @@ function EditOfNewStudentList() {
     () =>
       studentNameWithClassId.map((stu) => ({
         value: stu.student_id,
-        label: `${stu?.first_name} ${stu?.mid_name} ${stu.last_name}`,
+        label: `${stu?.first_name || " "} ${stu?.mid_name || " "} ${
+          stu.last_name || " "
+        }`,
       })),
     [studentNameWithClassId]
   );
@@ -465,11 +467,28 @@ function EditOfNewStudentList() {
         m_dob: parentInformation.m_dob || "",
         f_blood_group: parentInformation.f_blood_group || "",
         m_blood_group: parentInformation.m_blood_group || "",
+        SetToReceiveSMS: parentInformation.SetToReceiveSMS || "",
+        SetEmailIDAsUsername: parentInformation.SetEmailIDAsUsername || "",
       }));
 
-      // Setting up preselected values for the radio buttons based on parentInformation
-      const userId = parentInformation.user_master?.user_id; // Assuming user_master exists in parentInformation
+      setFatherMobileSelected({
+        setUsername: parentInformation.SetEmailIDAsUsername === "FatherMob",
+        receiveSms: parentInformation.SetToReceiveSMS === "FatherMob",
+      });
+      setMotherMobileSelected({
+        setUsername: parentInformation.SetEmailIDAsUsername === "MotherMob",
+        receiveSms: parentInformation.SetToReceiveSMS === "MotherMob",
+      });
+      setFatherEmailSelected({
+        setUsername: parentInformation.SetEmailIDAsUsername === "Father",
+      });
+      setMotherEmailSelected({
+        setUsername: parentInformation.SetEmailIDAsUsername === "Mother",
+      });
 
+      // Setting up preselected values for the radio buttons based on parentInformation
+      const userId = parentInformation?.SetEmailIDAsUsername; // Assuming user_master exists in parentInformation
+      console.log("userId", userId);
       setFatherMobileSelected({
         setUsername:
           parentInformation.SetEmailIDAsUsername === "FatherMob" ||
@@ -496,6 +515,80 @@ function EditOfNewStudentList() {
           parentInformation.SetEmailIDAsUsername === "Mother" ||
           userId === parentInformation.m_emailid,
       });
+    }
+  }, [parentInformation]);
+
+  useEffect(() => {
+    if (parentInformation) {
+      // Set form data from student object...
+      setFormData((prev) => ({
+        ...prev,
+        f_mobile: parentInformation?.f_mobile || "",
+        f_email: parentInformation?.f_email || "",
+        m_mobile: parentInformation?.m_mobile || "",
+        m_emailid: parentInformation?.m_emailid || "",
+        // SetToReceiveSMS: parentInformation?.SetToReceiveSMS || "",
+        SetEmailIDAsUsername: parentInformation?.SetEmailIDAsUsername || "",
+      }));
+
+      // Initializing selectedUsername based on conditions
+      // const userId = student.user_master?.user_id;
+      // console.log("master user_id", userId);
+      // if (userId === student.parents?.f_mobile) {
+      //   setSelectedUsername("FatherMob");
+      // } else if (userId === student.parents?.m_mobile) {
+      //   setSelectedUsername("MotherMob");
+      // } else if (userId === student.parents?.f_email) {
+      //   setSelectedUsername("Father");
+      // } else if (userId === student.parents?.m_emailid) {
+      //   setSelectedUsername("Mother");
+      // } else if (userId === undefined) {
+      //   setSelectedUsername("");
+      //   console.log("run conditon when userid is undefined");
+      // }
+      // const userId = student.user_master?.user_id;
+      const userId = parentInformation?.SetEmailIDAsUsername
+        ? parentInformation?.SetEmailIDAsUsername
+        : null;
+      console.log("master user_id", userId);
+
+      // Check if userId is undefined and exit early
+      if (userId === null) {
+        setSelectedUsername("");
+        console.log("User ID is undefined, skipping conditions");
+        return;
+      } else if (userId === parentInformation?.f_mobile) {
+        setSelectedUsername("FatherMob");
+      } else if (userId === parentInformation?.m_mobile) {
+        setSelectedUsername("MotherMob");
+      } else if (userId === parentInformation?.f_email) {
+        setSelectedUsername("Father");
+      } else if (userId === parentInformation?.m_emailid) {
+        setSelectedUsername("Mother");
+      } else {
+        setSelectedUsername("");
+        console.log("User ID does not match any condition");
+      }
+
+      // Set 'SetToReceiveSMS' based on mobile number matching
+      if (parentInformation.SetToReceiveSMS === parentInformation?.f_mobile) {
+        setFormData((prev) => ({
+          ...prev,
+          SetToReceiveSMS: "Father",
+        }));
+      } else if (
+        parentInformation.SetToReceiveSMS === parentInformation?.m_mobile
+      ) {
+        setFormData((prev) => ({
+          ...prev,
+          SetToReceiveSMS: "Mother",
+        }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          SetToReceiveSMS: "",
+        }));
+      }
     }
   }, [parentInformation]);
 
@@ -1000,6 +1093,17 @@ function EditOfNewStudentList() {
   const handleSubmit = async (event) => {
     console.log("hudsfh");
     event.preventDefault();
+    // const validationErrors = validate();
+
+    // if (Object.keys(validationErrors).length > 0) {
+    //   setErrors(validationErrors);
+    //   Object.values(validationErrors).forEach((error) => {
+    //     console.log(error);
+    //   });
+    //   console.log("error in feilds name");
+
+    //   return;
+    // }
     const validationErrors = validate();
 
     if (Object.keys(validationErrors).length > 0) {
