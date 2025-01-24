@@ -657,24 +657,48 @@ function Form() {
     if (!formData.permant_add) newErrors.permant_add = "Address is required";
     if (!formData.city) newErrors.city = "City is required";
     if (!formData.state) newErrors.state = "State is required";
-    // Correct validation for gender selection
-    if (!formData.gender || formData.gender === "Select") {
-      newErrors.gender = "Gender selection is required";
-    }
-    if (!formData.religion || formData.religion === "Select") {
-      newErrors.religion = "Religion selection is required";
-    }
-    if (!formData.category || formData.category === "Select") {
+    // Dropdown validations
+    if (
+      !formData.category ||
+      formData.category === "Select" ||
+      formData.category === null
+    ) {
       newErrors.category = "Category selection is required";
     }
-    if (!formData.class_id || formData.class_id === "Select") {
+    if (
+      !formData.gender ||
+      formData.gender === "Select" ||
+      formData.gender === null
+    ) {
+      newErrors.gender = "Gender selection is required";
+    }
+    if (
+      !formData.religion ||
+      formData.religion === "Select" ||
+      formData.religion === null
+    ) {
+      newErrors.religion = "Religion selection is required";
+    }
+    if (
+      !formData.admission_class ||
+      formData.admission_class === "Select" ||
+      formData.admission_class === null
+    ) {
+      newErrors.admission_class = "Admission class selection is required";
+    }
+    if (
+      !formData.class_id ||
+      formData.class_id === "Select" ||
+      formData.class_id === null
+    ) {
       newErrors.class_id = "Class selection is required";
     }
-    if (!formData.section_id || formData.section_id === "Select") {
+    if (
+      !formData.section_id ||
+      formData.section_id === "Select" ||
+      formData.section_id === null
+    ) {
       newErrors.section_id = "Division selection is required";
-    }
-    if (!formData.admission_class || formData.admission_class === "Select") {
-      newErrors.admission_class = "Admission class selection is required";
     }
 
     // newErrors.gender = "Gender selection is required";
@@ -997,6 +1021,7 @@ function Form() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setErrors({});
     const validationErrors = validate();
 
     if (Object.keys(validationErrors).length > 0) {
@@ -1670,7 +1695,7 @@ function Form() {
                     type="text"
                     id="Udise_no"
                     name="udise_pen_no"
-                    maxLength={14}
+                    maxLength={11}
                     value={formData.udise_pen_no}
                     className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                     onChange={handleChange}
@@ -2229,7 +2254,7 @@ function Form() {
                     value={formData.f_mobile}
                     onChange={handleChange}
                     className="input-field block w-full border-1 border-gray-400 outline-none rounded-r-md py-1 px-3 bg-white shadow-inner"
-                    required
+                    // required
                   />
                 </div>
                 {backendErrors.phone && (
@@ -2519,7 +2544,7 @@ function Form() {
                     value={formData.m_mobile}
                     onChange={handleChange}
                     className="input-field block w-full border-1 border-gray-400 outline-none rounded-r-md py-1 px-3 bg-white shadow-inner"
-                    required
+                    // required
                   />
                 </div>
                 {backendErrors.phone && (

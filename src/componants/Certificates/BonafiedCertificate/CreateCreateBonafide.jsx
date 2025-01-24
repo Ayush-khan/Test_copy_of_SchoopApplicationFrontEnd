@@ -391,39 +391,252 @@ const CreateCreateBonafide = () => {
     }
   };
   // For FOrm
+  // const validate = () => {
+  //   const newErrors = {};
+
+  //   // Validate name
+  //   if (!formData.stud_name) newErrors.stud_name = "This field is required";
+  //   else if (!/^[^\d].*/.test(formData.stud_name))
+  //     newErrors.stud_name = "Name should not start with a number";
+
+  //   // Validate name
+  //   if (!formData.father_name) newErrors.father_name = "This field is required";
+  //   else if (!/^[^\d].*/.test(formData.father_name))
+  //     newErrors.father_name = "Name should not start with a number";
+  //   // Validate academic qualifications (now a single text input)
+  //   if (!formData.class_division)
+  //     newErrors.class_division = "This field is required";
+  //   if (!formData.sr_no) newErrors.sr_no = "This field is required";
+
+  //   // Validate dob
+  //   if (!formData.dob) newErrors.dob = "This field is required";
+  //   if (!formData.father_name) newErrors.father_name = "This field is required";
+
+  //   // Validate date of joining
+  //   if (!formData.date) newErrors.date = "This field is required";
+
+  //   // Validate Employee Id
+  //   if (!formData.purpose) newErrors.purpose = "This field is required";
+  //   // Validate address
+  //   if (!formData.dob_words) newErrors.dob_words = "This field is required";
+  //   if (!formData.nationality) newErrors.nationality = "This field is required";
+
+  //   setErrors(newErrors);
+  //   return newErrors;
+  // };
   const validate = () => {
     const newErrors = {};
 
-    // Validate name
-    if (!formData.stud_name) newErrors.stud_name = "This field is required";
-    else if (!/^[^\d].*/.test(formData.stud_name))
-      newErrors.stud_name = "Name should not start with a number";
+    // Required field validations
+    if (
+      !formData?.SetEmailIDAsUsername ||
+      formData.SetEmailIDAsUsername == null ||
+      formData.SetEmailIDAsUsername == ""
+    ) {
+      newErrors.SetEmailIDAsUsername = "User name is required";
+    }
+    if (
+      !formData?.SetToReceiveSMS ||
+      formData.SetToReceiveSMS == null ||
+      formData.SetToReceiveSMS == ""
+    ) {
+      newErrors.SetToReceiveSMS = "Receive SMS name is required";
+    }
+    if (
+      !formData.first_name?.trim() ||
+      formData.first_name == null ||
+      formData.first_name == ""
+    ) {
+      newErrors.first_name = "First name is required";
+    }
+    if (!formData.dob || formData.dob == null || formData.dob == "") {
+      newErrors.dob = "Date of Birth is required";
+    }
+    if (
+      !formData.nationality ||
+      formData.nationality == null ||
+      formData.nationality == ""
+    ) {
+      newErrors.nationality = "Nationality is required";
+    }
+    if (
+      !formData.mother_tongue ||
+      formData.mother_tongue == null ||
+      formData.mother_tongue == ""
+    ) {
+      newErrors.mother_tongue = "Mother Tongue is required";
+    }
+    if (
+      !formData.student_name?.trim() ||
+      formData.student_name == null ||
+      formData.student_name == ""
+    ) {
+      newErrors.student_name = "Student name is required";
+    }
+    if (
+      !formData.reg_no?.trim() ||
+      formData.reg_no == null ||
+      formData.reg_no == ""
+    ) {
+      newErrors.reg_no = "GR number is required";
+    }
+    if (
+      !formData.admission_date ||
+      formData.admission_date == null ||
+      formData.admission_date == "" ||
+      formData.admission_date == "0000-00-00"
+    ) {
+      newErrors.admission_date = "Date of admission is required";
+    }
+    if (
+      !formData.permant_add?.trim() ||
+      formData.permant_add == null ||
+      formData.permant_add == ""
+    ) {
+      newErrors.permant_add = "Permanent address is required";
+    }
+    if (
+      !formData.city?.trim() ||
+      formData.city == null ||
+      formData.city == ""
+    ) {
+      newErrors.city = "City is required";
+    }
+    if (
+      !formData.state?.trim() ||
+      formData.state == null ||
+      formData.state == ""
+    ) {
+      newErrors.state = "State is required";
+    }
 
-    // Validate name
-    if (!formData.father_name) newErrors.father_name = "This field is required";
-    else if (!/^[^\d].*/.test(formData.father_name))
-      newErrors.father_name = "Name should not start with a number";
-    // Validate academic qualifications (now a single text input)
-    if (!formData.class_division)
-      newErrors.class_division = "This field is required";
-    if (!formData.sr_no) newErrors.sr_no = "This field is required";
+    // Dropdown field validations
+    if (
+      !formData.category ||
+      formData.category == "Select" ||
+      formData.category == null ||
+      formData.category == ""
+    ) {
+      newErrors.category = "Category selection is required";
+    }
+    if (
+      !formData.gender ||
+      formData.gender == "Select" ||
+      formData.gender == null ||
+      formData.gender == ""
+    ) {
+      newErrors.gender = "Gender selection is required";
+    }
+    if (
+      !formData.religion ||
+      formData.religion == "Select" ||
+      formData.religion == null ||
+      formData.religion == ""
+    ) {
+      newErrors.religion = "Religion selection is required";
+    }
+    if (
+      !formData.admission_class ||
+      formData.admission_class == "Select" ||
+      formData.admission_class == "null" ||
+      formData.admission_class == ""
+    ) {
+      newErrors.admission_class = "Admission class selection is required";
+    }
+    if (
+      !formData.class_id ||
+      formData.class_id == "Select" ||
+      formData.class_id == null ||
+      formData.class_id == ""
+    ) {
+      newErrors.class_id = "Class selection is required";
+    }
+    if (
+      !formData.section_id ||
+      formData.section_id == "Select" ||
+      formData.section_id == null ||
+      formData.section_id == ""
+    ) {
+      newErrors.section_id = "Division selection is required";
+    }
 
-    // Validate dob
-    if (!formData.dob) newErrors.dob = "This field is required";
-    if (!formData.father_name) newErrors.father_name = "This field is required";
+    // Phone and Aadhaar validations
+    const phoneError = validatePhone(formData.f_mobile);
+    if (phoneError) {
+      newErrors.f_mobile = phoneError;
+    }
 
-    // Validate date of joining
-    if (!formData.date) newErrors.date = "This field is required";
+    const m_mobile = validatePhone(formData.m_mobile);
+    if (m_mobile) {
+      newErrors.m_mobile = m_mobile;
+    }
 
-    // Validate Employee Id
-    if (!formData.purpose) newErrors.purpose = "This field is required";
-    // Validate address
-    if (!formData.dob_words) newErrors.dob_words = "This field is required";
-    if (!formData.nationality) newErrors.nationality = "This field is required";
+    const stu_aadhaar_no = validateAadhar(formData.stu_aadhaar_no);
+    if (stu_aadhaar_no) {
+      newErrors.stu_aadhaar_no = stu_aadhaar_no;
+    }
 
-    setErrors(newErrors);
+    const m_adhar_no = validateAadhar(formData.m_adhar_no);
+    if (m_adhar_no) {
+      newErrors.m_adhar_no = m_adhar_no;
+    }
+
+    const aadharError = validateAadhar(formData.parent_adhar_no);
+    if (aadharError) {
+      newErrors.parent_adhar_no = aadharError;
+    }
+
+    // Email validations
+    const f_email = validateEmail(formData.f_email);
+    if (f_email) {
+      newErrors.f_email = f_email;
+    }
+
+    const m_emailid = validateEmail(formData.m_emailid);
+    if (m_emailid) {
+      newErrors.m_emailid = m_emailid;
+    }
+
+    // Guardian fields
+    if (
+      !formData.father_name?.trim() ||
+      formData.father_name == null ||
+      formData.father_name == ""
+    ) {
+      newErrors.father_name = "Father Name is required";
+    }
+    if (
+      !formData.mother_name?.trim() ||
+      formData.mother_name == null ||
+      formData.mother_name == ""
+    ) {
+      newErrors.mother_name = "Mother Name is required";
+    }
+    if (
+      !formData.m_adhar_no?.trim() ||
+      formData.m_adhar_no == null ||
+      formData.m_adhar_no == ""
+    ) {
+      newErrors.m_adhar_no = "Mother Aadhaar Card No. is required";
+    }
+    if (
+      !formData.stu_aadhaar_no?.trim() ||
+      formData.stu_aadhaar_no == null ||
+      formData.stu_aadhaar_no == ""
+    ) {
+      newErrors.stu_aadhaar_no = "Student Aadhaar Card No. is required";
+    }
+    if (
+      !formData.parent_adhar_no?.trim() ||
+      formData.parent_adhar_no == null ||
+      formData.parent_adhar_no == ""
+    ) {
+      newErrors.parent_adhar_no = "Father Aadhaar Card No. is required";
+    }
+
     return newErrors;
   };
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     let newValue = value;

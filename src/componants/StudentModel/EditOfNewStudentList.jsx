@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ImageCropper from "../common/ImageUploadAndCrop";
 import { FaUserGroup } from "react-icons/fa6";
 import Select from "react-select";
+import Loader from "../common/LoaderFinal/LoaderStyle";
 
 function EditOfNewStudentList() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -18,10 +19,13 @@ function EditOfNewStudentList() {
   const navigate = useNavigate();
   const location = useLocation();
   const { student } = location.state || {};
+  const [classForSiblingMapping, setClassForSiblingMapping] = useState(null);
+
   const [classes, setClasses] = useState([]);
   const [divisions, setDivisions] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedDivision, setSelectedDivision] = useState(null);
+
   const [classError, setClassError] = useState("");
   const [divisionError, setDivisionError] = useState("");
   const [usernameErrors, setUsernameErrors] = useState({
@@ -95,7 +99,7 @@ function EditOfNewStudentList() {
     stud_id_no: "",
     stu_aadhaar_no: "",
     gender: "",
-    category: " ",
+    category: "",
     blood_group: " ",
     mother_tongue: "",
     permant_add: " ",
@@ -189,14 +193,14 @@ function EditOfNewStudentList() {
         permant_add: student.permant_add || " ",
         mother_tongue: student.mother_tongue || "",
         birth_place: student.birth_place || "",
-        admission_class: student.admission_class || " ",
+        admission_class: student.admission_class || "",
         city: student.city || " ",
         state: student.state || "",
         roll_no: student.roll_no || "",
         // student_id: student.student_id || " ",
         reg_no: student.reg_no || " ",
         blood_group: student.blood_group || " ",
-        category: student.category || " ",
+        category: student.category || "",
         class_id: student.class_id || "",
         section_id: student.section_id || "",
         religion: student.religion || "",
@@ -276,6 +280,7 @@ function EditOfNewStudentList() {
   //   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingForSibling, setLoadingForSibling] = useState(false);
   //   const [isDropdownDisabled, setIsDropdownDisabled] = useState(false);
   const [parentExist, setParentExist] = useState("no"); // Track the selected radio button
   // Handle radio button change
@@ -348,7 +353,8 @@ function EditOfNewStudentList() {
   // Handle class selection
   const handleClassSelect = (selectedOption) => {
     setNameError("");
-    setSelectedClass(selectedOption);
+
+    setClassForSiblingMapping(selectedOption);
     setSelectedStudent(null); // Clear the student selection when class changes
     setSelectedStudentId(null);
     setClassIdForSearch(selectedOption.value);
@@ -370,7 +376,8 @@ function EditOfNewStudentList() {
       toast.error("Please select a student!");
       return;
     }
-    setLoading(true);
+    setLoadingForSibling(true);
+    setErrors({});
     try {
       const token = localStorage.getItem("authToken");
       let response;
@@ -393,7 +400,7 @@ function EditOfNewStudentList() {
     } catch (error) {
       toast.error("Error fetching student details.");
     } finally {
-      setLoading(false);
+      setLoadingForSibling(false);
     }
   };
 
@@ -593,7 +600,6 @@ function EditOfNewStudentList() {
   }, [parentInformation]);
 
   const fetchInitialData = async () => {
-    setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
       const classResponse = await axios.get(
@@ -603,14 +609,11 @@ function EditOfNewStudentList() {
       setClassesforForm(classResponse.data || []);
     } catch (error) {
       toast.error("Error fetching initial data.");
-    } finally {
-      setLoading(false);
     }
   };
 
   // Fetch student list based on class ID
   const fetchStudentNameWithClassId = async (section_id = null) => {
-    setLoading(true);
     try {
       const params = section_id ? { section_id } : {};
       const token = localStorage.getItem("authToken");
@@ -624,8 +627,6 @@ function EditOfNewStudentList() {
       setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching students.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -646,7 +647,7 @@ function EditOfNewStudentList() {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
-          setDivisions(response.data.divisions); // Update divisions
+          setDivisions(response?.data?.divisions); // Update divisions
         } catch (error) {
           toast.error("Error fetching divisions");
         }
@@ -814,102 +815,368 @@ function EditOfNewStudentList() {
     return null;
   };
 
+  // Handle change and field-level validation
+
+  // const validate = () => {
+  //   const newErrors = {};
+
+  //   // Required field validations
+  //   if (!formData?.SetEmailIDAsUsername) {
+  //     newErrors.SetEmailIDAsUsername = "User name is required";
+  //   }
+  //   if (!formData?.SetToReceiveSMS) {
+  //     newErrors.SetToReceiveSMS = "Receive SMS name is required";
+  //   }
+  //   if (!formData.first_name?.trim()) {
+  //     newErrors.first_name = "First name is required";
+  //   }
+  //   if (!formData.dob) {
+  //     newErrors.dob = "Date of Birth is required";
+  //   }
+  //   if (!formData.nationality) {
+  //     newErrors.nationality = "Nationality is required";
+  //   }
+  //   if (!formData.mother_tongue) {
+  //     newErrors.mother_tongue = "Mother Tongue is required";
+  //   }
+  //   if (!formData.student_name?.trim()) {
+  //     newErrors.student_name = "Student name is required";
+  //   }
+  //   if (!formData.reg_no?.trim()) {
+  //     newErrors.reg_no = "GR number is required";
+  //   }
+  //   if (!formData.admission_date) {
+  //     newErrors.admission_date = "Date of admission is required";
+  //   }
+  //   if (!formData.permant_add?.trim()) {
+  //     newErrors.permant_add = "Permanent address is required";
+  //   }
+  //   if (!formData.city?.trim()) {
+  //     newErrors.city = "City is required";
+  //   }
+  //   if (!formData.state?.trim()) {
+  //     newErrors.state = "State is required";
+  //   }
+
+  //   // Dropdown field validations
+
+  //   if (
+  //     !formData.category ||
+  //     formData.category == "Select" ||
+  //     formData.category == null
+  //   ) {
+  //     newErrors.category = "Category selection is required";
+  //   }
+  //   if (
+  //     !formData.gender ||
+  //     formData.gender == "Select" ||
+  //     formData.gender == null
+  //   ) {
+  //     newErrors.gender = "Gender selection is required";
+  //   }
+  //   if (
+  //     !formData.religion ||
+  //     formData.religion == "Select" ||
+  //     formData.religion == null
+  //   ) {
+  //     newErrors.religion = "Religion selection is required";
+  //   }
+  //   if (
+  //     !formData.admission_class ||
+  //     formData.admission_class == "Select" ||
+  //     formData.admission_class == null
+  //   ) {
+  //     newErrors.admission_class = "Admission class selection is required";
+  //   }
+  //   if (
+  //     !formData.class_id ||
+  //     formData.class_id == "Select" ||
+  //     formData.class_id == null
+  //   ) {
+  //     newErrors.class_id = "Class selection is required";
+  //   }
+  //   if (
+  //     !formData.section_id ||
+  //     formData.section_id == "Select" ||
+  //     formData.section_id == null
+  //   ) {
+  //     newErrors.section_id = "Division selection is required";
+  //   }
+
+  //   // Phone and Aadhaar validations
+  //   const phoneError = validatePhone(formData.f_mobile);
+  //   if (phoneError) {
+  //     newErrors.f_mobile = phoneError;
+  //   }
+
+  //   const m_mobile = validatePhone(formData.m_mobile);
+  //   if (m_mobile) {
+  //     newErrors.m_mobile = m_mobile;
+  //   }
+
+  //   const stu_aadhaar_no = validateAadhar(formData.stu_aadhaar_no);
+  //   if (stu_aadhaar_no) {
+  //     newErrors.stu_aadhaar_no = stu_aadhaar_no;
+  //   }
+
+  //   const m_adhar_no = validateAadhar(formData.m_adhar_no);
+  //   if (m_adhar_no) {
+  //     newErrors.m_adhar_no = m_adhar_no;
+  //   }
+
+  //   const aadharError = validateAadhar(formData.parent_adhar_no);
+  //   if (aadharError) {
+  //     newErrors.parent_adhar_no = aadharError;
+  //   }
+
+  //   // Email validations
+  //   const f_email = validateEmail(formData.f_email);
+  //   if (f_email) {
+  //     newErrors.f_email = f_email;
+  //   }
+
+  //   const m_emailid = validateEmail(formData.m_emailid);
+  //   if (m_emailid) {
+  //     newErrors.m_emailid = m_emailid;
+  //   }
+
+  //   // Guardian fields
+  //   if (!formData.father_name?.trim()) {
+  //     newErrors.father_name = "Father Name is required";
+  //   }
+  //   if (!formData.mother_name?.trim()) {
+  //     newErrors.mother_name = "Mother Name is required";
+  //   }
+  //   if (!formData.m_adhar_no?.trim()) {
+  //     newErrors.m_adhar_no = "Mother Aadhaar Card No. is required";
+  //   }
+  //   if (!formData.stu_aadhaar_no?.trim()) {
+  //     newErrors.stu_aadhaar_no = "Student Aadhaar Card No. is required";
+  //   }
+  //   if (!formData.parent_adhar_no?.trim()) {
+  //     newErrors.parent_adhar_no = "Father Aadhaar Card No. is required";
+  //   }
+
+  //   return newErrors;
+  // };
   const validate = () => {
     const newErrors = {};
-    if (!formData.category || formData.category === "Select") {
-      newErrors.category = "Category selection is required";
-    }
-    // Validate required fields
-    // Validate required fields
-    if (!formData?.SetEmailIDAsUsername)
+
+    // Required field validations
+    if (
+      !formData?.SetEmailIDAsUsername ||
+      formData.SetEmailIDAsUsername == null ||
+      formData.SetEmailIDAsUsername == ""
+    ) {
       newErrors.SetEmailIDAsUsername = "User name is required";
-    if (!formData?.SetToReceiveSMS)
-      newErrors.SetToReceiveSMS = "ReceiveSms name is required";
-    if (!formData.first_name) newErrors.first_name = "First name is required";
-    // if (!formData.gender) newErrors.gender = "Gender selection is required";
-    if (!formData.dob) newErrors.dob = "Date of Birth is required";
-    if (!formData.nationality)
+    }
+    if (
+      !formData?.SetToReceiveSMS ||
+      formData.SetToReceiveSMS == null ||
+      formData.SetToReceiveSMS == ""
+    ) {
+      newErrors.SetToReceiveSMS = "Receive SMS name is required";
+    }
+    if (
+      !formData.first_name?.trim() ||
+      formData.first_name == null ||
+      formData.first_name == ""
+    ) {
+      newErrors.first_name = "First name is required";
+    }
+    if (
+      !formData.dob ||
+      formData.dob == null ||
+      formData.dob == "" ||
+      formData.dob == "0000-00-00"
+    ) {
+      newErrors.dob = "Date of Birth is required";
+    }
+    if (
+      !formData.nationality ||
+      formData.nationality == null ||
+      formData.nationality == ""
+    ) {
       newErrors.nationality = "Nationality is required";
-    if (!formData.mother_tongue)
-      newErrors.mother_tongue = "MotherTongue is required";
-    if (!formData.student_name)
+    }
+    if (
+      !formData.mother_tongue ||
+      formData.mother_tongue == null ||
+      formData.mother_tongue == ""
+    ) {
+      newErrors.mother_tongue = "Mother Tongue is required";
+    }
+    if (
+      !formData.student_name?.trim() ||
+      formData.student_name == null ||
+      formData.student_name == ""
+    ) {
       newErrors.student_name = "Student name is required";
-    if (!formData.reg_no) {
+    }
+    if (
+      !formData.reg_no?.trim() ||
+      formData.reg_no == null ||
+      formData.reg_no == ""
+    ) {
       newErrors.reg_no = "GR number is required";
     }
-    if (!formData.admission_date)
+    if (
+      !formData.admission_date ||
+      formData.admission_date == null ||
+      formData.admission_date == "" ||
+      formData.admission_date == "0000-00-00"
+    ) {
       newErrors.admission_date = "Date of admission is required";
-    if (!formData.admission_date)
-      newErrors.admission_date = "Date of admission is required";
-    // Adrees validations
-    if (!formData.permant_add) newErrors.permant_add = "Address is required";
-    if (!formData.city) newErrors.city = "City is required";
-    if (!formData.state) newErrors.state = "State is required";
-    // Correct validation for gender selection
-    if (!formData.gender || formData.gender === "Select") {
+    }
+    if (
+      !formData.permant_add?.trim() ||
+      formData.permant_add == null ||
+      formData.permant_add == ""
+    ) {
+      newErrors.permant_add = "Permanent address is required";
+    }
+    if (
+      !formData.city?.trim() ||
+      formData.city == null ||
+      formData.city == ""
+    ) {
+      newErrors.city = "City is required";
+    }
+    if (
+      !formData.state?.trim() ||
+      formData.state == null ||
+      formData.state == ""
+    ) {
+      newErrors.state = "State is required";
+    }
+
+    // Dropdown field validations
+    if (
+      !formData.category ||
+      formData.category == "Select" ||
+      formData.category == null ||
+      formData.category == ""
+    ) {
+      newErrors.category = "Category selection is required";
+    }
+    if (
+      !formData.gender ||
+      formData.gender == "Select" ||
+      formData.gender == null ||
+      formData.gender == ""
+    ) {
       newErrors.gender = "Gender selection is required";
     }
-    if (!formData.religion || formData.religion === "Select") {
+    if (
+      !formData.religion ||
+      formData.religion == "Select" ||
+      formData.religion == null ||
+      formData.religion == ""
+    ) {
       newErrors.religion = "Religion selection is required";
     }
-
-    if (!formData.class_id || formData.class_id === "Select") {
-      newErrors.class_id = "Class selection is required";
-    }
-    if (!formData.section_id || formData.section_id === "Select") {
-      newErrors.section_id = "Division selection is required";
-    }
-    if (!formData.admission_class || formData.admission_class === "Select") {
+    if (
+      !formData.admission_class ||
+      formData.admission_class == "Select" ||
+      formData.admission_class == "null" ||
+      formData.admission_class == ""
+    ) {
       newErrors.admission_class = "Admission class selection is required";
     }
+    if (
+      !formData.class_id ||
+      formData.class_id == "Select" ||
+      formData.class_id == null ||
+      formData.class_id == ""
+    ) {
+      newErrors.class_id = "Class selection is required";
+    }
+    if (
+      !formData.section_id ||
+      formData.section_id == "Select" ||
+      formData.section_id == null ||
+      formData.section_id == ""
+    ) {
+      newErrors.section_id = "Division selection is required";
+    }
 
-    // newErrors.gender = "Gender selection is required";
-
-    // Phone, Aadhar and Email validations
+    // Phone and Aadhaar validations
     const phoneError = validatePhone(formData.f_mobile);
-    if (phoneError) newErrors.f_mobile = phoneError;
-    // mother phone error
+    if (phoneError) {
+      newErrors.f_mobile = phoneError;
+    }
+
     const m_mobile = validatePhone(formData.m_mobile);
-    if (m_mobile) newErrors.m_mobile = m_mobile;
+    if (m_mobile) {
+      newErrors.m_mobile = m_mobile;
+    }
 
     const stu_aadhaar_no = validateAadhar(formData.stu_aadhaar_no);
-    if (stu_aadhaar_no) newErrors.stu_aadhaar_no = stu_aadhaar_no;
-    // mother adhar card validatoins
-    const m_adhar_no = validateAadhar(formData.m_adhar_no);
-    if (m_adhar_no) newErrors.m_adhar_no = m_adhar_no;
-    // Father adhar validations
-    const aadharError = validateAadhar(formData.parent_adhar_no);
-    if (aadharError) newErrors.parent_adhar_no = aadharError;
+    if (stu_aadhaar_no) {
+      newErrors.stu_aadhaar_no = stu_aadhaar_no;
+    }
 
+    const m_adhar_no = validateAadhar(formData.m_adhar_no);
+    if (m_adhar_no) {
+      newErrors.m_adhar_no = m_adhar_no;
+    }
+
+    const aadharError = validateAadhar(formData.parent_adhar_no);
+    if (aadharError) {
+      newErrors.parent_adhar_no = aadharError;
+    }
+
+    // Email validations
     const f_email = validateEmail(formData.f_email);
-    if (f_email) newErrors.f_email = f_email;
+    if (f_email) {
+      newErrors.f_email = f_email;
+    }
 
     const m_emailid = validateEmail(formData.m_emailid);
-    if (m_emailid) newErrors.m_emailid = m_emailid;
-    // Validate required fields
-    if (!formData.father_name)
+    if (m_emailid) {
+      newErrors.m_emailid = m_emailid;
+    }
+
+    // Guardian fields
+    if (
+      !formData.father_name?.trim() ||
+      formData.father_name == null ||
+      formData.father_name == ""
+    ) {
       newErrors.father_name = "Father Name is required";
-    // mother
-    // Validate Aadhaar fields with null/undefined check before using trim()
-    if (!formData.m_adhar_no || !formData.m_adhar_no.trim()) {
+    }
+    if (
+      !formData.mother_name?.trim() ||
+      formData.mother_name == null ||
+      formData.mother_name == ""
+    ) {
+      newErrors.mother_name = "Mother Name is required";
+    }
+    if (
+      !formData.m_adhar_no?.trim() ||
+      formData.m_adhar_no == null ||
+      formData.m_adhar_no == ""
+    ) {
       newErrors.m_adhar_no = "Mother Aadhaar Card No. is required";
     }
-    if (!formData.stu_aadhaar_no || !formData.stu_aadhaar_no.trim()) {
+    if (
+      !formData.stu_aadhaar_no?.trim() ||
+      formData.stu_aadhaar_no == null ||
+      formData.stu_aadhaar_no == ""
+    ) {
       newErrors.stu_aadhaar_no = "Student Aadhaar Card No. is required";
     }
-    if (!formData.parent_adhar_no || !formData.parent_adhar_no.trim()) {
+    if (
+      !formData.parent_adhar_no?.trim() ||
+      formData.parent_adhar_no == null ||
+      formData.parent_adhar_no == ""
+    ) {
       newErrors.parent_adhar_no = "Father Aadhaar Card No. is required";
     }
-    if (!formData.mother_name)
-      newErrors.mother_name = "Mother Name is required";
-    // if (!formData.m_adhar_no.trim())
-    //   newErrors.m_adhar_no = "Mother Aadhaar Card No. is required";
-    // Add more validations as needed
 
     return newErrors;
   };
 
-  // Handle change and field-level validation
   const handleChange = (event) => {
     const { name, value, checked, type } = event.target;
     let newValue = value;
@@ -1104,15 +1371,12 @@ function EditOfNewStudentList() {
 
     //   return;
     // }
+    setErrors({});
     const validationErrors = validate();
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      Object.values(validationErrors).forEach((error) => {
-        console.log(error);
-      });
-      console.log("error in feilds name");
-
+      console.log("Validation Errors:", validationErrors);
       return;
     }
     // Check for username-specific errors
@@ -1145,6 +1409,7 @@ function EditOfNewStudentList() {
     }
     try {
       setBackendErrors({});
+      setLoading(true); // Start loading
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("No authentication token found");
@@ -1180,6 +1445,8 @@ function EditOfNewStudentList() {
           error.message || "Backdend error occur while updating data"
         );
       }
+    } finally {
+      setLoading(false); // End loading state
     }
   };
 
@@ -1743,7 +2010,11 @@ function EditOfNewStudentList() {
                 onChange={handleChange}
                 // onBlur={handleBlur}
               />
-
+              {backendErrors.stu_aadhaar_no && (
+                <p className="text-[12px] text-red-500 mb-1">
+                  {backendErrors.stu_aadhaar_no}
+                </p>
+              )}
               {errors.stu_aadhaar_no && (
                 <p className="text-[12px] text-red-500 mb-1">
                   {errors.stu_aadhaar_no}
@@ -1763,7 +2034,7 @@ function EditOfNewStudentList() {
                   type="text"
                   id="Udise_no"
                   name="udise_pen_no"
-                  maxLength={14}
+                  maxLength={11}
                   value={formData.udise_pen_no}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
@@ -2127,7 +2398,6 @@ function EditOfNewStudentList() {
                     checked={formData.has_specs === "Y"}
                     value="Y"
                     onChange={handleChange}
-                    // onBlur={handleBlur}
                   />
                   <label htmlFor="yes" className="ml-1">
                     Yes
@@ -2138,10 +2408,9 @@ function EditOfNewStudentList() {
                     type="radio"
                     id="no"
                     name="has_specs"
-                    checked={formData.has_specs === "N" || !formData.has_specs}
+                    checked={formData.has_specs === "N"}
                     value="N"
                     onChange={handleChange}
-                    // onBlur={handleBlur}
                   />
                   <label htmlFor="no" className="ml-1">
                     No
@@ -2202,10 +2471,10 @@ function EditOfNewStudentList() {
                   <div className="w-[60%] md:w-[50%] ">
                     <Select
                       isDisabled={isDropdownDisabled} // Disable if parentExist is "no"
-                      value={selectedClass}
+                      value={classForSiblingMapping}
                       onChange={handleClassSelect}
                       options={classOptions}
-                      placeholder="Class "
+                      placeholder="Class"
                       isSearchable
                       isClearable
                       className="text-sm"
@@ -2245,11 +2514,15 @@ function EditOfNewStudentList() {
                 </div>
 
                 <button
-                  onClick={handleSearch}
                   type="button"
-                  className=" my-1 md:my-4 btn h-10  w-18 md:w-auto btn-primary "
+                  onClick={handleSearch}
+                  style={{ backgroundColor: "#2196F3" }}
+                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                    loadingForSibling ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={loadingForSibling}
                 >
-                  Search
+                  {loadingForSibling ? "Searching..." : "Search"}
                 </button>
               </div>
             </div>
@@ -2428,7 +2701,7 @@ function EditOfNewStudentList() {
                       ? "bg-gray-200  text-gray-500"
                       : "bg-white"
                   }`}
-                  required
+                  // required
                 />
               </div>
               {backendErrors.phone && (
@@ -2467,10 +2740,11 @@ function EditOfNewStudentList() {
                   name="receiveSms"
                   value="Father"
                   id="receiveSmsmob"
-                  checked={
-                    formData.SetToReceiveSMS === "Father" ||
-                    formData.SetToReceiveSMS == formData.f_mobile
-                  }
+                  // checked={
+                  //   formData.SetToReceiveSMS === "Father" ||
+                  //   formData.SetToReceiveSMS == formData.f_mobile
+                  // }
+                  checked={formData.SetToReceiveSMS === "Father"}
                   onChange={() => handleReceiveSmsSelection("Father")}
                 />
                 <label htmlFor="receiveSmsmob">
@@ -2733,7 +3007,6 @@ function EditOfNewStudentList() {
                       ? "bg-gray-200  text-gray-500"
                       : "bg-white"
                   }`}
-                  required
                 />
               </div>
               {backendErrors.phone && (
@@ -2765,10 +3038,11 @@ function EditOfNewStudentList() {
                   name="receiveSms"
                   value="Mother"
                   id="receiveSmsmobMother"
-                  checked={
-                    formData.SetToReceiveSMS === "Mother" ||
-                    formData.SetToReceiveSMS == formData.m_mobile
-                  }
+                  // checked={
+                  //   formData.SetToReceiveSMS === "Mother" ||
+                  //   formData.SetToReceiveSMS == formData.m_mobile
+                  // }
+                  checked={formData.SetToReceiveSMS === "Mother"}
                   onChange={() => handleReceiveSmsSelection("Mother")}
                 />
                 <label htmlFor="receiveSmsmobMother">
@@ -2840,13 +3114,50 @@ function EditOfNewStudentList() {
             {/* added father feilds here */}
             <div className="col-span-4 md:mr-9 my-2 text-right">
               <button
-                type="submit"
-                // type="button"
+                type="search"
+                onClick={handleSubmit}
                 style={{ backgroundColor: "#2196F3" }}
-                className=" text-white font-bold py-1 border-1 border-blue-500 px-4 rounded"
+                className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={loading}
               >
-                Update
+                {loading ? (
+                  <span className="flex items-center">
+                    <svg
+                      className="animate-spin h-4 w-4 mr-2 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      ></path>
+                    </svg>
+                    Updating...
+                  </span>
+                ) : (
+                  "Update"
+                )}
               </button>
+              {/* <button
+                  type="submit"
+                  // type="button"
+                  style={{ backgroundColor: "#2196F3" }}
+                  className=" text-white font-bold py-1 border-1 border-blue-500 px-4 rounded"
+                >
+                  Update
+                </button> */}
             </div>
           </div>
         </form>
