@@ -251,7 +251,7 @@ const SubjectAllotmentHSC = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    let hasError = false;
+    // let hasError = false;
 
     // Validate if `selectedStudents` array is empty
 
@@ -272,6 +272,24 @@ const SubjectAllotmentHSC = () => {
     // if (hasError){
     //     console.log()
     //     return};
+
+    let hasValidSelection = false;
+
+    // Check if at least one student has both `sub_group_id` and `opt_subject_id` filled
+    for (const student of studentsData) {
+      if (student.sub_group_id !== "" && student.opt_subject_id !== "") {
+        hasValidSelection = true;
+        break; // Exit the loop early since we found a valid entry
+      }
+    }
+
+    // If no valid selection, show a validation error toast
+    if (!hasValidSelection) {
+      toast.error(
+        "Please select both a student subject group and an optional subject for at least one student."
+      );
+      return; // Exit the function if validation fails
+    }
 
     try {
       setLoading(true); // Start loading
