@@ -1276,7 +1276,10 @@ function NewStudentList() {
       );
 
       // Trigger download using a hidden link element
-      triggerFileDownload(response.data, "student_list_template.csv");
+      triggerFileDownload(
+        response.data,
+        `student_list_template_of_${classNameForBulkUpload}.csv`
+      );
     } catch (error) {
       console.error("Error downloading template:", error);
     }
