@@ -2769,14 +2769,14 @@ function EditOfNewStudentList() {
                     name="setUsername"
                     onChange={handleFatherMobileSelection}
                     checked={selectedUsername === "FatherMob"}
-                    disabled={loadingForUsername} // Disable input while loading
                   />
-                  {loadingForUsername ? (
-                    <span>Loading...</span> // Loader for this option
-                  ) : (
-                    <label htmlFor="setusernameFatherMob">
-                      Set this as username
-                    </label>
+                  <label htmlFor="setusernameFatherMob">
+                    Set this as username
+                  </label>
+                  {selectedUsername === "FatherMob" && loadingForUsername && (
+                    <div>
+                      <LoadingSpinner />
+                    </div>
                   )}
                 </div>
                 <div className={`${errors.SetEmailIDAsUsername ? "h-2" : ""}`}>
@@ -2846,14 +2846,14 @@ function EditOfNewStudentList() {
                     name="setUsername"
                     onChange={handleFatherEmailSelection}
                     checked={selectedUsername === "Father"}
-                    disabled={loadingForUsername} // Disable input while loading
                   />
-                  {loadingForUsername ? (
-                    <span>Loading...</span> // Loader for this option
-                  ) : (
-                    <label htmlFor="setUserNameFather">
-                      Set this as username
-                    </label>
+                  <label htmlFor="setUserNameFather">
+                    Set this as username
+                  </label>
+                  {selectedUsername === "Father" && loadingForUsername && (
+                    <div>
+                      <LoadingSpinner />
+                    </div>
                   )}
                 </div>
               </div>
@@ -3107,14 +3107,14 @@ function EditOfNewStudentList() {
                     name="setUsername"
                     onChange={handleMotherMobileSelection}
                     checked={selectedUsername === "MotherMob"}
-                    disabled={loadingForUsername} // Disable input while loading
                   />
-                  {loadingForUsername ? (
-                    <span>Loading...</span> // Loader for this option
-                  ) : (
-                    <label htmlFor="setusernameMotherMob">
-                      Set this as username
-                    </label>
+                  <label htmlFor="setusernameMotherMob">
+                    Set this as username
+                  </label>
+                  {selectedUsername === "MotherMob" && loadingForUsername && (
+                    <div>
+                      <LoadingSpinner />
+                    </div>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -3173,12 +3173,12 @@ function EditOfNewStudentList() {
                     name="setUsername"
                     onChange={handleMotherEmailSelection}
                     checked={selectedUsername === "Mother"}
-                    disabled={loadingForUsername} // Disable input while loading
                   />
-                  {loadingForUsername ? (
-                    <span>Loading...</span> // Loader for this option
-                  ) : (
-                    <label htmlFor="emailuser">Set this as username</label>
+                  <label htmlFor="emailuser">Set this as username</label>
+                  {selectedUsername === "Mother" && loadingForUsername && (
+                    <div>
+                      <LoadingSpinner />
+                    </div>
                   )}
                 </div>
               </div>
