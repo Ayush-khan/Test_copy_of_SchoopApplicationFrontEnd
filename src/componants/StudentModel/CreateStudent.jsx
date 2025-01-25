@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ImageCropper from "../common/ImageUploadAndCrop";
 import { FaUserGroup } from "react-icons/fa6";
 import Loader from "../common/LoaderFinal/LoaderStyle";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 function Form() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -16,6 +17,8 @@ function Form() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const [loadingForUsername, setLoadingForUsername] = useState(false);
+
   const { student } = location.state || {};
   const [classes, setClasses] = useState([]);
   const [divisions, setDivisions] = useState([]);
@@ -432,6 +435,7 @@ function Form() {
   // };
 
   const checkUserId = async (studentId, userId) => {
+    setLoadingForUsername(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -442,10 +446,12 @@ function Form() {
         }
       );
 
-      return response.data.exists;
+      return response?.data?.exists;
     } catch (error) {
       console.error("Error checking username uniqueness:", error);
       return false; // Default to false if there's an error
+    } finally {
+      setLoadingForUsername(false);
     }
   };
 
@@ -2511,6 +2517,11 @@ function Form() {
                   <label htmlFor="setusernameFatherMob">
                     Set this as username
                   </label>
+                  {selectedUsername === "FatherMob" && loadingForUsername && (
+                    <div>
+                      <LoadingSpinner />
+                    </div>
+                  )}
                 </div>
                 <div className={`${errors.SetEmailIDAsUsername ? "h-2" : ""}`}>
                   {errors.SetEmailIDAsUsername && (
@@ -2581,6 +2592,11 @@ function Form() {
                   <label htmlFor="setUserNameFather">
                     Set this as username
                   </label>
+                  {selectedUsername === "Father" && loadingForUsername && (
+                    <div>
+                      <LoadingSpinner />
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="mt-2">
@@ -2801,6 +2817,11 @@ function Form() {
                   <label htmlFor="setusernameMotherMob">
                     Set this as username
                   </label>
+                  {selectedUsername === "MotherMob" && loadingForUsername && (
+                    <div>
+                      <LoadingSpinner />
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <input
@@ -2859,6 +2880,11 @@ function Form() {
                     checked={selectedUsername === "Mother"}
                   />
                   <label htmlFor="emailuser">Set this as username</label>
+                  {selectedUsername === "Mother" && loadingForUsername && (
+                    <div>
+                      <LoadingSpinner />
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="mt-2">

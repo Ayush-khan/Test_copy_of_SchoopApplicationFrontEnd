@@ -57,7 +57,7 @@ function ClassList() {
       });
 
       setClasses(response.data);
-      setPageCount(Math.ceil(response.data.length / pageSize));
+      setPageCount(Math.ceil(response?.data?.length / pageSize));
     } catch (error) {
       setError(error.message);
     } finally {
