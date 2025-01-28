@@ -859,6 +859,13 @@ const AdminNavBar = () => {
         </NavDropdown.Item>
         <NavDropdown.Item
           as={Link}
+          to="/leavetype"
+          className="text-sm font-bold hover:text-black"
+        >
+          Leave Type
+        </NavDropdown.Item>
+        <NavDropdown.Item
+          as={Link}
           to="/Exams"
           className="text-sm font-bold hover:text-black"
         >

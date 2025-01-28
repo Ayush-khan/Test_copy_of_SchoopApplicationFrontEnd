@@ -175,6 +175,7 @@ import ViewLeaveApplication from "../componants/LeaveApplications/ViewLeaveAppli
 import LeaveAllocationtoAllStaff from "../componants/LeaveApplications/LeaveAllocationtoAllStaff.jsx";
 import SiblingMapping from "../componants/SiblingMapping/SiblingMapping.jsx";
 import SubjectAllotmentHSC from "../componants/MastersModule/SubjectAllotmentForHSC/SubjectAllotmentHSC.jsx";
+import LeaveType from "../componants/LeaveType/LeaveType.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -349,6 +350,11 @@ function Index() {
         <Route
           path="/staff/view/:id"
           element={<PrivateRoute element={<ViewStaff />} />}
+        />
+        {/* Leave Type */}
+        <Route
+          path="/leavetype"
+          element={<PrivateRoute element={<LeaveType />} />}
         />
         {/* LeaveAllocation */}
         <Route
