@@ -1278,7 +1278,7 @@ function NewStudentList() {
       // Trigger download using a hidden link element
       triggerFileDownload(
         response.data,
-        `student_list_template_of_${classNameForBulkUpload}.csv`
+        `${classNameForBulkUpload}_template.csv`
       );
     } catch (error) {
       console.error("Error downloading template:", error);
@@ -1359,7 +1359,10 @@ function NewStudentList() {
       );
 
       // Trigger download using a hidden link element
-      triggerFileDownload(response.data, "student_list_template.csv");
+      triggerFileDownload(
+        response.data,
+        `${classNameForBulkUpload}_rejected_template.csv`
+      );
     } catch (error) {
       console.error("Error downloading template:", error);
     }
@@ -1402,6 +1405,30 @@ function NewStudentList() {
       return;
     }
 
+    // Extract the trimmed class name from the file name (assuming the format is "12 A.csv")
+    const fileNameWithoutExtension = selectedFile.name.split("_")[0].trim(); // Remove extension and trim spaces
+    // Remove extension and trim spaces
+    const classNameForBulkUploadForCheck = classNameForBulkUpload.trim(); // Trim the class name for comparison
+    console.log(
+      "fileNameWithoutExtension",
+      fileNameWithoutExtension,
+      "classNameForBulkUploadForCheck",
+      classNameForBulkUploadForCheck
+    );
+    // Check if the file name matches the selected class name
+    if (fileNameWithoutExtension !== classNameForBulkUploadForCheck) {
+      // toast.error(
+      //   "Invalid file! Select a valid file without renaming it or modifying the first four columns."
+      // );
+      toast.warning(
+        "⚠️Invalid file! Please select a valid file without renaming it or modifying the first four columns."
+      );
+      return;
+    }
+    // if (fileNameWithoutExtension !== classNameForBulkUploadForCheck) {
+    //   toast.error("Do not change the file name please");
+    //   return;
+    // }
     setLoading(true); // Show loader
     const formData = new FormData();
     formData.append("file", selectedFile); // Append the selected file
