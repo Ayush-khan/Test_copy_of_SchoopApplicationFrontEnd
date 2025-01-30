@@ -55,6 +55,7 @@ const EventCard = () => {
       );
 
       setEvents(response?.data);
+      console.log("responseData of Events", response?.data);
     } catch (error) {
       setError(error.message);
       console.error("Error fetching events:", error);
@@ -77,6 +78,7 @@ const EventCard = () => {
   const filteredEvents = events.filter(
     (event) => new Date(event.start_date).getMonth() === selectedMonth
   );
+  console.log("filteredEvents", filteredEvents);
 
   return (
     <div className={`  border-2 border-solid h-64 bg-slate-100`}>
