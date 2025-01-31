@@ -10,10 +10,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 
-const SubjectAllotmentHSC = () => {
+const CategoryReligion = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [searchTerm, setSearchTerm] = useState("");
-  const [showAddModal, setShowAddModal] = useState(false);
 
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedStudentForStudent, setSelectedStudentForStudent] =
@@ -158,20 +157,28 @@ const SubjectAllotmentHSC = () => {
     setSelectedStudent(selectedOption);
     setSelectedStudentId(selectedOption?.value);
   };
+  //   const classOptions = useMemo(
+  //     () =>
+  //       classesforForm
+  //         .filter(
+  //           (cls) => cls.class_id > 125 || cls.name === "11" || cls.name === "12"
+  //         )
+  //         .map((cls) => ({
+  //           value: cls.class_id,
+  //           label: `${cls.name}`,
+  //           key: `${cls.class_id}`,
+  //         })),
+  //     [classesforForm]
+  //   );
   const classOptions = useMemo(
     () =>
-      classesforForm
-        .filter(
-          (cls) => cls.class_id > 125 || cls.name === "11" || cls.name === "12"
-        )
-        .map((cls) => ({
-          value: cls.class_id,
-          label: `${cls.name}`,
-          key: `${cls.class_id}`,
-        })),
+      classesforForm.map((cls) => ({
+        value: cls.class_id,
+        label: `${cls.name}`,
+        key: `${cls.class_id}`,
+      })),
     [classesforForm]
   );
-
   console.log("classOptions", classOptions);
 
   const studentOptions = useMemo(
@@ -407,12 +414,7 @@ const SubjectAllotmentHSC = () => {
     );
     setStudentsData(updatedStudents);
   };
-  const handleAdd = () => {
-    setShowAddModal(true);
-  };
-  const handleCloseModal = () => {
-    setShowAddModal(false);
-  };
+
   const reset = () => {
     setParentInformation([]); // Assuming response data contains form data
     setStudentsData([]);
@@ -433,7 +435,7 @@ const SubjectAllotmentHSC = () => {
       <div className="md:mx-auto md:w-[85%] p-4 bg-white mt-4 ">
         <div className=" w-full    flex justify-between items-center ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-            Subjects For Higher Secondary Class
+            Update Category and Religion
           </h3>
           <RxCross1
             className="   text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -571,7 +573,7 @@ const SubjectAllotmentHSC = () => {
                       Allot Subjects For Students
                     </h6>
                     <div className="box-border  flex justify-end md:gap-x-2  ">
-                      <div className=" w-full md:w-[50%] mr-1">
+                      <div className=" w-full  mr-1">
                         <input
                           type="text"
                           className="form-control"
@@ -579,16 +581,6 @@ const SubjectAllotmentHSC = () => {
                           onChange={(e) => setSearchTerm(e.target.value)}
                         />
                       </div>
-                      <button
-                        className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                        onClick={handleAdd}
-                      >
-                        <MdOutlineRemoveRedEye className=" inline-block mb-1 mr-1  font-bold text-xl text-pink-200" />
-                        <span className="text-xs font-medium">
-                          Subjects Info
-                          {/* Subject Combination Details */}
-                        </span>
-                      </button>
                     </div>
                   </div>
                   <div
@@ -605,6 +597,9 @@ const SubjectAllotmentHSC = () => {
                             <tr className="bg-gray-200 ">
                               <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
                                 <p className="relative -top-2.5 "> Sr. No</p>
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                                <p className="relative -top-2.5 "> Roll No.</p>
                               </th>
                               <th className="px-2 text-center  lg:px-3 py-2 border text-sm font-semibold">
                                 <p className="relative -top-2.5 ">
@@ -846,100 +841,8 @@ const SubjectAllotmentHSC = () => {
           )}
         </div>
       </div>
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg w-[50%] max-w-5xl max-h-full overflow-auto">
-            <div className="flex justify-between items-center px-4 py-2.5 border-b border-gray-200">
-              <h6 className="text-lg font-bold text-gray-600 mt-1">
-                Subject Combination Details
-              </h6>
-              <RxCross1
-                className="text-3xl  text-red-600 cursor-pointer hover:bg-red-100 p-1 rounded-full"
-                onClick={handleCloseModal}
-              />
-            </div>
-            <div className="h-1 w-[98%] mx-auto bg-[#C03078] mb-3"></div>
-            <div className="px-6 pb-6">
-              <table className="w-full table-auto border-collapse border border-gray-400 shadow-md">
-                <thead className="bg-gray-200 text-gray-700  ">
-                  <tr>
-                    <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
-                      PCM
-                    </th>
-                    <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
-                      PCB
-                    </th>
-                    <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
-                      Commerce
-                    </th>
-                    <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
-                      Arts
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="text-center ">
-                  <tr>
-                    <td className="border border-gray-300 px-4 py-2">
-                      English
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      English
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      English
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      English
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-300 px-4 py-2">
-                      Physics
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      Physics
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      Accountancy
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      History
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-300 px-4 py-2">
-                      Chemistry
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      Chemistry
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      Business Studies
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      Geography
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-300 px-4 py-2">Maths</td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      Biology
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      Economics
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      Economics
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-export default SubjectAllotmentHSC;
+export default CategoryReligion;

@@ -664,6 +664,12 @@ const AdminNavBar = () => {
         <NavDropdown.Item as={Link} to="#">
           Allot Department Coordinator
         </NavDropdown.Item>
+        <NavDropdown.Item as={Link} to="#">
+          Allot GR Number
+        </NavDropdown.Item>
+        <NavDropdown.Item as={Link} to="/categoryReligion">
+          Update Category and religion
+        </NavDropdown.Item>
       </NavDropdown>
 
       {/* ID Card Dropdown */}
