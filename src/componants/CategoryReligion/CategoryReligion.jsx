@@ -5,11 +5,6 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-import { FaCheck } from "react-icons/fa";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { MdOutlineRemoveRedEye } from "react-icons/md";
-
 const CategoryReligion = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,46 +44,38 @@ const CategoryReligion = () => {
   const [loadingStudents, setLoadingStudents] = useState(false);
 
   const [studentsData, setStudentsData] = useState([]);
-  const [subjectGroups, setSubjectGroups] = useState([]);
-  const [optionalSubjects, setOptionalSubjects] = useState([]);
+  const [subjectGroups, setSubjectGroups] = useState([
+    { category: "General", name: "General" },
+    { category: "OBC", name: "OBC" },
+    { category: "SC", name: "SC" },
+    { category: "ST", name: "ST" },
+    { category: "SBC", name: "SBC" },
+    { category: "NT", name: "NT" },
+    { category: "VJNT", name: "VJNT" },
+    { category: "Minority", name: "Minority" },
+  ]);
+
+  const [optionalSubjects, setOptionalSubjects] = useState([
+    { religion: "Hindu", name: "Hindu" },
+    { religion: "Muslims", name: "Muslims" },
+    { religion: "Sikh", name: "Sikh" },
+    { religion: "Jain", name: "Jain" },
+    { religion: "Christian", name: "Christian" },
+    { religion: "Buddhism", name: "Buddhism" },
+  ]);
+
+  const [gender] = useState([
+    { gender: "M", label: "Male" },
+    { gender: "F", label: "Female" },
+  ]);
+
   const [subjectGroup, setSubjectGroup] = useState("");
   const [optionalSubject, setOptionalSubject] = useState("");
   useEffect(() => {
     // Fetch both classes and student names on component mount
     fetchInitialDataAndStudents();
-    fetchSubjectGroups();
-    fetchOptionalSubjects();
   }, []);
-  const fetchSubjectGroups = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_subject_group`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setSubjectGroups(response.data.data || []);
-    } catch (err) {
-      setError("Error fetching subject groups");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const fetchOptionalSubjects = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_optional_subject`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setOptionalSubjects(response.data.data || []);
-    } catch (err) {
-      toast.error("Error fetching optional subjects");
-    }
-  };
   const fetchInitialDataAndStudents = async () => {
     try {
       setLoadingClasses(true);
@@ -230,7 +217,7 @@ const CategoryReligion = () => {
       setLoadingForSearch(true); // Start loading
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/get_subjecthigherstudentwise/${classIdForSearch}/${selectedStudentId}`,
+        `${API_URL}/api/get_studentcategoryreligion/${classIdForSearch}/${selectedStudentId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -373,40 +360,6 @@ const CategoryReligion = () => {
           .includes(searchTerm.toLowerCase())
       )
     : [];
-
-  const handleApplySubjectGroup = () => {
-    const updatedStudents = studentsData.map((student) => ({
-      ...student,
-      sub_group_id: subjectGroup, // Apply the selected subject group to all students
-    }));
-    setStudentsData(updatedStudents);
-  };
-
-  const handleRemoveSubjectGroup = () => {
-    setSubjectGroup("");
-    const updatedStudents = studentsData.map((student) => ({
-      ...student,
-      sub_group_id: "",
-    }));
-    setStudentsData(updatedStudents);
-  };
-
-  const handleApplyOptionalSubject = () => {
-    const updatedStudents = studentsData.map((student) => ({
-      ...student,
-      opt_subject_id: optionalSubject, // Apply the selected optional subject to all students
-    }));
-    setStudentsData(updatedStudents);
-  };
-
-  const handleRemoveOptionalSubject = () => {
-    setOptionalSubject("");
-    const updatedStudents = studentsData.map((student) => ({
-      ...student,
-      opt_subject_id: "",
-    }));
-    setStudentsData(updatedStudents);
-  };
 
   const handleStudentDropdownChange = (id, field, value) => {
     const updatedStudents = studentsData.map((student) =>
@@ -607,106 +560,13 @@ const CategoryReligion = () => {
                                 </p>
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold ">
-                                Subject Group
-                                <div className=" flex ">
-                                  <select
-                                    className="px-2 w-full  py-1 my-1 border rounded-md"
-                                    value={subjectGroup}
-                                    onChange={(e) =>
-                                      setSubjectGroup(e.target.value)
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    {subjectGroups.map((group) => (
-                                      <option
-                                        key={group.sub_group_id}
-                                        value={group.sub_group_id}
-                                      >
-                                        {group.sub_group_name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <div className="flex my-1">
-                                    <div className="relative group">
-                                      <button
-                                        className="text-green-500 px-2 py-1 rounded-md hover:bg-white"
-                                        onClick={handleApplySubjectGroup}
-                                      >
-                                        <FaCheck className="text-md" />
-                                      </button>
-                                      {/* Tooltip */}
-                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-green-500  text-white text-[.8em] rounded-md py-1 px-2">
-                                        Apply
-                                      </div>
-                                    </div>
-                                    <div className="relative group ml-2">
-                                      <button
-                                        className="text-red-500 px-2 py-1 rounded-md hover:bg-white"
-                                        onClick={handleRemoveSubjectGroup}
-                                      >
-                                        <FontAwesomeIcon
-                                          icon={faXmark}
-                                          className="text-md"
-                                        />
-                                      </button>
-                                      {/* Tooltip */}
-                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-red-500 text-white text-[.8em] rounded-md py-1 px-2">
-                                        Remove
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
+                                Category
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
-                                Optional Subject
-                                <div className=" w-full md:w-[85%] mx-auto flex  ">
-                                  <select
-                                    className="px-2 w-full md:w-[78%] mx-auto py-1 my-1 border rounded-md"
-                                    value={optionalSubject}
-                                    onChange={(e) =>
-                                      setOptionalSubject(e.target.value)
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    {optionalSubjects.map((subject) => (
-                                      <option
-                                        key={subject.sm_id}
-                                        value={subject.sm_id}
-                                      >
-                                        {subject.name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <div className="flex my-1">
-                                    <div className="relative group">
-                                      <button
-                                        className="text-green-500 px-2 py-1 rounded-md hover:bg-white"
-                                        onClick={handleApplyOptionalSubject}
-                                      >
-                                        <FaCheck className="text-md" />
-                                      </button>
-                                      {/* Tooltip */}
-                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-green-500  text-white text-[.8em] rounded-md py-1 px-2">
-                                        Apply
-                                      </div>
-                                    </div>
-                                    <div className="relative group ml-2">
-                                      <button
-                                        className="text-red-500 px-2 py-1 rounded-md hover:bg-white"
-                                        onClick={handleRemoveOptionalSubject}
-                                      >
-                                        <FontAwesomeIcon
-                                          icon={faXmark}
-                                          className="text-md"
-                                        />
-                                      </button>
-                                      {/* Tooltip */}
-                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-red-500 text-white text-[.8em] rounded-md py-1 px-2">
-                                        Remove
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
+                                Religion
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                                Gender
                               </th>
                             </tr>
                           </thead>
@@ -723,6 +583,11 @@ const CategoryReligion = () => {
                                     {index + 1}
                                   </td>
                                   <td className="text-center px-2 lg:px-3 border text-sm">
+                                    {student.roll_no
+                                      ? `${student.roll_no}`
+                                      : ""}{" "}
+                                  </td>
+                                  <td className="text-center px-2 lg:px-3 border text-sm">
                                     {`${student.first_name} ${
                                       student.mid_name || ""
                                     } ${student.last_name}`}
@@ -730,11 +595,11 @@ const CategoryReligion = () => {
                                   <td className="text-center px-2 lg:px-3 border text-sm">
                                     <select
                                       className="px-2 w-full md:w-[80%] py-1 border rounded-md"
-                                      value={student.sub_group_id || ""}
+                                      value={student.category || ""}
                                       onChange={(e) =>
                                         handleStudentDropdownChange(
                                           student.student_id,
-                                          "sub_group_id",
+                                          "category",
                                           e.target.value
                                         )
                                       }
@@ -742,22 +607,23 @@ const CategoryReligion = () => {
                                       <option value="">Select</option>
                                       {subjectGroups.map((group) => (
                                         <option
-                                          key={group.sub_group_id}
-                                          value={group.sub_group_id}
+                                          key={group.category}
+                                          value={group.name}
                                         >
-                                          {group.sub_group_name}
+                                          {group.name}
                                         </option>
                                       ))}
                                     </select>
                                   </td>
-                                  <td className="text-center px-2 lg:px-3 border text-sm ">
+
+                                  <td className="text-center px-2 lg:px-3 border text-sm">
                                     <select
                                       className="px-2 w-full md:w-[80%] py-2 my-2 border rounded-md"
-                                      value={student.opt_subject_id || ""}
+                                      value={student.religion || ""}
                                       onChange={(e) =>
                                         handleStudentDropdownChange(
                                           student.student_id,
-                                          "opt_subject_id",
+                                          "religion",
                                           e.target.value
                                         )
                                       }
@@ -765,10 +631,31 @@ const CategoryReligion = () => {
                                       <option value="">Select</option>
                                       {optionalSubjects.map((subject) => (
                                         <option
-                                          key={subject.sm_id}
-                                          value={subject.sm_id}
+                                          key={subject.religion}
+                                          value={subject.name}
                                         >
                                           {subject.name}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </td>
+
+                                  <td className="text-center px-2 lg:px-3 border text-sm">
+                                    <select
+                                      className="px-2 w-full md:w-[80%] py-1 border rounded-md"
+                                      value={student.gender || ""}
+                                      onChange={(e) =>
+                                        handleStudentDropdownChange(
+                                          student.student_id,
+                                          "gender",
+                                          e.target.value
+                                        )
+                                      }
+                                    >
+                                      <option value="">Select</option>
+                                      {gender.map((g) => (
+                                        <option key={g.gender} value={g.gender}>
+                                          {g.label}
                                         </option>
                                       ))}
                                     </select>
