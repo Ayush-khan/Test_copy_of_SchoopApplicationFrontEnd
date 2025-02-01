@@ -34,7 +34,7 @@ const AllotGRNumbers = () => {
 
   // for form
   const [errors, setErrors] = useState({});
-  const [backendErrors, setBackendErrors] = useState({});
+  const [errorsBackend, setErrorsBackend] = useState({});
 
   const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
@@ -52,6 +52,7 @@ const AllotGRNumbers = () => {
   const fetchClasses = async () => {
     try {
       setLoadingClasses(true);
+      setLoadingStudents(true);
       const token = localStorage.getItem("authToken");
       const response = await axios.get(`${API_URL}/api/getClassList`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -66,6 +67,7 @@ const AllotGRNumbers = () => {
       console.error("Error fetching classes", error);
     } finally {
       setLoadingClasses(false);
+      setLoadingStudents(false);
     }
   };
 
@@ -80,7 +82,7 @@ const AllotGRNumbers = () => {
 
   const fetchDivisions = async (classId) => {
     try {
-      setLoadingDivision(true);
+      setLoadingStudents(true);
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
         `${API_URL}/api/get_divisions/${classId}`,
@@ -102,7 +104,7 @@ const AllotGRNumbers = () => {
       toast.error("Error fetching divisions");
       console.error("Error fetching divisions", error);
     } finally {
-      setLoadingDivision(false);
+      setLoadingStudents(false);
     }
   };
 
@@ -140,7 +142,7 @@ const AllotGRNumbers = () => {
     // setNameErrorForClassForStudent("");
     setNameErrorForStudent("");
     setErrors({}); // Clears all field-specific errors
-
+    setErrorsBackend({});
     let hasError = false;
     if (!selectedClass) {
       setNameErrorForClass("Please select a class.");
@@ -616,7 +618,7 @@ const AllotGRNumbers = () => {
         scrollTarget.scrollIntoView({ behavior: "smooth", block: "center" });
         return; // Stop form submission
       }
-
+      setErrorsBackend({});
       // Step 3: Submit Data
       const requestData = { students: studentInformation };
       console.log("request data", requestData);
@@ -642,65 +644,39 @@ const AllotGRNumbers = () => {
     } catch (error) {
       if (error.response?.status === 422) {
         console.log("Full Validation Error Response:", error.response.data);
-        const errorMessages = error.response.data.errors;
-        const studentsData = error.response.data.students || [];
-        console.log("errorMessages", errorMessages);
-        if (errorMessages) {
-          const displayedMessages = new Set();
 
-          Object.keys(errorMessages).forEach((key) => {
-            const keyParts = key.split(".");
-            const studentIndex =
-              keyParts.length > 1 ? parseInt(keyParts[1], 10) : null;
-            let rollNo = "Unknown";
+        const errorMessages = error.response.data.errors; // Errors object
+        const studentsData = error.response.data.students || []; // Optional students data
+        const newErrors = {};
 
-            if (!isNaN(studentIndex) && studentsData[studentIndex]) {
-              console.log(
-                `Student Found at Index ${studentIndex}:`,
-                studentsData[studentIndex]
-              );
-              rollNo = studentsData[studentIndex].roll_no ?? "Unknown";
-            } else {
-              console.warn(
-                `Invalid Student Index: ${studentIndex}`,
-                studentsData
-              );
+        console.log("errorMessages:", errorMessages);
+
+        // Iterate over the keys of the errorMessages object
+        Object.keys(errorMessages).forEach((key) => {
+          // Split the key into parts (e.g., "students.2.reg_no" -> ["students", "2", "reg_no"])
+          const keyParts = key.split(".");
+
+          if (keyParts[0] === "students" && keyParts.length === 3) {
+            const studentIndex = parseInt(keyParts[1], 10); // Get the index (e.g., "2", "4", "5")
+            const fieldName = keyParts[2]; // Get the field name (e.g., "reg_no")
+
+            if (!isNaN(studentIndex)) {
+              const studentId =
+                studentsData[studentIndex]?.student_id || studentIndex; // Use `student_id` if available, otherwise fallback to index
+
+              // Initialize the error object for this student ID if it doesn't exist
+              if (!newErrors[studentId]) {
+                newErrors[studentId] = {};
+              }
+
+              // Add the error message for this field
+              newErrors[studentId][fieldName] = errorMessages[key].join(", ");
             }
+          }
+        });
 
-            errorMessages[key].forEach((msg) => {
-              let customMsg = msg;
-
-              if (msg.toLowerCase().includes("required")) {
-                customMsg = `The student's roll number ${rollNo} field is required.`;
-              }
-
-              if (!displayedMessages.has(customMsg)) {
-                console.log(`Toast Error: ${customMsg}`);
-                toast.error(customMsg);
-                displayedMessages.add(customMsg);
-
-                // 🔹 Scroll into view for the reg_no duplicate error
-                if (key.includes("reg_no")) {
-                  const refKey = `${
-                    studentsData[studentIndex]?.student_id
-                  }-${key.split(".").pop()}`;
-                  const field = studentRefs.current[refKey];
-
-                  if (field) {
-                    field.classList.add("border-red-500", "ring-red-300");
-                    field.focus();
-                    field.scrollIntoView({
-                      behavior: "smooth",
-                      block: "center",
-                    });
-                  }
-                }
-              }
-            });
-          });
-        } else {
-          toast.error("Validation error occurred.");
-        }
+        console.log("Mapped Errors:", newErrors); // Log the mapped errors to debug
+        setErrorsBackend(newErrors); // Update the state with mapped errors
       } else {
         toast.error(
           `An error occurred: ${error.response?.data?.message || error.message}`
@@ -754,6 +730,19 @@ const AllotGRNumbers = () => {
         [fieldName]: error,
       },
     }));
+    // Remove backend error for this specific field dynamically
+    setErrorsBackend((prevErrorsBackend) => {
+      const updatedBackendErrors = { ...prevErrorsBackend };
+      if (updatedBackendErrors[studentId]) {
+        delete updatedBackendErrors[studentId][fieldName];
+
+        // If no more fields have errors for this studentId, delete the entire studentId entry
+        if (Object.keys(updatedBackendErrors[studentId]).length === 0) {
+          delete updatedBackendErrors[studentId];
+        }
+      }
+      return updatedBackendErrors;
+    });
   };
 
   // const validate = () => {
@@ -836,119 +825,119 @@ const AllotGRNumbers = () => {
         ></div>
         <div className="w-full md:container mt-4">
           {/* Search Section */}
-          <div className="pt-2 md:pt-4"></div>
-          <div className="pt-8 w-full md:w-[70%]  relative ml-0 md:ml-[10%]  border-1 flex justify-start flex-col md:flex-row gap-x-1  bg-white rounded-lg mt-2 md:mt-6 p-2 ">
-            {/* <h6 className=" w-[20%] float-start text-nowrap text-blue-600 mt-2.5"></h6> */}
 
-            <div className="w-full flex md:flex-row justify-start items-center">
-              <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                <div className="w-full gap-x-1 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row ">
-                  <label
-                    className="text-md mt-1.5 mr-1 md:mr-0 inline-flex"
-                    htmlFor="classSelect"
-                  >
-                    Class <span className="text-red-500">*</span>
-                  </label>
+          <div className="     w-full md:container mt-4">
+            {/* Search Section */}
+            <div className=" w-full md:w-[65%] border-1 flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg relative md:left-16 left-0  mt-1 p-2 ">
+              <div className="w-full   flex md:flex-row justify-between items-center">
+                <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                  <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
+                    <label
+                      className="text-md mt-1.5 mr-1 md:mr-0"
+                      htmlFor="classSelect"
+                    >
+                      Class <span className="text-red-500">*</span>
+                    </label>
 
-                  <div className="w-full md:w-[30%]">
-                    <Select
-                      id="classSelect"
-                      value={selectedClass}
-                      onChange={handleClassSelect}
-                      options={classOptions}
-                      placeholder={
-                        loadingClasses ? "Loading classes..." : "Select"
-                      }
-                      isSearchable
-                      isClearable
-                      className="text-sm"
-                      styles={{
-                        menu: (provided) => ({
-                          ...provided,
-                          zIndex: 1050, // Set your desired z-index value
-                        }),
-                      }}
-                      isDisabled={loadingClasses}
-                    />
-                    {nameErrorForClass && (
-                      <div className="h-8 relative ml-1 text-danger text-xs">
-                        {nameErrorForClass}
-                      </div>
-                    )}
-                  </div>
-
-                  <label
-                    className="text-md mt-1.5 mr-1 md:mr-0 inline-flex"
-                    htmlFor="divisionSelect"
-                  >
-                    Division <span className="text-red-500">*</span>
-                  </label>
-
-                  <div className="w-full md:w-[30%]">
-                    <Select
-                      id="divisionSelect"
-                      value={selectedDivision}
-                      onChange={handleDivisionSelect}
-                      options={divisionOptions}
-                      placeholder={
-                        loadingClasses ? "Loading divisions..." : "Select"
-                      }
-                      isSearchable
-                      isClearable
-                      className="text-sm"
-                      styles={{
-                        menu: (provided) => ({
-                          ...provided,
-                          zIndex: 1050, // Set your desired z-index value
-                        }),
-                      }}
-                      isDisabled={loadingDivision}
-                    />
-                    {nameErrorForDivision && (
-                      <div className="h-8 relative ml-1 text-danger text-xs">
-                        {nameErrorForDivision}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <button
-                  type="search"
-                  onClick={handleSearch}
-                  style={{ backgroundColor: "#2196F3" }}
-                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                    loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                  disabled={loadingForSearch}
-                >
-                  {loadingForSearch ? (
-                    <span className="flex items-center">
-                      <svg
-                        className="animate-spin h-4 w-4 mr-2 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
+                    <div className="w-full md:w-[30%]">
+                      <Select
+                        id="classSelect"
+                        value={selectedClass}
+                        onChange={handleClassSelect}
+                        options={classOptions}
+                        placeholder={loadingClasses ? "Loading..." : "Select"}
+                        isSearchable
+                        isClearable
+                        className="text-sm"
+                        styles={{
+                          menu: (provided) => ({
+                            ...provided,
+                            zIndex: 1050, // Set your desired z-index value
+                          }),
+                        }}
+                        isDisabled={loadingClasses}
+                      />
+                      {nameErrorForClass && (
+                        <div className="h-8 relative ml-1 text-danger text-xs">
+                          {nameErrorForClass}
+                        </div>
+                      )}
+                    </div>
+                    <div className="w-full  gap-x-4 justify-between relative left-0 md:left-[7%]  md:w-[40%]  my-1 md:my-4 flex md:flex-row">
+                      <label
+                        className="text-md  mr-1 mt-0.5 md:mr-0 inline-flex"
+                        htmlFor="divisionSelect"
                       >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                        ></path>
-                      </svg>
-                      Loading...
-                    </span>
-                  ) : (
-                    "Browse"
-                  )}
-                </button>
+                        Division <span className="text-red-500">*</span>
+                      </label>
+
+                      <div className="w-full md:w-[65%] relative -top-1">
+                        <Select
+                          id="divisionSelect"
+                          value={selectedDivision}
+                          onChange={handleDivisionSelect}
+                          options={divisionOptions}
+                          placeholder={
+                            loadingStudents ? "Loading..." : "Select"
+                          }
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          styles={{
+                            menu: (provided) => ({
+                              ...provided,
+                              zIndex: 1050, // Set your desired z-index value
+                            }),
+                          }}
+                          isDisabled={loadingStudents}
+                        />
+                        {nameErrorForDivision && (
+                          <div className="h-8 relative ml-1 text-danger text-xs">
+                            {nameErrorForDivision}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="search"
+                    onClick={handleSearch}
+                    style={{ backgroundColor: "#2196F3" }}
+                    className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                      loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    disabled={loadingForSearch}
+                  >
+                    {loadingForSearch ? (
+                      <span className="flex items-center">
+                        <svg
+                          className="animate-spin h-4 w-4 mr-2 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          ></path>
+                        </svg>
+                        Loading...
+                      </span>
+                    ) : (
+                      "Browse"
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -981,7 +970,7 @@ const AllotGRNumbers = () => {
                         <thead className=" ">
                           <tr className="bg-gray-200 ">
                             <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Sr. NO.
+                              Sr. No.
                             </th>
                             <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Roll No.
@@ -1057,6 +1046,11 @@ const AllotGRNumbers = () => {
                                   {errors[student.student_id]?.reg_no && (
                                     <span className="text-red-500 text-xs block mt-1">
                                       {errors[student.student_id]?.reg_no}
+                                    </span>
+                                  )}
+                                  {errorsBackend[index]?.reg_no && (
+                                    <span className="text-red-500 text-xs block mt-1">
+                                      {errorsBackend[index]?.reg_no}
                                     </span>
                                   )}
                                 </td>
