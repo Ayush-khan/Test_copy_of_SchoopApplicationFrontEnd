@@ -623,6 +623,8 @@ const AllotGRNumbers = () => {
       const requestData = { students: studentInformation };
       console.log("request data", requestData);
 
+      setLoading(true); // Start loading
+
       const response = await axios.put(
         `${API_URL}/api/update_studentallotgrno`,
         requestData,
@@ -634,7 +636,21 @@ const AllotGRNumbers = () => {
       console.log("Full API Response:", response);
 
       if (response.status === 200) {
-        toast.success("Student details updated successfully!");
+        toast.success(
+          "GR No. and Aadhaar No. for Students Alloted successfully!"
+        );
+        setstudentInformation(null);
+        setError({});
+        setErrorsBackend({});
+        setSelectedClass(null); // Reset class selection
+        setSelectedStudent(null); // Reset student selection
+        setSelectedStudents([]); // Clear selected students
+        setDivisionForForm([]);
+        setSelectedDivision(null);
+        setSelectedStudentForStudent(null);
+        setSelectedStudentForStudent([]);
+        setSelectedClassForStudent(null);
+        setSelectedClassForStudent([]);
         console.log(response.data);
       } else {
         toast.error(
@@ -682,6 +698,8 @@ const AllotGRNumbers = () => {
           `An error occurred: ${error.response?.data?.message || error.message}`
         );
       }
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
