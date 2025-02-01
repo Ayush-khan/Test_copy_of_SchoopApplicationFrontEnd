@@ -270,8 +270,13 @@ const CategoryReligion = () => {
     let hasValidSelection = false;
 
     // Check if at least one student has both `sub_group_id` and `opt_subject_id` filled
+    console.log("studentsData", studentsData);
     for (const student of studentsData) {
-      if (student.sub_group_id !== "" && student.opt_subject_id !== "") {
+      if (
+        student.religion !== "" &&
+        student.category !== "" &&
+        student.gender !== ""
+      ) {
         hasValidSelection = true;
         break; // Exit the loop early since we found a valid entry
       }
@@ -280,7 +285,7 @@ const CategoryReligion = () => {
     // If no valid selection, show a validation error toast
     if (!hasValidSelection) {
       toast.error(
-        "Please select both a student subject group and an optional subject for at least one student."
+        "Please select a student Category, Religion and Gender for at least one student."
       );
       return; // Exit the function if validation fails
     }
@@ -301,9 +306,11 @@ const CategoryReligion = () => {
       //   };
       console.log("students Data submissions", studentsData);
       // Make the API call
-      const response = await axios.post(
-        `${API_URL}/api/save_subjectforhsc`,
-        studentsData,
+      const response = await axios.put(
+        `${API_URL}/api/update_studentcategoryreligion`,
+        {
+          students: studentsData,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -313,7 +320,10 @@ const CategoryReligion = () => {
 
       // Handle successful response
       if (response.status === 200) {
-        toast.success("Subject allotment for HSC has been successfully added!");
+        toast.success(
+          "The category and religion for the students have been successfully updated!"
+        );
+
         setOptionalSubject("");
         setSubjectGroup("");
         setSelectedClass(null); // Reset class selection
@@ -337,7 +347,9 @@ const CategoryReligion = () => {
       console.error("Error:", error.response?.data);
 
       // Display error message
-      toast.error("An error occurred while allot subjects for HSC.");
+      toast.error(
+        "An error occurred while updating category and religion for the students."
+      );
 
       if (error.response && error.response.data) {
         setBackendErrors(error.response.data || {});
@@ -351,14 +363,26 @@ const CategoryReligion = () => {
     navigate("/dashboard");
   };
 
+  //   const filteredStudents = studentsData
+  //     ? studentsData.filter((student) =>
+  //         `${student.first_name || ""} ${student.mid_name || ""} ${
+  //           student.last_name || ""
+  //         }`
+  //           .toLowerCase()
+  //           .includes(searchTerm.toLowerCase())
+  //       )
+  //     : [];
   const filteredStudents = studentsData
-    ? studentsData.filter((student) =>
-        `${student.first_name || ""} ${student.mid_name || ""} ${
-          student.last_name || ""
-        }`
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      )
+    ? studentsData.filter((student) => {
+        const fullName = `${student.first_name || ""} ${
+          student.mid_name || ""
+        } ${student.last_name || ""}`.toLowerCase();
+        const rollNo = student.roll_no ? `${student.roll_no}` : ""; // Handle roll_no null case
+        return (
+          fullName.includes(searchTerm.toLowerCase()) || // Match name
+          rollNo.includes(searchTerm) // Match roll number
+        );
+      })
     : [];
 
   const handleStudentDropdownChange = (id, field, value) => {
@@ -523,7 +547,7 @@ const CategoryReligion = () => {
                 <div className="card mx-auto lg:w-full shadow-lg">
                   <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
                     <h6 className=" text-gray-700 mt-1   text-nowrap">
-                      Allot Subjects For Students
+                      Update Category and Religion For Students
                     </h6>
                     <div className="box-border  flex justify-end md:gap-x-2  ">
                       <div className=" w-full  mr-1">
@@ -592,7 +616,7 @@ const CategoryReligion = () => {
                                   </td>
                                   <td className="text-center px-2 lg:px-3 border text-sm">
                                     <select
-                                      className="px-2 w-full md:w-[80%] py-1 border rounded-md"
+                                      className="px-2 w-full md:w-[80%] py-1 my-2 border rounded-md"
                                       value={student.category || ""}
                                       onChange={(e) =>
                                         handleStudentDropdownChange(
@@ -616,7 +640,7 @@ const CategoryReligion = () => {
 
                                   <td className="text-center px-2 lg:px-3 border text-sm">
                                     <select
-                                      className="px-2 w-full md:w-[80%] py-2 my-2 border rounded-md"
+                                      className="px-2 w-full md:w-[80%] py-1 my-2 border rounded-md"
                                       value={student.religion || ""}
                                       onChange={(e) =>
                                         handleStudentDropdownChange(
@@ -640,7 +664,7 @@ const CategoryReligion = () => {
 
                                   <td className="text-center px-2 lg:px-3 border text-sm">
                                     <select
-                                      className="px-2 w-full md:w-[80%] py-1 border rounded-md"
+                                      className="px-2 w-full md:w-[80%] py-1 my-2 border rounded-md"
                                       value={student.gender || ""}
                                       onChange={(e) =>
                                         handleStudentDropdownChange(
@@ -712,10 +736,10 @@ const CategoryReligion = () => {
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                               ></path>
                             </svg>
-                            Saving...
+                            Updating...
                           </span>
                         ) : (
-                          "Save"
+                          "Update"
                         )}
                       </button>
                     </div>

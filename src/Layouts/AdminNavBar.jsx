@@ -668,7 +668,7 @@ const AdminNavBar = () => {
           Allot GR Number
         </NavDropdown.Item>
         <NavDropdown.Item as={Link} to="/categoryReligion">
-          Update Category and religion
+          Update Category and Religion
         </NavDropdown.Item>
       </NavDropdown>
 
