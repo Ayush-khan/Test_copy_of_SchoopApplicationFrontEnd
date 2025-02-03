@@ -1456,7 +1456,7 @@ function EditOfNewStudentList() {
     }
   };
 
-  // Fetch class names when component loads
+  // Fetch the class names when component loads
 
   return (
     <div className=" w-[95%] mx-auto p-4">
