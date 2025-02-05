@@ -5,7 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-import "./AllotGRNumbers";
+import "./AllotGRNumbers.module.CSS";
 const AllotGRNumbers = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,7 +34,7 @@ const AllotGRNumbers = () => {
 
   // for form
   const [errors, setErrors] = useState({});
-  const [errorsBackend, setErrorsBackend] = useState({});
+  const [backendErrors, setBackendErrors] = useState({});
 
   const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
@@ -46,13 +46,13 @@ const AllotGRNumbers = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [editedStudents, setEditedStudents] = useState({});
   const [error, setError] = useState(null);
+  const [invalidField, setInvalidField] = useState(null);
 
   const studentRefs = useRef({});
 
   const fetchClasses = async () => {
     try {
       setLoadingClasses(true);
-      setLoadingStudents(true);
       const token = localStorage.getItem("authToken");
       const response = await axios.get(`${API_URL}/api/getClassList`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -67,7 +67,6 @@ const AllotGRNumbers = () => {
       console.error("Error fetching classes", error);
     } finally {
       setLoadingClasses(false);
-      setLoadingStudents(false);
     }
   };
 
@@ -82,7 +81,7 @@ const AllotGRNumbers = () => {
 
   const fetchDivisions = async (classId) => {
     try {
-      setLoadingStudents(true);
+      setLoadingDivision(true);
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
         `${API_URL}/api/get_divisions/${classId}`,
@@ -104,7 +103,7 @@ const AllotGRNumbers = () => {
       toast.error("Error fetching divisions");
       console.error("Error fetching divisions", error);
     } finally {
-      setLoadingStudents(false);
+      setLoadingDivision(false);
     }
   };
 
@@ -142,7 +141,7 @@ const AllotGRNumbers = () => {
     // setNameErrorForClassForStudent("");
     setNameErrorForStudent("");
     setErrors({}); // Clears all field-specific errors
-    setErrorsBackend({});
+
     let hasError = false;
     if (!selectedClass) {
       setNameErrorForClass("Please select a class.");
@@ -199,514 +198,190 @@ const AllotGRNumbers = () => {
     }
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     console.log("token:", token);
-  //     console.log("studentInformation:", studentInformation);
-
-  //     if (!studentInformation || studentInformation.length === 0) {
-  //       alert("No student data to update.");
-  //       return;
-  //     }
-
-  //     let hasEmptyFields = false;
-  //     let firstInvalidField = null;
-
-  //     // Step 1: Check for missing fields
-  //     studentInformation.forEach((student) => {
-  //       ["reg_no", "stu_aadhaar_no", "admission_date"].forEach((field) => {
-  //         const refKey = `${student.student_id}-${field}`;
-  //         const inputField = studentRefs.current[refKey];
-
-  //         if (!student[field] || student[field].trim() === "") {
-  //           hasEmptyFields = true;
-
-  //           if (inputField) {
-  //             inputField.classList.add("border-red-500", "ring-red-300");
-
-  //             if (!firstInvalidField) {
-  //               firstInvalidField = inputField; // Store first invalid field
-  //             }
-  //           }
-  //         } else {
-  //           if (inputField) {
-  //             inputField.classList.remove("border-red-500", "ring-red-300");
-  //           }
-  //         }
-  //       });
-  //     });
-
-  //     // Step 2: Check for duplicate reg_no values
-  //     const regNoMap = new Map();
-  //     let hasDuplicates = false;
-
-  //     studentInformation.forEach((student) => {
-  //       if (student.reg_no) {
-  //         if (regNoMap.has(student.reg_no)) {
-  //           hasDuplicates = true;
-
-  //           const firstIndex = regNoMap.get(student.reg_no);
-  //           const duplicateIndex = student.student_id;
-
-  //           const firstField = studentRefs.current[`${firstIndex}-reg_no`];
-  //           const duplicateField =
-  //             studentRefs.current[`${duplicateIndex}-reg_no`];
-
-  //           if (firstField)
-  //             firstField.classList.add("border-red-500", "ring-red-300");
-  //           if (duplicateField)
-  //             duplicateField.classList.add("border-red-500", "ring-red-300");
-
-  //           if (!firstInvalidField)
-  //             firstInvalidField = firstField || duplicateField;
-  //         } else {
-  //           regNoMap.set(student.reg_no, student.student_id);
-  //         }
-  //       }
-  //     });
-
-  //     if (hasDuplicates) {
-  //       toast.error("Duplicate GR Numbers found. Please correct them.");
-  //     }
-
-  //     // Scroll to first invalid field
-  //     if (firstInvalidField) {
-  //       firstInvalidField.focus();
-  //       firstInvalidField.scrollIntoView({
-  //         behavior: "smooth",
-  //         block: "center",
-  //       });
-  //       return; // Stop form submission
-  //     }
-
-  //     const requestData = { students: studentInformation };
-  //     console.log("request data", requestData);
-
-  //     const response = await axios.put(
-  //       `${API_URL}/api/update_studentallotgrno`,
-  //       requestData,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-
-  //     console.log("Full API Response:", response);
-
-  //     if (response.status === 200) {
-  //       toast.success("Student details updated successfully!");
-  //       console.log(response.data);
-  //     } else {
-  //       toast.error(
-  //         `Failed to update student details. Status: ${response.status}`
-  //       );
-  //     }
-  //   } catch (error) {
-  //     if (error.response?.status === 422) {
-  //       console.log("Full Validation Error Response:", error.response.data);
-  //       const errorMessages = error.response.data.errors;
-  //       const studentsData = error.response.data.students || [];
-
-  //       if (errorMessages) {
-  //         const displayedMessages = new Set();
-
-  //         Object.keys(errorMessages).forEach((key) => {
-  //           const keyParts = key.split(".");
-  //           const studentIndex =
-  //             keyParts.length > 1 ? parseInt(keyParts[1], 10) : null;
-  //           let rollNo = "Unknown";
-
-  //           if (!isNaN(studentIndex) && studentsData[studentIndex]) {
-  //             console.log(
-  //               `Student Found at Index ${studentIndex}:`,
-  //               studentsData[studentIndex]
-  //             );
-  //             rollNo = studentsData[studentIndex].roll_no ?? "Unknown";
-  //           } else {
-  //             console.warn(
-  //               `Invalid Student Index: ${studentIndex}`,
-  //               studentsData
-  //             );
-  //           }
-
-  //           errorMessages[key].forEach((msg) => {
-  //             let customMsg = msg;
-
-  //             if (msg.toLowerCase().includes("required")) {
-  //               customMsg = `The student's roll number ${rollNo} field is required.`;
-  //             }
-
-  //             if (!displayedMessages.has(customMsg)) {
-  //               console.log(`Toast Error: ${customMsg}`);
-  //               toast.error(customMsg);
-  //               displayedMessages.add(customMsg);
-  //             }
-  //           });
-
-  //           if (
-  //             key.includes("reg_no") ||
-  //             key.includes("stu_aadhaar_no") ||
-  //             key.includes("admission_date")
-  //           ) {
-  //             const refKey = `${studentsData[studentIndex]?.student_id}-${key
-  //               .split(".")
-  //               .pop()}`;
-  //             const field = studentRefs.current[refKey];
-
-  //             if (field) {
-  //               field.classList.add("border-red-500", "ring-red-300");
-  //               field.focus();
-  //               field.scrollIntoView({ behavior: "smooth", block: "center" });
-  //             }
-  //           }
-  //         });
-  //       } else {
-  //         toast.error("Validation error occurred.");
-  //       }
-  //     } else {
-  //       toast.error(
-  //         `An error occurred: ${error.response?.data?.message || error.message}`
-  //       );
-  //     }
-  //   }
-  // };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     console.log("token:", token);
-  //     console.log("studentInformation:", studentInformation);
-
-  //     if (!studentInformation || studentInformation.length === 0) {
-  //       alert("No student data to update.");
-  //       return;
-  //     }
-
-  //     let hasEmptyFields = false;
-  //     let firstInvalidField = null;
-
-  //     studentInformation.forEach((student, index) => {
-  //       ["reg_no", "stu_aadhaar_no", "admission_date"].forEach((field) => {
-  //         const refKey = `${student.student_id}-${field}`;
-  //         const inputField = studentRefs.current[refKey];
-
-  //         if (!student[field] || student[field].trim() === "") {
-  //           hasEmptyFields = true;
-
-  //           if (inputField) {
-  //             inputField.classList.add("border-red-500", "ring-red-300");
-
-  //             if (!firstInvalidField) {
-  //               firstInvalidField = inputField; // Store first invalid field
-  //             }
-  //           }
-  //         } else {
-  //           if (inputField) {
-  //             inputField.classList.remove("border-red-500", "ring-red-300");
-  //           }
-  //         }
-  //       });
-  //     });
-
-  //     // Step 2: Handle Duplicate reg_no
-  //     const regNoMap = new Map();
-  //     let hasDuplicates = false;
-
-  //     studentInformation.forEach((student) => {
-  //       if (student.reg_no) {
-  //         if (regNoMap.has(student.reg_no)) {
-  //           hasDuplicates = true;
-
-  //           const firstIndex = regNoMap.get(student.reg_no);
-  //           const duplicateIndex = student.student_id;
-
-  //           const firstField = studentRefs.current[`${firstIndex}-reg_no`];
-  //           const duplicateField = studentRefs.current[`${duplicateIndex}-reg_no`];
-
-  //           if (firstField) firstField.classList.add("border-red-500", "ring-red-300");
-  //           if (duplicateField) duplicateField.classList.add("border-red-500", "ring-red-300");
-
-  //           if (!firstInvalidField) firstInvalidField = firstField || duplicateField;
-  //         } else {
-  //           regNoMap.set(student.reg_no, student.student_id);
-  //         }
-  //       }
-  //     });
-
-  //     if (hasDuplicates) {
-  //       toast.error("Duplicate GR Numbers found. Please correct them.");
-  //     }
-
-  //     // Scroll to first invalid field or duplicate reg_no field
-  //     if (firstInvalidField) {
-  //       firstInvalidField.focus();
-  //       firstInvalidField.scrollIntoView({ behavior: "smooth", block: "center" });
-  //       return; // Stop form submission
-  //     }
-
-  //     const requestData = { students: studentInformation };
-  //     console.log("request data", requestData);
-
-  //     const response = await axios.put(`${API_URL}/api/update_studentallotgrno`, requestData, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-
-  //     console.log("Full API Response:", response);
-
-  //     if (response.status === 200) {
-  //       toast.success("Student details updated successfully!");
-  //       console.log(response.data);
-  //     } else {
-  //       toast.error(`Failed to update student details. Status: ${response.status}`);
-  //     }
-  //   } catch (error) {
-  //     if (error.response?.status === 422) {
-  //       console.log("Full Validation Error Response:", error.response.data);
-  //       const errorMessages = error.response.data.errors;
-  //       const studentsData = error.response.data.students || [];
-
-  //       if (errorMessages) {
-  //         const displayedMessages = new Set();
-
-  //         Object.keys(errorMessages).forEach((key) => {
-  //           const keyParts = key.split(".");
-  //           const studentIndex = keyParts.length > 1 ? parseInt(keyParts[1], 10) : null;
-  //           let rollNo = "Unknown";
-
-  //           if (!isNaN(studentIndex) && studentsData[studentIndex]) {
-  //             console.log(`Student Found at Index ${studentIndex}:`, studentsData[studentIndex]);
-  //             rollNo = studentsData[studentIndex].roll_no ?? "Unknown";
-  //           } else {
-  //             console.warn(`Invalid Student Index: ${studentIndex}`, studentsData);
-  //           }
-
-  //           errorMessages[key].forEach((msg) => {
-  //             let customMsg = msg;
-
-  //             if (msg.toLowerCase().includes("required")) {
-  //               customMsg = `The student's roll number ${rollNo} field is required.`;
-  //             }
-
-  //             if (!displayedMessages.has(customMsg)) {
-  //               console.log(`Toast Error: ${customMsg}`);
-  //               toast.error(customMsg);
-  //               displayedMessages.add(customMsg);
-
-  //               // 🔹 Scroll into view for the reg_no duplicate error
-  //               if (key.includes("reg_no")) {
-  //                 const refKey = `${studentsData[studentIndex]?.student_id}-${key.split(".").pop()}`;
-  //                 const field = studentRefs.current[refKey];
-
-  //                 if (field) {
-  //                   field.classList.add("border-red-500", "ring-red-300");
-  //                   field.focus();
-  //                   field.scrollIntoView({ behavior: "smooth", block: "center" });
-  //                 }
-  //               }
-  //             }
-  //           });
-  //         });
-  //       } else {
-  //         toast.error("Validation error occurred.");
-  //       }
-  //     } else {
-  //       toast.error(`An error occurred: ${error.response?.data?.message || error.message}`);
-  //     }
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const token = localStorage.getItem("authToken");
-      console.log("token:", token);
-      console.log("studentInformation:", studentInformation);
-
-      if (!studentInformation || studentInformation.length === 0) {
+      if (!studentInformation?.length) {
         alert("No student data to update.");
+        toast.error("All fields are required.");
         return;
       }
 
-      let hasEmptyFields = false;
       let firstInvalidField = null;
+      const regNoCount = {}; // Track occurrences of GR numbers
+      const aadhaarCount = {}; // Track occurrences of Aadhaar numbers
+      const errors = {}; // Store errors for validation
 
-      // Step 1: Check for empty fields
-      studentInformation.forEach((student) => {
-        ["reg_no", "stu_aadhaar_no", "admission_date"].forEach((field) => {
-          const refKey = `${student.student_id}-${field}`;
-          const inputField = studentRefs.current[refKey];
-
-          if (!student[field] || student[field].trim() === "") {
-            hasEmptyFields = true;
-
-            if (inputField) {
-              inputField.classList.add("border-red-500", "ring-red-300");
-
-              if (!firstInvalidField) {
-                firstInvalidField = inputField; // Store first invalid field
-              }
-            }
-          } else {
-            if (inputField) {
-              inputField.classList.remove("border-red-500", "ring-red-300");
-            }
-          }
-        });
-      });
-
-      // Step 2: Handle Duplicate reg_no
-      const regNoMap = new Map();
-      let hasDuplicatesSameClass = false;
-      let hasDuplicatesDifferentClass = false;
-      let firstDuplicateField = null;
-
+      // Count occurrences of GR numbers and Aadhaar numbers
       studentInformation.forEach((student) => {
         if (student.reg_no) {
-          if (regNoMap.has(student.reg_no)) {
-            const existingStudent = regNoMap.get(student.reg_no);
-
-            if (
-              existingStudent.class_id === student.class_id &&
-              existingStudent.division_id === student.division_id
-            ) {
-              hasDuplicatesSameClass = true;
-            } else {
-              hasDuplicatesDifferentClass = true;
-            }
-
-            // Highlight the duplicate fields
-            const firstField =
-              studentRefs.current[`${existingStudent.student_id}-reg_no`];
-            const duplicateField =
-              studentRefs.current[`${student.student_id}-reg_no`];
-
-            if (firstField)
-              firstField.classList.add("border-red-500", "ring-red-300");
-            if (duplicateField)
-              duplicateField.classList.add("border-red-500", "ring-red-300");
-
-            if (!firstDuplicateField)
-              firstDuplicateField = firstField || duplicateField;
-          } else {
-            regNoMap.set(student.reg_no, student);
-          }
+          regNoCount[student.reg_no] = (regNoCount[student.reg_no] || 0) + 1;
+        }
+        if (student.stu_aadhaar_no) {
+          aadhaarCount[student.stu_aadhaar_no] =
+            (aadhaarCount[student.stu_aadhaar_no] || 0) + 1;
         }
       });
 
-      // Show toast messages and scroll to invalid fields
-      if (hasDuplicatesSameClass) {
-        toast.error(
-          "Duplicate Registration Numbers found in the same class and division. Please correct them."
-        );
-      }
+      // Validate fields
+      const updatedStudentInformation = studentInformation.map((student) => {
+        let studentHasError = false;
 
-      if (hasDuplicatesDifferentClass) {
-        toast.error(
-          "Duplicate Registration Number found in a different class or division."
-        );
-      }
+        // Validate empty fields
+        ["reg_no", "stu_aadhaar_no", "admission_date"].forEach((field) => {
+          if (!student[field]?.trim()) {
+            studentHasError = true;
+            errors[`${student.student_id}-${field}`] =
+              "This field cannot be empty";
+          }
+        });
 
-      // Scroll to the first invalid or duplicate field
-      const scrollTarget = firstInvalidField || firstDuplicateField;
-      if (scrollTarget) {
-        scrollTarget.focus();
-        scrollTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Check for duplicate GR Number
+        if (student.reg_no && regNoCount[student.reg_no] > 1) {
+          studentHasError = true;
+          errors[`${student.student_id}-reg_no`] = "GR number must be unique";
+        }
+
+        // Check for duplicate Aadhaar Number
+        if (
+          student.stu_aadhaar_no &&
+          aadhaarCount[student.stu_aadhaar_no] > 1
+        ) {
+          studentHasError = true;
+          errors[`${student.student_id}-stu_aadhaar_no`] =
+            "Aadhaar number must be unique";
+        }
+
+        return { ...student, hasError: studentHasError };
+      });
+
+      // Initialize a Set to store unique error messages
+      const errorMessages = new Set();
+
+      // Highlight and scroll to the first invalid field
+      const firstInvalidStudent = updatedStudentInformation.find(
+        (student) => student.hasError
+      );
+      if (firstInvalidStudent) {
+        Object.keys(errors).forEach((key) => {
+          const fieldElement = studentRefs.current[key]; // Get the input element
+          if (fieldElement) {
+            fieldElement.classList.add("border-red-500", "ring-red-300"); // Highlight field
+            if (!firstInvalidField) {
+              firstInvalidField = fieldElement;
+            }
+          }
+          errorMessages.add(errors[key]); // Collect unique error messages
+        });
+
+        if (firstInvalidField) {
+          firstInvalidField.focus(); // Focus on the first invalid input
+          firstInvalidField.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          }); // Smooth scroll
+        }
+
+        // Display toast messages for unique errors
+        // if (errorMessages.size > 0) {
+        //   toast.error(Array.from(errorMessages).join("\n"),
+        //   {
+        //     autoClose: 5000,
+        //     position: "top-right",
+        //     closeOnClick: true,
+        //     pauseOnHover: true,
+        //   });
+        // }
+
         return; // Stop form submission
       }
-      setErrorsBackend({});
-      // Step 3: Submit Data
-      const requestData = { students: studentInformation };
-      console.log("request data", requestData);
 
-      setLoading(true); // Start loading
-
+      // Proceed with API call if validation passes
       const response = await axios.put(
         `${API_URL}/api/update_studentallotgrno`,
-        requestData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { students: updatedStudentInformation },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log("Full API Response:", response);
-
       if (response.status === 200) {
-        toast.success(
-          "GR No. and Aadhaar No. for Students Alloted successfully!"
-        );
-        setstudentInformation(null);
-        setError({});
-        setErrorsBackend({});
-        setSelectedClass(null); // Reset class selection
-        setSelectedStudent(null); // Reset student selection
-        setSelectedStudents([]); // Clear selected students
-        setDivisionForForm([]);
-        setSelectedDivision(null);
-        setSelectedStudentForStudent(null);
-        setSelectedStudentForStudent([]);
-        setSelectedClassForStudent(null);
-        setSelectedClassForStudent([]);
-        console.log(response.data);
+        toast.success("Student details updated successfully!");
       } else {
         toast.error(
           `Failed to update student details. Status: ${response.status}`
         );
       }
     } catch (error) {
+      console.log("Full API Error Response:", error.response);
+
       if (error.response?.status === 422) {
-        console.log("Full Validation Error Response:", error.response.data);
+        const backendErrors = error.response.data;
 
-        const errorMessages = error.response.data.errors; // Errors object
-        const studentsData = error.response.data.students || []; // Optional students data
-        const newErrors = {};
+        if (backendErrors.errors) {
+          const formattedErrors = {};
+          const errorMessages = new Set(); // Store unique error messages
 
-        console.log("errorMessages:", errorMessages);
+          Object.entries(backendErrors.errors).forEach(([key, messages]) => {
+            const match = key.match(/^students\.(\d+)\.(.+)$/);
+            if (match) {
+              const studentIndex = Number(match[1]);
+              const fieldName = match[2];
 
-        // Iterate over the keys of the errorMessages object
-        Object.keys(errorMessages).forEach((key) => {
-          // Split the key into parts (e.g., "students.2.reg_no" -> ["students", "2", "reg_no"])
-          const keyParts = key.split(".");
+              const studentId = studentInformation[studentIndex]?.student_id;
+              if (studentId) {
+                if (!formattedErrors[studentId]) {
+                  formattedErrors[studentId] = {};
+                }
+                formattedErrors[studentId][fieldName] = messages[0];
 
-          if (keyParts[0] === "students" && keyParts.length === 3) {
-            const studentIndex = parseInt(keyParts[1], 10); // Get the index (e.g., "2", "4", "5")
-            const fieldName = keyParts[2]; // Get the field name (e.g., "reg_no")
-
-            if (!isNaN(studentIndex)) {
-              const studentId =
-                studentsData[studentIndex]?.student_id || studentIndex; // Use `student_id` if available, otherwise fallback to index
-
-              // Initialize the error object for this student ID if it doesn't exist
-              if (!newErrors[studentId]) {
-                newErrors[studentId] = {};
+                errorMessages.add(messages[0]); // Collect unique error messages
               }
-
-              // Add the error message for this field
-              newErrors[studentId][fieldName] = errorMessages[key].join(", ");
             }
-          }
-        });
+          });
 
-        console.log("Mapped Errors:", newErrors); // Log the mapped errors to debug
-        setErrorsBackend(newErrors); // Update the state with mapped errors
+          if (Object.keys(formattedErrors).length > 0) {
+            setBackendErrors(formattedErrors);
+
+            // Scroll to first backend error
+            const firstErrorKey = Object.keys(formattedErrors)[0];
+            const firstErrorFieldKey = Object.keys(
+              formattedErrors[firstErrorKey]
+            )[0];
+            const firstErrorField =
+              studentRefs.current[`${firstErrorKey}-${firstErrorFieldKey}`];
+
+            if (firstErrorField) {
+              firstErrorField.classList.add("border-red-500", "ring-red-300");
+              firstErrorField.focus();
+              firstErrorField.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+
+            // Display unique error messages in a single toast
+            // if (errorMessages.size > 0) {
+            //   toast.error(Array.from(errorMessages).join("\n"), {
+            //     autoClose: 5000,
+            //     position: "top-right",
+            //     closeOnClick: true,
+            //     pauseOnHover: true,
+            //   });
+            // }
+          }
+        }
       } else {
         toast.error(
           `An error occurred: ${error.response?.data?.message || error.message}`
         );
       }
-    } finally {
-      setLoading(false); // Stop loading
     }
   };
 
   const handleInputChange = (e, studentId, fieldName) => {
     const { value } = e.target;
 
-    // Update the student's field value
     setstudentInformation((prevStudents) =>
       prevStudents.map((student) =>
         student.student_id === studentId || student.roll_no === studentId
@@ -718,7 +393,6 @@ const AllotGRNumbers = () => {
     // Perform field-specific validation
     let error = "";
 
-    // Field-specific validation logic
     if (fieldName === "reg_no") {
       if (!value) {
         error = "GR number is required.";
@@ -736,11 +410,26 @@ const AllotGRNumbers = () => {
       if (!value) {
         error = "Aadhaar number is required.";
       } else if (!/^\d{12}$/.test(value)) {
-        error = "Please enter 12 digit.";
+        error = "Please enter 12 digits.";
+      } else if (
+        studentInformation.some(
+          (student) =>
+            student.stu_aadhaar_no === value && student.student_id !== studentId
+        )
+      ) {
+        error = "Aadhaar Number must be unique.";
       }
     }
 
-    // Update the errors state with the specific field error
+    if (fieldName === "admission_date") {
+      if (!value) {
+        error = "Admission date is required.";
+      } else if (isNaN(new Date(value).getTime())) {
+        error = "Please enter a valid date.";
+      }
+    }
+
+    // Update the frontend validation errors
     setErrors((prevErrors) => ({
       ...prevErrors,
       [studentId]: {
@@ -748,55 +437,21 @@ const AllotGRNumbers = () => {
         [fieldName]: error,
       },
     }));
-    // Remove backend error for this specific field dynamically
-    setErrorsBackend((prevErrorsBackend) => {
-      const updatedBackendErrors = { ...prevErrorsBackend };
-      if (updatedBackendErrors[studentId]) {
-        delete updatedBackendErrors[studentId][fieldName];
 
-        // If no more fields have errors for this studentId, delete the entire studentId entry
-        if (Object.keys(updatedBackendErrors[studentId]).length === 0) {
-          delete updatedBackendErrors[studentId];
+    // ✅ Clear the backend error for this field when the user types
+    setBackendErrors((prevErrors) => {
+      const newErrors = { ...prevErrors };
+      if (newErrors[studentId] && newErrors[studentId][fieldName]) {
+        delete newErrors[studentId][fieldName];
+
+        // If no more errors for this student, remove them from the object
+        if (Object.keys(newErrors[studentId]).length === 0) {
+          delete newErrors[studentId];
         }
       }
-      return updatedBackendErrors;
+      return newErrors;
     });
   };
-
-  // const validate = () => {
-  //   let hasError = false;
-  //   let newErrors = {};
-  //   let regNoSet = new Set(); // To track unique registration numbers
-
-  //   studentInformation.forEach((student) => {
-  //     // Validate reg_no: Must not be empty and must be unique
-  //     if (!student.reg_no) {
-  //       newErrors[student.student_id] = "Registration number is required.";
-  //       hasError = true;
-  //     } else if (regNoSet.has(student.reg_no)) {
-  //       newErrors[student.student_id] = "Registration number must be unique.";
-  //       hasError = true;
-  //     } else {
-  //       regNoSet.add(student.reg_no);
-  //     }
-
-  //     if (!student.stu_aadhaar_no) {
-  //       newErrors[student.student_id] = "Aadhaar number is required.";
-  //       hasError = true;
-  //     } else if (!/^\d{12}$/.test(student.stu_aadhaar_no)) {
-  //       newErrors[student.student_id] =
-  //         "Aadhaar number must be exactly 12 digits.";
-  //       hasError = true;
-  //     } else {
-  //       newErrors[student.student_id] = ""; // Clear any previous error for Aadhaar
-  //     }
-
-  //     // Additional field validations can be added here if needed
-  //   });
-
-  //   setErrors(newErrors);
-  //   return !hasError;
-  // };
 
   const filteredParents = useMemo(() => {
     if (!Array.isArray(studentInformation)) return [];
@@ -806,7 +461,8 @@ const AllotGRNumbers = () => {
       return (
         (student.roll_no !== null &&
           student.roll_no.toString().toLowerCase().includes(searchLower)) ||
-        `${student.full_name || ""}`.toLowerCase().includes(searchLower)
+        student.full_name.toLowerCase().includes(searchLower) ||
+        student.reg_no.toString().toLowerCase().includes(searchLower)
       );
     });
     // .sort((a, b) => (a.roll_no || 0) - (b.roll_no || 0)); // Sort by roll_no
@@ -820,6 +476,7 @@ const AllotGRNumbers = () => {
   const handleNavigation = () => {
     navigate("/dashboard");
   };
+
   return (
     <div>
       <ToastContainer />
@@ -843,128 +500,131 @@ const AllotGRNumbers = () => {
         ></div>
         <div className="w-full md:container mt-4">
           {/* Search Section */}
+          <div className="pt-2 md:pt-4"></div>
+          <div className="pt-8 w-full md:w-[70%]  relative ml-0 md:ml-[10%]  border-1 flex justify-start flex-col md:flex-row gap-x-1  bg-white rounded-lg mt-2 md:mt-6 p-2 ">
+            {/* <h6 className=" w-[20%] float-start text-nowrap text-blue-600 mt-2.5"></h6> */}
 
-          <div className="     w-full md:container mt-4">
-            {/* Search Section */}
-            <div className=" w-full md:w-[65%] border-1 flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg relative md:left-16 left-0  mt-1 p-2 ">
-              <div className="w-full   flex md:flex-row justify-between items-center">
-                <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                  <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
-                    <label
-                      className="text-md mt-1.5 mr-1 md:mr-0"
-                      htmlFor="classSelect"
-                    >
-                      Class <span className="text-red-500">*</span>
-                    </label>
+            <div className="w-full flex md:flex-row justify-start items-center">
+              <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                <div className="w-full gap-x-1 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row ">
+                  <label
+                    className="text-md mt-1.5 mr-1 md:mr-0 inline-flex"
+                    htmlFor="classSelect"
+                  >
+                    Class <span className="text-red-500">*</span>
+                  </label>
 
-                    <div className="w-full md:w-[30%]">
-                      <Select
-                        id="classSelect"
-                        value={selectedClass}
-                        onChange={handleClassSelect}
-                        options={classOptions}
-                        placeholder={loadingClasses ? "Loading..." : "Select"}
-                        isSearchable
-                        isClearable
-                        className="text-sm"
-                        styles={{
-                          menu: (provided) => ({
-                            ...provided,
-                            zIndex: 1050, // Set your desired z-index value
-                          }),
-                        }}
-                        isDisabled={loadingClasses}
-                      />
-                      {nameErrorForClass && (
-                        <div className="h-8 relative ml-1 text-danger text-xs">
-                          {nameErrorForClass}
-                        </div>
-                      )}
-                    </div>
-                    <div className="w-full  gap-x-4 justify-between relative left-0 md:left-[7%]  md:w-[40%]  my-1 md:my-4 flex md:flex-row">
-                      <label
-                        className="text-md  mr-1 mt-0.5 md:mr-0 inline-flex"
-                        htmlFor="divisionSelect"
-                      >
-                        Division <span className="text-red-500">*</span>
-                      </label>
-
-                      <div className="w-full md:w-[65%] relative -top-1">
-                        <Select
-                          id="divisionSelect"
-                          value={selectedDivision}
-                          onChange={handleDivisionSelect}
-                          options={divisionOptions}
-                          placeholder={
-                            loadingStudents ? "Loading..." : "Select"
-                          }
-                          isSearchable
-                          isClearable
-                          className="text-sm"
-                          styles={{
-                            menu: (provided) => ({
-                              ...provided,
-                              zIndex: 1050, // Set your desired z-index value
-                            }),
-                          }}
-                          isDisabled={loadingStudents}
-                        />
-                        {nameErrorForDivision && (
-                          <div className="h-8 relative ml-1 text-danger text-xs">
-                            {nameErrorForDivision}
-                          </div>
-                        )}
+                  <div className="w-full md:w-[30%]">
+                    <Select
+                      id="classSelect"
+                      value={selectedClass}
+                      onChange={handleClassSelect}
+                      options={classOptions}
+                      placeholder={
+                        loadingClasses ? "Loading classes..." : "Select"
+                      }
+                      isSearchable
+                      isClearable
+                      className="text-sm"
+                      styles={{
+                        menu: (provided) => ({
+                          ...provided,
+                          zIndex: 1050, // Set your desired z-index value
+                        }),
+                      }}
+                      isDisabled={loadingClasses}
+                    />
+                    {nameErrorForClass && (
+                      <div className="h-8 relative ml-1 text-danger text-xs">
+                        {nameErrorForClass}
                       </div>
-                    </div>
+                    )}
                   </div>
 
-                  <button
-                    type="search"
-                    onClick={handleSearch}
-                    style={{ backgroundColor: "#2196F3" }}
-                    className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                      loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    disabled={loadingForSearch}
+                  <label
+                    className="text-md mt-1.5 mr-1 md:mr-0 inline-flex"
+                    htmlFor="divisionSelect"
                   >
-                    {loadingForSearch ? (
-                      <span className="flex items-center">
-                        <svg
-                          className="animate-spin h-4 w-4 mr-2 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          ></path>
-                        </svg>
-                        Loading...
-                      </span>
-                    ) : (
-                      "Browse"
+                    Division <span className="text-red-500">*</span>
+                  </label>
+
+                  <div className="w-full md:w-[30%]">
+                    <Select
+                      id="divisionSelect"
+                      value={selectedDivision}
+                      onChange={handleDivisionSelect}
+                      options={divisionOptions}
+                      placeholder={
+                        loadingClasses ? "Loading divisions..." : "Select"
+                      }
+                      isSearchable
+                      isClearable
+                      className="text-sm"
+                      styles={{
+                        menu: (provided) => ({
+                          ...provided,
+                          zIndex: 1050, // Set your desired z-index value
+                        }),
+                      }}
+                      isDisabled={loadingDivision}
+                    />
+                    {nameErrorForDivision && (
+                      <div className="h-8 relative ml-1 text-danger text-xs">
+                        {nameErrorForDivision}
+                      </div>
                     )}
-                  </button>
+                  </div>
                 </div>
+
+                <button
+                  type="search"
+                  onClick={handleSearch}
+                  style={{ backgroundColor: "#2196F3" }}
+                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                    loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={loadingForSearch}
+                >
+                  {loadingForSearch ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin h-4 w-4 mr-2 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        ></path>
+                      </svg>
+                      Loading...
+                    </span>
+                  ) : (
+                    "Browse"
+                  )}
+                </button>
               </div>
             </div>
           </div>
           {/* Form Section - Displayed when studentInformation is fetched */}
           {studentInformation && (
-            <div className="w-full md:w-[93%] md:container mx-auto py-4 px-4 ">
+            <div className="w-full md:container mx-auto py-4 px-4 ">
               <div className="card mx-auto w-full shadow-lg">
-                {/* <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
-                  <div className="box-border flex md:gap-x-2">
+                <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
+                  <h6 className="text-gray-700 mt-1   text-nowrap">
+                    Select Students for allot GR & Aadhaar No.
+                  </h6>
+                  <div className="box-border flex md:gap-x-2  ">
                     <div className=" w-1/2 md:w-fit mr-1">
                       <input
                         type="text"
@@ -980,18 +640,18 @@ const AllotGRNumbers = () => {
                   style={{
                     backgroundColor: "#C03078",
                   }}
-                ></div> */}
+                ></div>
                 <div className="card-body w-full ">
                   <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full mx-auto">
                     <div className="bg-white rounded-lg shadow-xs">
                       <table className="min-w-full leading-normal table-auto">
                         <thead className=" ">
                           <tr className="bg-gray-200 ">
-                            <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            <th className="px-2 w-full md:w-[7%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Sr. No.
                             </th>
                             <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Roll No.
+                              Roll No
                             </th>
                             <th className="px-2 w-full md:w-[40%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Student Name
@@ -1003,7 +663,7 @@ const AllotGRNumbers = () => {
                               Admission Date
                             </th>
                             <th className="px-2 w-full md:w-[30%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Student Aadhhar No.
+                              Student Aadhaar No.
                             </th>
                           </tr>
                         </thead>
@@ -1066,9 +726,13 @@ const AllotGRNumbers = () => {
                                       {errors[student.student_id]?.reg_no}
                                     </span>
                                   )}
-                                  {errorsBackend[index]?.reg_no && (
+                                  {backendErrors[student.student_id]
+                                    ?.reg_no && (
                                     <span className="text-red-500 text-xs block mt-1">
-                                      {errorsBackend[index]?.reg_no}
+                                      {
+                                        backendErrors[student.student_id]
+                                          ?.reg_no
+                                      }
                                     </span>
                                   )}
                                 </td>
@@ -1094,7 +758,17 @@ const AllotGRNumbers = () => {
                                         "admission_date"
                                       )
                                     }
+                                    // max={student.admission_date || ""}
                                   />
+                                  {errors[student.student_id]
+                                    ?.admission_date && (
+                                    <span className="text-red-500 text-xs block mt-1">
+                                      {
+                                        errors[student.student_id]
+                                          ?.admission_date
+                                      }
+                                    </span>
+                                  )}
                                 </td>
 
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
@@ -1129,8 +803,6 @@ const AllotGRNumbers = () => {
                                     </span>
                                   )}
                                 </td>
-
-                                {/* 444444 */}
                               </tr>
                             ))
                           ) : (
