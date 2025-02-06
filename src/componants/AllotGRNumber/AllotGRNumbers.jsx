@@ -204,6 +204,8 @@ const AllotGRNumbers = () => {
     e.preventDefault();
 
     try {
+      setLoading(true); // Start loading
+
       const token = localStorage.getItem("authToken");
       if (!studentInformation?.length) {
         alert("No student data to update.");
@@ -286,17 +288,6 @@ const AllotGRNumbers = () => {
           }); // Smooth scroll
         }
 
-        // Display toast messages for unique errors
-        // if (errorMessages.size > 0) {
-        //   toast.error(Array.from(errorMessages).join("\n"),
-        //   {
-        //     autoClose: 5000,
-        //     position: "top-right",
-        //     closeOnClick: true,
-        //     pauseOnHover: true,
-        //   });
-        // }
-
         return; // Stop form submission
       }
 
@@ -309,6 +300,23 @@ const AllotGRNumbers = () => {
 
       if (response.status === 200) {
         toast.success("Student details updated successfully!");
+        setSelectedClass(null); // Reset class selection
+        setSelectedStudent(null); // Reset student selection
+        setSelectedStudents([]); // Clear selected students
+        setErrors({});
+        setSelectedStudentForStudent(null);
+        setSelectedStudentForStudent([]);
+        setSelectedClassForStudent(null);
+        setSelectedDivision("");
+        setDivisionForForm([]);
+        setSelectedClassForStudent([]);
+        setNameErrorForClassForStudent("");
+        setNameErrorForStudent("");
+        setSelectAll(null);
+        setBackendErrors({});
+        setTimeout(() => {
+          setstudentInformation(null);
+        }, 500);
       } else {
         toast.error(
           `Failed to update student details. Status: ${response.status}`
@@ -361,16 +369,6 @@ const AllotGRNumbers = () => {
                 block: "center",
               });
             }
-
-            // Display unique error messages in a single toast
-            // if (errorMessages.size > 0) {
-            //   toast.error(Array.from(errorMessages).join("\n"), {
-            //     autoClose: 5000,
-            //     position: "top-right",
-            //     closeOnClick: true,
-            //     pauseOnHover: true,
-            //   });
-            // }
           }
         }
       } else {
@@ -378,6 +376,8 @@ const AllotGRNumbers = () => {
           `An error occurred: ${error.response?.data?.message || error.message}`
         );
       }
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 

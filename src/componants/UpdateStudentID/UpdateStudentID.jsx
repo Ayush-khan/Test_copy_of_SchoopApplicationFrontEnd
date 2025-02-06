@@ -203,6 +203,8 @@ const UpdateStudentID = () => {
     e.preventDefault();
 
     try {
+      setLoading(true); // Start loading
+
       const token = localStorage.getItem("authToken");
 
       if (!studentInformation?.length) {
@@ -274,6 +276,26 @@ const UpdateStudentID = () => {
 
       if (response.status === 200) {
         toast.success("Student details updated successfully!");
+        setSelectedClass(null); // Reset class selection
+        // setSelectedClassForStudent(null);
+        // selectedStudentForStudent(null);
+
+        setSelectedStudent(null); // Reset student selection
+        setSelectedStudents([]); // Clear selected students
+        setErrors({});
+        setSelectedStudentForStudent(null);
+        setSelectedStudentForStudent([]);
+        setSelectedClassForStudent(null);
+        setSelectedDivision("");
+        setDivisionForForm([]);
+        setSelectedClassForStudent([]);
+        setNameErrorForClassForStudent("");
+        setNameErrorForStudent("");
+        setSelectAll(null);
+        setBackendErrors({});
+        setTimeout(() => {
+          setstudentInformation(null);
+        }, 500);
       } else {
         toast.error(
           `Failed to update student details. Status: ${response.status}`
@@ -282,6 +304,8 @@ const UpdateStudentID = () => {
     } catch (error) {
       console.log("Full API Error Response:", error.response);
       toast.error("Error Updating Student Details.");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
