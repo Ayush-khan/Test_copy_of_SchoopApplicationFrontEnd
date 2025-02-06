@@ -277,9 +277,6 @@ const UpdateStudentID = () => {
       if (response.status === 200) {
         toast.success("Student details updated successfully!");
         setSelectedClass(null); // Reset class selection
-        // setSelectedClassForStudent(null);
-        // selectedStudentForStudent(null);
-
         setSelectedStudent(null); // Reset student selection
         setSelectedStudents([]); // Clear selected students
         setErrors({});
