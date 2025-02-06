@@ -508,115 +508,117 @@ const AllotGRNumbers = () => {
 
             <div className="w-full flex md:flex-row justify-start items-center">
               <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                <div className="w-full border-1  gap-x-1 md:gap-x-6 items-center md:justify-between my-1 md:my-4 flex flex-col md:flex-row ">
-                  <div className="  w-full md:w-[37%] flex flex-row justify-between   ">
-                    <label
-                      className="text-md mt-1.5 mr-1 md:mr-0 inline-flex"
-                      htmlFor="classSelect"
-                    >
-                      Class <span className="text-red-500">*</span>
-                    </label>
+                <div className="w-full  gap-x-1 md:gap-x-6 items-center md:justify-between my-1 md:my-4 flex flex-col md:flex-row ">
+                  <div className=" w-full md:w-[85%] flex flex-col md:flex-row justify-between">
+                    <div className="  w-full md:w-[47%] flex flex-row justify-between   ">
+                      <label
+                        className="text-md mt-1.5 mr-1 md:mr-0 inline-flex"
+                        htmlFor="classSelect"
+                      >
+                        Class <span className="text-red-500">*</span>
+                      </label>
 
-                    <div className="w-full md:w-[70%]">
-                      <Select
-                        id="classSelect"
-                        value={selectedClass}
-                        onChange={handleClassSelect}
-                        options={classOptions}
-                        placeholder={
-                          loadingClasses ? "Loading classes..." : "Select"
-                        }
-                        isSearchable
-                        isClearable
-                        className="text-sm"
-                        styles={{
-                          menu: (provided) => ({
-                            ...provided,
-                            zIndex: 1050, // Set your desired z-index value
-                          }),
-                        }}
-                        isDisabled={loadingClasses}
-                      />
-                      {nameErrorForClass && (
-                        <div className="h-8 relative ml-1 text-danger text-xs">
-                          {nameErrorForClass}
-                        </div>
-                      )}
+                      <div className="w-full md:w-[70%]">
+                        <Select
+                          id="classSelect"
+                          value={selectedClass}
+                          onChange={handleClassSelect}
+                          options={classOptions}
+                          placeholder={
+                            loadingClasses ? "Loading classes..." : "Select"
+                          }
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          styles={{
+                            menu: (provided) => ({
+                              ...provided,
+                              zIndex: 1050, // Set your desired z-index value
+                            }),
+                          }}
+                          isDisabled={loadingClasses}
+                        />
+                        {nameErrorForClass && (
+                          <div className="h-8 relative ml-1 text-danger text-xs">
+                            {nameErrorForClass}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="  w-full md:w-[44%] flex flex-row justify-between   ">
+                      {" "}
+                      <label
+                        className="text-md mt-1.5 mr-1 md:mr-0 inline-flex"
+                        htmlFor="divisionSelect"
+                      >
+                        Division <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-full md:w-[60%]">
+                        <Select
+                          id="divisionSelect"
+                          value={selectedDivision}
+                          onChange={handleDivisionSelect}
+                          options={divisionOptions}
+                          placeholder={
+                            loadingClasses ? "Loading divisions..." : "Select"
+                          }
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          styles={{
+                            menu: (provided) => ({
+                              ...provided,
+                              zIndex: 1050, // Set your desired z-index value
+                            }),
+                          }}
+                          isDisabled={loadingDivision}
+                        />
+                        {nameErrorForDivision && (
+                          <div className="h-8 relative ml-1 text-danger text-xs">
+                            {nameErrorForDivision}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="  w-full md:w-[34%] flex flex-row justify-between   ">
-                    {" "}
-                    <label
-                      className="text-md mt-1.5 mr-1 md:mr-0 inline-flex"
-                      htmlFor="divisionSelect"
-                    >
-                      Division <span className="text-red-500">*</span>
-                    </label>
-                    <div className="w-full md:w-[60%]">
-                      <Select
-                        id="divisionSelect"
-                        value={selectedDivision}
-                        onChange={handleDivisionSelect}
-                        options={divisionOptions}
-                        placeholder={
-                          loadingClasses ? "Loading divisions..." : "Select"
-                        }
-                        isSearchable
-                        isClearable
-                        className="text-sm"
-                        styles={{
-                          menu: (provided) => ({
-                            ...provided,
-                            zIndex: 1050, // Set your desired z-index value
-                          }),
-                        }}
-                        isDisabled={loadingDivision}
-                      />
-                      {nameErrorForDivision && (
-                        <div className="h-8 relative ml-1 text-danger text-xs">
-                          {nameErrorForDivision}
-                        </div>
-                      )}
-                    </div>
-                  </div>{" "}
-                  <button
-                    type="search"
-                    onClick={handleSearch}
-                    style={{ backgroundColor: "#2196F3" }}
-                    className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                      loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    disabled={loadingForSearch}
-                  >
-                    {loadingForSearch ? (
-                      <span className="flex items-center">
-                        <svg
-                          className="animate-spin h-4 w-4 mr-2 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          ></path>
-                        </svg>
-                        Loading...
-                      </span>
-                    ) : (
-                      "Browse"
-                    )}
-                  </button>
                 </div>
+                <button
+                  type="search"
+                  onClick={handleSearch}
+                  style={{ backgroundColor: "#2196F3" }}
+                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                    loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={loadingForSearch}
+                >
+                  {loadingForSearch ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin h-4 w-4 mr-2 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        ></path>
+                      </svg>
+                      Loading...
+                    </span>
+                  ) : (
+                    "Browse"
+                  )}
+                </button>
               </div>
             </div>
           </div>
