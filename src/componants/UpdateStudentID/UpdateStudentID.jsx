@@ -115,6 +115,7 @@ const UpdateStudentID = () => {
   }, [divisionforForm]);
 
   const handleClassSelect = (selectedOption) => {
+    setNameErrorForClass("");
     setSelectedClass(selectedOption); // change
     // setClassError("");
 
@@ -128,6 +129,7 @@ const UpdateStudentID = () => {
   };
 
   const handleDivisionSelect = (selectedOption) => {
+    setNameErrorForDivision("");
     setSelectedDivision(selectedOption); // Ensure correct value is set
   };
 
