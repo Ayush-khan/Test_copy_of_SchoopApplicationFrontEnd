@@ -178,6 +178,7 @@ import SubjectAllotmentHSC from "../componants/MastersModule/SubjectAllotmentFor
 import LeaveType from "../componants/LeaveType/LeaveType.jsx";
 import CategoryReligion from "../componants/CategoryReligion/CategoryReligion.jsx";
 import AllotGRNumbers from "../componants/AllotGRNumber/AllotGRNumbers.jsx";
+import UpdateStudentID from "../componants/UpdateStudentID/UpdateStudentID.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -504,6 +505,11 @@ function Index() {
         <Route
           path="/allotGRNumber"
           element={<PrivateRoute element={<AllotGRNumbers />} />}
+        />
+        {/* UpdateStudentID Module */}
+        <Route
+          path="/updateStudentID"
+          element={<PrivateRoute element={<UpdateStudentID />} />}
         />
         {/*Update CategoryReligion Module */}
         <Route
