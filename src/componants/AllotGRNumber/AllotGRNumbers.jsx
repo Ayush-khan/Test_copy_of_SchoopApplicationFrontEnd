@@ -119,7 +119,7 @@ const AllotGRNumbers = () => {
   const handleClassSelect = (selectedOption) => {
     setSelectedClass(selectedOption);
     // setClassError("");
-
+    setNameErrorForClass("");
     setSelectedDivision(null); // Reset division dropdown
     setDivisionForForm([]); // Clear division options
     setClassIdForSearch(selectedOption?.value);
@@ -131,6 +131,7 @@ const AllotGRNumbers = () => {
 
   const handleDivisionSelect = (selectedOption) => {
     setSelectedDivision(selectedOption); // Ensure correct value is set
+    setNameErrorForDivision("");
   };
 
   const handleSearch = async () => {
