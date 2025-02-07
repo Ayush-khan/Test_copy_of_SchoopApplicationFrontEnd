@@ -1422,10 +1422,15 @@ function EditOfNewStudentList() {
       }
       // console.log("formattedFormData", formattedFormData);
       console.log("formData", formData);
+      const updatedFormData = {
+        ...formData,
+        SetEmailIDAsUsername: selectedUsername || "",
+      };
+      console.log("formData Before submitting", updatedFormData);
       // const ParentIdIs=formData.parent_id;
       const response = await axios.put(
         `${API_URL}/api/updateNewStudent/${student.student_id}/${formData?.parent_id}`,
-        formData, // Send the FormData object
+        updatedFormData, // Send the FormData object
         {
           headers: {
             Authorization: `Bearer ${token}`,
