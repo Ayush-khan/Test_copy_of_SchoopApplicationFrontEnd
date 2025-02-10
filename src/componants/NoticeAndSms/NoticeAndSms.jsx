@@ -1092,7 +1092,7 @@ function NoticeAndSms() {
                           const textAfterCursor = noticeDesc.slice(cursorPos); // Text after the cursor
                           const updatedText = `${textBeforeCursor}\n• ${textAfterCursor}`;
                           setNoticeDesc(updatedText);
-                          // Move the cursor to the position after the bullet point gfgdfgd
+                          // Move the cursor to the position after the bullet point g
                           setTimeout(() => {
                             e.target.selectionStart = e.target.selectionEnd =
                               cursorPos + 3;
