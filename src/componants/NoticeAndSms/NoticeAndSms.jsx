@@ -1088,7 +1088,7 @@ function NoticeAndSms() {
                           const textBeforeCursor = noticeDesc.slice(
                             0,
                             cursorPos
-                          ); // Text before the cursor
+                          ); // Text before the cursorfdsf
                           const textAfterCursor = noticeDesc.slice(cursorPos); // Text after the cursor
                           const updatedText = `${textBeforeCursor}\n• ${textAfterCursor}`;
                           setNoticeDesc(updatedText);
