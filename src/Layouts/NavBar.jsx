@@ -696,7 +696,7 @@ function NavBar() {
         toast.error("No student found with this GR number.");
         console.log("Error: No student found"); // Debugging
       } else {
-        navigate(`/student_grn_data`, {
+        navigate(`/StudentSearchUsingGRN`, {
           state: { studentData: studentList[0] },
         });
       }
