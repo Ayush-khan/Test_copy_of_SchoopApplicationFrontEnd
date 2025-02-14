@@ -419,7 +419,7 @@ const UpdateStudentID = () => {
     <div>
       <ToastContainer />
 
-      <div className="md:mx-auto md:w-[98%] p-4 bg-white mt-4 ">
+      <div className="md:mx-auto md:w-[90%] p-4 bg-white mt-4 ">
         <div className=" w-full    flex justify-between items-center ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Update Student ID & Other Details
@@ -589,13 +589,13 @@ const UpdateStudentID = () => {
                       <table className="min-w-full leading-normal table-auto">
                         <thead className=" ">
                           <tr className="bg-gray-200 ">
-                            <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            <th className="px-2 w-full md:w-[5%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Sr. No.
                             </th>
                             <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Roll No
                             </th>
-                            <th className="px-2 w-full md:w-[25%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            <th className="px-2 w-full md:w-[30%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Student Name
                             </th>
                             <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
