@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { ToastContainer } from "react-bootstrap";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const StudentSearchUsingGRN = () => {
@@ -25,6 +25,7 @@ const StudentSearchUsingGRN = () => {
 
   return (
     <>
+      <ToastContainer />
       <div className="W-[95%] mx-auto p-4">
         <div className="card p-3 rounded-md">
           <div className="card-header mb-4 flex justify-between items-center">
@@ -43,7 +44,6 @@ const StudentSearchUsingGRN = () => {
 
           <div className="bg-white w-full md:w-[95%] mx-2 rounded-md ">
             <div className="w-full mx-auto">
-              <ToastContainer />
               <div className="">
                 {" "}
                 {/* mb-4 */}
