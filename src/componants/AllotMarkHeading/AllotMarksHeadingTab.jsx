@@ -927,15 +927,17 @@ const AllotMarksHeadingTab = () => {
 
     try {
       const token = localStorage.getItem("authToken");
-      await axios.delete(
+      const response = await axios.delete(
         `${API_URL}/api/delete_AllotMarkheadingss/${selectedClass.value}/${selectedExam.value}/${selectedSubject.value}`,
 
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      toast.success(
+        response?.data?.message || "Allot Marks headings Deleted successfully"
+      );
 
-      toast.success("Allot Marks headings Deleted successfully");
       // Reset the form
       setSelectedClass(null);
       setSelectedExam(null);
