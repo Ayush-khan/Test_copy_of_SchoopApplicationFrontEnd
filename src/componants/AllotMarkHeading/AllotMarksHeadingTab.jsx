@@ -928,7 +928,7 @@ const AllotMarksHeadingTab = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.delete(
-        `${API_URL}/api/delete_AllotMarkheadingss/${selectedClass.value}/${selectedExam.value}/${selectedSubject.value}`,
+        `${API_URL}/api/delete_AllotMarkheadingss/${selectedClass.value}/${selectedSubject.value}/${selectedExam.value}`,
 
         {
           headers: { Authorization: `Bearer ${token}` },
