@@ -460,21 +460,6 @@ const SiblingMapping = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Validation checks
-    if (selectedStudentId === selectedStudentIdForSecond) {
-      toast.error(
-        "🚫 Both students cannot be the same. Please select different students!",
-        {
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        }
-      );
-      return;
-    }
-
     let hasError = false;
 
     if (!selectedStudentId) {
@@ -494,7 +479,20 @@ const SiblingMapping = () => {
     if (hasError) {
       return;
     }
-
+    // Validation checks
+    if (selectedStudentId === selectedStudentIdForSecond) {
+      toast.error(
+        "🚫 Both students cannot be the same. Please select different students!",
+        {
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
+      return;
+    }
     // Prepare the data format as per requirement
     const requestData = {
       operation: "create",
