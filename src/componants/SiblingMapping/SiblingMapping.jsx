@@ -709,9 +709,7 @@ const SiblingMapping = () => {
                           value={selectedClass}
                           onChange={handleClassSelect}
                           options={classOptions}
-                          placeholder={
-                            loadingClasses ? "Loading classes..." : "Select"
-                          }
+                          placeholder={loadingClasses ? "Loading..." : "Select"}
                           isSearchable
                           isClearable
                           className="text-[.8em]"
@@ -735,7 +733,7 @@ const SiblingMapping = () => {
                           onChange={handleStudentSelect}
                           options={studentOptions}
                           placeholder={
-                            loadingStudents ? "Loading students..." : "Select"
+                            loadingStudents ? "Loading..." : "Select"
                           }
                           isSearchable
                           isClearable
@@ -902,11 +900,6 @@ const SiblingMapping = () => {
                             <label htmlFor="parent1" className="text-gray-700">
                               Set this as parent
                             </label>{" "}
-                            {radioButtonError && (
-                              <div className="  ml-1 text-danger text-xs">
-                                {radioButtonError}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </form>
@@ -934,9 +927,7 @@ const SiblingMapping = () => {
                           onChange={handleClassSelectForSecond}
                           options={classOptionsForSecond}
                           placeholder={
-                            loadingClassesForSecond
-                              ? "Loading classes..."
-                              : "Select"
+                            loadingClassesForSecond ? "Loading..." : "Select"
                           }
                           isSearchable
                           isClearable
@@ -961,9 +952,7 @@ const SiblingMapping = () => {
                           onChange={handleStudentSelectForSecond}
                           options={studentOptionsForSecond}
                           placeholder={
-                            loadingStudentsForSecond
-                              ? "Loading students..."
-                              : "Select"
+                            loadingStudentsForSecond ? "Loading..." : "Select"
                           }
                           isSearchable
                           isClearable
