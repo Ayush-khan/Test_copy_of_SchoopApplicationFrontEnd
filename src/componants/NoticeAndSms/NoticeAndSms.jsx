@@ -539,9 +539,9 @@ function NoticeAndSms() {
       );
 
       // fetchClassNames();
-      handleSearch();
+      await handleSearch();
 
-      setShowPublishModal(false);
+      // setShowPublishModal(false);
       // setSubjects([]);
       toast.success(`${currestSubjectNameForDelete} Publish successfully!`);
     } catch (error) {
