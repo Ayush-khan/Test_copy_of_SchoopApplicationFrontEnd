@@ -1381,7 +1381,7 @@ function NoticeAndSms() {
                 ></div>
                 <div className="modal-body">
                   Are you sure you want to Publish this{" "}
-                  {` ${currestSubjectNameForDelete} `} ?
+                  {` ${currentSection?.notice_type} `} ?
                 </div>
                 <div className=" flex justify-end p-3">
                   <button
