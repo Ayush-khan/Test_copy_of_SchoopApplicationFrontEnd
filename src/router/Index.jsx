@@ -181,6 +181,7 @@ import AllotGRNumbers from "../componants/AllotGRNumber/AllotGRNumbers.jsx";
 import UpdateStudentID from "../componants/UpdateStudentID/UpdateStudentID.jsx";
 import StudentSearchUsingGRN from "../componants/StudentSearchUsingGRN/StudentSearchUsingGRN.jsx";
 import HolidayList from "../componants/HolidayList/HolidayList.jsx";
+import StudentIdCard from "../componants/IDCards/StudentIdCard.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -564,6 +565,12 @@ function Index() {
         <Route
           path="/sections"
           element={<PrivateRoute element={<Sections />} />}
+        />
+        {/* Id Cards Module */}
+        {/* Student Id Card Module */}
+        <Route
+          path="/studentIdCard"
+          element={<PrivateRoute element={<StudentIdCard />} />}
         />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />

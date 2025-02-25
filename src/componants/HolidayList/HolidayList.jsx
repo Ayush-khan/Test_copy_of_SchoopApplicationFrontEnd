@@ -1341,61 +1341,6 @@ function HolidayList() {
                     backgroundColor: "#C03078",
                   }}
                 ></div>
-                {/* <hr className="font-bold"></hr> */}
-                {/* <div className="modal-body">
-                  <div className="relative mb-3 flex justify-center mx-4">
-                    <label htmlFor="title" className="w-1/2 mt-2">
-                      Title<span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="title"
-                      name="title"
-                      value={formData.title}
-                      className="form-control shadow-md"
-                      onChange={handleChangeInput}
-                    />
-                  </div>
-
-                  <div className="relative mb-3 flex justify-center mx-4">
-                    <label htmlFor="startDate" className="w-1/2 mt-2">
-                      Start Date<span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="startDate"
-                      type="date"
-                      name="holiday_date"
-                      value={formData.holiday_date}
-                      className="form-control shadow-md"
-                      onChange={handleChangeInput}
-                      min={dateLimits.min} // Restrict min date
-                      max={dateLimits.max} // Restrict max date
-                    />
-                    <div className="absolute top-9 left-1/3">
-                      {fieldErrors.holiday_date && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.holiday_date}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className=" relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="endDate" className="w-1/2 mt-2">
-                      End Date
-                    </label>
-                    <input
-                      id="endDate"
-                      type="date"
-                      name="to_date"
-                      value={formData.to_date}
-                      className="form-control shadow-md"
-                      onChange={handleChangeInput}
-                      min={dateLimits.min} // Restrict min date
-                      max={dateLimits.max} // Restrict max date
-                    />
-                  </div>
-                </div> */}
 
                 <div className="modal-body">
                   <div className=" relative mb-4 flex justify-center  mx-4">

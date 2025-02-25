@@ -769,7 +769,7 @@ const AdminNavBar = () => {
         >
           <NavDropdown.Item
             as={Link}
-            to="#"
+            to="/studentIdCard"
             className="text-sm font-bold hover:text-black"
           >
             Student ID Card
