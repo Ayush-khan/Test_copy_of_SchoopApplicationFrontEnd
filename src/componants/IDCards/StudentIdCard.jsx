@@ -9,25 +9,25 @@ import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import ReactPaginate from "react-paginate";
+import { FaDownload } from "react-icons/fa";
 
 const StudentIdCard = () => {
   const API_URL = import.meta.env.VITE_API_URL;
-  const [activeTab, setActiveTab] = useState("Manage");
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // Format as yyyy-MM-dd
   });
+  const [currentPage, setCurrentPage] = useState(0);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
-  const [description, setDescription] = useState("");
+
   const navigate = useNavigate();
-  const [errors, setErrors] = useState({});
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
-  const [dates, setDates] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [timetable, setTimetable] = useState([]);
@@ -35,11 +35,11 @@ const StudentIdCard = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedDay, setSelectedDay] = useState("");
+  const pageSize = 10;
+  const [pageCount, setPageCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    // Fetch both classes and exams when the component mounts
-
     fetchExams();
   }, []);
 
@@ -49,36 +49,18 @@ const StudentIdCard = () => {
       const token = localStorage.getItem("authToken");
 
       const response = await axios.get(
-        `${API_URL}/api/get_teachersubstitutionlist`,
+        `${API_URL}/api/getallClassWithStudentCount`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("teacher", response);
-      setStudentNameWithClassId(response.data?.data || []);
+      console.log("Class", response);
+      setStudentNameWithClassId(response?.data || []);
     } catch (error) {
-      toast.error("Error fetching teachers");
-      console.error("Error fetching teachers:", error);
+      toast.error("Error fetching Classes");
+      console.error("Error fetching Classes:", error);
     } finally {
       setLoadingExams(false);
-    }
-  };
-
-  const handleDateChange = (e) => {
-    const newDate = e.target.value;
-    const currentYear = new Date().getFullYear();
-    const selectedYear = new Date(newDate).getFullYear();
-
-    // Allow only dates within the previous, current, and next years
-    if (selectedYear >= currentYear - 1 && selectedYear <= currentYear + 1) {
-      setSelectedDate(newDate);
-      // Calculate the day of the week
-      //   const dayOfWeek = new Date(newDate).toLocaleDateString("en-US", {
-      //     weekday: "long", // "long" gives the full name of the day
-      //   });
-      //   setSelectedDay(dayOfWeek); // Store the day in state
-    } else {
-      alert("Please select a date within the allowed range.");
     }
   };
 
@@ -92,9 +74,9 @@ const StudentIdCard = () => {
 
   const studentOptions = useMemo(
     () =>
-      studentNameWithClassId.map((teacher) => ({
-        value: teacher.teacher_id,
-        label: teacher.name,
+      studentNameWithClassId.map((cls) => ({
+        value: cls?.section_id,
+        label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
       })),
     [studentNameWithClassId]
   );
@@ -105,7 +87,7 @@ const StudentIdCard = () => {
 
     // Check if selectedStudent is empty and set the error message
     if (!selectedStudent) {
-      setStudentError("Please select teacher.");
+      setStudentError("Please select Class.");
       valid = false;
     } else {
       setStudentError(""); // Reset error if teacher is selected
@@ -118,63 +100,23 @@ const StudentIdCard = () => {
 
     try {
       setLoadingForSearch(true); // Start loading
-
+      setSearchTerm("");
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/get_substituteteacherdata/${selectedStudentId}/${selectedDate}`,
+        `${API_URL}/api/get_students?section_id=${selectedStudentId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      if (response?.data?.success && response.data?.data?.length > 0) {
-        const substitutionData = response.data.data;
-
-        // Map response data into a usable structure for rendering
-        const timetableData = substitutionData.map((item) => ({
-          date: item.date,
-          period: item.period,
-          subjectName: item.sname,
-          subTeacher: item.sub_teacher,
-          className: item.c_name,
-          sectionName: item.s_name,
-          academicYear: item.academic_yr,
-          teacherId: item?.teacher_id,
-        }));
-        setSelectedDay(response?.data?.day_week);
-
-        setDates([...new Set(substitutionData.map((item) => item.date))]); // Unique dates
-        setTimetable(timetableData);
-
-        toast.success("Substitution data fetched successfully!");
-      } else {
-        toast.error(
-          "No substitution data available for the selected teacher and date."
-        );
-        setDates([]);
-        setTimetable([]); // Reset timetable to avoid incorrect rendering
-      }
+      setTimetable(response?.data?.students);
+      setPageCount(Math.ceil(response?.data?.students?.length / pageSize)); // Set page count based on response size
     } catch (error) {
-      console.error("Error fetching substitution data:", error);
-      toast.error("An error occurred while fetching substitution data.");
+      console.error("Error fetching Student Id Card data:", error);
+      toast.error("An error occurred while fetching Student Id Carddata.");
     } finally {
       setLoadingForSearch(false);
     }
   };
-
-  // Function to reset the table
-  const resetTimetable = () => {
-    setTimetable(
-      timetable.map((row) => ({
-        ...row,
-        subjects: Array(4).fill(""),
-        option: "Select",
-        studyLeave: false,
-      }))
-    );
-    setDescription("");
-  };
-  // Function to update timetable rows
 
   const handleDelete = () => {
     setShowDeleteModal(true);
@@ -242,127 +184,272 @@ const StudentIdCard = () => {
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-  };
+
   console.log("row", timetable);
+  //   const handlePrint = () => {
+  //     // Prepare the content for printing
+  //     const printContent = `
+  //     <div class="flex items-center justify-center min-h-screen bg-white">
+  //       <div id="tableHeading" class="text-center w-3/4">
+  //         <h4 id="tableHeading5" class="text-xl text-center mb-0">
+  //           Substitution Timetable of ${selectedStudent.label}
+  //         </h4>
+  //         <table class="w-full border-collapse border border-black mx-auto mt-0">
+  //           <thead>
+  //             <tr class="bg-gray-100">
+  //               <th class="border border-black p-2 text-center font-semibold">Date</th>
+
+  //                             <th class="border border-black p-2 text-center font-semibold">Period</th>
+  //               <th class="border border-black p-2 text-center font-semibold">Subject</th>
+
+  //               <th class="border border-black p-2 text-center font-semibold">Substitute Teacher</th>
+
+  //             </tr>
+  //           </thead>
+  //           <tbody>
+  //             ${timetable
+  //               .map(
+  //                 (row) => `
+  //                 <tr>
+  //                   <td class="border border-black p-2 text-center">${
+  //                     row.date || "-"
+  //                   }</td>
+
+  //                   <td class="border border-black p-2 text-center">${
+  //                     row.period || "-"
+  //                   }</td>
+  //                   <td class="border border-black p-2 text-center">${
+  //                     row.subjectName || "-"
+  //                   }  ${row.className || "-"}-${row.sectionName || "-"}
+  //                   </td>
+
+  //                   <td class="border border-black p-2 text-center">${
+  //                     row.subTeacher || "-"
+  //                   }</td>
+
+  //                 </tr>
+  //               `
+  //               )
+  //               .join("")}
+  //           </tbody>
+  //         </table>
+  //       </div>
+  //     </div>
+  //   `;
+
+  //     // Open a new print window
+  //     const printWindow = window.open("", "", "height=800,width=1000");
+  //     printWindow.document.write(
+  //       `<html>
+  //       <head>
+  //         <title></title>
+  //         <style>
+  //           @page {
+  //             margin: 0;
+  //           }
+  //           body {
+  //             margin: 0;
+  //             padding: 0;
+  //             font-family: Arial, sans-serif;
+  //           }
+  //           #tableHeading {
+  //             width: 70%;
+  //             margin: auto;
+  //             margin-top: 4em;
+  //           }
+  //           #tableHeading5 {
+  //             text-align: center;
+  //             margin-bottom: 5px;
+  //           }
+  //           table {
+  //             border-spacing: 0;
+  //             width: 100%;
+  //             margin: auto;
+  //           }
+  //           th {
+  //           font-size: .8em;
+  //             background-color: #f9f9f9;
+  //           }
+  //             td{
+  //             font-size:12px;
+  //             }
+
+  //           th, td {
+  //             border: 1px solid gray;
+  //             padding: 8px;
+
+  //             text-align: center;
+  //           }
+  //         </style>
+  //       </head>
+  //       <body>
+  //         ${printContent}
+  //       </body>
+  //     </html>`
+  //     );
+  //     printWindow.document.close();
+
+  //     // Trigger the print dialog
+  //     printWindow.print();
+  //   };
+
   const handlePrint = () => {
-    // Prepare the content for printing
     const printContent = `
     <div class="flex items-center justify-center min-h-screen bg-white">
       <div id="tableHeading" class="text-center w-3/4">
         <h4 id="tableHeading5" class="text-xl text-center mb-0">
-          Substitution Timetable of ${selectedStudent.label}
+          Student Information Table
         </h4>
-        <table class="w-full border-collapse border border-black mx-auto mt-0">
+        <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-0">
           <thead>
             <tr class="bg-gray-100">
-              <th class="border border-black p-2 text-center font-semibold">Date</th>
-                         
-                            <th class="border border-black p-2 text-center font-semibold">Period</th>
-              <th class="border border-black p-2 text-center font-semibold">Subject</th>
-
-              <th class="border border-black p-2 text-center font-semibold">Substitute Teacher</th>
-
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No</th>
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Photo</th>
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Name</th>
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">DOB</th>
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Mobile No.</th>
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Mother Mobile No.</th>
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Address</th>
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Blood Group</th>
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Grn No.</th>
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">House</th>
+              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Image Name</th>
             </tr>
           </thead>
           <tbody>
-            ${timetable
+            ${displayedSections
               .map(
-                (row) => `
-                <tr>
-                  <td class="border border-black p-2 text-center">${
-                    row.date || "-"
+                (subject, index) => `
+                <tr class="text-sm">
+                  <td class="px-2 text-center py-2 border border-black">${
+                    index + 1
                   }</td>
-                  
-                  <td class="border border-black p-2 text-center">${
-                    row.period || "-"
+                  <td class="px-2 text-center py-2 border border-black">${
+                    subject?.roll_no || "-"
                   }</td>
-                  <td class="border border-black p-2 text-center">${
-                    row.subjectName || "-"
-                  }  ${row.className || "-"}-${row.sectionName || "-"}
+                  <td class="px-2 text-center py-2 border border-black">
+                    <img src="${
+                      //   subject?.image_name || "https://via.placeholder.com/50"
+                      subject?.image_name || ""
+                    }" 
+                         alt="${subject?.name}" 
+                         class="student-photo" />
                   </td>
-                  
-                  <td class="border border-black p-2 text-center">${
-                    row.subTeacher || "-"
+                  <td class="px-2 text-center py-2 border border-black">${
+                    subject?.get_class?.name || ""
+                  } ${subject?.get_division?.name || ""}</td>
+                  <td class="px-2 text-center py-2 border border-black">${
+                    subject?.first_name || ""
+                  } ${subject?.mid_name || ""} ${subject?.last_name || ""}</td>
+                  <td class="px-2 text-center py-2 border border-black">${
+                    subject?.dob || "-"
                   }</td>
-                  
-                 
-                </tr>
-              `
+                  <td class="px-2 text-center py-2 border border-black">${
+                    subject?.parents?.f_mobile || "-"
+                  }</td>
+                  <td class="px-2 text-center py-2 border border-black">${
+                    subject?.parents?.m_mobile || "-"
+                  }</td>
+                  <td class="px-2 text-center py-2 border border-black">${
+                    subject?.permant_add || "-"
+                  }</td>
+                  <td class="px-2 text-center py-2 border border-black">${
+                    subject?.blood_group || "-"
+                  }</td>
+                  <td class="px-2 text-center py-2 border border-black">${
+                    subject?.reg_no || "-"
+                  }</td>
+                  <td class="px-2 text-center py-2 border border-black">${
+                    subject?.house || "-"
+                  }</td>
+                  <td class="px-2 text-center py-2 border border-black">${
+                    subject?.image_name || "-"
+                  }</td>
+                </tr>`
               )
               .join("")}
           </tbody>
         </table>
       </div>
-    </div>
-  `;
+    </div>`;
 
-    // Open a new print window
     const printWindow = window.open("", "", "height=800,width=1000");
-    printWindow.document.write(
-      `<html>
-      <head>
-        <title></title>
-        <style>
-          @page {
-            margin: 0;
-          }
-          body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-          }
-          #tableHeading {
-            width: 70%;
-            margin: auto;
-            margin-top: 4em;
-          }
-          #tableHeading5 {
-            text-align: center;
-            margin-bottom: 5px;
-          }
-          table {
-            border-spacing: 0;
-            width: 100%;
-            margin: auto;
-          }
-          th {
-          font-size: .8em;
-            background-color: #f9f9f9;
-          }
-            td{
-            font-size:12px;
-            }
-          
-          th, td {
-            border: 1px solid gray;
-            padding: 8px;
-            
-            text-align: center;
-          }
-        </style>
-      </head>
-      <body>
-        ${printContent}
-      </body>
-    </html>`
-    );
+    printWindow.document.write(`
+    <html>
+    <head>
+      <title>Print Table</title>
+      <style>
+        @page { margin: 0; }
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        #tableHeading { width: 70%; margin: auto; margin-top: 4em; }
+        #tableHeading5 { text-align: center; margin-bottom: 5px; }
+        table { border-spacing: 0; width: 100%; margin: auto; }
+        th { font-size: 0.8em; background-color: #f9f9f9; }
+        td { font-size: 12px; }
+        th, td { border: 1px solid gray; padding: 8px; text-align: center; }
+        
+        /* Make student images smaller in print */
+        .student-photo {
+          width: 30px !important; 
+          height: 30px !important;
+          object-fit: cover;
+          border-radius: 50%;
+        }
+      </style>
+    </head>
+    <body>
+      ${printContent}
+    </body>
+    </html>`);
     printWindow.document.close();
-
-    // Trigger the print dialog
     printWindow.print();
   };
 
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
+  };
+  const filteredSections = timetable.filter((section) => {
+    // Convert the search term to lowercase for case-insensitive comparison
+    const searchLower = searchTerm.toLowerCase();
+
+    // Get the student's full name, class name, and user ID for filtering
+    const studentName =
+      `${section?.first_name} ${section?.mid_name} ${section?.last_name}`?.toLowerCase() ||
+      "";
+    const studentClass = section?.get_class?.name?.toLowerCase() || "";
+    const studentUserId = section?.user_master?.user_id?.toLowerCase() || "";
+    const studentRollNo = section?.roll_no?.toString().toLowerCase() || ""; // Convert roll number to string for comparison
+
+    // Check if the search term is present in Roll No, Name, Class, or UserId
+    return (
+      studentRollNo.includes(searchLower) ||
+      studentName.includes(searchLower) ||
+      studentClass.includes(searchLower) ||
+      studentUserId.includes(searchLower)
+    );
+  });
+
+  const displayedSections = filteredSections.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize
+  );
   return (
     <>
-      <div className="w-full md:w-[80%] mx-auto p-4 ">
+      <div className="w-full md:w-[95%] mx-auto p-4 ">
         <ToastContainer />
         <div className="card p-4 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Student ID Card
             </h5>
+            <RxCross1
+              className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+              onClick={() => {
+                navigate("/dashboard");
+              }}
+            />
           </div>
           <div
             className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
@@ -372,17 +459,17 @@ const StudentIdCard = () => {
           ></div>
 
           <>
-            <div className=" w-full md:w-[79%] border-1 drop-shadow-sm  flex justify-center flex-col md:flex-row gap-x-1  bg-white rounded-lg   ml-0    p-2">
-              <div className="w-[99%] flex md:flex-row justify-between items-center">
-                <div className="w-full flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                  <div className="w-full gap-x-2   justify-around md:w-[95%] my-1 md:my-4 flex md:flex-row">
+            <div className=" w-full md:w-[55%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+              <div className="w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
+                <div className="form-group  relative  left-0 md:left-[20%]  w-full md:w-[70%]   flex justify-start gap-x-1 md:gap-x-6 ">
+                  <div className="w-full gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                     <label
-                      className="md:w-[25%] text-md pl-0 md:pl-3 mt-1.5"
+                      className="md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      Teacher <span className="text-red-500">*</span>
+                      Class <span className="text-red-500">*</span>
                     </label>
-                    <div className=" w-full md:w-[70%]">
+                    <div className=" w-full md:w-[65%]">
                       <Select
                         menuPortalTarget={document.body}
                         menuPosition="fixed"
@@ -390,9 +477,7 @@ const StudentIdCard = () => {
                         value={selectedStudent}
                         onChange={handleStudentSelect}
                         options={studentOptions}
-                        placeholder={
-                          loadingExams ? "Loading exams..." : "Select"
-                        }
+                        placeholder={loadingExams ? "Loading..." : "Select"}
                         isSearchable
                         isClearable
                         className="text-sm"
@@ -403,27 +488,6 @@ const StudentIdCard = () => {
                           {studentError}
                         </div>
                       )}
-                    </div>
-                  </div>
-                  <div className="w-full gap-x-14 md:gap-x-6 md:justify-center my-1 md:my-4 flex md:flex-row">
-                    <label
-                      className="text-md mt-1.5 mr-1 md:mr-0"
-                      htmlFor="classSelect"
-                    >
-                      Date
-                    </label>
-                    <div className="w-full md:w-[50%]">
-                      <input
-                        id="dateInput"
-                        type="date"
-                        value={selectedDate} // Default to current date
-                        onChange={handleDateChange}
-                        onKeyDown={(e) => e.preventDefault()} // Prevent clearing the field
-                        min={`${new Date().getFullYear() - 1}-01-01`} // Min date: Jan 1 of previous year
-                        max={`${new Date().getFullYear() + 1}-12-31`} // Max date: Dec 31 of next year
-                        className=" w-full border-1 rounded px-2 py-2 border-gray-300"
-                        required
-                      />
                     </div>
                   </div>
                   <button
@@ -471,83 +535,204 @@ const StudentIdCard = () => {
 
             {timetable.length > 0 && (
               <>
-                <div className="my-2 pt-3 flex flex-col md:flex-row gap-1 justify-center md:justify-end">
-                  <button
-                    type="button"
-                    onClick={() => handleSubmitEdit({ timetable })}
-                    className="bg-blue-500 hover:bg-blue-600 text-white   px-3 rounded"
-                  >
-                    Edit <FontAwesomeIcon icon={faEdit} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete()}
-                    className={`bg-red-500 text-white  px-3 rounded hover:bg-red-700 ${
-                      isSubmitDisabled ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    disabled={isSubmitDisabled}
-                  >
-                    Delete <FontAwesomeIcon icon={faTrash} />
-                  </button>
-                  <button
-                    onClick={handlePrint}
-                    className=" flex  flex-row justify-center align-middle items-center gap-x-1 bg-blue-500 hover:bg-blue-600 text-white   px-3 rounded"
-                  >
-                    print <FiPrinter />
-                  </button>
-                </div>
-                <div className=" md:w-[80%] w-full mx-auto pb-4 pt-2 px-1 md:px-4">
-                  <div className="card bg-gray-100 py-2 px-3 rounded-md">
-                    {/* Responsive Table Wrapper */}{" "}
-                    <h5 className="text-center text-blue-600">{`Timetable for ${selectedDay} `}</h5>
-                    <div className="overflow-x-auto">
-                      <table className="table-auto  w-full border-collapse border bg-gray-50 border-gray-300">
-                        <thead>
-                          <tr className="bg-gray-200">
-                            <th className="border p-2 font-semibold text-center">
-                              Period
-                            </th>
-                            <th className="border p-2 font-semibold text-center">
-                              Subject
-                            </th>
-                            <th className="border p-2 font-semibold text-center">
-                              Subject Teacher
-                            </th>
-                            <th className="border p-2 font-semibold text-center">
-                              Substitute Teacher
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {loading ? (
-                            <tr>
-                              <td colSpan="5" className="text-center py-4">
-                                <Loader /> {/* Replace with your loader */}
-                              </td>
-                            </tr>
-                          ) : (
-                            timetable.map((row, index) => (
-                              <tr key={index}>
-                                <td className="border p-2 text-center">
-                                  {row.period || " "}
-                                </td>
-                                <td className="border p-2 text-center">
-                                  {row.subjectName} {row.className || "-"}-
-                                  {row.sectionName || ""}
-                                </td>
-                                <td className="border p-2 text-center">
-                                  {selectedStudent.label || ""}
-                                </td>
-                                <td className="border p-2 text-center">
-                                  {row.subTeacher || " "}
-                                </td>
-                              </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
+                <div className="w-full  mt-4">
+                  <div className="card mx-auto lg:w-full shadow-lg">
+                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                      <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
+                        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                          Student List
+                        </h3>
+                        <div className="w-1/2 md:w-[18%] mr-1 ">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search "
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div className=" flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                        <button
+                          type="button"
+                          onClick={() => handleSubmitEdit({ timetable })}
+                          className="bg-blue-400 hover:bg-blue-500 text-white   px-3 rounded"
+                        >
+                          <FontAwesomeIcon icon={faEdit} />
+                        </button>{" "}
+                        <button
+                          onClick={handlePrint}
+                          className=" flex  flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white   px-3 rounded"
+                        >
+                          <FiPrinter />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete()}
+                          className={`bg-blue-400 text-white  px-3 rounded hover:bg-blue-500 ${
+                            isSubmitDisabled
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                          disabled={isSubmitDisabled}
+                        >
+                          <FaDownload />
+                        </button>
+                      </div>
                     </div>
-                    {/* Action Buttons */}
+                    <div
+                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+                      style={{
+                        backgroundColor: "#C03078",
+                      }}
+                    ></div>
+
+                    <div className="card-body w-full">
+                      <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+                        <table className="min-w-full leading-normal table-auto">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Sr.No
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Roll No
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Photo
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Class
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Student Name
+                              </th>
+
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                DOB
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Father Mobile No.
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Mother Mobile No.
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Address
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Blood Group
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Grn No.
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                House
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Image Name
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {displayedSections.length ? (
+                              displayedSections.map((subject, index) => (
+                                <tr
+                                  key={subject.student_id}
+                                  className="text-sm "
+                                >
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {currentPage * pageSize + index + 1}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.roll_no}
+                                  </td>
+                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
+                                    {console.log(
+                                      "the teacher image",
+                                      `${subject?.image_url}`
+                                    )}
+
+                                    <img
+                                      src={
+                                        subject?.image_name
+                                          ? // ? `https://sms.evolvu.in/storage/app/public/student_images/${subject?.image_name}`
+                                            `${subject?.image_name}`
+                                          : "https://via.placeholder.com/50"
+                                      }
+                                      alt={subject?.name}
+                                      className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
+                                    />
+                                  </td>{" "}
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
+                                    {`${subject?.get_class?.name}${" "}${
+                                      subject?.get_division?.name
+                                    }`}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {`${subject?.first_name ?? ""} ${
+                                      subject?.mid_name
+                                        ? subject.mid_name + " "
+                                        : ""
+                                    }${subject?.last_name ?? ""}`.trim()}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.dob}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.parents?.f_mobile}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.parents?.m_mobile}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.permant_add}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.blood_group}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.reg_no}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.house}
+                                  </td>
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.image_name}
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                <div className=" text-center text-xl text-red-700">
+                                  Oops! No data found..
+                                </div>
+                              </div>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className=" flex justify-center pt-2 -mb-3">
+                        <ReactPaginate
+                          previousLabel={"Previous"}
+                          nextLabel={"Next"}
+                          breakLabel={"..."}
+                          breakClassName={"page-item"}
+                          breakLinkClassName={"page-link"}
+                          pageCount={pageCount}
+                          marginPagesDisplayed={1}
+                          pageRangeDisplayed={1}
+                          onPageChange={handlePageClick}
+                          containerClassName={"pagination"}
+                          pageClassName={"page-item"}
+                          pageLinkClassName={"page-link"}
+                          previousClassName={"page-item"}
+                          previousLinkClassName={"page-link"}
+                          nextClassName={"page-item"}
+                          nextLinkClassName={"page-link"}
+                          activeClassName={"active"}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </>
@@ -561,7 +746,7 @@ const StudentIdCard = () => {
             <div className="modal-dialog  modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Delete Timetable</h5>
+                  <h5 className="modal-title">Download Student Id Card</h5>
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -577,26 +762,19 @@ const StudentIdCard = () => {
                 ></div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to delete substitution of
+                    Are you sure you want to download student ID card of
                     {` ${selectedStudent?.label}?`}
                     {/* {currentClass?.name}? */}
                   </p>
                 </div>
                 <div className=" flex justify-end p-3">
-                  {/* <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowDeleteModal(false)}
-                  >
-                    Cancel
-                  </button> */}
                   <button
                     type="button"
-                    className="btn btn-danger px-3 mb-2"
+                    className="py-2 rounded-md bg-blue-500 hover:bg-blue-700 text-white px-3 "
                     onClick={handleSubmitDelete}
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Deleting..." : "Delete"}
+                    {isSubmitting ? "Downloading..." : "Download"}
                   </button>
                 </div>
               </div>
