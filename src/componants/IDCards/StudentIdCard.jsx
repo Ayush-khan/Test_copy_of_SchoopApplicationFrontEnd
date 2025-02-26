@@ -7,20 +7,14 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import ReactPaginate from "react-paginate";
 import { FaDownload, FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 
 const StudentIdCard = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split("T")[0]; // Format as yyyy-MM-dd
-  });
+
   const [currentPage, setCurrentPage] = useState(0);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
