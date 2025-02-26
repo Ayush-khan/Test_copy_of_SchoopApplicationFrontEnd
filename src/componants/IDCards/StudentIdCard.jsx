@@ -253,124 +253,12 @@ const StudentIdCard = () => {
   };
 
   console.log("row", timetable);
-  // const handlePrint = () => {
-  //   const printContent = `
-  //   <div class="flex items-center justify-center min-h-screen bg-white">
-  //     <div id="tableHeading" class="text-center w-3/4">
-
-  //       <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-0">
-  //         <thead>
-  //           <tr class="bg-gray-100">
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Photo</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Name</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">DOB</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Mobile No.</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Mother Mobile No.</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Address</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Blood Group</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Grn No.</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">House</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Image Name</th>
-  //           </tr>
-  //         </thead>
-  //         <tbody>
-  //           ${displayedSections
-  //             .map(
-  //               (subject, index) => `
-  //               <tr class="text-sm">
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   index + 1
-  //                 }</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.roll_no || "-"
-  //                 }</td>
-  //                 <td class="px-2 text-center py-2 border border-black">
-  //                   <img src="${
-  //                     //   subject?.image_name || "https://via.placeholder.com/50"
-  //                     subject?.image_url || ""
-  //                   }"
-  //                        alt="${subject?.url}"
-  //                        class="student-photo" />
-  //                 </td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.class_name || ""
-  //                 } ${subject?.sec_name || ""}</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.first_name || ""
-  //                 } ${subject?.mid_name || ""} ${subject?.last_name || ""}</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.dob || "-"
-  //                 }</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.f_mobile || "-"
-  //                 }</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.m_mobile || "-"
-  //                 }</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.permant_add || "-"
-  //                 }</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.blood_group || "-"
-  //                 }</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.reg_no || "-"
-  //                 }</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.house || "-"
-  //                 }</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.image_name || "-"
-  //                 }</td>
-  //               </tr>`
-  //             )
-  //             .join("")}
-  //         </tbody>
-  //       </table>
-  //     </div>
-  //   </div>`;
-
-  //   const printWindow = window.open("", "", "height=800,width=1000");
-  //   printWindow.document.write(`
-  //   <html>
-  //   <head>
-  //     <title>Print Table</title>
-  //     <style>
-  //       @page { margin: 0; }
-  //       body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
-  //       #tableHeading { width: 70%; margin: auto; margin-top: 4em; }
-  //       #tableHeading5 { text-align: center; margin-bottom: 5px; }
-  //       table { border-spacing: 0; width: 100%; margin: auto; }
-  //       th { font-size: 0.8em; background-color: #f9f9f9; }
-  //       td { font-size: 12px; }
-  //       th, td { border: 1px solid gray; padding: 8px; text-align: center; }
-
-  //       /* Make student images smaller in print */
-  //       .student-photo {
-  //         width: 30px !important;
-  //         height: 30px !important;
-  //         object-fit: cover;
-  //         border-radius: 50%;
-  //       }
-  //     </style>
-  //   </head>
-  //   <body>
-  //     ${printContent}
-  //   </body>
-  //   </html>`);
-  //   printWindow.document.close();
-  //   printWindow.print();
-  // };
-
   const handlePrint = () => {
     const printTitle = `Student ID Card List of ${selectedStudent.label}`;
 
     const printContent = `
   <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
-         <h5 class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
+         <h5 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
  <div id="tableHeading" class="text-center w-3/4">
       <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-2">
         <thead>
@@ -450,10 +338,11 @@ const StudentIdCard = () => {
   <head>
     <title>${printTitle}</title>
     <style>
-      @page { margin: 0; }
-      body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+      @page { margin: 0; padding:0; box-sizing:border-box;   ;
+}
+      body { margin: 0; padding: 0; box-sizing:border-box; font-family: Arial, sans-serif; }
       #tableHeading {
-  width: 80%;
+  width: 100%;
   margin: auto; /* Centers the div horizontally */
   display: flex;
   justify-content: center;
@@ -461,31 +350,38 @@ const StudentIdCard = () => {
 
 #tableHeading table {
   width: 100%; /* Ensures the table fills its container */
-  border-collapse: collapse;
+  margin:auto;
+  padding:0 10em 0 10em;
+
+  
+
 
 }
 
 #tableContainer {
   display: flex;
   justify-content: center; /* Centers the table horizontally */
-  width: 100%;
+  width: 80%;
+  
 }
 
  
 h5 {  
   width: 100%;  
   text-align: center;  
-  border: 1px solid green;  
   margin: 0;  /* Remove any default margins */
   padding: 5px 0;  /* Adjust padding if needed */
 }
 
 #tableMain {
+width:100%;
+margin:auto;
+box-sizing:border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start; /* Prevent unnecessary space */
-  border: 1px solid red;
+padding:0 10em 0 10em;
 }
 
 h5 + * { /* Targets the element after h5 */
@@ -493,7 +389,7 @@ h5 + * { /* Targets the element after h5 */
 }
 
 
-      table { border-spacing: 0; width: 100%; margin: auto; }
+      table { border-spacing: 0; width: 70%; margin: auto;   }
       th { font-size: 0.8em; background-color: #f9f9f9; }
       td { font-size: 12px; }
       th, td { border: 1px solid gray; padding: 8px; text-align: center; }
@@ -509,7 +405,6 @@ h5 + * { /* Targets the element after h5 */
     ${printContent}
   </body>
   </html>`);
-
     printWindow.document.close();
     printWindow.print();
   };
@@ -658,7 +553,7 @@ h5 + * { /* Targets the element after h5 */
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          Student List
+                          Student ID Card List
                         </h3>
                         <div className="w-1/2 md:w-[18%] mr-1 ">
                           <input
@@ -669,24 +564,33 @@ h5 + * { /* Targets the element after h5 */
                           />
                         </div>
                       </div>
-                      <div className=" flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                      <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
                         <button
                           type="button"
                           onClick={handleDownloadEXL}
-                          className="bg-blue-400 py-1 hover:bg-blue-500 text-white   px-3 rounded"
+                          className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
                         >
                           <FaFileExcel />
-                        </button>{" "}
+
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.8em] rounded-md py-1 px-2">
+                            Download Excel
+                          </div>
+                        </button>
+
                         <button
                           onClick={handlePrint}
-                          className=" flex  flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white   px-3 rounded"
+                          className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
                         >
                           <FiPrinter />
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.8em] rounded-md py-1 px-2">
+                            Print{" "}
+                          </div>
                         </button>
+
                         <button
                           type="button"
-                          onClick={() => handleDownloadZip()}
-                          className={`bg-blue-400 text-white  px-3 rounded hover:bg-blue-500 ${
+                          onClick={handleDownloadZip}
+                          className={`relative bg-blue-400 text-white px-3 rounded hover:bg-blue-500 group ${
                             isSubmitDisabled
                               ? "opacity-50 cursor-not-allowed"
                               : ""
@@ -694,6 +598,10 @@ h5 + * { /* Targets the element after h5 */
                           disabled={isSubmitDisabled}
                         >
                           <FaDownload />
+
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.8em] rounded-md py-1 px-2">
+                            Download ZIP
+                          </div>
                         </button>
                       </div>
                     </div>
