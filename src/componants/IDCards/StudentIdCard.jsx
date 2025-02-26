@@ -10,7 +10,9 @@ import { FiPrinter } from "react-icons/fi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import ReactPaginate from "react-paginate";
-import { FaDownload } from "react-icons/fa";
+import { FaDownload, FaFileExcel } from "react-icons/fa";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const StudentIdCard = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -76,7 +78,7 @@ const StudentIdCard = () => {
     () =>
       studentNameWithClassId.map((cls) => ({
         value: cls?.section_id,
-        label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+        label: `${cls?.get_class?.name} ${cls.name}`,
       })),
     [studentNameWithClassId]
   );
@@ -100,16 +102,22 @@ const StudentIdCard = () => {
 
     try {
       setLoadingForSearch(true); // Start loading
+      setTimetable([]);
       setSearchTerm("");
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/get_students?section_id=${selectedStudentId}`,
+        `${API_URL}/api/get_studentidcard?section_id=${selectedStudentId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setTimetable(response?.data?.students);
-      setPageCount(Math.ceil(response?.data?.students?.length / pageSize)); // Set page count based on response size
+      if (!response?.data?.data || response?.data?.data.length === 0) {
+        toast.error("No student ID card data found for the selected class."); // Show warning toast
+        setTimetable([]); // Ensure timetable is set to an empty array
+      } else {
+        setTimetable(response?.data?.data);
+        setPageCount(Math.ceil(response?.data?.data?.length / pageSize)); // Set page count based on response size
+      }
     } catch (error) {
       console.error("Error fetching Student Id Card data:", error);
       toast.error("An error occurred while fetching Student Id Carddata.");
@@ -118,23 +126,70 @@ const StudentIdCard = () => {
     }
   };
 
-  const handleDelete = () => {
-    setShowDeleteModal(true);
-  };
-  const handleSubmitEdit = (staffItem) => {
-    console.log("this is the )))))))))", staffItem);
-    // navigate(`/editStaff/${staffItem.user_id}`
-    navigate(
-      `/substitute/edit/${selectedStudentId}`,
+  const handleDownloadEXL = () => {
+    if (!displayedSections || displayedSections.length === 0) {
+      toast.error(
+        "No data available to download Excel sheet of Student ID Card."
+      );
+      return;
+    }
 
-      {
-        state: { staff: staffItem },
-      }
+    // Define headers
+    const headers = [
+      "Sr.No",
+      "Roll No",
+      "Photo URL",
+      "Class",
+      "Student Name",
+      "DOB",
+      "Father Mobile No.",
+      "Mother Mobile No.",
+      "Address",
+      "Blood Group",
+      "Grn No.",
+      "House",
+      "Image Name",
+    ];
+
+    // Convert table data into an array format
+    const data = displayedSections.map((subject, index) => [
+      index + 1,
+      subject?.roll_no || "-",
+      subject?.image_url || "-",
+      `${subject?.class_name || ""} ${subject?.sec_name || ""}`,
+      `${subject?.first_name || ""} ${subject?.mid_name || ""} ${
+        subject?.last_name || ""
+      }`,
+      subject?.dob || "-",
+      subject?.f_mobile || "-",
+      subject?.m_mobile || "-",
+      subject?.permant_add || "-",
+      subject?.blood_group || "-",
+      subject?.reg_no || "-",
+      subject?.house || "-",
+      subject?.image_name || "-",
+    ]);
+
+    // Create a worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+
+    // Create a workbook and append the worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Student Data");
+
+    // Write and download the file
+    XLSX.writeFile(
+      workbook,
+      `Student idCard list of ${selectedStudent.label}.xlsx`
     );
   };
-  const handleSubmitDelete = async () => {
-    if (isSubmitting) return; // Prevent re-submitting
+  const handleDownloadZip = () => {
+    setShowDeleteModal(true);
+  };
+  const handleSubmitDownloadZip = async () => {
+    if (isSubmitting) return; // Prevent multiple submissions
     setIsSubmitting(true);
+
     try {
       const token = localStorage.getItem("authToken");
 
@@ -142,43 +197,55 @@ const StudentIdCard = () => {
         throw new Error("No authentication token found.");
       }
 
-      const response = await axios.delete(
-        `${API_URL}/api/delete_subsituteteacher/${selectedStudentId}/${selectedDate}`,
+      // Fetch the ZIP file from the API
+      const response = await axios.get(
+        `${API_URL}/api/get_ziparchive?section_id=${selectedStudentId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          withCredentials: true,
+          responseType: "blob", // Important for handling binary data
         }
       );
 
-      // Handle successful deletion
-      if (response.data && response.data.status === 400) {
-        const errorMessage = response.data.message || "Delete failed.";
-        toast.error(errorMessage);
-      } else {
-        toast.success("Substitution Teacher Timetable deleted successfully!");
-        setTimetable([]); // Reset timetable to avoid incorrect rendering
-
-        // fetchClasses(); // Refresh the classes list
+      if (!response.data) {
+        toast.error("No data available for download.");
+        return;
       }
 
-      setShowDeleteModal(false); // Close the modal
-    } catch (error) {
-      console.error("Error deleting Substitution Teacher Timetable:", error);
+      // Create a Blob from the response
+      const blob = new Blob([response.data], { type: "application/zip" });
+      const url = window.URL.createObjectURL(blob);
 
-      // Handle error responses
+      // Create a temporary link to trigger the download
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `Student idCard list of ${selectedStudent.label}.zip`
+      );
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("ZIP file downloaded successfully!");
+    } catch (error) {
+      console.error("Error downloading ZIP file:", error);
+
       if (error.response && error.response.status === 400) {
-        const errorMessage = error.response.data.message || "Delete failed.";
-        toast.error(errorMessage);
+        toast.error(error.response.data.message || "Download failed.");
       } else {
         toast.error("Server error. Please try again later.");
       }
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
       setShowDeleteModal(false);
     }
   };
+
   const handleCloseModal = () => {
     setShowAddModal(false);
     setShowEditModal(false);
@@ -186,223 +253,263 @@ const StudentIdCard = () => {
   };
 
   console.log("row", timetable);
-  //   const handlePrint = () => {
-  //     // Prepare the content for printing
-  //     const printContent = `
-  //     <div class="flex items-center justify-center min-h-screen bg-white">
-  //       <div id="tableHeading" class="text-center w-3/4">
-  //         <h4 id="tableHeading5" class="text-xl text-center mb-0">
-  //           Substitution Timetable of ${selectedStudent.label}
-  //         </h4>
-  //         <table class="w-full border-collapse border border-black mx-auto mt-0">
-  //           <thead>
-  //             <tr class="bg-gray-100">
-  //               <th class="border border-black p-2 text-center font-semibold">Date</th>
+  // const handlePrint = () => {
+  //   const printContent = `
+  //   <div class="flex items-center justify-center min-h-screen bg-white">
+  //     <div id="tableHeading" class="text-center w-3/4">
 
-  //                             <th class="border border-black p-2 text-center font-semibold">Period</th>
-  //               <th class="border border-black p-2 text-center font-semibold">Subject</th>
-
-  //               <th class="border border-black p-2 text-center font-semibold">Substitute Teacher</th>
-
-  //             </tr>
-  //           </thead>
-  //           <tbody>
-  //             ${timetable
-  //               .map(
-  //                 (row) => `
-  //                 <tr>
-  //                   <td class="border border-black p-2 text-center">${
-  //                     row.date || "-"
-  //                   }</td>
-
-  //                   <td class="border border-black p-2 text-center">${
-  //                     row.period || "-"
-  //                   }</td>
-  //                   <td class="border border-black p-2 text-center">${
-  //                     row.subjectName || "-"
-  //                   }  ${row.className || "-"}-${row.sectionName || "-"}
-  //                   </td>
-
-  //                   <td class="border border-black p-2 text-center">${
-  //                     row.subTeacher || "-"
-  //                   }</td>
-
-  //                 </tr>
-  //               `
-  //               )
-  //               .join("")}
-  //           </tbody>
-  //         </table>
-  //       </div>
+  //       <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-0">
+  //         <thead>
+  //           <tr class="bg-gray-100">
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No</th>
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Photo</th>
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Name</th>
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">DOB</th>
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Mobile No.</th>
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Mother Mobile No.</th>
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Address</th>
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Blood Group</th>
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Grn No.</th>
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">House</th>
+  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Image Name</th>
+  //           </tr>
+  //         </thead>
+  //         <tbody>
+  //           ${displayedSections
+  //             .map(
+  //               (subject, index) => `
+  //               <tr class="text-sm">
+  //                 <td class="px-2 text-center py-2 border border-black">${
+  //                   index + 1
+  //                 }</td>
+  //                 <td class="px-2 text-center py-2 border border-black">${
+  //                   subject?.roll_no || "-"
+  //                 }</td>
+  //                 <td class="px-2 text-center py-2 border border-black">
+  //                   <img src="${
+  //                     //   subject?.image_name || "https://via.placeholder.com/50"
+  //                     subject?.image_url || ""
+  //                   }"
+  //                        alt="${subject?.url}"
+  //                        class="student-photo" />
+  //                 </td>
+  //                 <td class="px-2 text-center py-2 border border-black">${
+  //                   subject?.class_name || ""
+  //                 } ${subject?.sec_name || ""}</td>
+  //                 <td class="px-2 text-center py-2 border border-black">${
+  //                   subject?.first_name || ""
+  //                 } ${subject?.mid_name || ""} ${subject?.last_name || ""}</td>
+  //                 <td class="px-2 text-center py-2 border border-black">${
+  //                   subject?.dob || "-"
+  //                 }</td>
+  //                 <td class="px-2 text-center py-2 border border-black">${
+  //                   subject?.f_mobile || "-"
+  //                 }</td>
+  //                 <td class="px-2 text-center py-2 border border-black">${
+  //                   subject?.m_mobile || "-"
+  //                 }</td>
+  //                 <td class="px-2 text-center py-2 border border-black">${
+  //                   subject?.permant_add || "-"
+  //                 }</td>
+  //                 <td class="px-2 text-center py-2 border border-black">${
+  //                   subject?.blood_group || "-"
+  //                 }</td>
+  //                 <td class="px-2 text-center py-2 border border-black">${
+  //                   subject?.reg_no || "-"
+  //                 }</td>
+  //                 <td class="px-2 text-center py-2 border border-black">${
+  //                   subject?.house || "-"
+  //                 }</td>
+  //                 <td class="px-2 text-center py-2 border border-black">${
+  //                   subject?.image_name || "-"
+  //                 }</td>
+  //               </tr>`
+  //             )
+  //             .join("")}
+  //         </tbody>
+  //       </table>
   //     </div>
-  //   `;
+  //   </div>`;
 
-  //     // Open a new print window
-  //     const printWindow = window.open("", "", "height=800,width=1000");
-  //     printWindow.document.write(
-  //       `<html>
-  //       <head>
-  //         <title></title>
-  //         <style>
-  //           @page {
-  //             margin: 0;
-  //           }
-  //           body {
-  //             margin: 0;
-  //             padding: 0;
-  //             font-family: Arial, sans-serif;
-  //           }
-  //           #tableHeading {
-  //             width: 70%;
-  //             margin: auto;
-  //             margin-top: 4em;
-  //           }
-  //           #tableHeading5 {
-  //             text-align: center;
-  //             margin-bottom: 5px;
-  //           }
-  //           table {
-  //             border-spacing: 0;
-  //             width: 100%;
-  //             margin: auto;
-  //           }
-  //           th {
-  //           font-size: .8em;
-  //             background-color: #f9f9f9;
-  //           }
-  //             td{
-  //             font-size:12px;
-  //             }
+  //   const printWindow = window.open("", "", "height=800,width=1000");
+  //   printWindow.document.write(`
+  //   <html>
+  //   <head>
+  //     <title>Print Table</title>
+  //     <style>
+  //       @page { margin: 0; }
+  //       body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+  //       #tableHeading { width: 70%; margin: auto; margin-top: 4em; }
+  //       #tableHeading5 { text-align: center; margin-bottom: 5px; }
+  //       table { border-spacing: 0; width: 100%; margin: auto; }
+  //       th { font-size: 0.8em; background-color: #f9f9f9; }
+  //       td { font-size: 12px; }
+  //       th, td { border: 1px solid gray; padding: 8px; text-align: center; }
 
-  //           th, td {
-  //             border: 1px solid gray;
-  //             padding: 8px;
-
-  //             text-align: center;
-  //           }
-  //         </style>
-  //       </head>
-  //       <body>
-  //         ${printContent}
-  //       </body>
-  //     </html>`
-  //     );
-  //     printWindow.document.close();
-
-  //     // Trigger the print dialog
-  //     printWindow.print();
-  //   };
+  //       /* Make student images smaller in print */
+  //       .student-photo {
+  //         width: 30px !important;
+  //         height: 30px !important;
+  //         object-fit: cover;
+  //         border-radius: 50%;
+  //       }
+  //     </style>
+  //   </head>
+  //   <body>
+  //     ${printContent}
+  //   </body>
+  //   </html>`);
+  //   printWindow.document.close();
+  //   printWindow.print();
+  // };
 
   const handlePrint = () => {
+    const printTitle = `Student ID Card List of ${selectedStudent.label}`;
+
     const printContent = `
-    <div class="flex items-center justify-center min-h-screen bg-white">
-      <div id="tableHeading" class="text-center w-3/4">
-        <h4 id="tableHeading5" class="text-xl text-center mb-0">
-          Student Information Table
-        </h4>
-        <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-0">
-          <thead>
-            <tr class="bg-gray-100">
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No</th>
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Photo</th>
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Name</th>
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">DOB</th>
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Mobile No.</th>
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Mother Mobile No.</th>
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Address</th>
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Blood Group</th>
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Grn No.</th>
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">House</th>
-              <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Image Name</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${displayedSections
-              .map(
-                (subject, index) => `
-                <tr class="text-sm">
-                  <td class="px-2 text-center py-2 border border-black">${
-                    index + 1
-                  }</td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.roll_no || "-"
-                  }</td>
-                  <td class="px-2 text-center py-2 border border-black">
-                    <img src="${
-                      //   subject?.image_name || "https://via.placeholder.com/50"
-                      subject?.image_name || ""
-                    }" 
-                         alt="${subject?.name}" 
-                         class="student-photo" />
-                  </td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.get_class?.name || ""
-                  } ${subject?.get_division?.name || ""}</td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.first_name || ""
-                  } ${subject?.mid_name || ""} ${subject?.last_name || ""}</td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.dob || "-"
-                  }</td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.parents?.f_mobile || "-"
-                  }</td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.parents?.m_mobile || "-"
-                  }</td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.permant_add || "-"
-                  }</td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.blood_group || "-"
-                  }</td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.reg_no || "-"
-                  }</td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.house || "-"
-                  }</td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.image_name || "-"
-                  }</td>
-                </tr>`
-              )
-              .join("")}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
+  <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
+         <h5 class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
+ <div id="tableHeading" class="text-center w-3/4">
+      <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-2">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Photo</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Name</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">DOB</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Mobile No.</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Mother Mobile No.</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Address</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Blood Group</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Grn No.</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">House</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Image Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${displayedSections
+            .map(
+              (subject, index) => `
+              <tr class="text-sm">
+                <td class="px-2 text-center py-2 border border-black">${
+                  index + 1
+                }</td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.roll_no || "-"
+                }</td>
+                <td class="px-2 text-center py-2 border border-black">
+                  <img src="${subject?.image_url || ""}" 
+                       alt="${subject?.url}" 
+                       class="student-photo" />
+                </td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.class_name || ""
+                } ${subject?.sec_name || ""}</td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.first_name || ""
+                } ${subject?.mid_name || ""} ${subject?.last_name || ""}</td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.dob || "-"
+                }</td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.f_mobile || "-"
+                }</td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.m_mobile || "-"
+                }</td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.permant_add || "-"
+                }</td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.blood_group || "-"
+                }</td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.reg_no || "-"
+                }</td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.house || "-"
+                }</td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.image_name || "-"
+                }</td>
+              </tr>`
+            )
+            .join("")}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
 
     const printWindow = window.open("", "", "height=800,width=1000");
     printWindow.document.write(`
-    <html>
-    <head>
-      <title>Print Table</title>
-      <style>
-        @page { margin: 0; }
-        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
-        #tableHeading { width: 70%; margin: auto; margin-top: 4em; }
-        #tableHeading5 { text-align: center; margin-bottom: 5px; }
-        table { border-spacing: 0; width: 100%; margin: auto; }
-        th { font-size: 0.8em; background-color: #f9f9f9; }
-        td { font-size: 12px; }
-        th, td { border: 1px solid gray; padding: 8px; text-align: center; }
-        
-        /* Make student images smaller in print */
-        .student-photo {
-          width: 30px !important; 
-          height: 30px !important;
-          object-fit: cover;
-          border-radius: 50%;
-        }
-      </style>
-    </head>
-    <body>
-      ${printContent}
-    </body>
-    </html>`);
+  <html>
+  <head>
+    <title>${printTitle}</title>
+    <style>
+      @page { margin: 0; }
+      body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+      #tableHeading {
+  width: 80%;
+  margin: auto; /* Centers the div horizontally */
+  display: flex;
+  justify-content: center;
+}
+
+#tableHeading table {
+  width: 100%; /* Ensures the table fills its container */
+  border-collapse: collapse;
+
+}
+
+#tableContainer {
+  display: flex;
+  justify-content: center; /* Centers the table horizontally */
+  width: 100%;
+}
+
+ 
+h5 {  
+  width: 100%;  
+  text-align: center;  
+  border: 1px solid green;  
+  margin: 0;  /* Remove any default margins */
+  padding: 5px 0;  /* Adjust padding if needed */
+}
+
+#tableMain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Prevent unnecessary space */
+  border: 1px solid red;
+}
+
+h5 + * { /* Targets the element after h5 */
+  margin-top: 0; /* Ensures no extra space after h5 */
+}
+
+
+      table { border-spacing: 0; width: 100%; margin: auto; }
+      th { font-size: 0.8em; background-color: #f9f9f9; }
+      td { font-size: 12px; }
+      th, td { border: 1px solid gray; padding: 8px; text-align: center; }
+      .student-photo {
+        width: 30px !important; 
+        height: 30px !important;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    ${printContent}
+  </body>
+  </html>`);
+
     printWindow.document.close();
     printWindow.print();
   };
@@ -410,24 +517,35 @@ const StudentIdCard = () => {
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
   };
+
   const filteredSections = timetable.filter((section) => {
-    // Convert the search term to lowercase for case-insensitive comparison
     const searchLower = searchTerm.toLowerCase();
 
-    // Get the student's full name, class name, and user ID for filtering
+    // Extract relevant fields and convert them to lowercase for case-insensitive search
+    const studentRollNo = section?.roll_no?.toString().toLowerCase() || "";
     const studentName =
-      `${section?.first_name} ${section?.mid_name} ${section?.last_name}`?.toLowerCase() ||
+      `${section?.first_name} ${section?.mid_name} ${section?.last_name}`.toLowerCase() ||
       "";
-    const studentClass = section?.get_class?.name?.toLowerCase() || "";
-    const studentUserId = section?.user_master?.user_id?.toLowerCase() || "";
-    const studentRollNo = section?.roll_no?.toString().toLowerCase() || ""; // Convert roll number to string for comparison
+    const studentDOB = section?.dob?.toLowerCase() || "";
+    const studentFatherMobile = section?.f_mobile?.toLowerCase() || "";
+    const studentMotherMobile = section?.m_mobile?.toLowerCase() || "";
+    const studentBloodGroup = section?.blood_group?.toLowerCase() || "";
+    const studentGrnNo = section?.reg_no?.toLowerCase() || "";
+    const studentHouse = section?.house?.toLowerCase() || "";
+    const studentClass =
+      `${section?.class_name} ${section?.sec_name}`.toLowerCase() || "";
 
-    // Check if the search term is present in Roll No, Name, Class, or UserId
+    // Check if the search term is present in any of the specified fields
     return (
       studentRollNo.includes(searchLower) ||
       studentName.includes(searchLower) ||
-      studentClass.includes(searchLower) ||
-      studentUserId.includes(searchLower)
+      studentDOB.includes(searchLower) ||
+      studentFatherMobile.includes(searchLower) ||
+      studentMotherMobile.includes(searchLower) ||
+      studentBloodGroup.includes(searchLower) ||
+      studentGrnNo.includes(searchLower) ||
+      studentHouse.includes(searchLower) ||
+      studentClass.includes(searchLower)
     );
   });
 
@@ -554,10 +672,10 @@ const StudentIdCard = () => {
                       <div className=" flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
                         <button
                           type="button"
-                          onClick={() => handleSubmitEdit({ timetable })}
-                          className="bg-blue-400 hover:bg-blue-500 text-white   px-3 rounded"
+                          onClick={handleDownloadEXL}
+                          className="bg-blue-400 py-1 hover:bg-blue-500 text-white   px-3 rounded"
                         >
-                          <FontAwesomeIcon icon={faEdit} />
+                          <FaFileExcel />
                         </button>{" "}
                         <button
                           onClick={handlePrint}
@@ -567,7 +685,7 @@ const StudentIdCard = () => {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDelete()}
+                          onClick={() => handleDownloadZip()}
                           className={`bg-blue-400 text-white  px-3 rounded hover:bg-blue-500 ${
                             isSubmitDisabled
                               ? "opacity-50 cursor-not-allowed"
@@ -654,9 +772,9 @@ const StudentIdCard = () => {
 
                                     <img
                                       src={
-                                        subject?.image_name
+                                        subject?.image_url
                                           ? // ? `https://sms.evolvu.in/storage/app/public/student_images/${subject?.image_name}`
-                                            `${subject?.image_name}`
+                                            `${subject?.image_url}`
                                           : "https://via.placeholder.com/50"
                                       }
                                       alt={subject?.name}
@@ -664,8 +782,8 @@ const StudentIdCard = () => {
                                     />
                                   </td>{" "}
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
-                                    {`${subject?.get_class?.name}${" "}${
-                                      subject?.get_division?.name
+                                    {`${subject?.class_name}${" "}${
+                                      subject?.sec_name
                                     }`}
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
@@ -679,10 +797,10 @@ const StudentIdCard = () => {
                                     {subject?.dob}
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.parents?.f_mobile}
+                                    {subject?.f_mobile}
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.parents?.m_mobile}
+                                    {subject?.m_mobile}
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {subject?.permant_add}
@@ -771,7 +889,7 @@ const StudentIdCard = () => {
                   <button
                     type="button"
                     className="py-2 rounded-md bg-blue-500 hover:bg-blue-700 text-white px-3 "
-                    onClick={handleSubmitDelete}
+                    onClick={handleSubmitDownloadZip}
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Downloading..." : "Download"}
