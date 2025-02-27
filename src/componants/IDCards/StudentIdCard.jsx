@@ -61,7 +61,7 @@ const StudentIdCard = () => {
   };
 
   const handleStudentSelect = (selectedOption) => {
-    setStudentError(""); // Reset error if student is selected
+    setStudentError(""); // Reset error if student is select.
     setSelectedStudent(selectedOption);
     setSelectedStudentId(selectedOption?.value);
   };
