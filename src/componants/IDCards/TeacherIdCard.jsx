@@ -98,7 +98,7 @@ const TeacherIdCard = () => {
       }`,
       subject?.phone || "  ",
       subject?.address || "  ",
-      subject?.sex === "F" ? "Female" : subject?.sex === "M" ? "Male" : " ",
+      subject?.sex || " ",
 
       subject?.blood_group || "  ",
       subject?.teacher_image_name || "  ",
@@ -232,11 +232,7 @@ const TeacherIdCard = () => {
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.address || " "
                 }</td>  <td class="px-2 text-center py-2 border border-black">${
-                subject?.sex === "F"
-                  ? "Female"
-                  : subject?.sex === "M"
-                  ? "Male"
-                  : " "
+                subject?.sex || " "
               }</td>
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.blood_group || " "
@@ -333,31 +329,21 @@ h5 + * { /* Targets the element after h5 */
 
   const filteredSections = timetable.filter((section) => {
     const searchLower = searchTerm.toLowerCase();
-
     // Extract relevant fields and convert them to lowercase for case-insensitive search
-    const studentRollNo = section?.roll_no?.toString().toLowerCase() || "";
-    const studentName =
-      `${section?.first_name} ${section?.mid_name} ${section?.last_name}`.toLowerCase() ||
-      "";
-    const studentDOB = section?.dob?.toLowerCase() || "";
-    const studentFatherMobile = section?.f_mobile?.toLowerCase() || "";
-    const studentMotherMobile = section?.m_mobile?.toLowerCase() || "";
+    const studentRollNo = section?.employee_id?.toString().toLowerCase() || "";
+    const studentName = `${section?.name} `.toLowerCase() || "";
+    const studentDOB = section?.phone?.toLowerCase() || "";
     const studentBloodGroup = section?.blood_group?.toLowerCase() || "";
-    const studentGrnNo = section?.reg_no?.toLowerCase() || "";
-    const studentHouse = section?.house?.toLowerCase() || "";
-    const studentClass =
-      `${section?.class_name} ${section?.sec_name}`.toLowerCase() || "";
+    const studentGrnNo = section?.sex?.toLowerCase() || "";
+    const studentClass = `${section?.address}`.toLowerCase() || "";
 
     // Check if the search term is present in any of the specified fields
     return (
       studentRollNo.includes(searchLower) ||
       studentName.includes(searchLower) ||
       studentDOB.includes(searchLower) ||
-      studentFatherMobile.includes(searchLower) ||
-      studentMotherMobile.includes(searchLower) ||
       studentBloodGroup.includes(searchLower) ||
       studentGrnNo.includes(searchLower) ||
-      studentHouse.includes(searchLower) ||
       studentClass.includes(searchLower)
     );
   });
@@ -547,11 +533,7 @@ h5 + * { /* Targets the element after h5 */
                                         {subject?.address}
                                       </td>
                                       <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                        {subject?.sex === "F"
-                                          ? "Female"
-                                          : subject?.sex === "M"
-                                          ? "Male"
-                                          : " "}{" "}
+                                        {subject?.sex || " "}
                                       </td>
                                       <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                         {subject?.blood_group}
