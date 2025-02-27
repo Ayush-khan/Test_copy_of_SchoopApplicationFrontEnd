@@ -406,9 +406,7 @@ h5 + * { /* Targets the element after h5 */
             {loadingForSearch ? (
               <>
                 <div className="flex justify-center items-center h-64">
-                  {/* <div className="spinner-border text-primary" role="status"> */}
                   <Loader />
-                  {/* </div> */}
                 </div>
               </>
             ) : (
