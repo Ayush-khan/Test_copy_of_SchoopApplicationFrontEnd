@@ -74,37 +74,34 @@ const TeacherIdCard = () => {
     // Define headers
     const headers = [
       "Sr.No",
-      "Roll No",
+
       "Photo URL",
-      "Class",
-      "Student Name",
-      "DOB",
-      "Father Mobile No.",
-      "Mother Mobile No.",
+      "Employee Id",
+      "Name",
+
+      "Phone No.",
+
       "Address",
+      "Gender",
       "Blood Group",
-      "Grn No.",
-      "House",
-      "Image Name",
+
+      "Profile Image Name",
     ];
 
     // Convert table data into an array format
     const data = displayedSections.map((subject, index) => [
       index + 1,
-      subject?.roll_no || "-",
-      subject?.image_url || "-",
-      `${subject?.class_name || ""} ${subject?.sec_name || ""}`,
-      `${subject?.first_name || ""} ${subject?.mid_name || ""} ${
-        subject?.last_name || ""
+
+      subject?.teacher_image_url || "  ",
+      `${subject?.employee_id || ""} `,
+      `${subject?.name || ""} 
       }`,
-      subject?.dob || "-",
-      subject?.f_mobile || "-",
-      subject?.m_mobile || "-",
-      subject?.permant_add || "-",
-      subject?.blood_group || "-",
-      subject?.reg_no || "-",
-      subject?.house || "-",
-      subject?.image_name || "-",
+      subject?.phone || "  ",
+      subject?.address || "  ",
+      subject?.sex === "F" ? "Female" : subject?.sex === "M" ? "Male" : " ",
+
+      subject?.blood_group || "  ",
+      subject?.teacher_image_name || "  ",
     ]);
 
     // Create a worksheet
@@ -112,13 +109,10 @@ const TeacherIdCard = () => {
 
     // Create a workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Student Data");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Teachers Data");
 
     // Write and download the file
-    XLSX.writeFile(
-      workbook,
-      `Student idCard list of ${selectedStudent.label}.xlsx`
-    );
+    XLSX.writeFile(workbook, `Teachers idCard list .xlsx`);
   };
   const handleDownloadZip = () => {
     setShowDeleteModal(true);
@@ -188,7 +182,7 @@ const TeacherIdCard = () => {
 
   console.log("row", timetable);
   const handlePrint = () => {
-    const printTitle = `Student ID Card List of ${selectedStudent.label}`;
+    const printTitle = `Teacher ID Card List`;
 
     const printContent = `
   <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
@@ -198,18 +192,17 @@ const TeacherIdCard = () => {
         <thead>
           <tr class="bg-gray-100">
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No</th>
+
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Photo</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Name</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">DOB</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Mobile No.</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Mother Mobile No.</th>
+                        <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Employee Id</th>
+
+            
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Name</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Phone No.</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Address</th>
+                        <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Gender</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Blood Group</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Grn No.</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">House</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Image Name</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Profile Image Name</th>
           </tr>
         </thead>
         <tbody>
@@ -220,43 +213,38 @@ const TeacherIdCard = () => {
                 <td class="px-2 text-center py-2 border border-black">${
                   index + 1
                 }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.roll_no || "-"
-                }</td>
+               
                 <td class="px-2 text-center py-2 border border-black">
-                  <img src="${subject?.image_url || ""}" 
+                  <img src="${subject?.teacher_image_url || ""}" 
                        alt="${subject?.url}" 
                        class="student-photo" />
                 </td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.class_name || ""
-                } ${subject?.sec_name || ""}</td>
+                  subject?.employee_id || " "
+                } </td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.first_name || ""
-                } ${subject?.mid_name || ""} ${subject?.last_name || ""}</td>
+                  subject?.name || " "
+                } </td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.dob || "-"
+                  subject?.phone || " "
                 }</td>
+              
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.f_mobile || "-"
+                  subject?.address || " "
+                }</td>  <td class="px-2 text-center py-2 border border-black">${
+                subject?.sex === "F"
+                  ? "Female"
+                  : subject?.sex === "M"
+                  ? "Male"
+                  : " "
+              }</td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.blood_group || " "
                 }</td>
+              
+                
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.m_mobile || "-"
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.permant_add || "-"
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.blood_group || "-"
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.reg_no || "-"
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.house || "-"
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.image_name || "-"
+                  subject?.teacher_image_name || " "
                 }</td>
               </tr>`
             )
