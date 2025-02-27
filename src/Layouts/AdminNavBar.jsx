@@ -776,7 +776,7 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
-            to="#"
+            to="/teacherIdCard"
             className="text-sm font-bold hover:text-black"
           >
             Teacher ID Card

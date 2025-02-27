@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
-import ReactPaginate from "react-paginate";
 import { FaDownload, FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
 
@@ -403,10 +402,6 @@ h5 + * { /* Targets the element after h5 */
     printWindow.print();
   };
 
-  const handlePageClick = (data) => {
-    setCurrentPage(data.selected);
-  };
-
   const filteredSections = timetable.filter((section) => {
     const searchLower = searchTerm.toLowerCase();
 
@@ -438,10 +433,7 @@ h5 + * { /* Targets the element after h5 */
     );
   });
 
-  const displayedSections = filteredSections.slice(
-    currentPage * pageSize,
-    (currentPage + 1) * pageSize
-  );
+  const displayedSections = filteredSections.slice(currentPage * pageSize);
   return (
     <>
       <div className="w-full md:w-[95%] mx-auto p-4 ">
@@ -547,7 +539,7 @@ h5 + * { /* Targets the element after h5 */
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          Student ID Card List
+                          Students ID Card List
                         </h3>
                         <div className="w-1/2 md:w-[18%] mr-1 ">
                           <input
@@ -566,8 +558,8 @@ h5 + * { /* Targets the element after h5 */
                         >
                           <FaFileExcel />
 
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.8em] rounded-md py-1 px-2">
-                            Download Excel
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
+                            Exports to excel
                           </div>
                         </button>
 
@@ -576,7 +568,7 @@ h5 + * { /* Targets the element after h5 */
                           className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
                         >
                           <FiPrinter />
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.8em] rounded-md py-1 px-2">
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
                             Print{" "}
                           </div>
                         </button>
@@ -593,8 +585,8 @@ h5 + * { /* Targets the element after h5 */
                         >
                           <FaDownload />
 
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.8em] rounded-md py-1 px-2">
-                            Download ZIP
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
+                            Download profile images
                           </div>
                         </button>
                       </div>
@@ -730,27 +722,6 @@ h5 + * { /* Targets the element after h5 */
                             )}
                           </tbody>
                         </table>
-                      </div>
-                      <div className=" flex justify-center pt-2 -mb-3">
-                        <ReactPaginate
-                          previousLabel={"Previous"}
-                          nextLabel={"Next"}
-                          breakLabel={"..."}
-                          breakClassName={"page-item"}
-                          breakLinkClassName={"page-link"}
-                          pageCount={pageCount}
-                          marginPagesDisplayed={1}
-                          pageRangeDisplayed={1}
-                          onPageChange={handlePageClick}
-                          containerClassName={"pagination"}
-                          pageClassName={"page-item"}
-                          pageLinkClassName={"page-link"}
-                          previousClassName={"page-item"}
-                          previousLinkClassName={"page-link"}
-                          nextClassName={"page-item"}
-                          nextLinkClassName={"page-link"}
-                          activeClassName={"active"}
-                        />
                       </div>
                     </div>
                   </div>

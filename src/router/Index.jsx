@@ -182,6 +182,7 @@ import UpdateStudentID from "../componants/UpdateStudentID/UpdateStudentID.jsx";
 import StudentSearchUsingGRN from "../componants/StudentSearchUsingGRN/StudentSearchUsingGRN.jsx";
 import HolidayList from "../componants/HolidayList/HolidayList.jsx";
 import StudentIdCard from "../componants/IDCards/StudentIdCard.jsx";
+import TeacherIdCard from "../componants/IDCards/TeacherIdCard.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -571,6 +572,11 @@ function Index() {
         <Route
           path="/studentIdCard"
           element={<PrivateRoute element={<StudentIdCard />} />}
+        />
+        {/* Teacher ID Card Module */}
+        <Route
+          path="/teacherIdCard"
+          element={<PrivateRoute element={<TeacherIdCard />} />}
         />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />
