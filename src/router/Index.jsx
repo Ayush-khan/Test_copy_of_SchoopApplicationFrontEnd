@@ -183,6 +183,8 @@ import StudentSearchUsingGRN from "../componants/StudentSearchUsingGRN/StudentSe
 import HolidayList from "../componants/HolidayList/HolidayList.jsx";
 import StudentIdCard from "../componants/IDCards/StudentIdCard.jsx";
 import TeacherIdCard from "../componants/IDCards/TeacherIdCard.jsx";
+import TimeTable from "../componants/TimeTableModule/TimeTable.jsx";
+import CreateTimeTable from "../componants/TimeTableModule/CreateTimeTable.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -525,6 +527,17 @@ function Index() {
           path="/updateStudentID"
           element={<PrivateRoute element={<UpdateStudentID />} />}
         />
+        {/* TimeTable Module */}
+        <Route
+          path="/timeTable"
+          element={<PrivateRoute element={<TimeTable />} />}
+        />
+        {/* Create TimeTable Module */}
+        <Route
+          path="/createTimeTable"
+          element={<PrivateRoute element={<CreateTimeTable />} />}
+        />
+
         {/*Update CategoryReligion Module */}
         <Route
           path="/categoryReligion"

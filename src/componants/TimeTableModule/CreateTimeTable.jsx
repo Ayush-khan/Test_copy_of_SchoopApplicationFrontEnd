@@ -96,22 +96,6 @@ const CreateTimeTable = () => {
     }
   };
 
-  // const handleSubjectSelect = (day, selectedOption) => {
-  //   setSelectedSubjects((prev) => ({
-  //     ...prev,
-  //     [day]: selectedOption,
-  //   }));
-  // };
-
-  // const handleSubjectSelect = (day, lectureIndex, selectedOption) => {
-  //   setSelectedSubjects((prev) => ({
-  //     ...prev,
-  //     [`${day}-${lectureIndex}`]: selectedOption,
-  //   }));
-  // };
-
-  // Ensure both classIdForSearch & sectionIdForSearch trigger fetchSubjects
-
   const handleSubjectSelect = (dayIndex, lectureIndex, selectedOption) => {
     setSelectedSubjects((prev) => {
       // Ensure the dayIndex exists
@@ -294,88 +278,6 @@ const CreateTimeTable = () => {
   const timeOptions = generateTimeSlots();
   const satTimeOptions = generateTimeSlots(8, 11.5);
 
-  // const handleAdd = async () => {
-  //   if (!selectedClass) {
-  //     toast.error("Please select Class");
-  //     return;
-  //   }
-  //   if (!selectedDivision) {
-  //     toast.error("Please select Division");
-  //     return;
-  //   }
-  //   if (!selectedMonFri || !selectedSat) {
-  //     toast.error("Please select both Mon-Fri and Sat lecture counts.");
-  //     return;
-  //   }
-
-  //   const monFriLectureCount =
-  //     parseInt(selectedMonFri.value.split(" ")[1]) || 0;
-  //   const satLectureCount = parseInt(selectedSat.value.split(" ")[1]) || 0;
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       toast.error("Authorization token is missing. Please log in again.");
-  //       return;
-  //     }
-
-  //     const params = {
-  //       lectures_per_week: monFriLectureCount,
-  //       saturday_lectures: satLectureCount,
-  //       class_id: selectedClass.value,
-  //       section_id: selectedDivision.value,
-  //     };
-
-  //     console.log("Sending API request with params:", params);
-
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_fieldsfortimetable`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params,
-  //       }
-  //     );
-
-  //     console.log("API Response:", response.data);
-
-  //     const timetableData = response.data.data;
-
-  //     if (response.data.success && timetableData) {
-  //       setShowTimeTable(true);
-
-  //       // Convert timetableData (object) into an array of day-wise schedules
-  //       const formattedTimetable = Object.entries(timetableData).map(
-  //         ([day, lectures]) => ({
-  //           day,
-  //           lectures: Array.isArray(lectures) ? lectures : [],
-  //         })
-  //       );
-
-  //       setTimetable(formattedTimetable);
-
-  //       // Check if all subject arrays are empty
-  //       const hasSubjects = formattedTimetable.some((entry) =>
-  //         entry.lectures.some(
-  //           (lecture) =>
-  //             Array.isArray(lecture.subject) && lecture.subject.length > 0
-  //         )
-  //       );
-
-  //       if (!hasSubjects) {
-  //         toast.warning("No subjects found. Please fill in the timetable.");
-  //       } else {
-  //         toast.success("Timetable loaded successfully!");
-  //       }
-  //     } else {
-  //       setTimetable([]);
-  //       toast.error("Invalid timetable data from API.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching timetable fields:", error);
-  //     toast.error("Failed to fetch timetable fields. Please try again later.");
-  //   }
-  // };
-
   const handleAdd = async () => {
     if (!selectedClass) {
       toast.error("Please select Class");
@@ -424,38 +326,14 @@ const CreateTimeTable = () => {
 
       if (response.data.success && timetableData) {
         setShowTimeTable(true);
-
-        // ✅ Ensure `timetableData` is always an object and `lectures` are arrays
-        // const formattedTimetable = Object.entries(timetableData || {}).map(
-        //   ([day, lectures]) => ({
-        //     day,
-        //     lectures: Array.isArray(lectures) ? lectures : [],
-        //   })
-        // );
         const formattedTimetable = Object.entries(timetableData || {}).map(
-          ([day, lectures]) => {
-            // Handle Time-In & Time-Out separately
-            const timeIns = timetableData["Time-In"] || [];
-            const timeOuts = timetableData["Time-Out"] || [];
-            const satTimeIns = timetableData["Sat Time In"] || [];
-            const satTimeOuts = timetableData["Sat Time Out"] || [];
-
-            return {
-              day,
-              lectures: (Array.isArray(lectures) ? lectures : []).map(
-                (lecture, index) => ({
-                  ...lecture,
-                  "Time In": timeIns[index]?.["Time In"] || "",
-                  "Time Out": timeOuts[index]?.["Time Out"] || "",
-                  "Sat Time In": satTimeIns[index]?.["Time In"] || "",
-                  "Sat Time Out": satTimeOuts[index]?.["Time Out"] || "",
-                })
-              ),
-            };
-          }
+          ([day, lectures]) => ({
+            day,
+            lectures: Array.isArray(lectures) ? lectures : [],
+          })
         );
-
         setTimetable(formattedTimetable);
+        console.log("Final Timetable:", formattedTimetable);
         console.log("setTimeTable is--->", timetable);
         // ✅ Check if there are subjects
         const hasSubjects = formattedTimetable.some((entry) =>
@@ -479,27 +357,6 @@ const CreateTimeTable = () => {
       toast.error("Failed to fetch timetable fields. Please try again later.");
     }
   };
-
-  // const [timetableData, setTimetableData] = useState(null);
-  // const [weekdaysLectureCount, setWeekdaysLectureCount] = useState(0);
-  // const [saturdayLectureCount, setSaturdayLectureCount] = useState(0);
-
-  // useEffect(() => {
-  //   if (timetableData?.data) {
-  //     const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-
-  //     // Determine the max lecture count dynamically
-  //     const maxWeekdaysLectures = Math.max(
-  //       ...weekdays.map((day) => timetableData.data[day]?.length || 0)
-  //     );
-
-  //     // Determine Saturday's lecture count
-  //     const saturdayLectures = timetableData.data["Saturday"]?.length || 0;
-
-  //     setWeekdaysLectureCount(maxWeekdaysLectures);
-  //     setSaturdayLectureCount(saturdayLectures);
-  //   }
-  // }, [timetableData]);
 
   return (
     <>
@@ -676,56 +533,6 @@ const CreateTimeTable = () => {
           </div>
         </div>
       </div>
-      {/* <div className="w-full mx-auto mt-4">
-        Row wise display timetable
-        <table className="w-full border-collapse border bg-white border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 p-2">Day</th>
-              {timetable.length > 0 && timetable[0]?.lectures?.length > 0
-                ? timetable[0].lectures.map((_, index) => (
-                    <th key={index} className="border border-gray-300 p-2">
-                      Lecture {index + 1}
-                    </th>
-                  ))
-                : null}
-            </tr>
-          </thead>
-
-          <tbody>
-            {timetable.map((day, dayIndex) => (
-              <tr key={dayIndex} className="border border-gray-300">
-                <td className="border border-gray-300 p-2 font-bold">
-                  {day.day}
-                </td>
-                {Array.isArray(day.lectures) && day.lectures.length > 0
-                  ? day.lectures.map((lecture, lecIndex) => (
-                      <td key={lecIndex} className="border border-gray-300 p-2">
-                        <Select
-                          options={subjects.map((sub) => ({
-                            value: sub.subject_id,
-                            label: sub.name,
-                          }))}
-                          onChange={(selectedOption) =>
-                            handleSubjectSelect(
-                              day.day,
-                              lecIndex,
-                              selectedOption
-                            )
-                          }
-                          placeholder="Select Subject"
-                          isSearchable
-                        />
-                      </td>
-                    ))
-                  : null}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-       
-      </div> */}
 
       <div className="relative w-[95%] bg-white shadow-xl rounded-lg border border-pink-500 mx-auto mt-3">
         <div className="overflow-x-auto p-4">
@@ -759,18 +566,38 @@ const CreateTimeTable = () => {
                       <td key={dayIndex} className="border border-gray-300 p-2">
                         {/*Ensure lecture exists for this day */}
                         {console.log(
-                          "day.lectures[lectureIndex]--->",
+                          "day.lectures[lectureIndex]--->Start",
+                          day.lectures[lectureIndex]?.["Time In"]
+                        )}
+                        {console.log(
+                          "Lecture Data:",
+                          day.lectures[lectureIndex]
+                        )}
+                        {console.log(
+                          "Time In--->:",
+                          day.lectures[lectureIndex]?.["Time In"]
+                        )}
+                        {console.log(
+                          "Time Out--->:",
+                          day.lectures[lectureIndex]?.["Time Out"]
+                        )}
+                        {console.log(
+                          "Sat Time In--->:",
+                          day.lectures[lectureIndex]?.["Sat Time In"]
+                        )}
+                        {console.log(
+                          "Sat Time Out--->:",
                           day.lectures[lectureIndex]?.["Sat Time Out"]
                         )}
                         {day.lectures[lectureIndex] ? (
                           <>
-                            {/* {console.log (day.lectures[lectureIndex])} */}
-                            {/* {console.log(day.lectures[lectureIndex]?.["Time-In"])} */}
-                            {/* Check if Time Data Exists */}
-                            {day.lectures[lectureIndex]?.["Time In"] ||
-                            day.lectures[lectureIndex]?.["Time Out"] ||
-                            day.lectures[lectureIndex]?.["Sat Time In"] ||
-                            day.lectures[lectureIndex]?.["Sat Time Out"] ? (
+                            {day.lectures[lectureIndex] &&
+                            (day.lectures[lectureIndex]?.["Time In"] == "" ||
+                              day.lectures[lectureIndex]?.["Time Out"] == "" ||
+                              day.lectures[lectureIndex]?.["Sat Time In"] ==
+                                " " ||
+                              day.lectures[lectureIndex]?.["Sat Time Out"] ==
+                                " ") ? (
                               <>
                                 {/* Mon-Fri Time Dropdowns */}
                                 {dayIndex < 5 ? (
@@ -779,7 +606,7 @@ const CreateTimeTable = () => {
                                       className="w-full px-1 py-1 border border-gray-300"
                                       value={
                                         day.lectures[lectureIndex]?.[
-                                          "Time-In"
+                                          "Time In"
                                         ] || ""
                                       }
                                       onChange={(e) =>
@@ -802,7 +629,7 @@ const CreateTimeTable = () => {
                                       className="w-full px-1 py-1 border border-gray-300 mt-1"
                                       value={
                                         day.lectures[lectureIndex]?.[
-                                          "Time-Out"
+                                          "Time Out"
                                         ] || ""
                                       }
                                       onChange={(e) =>
@@ -849,7 +676,6 @@ const CreateTimeTable = () => {
                                         </option>
                                       ))}
                                     </select>
-
                                     <select
                                       className="w-full px-1 py-1 border border-gray-300 mt-1"
                                       value={
@@ -922,267 +748,3 @@ const CreateTimeTable = () => {
 };
 
 export default CreateTimeTable;
-
-
-
-{
-  /* Ensure the dropdowns appear when time fields are empty but not undefined */
-}
-{
-  day.lectures[lectureIndex] &&
-  (day.lectures[lectureIndex]?.["Time In"] !== undefined ||
-    day.lectures[lectureIndex]?.["Time Out"] !== undefined ||
-    day.lectures[lectureIndex]?.["Sat Time In"] !== undefined ||
-    day.lectures[lectureIndex]?.["Sat Time Out"] !== undefined) ? (
-    <>
-      {/* Mon-Fri Time Dropdowns */}
-      {dayIndex < 5 ? (
-        <>
-          <select
-            className="w-full px-1 py-1 border border-gray-300"
-            value={day.lectures[lectureIndex]?.["Time-In"] || ""}
-            onChange={(e) =>
-              handleStartSelect(dayIndex, lectureIndex, e.target.value)
-            }
-          >
-            <option value="">Select Time-In</option>
-            {timeOptions.map((time, i) => (
-              <option key={i} value={time}>
-                {time}
-              </option>
-            ))}
-          </select>
-
-          <select
-            className="w-full px-1 py-1 border border-gray-300 mt-1"
-            value={day.lectures[lectureIndex]?.["Time-Out"] || ""}
-            onChange={(e) =>
-              handleEndSelect(dayIndex, lectureIndex, e.target.value)
-            }
-          >
-            <option value="">Select Time-Out</option>
-            {getFilteredEndTimeOptions(dayIndex, lectureIndex).map(
-              (time, i) => (
-                <option key={i} value={time}>
-                  {time}
-                </option>
-              )
-            )}
-          </select>
-        </>
-      ) : (
-        // Saturday Time Dropdowns
-        <>
-          <select
-            className="w-full px-1 py-1 border border-gray-300"
-            value={day.lectures[lectureIndex]?.["Sat Time In"] || ""}
-            onChange={(e) =>
-              handleSatStartSelect(dayIndex, lectureIndex, e.target.value)
-            }
-          >
-            <option value="">Select Time-In</option>
-            {satTimeOptions.map((time, i) => (
-              <option key={i} value={time}>
-                {time}
-              </option>
-            ))}
-          </select>
-
-          <select
-            className="w-full px-1 py-1 border border-gray-300 mt-1"
-            value={day.lectures[lectureIndex]?.["Sat Time Out"] || ""}
-            onChange={(e) =>
-              handleSatEndSelect(dayIndex, lectureIndex, e.target.value)
-            }
-          >
-            <option value="">Select Time-Out</option>
-            {getFilteredSatEndTimeOptions(dayIndex, lectureIndex).map(
-              (time, i) => (
-                <option key={i} value={time}>
-                  {time}
-                </option>
-              )
-            )}
-          </select>
-        </>
-      )}
-    </>
-  ) : (
-    // Only show Subject Dropdown when no time fields exist
-    day.lectures[lectureIndex]?.subject && (
-      <select
-        className="w-full px-1 py-1 border border-gray-300 mt-1"
-        value={
-          selectedSubjects[dayIndex]?.lectures[lectureIndex]?.subject?.sm_id ||
-          ""
-        }
-        onChange={(e) =>
-          handleSubjectSelect(dayIndex, lectureIndex, e.target.value)
-        }
-      >
-        <option value="">Select Subject</option>
-        {subjects.map((subject, i) => (
-          <option key={i} value={subject.sm_id}>
-            {subject.name}
-          </option>
-        ))}
-      </select>
-    )
-  );
-}
-
-
-
-
-
-
-
-
-
-
-<table className="table-auto border-collapse border border-gray-300 w-full">
-  <thead className="bg-gray-200">
-    <tr>
-      <th className="border p-2 font-semibold text-center">Sr No.</th>
-      {timetable.map((day, index) => (
-        <th key={index} className="border p-2 font-semibold text-center">
-          {day.day}
-        </th>
-      ))}
-    </tr>
-  </thead>
-  <tbody className="bg-gray-50">
-    {timetable.length > 0 &&
-      [...Array(Math.max(...timetable.map((day) => day.lectures.length)))].map(
-        (_, lectureIndex) => (
-          <tr key={lectureIndex}>
-            <td className="border p-1 text-center">{lectureIndex + 1}</td>
-
-            {timetable.map((day, dayIndex) => (
-              <td key={dayIndex} className="border border-gray-300 p-2">
-                {day.lectures[lectureIndex] ? (
-                  <>
-                    {/* Time In Dropdown */}
-                    <select
-                      className="border p-1 rounded"
-                      value={day.lectures[lectureIndex]?.["Time In"] || ""}
-                      onChange={(e) => {
-                        const updatedTimetable = [...timetable];
-                        updatedTimetable[dayIndex].lectures[lectureIndex][
-                          "Time In"
-                        ] = e.target.value;
-                        setTimetable(updatedTimetable);
-                      }}
-                    >
-                      <option value="">Select Time In</option>
-                      <option value="08:00 AM">08:00 AM</option>
-                      <option value="09:00 AM">09:00 AM</option>
-                      <option value="10:00 AM">10:00 AM</option>
-                    </select>
-
-                    {/* Time Out Dropdown */}
-                    <select
-                      className="border p-1 rounded ml-2"
-                      value={day.lectures[lectureIndex]?.["Time Out"] || ""}
-                      onChange={(e) => {
-                        const updatedTimetable = [...timetable];
-                        updatedTimetable[dayIndex].lectures[lectureIndex][
-                          "Time Out"
-                        ] = e.target.value;
-                        setTimetable(updatedTimetable);
-                      }}
-                    >
-                      <option value="">Select Time Out</option>
-                      <option value="09:00 AM">09:00 AM</option>
-                      <option value="10:00 AM">10:00 AM</option>
-                      <option value="11:00 AM">11:00 AM</option>
-                    </select>
-
-                    {/* Saturday Time In Dropdown */}
-                    {day.day === "Saturday" && (
-                      <select
-                        className="border p-1 rounded ml-2"
-                        value={
-                          day.lectures[lectureIndex]?.["Sat Time In"] || ""
-                        }
-                        onChange={(e) => {
-                          const updatedTimetable = [...timetable];
-                          updatedTimetable[dayIndex].lectures[lectureIndex][
-                            "Sat Time In"
-                          ] = e.target.value;
-                          setTimetable(updatedTimetable);
-                        }}
-                      >
-                        <option value="">Select Sat Time In</option>
-                        <option value="08:30 AM">08:30 AM</option>
-                        <option value="09:30 AM">09:30 AM</option>
-                        <option value="10:30 AM">10:30 AM</option>
-                      </select>
-                    )}
-
-                    {/* Saturday Time Out Dropdown */}
-                    {day.day === "Saturday" && (
-                      <select
-                        className="border p-1 rounded ml-2"
-                        value={
-                          day.lectures[lectureIndex]?.["Sat Time Out"] || ""
-                        }
-                        onChange={(e) => {
-                          const updatedTimetable = [...timetable];
-                          updatedTimetable[dayIndex].lectures[lectureIndex][
-                            "Sat Time Out"
-                          ] = e.target.value;
-                          setTimetable(updatedTimetable);
-                        }}
-                      >
-                        <option value="">Select Sat Time Out</option>
-                        <option value="09:30 AM">09:30 AM</option>
-                        <option value="10:30 AM">10:30 AM</option>
-                        <option value="11:30 AM">11:30 AM</option>
-                      </select>
-                    )}
-                  </>
-                ) : (
-                  "-"
-                )}
-              </td>
-            ))}
-          </tr>
-        )
-      )}
-  </tbody>
-</table>;
-
-
-
-
-
-{
-  timetable.map((day, dayIndex) => (
-    <td key={dayIndex} className="border border-gray-300 p-2">
-      {day.lectures[lectureIndex] ? (
-        <>
-          {/* Show only the "Time In" dropdown in the "Time In" column */}
-          {day.lectures[lectureIndex]?.["Time In"] !== undefined && (
-            <select
-              className="w-full px-1 py-1 border border-gray-300"
-              value={day.lectures[lectureIndex]?.["Time In"] || ""}
-              onChange={(e) =>
-                handleStartSelect(dayIndex, lectureIndex, e.target.value)
-              }
-            >
-              <option value="">Select Time-In</option>
-              {timeOptions.map((time, i) => (
-                <option key={i} value={time}>
-                  {time}
-                </option>
-              ))}
-            </select>
-          )}
-        </>
-      ) : (
-        "" // Hide empty cells
-      )}
-    </td>
-  ));
-}

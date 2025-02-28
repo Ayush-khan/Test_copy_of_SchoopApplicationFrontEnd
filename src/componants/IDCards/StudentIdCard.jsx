@@ -147,20 +147,20 @@ const StudentIdCard = () => {
     // Convert table data into an array format
     const data = displayedSections.map((subject, index) => [
       index + 1,
-      subject?.roll_no || "-",
-      subject?.image_url || "-",
+      subject?.roll_no || " ",
+      subject?.image_url || " ",
       `${subject?.class_name || ""} ${subject?.sec_name || ""}`,
       `${subject?.first_name || ""} ${subject?.mid_name || ""} ${
         subject?.last_name || ""
       }`,
-      subject?.dob || "-",
-      subject?.f_mobile || "-",
-      subject?.m_mobile || "-",
-      subject?.permant_add || "-",
-      subject?.blood_group || "-",
-      subject?.reg_no || "-",
-      subject?.house || "-",
-      subject?.image_name || "-",
+      subject?.dob || " ",
+      subject?.f_mobile || " ",
+      subject?.m_mobile || " ",
+      subject?.permant_add || " ",
+      subject?.blood_group || " ",
+      subject?.reg_no || " ",
+      subject?.house || " ",
+      subject?.image_name || " ",
     ]);
 
     // Create a worksheet
@@ -280,7 +280,7 @@ const StudentIdCard = () => {
                   index + 1
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.roll_no || "-"
+                  subject?.roll_no || " "
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">
                   <img src="${subject?.image_url || ""}" 
@@ -294,28 +294,28 @@ const StudentIdCard = () => {
                   subject?.first_name || ""
                 } ${subject?.mid_name || ""} ${subject?.last_name || ""}</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.dob || "-"
+                  subject?.dob || " "
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.f_mobile || "-"
+                  subject?.f_mobile || " "
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.m_mobile || "-"
+                  subject?.m_mobile || " "
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.permant_add || "-"
+                  subject?.permant_add || " "
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.blood_group || "-"
+                  subject?.blood_group || " "
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.reg_no || "-"
+                  subject?.reg_no || " "
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.house || "-"
+                  subject?.house || " "
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.image_name || "-"
+                  subject?.image_name || " "
                 }</td>
               </tr>`
             )
