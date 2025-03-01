@@ -71,7 +71,7 @@ import Loader from "../common/LoaderFinal/LoaderStyle";
 //         value={student.permant_add}
 //         // onChange={handleChange}
 //         required
-//         className="input-field block w-full border-1 border-gray-600 rounded-md py-1 px-3 bg-white shadow-inner"
+//         className="input-field block w-full  border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
 //       />
 //       <p>Address: {student.permant_add}</p>
 //     </div>
@@ -138,7 +138,7 @@ const StudentInfo = ({ student, onUpdate }) => {
             name="blood_group"
             value={editedStudent.blood_group}
             onChange={handleChange}
-            className="w-full border border-gray-600 rounded-md p-2 shadow-inner"
+            className="w-full   border-1 border-gray-400 rounded-md p-2 shadow-inner"
           >
             <option value="">Select</option>
             <option value="AB+">AB+</option>
@@ -160,7 +160,7 @@ const StudentInfo = ({ student, onUpdate }) => {
             name="house"
             value={editedStudent.house}
             onChange={handleChange}
-            className="w-full border border-gray-600 rounded-md p-2 shadow-inner"
+            className="w-full   border-1 border-gray-400 rounded-md p-2 shadow-inner"
           >
             <option value="">Select</option>
             <option value="E">Emerald</option>
@@ -179,7 +179,7 @@ const StudentInfo = ({ student, onUpdate }) => {
             value={editedStudent.permant_add}
             onChange={handleChange}
             maxLength={240}
-            className="w-full border border-gray-600 rounded-md p-2 shadow-inner"
+            className="w-full  border-1 border-gray-400 rounded-md p-2 shadow-inner"
           />
         </div>
       </div>
@@ -216,11 +216,12 @@ const ParentInfo = ({ parent, onUpdate }) => {
               />
             </div>
           </div>
-          <div className="  flex flex-row justify-start gap-x-6">
-            <label className="block font-bold text-sm w-full md:w-[30%] ">
+          <div className="  flex flex-row justify-start ">
+            <label className="block mt-2 font-bold text-sm w-full md:w-[25%] ">
+              {" "}
               Father Name
             </label>
-            <p className=" bg-gray-200 border-1 border-gray-100 rounded-md p-2 shadow-inner">
+            <p className=" w-[52%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
               {editedParent.father_name || " "}
             </p>
           </div>
@@ -234,7 +235,7 @@ const ParentInfo = ({ parent, onUpdate }) => {
               name="f_mobile"
               value={editedParent.f_mobile || ""}
               onChange={handleChange}
-              className=" border-1 border-gray-600 rounded-md p-2 shadow-inner"
+              className="  border-1 border-gray-400 rounded-md p-2 shadow-inner"
             />
           </div>
         </div>
@@ -249,11 +250,11 @@ const ParentInfo = ({ parent, onUpdate }) => {
               />
             </div>
           </div>
-          <div className="  flex flex-row justify-start gap-x-6">
-            <label className="block font-bold text-sm w-full md:w-[32%] ">
+          <div className="  flex flex-row justify-start ">
+            <label className="block mt-2 font-bold text-sm w-full md:w-[28%] ">
               Mother Name
             </label>
-            <p className=" w-[50%] mx-auto bg-gray-200 border-1 border-gray-100 rounded-md p-2 shadow-inner">
+            <p className=" ml-1 w-[51%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
               {editedParent.mother_name || " "}
             </p>
           </div>
@@ -267,7 +268,7 @@ const ParentInfo = ({ parent, onUpdate }) => {
               name="m_mobile"
               value={editedParent.m_mobile || ""}
               onChange={handleChange}
-              className=" border-1 border-gray-600 rounded-md p-2 shadow-inner"
+              className="  border-1 border-gray-400 rounded-md p-2 shadow-inner"
             />
           </div>
         </div>
@@ -305,11 +306,13 @@ const GuardianInfo = ({ guardian, onUpdate }) => {
           />
         </div>
       </div>
-      <div className="  flex flex-row justify-start gap-x-6">
-        <label className="block font-bold text-sm w-full md:w-[34%] ">
+      <div className="  flex flex-row justify-start ">
+        <label className="block mt-2 font-bold text-sm w-full md:w-[35%] ">
           Guardian Name
         </label>
-        <p>{editedGuardian.guardian_name || " "}</p>
+        <p className=" w-[52%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
+          {editedGuardian.guardian_name || " "}
+        </p>
       </div>
 
       <div className="  flex flex-row justify-start gap-x-6">
@@ -321,7 +324,7 @@ const GuardianInfo = ({ guardian, onUpdate }) => {
           name="guardian_mobile"
           value={editedGuardian.guardian_mobile || ""}
           onChange={handleChange}
-          className=" border-1 border-gray-600 rounded-md p-2 shadow-inner"
+          className="  border-1 border-gray-400 rounded-md p-2 shadow-inner"
         />
       </div>
     </div>
@@ -360,25 +363,117 @@ const IDCardDetails = () => {
   useEffect(() => {
     fetchExams();
   }, []);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
+    // Prevent double submissions
+    if (loading) return;
+
+    // Validate the form data
+
+    // Format form data for API
+    const formattedFormData = {};
+
+    try {
+      setLoading(true); // Start loading state
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      console.log("Submitting data:", formattedFormData);
+      const response = await axios.put(
+        `${API_URL}/api/teachers/${staff.teacher_id}`,
+        formattedFormData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Handle successful response
+      if (response.status === 200) {
+        toast.success("Teacher updated successfully!");
+        setTimeout(() => {
+          navigate("/studentIdCard");
+        }, 500);
+      }
+    } catch (error) {
+      console.error(
+        "Error updating teacher:",
+        error.response?.data || error.message
+      );
+    } finally {
+      setLoading(false); // End loading state
+    }
+  };
   if (loading) return <p>Loading...</p>;
   if (!data) return <p>No data available</p>;
 
   return (
-    <>
-      <div className="w-full  mx-auto p-4 flex flex-wrap gap-4 justify-center">
-        {data.students.map((student) => (
-          <StudentInfo key={student.student_id} student={student} />
-        ))}
-      </div>
+    <div className="bg-gray-200 w-full md:w-[95%] mx-auto">
+      <ToastContainer />
 
-      <diV className="w-full md:w-[95%] mx-auto flex flex-row justify-between gap-x-4">
-        {data.parents.map((parent) => (
-          <ParentInfo key={parent.parent_id} parent={parent} />
-        ))}
-        {data.guardian && <GuardianInfo guardian={data.guardian} />}
-      </diV>
-    </>
+      <div className="card p-4 rounded-md ">
+        <div className=" card-header mb-4 flex justify-between items-center ">
+          <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+            ID Card Details
+          </h5>
+
+          <RxCross1
+            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() => {
+              navigate("/studentIdCard");
+            }}
+          />
+        </div>
+        <div
+          className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+          style={{
+            backgroundColor: "#C03078",
+          }}
+        ></div>
+        <p className="  md:absolute md:right-10  md:top-[10%]   text-gray-500 ">
+          <span className="text-red-500">*</span>indicates mandatory information
+        </p>
+        <form
+          onSubmit={handleSubmit}
+          className="   overflow-x-hidden shadow-md  bg-gray-50"
+        >
+          {loading ? (
+            <div className=" inset-0 flex items-center justify-center bg-gray-50  z-10">
+              <Loader /> {/* Replace this with your loader component */}
+            </div>
+          ) : (
+            <>
+              <div className="w-full  mx-auto p-4 flex flex-wrap gap-4 justify-center">
+                {data.students.map((student) => (
+                  <StudentInfo key={student.student_id} student={student} />
+                ))}
+              </div>
+
+              <diV className="w-full md:w-[95%] mx-auto flex flex-row justify-between gap-x-4">
+                {data.parents.map((parent) => (
+                  <ParentInfo key={parent.parent_id} parent={parent} />
+                ))}
+                {data.guardian && <GuardianInfo guardian={data.guardian} />}
+              </diV>
+              <div className="col-span-3 md:mr-9 my-2 text-right">
+                <button
+                  type="submit"
+                  style={{ backgroundColor: "#2196F3" }}
+                  className=" text-white font-bold py-1 border-1 border-blue-500 px-4 rounded"
+                >
+                  Update
+                </button>
+              </div>
+            </>
+          )}
+        </form>
+      </div>
+    </div>
   );
 };
 
