@@ -401,6 +401,18 @@ h5 + * { /* Targets the element after h5 */
     printWindow.document.close();
     printWindow.print();
   };
+  const handleSubjectClick = (subject) => {
+    if (subject) {
+      // window.location.href = `/iDCardDetails?subject=${subject}`;
+      navigate(
+        `/iDCardDetails/${subject?.parent_id}`,
+
+        {
+          state: { staff: subject },
+        }
+      );
+    }
+  };
 
   const filteredSections = timetable.filter((section) => {
     const searchLower = searchTerm.toLowerCase();
@@ -708,8 +720,13 @@ h5 + * { /* Targets the element after h5 */
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {subject?.house}
                                   </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.image_name}
+                                  <td
+                                    className="px-2 text-center lg:px-3 py-2 hover:font-semibold  border border-gray-950 text-sm cursor-pointer text-blue-600 hover:text-blue-700"
+                                    onClick={() => handleSubjectClick(subject)}
+                                  >
+                                    <p className="border-b-2 mt-3  hover:border-blue-600 ">
+                                      {subject?.image_name}
+                                    </p>
                                   </td>
                                 </tr>
                               ))
