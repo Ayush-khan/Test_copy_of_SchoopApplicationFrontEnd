@@ -92,14 +92,14 @@ const StudentInfo = ({ student, onUpdate }) => {
 
   return (
     <div className="w-full md:w-[48%] border p-4 pt-2 rounded-lg shadow-lg bg-white">
-      <h2 className="text-xl font-bold mb-4 text-center text-gray-600">
+      <h2 className="text-xl font-bold mb-4 text-center text-gray-500">
         Student Information
       </h2>
 
       {/* Grid Layout for Fields */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="flex flex-col md:grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Full Name */}{" "}
-        <div className=" row-span-2 flex justify-center mb-4">
+        <div className=" md:row-span-2 md:col-span-1  flex justify-center mb-4 ">
           <div className="rounded-full">
             <ImageCropper
               photoPreview={editedStudent?.image_url}
@@ -107,7 +107,7 @@ const StudentInfo = ({ student, onUpdate }) => {
             />
           </div>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col mt-2">
           <label className="font-bold text-sm">Full Name</label>
           <p className=" bg-gray-200 border-1 border-gray-100 rounded-md p-2 shadow-inner">
             {editedStudent.first_name || ""} {editedStudent.mid_name || " "}{" "}
@@ -115,7 +115,7 @@ const StudentInfo = ({ student, onUpdate }) => {
           </p>
         </div>
         {/* Class & Division */}
-        <div className="flex flex-col">
+        <div className="flex flex-col mt-2">
           <label className="font-bold text-sm">Class & Division</label>
           <p className=" bg-gray-200 border-1 border-gray-100 rounded-md p-2 shadow-inner">
             {editedStudent.classname || " "} -{" "}
@@ -201,11 +201,11 @@ const ParentInfo = ({ parent, onUpdate }) => {
 
   return (
     <div className="w-full md:w-[80%] border p-4 pt-2 rounded-lg shadow-lg bg-white">
-      <h2 className="text-xl font-bold mb-4 text-center text-gray-600">
+      <h2 className="text-xl font-bold mb-4 text-center text-gray-500">
         Parent Information
       </h2>
-      <div className="flex flex-col md:flex-row gap-x-6 justify-normal md:justify-between items-center">
-        <div className="border-1 border-black w-full md:w-[50%]">
+      <div className="flex flex-col md:flex-row gap-x-6 gap-y-6 md:gap-y-1 justify-normal md:justify-between items-center">
+        <div className=" w-full md:w-[50%]">
           <div className="flex justify-center mb-4">
             <div className=" rounded-full ">
               <ImageCropper
@@ -216,12 +216,12 @@ const ParentInfo = ({ parent, onUpdate }) => {
               />
             </div>
           </div>
-          <div className="  flex flex-row justify-start ">
+          <div className="  flex flex-row justify-start gap-x-1 md:gap-x-5 ">
             <label className="block mt-2 font-bold text-sm w-full md:w-[25%] ">
               {" "}
               Father Name
             </label>
-            <p className=" w-[52%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
+            <p className=" w-full md:w-[58%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
               {editedParent.father_name || " "}
             </p>
           </div>
@@ -239,7 +239,7 @@ const ParentInfo = ({ parent, onUpdate }) => {
             />
           </div>
         </div>
-        <div className="border-1 border-black w-full md:w-[50%]">
+        <div className=" w-full md:w-[50%]">
           <div className="flex justify-center mb-4">
             <div className=" rounded-full ">
               <ImageCropper
@@ -250,11 +250,11 @@ const ParentInfo = ({ parent, onUpdate }) => {
               />
             </div>
           </div>
-          <div className="  flex flex-row justify-start ">
-            <label className="block mt-2 font-bold text-sm w-full md:w-[28%] ">
+          <div className="  flex flex-row justify-start gap-x-1 md:gap-x-5 ">
+            <label className="block mt-2 font-bold text-sm w-full md:w-[30%] ">
               Mother Name
             </label>
-            <p className=" ml-1 w-[51%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
+            <p className="  w-full md:w-[56%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
               {editedParent.mother_name || " "}
             </p>
           </div>
@@ -295,7 +295,7 @@ const GuardianInfo = ({ guardian, onUpdate }) => {
 
   return (
     <div className="w-full md:w-[40%] border p-4 pt-2 rounded-lg shadow-lg bg-white">
-      <h2 className="text-xl font-bold mb-4 text-center text-gray-600">
+      <h2 className="text-xl font-bold mb-4 text-center text-gray-500">
         Guardian Information
       </h2>
       <div className="flex justify-center mb-4">
@@ -306,11 +306,11 @@ const GuardianInfo = ({ guardian, onUpdate }) => {
           />
         </div>
       </div>
-      <div className="  flex flex-row justify-start ">
+      <div className="  flex flex-row justify-start gap-x-1 md:gap-x-5">
         <label className="block mt-2 font-bold text-sm w-full md:w-[35%] ">
           Guardian Name
         </label>
-        <p className=" w-[52%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
+        <p className=" w-full md:w-[58%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
           {editedGuardian.guardian_name || " "}
         </p>
       </div>
@@ -409,11 +409,11 @@ const IDCardDetails = () => {
       setLoading(false); // End loading state
     }
   };
-  if (loading) return <p>Loading...</p>;
+  //   if (loading) return <p>Loading...</p>;
   if (!data) return <p>No data available</p>;
 
   return (
-    <div className="bg-gray-200 w-full md:w-[95%] mx-auto">
+    <div className="mt-4 bg-gray-200 w-full md:w-[95%] mx-auto">
       <ToastContainer />
 
       <div className="card p-4 rounded-md ">
@@ -440,21 +440,21 @@ const IDCardDetails = () => {
         </p>
         <form
           onSubmit={handleSubmit}
-          className="   overflow-x-hidden shadow-md  bg-gray-50"
+          className="   p-0 overflow-x-hidden shadow-md  bg-gray-50 "
         >
           {loading ? (
-            <div className=" inset-0 flex items-center justify-center bg-gray-50  z-10">
-              <Loader /> {/* Replace this with your loader component */}
+            <div className="flex justify-center items-center h-64">
+              <Loader />
             </div>
           ) : (
-            <>
-              <div className="w-full  mx-auto p-4 flex flex-wrap gap-4 justify-center">
+            <div>
+              <div className="w-full  mx-auto  flex flex-wrap p-4 gap-4 justify-center">
                 {data.students.map((student) => (
                   <StudentInfo key={student.student_id} student={student} />
                 ))}
               </div>
 
-              <diV className="w-full md:w-[95%] mx-auto flex flex-row justify-between gap-x-4">
+              <diV className="w-full md:w-[95%] mx-auto flex flex-col md:flex-row justify-between gap-x-4">
                 {data.parents.map((parent) => (
                   <ParentInfo key={parent.parent_id} parent={parent} />
                 ))}
@@ -469,7 +469,7 @@ const IDCardDetails = () => {
                   Update
                 </button>
               </div>
-            </>
+            </div>
           )}
         </form>
       </div>
