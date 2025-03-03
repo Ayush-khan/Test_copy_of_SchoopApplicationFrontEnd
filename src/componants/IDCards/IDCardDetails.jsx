@@ -40,9 +40,17 @@ const IDCardDetails = () => {
       setStudents(data.students || []);
       setParents(Array.isArray(data.parents) ? data.parents : []);
       //   setGuardian(Array.isArray(data.guardian) ? data.guardian : []);
+      //   setGuardian(
+      //     Array.isArray(data.guardian) ? data.guardian : [data.guardian]
+      //   );
       setGuardian(
-        Array.isArray(data.guardian) ? data.guardian : [data.guardian]
+        Array.isArray(data.guardian)
+          ? data.guardian
+          : data.guardian
+          ? [data.guardian]
+          : []
       );
+
       console.log("setParents", parents);
 
       console.log("setGuardian", guardian);
@@ -94,7 +102,12 @@ const IDCardDetails = () => {
   const handleStudentImageCropped = (croppedImageData, index) => {
     setStudents((prev) =>
       prev.map((student, i) =>
-        i === index ? { ...student, image_url: croppedImageData } : student
+        i === index
+          ? {
+              ...student,
+              image_base: croppedImageData ? croppedImageData : "", // Store base64 or empty
+            }
+          : student
       )
     );
   };
@@ -103,10 +116,16 @@ const IDCardDetails = () => {
   //     setStudents((prev) => ({ ...prev, image_url: croppedImageData }));
   //   };
 
-  const handleParentImageCropped = (croppedImageData, index) => {
+  const handleParentImageCropped = (croppedImageData, index, type) => {
     setParents((prev) =>
       prev.map((parent, i) =>
-        i === index ? { ...parent, image_url: croppedImageData } : parent
+        i === index
+          ? {
+              ...parent,
+              // Dynamic key: father_image_url or mother_image_url
+              [`${type}_image_base`]: croppedImageData ? croppedImageData : "",
+            }
+          : parent
       )
     );
   };
@@ -117,7 +136,13 @@ const IDCardDetails = () => {
   const handleGuardianImageCropped = (croppedImageData, index) => {
     setGuardian((prev) =>
       prev.map((guardian, i) =>
-        i === index ? { ...guardian, image_url: croppedImageData } : guardian
+        i === index
+          ? {
+              ...guardian,
+
+              guardian_image_base: croppedImageData ? croppedImageData : "", // Store base64 or empty
+            }
+          : guardian
       )
     );
   };
@@ -133,10 +158,30 @@ const IDCardDetails = () => {
     if (loadingForSubmit) return;
     const formattedFormData = {};
     console.log("Student Data Submit---->", data);
+    const formattedStudents = students.map((student) => ({
+      ...student,
+      image_url: student.image_url || "",
+      image_base: student.image_base || "",
+    }));
+
+    const formattedParents = parents.map((parent) => ({
+      ...parent,
+      father_image_url: parent.father_image_url || "",
+      mother_image_url: parent.mother_image_url || "",
+      father_image_base: parent.father_image_base || "",
+      mother_image_base: parent.mother_image_base || "",
+    }));
+
+    const formattedGuardians = guardian.map((g) => ({
+      ...g,
+      guardian_image_url: g.guardian_image_url,
+      guardian_image_base: g.guardian_image_base || "",
+    }));
+
     const finalData = {
-      student: students,
-      parent: parents,
-      guardian: guardian,
+      student: formattedStudents,
+      parent: formattedParents,
+      guardian: formattedGuardians,
     };
 
     console.log("Submitting Data----->", finalData);
@@ -354,7 +399,11 @@ const IDCardDetails = () => {
                             <ImageCropper
                               photoPreview={parent?.father_image_url}
                               onImageCropped={(croppedImage) =>
-                                handleParentImageCropped(croppedImage, index)
+                                handleParentImageCropped(
+                                  croppedImage,
+                                  index,
+                                  "father"
+                                )
                               }
                             />
                             {/* <ImageCropper
@@ -402,7 +451,11 @@ const IDCardDetails = () => {
                             <ImageCropper
                               photoPreview={parent?.mother_image_url}
                               onImageCropped={(croppedImage) =>
-                                handleParentImageCropped(croppedImage, index)
+                                handleParentImageCropped(
+                                  croppedImage,
+                                  index,
+                                  "mother"
+                                )
                               }
                             />
                             {/* <ImageCropper
