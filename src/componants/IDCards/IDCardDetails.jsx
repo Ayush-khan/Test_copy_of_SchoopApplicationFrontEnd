@@ -147,10 +147,10 @@ const IDCardDetails = () => {
         throw new Error("No authentication token found");
       }
 
-      console.log("Submitting data:", formattedFormData);
+      console.log("Submitting data-->:", finalData);
       const response = await axios.put(
         `${API_URL}/api/teachers/${staff.teacher_id}`,
-        formattedFormData,
+        finalData,
         {
           headers: {
             "Content-Type": "application/json",
@@ -371,16 +371,16 @@ const IDCardDetails = () => {
                             /> */}
                           </div>
                         </div>
-                        <div className="flex flex-row justify-start gap-x-1 md:gap-x-5">
-                          <label className="block mt-2 font-bold text-sm w-full md:w-[25%]">
+                        <div className="flex flex-row justify-start gap-x-1 md:gap-x-5  px-1 ">
+                          <label className="block mt-2 font-bold text-sm w-full md:w-[35%]">
                             Father Name
                           </label>
-                          <p className="w-full md:w-[58%] mx-auto bg-gray-200 border border-gray-400 rounded-md p-2 shadow-inner">
+                          <p className="w-full md:w-[58%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
                             {parent.father_name || " "}
                           </p>
                         </div>
-                        <div className="mb-2 flex flex-row justify-start gap-x-6">
-                          <label className="block mt-2 font-bold text-sm w-full md:w-[50%]">
+                        <div className="mb-2 flex flex-row justify-start gap-x-1 md:gap-x-5  px-1 ">
+                          <label className="block mt-2 font-bold text-sm w-full md:w-[35%]">
                             Father Mobile{" "}
                             <span className="text-red-500">*</span>
                           </label>
@@ -390,7 +390,7 @@ const IDCardDetails = () => {
                             value={parent.f_mobile || ""}
                             // onChange={handleParentChange}
                             onChange={(e) => handleParentChange(e, index)}
-                            className="border border-gray-400 rounded-md p-2 shadow-inner w-full "
+                            className=" md:w-[58%] mx-auto border-1 border-gray-400 rounded-md p-2 shadow-inner w-full "
                           />
                         </div>
                       </div>
@@ -416,16 +416,16 @@ const IDCardDetails = () => {
                             /> */}
                           </div>
                         </div>
-                        <div className="flex flex-row justify-start gap-x-1 md:gap-x-5">
+                        <div className="flex flex-row justify-start gap-x-1 md:gap-x-5  px-1  ">
                           <label className="block mt-2 font-bold text-sm w-full md:w-[30%]">
                             Mother Name
                           </label>
-                          <p className="w-full md:w-[56%] mx-auto bg-gray-200 border border-gray-400 rounded-md p-2 shadow-inner">
+                          <p className="w-full md:w-[58%]  mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
                             {parent.mother_name || " "}
                           </p>
                         </div>
-                        <div className="mb-2 flex flex-row justify-start gap-x-6">
-                          <label className="block font-bold mt-2 text-sm w-full md:w-[60%]">
+                        <div className="mb-2 flex flex-row justify-start gap-x-1 md:gap-x-5    ">
+                          <label className="block font-bold   mt-2 text-sm w-full md:w-[33%]">
                             Mother Mobile{" "}
                             <span className="text-red-500">*</span>
                           </label>
@@ -435,7 +435,7 @@ const IDCardDetails = () => {
                             value={parent.m_mobile || ""}
                             // onChange={handleParentChange}
                             onChange={(e) => handleParentChange(e, index)}
-                            className="border border-gray-400 rounded-md p-2 shadow-inner w-full"
+                            className=" md:w-[58%] border-1 border-gray-400 rounded-md p-2 shadow-inner w-full"
                           />
                         </div>
                       </div>
@@ -473,7 +473,7 @@ const IDCardDetails = () => {
                         <label className="block mt-2 font-bold text-sm w-full md:w-[35%]">
                           Guardian Name
                         </label>
-                        <p className="w-full md:w-[58%] mx-auto bg-gray-200 border border-gray-400 rounded-md p-2 shadow-inner">
+                        <p className="w-full md:w-[58%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
                           {guardians.guardian_name || " "}
                         </p>
                       </div>
@@ -486,7 +486,7 @@ const IDCardDetails = () => {
                           name="guardian_mobile"
                           value={guardians.guardian_mobile || ""}
                           onChange={(e) => handleGuardianChange(e, index)}
-                          className="border border-gray-400 rounded-md p-2 shadow-inner w-full"
+                          className="border-1 border-gray-400 rounded-md p-2 shadow-inner w-full"
                         />
                       </div>
                     </div>
