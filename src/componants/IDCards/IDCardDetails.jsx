@@ -193,8 +193,8 @@ const IDCardDetails = () => {
       }
 
       console.log("Submitting data-->:", finalData);
-      const response = await axios.put(
-        `${API_URL}/api/teachers/${staff.teacher_id}`,
+      const response = await axios.post(
+        `${API_URL}/api/save_studentparentguardianimage`,
         finalData,
         {
           headers: {
@@ -206,14 +206,14 @@ const IDCardDetails = () => {
 
       // Handle successful response
       if (response.status === 200) {
-        toast.success("Teacher updated successfully!");
+        toast.success("Id Card Saved successfully!");
         setTimeout(() => {
           navigate("/studentIdCard");
         }, 500);
       }
     } catch (error) {
       console.error(
-        "Error updating teacher:",
+        "Error updating Id Card :",
         error.response?.data || error.message
       );
     } finally {
