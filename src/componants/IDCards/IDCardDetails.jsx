@@ -16,11 +16,13 @@ const IDCardDetails = () => {
   const [students, setStudents] = useState([]);
   const [parents, setParents] = useState([]);
   const [guardian, setGuardian] = useState([]);
-
+  const [formErrors, setFormErrors] = useState([]);
   const { staff } = location.state || {};
   console.log("IdCardDetails***", staff);
   const [data, setData] = useState(null);
   const fetchStudentData = async () => {
+    setFormErrors([]); // Reset errors if no validation issues
+
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
@@ -147,17 +149,70 @@ const IDCardDetails = () => {
     );
   };
 
-  //   const handleGuardianImageCropped = (croppedImageData) => {
-  //     setGuardian((prev) => ({ ...prev, image_url: croppedImageData }));
-  //   };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     // Prevent double submissions
     if (loadingForSubmit) return;
-    const formattedFormData = {};
+    setFormErrors([]); // Reset errors if no validation issues
+    // Validation checks
+    let errors = [];
+
+    console.log("Start submitting...");
+
+    // Collect student-related errors
+    students.forEach((student, index) => {
+      if (!student.blood_group) {
+        errors.push({
+          field: `student_blood_group_${index}`,
+          message: "Blood Group is required.",
+        });
+      }
+      if (!student.permant_add) {
+        errors.push({
+          field: `student_address_${index}`,
+          message: "Permanent Address is required.",
+        });
+      }
+    });
+
+    // Collect parent-related errors
+    parents.forEach((parent, index) => {
+      if (!parent.f_mobile) {
+        errors.push({
+          field: `parent_f_mobile_${index}`,
+          message: "Father's Mobile Number is required.",
+        });
+      }
+      if (!parent.m_mobile) {
+        errors.push({
+          field: `parent_m_mobile_${index}`,
+          message: "Mother's Mobile Number is required.",
+        });
+      }
+    });
+
+    // Collect guardian-related errors
+    guardian.forEach((g, index) => {
+      if (!g.guardian_mobile) {
+        errors.push({
+          field: `guardian_mobile_${index}`,
+          message: "Guardian's Mobile Number is required.",
+        });
+      }
+    });
+
+    console.log("Collected errors:", errors);
+
+    if (errors.length > 0) {
+      setFormErrors(errors); // Store structured errors in state
+      return;
+    }
+
+    setFormErrors([]); // Reset errors if no validation issues
+
     console.log("Student Data Submit---->", data);
+
     const formattedStudents = students.map((student) => ({
       ...student,
       image_url: student.image_url || "",
@@ -185,6 +240,7 @@ const IDCardDetails = () => {
     };
 
     console.log("Submitting Data----->", finalData);
+
     try {
       setLoadingForSubmit(true); // Start loading state
       const token = localStorage.getItem("authToken");
@@ -192,7 +248,6 @@ const IDCardDetails = () => {
         throw new Error("No authentication token found");
       }
 
-      console.log("Submitting data-->:", finalData);
       const response = await axios.post(
         `${API_URL}/api/save_studentparentguardianimage`,
         finalData,
@@ -204,22 +259,25 @@ const IDCardDetails = () => {
         }
       );
 
-      // Handle successful response
       if (response.status === 200) {
-        toast.success("Id Card Saved successfully!");
+        toast.success("ID Card Saved successfully!");
+        setFormErrors([]); // Reset errors if no validation issues
+
         setTimeout(() => {
           navigate("/studentIdCard");
         }, 500);
       }
     } catch (error) {
       console.error(
-        "Error updating Id Card :",
+        "Error Saving ID Card:",
         error.response?.data || error.message
       );
     } finally {
-      setLoadingForSubmit(false); // End loading state
+      setLoadingForSubmit(false);
+      setFormErrors([]); // Reset errors if no validation issues
     }
   };
+
   //   if (loading) return <p>Loading...</p>;
   if (!students || !parents || !guardian)
     return (
@@ -280,13 +338,6 @@ const IDCardDetails = () => {
                         {/* Full Name */}{" "}
                         <div className=" md:row-span-2 md:col-span-1  flex justify-center mb-4 ">
                           <div className="rounded-full">
-                            {/* <ImageCropper
-                              photoPreview={student?.image_url}
-                              //   onImageCropped={handleStudentImageCropped}
-                              onImageCropped={(e) =>
-                                handleStudentImageCropped(e, index)
-                              }
-                            /> */}
                             <ImageCropper
                               photoPreview={student?.image_url}
                               onImageCropped={(croppedImage) =>
@@ -342,6 +393,19 @@ const IDCardDetails = () => {
                             <option value="O+">O+</option>
                             <option value="O-">O-</option>
                           </select>
+                          {formErrors.some(
+                            (err) =>
+                              err.field === `student_blood_group_${index}`
+                          ) && (
+                            <p className="text-red-500 text-xs">
+                              {
+                                formErrors.find(
+                                  (err) =>
+                                    err.field === `student_blood_group_${index}`
+                                )?.message
+                              }
+                            </p>
+                          )}
                         </div>
                         {/* House */}
                         <div className="flex flex-col">
@@ -374,6 +438,18 @@ const IDCardDetails = () => {
                             maxLength={240}
                             className="w-full border-1 border-gray-400 rounded-md p-2 shadow-inner"
                           />
+                          {formErrors.some(
+                            (err) => err.field === `student_address_${index}`
+                          ) && (
+                            <p className="text-red-500 text-xs">
+                              {
+                                formErrors.find(
+                                  (err) =>
+                                    err.field === `student_address_${index}`
+                                )?.message
+                              }
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -406,18 +482,6 @@ const IDCardDetails = () => {
                                 )
                               }
                             />
-                            {/* <ImageCropper
-                              photoPreview={parent.father_image_url}
-                              onImageCropped={(e) =>
-                                handleParentImageCropped(e, "father_image_url")
-                              }
-                              //   onImageCropped={(cropped) =>
-                              //     handleParentImageCropped(
-                              //       cropped,
-                              //       "father_image_url"
-                              //     )
-                              //   }
-                            /> */}
                           </div>
                         </div>
                         <div className="flex flex-row justify-start gap-x-1 md:gap-x-5  px-1 ">
@@ -438,10 +502,38 @@ const IDCardDetails = () => {
                             name="f_mobile"
                             value={parent.f_mobile || ""}
                             // onChange={handleParentChange}
-                            onChange={(e) => handleParentChange(e, index)}
+                            onChange={(e) => {
+                              let value = e.target.value;
+
+                              // Remove any non-digit characters
+                              value = value.replace(/\D/g, "");
+
+                              // Limit input to 10 digits
+                              if (value.length > 10) {
+                                value = value.slice(0, 10);
+                              }
+
+                              handleParentChange(
+                                { target: { name: "f_mobile", value } },
+                                index
+                              );
+                            }}
+                            // onChange={(e) => handleParentChange(e, index)}
                             className=" md:w-[58%] mx-auto border-1 border-gray-400 rounded-md p-2 shadow-inner w-full "
-                          />
+                          />{" "}
                         </div>
+                        {formErrors.some(
+                          (err) => err.field === `parent_f_mobile_${index}`
+                        ) && (
+                          <p className="text-red-500 text-xs mx-2 relative -top-1  float-right">
+                            {
+                              formErrors.find(
+                                (err) =>
+                                  err.field === `parent_f_mobile_${index}`
+                              )?.message
+                            }
+                          </p>
+                        )}
                       </div>
 
                       {/* Mother Information */}
@@ -458,15 +550,6 @@ const IDCardDetails = () => {
                                 )
                               }
                             />
-                            {/* <ImageCropper
-                              photoPreview={parent.mother_image_url}
-                              onImageCropped={(e) =>
-                                handleParentImageCropped(e, "mother_image_url")
-                              }
-                              //   onImageCropped={(cropped) =>
-                              //     handleParentImageCropped(cropped)
-                              //   }
-                            /> */}
                           </div>
                         </div>
                         <div className="flex flex-row justify-start gap-x-1 md:gap-x-5  px-1  ">
@@ -487,10 +570,38 @@ const IDCardDetails = () => {
                             name="m_mobile"
                             value={parent.m_mobile || ""}
                             // onChange={handleParentChange}
-                            onChange={(e) => handleParentChange(e, index)}
+                            onChange={(e) => {
+                              let value = e.target.value;
+
+                              // Remove any non-digit characters
+                              value = value.replace(/\D/g, "");
+
+                              // Limit input to 10 digits
+                              if (value.length > 10) {
+                                value = value.slice(0, 10);
+                              }
+
+                              handleParentChange(
+                                { target: { name: "m_mobile", value } },
+                                index
+                              );
+                            }}
+                            // onChange={(e) => handleParentChange(e, index)}
                             className=" md:w-[58%] border-1 border-gray-400 rounded-md p-2 shadow-inner w-full"
                           />
                         </div>
+                        {formErrors.some(
+                          (err) => err.field === `parent_m_mobile_${index}`
+                        ) && (
+                          <p className="text-red-500 relative -top-1 text-xs mx-3  float-right">
+                            {
+                              formErrors.find(
+                                (err) =>
+                                  err.field === `parent_m_mobile_${index}`
+                              )?.message
+                            }
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -514,12 +625,6 @@ const IDCardDetails = () => {
                               handleGuardianImageCropped(croppedImage, index)
                             }
                           />
-                          {/* <ImageCropper
-                            photoPreview={guardian?.guardian_image_url}
-                            onImageCropped={(croppedImage) =>
-                              handleGuardianImageCropped(croppedImage, index)
-                            }
-                          /> */}
                         </div>
                       </div>
                       <div className="flex flex-row justify-start gap-x-1 md:gap-x-5">
@@ -538,10 +643,37 @@ const IDCardDetails = () => {
                           type="text"
                           name="guardian_mobile"
                           value={guardians.guardian_mobile || ""}
-                          onChange={(e) => handleGuardianChange(e, index)}
+                          onChange={(e) => {
+                            let value = e.target.value;
+
+                            // Remove any non-digit characters
+                            value = value.replace(/\D/g, "");
+
+                            // Limit input to 10 digits
+                            if (value.length > 10) {
+                              value = value.slice(0, 10);
+                            }
+
+                            handleGuardianChange(
+                              { target: { name: "guardian_mobile", value } },
+                              index
+                            );
+                          }}
+                          //   onChange={(e) => handleGuardianChange(e, index)}
                           className="border-1 border-gray-400 rounded-md p-2 shadow-inner w-full"
-                        />
+                        />{" "}
                       </div>
+                      {formErrors.some(
+                        (err) => err.field === `guardian_mobile_${index}`
+                      ) && (
+                        <p className="text-red-500  text-xs   float-right">
+                          {
+                            formErrors.find(
+                              (err) => err.field === `guardian_mobile_${index}`
+                            )?.message
+                          }
+                        </p>
+                      )}
                     </div>
                   ))}
               </div>
@@ -553,7 +685,7 @@ const IDCardDetails = () => {
                   className="btn btn-primary  px-3 mb-2 font-bold"
                   disabled={loadingForSubmit}
                 >
-                  {loadingForSubmit ? "Updating..." : "Update"}
+                  {loadingForSubmit ? "Submiting..." : "Submit"}
                 </button>
               </div>
             </div>
