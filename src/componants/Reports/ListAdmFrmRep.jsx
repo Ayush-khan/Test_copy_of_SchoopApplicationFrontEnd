@@ -563,7 +563,7 @@ const ListAdmFrmRep = () => {
                       className="md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      Class <span className="text-red-500">*</span>
+                      Class
                     </label>
                     <div className=" w-full md:w-[65%]">
                       <Select
