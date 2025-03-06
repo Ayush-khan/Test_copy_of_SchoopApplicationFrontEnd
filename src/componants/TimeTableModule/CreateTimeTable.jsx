@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import axios from "axios";
-import styles from "./CreateTimeTable.module.css";
+// import styles from "./CreateTimeTable.module.css";
 
 const CreateTimeTable = () => {
   const API_URL = import.meta.env.VITE_API_URL; // Ensure this is correctly defined in your .env
@@ -17,43 +17,23 @@ const CreateTimeTable = () => {
   const [loadingClasses, setLoadingClasses] = useState(false);
   const [classError, setClassError] = useState("");
   const navigate = useNavigate();
-
   const [divisionforForm, setDivisionForForm] = useState([]);
   const [selectedDivision, setSelectedDivision] = useState(null);
   const [loadingDivision, setLoadingDivision] = useState(false);
   const [divisionError, setDivisionError] = useState("");
-
   const [selectedMonFri, setSelectedMonFri] = useState(null);
   const [selectedSat, setSelectedSat] = useState(null);
   const [monFriLectures, setMonFriLectures] = useState([]);
   const [satLectures, setSatLectures] = useState([]);
-
   const [loadingForSearch, setLoadingForSearch] = useState(false);
   const [classIdForSearch, setClassIdForSearch] = useState(null);
   const [sectionIdForSearch, setSectionIdForSearch] = useState(null);
-
   const [timetable, setTimetable] = useState([]);
-  const [dates, setDates] = useState([]);
-
-  const [selectedTime, setSelectedTime] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-
-  const [satStartTime, setSatStartTime] = useState("");
-  const [satEndTime, setSatEndTime] = useState("");
-
   const [subjects, setSubjects] = useState([]);
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [selectedSubjects, setSelectedSubjects] = useState({});
-
   const [lectureCount, setLectureCount] = useState(8); // Default value for Mon-Fri
   const [satLectureCount, setSatLectureCount] = useState(5); // Default for Sat
-
-  const [loading, setLoading] = useState(false);
-  const [lecturesPerWeek, setLecturesPerWeek] = useState("");
-  const [saturdayLectures, setSaturdayLectures] = useState("");
-  const [classId, setClassId] = useState("");
-  const [sectionId, setSectionId] = useState("");
   const [showTimeTable, setShowTimeTable] = useState(false);
   const [openDropdown, setOpenDropdown] = useState({});
 
@@ -96,24 +76,6 @@ const CreateTimeTable = () => {
       setLoadingSubjects(false); // Ensure the loader state is updated
     }
   };
-
-  // const handleSubjectSelect = (dayIndex, lectureIndex, selectedOption) => {
-  //   setSelectedSubjects((prev) => {
-  //     // Ensure the dayIndex exists
-  //     const updatedDay = prev[dayIndex] || { lectures: [] };
-
-  //     // Ensure the lectureIndex exists in lectures
-  //     const updatedLectures = [...(updatedDay.lectures || [])];
-  //     updatedLectures[lectureIndex] = {
-  //       subject: { sm_id: selectedOption },
-  //     };
-
-  //     return {
-  //       ...prev,
-  //       [dayIndex]: { ...updatedDay, lectures: updatedLectures },
-  //     };
-  //   });
-  // };
 
   useEffect(() => {
     fetchClasses();
@@ -233,21 +195,6 @@ const CreateTimeTable = () => {
       Array.from({ length: numLectures }, (_, index) => index + 1)
     );
   };
-
-  // const generateTimeSlots = (startHour = 8, endHour = 14.3, interval = 30) => {
-  //   const slots = [];
-  //   const startTime = startHour * 60;
-  //   const endTime = endHour * 60;
-  //   for (let time = startTime; time < endTime; time += interval) {
-  //     const hours = Math.floor(time / 60);
-  //     const minutes = time % 60;
-  //     const ampm = hours >= 12 ? "PM" : "AM";
-  //     const formattedHour = hours > 12 ? hours - 12 : hours;
-  //     const formattedMinutes = minutes === 0 ? "00" : minutes;
-  //     slots.push(`${formattedHour}:${formattedMinutes} ${ampm}`);
-  //   }
-  //   return slots;
-  // };
 
   const generateTimeSlots = (startHour = 8, endHour = 14, interval = 5) => {
     const slots = [];
@@ -471,91 +418,16 @@ const CreateTimeTable = () => {
     }
   };
 
-  // const handleSubmit = async () => {
-  // const token = localStorage.getItem("authToken");
-  // if (!token) {
-  //     toast.error("Authorization token is missing. Please login again");
-  //     return;
-  // }
-
-  // try {
-  //     if (!selectedClass) {
-  //         toast.error("Please select a class before submitting.");
-  //         return;
-  //     }
-  //     const monFriLectureCount = parseInt(selectedMonFri.value.split(" ")[1]) || 0;
-
-  //     let timetableData = {
-  //         class_id: selectedClass.value,
-  //         section_id : selectedDivision.value,
-  //         num_lec: monFriLectureCount, // Total lectures count from dynamic API
-  //     };
-
-  //     timetable.forEach((day, dayIndex) => {
-  //         day.lectures.forEach((lecture, index) => {
-  //             let i = index + 1; // Ensure lecture index starts from 1
-
-  //             let timeIn = lecture["Time In"] || "N/A";
-  //             let timeOut = lecture["Time Out"] || "N/A";
-  //             let satTimeIn = lecture["Sat Time In"] || "N/A";
-  //             let satTimeOut = lecture["Sat Time Out"] || "N/A";
-
-  //             // console.log(`Lecture ${i} on ${day.day} - Time In: ${timeIn}, Time Out: ${timeOut}, Sat Time In: ${satTimeIn}, Sat Time Out: ${satTimeOut}`);
-
-  //             if (day.day.includes("Monday")) {
-  //                 timetableData[`mon${i}`] = selectedSubjects[dayIndex]?.lectures[index]?.subject.map(s => s.name).join(", ") || "";
-  //                 timetableData[`time_in${i}`] = timeIn;
-  //                 timetableData[`time_out${i}`] = timeOut;
-  //             }
-  //             if (day.day.includes("Tuesday")) {
-  //                 timetableData[`tue${i}`] = selectedSubjects[dayIndex]?.lectures[index]?.subject.map(s => s.name).join(", ") || "";
-  //             }
-  //             if (day.day.includes("Wednesday")) {
-  //                 timetableData[`wed${i}`] = selectedSubjects[dayIndex]?.lectures[index]?.subject.map(s => s.name).join(", ") || "";
-  //             }
-  //             if (day.day.includes("Thursday")) {
-  //                 timetableData[`thu${i}`] = selectedSubjects[dayIndex]?.lectures[index]?.subject.map(s => s.name).join(", ") || "";
-  //             }
-  //             if (day.day.includes("Friday")) {
-  //                 timetableData[`fri${i}`] = selectedSubjects[dayIndex]?.lectures[index]?.subject.map(s => s.name).join(", ") || "";
-  //             }
-  //             if (day.day.includes("Saturday")) {
-  //                 timetableData[`sat${i}`] = selectedSubjects[dayIndex]?.lectures[index]?.subject.map(s => s.name).join(", ") || "";
-  //                 timetableData[`sat_in${i}`] = satTimeIn;
-  //                 timetableData[`sat_out${i}`] = satTimeOut;
-  //             }
-  //         });
-  //     });
-
-  //     console.log("Final Timetable Data before submission:", JSON.stringify(timetableData, null, 2));
-
-  //     // Submit timetable data to API
-  //     const response = await axios.post(`${API_URL}/api/save_classtimetable`, timetableData, {
-  //         headers: {
-  //             Authorization: `Bearer ${token}`,
-  //             "Content-Type": "application/json",
-  //         },
-  //     });
-
-  //     console.log("Response:", response.data);
-
-  //     if (response.status === 200) {
-  //         toast.success("Timetable saved successfully!");
-  //     } else {
-  //         toast.error(response.data.message || "Failed to save timetable.");
-  //     }
-  // } catch (error) {
-  //     console.error("Error saving timetable:", error.response?.data || error.message);
-  //     toast.error(error.response?.data?.message || "An error occurred while saving the timetable.");
-  // }
-  // };
-
   const handleSubmit = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) {
       toast.error("Authorization token is missing. Please login again");
       return;
     }
+    let timeIn;
+    let timeOut;
+    let satTimeIn;
+    let satTimeOut;
 
     try {
       if (!selectedClass) {
@@ -573,6 +445,77 @@ const CreateTimeTable = () => {
         section_id: selectedDivision.value,
         num_lec: monFriLectureCount,
       };
+      console.log("TimeTable before Submit...", timetableData);
+      //   timetable.forEach((day, dayIndex) => {
+      //     day.lectures.forEach((lecture, index) => {
+      //       let i = index + 1;
+
+      //       console.log(
+      //         `Checking before lecture structure for ${day.day}, Lecture ${i}:`,
+      //         lecture
+      //       );
+
+      //       let timeIn = lecture["Time In"] ?? "N/A";
+      //       let timeOut = lecture["Time Out"] ?? "N/A";
+      //       let satTimeIn = lecture["Sat Time In"] ?? "N/A";
+      //       let satTimeOut = lecture["Sat Time Out"] ?? "N/A";
+      //       console.log("Lectures are:", lecture["Time In"]);
+      //       console.log(`Checking ${timeIn}`);
+      //       console.log(
+      //         "timeIn",
+      //         timeIn,
+      //         "timeOut",
+      //         timeOut,
+      //         "satTimeIn",
+      //         satTimeIn,
+      //         "satTimeOut",
+      //         satTimeOut
+      //       );
+
+      //       switch (day.day) {
+      //         case "Monday":
+      //           timetableData[`mon${i}`] =
+      //             selectedSubjects[dayIndex]?.lectures[index]?.subject
+      //               .map((s) => s.name)
+      //               .join(", ") || "";
+      //           timetableData[`time_in${i}`] = timeIn;
+      //           timetableData[`time_out${i}`] = timeOut;
+      //           break;
+      //         case "Tuesday":
+      //           timetableData[`tue${i}`] =
+      //             selectedSubjects[dayIndex]?.lectures[index]?.subject
+      //               .map((s) => s.name)
+      //               .join(", ") || "";
+      //           break;
+      //         case "Wednesday":
+      //           timetableData[`wed${i}`] =
+      //             selectedSubjects[dayIndex]?.lectures[index]?.subject
+      //               .map((s) => s.name)
+      //               .join(", ") || "";
+      //           break;
+      //         case "Thursday":
+      //           timetableData[`thu${i}`] =
+      //             selectedSubjects[dayIndex]?.lectures[index]?.subject
+      //               .map((s) => s.name)
+      //               .join(", ") || "";
+      //           break;
+      //         case "Friday":
+      //           timetableData[`fri${i}`] =
+      //             selectedSubjects[dayIndex]?.lectures[index]?.subject
+      //               .map((s) => s.name)
+      //               .join(", ") || "";
+      //           break;
+      //         case "Saturday":
+      //           timetableData[`sat${i}`] =
+      //             selectedSubjects[dayIndex]?.lectures[index]?.subject
+      //               .map((s) => s.name)
+      //               .join(", ") || "";
+      //           timetableData[`sat_in${i}`] = satTimeIn;
+      //           timetableData[`sat_out${i}`] = satTimeOut;
+      //           break;
+      //       }
+      //     });
+      //   });
 
       timetable.forEach((day, dayIndex) => {
         day.lectures.forEach((lecture, index) => {
@@ -583,51 +526,51 @@ const CreateTimeTable = () => {
             lecture
           );
 
-          let timeIn = lecture?.["Time In"] ?? "N/A";
-          let timeOut = lecture?.["Time Out"] ?? "N/A";
-          let satTimeIn = lecture?.["Sat Time In"] ?? "N/A";
-          let satTimeOut = lecture?.["Sat Time Out"] ?? "N/A";
+          // Extract time values with a default fallback
+          timeIn = lecture?.["Time In"];
+          timeOut = lecture?.["Time Out"];
+          satTimeIn = lecture?.["Sat Time In"];
+          satTimeOut = lecture?.["Sat Time Out"];
 
-          console.log(`Checking ${timeIn}`);
+          console.log("Lecture Data:", lecture);
+          console.log(
+            "Extracted Times - timeIn:",
+            timeIn,
+            "| timeOut:",
+            timeOut,
+            "| satTimeIn:",
+            satTimeIn,
+            "| satTimeOut:",
+            satTimeOut
+          );
 
+          // Fetch subject name safely
+          let subjectNames =
+            selectedSubjects[dayIndex]?.lectures[index]?.subject
+              ?.map((s) => s.name)
+              .join(", ") || "";
+
+          // Assign data based on the day
           switch (day.day) {
             case "Monday":
-              timetableData[`mon${i}`] =
-                selectedSubjects[dayIndex]?.lectures[index]?.subject
-                  .map((s) => s.name)
-                  .join(", ") || "";
+              timetableData[`mon${i}`] = subjectNames;
               timetableData[`time_in${i}`] = timeIn;
               timetableData[`time_out${i}`] = timeOut;
               break;
             case "Tuesday":
-              timetableData[`tue${i}`] =
-                selectedSubjects[dayIndex]?.lectures[index]?.subject
-                  .map((s) => s.name)
-                  .join(", ") || "";
+              timetableData[`tue${i}`] = subjectNames;
               break;
             case "Wednesday":
-              timetableData[`wed${i}`] =
-                selectedSubjects[dayIndex]?.lectures[index]?.subject
-                  .map((s) => s.name)
-                  .join(", ") || "";
+              timetableData[`wed${i}`] = subjectNames;
               break;
             case "Thursday":
-              timetableData[`thu${i}`] =
-                selectedSubjects[dayIndex]?.lectures[index]?.subject
-                  .map((s) => s.name)
-                  .join(", ") || "";
+              timetableData[`thu${i}`] = subjectNames;
               break;
             case "Friday":
-              timetableData[`fri${i}`] =
-                selectedSubjects[dayIndex]?.lectures[index]?.subject
-                  .map((s) => s.name)
-                  .join(", ") || "";
+              timetableData[`fri${i}`] = subjectNames;
               break;
             case "Saturday":
-              timetableData[`sat${i}`] =
-                selectedSubjects[dayIndex]?.lectures[index]?.subject
-                  .map((s) => s.name)
-                  .join(", ") || "";
+              timetableData[`sat${i}`] = subjectNames;
               timetableData[`sat_in${i}`] = satTimeIn;
               timetableData[`sat_out${i}`] = satTimeOut;
               break;
@@ -635,11 +578,24 @@ const CreateTimeTable = () => {
         });
       });
 
+      // Final debug check
+      console.log("Final Timetable Data:", timetableData);
+
       console.log(
         "Final Timetable Data before submission:",
         JSON.stringify(timetableData, null, 2)
       );
-
+      console.log(
+        "Final Result is:",
+        "Extracted Times - timeIn:",
+        timeIn,
+        "| timeOut:",
+        timeOut,
+        "| satTimeIn:",
+        satTimeIn,
+        "| satTimeOut:",
+        satTimeOut
+      );
       const response = await axios.post(
         `${API_URL}/api/save_classtimetable`,
         timetableData,
@@ -761,10 +717,7 @@ const CreateTimeTable = () => {
                       </div>
                     )}
                   </div>
-                  {/* </div> */}
-                  {/* Mon-Fri and Sat Row */}
-                  {/* <div className="w-full flex justify-between items-center mb-4"> */}
-                  {/* Mon-Fri Dropdown */}
+
                   <div className="w-[25%] p-3">
                     <label
                       htmlFor="monFriSelect"
@@ -1050,38 +1003,6 @@ const CreateTimeTable = () => {
 
                                   {/* Dropdown Menu */}
                                   {openDropdown[dayIndex]?.[lectureIndex] && (
-                                    // <div className="absolute bg-white border border-gray-300 w-full mt-1 z-10 max-h-48 overflow-y-auto">
-                                    //   {subjects.map((subject) => (
-                                    //     <label
-                                    //       key={subject.sm_id}
-                                    //       className="block px-2 py-1"
-                                    //     >
-                                    //       <input
-                                    //         type="checkbox"
-                                    //         value={subject.sm_id}
-                                    //         checked={
-                                    //           selectedSubjects[
-                                    //             dayIndex
-                                    //           ]?.lectures[
-                                    //             lectureIndex
-                                    //           ]?.subject?.some(
-                                    //             (s) => s.sm_id === subject.sm_id
-                                    //           ) || false
-                                    //         }
-                                    //         onChange={(e) =>
-                                    //           handleSubjectSelect(
-                                    //             dayIndex,
-                                    //             lectureIndex,
-                                    //             subject,
-                                    //             e.target.checked
-                                    //           )
-                                    //         }
-                                    //         className="mr-2"
-                                    //       />
-                                    //       {subject.name}
-                                    //     </label>
-                                    //   ))}
-                                    // </div>
                                     <div className="absolute bg-white border border-gray-300 w-48 mt-1 z-10 max-h-48 overflow-y-auto">
                                       {subjects.map((subject) => (
                                         <label

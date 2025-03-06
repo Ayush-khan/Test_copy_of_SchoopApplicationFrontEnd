@@ -186,6 +186,7 @@ import TeacherIdCard from "../componants/IDCards/TeacherIdCard.jsx";
 import TimeTable from "../componants/TimeTableModule/TimeTable.jsx";
 import CreateTimeTable from "../componants/TimeTableModule/CreateTimeTable.jsx";
 import IDCardDetails from "../componants/IDCards/IDCardDetails.jsx";
+import ListAdmFrmRep from "../componants/Reports/ListAdmFrmRep.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -587,6 +588,11 @@ function Index() {
         <Route
           path="/iDCardDetails/:id"
           element={<PrivateRoute element={<IDCardDetails />} />}
+        />
+        {/* List Of Admission Form Reports */}
+        <Route
+          path="/listAdmFrmRep"
+          element={<PrivateRoute element={<ListAdmFrmRep />} />}
         />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />
