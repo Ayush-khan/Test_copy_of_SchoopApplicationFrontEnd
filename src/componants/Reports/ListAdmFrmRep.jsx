@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
-import { FaDownload, FaFileExcel } from "react-icons/fa";
+import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
 
 const ListAdmFrmRep = () => {
@@ -27,10 +27,7 @@ const ListAdmFrmRep = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [timetable, setTimetable] = useState([]);
-  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
@@ -80,9 +77,7 @@ const ListAdmFrmRep = () => {
   const customStyles = {
     control: (base, { isFocused }) => ({
       ...base,
-      //   borderColor: isFocused ? "#6366F1" : "#d1d5db", // Indigo focus ring
-      //   boxShadow: isFocused ? "0 0 0 2px rgba(99, 102, 241, 0.2)" : "none",
-      //   "&:hover": { borderColor: "#6366F1" },
+      borderColor: isFocused ? "#6366F1" : "#d1d5db", // Indigo focus ring
     }),
     singleValue: (base, { data }) => ({
       ...base,
@@ -136,299 +131,336 @@ const ListAdmFrmRep = () => {
       setLoadingForSearch(false);
     }
   };
+  //   const handleDownloadEXL = () => {
+  //     if (!displayedSections || displayedSections.length === 0) {
+  //       toast.error(
+  //         "No data available to download Excel sheet of Student ID Card."
+  //       );
+  //       return;
+  //     }
+
+  //     // Define headers
+  //     const headers = [
+  //       "Sr.No",
+  //       "Roll No",
+  //       "Photo URL",
+  //       "Class",
+  //       "Student Name",
+  //       "DOB",
+  //       "Father Mobile No.",
+  //       "Mother Mobile No.",
+  //       "Address",
+  //       "Blood Group",
+  //       "Grn No.",
+  //       "House",
+  //       "Image Name",
+  //     ];
+
+  //     // Convert table data into an array format
+  //     const data = displayedSections.map((subject, index) => [
+  //       index + 1,
+  //       subject?.roll_no || " ",
+  //       subject?.image_url || " ",
+  //       `${subject?.class_name || ""} ${subject?.sec_name || ""}`,
+  //       `${subject?.first_name || ""} ${subject?.mid_name || ""} ${
+  //         subject?.last_name || ""
+  //       }`,
+  //       subject?.dob || " ",
+  //       subject?.f_mobile || " ",
+  //       subject?.m_mobile || " ",
+  //       subject?.permant_add || " ",
+  //       subject?.blood_group || " ",
+  //       subject?.reg_no || " ",
+  //       subject?.house || " ",
+  //       subject?.image_name || " ",
+  //     ]);
+
+  //     // Create a worksheet
+  //     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+
+  //     // Create a workbook and append the worksheet
+  //     const workbook = XLSX.utils.book_new();
+  //     XLSX.utils.book_append_sheet(workbook, worksheet, "Student Data");
+
+  //     // Write and download the file
+  //     XLSX.writeFile(
+  //       workbook,
+  //       `Student idCard list of ${selectedStudent.label}.xlsx`
+  //     );
+  //   };
   const handleDownloadEXL = () => {
     if (!displayedSections || displayedSections.length === 0) {
-      toast.error(
-        "No data available to download Excel sheet of Student ID Card."
-      );
+      toast.error("No data available to download the Excel sheet.");
       return;
     }
 
-    // Define headers
+    // Define headers matching the print table
     const headers = [
-      "Sr.No",
-      "Roll No",
-      "Photo URL",
-      "Class",
+      "Sr No.",
+      "Form Id.",
       "Student Name",
+      "Class",
+      "Application Date",
+      "Status",
       "DOB",
-      "Father Mobile No.",
-      "Mother Mobile No.",
-      "Address",
+      "Birth Place",
+      "Present Address",
+      "City, State, Pincode",
+      "Permanent Address",
+      "Gender",
+      "Religion",
+      "Caste",
+      "Subcaste",
+      "Nationality",
+      "Mother Tongue",
+      "Category",
       "Blood Group",
-      "Grn No.",
-      "House",
-      "Image Name",
+      "Aadhaar No.",
+      "Sibling",
+      "Father Name",
+      "Occupation",
+      "Mobile No.",
+      "Email Id",
+      "Father Aadhaar No.",
+      "Qualification",
+      "Mother Name",
+      "Occupation",
+      "Mobile No.",
+      "Email Id",
+      "Mother Aadhaar No.",
+      "Qualification",
+      "Areas of Interest",
+      "Order Id",
     ];
 
-    // Convert table data into an array format
-    const data = displayedSections.map((subject, index) => [
+    // Convert displayedSections data to array format for Excel
+    const data = displayedSections.map((student, index) => [
       index + 1,
-      subject?.roll_no || " ",
-      subject?.image_url || " ",
-      `${subject?.class_name || ""} ${subject?.sec_name || ""}`,
-      `${subject?.first_name || ""} ${subject?.mid_name || ""} ${
-        subject?.last_name || ""
+      student?.form_id || " ",
+      `${student?.first_name || ""} ${student?.mid_name || ""} ${
+        student?.last_name || ""
       }`,
-      subject?.dob || " ",
-      subject?.f_mobile || " ",
-      subject?.m_mobile || " ",
-      subject?.permant_add || " ",
-      subject?.blood_group || " ",
-      subject?.reg_no || " ",
-      subject?.house || " ",
-      subject?.image_name || " ",
+      student?.classname || " ",
+      student?.application_date || " ",
+      student?.admission_form_status || " ",
+      student?.dob || " ",
+      student?.birth_place || " ",
+      student?.locality || " ",
+      `${student?.city || ""}, ${student?.state || ""}, ${
+        student?.pincode || ""
+      }`,
+      student?.perm_address || " ",
+      student?.gender === "M"
+        ? "Male"
+        : student?.gender === "F"
+        ? "Female"
+        : student?.gender || " ",
+      student?.religion || " ",
+      student?.caste || " ",
+      student?.subcaste || " ",
+      student?.nationality || " ",
+      student?.mother_tongue || " ",
+      student?.category || " ",
+      student?.blood_group || " ",
+      student?.stud_aadhar || " ",
+      student?.sibling_student_info || " ",
+      student?.father_name || " ",
+      student?.father_occupation || " ",
+      student?.f_mobile || " ",
+      student?.f_email || " ",
+      student?.f_aadhar_no || " ",
+      student?.f_qualification || " ",
+      student?.mother_name || " ",
+      student?.mother_occupation || " ",
+      student?.m_mobile || " ",
+      student?.m_emailid || " ",
+      student?.m_aadhar_no || " ",
+      student?.m_qualification || " ",
+      student?.area_in_which_parent_can_contribute || " ",
+      student?.OrderId || " ",
     ]);
 
     // Create a worksheet
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
 
+    // Auto-adjust column width
+    const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
+    worksheet["!cols"] = columnWidths;
+
     // Create a workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Student Data");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
 
-    // Write and download the file
-    XLSX.writeFile(
-      workbook,
-      `Student idCard list of ${selectedStudent.label}.xlsx`
-    );
-  };
-  const handleDownloadZip = () => {
-    setShowDeleteModal(true);
-  };
-  const handleSubmitDownloadZip = async () => {
-    if (isSubmitting) return; // Prevent multiple submissions
-    setIsSubmitting(true);
-
-    try {
-      const token = localStorage.getItem("authToken");
-
-      if (!token) {
-        throw new Error("No authentication token found.");
-      }
-
-      // Fetch the ZIP file from the API
-      const response = await axios.get(
-        `${API_URL}/api/get_ziparchive?section_id=${selectedStudentId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          responseType: "blob", // Important for handling binary data
-        }
-      );
-
-      if (!response.data) {
-        toast.error("No data available for download.");
-        return;
-      }
-
-      // Create a Blob from the response
-      const blob = new Blob([response.data], { type: "application/zip" });
-      const url = window.URL.createObjectURL(blob);
-
-      // Create a temporary link to trigger the download
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `Student idCard list of ${selectedStudent.label}.zip`
-      );
-      document.body.appendChild(link);
-      link.click();
-
-      // Cleanup
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      toast.success("ZIP file downloaded successfully!");
-    } catch (error) {
-      console.error("Error downloading ZIP file:", error);
-
-      if (error.response && error.response.status === 400) {
-        toast.error(error.response.data.message || "Download failed.");
-      } else {
-        toast.error("Server error. Please try again later.");
-      }
-    } finally {
-      setIsSubmitting(false);
-      setShowDeleteModal(false);
-    }
-  };
-
-  const handleCloseModal = () => {
-    setShowAddModal(false);
-    setShowEditModal(false);
-    setShowDeleteModal(false);
+    // Generate and download the Excel file
+    const fileName = `Admission_Forms_Report_${
+      selectedStudent?.label || "ALL"
+    }.xlsx`;
+    XLSX.writeFile(workbook, fileName);
   };
 
   console.log("row", timetable);
+
   const handlePrint = () => {
-    const printTitle = `Student ID Card List of ${selectedStudent.label}`;
+    const printTitle = `List of Admission Forms Report for ${
+      selectedStudent?.label ? `Class ${selectedStudent.label}` : "All Students"
+    }`;
 
     const printContent = `
-  <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
-         <h5 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
- <div id="tableHeading" class="text-center w-3/4">
-      <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-2">
-        <thead>
-          <tr class="bg-gray-100">
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Photo</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Name</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">DOB</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Mobile No.</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Mother Mobile No.</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Address</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Blood Group</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Grn No.</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">House</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Image Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${displayedSections
-            .map(
-              (subject, index) => `
-              <tr class="text-sm">
-                <td class="px-2 text-center py-2 border border-black">${
-                  index + 1
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.roll_no || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">
-                  <img src="${subject?.image_url || ""}" 
-                       alt="${subject?.url}" 
-                       class="student-photo" />
-                </td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.class_name || ""
-                } ${subject?.sec_name || ""}</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.first_name || ""
-                } ${subject?.mid_name || ""} ${subject?.last_name || ""}</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.dob || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.f_mobile || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.m_mobile || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.permant_add || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.blood_group || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.reg_no || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.house || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.image_name || " "
-                }</td>
-              </tr>`
-            )
-            .join("")}
-        </tbody>
-      </table>
-    </div>
-  </div>`;
-
-    const printWindow = window.open("", "", "height=800,width=1000");
-    printWindow.document.write(`
-  <html>
-  <head>
     <title>${printTitle}</title>
-    <style>
-      @page { margin: 0; padding:0; box-sizing:border-box;   ;
+  <style>
+    @page { margin: 4px; padding:4px; box-sizing:border-box;   ;
 }
-      body { margin: 0; padding: 0; box-sizing:border-box; font-family: Arial, sans-serif; }
-      #tableHeading {
-  width: 100%;
-  margin: auto; /* Centers the div horizontally */
-  display: flex;
-  justify-content: center;
-}
+    @media print {
+      body {
+        font-size: 10px;
+      }
+      .table-container {
+        width: 98%;
+        
+        transform: scale(0.99); /* Scale down to 39% */
+        transform-origin: top center;
+      }
+      table {
+        width: 100%;
+         border-spacing: 0; 
+        
+      }
+      th, td {
+        border: 1px solid black;
+        padding: 2px;
+        text-align: center;
+        word-wrap: break-word;
+      }
+    }
+      # HeadingForTitleIs{
+      width:100%;
+      margin:auto;
+      border: 2px solid black;
 
-#tableHeading table {
-  width: 100%; /* Ensures the table fills its container */
-  margin:auto;
-  padding:0 10em 0 10em;
-
-  
-
-
-}
-
-#tableContainer {
-  display: flex;
-  justify-content: center; /* Centers the table horizontally */
-  width: 80%;
-  
-}
-
- 
-h5 {  
+      }
+      h2 {  
   width: 100%;  
   text-align: center;  
+  
   margin: 0;  /* Remove any default margins */
   padding: 5px 0;  /* Adjust padding if needed */
 }
-
-#tableMain {
-width:100%;
-margin:auto;
-box-sizing:border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; /* Prevent unnecessary space */
-padding:0 10em 0 10em;
-}
-
-h5 + * { /* Targets the element after h5 */
+  h2 + * { /* Targets the element after h5 */
   margin-top: 0; /* Ensures no extra space after h5 */
 }
 
+  </style>
+  
+  <div class="table-container">
+<h2 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h2>  
+  <table class="min-w-full leading-normal table-auto border border-black">
+      <thead>
+        <tr class="bg-gray-100">
+          ${[
+            "Sr No.",
+            "Form Id.",
+            "Student Name",
+            "Class",
+            "Application Date",
+            "Status",
+            "DOB",
+            "Birth Place",
+            "Present Address",
+            "City, State, Pincode",
+            "Permanent Address",
+            "Gender",
+            "Religion",
+            "Caste",
+            "Subcaste",
+            "Nationality",
+            "Mother Tongue",
+            "Category",
+            "Blood Group",
+            "Aadhaar No.",
+            "Sibling",
+            "Father Name",
+            "Occupation",
+            "Mobile No.",
+            "Email Id",
+            "Father Aadhaar No.",
+            "Qualification",
+            "Mother Name",
+            "Occupation",
+            "Mobile No.",
+            "Email Id",
+            "Mother Aadhaar No.",
+            "Qualification",
+            "Areas of Interest",
+            "Order Id",
+          ]
+            .map(
+              (header) =>
+                `<th class="px-1 py-1 text-sm font-semibold border border-black">${header}</th>`
+            )
+            .join("")}
+        </tr>
+      </thead>
+      <tbody>
+        ${displayedSections
+          .map(
+            (student, index) => `
+            <tr>
+              <td>${index + 1}</td>
+              <td>${student.form_id}</td>
+              <td>${student.first_name} ${student.mid_name} ${
+              student.last_name
+            }</td>
+              <td>${student.classname}</td>
+              <td>${student.application_date}</td>
+              <td>${student.admission_form_status}</td>
+              <td>${student.dob}</td>
+              <td>${student.birth_place}</td>
+              <td>${student.locality}</td>
+              <td>${student.city}, ${student.state}, ${student.pincode}</td>
+              <td>${student.perm_address}</td>
+              <td>${
+                student.gender === "M"
+                  ? "Male"
+                  : student.gender === "F"
+                  ? "Female"
+                  : student.gender
+              }</td>
+              <td>${student.religion}</td>
+              <td>${student.caste}</td>
+              <td>${student.subcaste}</td>
+              <td>${student.nationality}</td>
+              <td>${student.mother_tongue}</td>
+              <td>${student.category}</td>
+              <td>${student.blood_group}</td>
+              <td>${student.stud_aadhar}</td>
+              <td>${student.sibling_student_info}</td>
+              <td>${student.father_name}</td>
+              <td>${student.father_occupation}</td>
+              <td>${student.f_mobile}</td>
+              <td>${student.f_email}</td>
+              <td>${student.f_aadhar_no}</td>
+              <td>${student.f_qualification}</td>
+              <td>${student.mother_name}</td>
+              <td>${student.mother_occupation}</td>
+              <td>${student.m_mobile}</td>
+              <td>${student.m_emailid}</td>
+              <td>${student.m_aadhar_no}</td>
+              <td>${student.m_qualification}</td>
+              <td>${student.area_in_which_parent_can_contribute}</td>
+              <td>${student.OrderId}</td>
+            </tr>
+          `
+          )
+          .join("")}
+      </tbody>
+    </table>
+  </div>
+  `;
 
-      table { border-spacing: 0; width: 70%; margin: auto;   }
-      th { font-size: 0.8em; background-color: #f9f9f9; }
-      td { font-size: 12px; }
-      th, td { border: 1px solid gray; padding: 8px; text-align: center; }
-      .student-photo {
-        width: 30px !important; 
-        height: 30px !important;
-        object-fit: cover;
-        border-radius: 50%;
-      }
-    </style>
-  </head>
-  <body>
-    ${printContent}
-  </body>
-  </html>`);
-    printWindow.document.close();
-    printWindow.print();
-  };
-  const handleSubjectClick = (subject) => {
-    if (subject) {
-      // window.location.href = `/iDCardDetails?subject=${subject}`;
-      navigate(
-        `/iDCardDetails/${subject?.parent_id}`,
-
-        {
-          state: { staff: subject },
-        }
-      );
-    }
+    const newWindow = window.open("", "_blank");
+    newWindow.document.write(printContent);
+    newWindow.document.close();
+    newWindow.print();
   };
 
   const filteredSections = timetable.filter((section) => {
@@ -591,7 +623,7 @@ h5 + * { /* Targets the element after h5 */
                       type="search"
                       onClick={handleSearch}
                       style={{ backgroundColor: "#2196F3" }}
-                      className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                      className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
                         loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                       disabled={loadingForSearch}
@@ -618,10 +650,10 @@ h5 + * { /* Targets the element after h5 */
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                             ></path>
                           </svg>
-                          Loading...
+                          Browsing...
                         </span>
                       ) : (
-                        "Search"
+                        "Browse"
                       )}
                     </button>
                   </div>
@@ -669,23 +701,6 @@ h5 + * { /* Targets the element after h5 */
                             Print{" "}
                           </div>
                         </button>
-
-                        <button
-                          type="button"
-                          onClick={handleDownloadZip}
-                          className={`relative bg-blue-400 text-white px-3 rounded hover:bg-blue-500 group ${
-                            isSubmitDisabled
-                              ? "opacity-50 cursor-not-allowed"
-                              : ""
-                          }`}
-                          disabled={isSubmitDisabled}
-                        >
-                          <FaDownload />
-
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                            Download profile images
-                          </div>
-                        </button>
                       </div>
                     </div>
                     <div
@@ -696,52 +711,14 @@ h5 + * { /* Targets the element after h5 */
                     ></div>
 
                     <div className="card-body w-full">
-                      <div className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll">
+                      <div
+                        className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
+                        style={{
+                          scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
+                          scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
+                        }}
+                      >
                         <table className="min-w-full leading-normal table-auto">
-                          {/* <thead>
-                            <tr className="bg-gray-100">
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Sr.No
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Roll No
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Photo
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Class
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Student Name
-                              </th>
-
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                DOB
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Father Mobile No.
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Mother Mobile No.
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Address
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Blood Group
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Grn No.
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                House
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Image Name
-                              </th>
-                            </tr>
-                          </thead> */}
                           <thead>
                             <tr className="bg-gray-100">
                               {[
@@ -834,7 +811,12 @@ h5 + * { /* Targets the element after h5 */
                                     {student.perm_address}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.gender}
+                                    {/* {student.gender} */}
+                                    {student.gender === "M"
+                                      ? "Male"
+                                      : student.gender === "F"
+                                      ? "Female"
+                                      : student.gender}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.religion}
@@ -927,48 +909,6 @@ h5 + * { /* Targets the element after h5 */
           </>
         </div>
       </div>
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
-          <div className="modal show " style={{ display: "block" }}>
-            <div className="modal-dialog  modal-dialog-centered">
-              <div className="modal-content">
-                <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Download Student Id Card</h5>
-                  <RxCross1
-                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                    type="button"
-                    // className="btn-close text-red-600"
-                    onClick={handleCloseModal}
-                  />
-                </div>
-                <div
-                  className=" relative  mb-3 h-1 w-[95%] mx-auto bg-red-700"
-                  style={{
-                    backgroundColor: "#C03078",
-                  }}
-                ></div>
-                <div className="modal-body">
-                  <p>
-                    Are you sure you want to download student ID card of
-                    {` ${selectedStudent?.label}?`}
-                    {/* {currentClass?.name}? */}
-                  </p>
-                </div>
-                <div className=" flex justify-end p-3">
-                  <button
-                    type="button"
-                    className="py-2 rounded-md bg-blue-500 hover:bg-blue-700 text-white px-3 "
-                    onClick={handleSubmitDownloadZip}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Downloading..." : "Download"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
