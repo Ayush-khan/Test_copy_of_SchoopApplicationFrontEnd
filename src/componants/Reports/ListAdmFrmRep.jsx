@@ -435,37 +435,73 @@ h5 + * { /* Targets the element after h5 */
     const searchLower = searchTerm.toLowerCase();
 
     // Extract relevant fields and convert them to lowercase for case-insensitive search
-    const studentRollNo = section?.roll_no?.toString().toLowerCase() || "";
+    const formId = section?.form_id?.toLowerCase() || "";
+    const academicYear = section?.academic_yr?.toLowerCase() || "";
     const studentName =
-      `${section?.first_name} ${section?.mid_name} ${section?.last_name}`.toLowerCase() ||
-      "";
+      `${section?.first_name} ${section?.mid_name} ${section?.last_name}`
+        .toLowerCase()
+        .trim() || "";
     const studentDOB = section?.dob?.toLowerCase() || "";
-    const studentFatherMobile = section?.f_mobile?.toLowerCase() || "";
-    const studentMotherMobile = section?.m_mobile?.toLowerCase() || "";
+    const studentGender = section?.gender?.toLowerCase() || "";
+    const applicationDate = section?.application_date?.toLowerCase() || "";
+    const studentReligion = section?.religion?.toLowerCase() || "";
+    const studentCaste = section?.caste?.toLowerCase() || "";
+    const studentSubcaste = section?.subcaste?.toLowerCase() || "";
+    const studentNationality = section?.nationality?.toLowerCase() || "";
+    const studentMotherTongue = section?.mother_tongue?.toLowerCase() || "";
+    const studentCategory = section?.category?.toLowerCase() || "";
+    const studentLocality = section?.locality?.toLowerCase() || "";
+    const studentCity = section?.city?.toLowerCase() || "";
+    const studentState = section?.state?.toLowerCase() || "";
+    const studentPincode = section?.pincode?.toString().toLowerCase() || "";
+    const permanentAddress = section?.perm_address?.toLowerCase() || "";
+    const fatherName = section?.father_name?.toLowerCase() || "";
+    const fatherMobile = section?.f_mobile?.toLowerCase() || "";
+    const fatherEmail = section?.f_email?.toLowerCase() || "";
+    const motherName = section?.mother_name?.toLowerCase() || "";
+    const motherMobile = section?.m_mobile?.toLowerCase() || "";
+    const motherEmail = section?.m_emailid?.toLowerCase() || "";
     const studentBloodGroup = section?.blood_group?.toLowerCase() || "";
-    const studentGrnNo = section?.reg_no?.toLowerCase() || "";
-    const studentHouse = section?.house?.toLowerCase() || "";
-    const studentClass =
-      `${section?.class_name} ${section?.sec_name}`.toLowerCase() || "";
+    const admissionStatus = section?.admission_form_status?.toLowerCase() || "";
+    const className = section?.classname?.toLowerCase() || "";
+    const orderId = section?.OrderId?.toLowerCase() || "";
 
     // Check if the search term is present in any of the specified fields
     return (
-      studentRollNo.includes(searchLower) ||
+      formId.includes(searchLower) ||
+      academicYear.includes(searchLower) ||
       studentName.includes(searchLower) ||
       studentDOB.includes(searchLower) ||
-      studentFatherMobile.includes(searchLower) ||
-      studentMotherMobile.includes(searchLower) ||
+      studentGender.includes(searchLower) ||
+      applicationDate.includes(searchLower) ||
+      studentReligion.includes(searchLower) ||
+      studentCaste.includes(searchLower) ||
+      studentSubcaste.includes(searchLower) ||
+      studentNationality.includes(searchLower) ||
+      studentMotherTongue.includes(searchLower) ||
+      studentCategory.includes(searchLower) ||
+      studentLocality.includes(searchLower) ||
+      studentCity.includes(searchLower) ||
+      studentState.includes(searchLower) ||
+      studentPincode.includes(searchLower) ||
+      permanentAddress.includes(searchLower) ||
+      fatherName.includes(searchLower) ||
+      fatherMobile.includes(searchLower) ||
+      fatherEmail.includes(searchLower) ||
+      motherName.includes(searchLower) ||
+      motherMobile.includes(searchLower) ||
+      motherEmail.includes(searchLower) ||
       studentBloodGroup.includes(searchLower) ||
-      studentGrnNo.includes(searchLower) ||
-      studentHouse.includes(searchLower) ||
-      studentClass.includes(searchLower)
+      admissionStatus.includes(searchLower) ||
+      className.includes(searchLower) ||
+      orderId.includes(searchLower)
     );
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
   return (
     <>
-      <div className="w-full md:w-[95%] mx-auto p-4 ">
+      <div className="w-full md:w-[100%] mx-auto p-4 ">
         <ToastContainer />
         <div className="card p-4 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
@@ -660,9 +696,9 @@ h5 + * { /* Targets the element after h5 */
                     ></div>
 
                     <div className="card-body w-full">
-                      <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+                      <div className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll">
                         <table className="min-w-full leading-normal table-auto">
-                          <thead>
+                          {/* <thead>
                             <tr className="bg-gray-100">
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Sr.No
@@ -705,77 +741,171 @@ h5 + * { /* Targets the element after h5 */
                                 Image Name
                               </th>
                             </tr>
+                          </thead> */}
+                          <thead>
+                            <tr className="bg-gray-100">
+                              {[
+                                "Sr No.",
+                                "Form Id.",
+                                "Student Name",
+                                "Class",
+                                "Application Date",
+                                "Status",
+                                "DOB",
+                                "Birth Place",
+                                "Present Address",
+                                "City, State, Pincode",
+                                "Permanent Address",
+                                "Gender",
+                                "Religion",
+                                "Caste",
+                                "Subcaste",
+                                "Nationality",
+                                "Mother Tongue",
+                                "Category",
+                                "Blood Group",
+                                "Aadhaar No.",
+                                "Sibling",
+                                "Father Name",
+                                "Occupation",
+                                "Mobile No.",
+                                "Email Id",
+                                "Father Aadhaar No.",
+                                "Qualification",
+                                "Mother Name",
+                                "Occupation",
+                                "Mobile No.",
+                                "Email Id",
+                                "Mother Aadhaar No.",
+                                "Qualification",
+                                "Areas of Interest",
+                                "Order Id",
+                              ].map((header, index) => (
+                                <th
+                                  key={index}
+                                  className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
+                                >
+                                  {header}
+                                </th>
+                              ))}
+                            </tr>
                           </thead>
+
                           <tbody>
                             {displayedSections.length ? (
-                              displayedSections.map((subject, index) => (
+                              displayedSections?.map((student, index) => (
                                 <tr
-                                  key={subject.student_id}
-                                  className="text-sm "
+                                  key={student.adm_form_pk}
+                                  className="border border-gray-300"
                                 >
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {currentPage * pageSize + index + 1}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {index + 1}
                                   </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.roll_no}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.form_id}
                                   </td>
-                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
-                                    {console.log(
-                                      "the teacher image",
-                                      `${subject?.image_url}`
-                                    )}
-
-                                    <img
-                                      src={
-                                        subject?.image_url
-                                          ? // ? `https://sms.evolvu.in/storage/app/public/student_images/${subject?.image_name}`
-                                            `${subject?.image_url}`
-                                          : "https://via.placeholder.com/50"
-                                      }
-                                      alt={subject?.name}
-                                      className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
-                                    />
-                                  </td>{" "}
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
-                                    {`${subject?.class_name}${" "}${
-                                      subject?.sec_name
-                                    }`}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.first_name} {student.mid_name}{" "}
+                                    {student.last_name}
                                   </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {`${subject?.first_name ?? ""} ${
-                                      subject?.mid_name
-                                        ? subject.mid_name + " "
-                                        : ""
-                                    }${subject?.last_name ?? ""}`.trim()}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.classname}
                                   </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.dob}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.application_date}
                                   </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.f_mobile}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.admission_form_status}
                                   </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.m_mobile}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.dob}
                                   </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.permant_add}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.birth_place}
                                   </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.blood_group}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.locality}
                                   </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.reg_no}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.city}, {student.state},{" "}
+                                    {student.pincode}
                                   </td>
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.house}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.perm_address}
                                   </td>
-                                  <td
-                                    className="px-2 text-center lg:px-3 py-2 hover:font-semibold  border border-gray-950 text-sm cursor-pointer text-blue-600 hover:text-blue-700"
-                                    onClick={() => handleSubjectClick(subject)}
-                                  >
-                                    <p className="border-b-2 mt-3  hover:border-blue-600 ">
-                                      {subject?.image_name}
-                                    </p>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.gender}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.religion}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.caste}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.subcaste}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.nationality}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.mother_tongue}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.category}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.blood_group}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.stud_aadhar}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.sibling_student_info}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.father_name}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.father_occupation}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.f_mobile}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.f_email}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.f_aadhar_no}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.f_qualification}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.mother_name}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.mother_occupation}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.m_mobile}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.m_emailid}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.m_aadhar_no}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.m_qualification}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {
+                                      student.area_in_which_parent_can_contribute
+                                    }
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.OrderId}
                                   </td>
                                 </tr>
                               ))
