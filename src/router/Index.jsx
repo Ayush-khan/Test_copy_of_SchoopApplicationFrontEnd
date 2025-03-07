@@ -187,6 +187,7 @@ import TimeTable from "../componants/TimeTableModule/TimeTable.jsx";
 import CreateTimeTable from "../componants/TimeTableModule/CreateTimeTable.jsx";
 import IDCardDetails from "../componants/IDCards/IDCardDetails.jsx";
 import ListAdmFrmRep from "../componants/Reports/ListAdmFrmRep.jsx";
+import Balanceleave from "../componants/Reports/Balanceleave.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -593,6 +594,11 @@ function Index() {
         <Route
           path="/listAdmFrmRep"
           element={<PrivateRoute element={<ListAdmFrmRep />} />}
+        />
+        {/* Balance Leave Module */}
+        <Route
+          path="/balanceleave"
+          element={<PrivateRoute element={<Balanceleave />} />}
         />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />

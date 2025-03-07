@@ -300,168 +300,168 @@ const ListAdmFrmRep = () => {
 
   console.log("row", timetable);
 
-  const handlePrint = () => {
-    const printTitle = `List of Admission Forms Report for ${
-      selectedStudent?.label ? `Class ${selectedStudent.label}` : "All Students"
-    }`;
+  //   const handlePrint = () => {
+  //     const printTitle = `List of Admission Forms Report for ${
+  //       selectedStudent?.label ? `Class ${selectedStudent.label}` : "All Students"
+  //     }`;
 
-    const printContent = `
-    <title>${printTitle}</title>
-  <style>
-    @page { margin: 4px; padding:4px; box-sizing:border-box;   ;
-}
-    @media print {
-      body {
-        font-size: 10px;
-      }
-      .table-container {
-        width: 98%;
-        
-        transform: scale(0.99); /* Scale down to 39% */
-        transform-origin: top center;
-      }
-      table {
-        width: 100%;
-         border-spacing: 0; 
-        
-      }
-      th, td {
-        border: 1px solid black;
-        padding: 2px;
-        text-align: center;
-        word-wrap: break-word;
-      }
-    }
-      # HeadingForTitleIs{
-      width:100%;
-      margin:auto;
-      border: 2px solid black;
+  //     const printContent = `
+  //     <title>${printTitle}</title>
+  //   <style>
+  //     @page { margin: 4px; padding:4px; box-sizing:border-box;   ;
+  // }
+  //     @media print {
+  //       body {
+  //         font-size: 10px;
+  //       }
+  //       .table-container {
+  //         width: 98%;
 
-      }
-      h2 {  
-  width: 100%;  
-  text-align: center;  
-  
-  margin: 0;  /* Remove any default margins */
-  padding: 5px 0;  /* Adjust padding if needed */
-}
-  h2 + * { /* Targets the element after h5 */
-  margin-top: 0; /* Ensures no extra space after h5 */
-}
+  //         transform: scale(0.99); /* Scale down to 39% */
+  //         transform-origin: top center;
+  //       }
+  //       table {
+  //         width: 100%;
+  //          border-spacing: 0;
 
-  </style>
-  
-  <div class="table-container">
-<h2 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h2>  
-  <table class="min-w-full leading-normal table-auto border border-black">
-      <thead>
-        <tr class="bg-gray-100">
-          ${[
-            "Sr No.",
-            "Form Id.",
-            "Student Name",
-            "Class",
-            "Application Date",
-            "Status",
-            "DOB",
-            "Birth Place",
-            "Present Address",
-            "City, State, Pincode",
-            "Permanent Address",
-            "Gender",
-            "Religion",
-            "Caste",
-            "Subcaste",
-            "Nationality",
-            "Mother Tongue",
-            "Category",
-            "Blood Group",
-            "Aadhaar No.",
-            "Sibling",
-            "Father Name",
-            "Occupation",
-            "Mobile No.",
-            "Email Id",
-            "Father Aadhaar No.",
-            "Qualification",
-            "Mother Name",
-            "Occupation",
-            "Mobile No.",
-            "Email Id",
-            "Mother Aadhaar No.",
-            "Qualification",
-            "Areas of Interest",
-            "Order Id",
-          ]
-            .map(
-              (header) =>
-                `<th class="px-1 py-1 text-sm font-semibold border border-black">${header}</th>`
-            )
-            .join("")}
-        </tr>
-      </thead>
-      <tbody>
-        ${displayedSections
-          .map(
-            (student, index) => `
-            <tr>
-              <td>${index + 1}</td>
-              <td>${student.form_id}</td>
-              <td>${student.first_name} ${student.mid_name} ${
-              student.last_name
-            }</td>
-              <td>${student.classname}</td>
-              <td>${student.application_date}</td>
-              <td>${student.admission_form_status}</td>
-              <td>${student.dob}</td>
-              <td>${student.birth_place}</td>
-              <td>${student.locality}</td>
-              <td>${student.city}, ${student.state}, ${student.pincode}</td>
-              <td>${student.perm_address}</td>
-              <td>${
-                student.gender === "M"
-                  ? "Male"
-                  : student.gender === "F"
-                  ? "Female"
-                  : student.gender
-              }</td>
-              <td>${student.religion}</td>
-              <td>${student.caste}</td>
-              <td>${student.subcaste}</td>
-              <td>${student.nationality}</td>
-              <td>${student.mother_tongue}</td>
-              <td>${student.category}</td>
-              <td>${student.blood_group}</td>
-              <td>${student.stud_aadhar}</td>
-              <td>${student.sibling_student_info}</td>
-              <td>${student.father_name}</td>
-              <td>${student.father_occupation}</td>
-              <td>${student.f_mobile}</td>
-              <td>${student.f_email}</td>
-              <td>${student.f_aadhar_no}</td>
-              <td>${student.f_qualification}</td>
-              <td>${student.mother_name}</td>
-              <td>${student.mother_occupation}</td>
-              <td>${student.m_mobile}</td>
-              <td>${student.m_emailid}</td>
-              <td>${student.m_aadhar_no}</td>
-              <td>${student.m_qualification}</td>
-              <td>${student.area_in_which_parent_can_contribute}</td>
-              <td>${student.OrderId}</td>
-            </tr>
-          `
-          )
-          .join("")}
-      </tbody>
-    </table>
-  </div>
-  `;
+  //       }
+  //       th, td {
+  //         border: 1px solid black;
+  //         padding: 2px;
+  //         text-align: center;
+  //         word-wrap: break-word;
+  //       }
+  //     }
+  //       # HeadingForTitleIs{
+  //       width:100%;
+  //       margin:auto;
+  //       border: 2px solid black;
 
-    const newWindow = window.open("", "_blank");
-    newWindow.document.write(printContent);
-    newWindow.document.close();
-    newWindow.print();
-  };
+  //       }
+  //       h2 {
+  //   width: 100%;
+  //   text-align: center;
+
+  //   margin: 0;  /* Remove any default margins */
+  //   padding: 5px 0;  /* Adjust padding if needed */
+  // }
+  //   h2 + * { /* Targets the element after h5 */
+  //   margin-top: 0; /* Ensures no extra space after h5 */
+  // }
+
+  //   </style>
+
+  //   <div class="table-container">
+  // <h2 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h2>
+  //   <table class="min-w-full leading-normal table-auto border border-black">
+  //       <thead>
+  //         <tr class="bg-gray-100">
+  //           ${[
+  //             "Sr No.",
+  //             "Form Id.",
+  //             "Student Name",
+  //             "Class",
+  //             "Application Date",
+  //             "Status",
+  //             "DOB",
+  //             "Birth Place",
+  //             "Present Address",
+  //             "City, State, Pincode",
+  //             "Permanent Address",
+  //             "Gender",
+  //             "Religion",
+  //             "Caste",
+  //             "Subcaste",
+  //             "Nationality",
+  //             "Mother Tongue",
+  //             "Category",
+  //             "Blood Group",
+  //             "Aadhaar No.",
+  //             "Sibling",
+  //             "Father Name",
+  //             "Occupation",
+  //             "Mobile No.",
+  //             "Email Id",
+  //             "Father Aadhaar No.",
+  //             "Qualification",
+  //             "Mother Name",
+  //             "Occupation",
+  //             "Mobile No.",
+  //             "Email Id",
+  //             "Mother Aadhaar No.",
+  //             "Qualification",
+  //             "Areas of Interest",
+  //             "Order Id",
+  //           ]
+  //             .map(
+  //               (header) =>
+  //                 `<th class="px-1 py-1 text-sm font-semibold border border-black">${header}</th>`
+  //             )
+  //             .join("")}
+  //         </tr>
+  //       </thead>
+  //       <tbody>
+  //         ${displayedSections
+  //           .map(
+  //             (student, index) => `
+  //             <tr>
+  //               <td>${index + 1}</td>
+  //               <td>${student.form_id}</td>
+  //               <td>${student.first_name} ${student.mid_name} ${
+  //               student.last_name
+  //             }</td>
+  //               <td>${student.classname}</td>
+  //               <td>${student.application_date}</td>
+  //               <td>${student.admission_form_status}</td>
+  //               <td>${student.dob}</td>
+  //               <td>${student.birth_place}</td>
+  //               <td>${student.locality}</td>
+  //               <td>${student.city}, ${student.state}, ${student.pincode}</td>
+  //               <td>${student.perm_address}</td>
+  //               <td>${
+  //                 student.gender === "M"
+  //                   ? "Male"
+  //                   : student.gender === "F"
+  //                   ? "Female"
+  //                   : student.gender
+  //               }</td>
+  //               <td>${student.religion}</td>
+  //               <td>${student.caste}</td>
+  //               <td>${student.subcaste}</td>
+  //               <td>${student.nationality}</td>
+  //               <td>${student.mother_tongue}</td>
+  //               <td>${student.category}</td>
+  //               <td>${student.blood_group}</td>
+  //               <td>${student.stud_aadhar}</td>
+  //               <td>${student.sibling_student_info}</td>
+  //               <td>${student.father_name}</td>
+  //               <td>${student.father_occupation}</td>
+  //               <td>${student.f_mobile}</td>
+  //               <td>${student.f_email}</td>
+  //               <td>${student.f_aadhar_no}</td>
+  //               <td>${student.f_qualification}</td>
+  //               <td>${student.mother_name}</td>
+  //               <td>${student.mother_occupation}</td>
+  //               <td>${student.m_mobile}</td>
+  //               <td>${student.m_emailid}</td>
+  //               <td>${student.m_aadhar_no}</td>
+  //               <td>${student.m_qualification}</td>
+  //               <td>${student.area_in_which_parent_can_contribute}</td>
+  //               <td>${student.OrderId}</td>
+  //             </tr>
+  //           `
+  //           )
+  //           .join("")}
+  //       </tbody>
+  //     </table>
+  //   </div>
+  //   `;
+
+  //     const newWindow = window.open("", "_blank");
+  //     newWindow.document.write(printContent);
+  //     newWindow.document.close();
+  //     newWindow.print();
+  //   };
 
   const filteredSections = timetable.filter((section) => {
     const searchLower = searchTerm.toLowerCase();
@@ -692,7 +692,7 @@ const ListAdmFrmRep = () => {
                           </div>
                         </button>
 
-                        <button
+                        {/* <button
                           onClick={handlePrint}
                           className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
                         >
@@ -700,7 +700,7 @@ const ListAdmFrmRep = () => {
                           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
                             Print{" "}
                           </div>
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                     <div
