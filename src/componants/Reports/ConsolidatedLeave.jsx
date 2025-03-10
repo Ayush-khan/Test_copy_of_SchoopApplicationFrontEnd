@@ -10,7 +10,7 @@ import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
 
-const ListAdmFrmRep = () => {
+const ConsolidatedLeave = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [status, setStatus] = useState(null); // For status dropdown
@@ -301,9 +301,9 @@ const ListAdmFrmRep = () => {
   console.log("row", timetable);
 
   //   const handlePrint = () => {
-    //   const printTitle = `List of Admission Forms Report for ${
-    //     selectedStudent?.label ? `Class ${selectedStudent.label}` : "All Students"
-    //   }`;
+  //   const printTitle = `List of Admission Forms Report for ${
+  //     selectedStudent?.label ? `Class ${selectedStudent.label}` : "All Students"
+  //   }`;
 
   //     const printContent = `
   //     <title>${printTitle}</title>
@@ -913,4 +913,4 @@ const ListAdmFrmRep = () => {
   );
 };
 
-export default ListAdmFrmRep;
+export default ConsolidatedLeave;
