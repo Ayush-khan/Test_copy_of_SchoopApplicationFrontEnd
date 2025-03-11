@@ -373,7 +373,7 @@ h5 + * { /* Targets the element after h5 */
                       className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      {/* Staff <span className="text-red-500">*</span> */}
+                      {/* Staff dfs <span className="text-red-500">*</span> */}
                       Staff
                     </label>
                     <div className="w-full md:w-[65%]">
