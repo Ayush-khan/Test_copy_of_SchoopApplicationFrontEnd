@@ -10,11 +10,9 @@ import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
 
-const ConsolidatedLeave = () => {
+const StudentContactDetailsReport = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [toDate, setToDate] = useState(null);
-  const [fromDate, setFromDate] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
@@ -34,7 +32,7 @@ const ConsolidatedLeave = () => {
 
   useEffect(() => {
     fetchExams();
-    handleSearch();
+    // handleSearch();
   }, []);
 
   const fetchExams = async () => {
@@ -42,7 +40,7 @@ const ConsolidatedLeave = () => {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/staff_list`, {
+      const response = await axios.get(`${API_URL}/api/get_class_section`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("Class", response);
@@ -54,25 +52,17 @@ const ConsolidatedLeave = () => {
       setLoadingExams(false);
     }
   };
-  const statusMap = {
-    P: "Pending",
-    A: "Approved",
-    R: "Rejected",
-    H: "Hold",
-    S: "Scheduled",
-    V: "Verified",
-  };
+
   const handleStudentSelect = (selectedOption) => {
     setStudentError(""); // Reset error if student is select.
     setSelectedStudent(selectedOption);
     setSelectedStudentId(selectedOption?.value);
   };
-
   const studentOptions = useMemo(
     () =>
       studentNameWithClassId.map((cls) => ({
-        value: cls?.teacher_id,
-        label: `${cls.name}`,
+        value: cls?.section_id,
+        label: `${cls.get_class.name} ${cls.name}`,
       })),
     [studentNameWithClassId]
   );
@@ -81,22 +71,21 @@ const ConsolidatedLeave = () => {
 
   const handleSearch = async () => {
     setLoadingForSearch(false);
-    // if (!selectedStudentId) {
-    //   setStudentError("Please select Staff Name.");
-    //   setLoadingForSearch(false);
-    //   return;
-    // }
+    if (!selectedStudentId) {
+      setStudentError("Please select Class.");
+      setLoadingForSearch(false);
+      return;
+    }
     setSearchTerm("");
     try {
       setLoadingForSearch(true); // Start loading
       setTimetable([]);
       const token = localStorage.getItem("authToken");
       const params = {};
-      if (selectedStudentId) params.staff_id = selectedStudentId;
-      if (fromDate) params.from_date = fromDate;
-      if (toDate) params.to_date = toDate;
+      if (selectedStudentId) params.section_id = selectedStudentId;
+
       const response = await axios.get(
-        `${API_URL}/api/get_consolidatedleavereport`,
+        `${API_URL}/api/get_studentcontactdetailsreport`,
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
@@ -104,16 +93,16 @@ const ConsolidatedLeave = () => {
       );
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
-        toast.error("Consolidated Leave Report data not found.");
+        toast.error("Student Contact Details Report data not found.");
         setTimetable([]);
       } else {
         setTimetable(response?.data?.data);
         setPageCount(Math.ceil(response?.data?.data?.length / pageSize)); // Set page count based on response size
       }
     } catch (error) {
-      console.error("Error fetching Consolidated Leave Report:", error);
+      console.error("Error fetching Student Contact Details Report:", error);
       toast.error(
-        "Error fetching Consolidated Leave Report. Please try again."
+        "Error fetching Student Contact Details Report. Please try again."
       );
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
@@ -122,10 +111,10 @@ const ConsolidatedLeave = () => {
   };
 
   const handlePrint = () => {
-    const printTitle = `Consolidate Leave Report  ${
+    const printTitle = `Student Contact Details Report ${
       selectedStudent?.label
-        ? `List of ${selectedStudent.label}`
-        : ": Complete List of All Staff "
+        ? `List of Class ${selectedStudent.label}`
+        : ": For All Students "
     }`;
     const printContent = `
   <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
@@ -135,15 +124,16 @@ const ConsolidatedLeave = () => {
         <thead>
           <tr class="bg-gray-100">
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Staff Name</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Phone No.</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Leave Type</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Start Date</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">End Date</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">No. of days</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Status</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Approved By</th>
-           
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No.</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">GRN No.</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Full Name</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Name</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Mobile No.</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Email-Id</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Mother Name</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Mother Mobile No.</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Mother Email_-Id</th>
           </tr>
         </thead>
         <tbody>
@@ -155,29 +145,35 @@ const ConsolidatedLeave = () => {
                   index + 1
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.StaffName || " "
+                  subject?.roll_no || " "
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.phone || " "
+                  subject?.reg_no || " "
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.LeaveType || " "
-                }</td>
+                  subject?.classname || " "
+                } ${subject?.sectionname || " "}</td>
                 <td class="px-2 text-center py-2 border border-black">${
-                  subject?.leave_start_date || " "
-                }</td>
+                  subject?.first_name || " "
+                }${subject?.mid_name || " "} ${subject?.last_name || " "} </td>
                  <td class="px-2 text-center py-2 border border-black">${
-                   subject?.leave_end_date || " "
+                   subject?.father_name || " "
                  }</td>
                   <td class="px-2 text-center py-2 border border-black">${
-                    subject?.no_of_days || " "
+                    subject?.f_mobile || " "
                   }</td>
                    <td class="px-2 text-center py-2 border border-black">${
-                     statusMap[subject?.status] || " "
+                     subject?.f_email || " "
                    }</td>
                     <td class="px-2 text-center py-2 border border-black">${
-                      subject?.ApprovedBy || " "
+                      subject?.mother_name || " "
                     }</td>
+                     <td class="px-2 text-center py-2 border border-black">${
+                       subject?.m_mobile || " "
+                     }</td>
+                      <td class="px-2 text-center py-2 border border-black">${
+                        subject?.m_emailid || " "
+                      }</td>
               </tr>`
             )
             .join("")}
@@ -271,32 +267,39 @@ h5 + * { /* Targets the element after h5 */
     // Define headers matching the print table
     const headers = [
       "Sr No.",
-      "Staff Name",
-      "Phone No.",
-      "Leave Type",
-      "Start Date",
-      "End Date",
-      "No. of days",
-      "Status",
-      "Approved By",
+      "Roll No.",
+      "GRN No.",
+      "Class",
+      "Student Full Name",
+      "Father Name",
+      "Father Mobile No.",
+      "Father Email-Id",
+      "Mother Name",
+      "Mother Mobile No.",
+      "Mother Email-Id",
     ];
+
     // Convert displayedSections data to array format for Excel
     const data = displayedSections.map((student, index) => [
       index + 1,
-      student?.StaffName || " ",
-      student?.phone || " ",
-      student?.LeaveType || " ",
-      student?.leave_start_date || " ",
-      student?.leave_end_date || " ",
-      student?.no_of_days || " ",
-      statusMap[student?.status] || " ",
-      student?.ApprovedBy || " ",
-    ]);
+      student?.roll_no || " ",
 
+      student?.reg_no || " ",
+      `${student?.classname || " "} ${student?.sectionname || ""}}`,
+      `${student?.first_name || ""} ${student?.mid_name || ""} ${
+        student?.last_name || ""
+      }`,
+      student?.father_name || " ",
+      student?.f_mobile || " ",
+      student?.f_email || " ",
+      student?.mother_name || " ",
+
+      student?.m_mobile || " ",
+
+      student?.m_emailid || " ",
+    ]);
     // Create a worksheet
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
-
-    // Auto-adjust column width
     const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
     worksheet["!cols"] = columnWidths;
 
@@ -305,8 +308,8 @@ h5 + * { /* Targets the element after h5 */
     XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
 
     // Generate and download the Excel file
-    const fileName = ` Consolidate_Leave_Report_${
-      selectedStudent?.label || "For All Staff"
+    const fileName = `Student_Contact_Details_Report_${
+      selectedStudent?.label || "For ALL Students"
     }.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
@@ -317,25 +320,32 @@ h5 + * { /* Targets the element after h5 */
     const searchLower = searchTerm.toLowerCase();
 
     // Extract relevant fields and convert them to lowercase for case-insensitive search
-    const staffName = student?.StaffName?.toLowerCase() || "";
-    const phone = student?.phone?.toLowerCase() || "";
-    const leaveType = student?.LeaveType?.toLowerCase() || "";
-    const leaveStartDate = student?.leave_start_date?.toLowerCase() || "";
-    const leaveEndDate = student?.leave_end_date?.toLowerCase() || "";
-    const noOfDays = student?.no_of_days?.toString().toLowerCase() || "";
-    const status = statusMap[student?.status]?.toLowerCase() || "";
-    const approvedBy = student?.ApprovedBy?.toLowerCase() || "";
+    // const rollNo = student?.roll_no || "";
+    const regNo = student?.reg_no?.toLowerCase() || "";
+    const className = student?.classname?.toLowerCase() || "";
+    const studentName =
+      `${student?.first_name} ${student?.mid_name} ${student?.last_name}`
+        .toLowerCase()
+        .trim() || "";
+    const fatherName = student?.father_name?.toLowerCase() || "";
+    const fatherMobile = student?.f_mobile?.toLowerCase() || "";
+    const fatherEmail = student?.f_email?.toLowerCase() || "";
+    const motherName = student?.mother_name?.toLowerCase() || "";
+    const motherMobile = student?.m_mobile?.toLowerCase() || "";
+    const motherEmail = student?.m_emailid?.toLowerCase() || "";
 
     // Check if the search term is present in any of the specified fields
     return (
-      staffName.includes(searchLower) ||
-      phone.includes(searchLower) ||
-      leaveType.includes(searchLower) ||
-      leaveStartDate.includes(searchLower) ||
-      leaveEndDate.includes(searchLower) ||
-      noOfDays.includes(searchLower) ||
-      status.includes(searchLower) ||
-      approvedBy.includes(searchLower)
+      // rollNo.includes(searchLower) ||
+      regNo.includes(searchLower) ||
+      className.includes(searchLower) ||
+      studentName.includes(searchLower) ||
+      fatherName.includes(searchLower) ||
+      fatherMobile.includes(searchLower) ||
+      fatherEmail.includes(searchLower) ||
+      motherName.includes(searchLower) ||
+      motherMobile.includes(searchLower) ||
+      motherEmail.includes(searchLower)
     );
   });
 
@@ -347,7 +357,7 @@ h5 + * { /* Targets the element after h5 */
         <div className="card p-4 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              Consolidate Leave Report
+              Student Contact Details Report
             </h5>
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -364,19 +374,17 @@ h5 + * { /* Targets the element after h5 */
           ></div>
 
           <>
-            <div className=" w-full md:w-[85%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+            <div className=" w-full md:w-[70%]  flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
               <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                  {/* Class Dropdown */}
-                  <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                <div className="w-full md:w-[75%] gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                  <div className="w-full md:w-[50%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                     <label
-                      className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      {/* Staff <span className="text-red-500">*</span> */}
-                      Staff
+                      Class <span className="text-red-500">*</span>
                     </label>
-                    <div className="w-full md:w-[65%]">
+                    <div className=" w-full md:w-[65%]">
                       <Select
                         menuPortalTarget={document.body}
                         menuPosition="fixed"
@@ -389,21 +397,6 @@ h5 + * { /* Targets the element after h5 */
                         isClearable
                         className="text-sm"
                         isDisabled={loadingExams}
-                        styles={{
-                          control: (provided) => ({
-                            ...provided,
-                            fontSize: ".9em", // Adjust font size for selected value
-                            minHeight: "30px", // Reduce height
-                          }),
-                          menu: (provided) => ({
-                            ...provided,
-                            fontSize: "1em", // Adjust font size for dropdown options
-                          }),
-                          option: (provided) => ({
-                            ...provided,
-                            fontSize: ".9em", // Adjust font size for each option
-                          }),
-                        }}
                       />
                       {studentError && (
                         <div className="h-8 relative ml-1 text-danger text-xs">
@@ -412,52 +405,12 @@ h5 + * { /* Targets the element after h5 */
                       )}
                     </div>
                   </div>
-
-                  {/* From Date Dropdown */}
-                  <div className="w-full   md:w-[50%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
-                    <label
-                      className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
-                      htmlFor="fromDate"
-                    >
-                      From Date
-                    </label>
-                    <div className="w-full">
-                      <input
-                        type="date"
-                        id="fromDate"
-                        value={fromDate}
-                        onChange={(e) => setFromDate(e.target.value)}
-                        className="text-sm w-full border border-gray-300 rounded px-2 py-2"
-                      />
-                    </div>
-                  </div>
-
-                  {/* To Date Dropdown */}
-                  <div className="w-full  md:w-[45%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
-                    <label
-                      className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
-                      htmlFor="toDate"
-                    >
-                      To Date
-                    </label>
-                    <div className="w-full">
-                      <input
-                        type="date"
-                        id="toDate"
-                        value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
-                        className="text-sm w-full border border-gray-300 rounded px-2 py-2"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Browse Button */}
                   <div className="mt-1">
                     <button
                       type="search"
                       onClick={handleSearch}
                       style={{ backgroundColor: "#2196F3" }}
-                      className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                      className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
                         loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                       disabled={loadingForSearch}
@@ -484,14 +437,14 @@ h5 + * { /* Targets the element after h5 */
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                             ></path>
                           </svg>
-                          Browsing...
+                          Searching...
                         </span>
                       ) : (
-                        "Browse"
+                        "Search"
                       )}
                     </button>
                   </div>
-                </div>
+                </div>{" "}
               </div>
             </div>
 
@@ -502,7 +455,7 @@ h5 + * { /* Targets the element after h5 */
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          List Of Consolidated Leave Report
+                          List Of Student Contact Details Report
                         </h3>
                         <div className="w-1/2 md:w-[18%] mr-1 ">
                           <input
@@ -557,14 +510,16 @@ h5 + * { /* Targets the element after h5 */
                             <tr className="bg-gray-100">
                               {[
                                 "Sr No.",
-                                "Staff Name",
-                                "Phone No.",
-                                "Leave Type",
-                                "Start Date",
-                                "End Date",
-                                "No. of days",
-                                "Status",
-                                "Approved By",
+                                "Roll No.",
+                                "GRN No.",
+                                "Class",
+                                "Student Full Name",
+                                "Father Name",
+                                "Father Mobile No.",
+                                "Father Email-Id",
+                                "Mother Name",
+                                "Mother Mobile No.",
+                                "Mother Email-Id",
                               ].map((header, index) => (
                                 <th
                                   key={index}
@@ -587,31 +542,40 @@ h5 + * { /* Targets the element after h5 */
                                     {index + 1}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.StaffName || " "}
+                                    {student.roll_no || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.reg_no || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
+                                    {student.classname || " "}{" "}
+                                    {student.sectionname || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.first_name || " "}{" "}
+                                    {student.mid_name || " "}{" "}
+                                    {student.last_name || " "}
                                   </td>
 
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.phone || " "}
+                                    {student.father_name || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.LeaveType || " "}
+                                    {student.f_mobile || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.leave_start_date || " "}
+                                    {student.f_email || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student.mother_name || " "}
                                   </td>
 
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.leave_end_date || ""}
+                                    {student.m_mobile || " "}
                                   </td>
 
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.no_of_days || " "}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {statusMap[student?.status] || " "}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.ApprovedBy || " "}
+                                    {student.m_emailid || " "}
                                   </td>
                                 </tr>
                               ))
@@ -637,4 +601,4 @@ h5 + * { /* Targets the element after h5 */
   );
 };
 
-export default ConsolidatedLeave;
+export default StudentContactDetailsReport;

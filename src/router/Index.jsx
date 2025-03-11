@@ -189,6 +189,8 @@ import IDCardDetails from "../componants/IDCards/IDCardDetails.jsx";
 import ListAdmFrmRep from "../componants/Reports/ListAdmFrmRep.jsx";
 import Balanceleave from "../componants/Reports/Balanceleave.jsx";
 import ConsolidatedLeave from "../componants/Reports/ConsolidatedLeave.jsx";
+import StudentReport from "../componants/Reports/StudentReport.jsx";
+import StudentContactDetailsReport from "../componants/Reports/StudentContactDetailsReport.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -605,6 +607,16 @@ function Index() {
         <Route
           path="/consolidatedLeave"
           element={<PrivateRoute element={<ConsolidatedLeave />} />}
+        />
+        {/* Student Report Module */}
+        <Route
+          path="/studentReport"
+          element={<PrivateRoute element={<StudentReport />} />}
+        />
+        {/* Student Report Module */}
+        <Route
+          path="/studentContactDetailsReport"
+          element={<PrivateRoute element={<StudentContactDetailsReport />} />}
         />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />

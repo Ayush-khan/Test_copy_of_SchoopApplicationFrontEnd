@@ -847,14 +847,14 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
-            to="#"
+            to="/studentReport"
             className="text-sm font-bold hover:text-black"
           >
             Student Report
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
-            to="#"
+            to="/studentContactDetailsReport"
             className="text-sm font-bold hover:text-black"
           >
             Student Contact Details Report
