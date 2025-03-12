@@ -2,15 +2,10 @@ import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { faEdit, faTrash, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { TbFileCertificate } from "react-icons/tb";
 import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
-import { MdLockReset, MdOutlineRemoveRedEye } from "react-icons/md";
-import { FaCheck } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
@@ -34,9 +29,6 @@ const PendingStudentId = () => {
   const navigate = useNavigate();
   // State for form fields and validation errorsconst
   const [loading, setLoading] = useState(false); // For loader
-
-  const [houses, setHouses] = useState([]);
-  const [selectedHouses, setSelectedHouses] = useState({});
   const [parentsData, setParentsData] = useState([]);
   const [selectedFathers, setSelectedFathers] = useState([]);
   const [errors, setErrors] = useState({});
@@ -79,36 +71,6 @@ const PendingStudentId = () => {
     if (!str) return ""; // Handle empty values safely
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   };
-
-  // const fetchHouses = async () => {
-  //   setLoading(true); // Start loading
-  //   try {
-  //     const token = localStorage.getItem("authToken"); // Get auth token from local storage
-  //     const response = await axios.get(`${API_URL}/api/getHouseViseStudent`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-
-  //     if (response.status === 200) {
-  //       const houseData = response.data || [];
-  //       setHouses(houseData); // Assuming you have a state variable like `houses`
-  //       // console.log("house data", houseData);
-  //     } else {
-  //       toast.error("Failed to fetch house-wise student data.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching house-wise students:", error);
-  //     toast.error("Error fetching house-wise students.");
-  //   } finally {
-  //     setLoading(false); // Stop loading
-  //   }
-  // };
-
-  // const handleHouseChange = (studentId, selectedHouse) => {
-  //   setSelectedHouses((prev) => ({
-  //     ...prev,
-  //     [studentId]: selectedHouse,
-  //   }));
-  // };
 
   const handleSearch = async () => {
     if (isSubmitting) return; // Prevent multiple submissions
@@ -378,105 +340,6 @@ const PendingStudentId = () => {
       toast.error("Something went wrong. Please try again.");
     }
   };
-
-  //using this if any one student data is filled then update
-  // const handleSubmitEdit = async () => {
-  //   console.log("Selected Parents (IDs):", selectedFathers);
-  //   console.log("Raw Parents Data:", parentsData);
-
-  //   if (!parentsData || parentsData.length === 0) {
-  //     toast.error("Data is still loading. Please wait.");
-  //     return;
-  //   }
-
-  //   // 🔹 Convert `selectedFathers` & `parent_id` to numbers for strict comparison
-  //   const selectedParentIds = new Set(selectedFathers.map((id) => Number(id)));
-
-  //   console.log("Set of Selected Parent IDs:", selectedParentIds);
-
-  //   // ✅ Filter parentsData based on selected parent IDs
-  //   let filteredParentsData = parentsData.filter((parent) =>
-  //     selectedParentIds.has(Number(parent.parent_id))
-  //   );
-
-  //   // 🔥 Remove duplicates using a Map (ensures unique `parent_id`s)
-  //   filteredParentsData = Array.from(
-  //     new Map(filteredParentsData.map((parent) => [parent.parent_id, parent])).values()
-  //   );
-
-  //   console.log("Filtered Parents Data for Submission:", filteredParentsData);
-
-  //   if (filteredParentsData.length === 0) {
-  //     toast.error("No selected parent data available to update.");
-  //     return;
-  //   }
-
-  //   // ✅ **Filter out only students with complete data**
-  //   const updatedParentsData = filteredParentsData.map((parent) => {
-  //     const validStudents = (parent.students || []).filter((student) =>
-  //       student.permant_add && student.blood_group && student.house
-  //     );
-
-  //     return validStudents.length > 0
-  //       ? {
-  //           ...parent,
-  //           students: validStudents, // ✅ Keep only students with complete data
-  //         }
-  //       : null; // ❌ Skip parents who have no valid students
-  //   }).filter(Boolean); // Remove null entries
-
-  //   if (updatedParentsData.length === 0) {
-  //     toast.error("No valid students with complete data found.");
-  //     return;
-  //   }
-
-  //   const token = localStorage.getItem("authToken");
-
-  //   try {
-  //     // ✅ Prepare structured request data
-  //     const requestData = {
-  //       parents: updatedParentsData.map((parent) => ({
-  //         parent_id: parent.parent_id,
-  //         f_mobile: parent.f_mobile,
-  //         m_mobile: parent.m_mobile,
-  //         students: parent.students.map((student) => ({
-  //           student_id: student.student_id,
-  //           permant_add: student.permant_add,
-  //           blood_group: student.blood_group,
-  //           house: student.house,
-  //         })),
-  //       })),
-  //     };
-
-  //     console.log("Submitting Request Data:", requestData);
-
-  //     const response = await axios.put(
-  //       `${API_URL}/api/update_pendingstudentidcard`,
-  //       requestData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "application/json", // Ensure JSON format
-  //         },
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success("ID Card details updated successfully.");
-
-  //       // ✅ **Refresh the pending students after successful update**
-  //       handleSearch(); // 🔄 Reloads pending students
-
-  //       // ✅ **Clear selected checkboxes after update**
-  //       setSelectedFathers([]);
-  //     } else {
-  //       toast.error("Failed to update ID Card details.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error updating student ID card:", error);
-  //     toast.error("Something went wrong. Please try again.");
-  //   }
-  // };
 
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
