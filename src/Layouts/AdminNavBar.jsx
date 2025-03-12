@@ -881,6 +881,13 @@ const AdminNavBar = () => {
           >
             Student - Religion wise Report
           </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
+            to="/gendrWiseStudRepo"
+            className="text-sm font-bold hover:text-black"
+          >
+            Student - Gender wise Report
+          </NavDropdown.Item>
         </NavDropdown>
 
         {/* Ticket Dropdown */}
