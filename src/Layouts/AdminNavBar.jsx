@@ -786,7 +786,7 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
-            to="#"
+            to="/pendingStudentId"
             className="text-sm font-bold hover:text-black"
           >
             Pending Student ID Card
@@ -858,6 +858,27 @@ const AdminNavBar = () => {
             className="text-sm font-bold hover:text-black"
           >
             Student Contact Details Report
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
+            to="#"
+            className="text-sm font-bold hover:text-black"
+          >
+            Student Remarks Report
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
+            to="#"
+            className="text-sm font-bold hover:text-black"
+          >
+            Student - Category wise Report
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
+            to="#"
+            className="text-sm font-bold hover:text-black"
+          >
+            Student - Religion wise Report
           </NavDropdown.Item>
         </NavDropdown>
 
