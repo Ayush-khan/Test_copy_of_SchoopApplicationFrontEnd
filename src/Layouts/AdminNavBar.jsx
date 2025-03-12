@@ -868,7 +868,7 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
-            to="#"
+            to="/catWiseStudRepo"
             className="text-sm font-bold hover:text-black"
           >
             Student - Category wise Report
