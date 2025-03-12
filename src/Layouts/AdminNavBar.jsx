@@ -876,7 +876,7 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
-            to="#"
+            to="/relgWiseStudRepo"
             className="text-sm font-bold hover:text-black"
           >
             Student - Religion wise Report

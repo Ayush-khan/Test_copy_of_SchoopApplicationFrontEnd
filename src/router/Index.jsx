@@ -193,6 +193,7 @@ import StudentReport from "../componants/Reports/StudentReport.jsx";
 import StudentContactDetailsReport from "../componants/Reports/StudentContactDetailsReport.jsx";
 import PendingStudentId from "../componants/IDCards/PendingStudentId.jsx";
 import CatWiseStudRepo from "../componants/Reports/CatWiseStudRepo.jsx";
+import RelgWiseStudRepo from "../componants/Reports/RelgWiseStudRepo.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -629,6 +630,11 @@ function Index() {
         <Route
           path="/catWiseStudRepo"
           element={<PrivateRoute element={<CatWiseStudRepo />} />}
+        />
+        {/* Student Religion Wise  Report Module */}
+        <Route
+          path="/relgWiseStudRepo"
+          element={<PrivateRoute element={<RelgWiseStudRepo />} />}
         />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />
