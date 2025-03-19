@@ -845,14 +845,14 @@ const AdminNavBar = () => {
           >
             Consolidated Leave
           </NavDropdown.Item>
-          <NavDropdown.Item
+          {/* <NavDropdown.Item
             as={Link}
             // to="/studentReport"
             to="#"
             className="text-sm font-bold hover:text-black"
           >
             Student Report
-          </NavDropdown.Item>
+          </NavDropdown.Item> */}
           <NavDropdown.Item
             as={Link}
             to="/studentContactDetailsReport"
@@ -881,13 +881,14 @@ const AdminNavBar = () => {
           >
             Student - Religion wise Report
           </NavDropdown.Item>
-          <NavDropdown.Item
+          {/* <NavDropdown.Item
             as={Link}
-            to="/gendrWiseStudRepo"
+            // to="/gendrWiseStudRepo"
+            to="#"
             className="text-sm font-bold hover:text-black"
           >
             Student - Gender wise Report
-          </NavDropdown.Item>
+          </NavDropdown.Item> */}
           <NavDropdown.Item
             as={Link}
             to="/GenWiseCatRepo"
