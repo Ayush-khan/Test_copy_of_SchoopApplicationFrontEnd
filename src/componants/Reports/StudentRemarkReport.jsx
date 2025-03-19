@@ -43,6 +43,7 @@ const StudentRemarkReport = () => {
     fetchClassesWithSection();
     fetchTeacherList();
     fetchStudentsList();
+    handleSearch();
   }, []);
 
   const fetchClassesWithSection = async () => {

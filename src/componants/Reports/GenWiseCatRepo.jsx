@@ -32,7 +32,7 @@ const GenWiseCatRepo = () => {
 
   useEffect(() => {
     fetchExams();
-    // handleSearch();
+    handleSearch();
   }, []);
 
   const fetchExams = async () => {
@@ -72,11 +72,11 @@ const GenWiseCatRepo = () => {
 
   const handleSearch = async () => {
     setLoadingForSearch(false);
-    if (!selectedStudentId) {
-      setStudentError("Please select Class.");
-      setLoadingForSearch(false);
-      return;
-    }
+    // if (!selectedStudentId) {
+    //   setStudentError("Please select Class.");
+    //   setLoadingForSearch(false);
+    //   return;
+    // }
     setSearchTerm("");
     try {
       setLoadingForSearch(true); // Start loading
@@ -101,8 +101,8 @@ const GenWiseCatRepo = () => {
         setTimetable(response?.data?.data);
         setPageCount(Math.ceil(response?.data?.data?.length / pageSize)); // Set page count based on response size
       }
-      //   setSelectedStudent(null);
-      //   setSelectedStudentId(null);
+      setSelectedStudent(null);
+      setSelectedStudentId(null);
     } catch (error) {
       console.error("Error fetching Student Contact Details Report:", error);
       toast.error(
@@ -325,7 +325,7 @@ h5 + * { /* Targets the element after h5 */
                       className="md:w-[40%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      Class <span className="text-red-500">*</span>
+                      Class
                     </label>
                     <div className=" w-full md:w-[80%]">
                       <Select
