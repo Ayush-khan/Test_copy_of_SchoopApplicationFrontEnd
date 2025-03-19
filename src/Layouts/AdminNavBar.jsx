@@ -862,7 +862,7 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
-            to="#"
+            to="/StudentRemarkReport"
             className="text-sm font-bold hover:text-black"
           >
             Student Remarks Report
@@ -887,6 +887,13 @@ const AdminNavBar = () => {
             className="text-sm font-bold hover:text-black"
           >
             Student - Gender wise Report
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
+            to="/GenWiseCatRepo"
+            className="text-sm font-bold hover:text-black"
+          >
+            Student - Genderwise Categorywise Report
           </NavDropdown.Item>
         </NavDropdown>
 
