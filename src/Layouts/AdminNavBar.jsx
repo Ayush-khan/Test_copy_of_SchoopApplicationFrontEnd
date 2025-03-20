@@ -919,8 +919,7 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
-            // to="/feePaymentRepo"
-            to="#"
+            to="/feePaymentRepo"
             className="text-sm font-bold hover:text-black"
           >
             Fees Payment Report
