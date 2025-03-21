@@ -286,10 +286,10 @@ h5 + * { /* Targets the element after h5 */
           <>
             <div className=" w-full md:w-[85%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
               <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full md:w-[75%] gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                  <div className="w-full md:w-[80%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
+                <div className="w-full md:w-[75%]  gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                  <div className="w-full  md:w-[70%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                     <label
-                      className="md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="w-full md:w-[15%] text-md  mt-1.5"
                       htmlFor="studentSelect"
                     >
                       <span className=" text-nowrap text-gray-500 font-medium">
@@ -297,7 +297,7 @@ h5 + * { /* Targets the element after h5 */
                       </span>
                       {/* Staff Name <span className="text-red-500">*</span> */}
                     </label>
-                    <div className=" text-sm w-full md:w-[65%]">
+                    <div className=" text-sm w-full md:w-[60%]">
                       <DateRangePickerComponent
                         onDateChange={handleDateChange}
                       />
