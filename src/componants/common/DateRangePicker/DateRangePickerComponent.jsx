@@ -104,7 +104,7 @@ const DateRangePickerComponent = ({ onDateChange }) => {
       </div>
 
       {showPicker && (
-        <div className="absolute top-12 text-black left-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 w-full md:w-[70%]">
+        <div className="absolute top-12 text-black left-0 bg-white border border-gray-300 rounded-lg shadow-lg z-1 w-full md:w-[70%]">
           <div className="flex flex-col p-3 gap-2">
             {presetOptions.map((preset, index) => (
               <button
@@ -112,7 +112,7 @@ const DateRangePickerComponent = ({ onDateChange }) => {
                 className={`px-3 py-1 text-md rounded-md transition-all duration-300 ${
                   selectedPreset === preset.label
                     ? "bg-blue-500 text-white"
-                    : "bg-gray-100 hover:bg-blue-100 hover:text-blue-500"
+                    : "bg-gray-100 hover:bg-blue-100 hover:text-blue-500 hover:font-medium"
                 }`}
                 onClick={() => handlePresetSelect(preset)}
               >
@@ -123,7 +123,7 @@ const DateRangePickerComponent = ({ onDateChange }) => {
           {selectedPreset === "Custom Range" && (
             <div
               className="
-            absolute top-0 left-full
+            absolute top-0 left-full 
             bg-white border border-gray-300 rounded-lg shadow-md 
             w-0  
             [&_.rdrDay]:!bg-transparent 
