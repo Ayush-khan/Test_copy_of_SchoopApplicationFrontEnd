@@ -9,6 +9,7 @@ import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
+import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 
 const StaffReport = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -357,8 +358,8 @@ const StaffReport = () => {
     <>
       <div className="w-full md:w-[100%] mx-auto p-4 ">
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
-          <div className=" card-header mb-4 flex justify-between items-center ">
+        <div className="card rounded-md ">
+          {/* <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-xl">
               Staff Report
             </h5>
@@ -374,173 +375,180 @@ const StaffReport = () => {
             style={{
               backgroundColor: "#C03078",
             }}
-          ></div>
+          ></div> */}
+          {loadingForSearch ? (
+            <div className="flex justify-center items-center h-64">
+              {/* <div className="spinner-border text-primary" role="status"> */}
+              <LoaderStyle />
+              {/* </div> */}
+            </div>
+          ) : (
+            timetable.length > 0 && (
+              <>
+                <div className="w-full">
+                  <div className="card mx-auto lg:w-full shadow-lg">
+                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                      <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
+                        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                          List of Staff Report
+                        </h3>
+                        <div className="w-1/2 md:w-[18%] mr-1 ">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search "
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                        <button
+                          type="button"
+                          onClick={handleDownloadEXL}
+                          className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
+                        >
+                          <FaFileExcel />
 
-          {timetable.length > 0 && (
-            <>
-              <div className="w-full">
-                <div className="card mx-auto lg:w-full shadow-lg">
-                  <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                    <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
-                      <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                        List of Staff Report
-                      </h3>
-                      <div className="w-1/2 md:w-[18%] mr-1 ">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search "
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
+                            Exports to excel
+                          </div>
+                        </button>
+
+                        <button
+                          onClick={handlePrint}
+                          className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
+                        >
+                          <FiPrinter />
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
+                            Print{" "}
+                          </div>
+                        </button>
                       </div>
                     </div>
-                    <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
-                      <button
-                        type="button"
-                        onClick={handleDownloadEXL}
-                        className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
-                      >
-                        <FaFileExcel />
-
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                          Exports to excel
-                        </div>
-                      </button>
-
-                      <button
-                        onClick={handlePrint}
-                        className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
-                      >
-                        <FiPrinter />
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                          Print{" "}
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-                  <div
-                    className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                    style={{
-                      backgroundColor: "#C03078",
-                    }}
-                  ></div>
-
-                  <div className="card-body w-full">
                     <div
-                      className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
+                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
                       style={{
-                        scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
-                        scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
+                        backgroundColor: "#C03078",
                       }}
-                    >
-                      <table className="min-w-full leading-normal table-auto">
-                        <thead>
-                          <tr className="bg-gray-100">
-                            {[
-                              "Sr No.",
-                              "Staff Name",
-                              "Date of Birth",
-                              "Date of Joining",
-                              "Gender",
-                              "Blood Group",
-                              "Designation",
-                              "Phone No.",
-                              "Email",
-                              "Address",
-                              "Aadhaar Card No.",
-                              "Academic Qualification",
-                              "Professional Qualification",
-                              "Training Status",
-                              "Experience (in years)",
-                            ].map((header, index) => (
-                              <th
-                                key={index}
-                                className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
-                              >
-                                {header}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
+                    ></div>
 
-                        <tbody>
-                          {displayedSections.length ? (
-                            displayedSections?.map((student, index) => (
-                              <tr
-                                key={student.adm_form_pk}
-                                className="border border-gray-300"
-                              >
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {index + 1}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {capitalize(student?.name || " ")}
-                                </td>
+                    <div className="card-body w-full">
+                      <div
+                        className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
+                        style={{
+                          scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
+                          scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
+                        }}
+                      >
+                        <table className="min-w-full leading-normal table-auto">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              {[
+                                "Sr No.",
+                                "Staff Name",
+                                "Date of Birth",
+                                "Date of Joining",
+                                "Gender",
+                                "Blood Group",
+                                "Designation",
+                                "Phone No.",
+                                "Email",
+                                "Address",
+                                "Aadhaar Card No.",
+                                "Academic Qualification",
+                                "Professional Qualification",
+                                "Training Status",
+                                "Experience (in years)",
+                              ].map((header, index) => (
+                                <th
+                                  key={index}
+                                  className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
+                                >
+                                  {header}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
 
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.birthday
-                                    ? new Date(
-                                        student.birthday
-                                      ).toLocaleDateString("en-GB")
-                                    : " "}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.date_of_joining
-                                    ? new Date(
-                                        student.date_of_joining
-                                      ).toLocaleDateString("en-GB")
-                                    : " "}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.sex || " "}
-                                </td>
-                                <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
-                                  {student?.blood_group || " "}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.designation || " "}
-                                </td>
+                          <tbody>
+                            {displayedSections.length ? (
+                              displayedSections?.map((student, index) => (
+                                <tr
+                                  key={student.adm_form_pk}
+                                  className="border border-gray-300"
+                                >
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {index + 1}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {capitalize(student?.name || " ")}
+                                  </td>
 
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.phone || " "}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.email || " "}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {capitalize(student?.address || " ")}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.aadhar_card_no || " "}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.academic_qual || " "}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.professional_qual || " "}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.trained || " "}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.experience || " "}
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                              <div className=" text-center text-xl text-red-700">
-                                Oops! No data found..
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.birthday
+                                      ? new Date(
+                                          student.birthday
+                                        ).toLocaleDateString("en-GB")
+                                      : " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.date_of_joining
+                                      ? new Date(
+                                          student.date_of_joining
+                                        ).toLocaleDateString("en-GB")
+                                      : " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.sex || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
+                                    {student?.blood_group || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.designation || " "}
+                                  </td>
+
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.phone || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.email || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {capitalize(student?.address || " ")}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.aadhar_card_no || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.academic_qual || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.professional_qual || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.trained || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.experience || " "}
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                <div className=" text-center text-xl text-red-700">
+                                  Oops! No data found..
+                                </div>
                               </div>
-                            </div>
-                          )}
-                        </tbody>
-                      </table>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </>
+              </>
+            )
           )}
         </div>
       </div>
