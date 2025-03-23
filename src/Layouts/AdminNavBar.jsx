@@ -938,6 +938,20 @@ const AdminNavBar = () => {
           >
             Fees Payment Report
           </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
+            to="/worldlinfeePayRepo"
+            className="text-sm font-bold hover:text-black"
+          >
+            Worldline Fee Payment Report{" "}
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
+            to="/rozorpayfeePayRepo"
+            className="text-sm font-bold hover:text-black"
+          >
+            Razorpay Fee Payment Report{" "}
+          </NavDropdown.Item>
         </NavDropdown>
 
         {/* Ticket Dropdown */}
