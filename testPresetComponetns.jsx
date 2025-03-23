@@ -1,725 +1,185 @@
-import { useEffect, useState } from "react";
-import { RxCross1 } from "react-icons/rx";
-import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import ImageCropper from "../common/ImageUploadAndCrop";
-import Loader from "../common/LoaderFinal/LoaderStyle";
+import React, { useState, useEffect } from "react";
+import { DateRangePicker } from "react-date-range";
+import { DateRange } from "react-date-range";
+import {
+  format,
+  startOfWeek,
+  endOfWeek,
+  startOfQuarter,
+  endOfQuarter,
+  startOfYear,
+  endOfYear,
+} from "date-fns";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 
-const IDCardDetails = () => {
-  const API_URL = import.meta.env.VITE_API_URL;
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [loading, setLoading] = useState(false);
-  const [loadingForSubmit, setLoadingForSubmit] = useState(false);
-  const [students, setStudents] = useState([]);
-  const [parents, setParents] = useState([]);
-  const [guardian, setGuardian] = useState([]);
-  const [formErrors, setFormErrors] = useState([]);
-  const { staff } = location.state || {};
-  console.log("IdCardDetails***", staff);
-  const [data, setData] = useState(null);
-  const fetchStudentData = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("authToken");
+const DateRangePickerComponent = ({ onDateChange }) => {
+  const today = new Date();
+  const formattedToday = format(today, "yyyy-MM-dd");
 
-      const response = await axios.get(
-        `${API_URL}/api/get_studentdatawithparentdata?parent_id=${staff?.parent_id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      console.log("Class", response);
-      //   await setData(response?.data?.data || []);
+  const [showPicker, setShowPicker] = useState(false);
+  const [dateRange, setDateRange] = useState([
+    { startDate: today, endDate: today, key: "selection" },
+  ]);
 
-      const data = response?.data?.data || {};
-      setData(data);
+  const [tempDateRange, setTempDateRange] = useState(dateRange);
+  const [selectedPreset, setSelectedPreset] = useState("Today");
 
-      setStudents(data.students || []);
-      setParents(Array.isArray(data.parents) ? data.parents : []);
-      //   setGuardian(Array.isArray(data.guardian) ? data.guardian : []);
-      //   setGuardian(
-      //     Array.isArray(data.guardian) ? data.guardian : [data.guardian]
-      //   );
-      setGuardian(
-        Array.isArray(data.guardian)
-          ? data.guardian
-          : data.guardian
-          ? [data.guardian]
-          : []
-      );
+  const presetOptions = [
+    { label: "Today", range: [today, today] },
+    {
+      label: "Yesterday",
+      range: [new Date(today.setDate(today.getDate() - 1)), new Date(today)],
+    },
+    { label: "This Week", range: [startOfWeek(today), endOfWeek(today)] },
+    {
+      label: "This Month",
+      range: [new Date(today.getFullYear(), today.getMonth(), 1), today],
+    },
+    {
+      label: "Last Month",
+      range: [
+        new Date(today.getFullYear(), today.getMonth() - 1, 1),
+        new Date(today.getFullYear(), today.getMonth(), 0),
+      ],
+    },
+    {
+      label: "This Quarter",
+      range: [startOfQuarter(today), endOfQuarter(today)],
+    },
+    {
+      label: "This Half Year",
+      range: [
+        new Date(today.getFullYear(), today.getMonth() < 6 ? 0 : 6, 1),
+        new Date(today.getFullYear(), today.getMonth() < 6 ? 5 : 11, 30),
+      ],
+    },
+    { label: "This Year", range: [startOfYear(today), endOfYear(today)] },
+    { label: "Custom Range", range: null },
+  ];
 
-      console.log("setParents", parents);
-
-      console.log("setGuardian", guardian);
-    } catch (error) {
-      toast.error("Error fetching Student Data");
-      console.error("Error fetching Student Data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
   useEffect(() => {
-    fetchStudentData();
+    onDateChange(formattedToday, formattedToday);
   }, []);
 
-  // Handle Input Changes Separately
-  const handleStudentChange = (e, index) => {
-    const { name, value } = e.target;
-    setStudents((prev) =>
-      prev.map((student, i) =>
-        i === index ? { ...student, [name]: value } : student
-      )
-    );
-  };
+  const handlePresetSelect = (preset) => {
+    setSelectedPreset(preset.label);
 
-  console.log("student", students);
-  const handleParentChange = (e, index) => {
-    const { name, value } = e.target;
-    setParents((prev) =>
-      prev.map((parent, i) =>
-        i === index ? { ...parent, [name]: value } : parent
-      )
-    );
-  };
-
-  console.log("parent", parent);
-
-  const handleGuardianChange = (e, index) => {
-    const { name, value } = e.target;
-    setGuardian((prev) =>
-      prev.map((guardian, i) =>
-        i === index ? { ...guardian, [name]: value } : guardian
-      )
-    );
-  };
-
-  console.log("guardian", guardian);
-
-  // Handle Image Cropping Separately
-  const handleStudentImageCropped = (croppedImageData, index) => {
-    setStudents((prev) =>
-      prev.map((student, i) =>
-        i === index
-          ? {
-              ...student,
-              image_base: croppedImageData ? croppedImageData : "", // Store base64 or empty
-            }
-          : student
-      )
-    );
-  };
-
-  //   const handleStudentImageCropped = (croppedImageData) => {
-  //     setStudents((prev) => ({ ...prev, image_url: croppedImageData }));
-  //   };
-
-  const handleParentImageCropped = (croppedImageData, index, type) => {
-    setParents((prev) =>
-      prev.map((parent, i) =>
-        i === index
-          ? {
-              ...parent,
-              // Dynamic key: father_image_url or mother_image_url
-              [`${type}_image_base`]: croppedImageData ? croppedImageData : "",
-            }
-          : parent
-      )
-    );
-  };
-
-  //   const handleParentImageCropped = (croppedImageData) => {
-  //     setParents((prev) => ({ ...prev, image_url: croppedImageData }));
-  //   };
-  const handleGuardianImageCropped = (croppedImageData, index) => {
-    setGuardian((prev) =>
-      prev.map((guardian, i) =>
-        i === index
-          ? {
-              ...guardian,
-
-              guardian_image_base: croppedImageData ? croppedImageData : "", // Store base64 or empty
-            }
-          : guardian
-      )
-    );
-  };
-
-  //   const handleSubmit = async (event) => {
-  //     event.preventDefault();
-
-  //     // Prevent double submissions
-  //     if (loadingForSubmit) return;
-  //     console.log("Student Data Submit---->", data);
-  //     const formattedStudents = students.map((student) => ({
-  //       ...student,
-  //       image_url: student.image_url || "",
-  //       image_base: student.image_base || "",
-  //     }));
-
-  //     const formattedParents = parents.map((parent) => ({
-  //       ...parent,
-  //       father_image_url: parent.father_image_url || "",
-  //       mother_image_url: parent.mother_image_url || "",
-  //       father_image_base: parent.father_image_base || "",
-  //       mother_image_base: parent.mother_image_base || "",
-  //     }));
-
-  //     const formattedGuardians = guardian.map((g) => ({
-  //       ...g,
-  //       guardian_image_url: g.guardian_image_url,
-  //       guardian_image_base: g.guardian_image_base || "",
-  //     }));
-
-  //     const finalData = {
-  //       student: formattedStudents,
-  //       parent: formattedParents,
-  //       guardian: formattedGuardians,
-  //     };
-
-  //     console.log("Submitting Data----->", finalData);
-  //     try {
-  //       setLoadingForSubmit(true); // Start loading state
-  //       const token = localStorage.getItem("authToken");
-  //       if (!token) {
-  //         throw new Error("No authentication token found");
-  //       }
-
-  //       console.log("Submitting data-->:", finalData);
-  //       const response = await axios.post(
-  //         `${API_URL}/api/save_studentparentguardianimage`,
-  //         finalData,
-  //         {
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       // Handle successful response
-  //       if (response.status === 200) {
-  //         toast.success("Id Card Saved successfully!");
-  //         setTimeout(() => {
-  //           navigate("/studentIdCard");
-  //         }, 500);
-  //       }
-  //     } catch (error) {
-  //       console.error(
-  //         "Error Saving in Id Card :",
-  //         error.response?.data || error.message
-  //       );
-  //     } finally {
-  //       setLoadingForSubmit(false); // End loading state
-  //     }
-  //   };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    // Prevent double submissions
-    if (loadingForSubmit) return;
-
-    // Validation checks
-    let errors = [];
-
-    students.forEach((student, index) => {
-      if (!student.blood_group) {
-        errors.push(`Blood Group is required for Student ${index + 1}`);
-      }
-      if (!student.permanent_address) {
-        errors.push(`Permanent Address is required for Student ${index + 1}`);
-      }
-    });
-
-    parents.forEach((parent) => {
-      if (!parent.f_mobile) {
-        errors.push("Father's Mobile Number is required");
-      }
-      if (!parent.m_mobile) {
-        errors.push("Mother's Mobile Number is required");
-      }
-      // if (!parent.f_office_add && !parent.m_office_add) {
-      //   errors.push("At least one Parent's Address is required");
-      // }
-    });
-
-    guardian.forEach((g, index) => {
-      if (!g.g_mobile) {
-        errors.push(
-          `Guardian's Mobile Number is required for Guardian ${index + 1}`
-        );
-      }
-    });
-    if (errors.length > 0) {
-      setFormErrors(errors); // Store errors in state
-      return;
-    }
-
-    // Reset errors on successful validation
-    setFormErrors([]);
-    // if (errors.length > 0) {
-    //   errors.forEach((error) => toast.error(error));
-    //   return;
-    // }
-
-    console.log("Student Data Submit---->", data);
-
-    const formattedStudents = students.map((student) => ({
-      ...student,
-      image_url: student.image_url || "",
-      image_base: student.image_base || "",
-    }));
-
-    const formattedParents = parents.map((parent) => ({
-      ...parent,
-      father_image_url: parent.father_image_url || "",
-      mother_image_url: parent.mother_image_url || "",
-      father_image_base: parent.father_image_base || "",
-      mother_image_base: parent.mother_image_base || "",
-    }));
-
-    const formattedGuardians = guardian.map((g) => ({
-      ...g,
-      guardian_image_url: g.guardian_image_url,
-      guardian_image_base: g.guardian_image_base || "",
-    }));
-
-    const finalData = {
-      student: formattedStudents,
-      parent: formattedParents,
-      guardian: formattedGuardians,
-    };
-
-    console.log("Submitting Data----->", finalData);
-
-    try {
-      setLoadingForSubmit(true); // Start loading state
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      const response = await axios.post(
-        `${API_URL}/api/save_studentparentguardianimage`,
-        finalData,
+    if (preset.label === "Custom Range") {
+      setTempDateRange(dateRange);
+    } else {
+      setTempDateRange([
         {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        toast.success("ID Card Saved successfully!");
-        setTimeout(() => {
-          navigate("/studentIdCard");
-        }, 500);
-      }
-    } catch (error) {
-      console.error(
-        "Error Saving ID Card:",
-        error.response?.data || error.message
-      );
-    } finally {
-      setLoadingForSubmit(false);
+          startDate: preset.range[0],
+          endDate: preset.range[1],
+          key: "selection",
+        },
+      ]);
     }
   };
 
-  //   if (loading) return <p>Loading...</p>;
-  if (!students || !parents || !guardian)
-    return (
-      <>
-        {" "}
-        <div className="flex w-1/2 mx-auto bg-white justify-center items-center h-64">
-          <Loader />
-        </div>
-      </>
-    );
+  const handleApply = () => {
+    const searchFrom = format(tempDateRange[0].startDate, "yyyy-MM-dd");
+    const searchTo = format(tempDateRange[0].endDate, "yyyy-MM-dd");
+
+    setDateRange(tempDateRange);
+    onDateChange(searchFrom, searchTo);
+    setShowPicker(false);
+  };
+
+  const formatDate = (date) => format(date, "MMMM d, yyyy");
 
   return (
-    <div className="mt-4 bg-gray-200 w-full md:w-[95%] mx-auto">
-      <ToastContainer />
+    <div className="relative ">
+      <div
+        className="border border-gray-300 rounded-lg px-4 py-2 cursor-pointer shadow-md bg-white flex items-center gap-2 hover:ring-2 hover:ring-blue-500 transition-all duration-200"
+        onClick={() => setShowPicker(!showPicker)}
+      >
+        <span className="text-gray-500 font-medium">📅</span>
+        <span className="text-gray-800">
+          {`${formatDate(dateRange[0]?.startDate)} - ${formatDate(
+            dateRange[0]?.endDate
+          )}`}
+        </span>
+      </div>
 
-      <div className="card p-4 rounded-md ">
-        <div className=" card-header mb-4 flex justify-between items-center ">
-          <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-            ID Card Details
-          </h5>
-
-          <RxCross1
-            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-            onClick={() => {
-              navigate("/studentIdCard");
-            }}
-          />
-        </div>
-        <div
-          className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
-          style={{
-            backgroundColor: "#C03078",
-          }}
-        ></div>
-        <p className="  md:absolute md:right-10  md:top-[10%]   text-gray-500 ">
-          <span className="text-red-500">*</span>indicates mandatory information
-        </p>
-        <form
-          onSubmit={handleSubmit}
-          className="   p-0 overflow-x-hidden shadow-md  bg-gray-50 "
-        >
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <Loader />
-            </div>
-          ) : (
-            <div>
-              <div className="w-full  mx-auto  flex flex-wrap p-4 gap-4 justify-center">
-                {students.map((student, index) => (
-                  <>
-                    <div className="w-full md:w-[48%] border p-4 pt-2 rounded-lg shadow-lg bg-white">
-                      <h2 className="text-xl font-bold mb-4 text-center text-gray-500">
-                        Student {index + 1}
-                      </h2>
-
-                      {/* Grid Layout for Fields */}
-                      <div className="flex flex-col md:grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {/* Full Name */}{" "}
-                        <div className=" md:row-span-2 md:col-span-1  flex justify-center mb-4 ">
-                          <div className="rounded-full">
-                            {/* <ImageCropper
-                              photoPreview={student?.image_url}
-                              //   onImageCropped={handleStudentImageCropped}
-                              onImageCropped={(e) =>
-                                handleStudentImageCropped(e, index)
-                              }
-                            /> */}
-                            <ImageCropper
-                              photoPreview={student?.image_url}
-                              onImageCropped={(croppedImage) =>
-                                handleStudentImageCropped(croppedImage, index)
-                              }
-                            />
-                          </div>
-                        </div>
-                        <div className="flex flex-col mt-2">
-                          <label className="font-bold text-sm">Full Name</label>
-                          <p className=" bg-gray-200 border-1 border-gray-100 rounded-md p-2 shadow-inner">
-                            {student.first_name || ""} {student.mid_name || " "}{" "}
-                            {student.last_name || " "}
-                          </p>
-                        </div>
-                        {/* Class & Division */}
-                        <div className="flex flex-col mt-2">
-                          <label className="font-bold text-sm">
-                            Class & Division
-                          </label>
-                          <p className=" bg-gray-200 border-1 border-gray-100 rounded-md p-2 shadow-inner">
-                            {student.classname || " "} -{" "}
-                            {student.sectionname || " "}
-                          </p>
-                        </div>
-                        {/* Date of Birth */}
-                        <div className="flex flex-col">
-                          <label className="font-bold text-sm">
-                            Date of Birth
-                          </label>
-                          <p className=" bg-gray-200 border-1 border-gray-100 rounded-md p-2 shadow-inner">
-                            {student.dob || " "}
-                          </p>
-                        </div>
-                        {/* Blood Group */}
-                        <div className="flex flex-col">
-                          <label className="font-bold text-sm">
-                            Blood Group <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            name="blood_group"
-                            value={student.blood_group}
-                            onChange={(e) => handleStudentChange(e, index)}
-                            className="w-full   border-1 border-gray-400 rounded-md p-2 shadow-inner"
-                          >
-                            <option value="">Select</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
-                          </select>
-                          {formErrors.some(
-                            (err) =>
-                              err.field === `student_blood_group_${index}`
-                          ) && (
-                            <p className="text-red-500 text-sm">
-                              {
-                                formErrors.find(
-                                  (err) =>
-                                    err.field === `student_blood_group_${index}`
-                                )?.message
-                              }
-                            </p>
-                          )}
-                        </div>
-                        {/* House */}
-                        <div className="flex flex-col">
-                          <label className="font-bold text-sm">
-                            House <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            name="house"
-                            value={student.house}
-                            onChange={(e) => handleStudentChange(e, index)}
-                            // onChange={handleStudentChange}
-                            className="w-full   border-1 border-gray-400 rounded-md p-2 shadow-inner"
-                          >
-                            <option value="">Select</option>
-                            <option value="E">Emerald</option>
-                            <option value="R">Ruby</option>
-                            <option value="S">Sapphire</option>
-                            <option value="D">Diamond</option>
-                          </select>
-                        </div>
-                        {/* Address */}
-                        <div className="col-span-2 flex flex-col">
-                          <label className="font-bold text-sm">
-                            Address <span className="text-red-500">*</span>
-                          </label>
-                          <textarea
-                            name="permant_add"
-                            value={student.permant_add} // Fixed the typo
-                            onChange={(e) => handleStudentChange(e, index)}
-                            maxLength={240}
-                            className="w-full border-1 border-gray-400 rounded-md p-2 shadow-inner"
-                          />
-                          {formErrors.some(
-                            (err) => err.field === `student_address_${index}`
-                          ) && (
-                            <p className="text-red-500 text-sm">
-                              {
-                                formErrors.find(
-                                  (err) =>
-                                    err.field === `student_address_${index}`
-                                )?.message
-                              }
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ))}
-              </div>
-
-              <div className="w-full md:w-[95%] mx-auto flex flex-col md:flex-row justify-between gap-x-4">
-                {/* Parent Information */}
-                {parents.map((parent, index) => (
-                  <div
-                    key={index}
-                    className="w-full md:w-[80%] border p-4 pt-2 rounded-lg shadow-lg bg-white"
-                  >
-                    <h2 className="text-xl font-bold mb-4 text-center text-gray-500">
-                      Parent Information
-                    </h2>
-                    <div className="flex flex-col md:flex-row gap-x-6 gap-y-6 md:gap-y-1 justify-normal md:justify-between items-center">
-                      {/* Father Information */}
-                      <div className="w-full md:w-[50%]">
-                        <div className="flex justify-center mb-4">
-                          <div className="rounded-full">
-                            <ImageCropper
-                              photoPreview={parent?.father_image_url}
-                              onImageCropped={(croppedImage) =>
-                                handleParentImageCropped(
-                                  croppedImage,
-                                  index,
-                                  "father"
-                                )
-                              }
-                            />
-                            {/* <ImageCropper
-                              photoPreview={parent.father_image_url}
-                              onImageCropped={(e) =>
-                                handleParentImageCropped(e, "father_image_url")
-                              }
-                              //   onImageCropped={(cropped) =>
-                              //     handleParentImageCropped(
-                              //       cropped,
-                              //       "father_image_url"
-                              //     )
-                              //   }
-                            /> */}
-                          </div>
-                        </div>
-                        <div className="flex flex-row justify-start gap-x-1 md:gap-x-5  px-1 ">
-                          <label className="block mt-2 font-bold text-sm w-full md:w-[35%]">
-                            Father Name
-                          </label>
-                          <p className="w-full md:w-[58%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
-                            {parent.father_name || " "}
-                          </p>
-                        </div>
-                        <div className="mb-2 flex flex-row justify-start gap-x-1 md:gap-x-5  px-1 ">
-                          <label className="block mt-2 font-bold text-sm w-full md:w-[35%]">
-                            Father Mobile{" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="f_mobile"
-                            value={parent.f_mobile || ""}
-                            // onChange={handleParentChange}
-                            onChange={(e) => handleParentChange(e, index)}
-                            className=" md:w-[58%] mx-auto border-1 border-gray-400 rounded-md p-2 shadow-inner w-full "
-                          />
-                          {formErrors.some(
-                            (err) => err.field === `parent_f_mobile_${index}`
-                          ) && (
-                            <p className="text-red-500 text-sm">
-                              {
-                                formErrors.find(
-                                  (err) =>
-                                    err.field === `parent_f_mobile_${index}`
-                                )?.message
-                              }
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Mother Information */}
-                      <div className="w-full md:w-[50%]">
-                        <div className="flex justify-center mb-4">
-                          <div className="rounded-full">
-                            <ImageCropper
-                              photoPreview={parent?.mother_image_url}
-                              onImageCropped={(croppedImage) =>
-                                handleParentImageCropped(
-                                  croppedImage,
-                                  index,
-                                  "mother"
-                                )
-                              }
-                            />
-                            {/* <ImageCropper
-                              photoPreview={parent.mother_image_url}
-                              onImageCropped={(e) =>
-                                handleParentImageCropped(e, "mother_image_url")
-                              }
-                              //   onImageCropped={(cropped) =>
-                              //     handleParentImageCropped(cropped)
-                              //   }
-                            /> */}
-                          </div>
-                        </div>
-                        <div className="flex flex-row justify-start gap-x-1 md:gap-x-5  px-1  ">
-                          <label className="block mt-2 font-bold text-sm w-full md:w-[30%]">
-                            Mother Name
-                          </label>
-                          <p className="w-full md:w-[58%]  mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
-                            {parent.mother_name || " "}
-                          </p>
-                        </div>
-                        <div className="mb-2 flex flex-row justify-start gap-x-1 md:gap-x-5    ">
-                          <label className="block font-bold   mt-2 text-sm w-full md:w-[33%]">
-                            Mother Mobile{" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="m_mobile"
-                            value={parent.m_mobile || ""}
-                            // onChange={handleParentChange}
-                            onChange={(e) => handleParentChange(e, index)}
-                            className=" md:w-[58%] border-1 border-gray-400 rounded-md p-2 shadow-inner w-full"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Guardian Information */}
-                {guardian &&
-                  guardian.map((guardians, index) => (
-                    <div
-                      key={index}
-                      className="w-full md:w-[40%] border p-4 pt-2 rounded-lg shadow-lg bg-white"
-                    >
-                      <h2 className="text-xl font-bold mb-4 text-center text-gray-500">
-                        Guardian Information
-                      </h2>
-                      <div className="flex justify-center mb-4">
-                        <div className="rounded-full">
-                          <ImageCropper
-                            photoPreview={guardians.guardian_image_url}
-                            onImageCropped={(croppedImage) =>
-                              handleGuardianImageCropped(croppedImage, index)
-                            }
-                          />
-                          {/* <ImageCropper
-                            photoPreview={guardian?.guardian_image_url}
-                            onImageCropped={(croppedImage) =>
-                              handleGuardianImageCropped(croppedImage, index)
-                            }
-                          /> */}
-                        </div>
-                      </div>
-                      <div className="flex flex-row justify-start gap-x-1 md:gap-x-5">
-                        <label className="block mt-2 font-bold text-sm w-full md:w-[35%]">
-                          Guardian Name
-                        </label>
-                        <p className="w-full md:w-[58%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
-                          {guardians.guardian_name || " "}
-                        </p>
-                      </div>
-                      <div className="flex flex-row justify-start gap-x-6 ">
-                        <label className=" block mt-2 font-bold text-sm w-full md:w-[60%] ">
-                          Mobile Number <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="guardian_mobile"
-                          value={guardians.guardian_mobile || ""}
-                          onChange={(e) => handleGuardianChange(e, index)}
-                          className="border-1 border-gray-400 rounded-md p-2 shadow-inner w-full"
-                        />
-                        {formErrors.some(
-                          (err) => err.field === `guardian_mobile_${index}`
-                        ) && (
-                          <p className="text-red-500 text-sm">
-                            {
-                              formErrors.find(
-                                (err) =>
-                                  err.field === `guardian_mobile_${index}`
-                              )?.message
-                            }
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-
-              <div className="col-span-3 md:mr-9 my-2 text-right">
-                <button
-                  type="submit"
-                  style={{ backgroundColor: "#2196F3" }}
-                  className="btn btn-primary  px-3 mb-2 font-bold"
-                  disabled={loadingForSubmit}
-                >
-                  {loadingForSubmit ? "Submiting..." : "Submit"}
-                </button>
-              </div>
+      {showPicker && (
+        <div className="absolute top-12 text-black left-0 bg-white border border-gray-300 rounded-lg shadow-lg z-1 w-full md:w-[70%]">
+          <div className="flex flex-col p-3 gap-2">
+            {presetOptions.map((preset, index) => (
+              <button
+                key={index}
+                className={`px-3 py-1 text-md rounded-md transition-all duration-300 ${
+                  selectedPreset === preset.label
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 hover:bg-blue-100 hover:text-blue-500 hover:font-medium"
+                }`}
+                onClick={() => handlePresetSelect(preset)}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+          {selectedPreset === "Custom Range" && (
+            <div
+              className="
+            absolute top-0 left-full 
+            bg-white border border-gray-300 rounded-lg shadow-md 
+            w-0  
+            [&_.rdrDay]:!bg-transparent 
+            [&_.rdrDay]:!shadow-none 
+            [&_.rdrDayHovered]:!bg-transparent 
+            [&_.rdrDayHovered]:!shadow-none
+          "
+            >
+              <DateRange
+                onChange={(item) => setTempDateRange([item.selection])}
+                ranges={tempDateRange}
+                moveRangeOnFirstSelection={false}
+                editableDateInputs={true}
+                showSelectionPreview={true}
+              />
+              {/* With custom inputs of today this weak last weak this month last month */}
+              {/* <DateRangePicker
+                onChange={(item) => setTempDateRange([item.selection])}
+                ranges={tempDateRange}
+                moveRangeOnFirstSelection={false}
+                editableDateInputs={true}
+                showSelectionPreview={true}
+                // staticRanges={[]} // Removes predefined ranges like 'Today', 'Yesterday', etc.
+                // inputRanges={[]} // Removes custom input ranges
+              /> */}
             </div>
           )}
-        </form>
-      </div>
+          {/* {selectedPreset === "Custom Range" && (
+            <div className="[&_.rdrDay]:!bg-transparent [&_.rdrDay]:!shadow-none [&_.rdrDayHovered]:!bg-transparent [&_.rdrDayHovered]:!shadow-none">
+              <DateRangePicker
+                onChange={(item) => setTempDateRange([item.selection])}
+                ranges={tempDateRange}
+                moveRangeOnFirstSelection={false}
+                editableDateInputs={true}
+              />
+            </div>
+          )} */}
+
+          <div className="flex justify-end p-2 border-t border-gray-200 gap-2">
+            <button
+              className="bg-green-400 text-white px-4 py-2 rounded-md hover:bg-green-500 font-medium"
+              onClick={handleApply}
+            >
+              Apply
+            </button>
+            <button
+              className="bg-red-400 text-white px-4 py-2 rounded-md hover:bg-red-500 font-medium "
+              onClick={() => setShowPicker(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default IDCardDetails;
+export default DateRangePickerComponent;

@@ -26,35 +26,41 @@ const DateRangePickerComponent = ({ onDateChange }) => {
   const [selectedPreset, setSelectedPreset] = useState("Today");
 
   const presetOptions = [
-    { label: "Today", range: [today, today] },
+    {
+      label: "Today",
+      // range: [today, today]
+    },
     {
       label: "Yesterday",
-      range: [new Date(today.setDate(today.getDate() - 1)), new Date(today)],
+      //   range: [new Date(today.setDate(today.getDate() - 1)), new Date(today)],
     },
     { label: "This Week", range: [startOfWeek(today), endOfWeek(today)] },
     {
       label: "This Month",
-      range: [new Date(today.getFullYear(), today.getMonth(), 1), today],
+      //   range: [new Date(today.getFullYear(), today.getMonth(), 1), today],
     },
     {
       label: "Last Month",
-      range: [
-        new Date(today.getFullYear(), today.getMonth() - 1, 1),
-        new Date(today.getFullYear(), today.getMonth(), 0),
-      ],
+      //   range: [
+      //     new Date(today.getFullYear(), today.getMonth() - 1, 1),
+      //     new Date(today.getFullYear(), today.getMonth(), 0),
+      //   ],
     },
     {
       label: "This Quarter",
-      range: [startOfQuarter(today), endOfQuarter(today)],
+      //   range: [startOfQuarter(today), endOfQuarter(today)],
     },
     {
       label: "This Half Year",
-      range: [
-        new Date(today.getFullYear(), today.getMonth() < 6 ? 0 : 6, 1),
-        new Date(today.getFullYear(), today.getMonth() < 6 ? 5 : 11, 30),
-      ],
+      //   range: [
+      //     new Date(today.getFullYear(), today.getMonth() < 6 ? 0 : 6, 1),
+      //     new Date(today.getFullYear(), today.getMonth() < 6 ? 5 : 11, 30),
+      //   ],
     },
-    { label: "This Year", range: [startOfYear(today), endOfYear(today)] },
+    {
+      label: "This Year",
+      // range: [startOfYear(today), endOfYear(today)]
+    },
     { label: "Custom Range", range: null },
   ];
 
@@ -134,7 +140,7 @@ const DateRangePickerComponent = ({ onDateChange }) => {
             >
               <DateRange
                 onChange={(item) => setTempDateRange([item.selection])}
-                ranges={tempDateRange}
+                // ranges={tempDateRange}
                 moveRangeOnFirstSelection={false}
                 editableDateInputs={true}
                 showSelectionPreview={true}
@@ -142,7 +148,7 @@ const DateRangePickerComponent = ({ onDateChange }) => {
               {/* With custom inputs of today this weak last weak this month last month */}
               {/* <DateRangePicker
                 onChange={(item) => setTempDateRange([item.selection])}
-                ranges={tempDateRange}
+                // ranges={tempDateRange}
                 moveRangeOnFirstSelection={false}
                 editableDateInputs={true}
                 showSelectionPreview={true}
