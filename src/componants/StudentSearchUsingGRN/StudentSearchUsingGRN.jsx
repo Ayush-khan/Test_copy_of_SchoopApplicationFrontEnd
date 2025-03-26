@@ -671,9 +671,16 @@ import PersonalProfile from "./PersonalProfile";
 import RemarksObservation from "./RemarksObservation";
 import ReportCardCertificates from "./ReportCardCertificates";
 import HealthActivityRecord from "./HealthActivityRecord";
-
+import { RxCross1 } from "react-icons/rx";
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 export default function StudentSearchUsingGRN() {
   const [activeTab, setActiveTab] = useState("profile");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const student = location.state?.studentData || {};
 
   const tabs = [
     {
@@ -719,27 +726,41 @@ export default function StudentSearchUsingGRN() {
 
   return (
     <>
-      {" "}
-      <div className="flex  bg-gray-100 w-full md:w-[95%] mx-auto p-4">
-        {/* Left Side - Tabs */}
-        <div className="w-1/4 bg-white shadow-lg border-r p-6 rounded-lg">
-          <div className="flex flex-col items-center gap-4">
-            <div className="text-center">
-              <img
-                src="/path/to/default-profile.png"
-                alt="Profile"
-                className="w-24 h-24 rounded-full border-4 border-pink-500"
-              />
-              <h2 className="text-lg font-semibold mt-3">
-                ASHWATI - 11(D - Commerce & Arts) fdgdf
-              </h2>
-            </div>
+      <div className="w-full md:W-[95%] mx-auto p-4">
+        <div className="card p-3 rounded-md">
+          {/* <div className="card-header mb-4 flex justify-between items-center">
+            <h5 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+              Student Personal Profile
+            </h5>
+            <RxCross1
+              className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+              onClick={() => navigate("/dashboard")}
+            />
+          </div> */}
+          <div
+            className="relative w-full -top-6 h-1 mx-auto bg-red-700"
+            style={{ backgroundColor: "#C03078" }}
+          ></div>
+          <div className="flex  bg-gray-100 ">
+            {/* Left Side - Tabs */}
+            <div className="w-[15%] bg-white shadow-lg border-r p-6 rounded-lg">
+              <div className="flex flex-col items-center  gap-4">
+                <div className="text-center item-center ">
+                  <img
+                    src="/path/to/default-profile.png"
+                    alt="Profile"
+                    className="w-24 h-24 mx-auto rounded-full border-4 border-pink-500"
+                  />
+                  <h2 className="text-sm font-semibold mt-3">
+                    ASHWATI - 11(D - Commerce & Arts) fdgdf
+                  </h2>
+                </div>
 
-            <div className="w-full flex flex-col gap-3">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  className={`w-full flex items-center gap-2 p-3 rounded-lg text-white 
+                <div className="w-full text-sm flex flex-col gap-3">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-white 
                                     transition-all duration-300
                                     ${
                                       activeTab === tab.id
@@ -747,19 +768,21 @@ export default function StudentSearchUsingGRN() {
                                         : tab.bgColor
                                     }
                                     hover:bg-blue-400`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  {tab.icon}
-                  {tab.label}
-                </button>
-              ))}
+                      onClick={() => setActiveTab(tab.id)}
+                    >
+                      {tab.icon}
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side - Content */}
+            <div className="w-[85%] bg-white p-4 shadow-md rounded-lg  max-h-[calc(100vh-150px)] overflow-y-auto">
+              {renderTabContent()}
             </div>
           </div>
-        </div>
-
-        {/* Right Side - Content */}
-        <div className="w-3/4 bg-white p-8 shadow-md rounded-lg">
-          {renderTabContent()}
         </div>
       </div>
     </>
