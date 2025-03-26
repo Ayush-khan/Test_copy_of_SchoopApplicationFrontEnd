@@ -1,185 +1,296 @@
-import React, { useState, useEffect } from "react";
-import { DateRangePicker } from "react-date-range";
-import { DateRange } from "react-date-range";
-import {
-  format,
-  startOfWeek,
-  endOfWeek,
-  startOfQuarter,
-  endOfQuarter,
-  startOfYear,
-  endOfYear,
-} from "date-fns";
-import "react-date-range/dist/styles.css";
-import "react-date-range/dist/theme/default.css";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { RxCross1 } from "react-icons/rx";
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const DateRangePickerComponent = ({ onDateChange }) => {
-  const today = new Date();
-  const formattedToday = format(today, "yyyy-MM-dd");
+const StudentSearchUsingGRN = () => {
+  // const API_URL = import.meta.env.VITE_API_URL;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const student = location.state?.studentData || {};
 
-  const [showPicker, setShowPicker] = useState(false);
-  const [dateRange, setDateRange] = useState([
-    { startDate: today, endDate: today, key: "selection" },
-  ]);
+  console.log("student", student);
 
-  const [tempDateRange, setTempDateRange] = useState(dateRange);
-  const [selectedPreset, setSelectedPreset] = useState("Today");
-
-  const presetOptions = [
-    { label: "Today", range: [today, today] },
-    {
-      label: "Yesterday",
-      range: [new Date(today.setDate(today.getDate() - 1)), new Date(today)],
-    },
-    { label: "This Week", range: [startOfWeek(today), endOfWeek(today)] },
-    {
-      label: "This Month",
-      range: [new Date(today.getFullYear(), today.getMonth(), 1), today],
-    },
-    {
-      label: "Last Month",
-      range: [
-        new Date(today.getFullYear(), today.getMonth() - 1, 1),
-        new Date(today.getFullYear(), today.getMonth(), 0),
-      ],
-    },
-    {
-      label: "This Quarter",
-      range: [startOfQuarter(today), endOfQuarter(today)],
-    },
-    {
-      label: "This Half Year",
-      range: [
-        new Date(today.getFullYear(), today.getMonth() < 6 ? 0 : 6, 1),
-        new Date(today.getFullYear(), today.getMonth() < 6 ? 5 : 11, 30),
-      ],
-    },
-    { label: "This Year", range: [startOfYear(today), endOfYear(today)] },
-    { label: "Custom Range", range: null },
-  ];
+  const message = location.state?.message;
+  console.log(message);
 
   useEffect(() => {
-    onDateChange(formattedToday, formattedToday);
-  }, []);
-
-  const handlePresetSelect = (preset) => {
-    setSelectedPreset(preset.label);
-
-    if (preset.label === "Custom Range") {
-      setTempDateRange(dateRange);
-    } else {
-      setTempDateRange([
-        {
-          startDate: preset.range[0],
-          endDate: preset.range[1],
-          key: "selection",
-        },
-      ]);
+    if (location.state?.message) {
+      toast.success(location.state.message);
     }
-  };
-
-  const handleApply = () => {
-    const searchFrom = format(tempDateRange[0].startDate, "yyyy-MM-dd");
-    const searchTo = format(tempDateRange[0].endDate, "yyyy-MM-dd");
-
-    setDateRange(tempDateRange);
-    onDateChange(searchFrom, searchTo);
-    setShowPicker(false);
-  };
-
-  const formatDate = (date) => format(date, "MMMM d, yyyy");
+  }, [location.state]);
 
   return (
-    <div className="relative ">
-      <div
-        className="border border-gray-300 rounded-lg px-4 py-2 cursor-pointer shadow-md bg-white flex items-center gap-2 hover:ring-2 hover:ring-blue-500 transition-all duration-200"
-        onClick={() => setShowPicker(!showPicker)}
-      >
-        <span className="text-gray-500 font-medium">📅</span>
-        <span className="text-gray-800">
-          {`${formatDate(dateRange[0]?.startDate)} - ${formatDate(
-            dateRange[0]?.endDate
-          )}`}
-        </span>
-      </div>
-
-      {showPicker && (
-        <div className="absolute top-12 text-black left-0 bg-white border border-gray-300 rounded-lg shadow-lg z-1 w-full md:w-[70%]">
-          <div className="flex flex-col p-3 gap-2">
-            {presetOptions.map((preset, index) => (
-              <button
-                key={index}
-                className={`px-3 py-1 text-md rounded-md transition-all duration-300 ${
-                  selectedPreset === preset.label
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 hover:bg-blue-100 hover:text-blue-500 hover:font-medium"
-                }`}
-                onClick={() => handlePresetSelect(preset)}
-              >
-                {preset.label}
-              </button>
-            ))}
+    <>
+      <ToastContainer />
+      <div className="W-[95%] mx-auto p-4">
+        <div className="card p-3 rounded-md">
+          <div className="card-header mb-4 flex justify-between items-center">
+            <h5 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+              Student Personal Profile
+            </h5>
+            <RxCross1
+              className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+              onClick={() => navigate("/dashboard")}
+            />
           </div>
-          {selectedPreset === "Custom Range" && (
-            <div
-              className="
-            absolute top-0 left-full 
-            bg-white border border-gray-300 rounded-lg shadow-md 
-            w-0  
-            [&_.rdrDay]:!bg-transparent 
-            [&_.rdrDay]:!shadow-none 
-            [&_.rdrDayHovered]:!bg-transparent 
-            [&_.rdrDayHovered]:!shadow-none
-          "
-            >
-              <DateRange
-                onChange={(item) => setTempDateRange([item.selection])}
-                ranges={tempDateRange}
-                moveRangeOnFirstSelection={false}
-                editableDateInputs={true}
-                showSelectionPreview={true}
-              />
-              {/* With custom inputs of today this weak last weak this month last month */}
-              {/* <DateRangePicker
-                onChange={(item) => setTempDateRange([item.selection])}
-                ranges={tempDateRange}
-                moveRangeOnFirstSelection={false}
-                editableDateInputs={true}
-                showSelectionPreview={true}
-                // staticRanges={[]} // Removes predefined ranges like 'Today', 'Yesterday', etc.
-                // inputRanges={[]} // Removes custom input ranges
-              /> */}
-            </div>
-          )}
-          {/* {selectedPreset === "Custom Range" && (
-            <div className="[&_.rdrDay]:!bg-transparent [&_.rdrDay]:!shadow-none [&_.rdrDayHovered]:!bg-transparent [&_.rdrDayHovered]:!shadow-none">
-              <DateRangePicker
-                onChange={(item) => setTempDateRange([item.selection])}
-                ranges={tempDateRange}
-                moveRangeOnFirstSelection={false}
-                editableDateInputs={true}
-              />
-            </div>
-          )} */}
+          <div
+            className="relative w-full -top-6 h-1 mx-auto bg-red-700"
+            style={{ backgroundColor: "#C03078" }}
+          ></div>
 
-          <div className="flex justify-end p-2 border-t border-gray-200 gap-2">
-            <button
-              className="bg-green-400 text-white px-4 py-2 rounded-md hover:bg-green-500 font-medium"
-              onClick={handleApply}
-            >
-              Apply
-            </button>
-            <button
-              className="bg-red-400 text-white px-4 py-2 rounded-md hover:bg-red-500 font-medium "
-              onClick={() => setShowPicker(false)}
-            >
-              Cancel
-            </button>
+          <div className="bg-white w-full  mx-2 rounded-md ">
+            <div className="w-full mx-auto">
+              <div className="">
+                {" "}
+                {/* mb-4 */}
+                <div className="w-full flex gap-4">
+                  {/* Profile Image Card */}
+                  <div className="card p-3 w-full md:w-[20%] shadow-md flex flex-col items-center h-auto min-h-full">
+                    {/* Profile Image */}
+                    <img
+                      src=""
+                      alt="Profile"
+                      className="w-24 h-24 object-cover rounded-full border-2 border-gray-300 shadow-md"
+                    />
+                    {/* Student Name */}
+                    <p className="mt-3 text-center text-gray-700 font-semibold">
+                      {student.first_name}
+                    </p>
+                  </div>
+
+                  {/* Student  and Prent Information Card */}
+                  <div className="card p-3 w-full md:w-[80%] shadow-md flex flex-col h-auto min-h-full">
+                    {/* Student Information */}
+                    <div className="flex flex-col gap-y-3 p-2 flex-grow">
+                      <h3 className="text-gray-700 mt-1 mb-0 text-[1em] lg:text-xl text-nowrap">
+                        Student Information
+                      </h3>
+                      <div
+                        className="relative w-full h-0.5 mx-auto bg-red-700"
+                        style={{ backgroundColor: "#C03078" }}
+                      ></div>
+
+                      <div className=" text-sm grid grid-cols-3 gap-x-4 mt-3">
+                        {[
+                          {
+                            label: "Student Name",
+                            value: student.student_name || " ",
+                          },
+                          {
+                            label: "Date of Birth",
+                            value: student.dob || " ",
+                          },
+                          {
+                            label: "Admission Date",
+                            value: student.admission_date || " ",
+                          },
+                          { label: "GR No.", value: student.reg_no || " " },
+                          {
+                            label: "Student ID",
+                            value: student.student_id || " ",
+                          },
+                          {
+                            label: "Udise Pen No.",
+                            value: student.udise_pen_no || " ",
+                          },
+                          {
+                            label: "Aadhaar no.",
+                            value: student.stu_aadhaar_no || " ",
+                          },
+                          {
+                            label: "Class",
+                            value: student.get_class?.name || " ",
+                          },
+                          {
+                            label: "Division",
+                            value: student.get_division?.name || " ",
+                          },
+                          {
+                            label: "Roll No.",
+                            value: student.roll_no || " ",
+                          },
+                          { label: "House", value: student.house || " " },
+                          {
+                            label: "Admitted In Class",
+                            value: student.admission_class || " ",
+                          },
+                          { label: "Gender", value: student.gender || " " },
+                          {
+                            label: "Blood Group",
+                            value: student.blood_group || " ",
+                          },
+                          {
+                            label: "Permanant Address",
+                            value: student.permant_add || " ",
+                          },
+                          { label: "City", value: student.city || " " },
+                          { label: "State", value: student.state || " " },
+                          { label: "Pincode", value: student.pincode || " " },
+                          {
+                            label: "Religion",
+                            value: student.religion || " ",
+                          },
+                          { label: "Caste", value: student.caste || " " },
+                          {
+                            label: "Category",
+                            value: student.category || " ",
+                          },
+                          {
+                            label: "Nationality",
+                            value: student.nationality || " ",
+                          },
+                          {
+                            label: "Birth Place",
+                            value: student.birth_place || " ",
+                          },
+                          {
+                            label: "Mother Tongue",
+                            value: student.mother_tongue || " ",
+                          },
+                          {
+                            label: "Emergency Name",
+                            value: student.emergency_name || " ",
+                          },
+                          {
+                            label: "Emergency Contact",
+                            value: student.emergency_contact || " ",
+                          },
+                          {
+                            label: "Emergency Address",
+                            value: student.emergency_add || " ",
+                          },
+                          {
+                            label: "Transport Mode",
+                            value: student.transport_mode || " ",
+                          },
+                          {
+                            label: "Allergies",
+                            value: student.allergies || " ",
+                          },
+                          { label: "Weight", value: student.weight || " " },
+                          { label: "Height", value: student.height || " " },
+                          {
+                            label: "Has spectacles",
+                            value: student.has_spec || " ",
+                          },
+                        ].map((item, index) => (
+                          <div key={index} className="flex">
+                            <p className="w-40 font-bold">{item.label}:</p>
+                            <p className="flex-1">{item.value}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Parent Information */}
+                    <div className="flex flex-col gap-y-3 p-2 flex-grow">
+                      <h3 className="text-gray-700 mt-1 mb-0 text-[1em] lg:text-xl text-nowrap">
+                        Parent Information
+                      </h3>
+                      <div
+                        className="relative w-full h-0.5 mx-auto bg-red-700"
+                        style={{ backgroundColor: "#C03078" }}
+                      ></div>
+
+                      <div className="text-sm grid grid-cols-3 gap-x-4 mt-3">
+                        {[
+                          {
+                            label: "Father Name",
+                            value: student.parents?.father_name || " ",
+                          },
+                          {
+                            label: "Occupation",
+                            value: student.parents?.father_occupation || " ",
+                          },
+                          {
+                            label: "Office Address",
+                            value: student.parents?.f_office_add || " ",
+                          },
+                          {
+                            label: "Telephone",
+                            value: student.parents?.f_office_tel || " ",
+                          },
+                          {
+                            label: "Mobile Number",
+                            value: student.parents?.f_mobile || " ",
+                          },
+                          {
+                            label: "Email Id",
+                            value: student.parents?.f_email || " ",
+                          },
+                          {
+                            label: "Aadhaar no.",
+                            value: student.parents?.f_aadhaar_no || " ",
+                          },
+                          {
+                            label: "Date of Birth",
+                            value: student.parents?.f_dob || " ",
+                          },
+                          {
+                            label: "Blood Group",
+                            value: student.parents?.f_blood_group || " ",
+                          },
+                          {
+                            label: "User Id",
+                            value: student.parents?.user?.user_id || " ",
+                          },
+                          {
+                            label: "Mother Name",
+                            value: student.parents?.mother_name || " ",
+                          },
+                          {
+                            label: "Occupation",
+                            value: student.parents?.mother_occupation || " ",
+                          },
+                          {
+                            label: "Office Address",
+                            value: student.parents?.m_office_add || " ",
+                          },
+                          {
+                            label: "Telephone",
+                            value: student.parents?.m_office_tel || " ",
+                          },
+                          {
+                            label: "Mobile Number",
+                            value: student.parents?.m_mobile || " ",
+                          },
+                          {
+                            label: "Email Id",
+                            value: student.parents?.m_email || " ",
+                          },
+                          {
+                            label: "Aadhaar no.",
+                            value: student.parents?.m_aadhaar_no || " ",
+                          },
+                          {
+                            label: "Date of Birth",
+                            value: student.parents?.m_dob || " ",
+                          },
+                          {
+                            label: "Blood Group",
+                            value: student.parents?.m_blood_group || " ",
+                          },
+                        ].map((item, index) => (
+                          <div key={index} className="flex">
+                            <p className="w-40 font-bold">{item.label}:</p>
+                            <p className="flex-1">{item.value}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 };
 
-export default DateRangePickerComponent;
+export default StudentSearchUsingGRN;
