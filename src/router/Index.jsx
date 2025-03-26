@@ -205,6 +205,7 @@ import StaffReport from "../componants/Reports/StaffReport.jsx";
 import HSCStudentsSubjectsReport from "../componants/Reports/HSCStudentsSubjectsReport.jsx";
 import WorldlineFeePaymentReport from "../componants/Reports/WorldlineFeePaymentReport.jsx";
 import RazorpayFeePaymentReport from "../componants/Reports/RazorpayFeePaymentReport.jsx";
+import SubstituteTeacherMonthlyReport from "../componants/Reports/SubstituteTeacherMonthlyReport.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -702,6 +703,13 @@ function Index() {
         <Route
           path="/rozorpayfeePayRepo"
           element={<PrivateRoute element={<RazorpayFeePaymentReport />} />}
+        />
+        {/* Substitute Teacher Monthly Report Reportmodule */}
+        <Route
+          path="/SubsTeaMonthlyRepo"
+          element={
+            <PrivateRoute element={<SubstituteTeacherMonthlyReport />} />
+          }
         />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />

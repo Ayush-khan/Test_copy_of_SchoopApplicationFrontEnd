@@ -952,6 +952,13 @@ const AdminNavBar = () => {
           >
             Razorpay Fee Payment Report{" "}
           </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
+            to="/SubsTeaMonthlyRepo"
+            className="text-sm font-bold hover:text-black"
+          >
+            Substitute Teacher Monthly Report{" "}
+          </NavDropdown.Item>
         </NavDropdown>
 
         {/* Ticket Dropdown */}
