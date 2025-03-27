@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
-import { FaFileExcel } from "react-icons/fa";
+import { FaFileExcel, FaRegCalendarAlt } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -414,7 +414,9 @@ ${selectedStudent?.label || "For All Staff"}.xlsx`;
                         className="text-sm text-gray-700 mt-0.5 border border-gray-300 p-2 rounded cursor-pointer"
                         onClick={openDatePicker}
                       >
-                        {weekRange || "Select a date to see the week range"}
+                        {weekRange || (
+                          <FaRegCalendarAlt className="text-pink-500  " />
+                        )}
                       </div>
 
                       <DatePicker
