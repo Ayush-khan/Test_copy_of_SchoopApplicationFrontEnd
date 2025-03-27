@@ -959,6 +959,13 @@ const AdminNavBar = () => {
           >
             Substitute Teacher Monthly Report{" "}
           </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
+            to="/SubsWklyHrsRepo"
+            className="text-sm font-bold hover:text-black"
+          >
+            Substitution Weekly Hours Report{" "}
+          </NavDropdown.Item>
         </NavDropdown>
 
         {/* Ticket Dropdown */}

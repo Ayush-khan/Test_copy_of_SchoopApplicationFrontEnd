@@ -206,6 +206,7 @@ import HSCStudentsSubjectsReport from "../componants/Reports/HSCStudentsSubjects
 import WorldlineFeePaymentReport from "../componants/Reports/WorldlineFeePaymentReport.jsx";
 import RazorpayFeePaymentReport from "../componants/Reports/RazorpayFeePaymentReport.jsx";
 import SubstituteTeacherMonthlyReport from "../componants/Reports/SubstituteTeacherMonthlyReport.jsx";
+import SubstitutionWeeklyHoursReport from "../componants/Reports/SubstitutionWeeklyHoursReport.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -710,6 +711,11 @@ function Index() {
           element={
             <PrivateRoute element={<SubstituteTeacherMonthlyReport />} />
           }
+        />
+        {/* Substitution Weekly Hours Report Report Reportmodule */}
+        <Route
+          path="/SubsWklyHrsRepo"
+          element={<PrivateRoute element={<SubstitutionWeeklyHoursReport />} />}
         />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />
