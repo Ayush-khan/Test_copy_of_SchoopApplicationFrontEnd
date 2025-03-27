@@ -954,6 +954,13 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
+            to="/PndingStudIdCrdRepo"
+            className="text-sm font-bold hover:text-black"
+          >
+            Pending Student ID Card Report
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
             to="/SubsTeaMonthlyRepo"
             className="text-sm font-bold hover:text-black"
           >
@@ -965,6 +972,13 @@ const AdminNavBar = () => {
             className="text-sm font-bold hover:text-black"
           >
             Substitution Weekly Hours Report{" "}
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
+            to="/LeavCertifRepo"
+            className="text-sm font-bold hover:text-black"
+          >
+            Leaving Certificate Report
           </NavDropdown.Item>
         </NavDropdown>
 

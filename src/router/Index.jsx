@@ -207,6 +207,8 @@ import WorldlineFeePaymentReport from "../componants/Reports/WorldlineFeePayment
 import RazorpayFeePaymentReport from "../componants/Reports/RazorpayFeePaymentReport.jsx";
 import SubstituteTeacherMonthlyReport from "../componants/Reports/SubstituteTeacherMonthlyReport.jsx";
 import SubstitutionWeeklyHoursReport from "../componants/Reports/SubstitutionWeeklyHoursReport.jsx";
+import LeavingCertificateReport from "../componants/Reports/LeavingCertificateReport.jsx";
+import PendingStudentIdCardReport from "../componants/Reports/PendingStudentIdCardReport.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -716,6 +718,16 @@ function Index() {
         <Route
           path="/SubsWklyHrsRepo"
           element={<PrivateRoute element={<SubstitutionWeeklyHoursReport />} />}
+        />
+        {/* Leaving certificate Report Report Reportmodule */}
+        <Route
+          path="/LeavCertifRepo"
+          element={<PrivateRoute element={<LeavingCertificateReport />} />}
+        />
+        {/* PendingStudentIdcard Report Reportmodule */}
+        <Route
+          path="/PndingStudIdCrdRepo"
+          element={<PrivateRoute element={<PendingStudentIdCardReport />} />}
         />
         <Route path="/notification" element={<NotificationPage />} />
         <Route path="/changepassword" element={<ChangePassword />} />
