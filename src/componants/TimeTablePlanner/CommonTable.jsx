@@ -1,66 +1,45 @@
-import React from "react";
-
-const CommonTable = ({ title, headers, data, onSubmit }) => {
+export default function CommonTable({ periods, subjects }) {
   return (
-    <div className="relative w-[95%] bg-white shadow-xl rounded-lg border border-pink-500 mx-auto mt-3">
-      <div className="overflow-x-auto p-4">
-        <div className="p-2 px-3 bg-gray-100 flex justify-between items-center rounded-t-lg">
-          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl">
-            {title}
-          </h3>
-          <button
-            className="text-xl text-red-600 hover:cursor-pointer hover:bg-red-100 p-1 rounded"
-            onClick={() => window.history.back()} // Navigate back or handle custom logic
-          >
-            ✕
-          </button>
-        </div>
-        <div
-          className="relative w-full h-1 mb-3 mx-auto"
-          style={{ backgroundColor: "#C03078" }}
-        ></div>
-
-        <table className="table-auto border-collapse border border-gray-300 w-full">
-          <thead className="bg-gray-200">
-            <tr>
-              {headers.map((header, index) => (
-                <th
-                  key={index}
-                  className="border p-2 font-semibold text-center"
-                >
-                  {header}
-                </th>
+    <div className="overflow-x-auto">
+      <table className="table-auto w-full border-collapse border border-gray-300">
+        <thead>
+          <tr>
+            <th className="border p-2">Periods</th>
+            <th className="border p-2">Monday</th>
+            <th className="border p-2">Tuesday</th>
+            <th className="border p-2">Wednesday</th>
+            <th className="border p-2">Thursday</th>
+            <th className="border p-2">Friday</th>
+            <th className="border p-2">Saturday</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: periods }).map((_, idx) => (
+            <tr key={idx}>
+              <td className="border p-2">{idx + 1}</td>
+              {[
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+              ].map((day) => (
+                <td key={day} className="border p-2">
+                  <select className="border p-1 w-full">
+                    <option value="">Select Subject</option>
+                    {subjects.map((subject, i) => (
+                      <option key={i} value={subject}>
+                        {subject}
+                      </option>
+                    ))}
+                  </select>
+                </td>
               ))}
             </tr>
-          </thead>
-
-          <tbody className="bg-gray-50">
-            {data.map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                {row.map((cell, cellIndex) => (
-                  <td
-                    key={cellIndex}
-                    className="border border-gray-300 p-2 text-center"
-                  >
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <div className="flex justify-end p-2 relative">
-          <button
-            className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
-            onClick={onSubmit}
-          >
-            Save
-          </button>
-        </div>
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
-};
-
-export default CommonTable;
+}
