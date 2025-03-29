@@ -209,6 +209,7 @@ import SubstituteTeacherMonthlyReport from "../componants/Reports/SubstituteTeac
 import SubstitutionWeeklyHoursReport from "../componants/Reports/SubstitutionWeeklyHoursReport.jsx";
 import LeavingCertificateReport from "../componants/Reports/LeavingCertificateReport.jsx";
 import PendingStudentIdCardReport from "../componants/Reports/PendingStudentIdCardReport.jsx";
+import TimetablePlanner from "../componants/TimeTablePlanner/TimetablePlanner.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -543,6 +544,12 @@ function Index() {
         <Route
           path="/updateStudentID"
           element={<PrivateRoute element={<UpdateStudentID />} />}
+        />
+        {/* TimetablePlanner module */}
+        {/* Create TimeTable Module */}
+        <Route
+          path="/TimetablePlanner"
+          element={<PrivateRoute element={<TimetablePlanner />} />}
         />
         {/* TimeTable Module */}
         <Route
