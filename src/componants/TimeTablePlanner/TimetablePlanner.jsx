@@ -101,6 +101,8 @@ const TimetablePlanner = () => {
   const [weekRange, setWeekRange] = useState("");
   const [fromDate, setFromDate] = useState(null);
   const datePickerRef = useRef(null);
+  // const [tabs, setTabs] = useState([]);
+
   const data = {
     tabs: [
       { id: "1-A", label: "1-A", periods: 4 },
@@ -188,16 +190,32 @@ const TimetablePlanner = () => {
 
       const params = {
         teacher_id: selectedStudentId,
-        week: formattedWeek,
       };
 
       const response = await axios.get(
-        `${API_URL}/api/getsubstituteteacherweeklyreport`,
+        `${API_URL}/api/get_teacherclasstimetable`,
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
         }
       );
+      // const formattedTabs = response.data.data.map((item) => ({
+      //             id: `${item.classname}-${item.sectionname}`,
+      //             classname: item.classname,
+      //             sectionname: item.sectionname,
+      //             teachername: item.teachername,
+      //           }));
+
+      //           // Sort tabs by class in ascending order
+      //           const sortedTabs = formattedTabs.sort((a, b) => {
+      //             const classA = parseInt(a.classname, 10);
+      //             const classB = parseInt(b.classname, 10);
+      //             return classA - classB;
+      //           });
+
+      //   setTabs(sortedTabs);
+      //   setActiveTab(sortedTabs[0]?.id || ''); // Set default active tab
+      // }
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
         toast.error("Substitution Weekly Hours Report not found.");
@@ -218,7 +236,9 @@ const TimetablePlanner = () => {
   };
 
   console.log("row", timetable);
-
+  // const filteredTabs = tabs.filter((tab) =>
+  //   tab.id.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
   const filteredSections = timetable.filter((student) => {
     const searchLower = searchTerm.toLowerCase();
 
