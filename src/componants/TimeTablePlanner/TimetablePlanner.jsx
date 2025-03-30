@@ -101,10 +101,10 @@ const TimetablePlanner = () => {
   const [weekRange, setWeekRange] = useState("");
   const [fromDate, setFromDate] = useState(null);
   const datePickerRef = useRef(null);
-  // const [tabs, setTabs] = useState([]);
+  const [tabs, setTabs] = useState([]);
 
   const data = {
-    tabs: [
+    tab: [
       { id: "1-A", label: "1-A", periods: 4 },
       { id: "1-B", label: "1-B", periods: 5 },
       { id: "12-A", label: "12-A", periods: 6 },
@@ -127,7 +127,7 @@ const TimetablePlanner = () => {
       ],
     },
   };
-  const [activeTab, setActiveTab] = useState(data.tabs[0].id);
+  const [activeTab, setActiveTab] = useState(data.tab[0].id);
 
   useEffect(() => {
     fetchExams();
@@ -199,23 +199,6 @@ const TimetablePlanner = () => {
           params,
         }
       );
-      // const formattedTabs = response.data.data.map((item) => ({
-      //             id: `${item.classname}-${item.sectionname}`,
-      //             classname: item.classname,
-      //             sectionname: item.sectionname,
-      //             teachername: item.teachername,
-      //           }));
-
-      //           // Sort tabs by class in ascending order
-      //           const sortedTabs = formattedTabs.sort((a, b) => {
-      //             const classA = parseInt(a.classname, 10);
-      //             const classB = parseInt(b.classname, 10);
-      //             return classA - classB;
-      //           });
-
-      //   setTabs(sortedTabs);
-      //   setActiveTab(sortedTabs[0]?.id || ''); // Set default active tab
-      // }
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
         toast.error("Substitution Weekly Hours Report not found.");
@@ -224,6 +207,22 @@ const TimetablePlanner = () => {
         setTimetable(response?.data?.data);
         setPageCount(Math.ceil(response?.data?.data?.length / pageSize));
       }
+      const formattedTabs = response.data.data.map((item) => ({
+        id: `${item.classname}-${item.sectionname}`,
+        classname: item.classname,
+        sectionname: item.sectionname,
+        teachername: item.teachername,
+      }));
+
+      // Sort tabs by class in ascending order
+      const sortedTabs = formattedTabs.sort((a, b) => {
+        const classA = parseInt(a.classname, 10);
+        const classB = parseInt(b.classname, 10);
+        return classA - classB;
+      });
+
+      setTabs(sortedTabs);
+      //   setActiveTab(sortedTabs[0]?.id || ""); // Set default active tab
     } catch (error) {
       console.error("Error fetching Substitution Weekly Hours Report:", error);
       toast.error(
@@ -236,9 +235,9 @@ const TimetablePlanner = () => {
   };
 
   console.log("row", timetable);
-  // const filteredTabs = tabs.filter((tab) =>
-  //   tab.id.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
+  const filteredTabs = tabs.filter((tab) =>
+    tab.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const filteredSections = timetable.filter((student) => {
     const searchLower = searchTerm.toLowerCase();
 
@@ -260,12 +259,12 @@ const TimetablePlanner = () => {
 
   return (
     <>
-      <div className="w-full md:w-[85%] mx-auto p-4 ">
+      <div className="w-full md:w-[95%] mx-auto p-4 ">
         <ToastContainer />
         <div className="card p-4 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              Substitution Weekly Hours Report
+              Time Table Planner
             </h5>
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -282,7 +281,7 @@ const TimetablePlanner = () => {
           ></div>
 
           <>
-            <div className=" w-full md:w-[85%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+            <div className=" w-full md:w-[75%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
               <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                 <div className="w-full md:w-[90%] gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                   {/* Class Dropdown */}
@@ -376,70 +375,58 @@ const TimetablePlanner = () => {
 
             {timetable.length > 0 && (
               <>
-                <div className="w-full  mt-4">
-                  <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                      <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
-                        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          List Of Substitution Weekly Hours Report
-                        </h3>
-                        <div className="w-1/2 md:w-[18%] mr-1 ">
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search "
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
+                <div className="card mx-auto lg:w-full shadow-lg mt-3">
+                  <div className="card-body bg-gray-100 border-none w-full border-3 border-black flex">
+                    {/* Left Sidebar - Tabs */}
                     <div
-                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+                      className="w-[18%] border-r h-[400px] overflow-y-auto p-3 bg-white rounded-xl shadow-lg"
                       style={{
-                        backgroundColor: "#C03078",
+                        scrollbarWidth: "thin",
+                        scrollbarColor: "#6366F1 #E5E7EB", // Custom scrollbar colors
                       }}
-                    ></div>
+                    >
+                      <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center">
+                        Select Class
+                      </h3>
 
-                    <div className="card-body w-full">
+                      {tabs.map((tab) => (
+                        <button
+                          key={tab.id}
+                          className={`block w-full text-left p-3 my-2 text-lg font-medium rounded-lg transition-all duration-300 
+        ${
+          activeTab === tab.id
+            ? "bg-indigo-600 text-white shadow-md transform scale-105"
+            : "bg-gray-100 text-gray-700 hover:bg-indigo-200 hover:shadow-md"
+        }`}
+                          onClick={() => setActiveTab(tab.id)}
+                        >
+                          {tab.id}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Right Table Section */}
+                    <div className="w-[85%] overflow-hidden bg-white rounded-lg shadow-md">
+                      {/* Header */}
+                      <h2 className="text-xl text-blue-500 font-bold mb-2 text-center">
+                        Class - {activeTab}
+                      </h2>
+
+                      {/* Scrollable Table Container */}
                       <div
-                        className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
+                        className="overflow-y-auto h-[400px] border rounded-md p-2"
                         style={{
-                          scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
-                          scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
+                          scrollbarWidth: "thin", // For Firefox
+                          scrollbarColor: "#4F46E5 #E5E7EB", // Track and thumb color in Firefox
                         }}
                       >
-                        <table className="w-full md:w-[80%] mx-auto leading-normal table-auto">
-                          <div className="flex">
-                            <div className="w-1/4 border-r">
-                              {data.tabs.map((tab) => (
-                                <button
-                                  key={tab.id}
-                                  className={`block p-2 w-full ${
-                                    activeTab === tab.id
-                                      ? "bg-blue-500 text-white"
-                                      : "bg-white"
-                                  }`}
-                                  onClick={() => setActiveTab(tab.id)}
-                                >
-                                  {tab.label}
-                                </button>
-                              ))}
-                            </div>
-
-                            <div className="w-3/4 p-4">
-                              <h2 className="text-xl font-bold mb-4">
-                                Class - {activeTab}
-                              </h2>
-                              <CommonTable
-                                periods={
-                                  data.tabs.find((tab) => tab.id === activeTab)
-                                    .periods
-                                }
-                                subjects={data.subjects[activeTab]}
-                              />
-                            </div>
-                          </div>
-                        </table>
+                        <CommonTable
+                          periods={
+                            data.tab.find((tab) => tab.id === activeTab)
+                              ?.periods || []
+                          }
+                          subjects={data.subjects[activeTab] || []}
+                        />
                       </div>
                     </div>
                   </div>
