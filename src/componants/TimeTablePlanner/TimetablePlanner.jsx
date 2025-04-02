@@ -97,36 +97,162 @@ const TimetablePlanner = () => {
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  //   const [timetableData, setTimetableData] = useState([]);
+  const [timetableData, setTimetableData] = useState({
+    periods: [],
+    subjects: [],
+  }); // To hold transformed data
+  const [loadingForTabSwitch, setLoadingForTabSwitch] = useState(false); // Loading state
 
+  const [storeWholeData, setStoreWholeData] = useState([]);
   const [weekRange, setWeekRange] = useState("");
   const [fromDate, setFromDate] = useState(null);
   const datePickerRef = useRef(null);
   const [tabs, setTabs] = useState([]);
 
+  //   const data = {
+  //     tab: [
+  //       { id: "1-A", label: "1-A", periods: 4 },
+  //       { id: "1-B", label: "1-B", periods: 5 },
+  //       { id: "12-A", label: "12-A", periods: 6 },
+  //       { id: "12-B", label: "12-B", periods: 4 },
+  //     ],
+  //     subjects: {
+  //       "1-A": ["Math", "Science", "English", "History"],
+  //       "1-B": ["Biology", "Chemistry", "Physics", "Geography"],
+  //       "12-A": [
+  //         "Economics",
+  //         "Business Studies",
+  //         "Accountancy",
+  //         "Political Science",
+  //       ],
+  //       "12-B": [
+  //         "Computer Science",
+  //         "Art",
+  //         "Physical Education",
+  //         "Environmental Science",
+  //       ],
+  //     },
+  //   };
+  // Original formate
+  //   const data = {
+  //     "1-A": {
+  //       Monday: [
+  //         {
+  //           time_in: "08:30",
+  //           period_no: 1,
+  //           time_out: "09:10",
+  //           subject: "Math",
+  //           teacher: [{ t_name: "John Doe" }],
+  //         },
+  //         {
+  //           time_in: "09:10",
+  //           period_no: 2,
+  //           time_out: "09:45",
+  //           subject: "Science",
+  //           teacher: [{ t_name: "Jane Smith" }],
+  //         },
+  //         // Add other periods for Monday here...
+  //       ],
+  //       Tuesday: [
+  //         {
+  //           time_in: "08:30",
+  //           period_no: 1,
+  //           time_out: "09:10",
+  //           subject: "History",
+  //           teacher: [{ t_name: "John Doe" }],
+  //         },
+  //         // Add other periods for Tuesday here...
+  //       ],
+  //       // Add Wednesday, Thursday, Friday, Saturday for 1-A
+  //     },
+  //     "1-B": {
+  //       Monday: [
+  //         {
+  //           time_in: "08:30",
+  //           period_no: 1,
+  //           time_out: "09:10",
+  //           subject: "Biology",
+  //           teacher: [{ t_name: "Alice Cooper" }],
+  //         },
+  //         // Add other periods for Monday here...
+  //       ],
+  //       // Add Tuesday, Wednesday, Thursday, Friday, Saturday for 1-B
+  //     },
+  //     // Add other tabs for 12-A, 12-B with similar structure
+  //   };
   const data = {
     tab: [
-      { id: "1-A", label: "1-A", periods: 4 },
-      { id: "1-B", label: "1-B", periods: 5 },
+      { id: "1-A", label: "1-A", periods: 6 },
+      { id: "1-B", label: "1-B", periods: 6 },
       { id: "12-A", label: "12-A", periods: 6 },
-      { id: "12-B", label: "12-B", periods: 4 },
+      { id: "12-B", label: "12-B", periods: 6 },
     ],
-    subjects: {
-      "1-A": ["Math", "Science", "English", "History"],
-      "1-B": ["Biology", "Chemistry", "Physics", "Geography"],
-      "12-A": [
-        "Economics",
-        "Business Studies",
-        "Accountancy",
-        "Political Science",
+    "1-A": {
+      Monday: [
+        {
+          time_in: "08:30",
+          period_no: 1,
+          time_out: "09:10",
+          subject: "Math",
+          teacher: [{ t_name: "John Doe" }],
+        },
+        {
+          time_in: "09:10",
+          period_no: 2,
+          time_out: "09:45",
+          subject: "Science",
+          teacher: [{ t_name: "Jane Smith" }],
+        },
       ],
-      "12-B": [
-        "Computer Science",
-        "Art",
-        "Physical Education",
-        "Environmental Science",
+      Tuesday: [
+        {
+          time_in: "08:30",
+          period_no: 1,
+          time_out: "09:10",
+          subject: "History",
+          teacher: [{ t_name: "John Doe" }],
+        },
       ],
+      Wednesday: [],
+      Thursday: [],
+      Friday: [],
+      Saturday: [],
+    },
+    "1-B": {
+      Monday: [
+        {
+          time_in: "08:30",
+          period_no: 1,
+          time_out: "09:10",
+          subject: "Biology",
+          teacher: [{ t_name: "Alice Cooper" }],
+        },
+      ],
+      Tuesday: [],
+      Wednesday: [],
+      Thursday: [],
+      Friday: [],
+      Saturday: [],
+    },
+    "12-A": {
+      Monday: [],
+      Tuesday: [],
+      Wednesday: [],
+      Thursday: [],
+      Friday: [],
+      Saturday: [],
+    },
+    "12-B": {
+      Monday: [],
+      Tuesday: [],
+      Wednesday: [],
+      Thursday: [],
+      Friday: [],
+      Saturday: [],
     },
   };
+
   const [activeTab, setActiveTab] = useState(data.tab[0].id);
 
   useEffect(() => {
@@ -212,7 +338,11 @@ const TimetablePlanner = () => {
         classname: item.classname,
         sectionname: item.sectionname,
         teachername: item.teachername,
+        class_id: item.class_id, // Store class_id
+        section_id: item.section_id, // Store section_id
       }));
+
+      // Now you have class_id and section_id stored for each tab
 
       // Sort tabs by class in ascending order
       const sortedTabs = formattedTabs.sort((a, b) => {
@@ -256,6 +386,98 @@ const TimetablePlanner = () => {
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
+  // Fetch the timetable data when the active tab changes
+  const fetchTimetableData = async (class_id, section_id) => {
+    setLoadingForTabSwitch(true);
+
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      // Create the class_section_id based on class_id and section_id
+      //  const classSectionId = `${class_id}-${section_id}`;
+
+      const response = await axios.get(
+        `${API_URL}/api/get_timetablebyclasssection/${class_id}/${section_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+          },
+        }
+      );
+
+      if (response.data && response.data.data) {
+        const transformedData = transformTimetableData(response.data.data); // Transform data
+        setTimetableData(transformedData); // Store the transformed data (periods and subjects)
+
+        // setTimetableData(response.data.data); // Store the response data
+      } else {
+        setTimetableData([]); // In case no data is returned
+      }
+    } catch (error) {
+      console.error("Error fetching timetable data:", error);
+      setTimetableData([]); // Handle error
+    } finally {
+      setLoadingForTabSwitch(false);
+    }
+  };
+
+  // Callback function to handle the data returned from the child component
+  const handleTableData = (data) => {
+    // Store the data from the child component in the parent state
+    console.log("Data from child component:", data);
+    setStoreWholeData(data); // Store the data in state
+    console.log("Store Data is ", storeWholeData);
+  };
+
+  // Call the fetchTimetableData function when the active tab changes
+  //   useEffect(() => {
+  //     fetchTimetableData(activeTab);
+  //   }, [activeTab]);
+
+  // Example of how to transform the timetable data for table display
+  // Transform timetable data for table display
+  const transformTimetableData = (data) => {
+    const periods = [];
+    const subjects = [];
+
+    // Loop through each day of the week
+    Object.keys(data).forEach((day) => {
+      const dayData = data[day];
+
+      dayData.forEach((period) => {
+        periods.push({
+          period_no: period.period_no,
+          time_in: period.time_in,
+          time_out: period.time_out,
+          subject: period.subject,
+        });
+
+        // For each subject, we will need the list of teachers (if available)
+        subjects.push({
+          day,
+          period_no: period.period_no,
+          subject: period.subject,
+          teachers: period.teacher.map((t) => t.t_name).join(", "), // Join teachers if multiple
+        });
+      });
+    });
+
+    return { periods, subjects };
+  };
+
+  useEffect(() => {
+    // Find the active tab based on `activeTab`
+    const activeTabData = tabs.find((tab) => tab.id === activeTab);
+
+    // Call fetchTimetableData with class_id and section_id
+    if (activeTabData) {
+      setLoadingForTabSwitch(true);
+      fetchTimetableData(activeTabData.class_id, activeTabData.section_id);
+    }
+  }, [activeTab]); // Fetch data whenever activeTab changes
 
   return (
     <>
@@ -398,13 +620,15 @@ const TimetablePlanner = () => {
             ? "bg-indigo-600 text-white shadow-md transform scale-105"
             : "bg-gray-100 text-gray-700 hover:bg-indigo-200 hover:shadow-md"
         }`}
-                          onClick={() => setActiveTab(tab.id)}
+                          onClick={() => {
+                            setActiveTab(tab.id); // Set active tab
+                            // fetchTimetableData(tab.class_id, tab.section_id); // Pass class_id and section_id to fetch data
+                          }}
                         >
                           {tab.id}
                         </button>
                       ))}
                     </div>
-
                     {/* Right Table Section */}
                     <div className="w-[85%] overflow-hidden bg-white rounded-lg shadow-md">
                       {/* Header */}
@@ -421,12 +645,23 @@ const TimetablePlanner = () => {
                         }}
                       >
                         <CommonTable
+                          periods={timetableData?.periods || []} // Pass periods to CommonTable
+                          subjects={timetableData?.subjects || []} // Pass subjects to CommonTable
+                          loading={loadingForTabSwitch} // Show loading state if fetching data
+                          //   handleTableData={() => {}} // Example, you can pass a function to handle table data if needed
+                          handleTableData={handleTableData} // Callback function for handling table interactions
+                        />
+                        {/* <CommonTable
+                          periods={data[activeTab].periods} // Get periods for the activeTab
+                          subjects={data[activeTab]} // Get timetable data for the activeTab
+                        /> */}
+                        {/* <CommonTable
                           periods={
                             data.tab.find((tab) => tab.id === activeTab)
                               ?.periods || []
                           }
                           subjects={data.subjects[activeTab] || []}
-                        />
+                        /> */}
                       </div>
                     </div>
                   </div>
