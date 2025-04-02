@@ -210,6 +210,7 @@ import SubstitutionWeeklyHoursReport from "../componants/Reports/SubstitutionWee
 import LeavingCertificateReport from "../componants/Reports/LeavingCertificateReport.jsx";
 import PendingStudentIdCardReport from "../componants/Reports/PendingStudentIdCardReport.jsx";
 import TimetablePlanner from "../componants/TimeTablePlanner/TimetablePlanner.jsx";
+import TeacherPeriodAllocation from "../componants/TimeTablePlanner/CommonTableForAllTable/TeacherPeriodAllocation.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -448,6 +449,11 @@ function Index() {
         <Route
           path="/CareTacker/view/:id"
           element={<PrivateRoute element={<ViewCareTacker />} />}
+        />
+        {/* TimeTablePlanner module */}
+        <Route
+          path="/teacherPeriodAlloction"
+          element={<PrivateRoute element={<TeacherPeriodAllocation />} />}
         />
         {/* Set Late Time module */}
         <Route
