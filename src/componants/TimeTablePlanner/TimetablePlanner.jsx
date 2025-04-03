@@ -1,64 +1,3 @@
-// import { useState } from "react";
-// import CommonTable from "./CommonTable";
-
-// const data = {
-//   tabs: [
-//     { id: "1-A", label: "1-A", periods: 4 },
-//     { id: "1-B", label: "1-B", periods: 5 },
-//     { id: "12-A", label: "12-A", periods: 6 },
-//     { id: "12-B", label: "12-B", periods: 4 },
-//   ],
-//   subjects: {
-//     "1-A": ["Math", "Science", "English", "History"],
-//     "1-B": ["Biology", "Chemistry", "Physics", "Geography"],
-//     "12-A": [
-//       "Economics",
-//       "Business Studies",
-//       "Accountancy",
-//       "Political Science",
-//     ],
-//     "12-B": [
-//       "Computer Science",
-//       "Art",
-//       "Physical Education",
-//       "Environmental Science",
-//     ],
-//   },
-// };
-
-// export default function TimetablePlanner() {
-//   const [activeTab, setActiveTab] = useState(data.tabs[0].id);
-
-//   return (
-//     <>
-//       {" "}
-//       <div className="flex">
-//         <div className="w-1/4 border-r">
-//           {data.tabs.map((tab) => (
-//             <button
-//               key={tab.id}
-//               className={`block p-2 w-full ${
-//                 activeTab === tab.id ? "bg-blue-500 text-white" : "bg-white"
-//               }`}
-//               onClick={() => setActiveTab(tab.id)}
-//             >
-//               {tab.label}
-//             </button>
-//           ))}
-//         </div>
-
-//         <div className="w-3/4 p-4">
-//           <h2 className="text-xl font-bold mb-4">Class - {activeTab}</h2>
-//           <CommonTable
-//             periods={data.tabs.find((tab) => tab.id === activeTab).periods}
-//             subjects={data.subjects[activeTab]}
-//           />
-//         </div>
-//       </div>
-//     </>
-//   );
-// }
-
 import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
@@ -92,6 +31,7 @@ const TimetablePlanner = () => {
   const [timetableData, setTimetableData] = useState({
     periods: [],
     subjects: [],
+    rowCounts: { mon_fri: 0, sat: 0 }, // Initialize rowCounts state
   }); // To hold transformed data
   const [loadingForTabSwitch, setLoadingForTabSwitch] = useState(false); // Loading state
   const [storeWholeData, setStoreWholeData] = useState([]);
@@ -470,34 +410,69 @@ const TimetablePlanner = () => {
 
   // Example of how to transform the timetable data for table display
   // Transform timetable data for table display
+  // Function to transform timetable data
+  //
   const transformTimetableData = (data) => {
     const periods = [];
     const subjects = [];
 
-    // Loop through each day of the week
+    const rowCounts = {
+      mon_fri: data.mon_fri, // Number of periods for Monday to Friday
+      sat: data.sat, // Number of periods for Saturday
+    };
+
     Object.keys(data).forEach((day) => {
-      const dayData = data[day];
+      if (day !== "mon_fri" && day !== "sat") {
+        const dayData = data[day];
+        dayData.forEach((period) => {
+          periods.push({
+            period_no: period.period_no,
+            time_in: period.time_in,
+            time_out: period.time_out,
+            subject: period.subject,
+          });
 
-      dayData.forEach((period) => {
-        periods.push({
-          period_no: period.period_no,
-          time_in: period.time_in,
-          time_out: period.time_out,
-          subject: period.subject,
+          subjects.push({
+            day,
+            period_no: period.period_no,
+            subject: period.subject,
+            teachers: period.teacher.map((t) => t.t_name).join(", "), // Join teachers if multiple
+          });
         });
-
-        // For each subject, we will need the list of teachers (if available)
-        subjects.push({
-          day,
-          period_no: period.period_no,
-          subject: period.subject,
-          teachers: period.teacher.map((t) => t.t_name).join(", "), // Join teachers if multiple
-        });
-      });
+      }
     });
 
-    return { periods, subjects };
+    return { periods, subjects, rowCounts };
   };
+
+  // const transformTimetableData = (data) => {
+  //   const periods = [];
+  //   const subjects = [];
+
+  //   // Loop through each day of the week
+  //   Object.keys(data).forEach((day) => {
+  //     const dayData = data[day];
+
+  //     dayData.forEach((period) => {
+  //       periods.push({
+  //         period_no: period.period_no,
+  //         time_in: period.time_in,
+  //         time_out: period.time_out,
+  //         subject: period.subject,
+  //       });
+
+  //       // For each subject, we will need the list of teachers (if available)
+  //       subjects.push({
+  //         day,
+  //         period_no: period.period_no,
+  //         subject: period.subject,
+  //         teachers: period.teacher.map((t) => t.t_name).join(", "), // Join teachers if multiple
+  //       });
+  //     });
+  //   });
+
+  //   return { periods, subjects };
+  // };
 
   useEffect(() => {
     // Find the active tab based on `activeTab`
@@ -685,8 +660,17 @@ const TimetablePlanner = () => {
                           loading={loadingForTabSwitch} // Show loading state if fetching data
                           handleTableData={handleTableData} // Callback function for handling table interactions
                         /> */}
-
                         <CommonTable
+                          activeTab={activeTab}
+                          tabs={tabs}
+                          periods={timetableData.periods || []} // Pass periods to CommonTable
+                          subjects={subjects || []} // Pass subjects to CommonTable || []} // Pass subjects to CommonTable
+                          loading={loadingForTabSwitch} // Show loading state if fetching data
+                          selectedSubjects={selectedSubjects}
+                          handleTableData={handleTableData}
+                          rowCounts={timetableData.rowCounts} // Pass row counts (mon_fri and sat) to CommonTable
+                        />
+                        {/* <CommonTable
                           activeTab={activeTab}
                           tabs={tabs}
                           periods={timetableData?.periods || []} // Pass periods to CommonTable
@@ -694,7 +678,7 @@ const TimetablePlanner = () => {
                           loading={loadingForTabSwitch} // Show loading state if fetching data
                           selectedSubjects={selectedSubjects}
                           handleTableData={handleTableData}
-                        />
+                        /> */}
                         {/* <CommonTable
                           activeTab={activeTab}
                           tabs={tabs}
