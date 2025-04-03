@@ -66,25 +66,16 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-import Loader from "../common/LoaderFinal/LoaderStyle";
-import { FiPrinter } from "react-icons/fi";
-import { FaFileExcel, FaRegCalendarAlt } from "react-icons/fa";
-import * as XLSX from "xlsx";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import dayjs from "dayjs";
-import { format, startOfWeek, endOfWeek } from "date-fns";
 import CommonTable from "./CommonTable";
 
 const TimetablePlanner = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [toDate, setToDate] = useState(null);
   //   const [fromDate, setFromDate] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
 
   const navigate = useNavigate();
@@ -103,12 +94,11 @@ const TimetablePlanner = () => {
     subjects: [],
   }); // To hold transformed data
   const [loadingForTabSwitch, setLoadingForTabSwitch] = useState(false); // Loading state
-
   const [storeWholeData, setStoreWholeData] = useState([]);
   const [weekRange, setWeekRange] = useState("");
-  const [fromDate, setFromDate] = useState(null);
-  const datePickerRef = useRef(null);
+  const [subjects, setSubjects] = useState([]);
   const [tabs, setTabs] = useState([]);
+  const [selectedSubjects, setSelectedSubjects] = useState({});
 
   //   const data = {
   //     tab: [
@@ -296,7 +286,8 @@ const TimetablePlanner = () => {
 
   const handleSearch = async () => {
     setLoadingForSearch(false);
-
+    // setSelectedStudent("");
+    // setSelectedStudentId("");
     if (!selectedStudentId) {
       setStudentError("Please select Staff Name.");
       setLoadingForSearch(false);
@@ -387,7 +378,7 @@ const TimetablePlanner = () => {
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
   // Fetch the timetable data when the active tab changes
-  const fetchTimetableData = async (class_id, section_id) => {
+  const fetchTimetableData = async (teacher_id, class_id, section_id) => {
     setLoadingForTabSwitch(true);
 
     try {
@@ -416,20 +407,60 @@ const TimetablePlanner = () => {
       } else {
         setTimetableData([]); // In case no data is returned
       }
+      const subjectsResponse = await axios.get(
+        `${API_URL}/api/get_teachersubjectbyclass?teacher_id=${teacher_id}&class_id=${class_id}&section_id=${section_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+          },
+        }
+      );
+
+      if (subjectsResponse.data && subjectsResponse.data.data) {
+        setSubjects(subjectsResponse.data.data); // Store the subjects data
+        console.log("setSubject inside funciton: --->", subjects);
+      } else {
+        setSubjects([]); // In case no subjects data is returned
+      }
     } catch (error) {
       console.error("Error fetching timetable data:", error);
-      setTimetableData([]); // Handle error
+      setTimetableData([]); // Handle error fetching timetable data
+      setSubjects([]); // Handle error fetching subjects data
     } finally {
       setLoadingForTabSwitch(false);
     }
   };
 
   // Callback function to handle the data returned from the child component
-  const handleTableData = (data) => {
-    // Store the data from the child component in the parent state
-    console.log("Data from child component:", data);
-    setStoreWholeData(data); // Store the data in state
-    console.log("Store Data is ", storeWholeData);
+  // const handleTableData = (updatedSubjects) => {
+  //   setSelectedSubjects((prevSubjects) => ({
+  //     ...prevSubjects,
+  //     ...updatedSubjects, // Merge new data without overwriting
+  //   }));
+  // console.log(
+  //   "This is the data of the selected subjects[]",
+  //   selectedSubjects
+  // );
+  // };
+  const handleTableData = (
+    classId,
+    sectionId,
+    day,
+    period_no,
+    selectedSubject
+  ) => {
+    const key = `${classId}-${sectionId}`;
+
+    setSelectedSubjects((prevSubjects) => ({
+      ...prevSubjects,
+      [key]: {
+        ...prevSubjects[key], // Preserve previous data for the same class-section
+        [day]: {
+          ...(prevSubjects[key]?.[day] || {}), // Preserve previous day's data
+          [period_no]: selectedSubject, // Update selected subject for this period
+        },
+      },
+    }));
   };
 
   // Call the fetchTimetableData function when the active tab changes
@@ -470,14 +501,18 @@ const TimetablePlanner = () => {
 
   useEffect(() => {
     // Find the active tab based on `activeTab`
-    const activeTabData = tabs.find((tab) => tab.id === activeTab);
-
+    let activeTabData = tabs.find((tab) => tab.id === activeTab);
+    //  const activeTabData = tabs.find((tab) => tab.id === activeTab);
     // Call fetchTimetableData with class_id and section_id
     if (activeTabData) {
       setLoadingForTabSwitch(true);
-      fetchTimetableData(activeTabData.class_id, activeTabData.section_id);
+      fetchTimetableData(
+        selectedStudentId,
+        activeTabData.class_id,
+        activeTabData.section_id
+      );
     }
-  }, [activeTab]); // Fetch data whenever activeTab changes
+  }, [activeTab, selectedStudentId, tabs]); // Fetch data whenever activeTab changes
 
   return (
     <>
@@ -512,7 +547,7 @@ const TimetablePlanner = () => {
                       className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      Staff <span className="text-red-500">*</span>
+                      Teacher <span className="text-red-500">*</span>
                     </label>
                     <div className="w-full md:w-[65%]">
                       <Select
@@ -601,20 +636,20 @@ const TimetablePlanner = () => {
                   <div className="card-body bg-gray-100 border-none w-full border-3 border-black flex">
                     {/* Left Sidebar - Tabs */}
                     <div
-                      className="w-[18%] border-r h-[400px] overflow-y-auto p-3 bg-white rounded-xl shadow-lg"
+                      className="w-[15%] border-r h-[400px] overflow-y-auto p-3 bg-white rounded-xl shadow-lg"
                       style={{
                         scrollbarWidth: "thin",
                         scrollbarColor: "#6366F1 #E5E7EB", // Custom scrollbar colors
                       }}
                     >
-                      <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center">
+                      <h3 className="text-lg font-semibold text-blue-600 mb-3 text-center">
                         Select Class
                       </h3>
 
                       {tabs.map((tab) => (
                         <button
                           key={tab.id}
-                          className={`block w-full text-left p-3 my-2 text-lg font-medium rounded-lg transition-all duration-300 
+                          className={`block w-full text-center p-3 my-2 text-lg font-medium rounded-lg transition-all duration-300 
         ${
           activeTab === tab.id
             ? "bg-indigo-600 text-white shadow-md transform scale-105"
@@ -644,13 +679,35 @@ const TimetablePlanner = () => {
                           scrollbarColor: "#4F46E5 #E5E7EB", // Track and thumb color in Firefox
                         }}
                       >
-                        <CommonTable
+                        {/* <CommonTable
                           periods={timetableData?.periods || []} // Pass periods to CommonTable
-                          subjects={timetableData?.subjects || []} // Pass subjects to CommonTable
+                          subjects={subjects || []} // Pass subjects to CommonTable
                           loading={loadingForTabSwitch} // Show loading state if fetching data
-                          //   handleTableData={() => {}} // Example, you can pass a function to handle table data if needed
                           handleTableData={handleTableData} // Callback function for handling table interactions
+                        /> */}
+
+                        <CommonTable
+                          activeTab={activeTab}
+                          tabs={tabs}
+                          periods={timetableData?.periods || []} // Pass periods to CommonTable
+                          subjects={subjects || []} // Pass subjects to CommonTable
+                          loading={loadingForTabSwitch} // Show loading state if fetching data
+                          selectedSubjects={selectedSubjects}
+                          handleTableData={handleTableData}
                         />
+                        {/* <CommonTable
+                          activeTab={activeTab}
+                          tabs={tabs}
+                          periods={timetableData?.periods || []} // Pass periods to CommonTable
+                          subjects={subjects || []} // Pass subjects to CommonTable
+                          loading={loadingForTabSwitch}
+                          selectedSubjects={
+                            selectedSubjects[
+                              `${activeTab?.class_id}-${activeTabData?.section_id}`
+                            ] || {}
+                          }
+                          handleTableData={handleTableData}
+                        /> */}
                         {/* <CommonTable
                           periods={data[activeTab].periods} // Get periods for the activeTab
                           subjects={data[activeTab]} // Get timetable data for the activeTab
