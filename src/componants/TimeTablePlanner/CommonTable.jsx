@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 
 export default function CommonTable({
   periods,
@@ -78,9 +79,9 @@ export default function CommonTable({
                   }
                 >
                   <option value="">Select</option>
-                  {subjects.map((subject, i) => (
-                    <option key={i} value={subject.id}>
-                      {subject.subjectname} - {subject.teachers}
+                  {subjects.map((subject) => (
+                    <option key={subject.sm_id} value={subject.subject_id}>
+                      {subject.subjectname}
                     </option>
                   ))}
                 </select>
@@ -142,7 +143,9 @@ export default function CommonTable({
     <div className="overflow-x-auto">
       {loading ? (
         <div className="flex justify-center items-center p-5">
-          <span className="loader">Loading...</span>
+          <div className="flex justify-center items-center h-64">
+            <LoaderStyle />
+          </div>
         </div>
       ) : (
         renderTable()

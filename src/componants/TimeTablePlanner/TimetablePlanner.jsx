@@ -235,7 +235,12 @@ const TimetablePlanner = () => {
     }
 
     setSearchTerm("");
-
+    setTimetableData({
+      periods: [],
+      subjects: [],
+      rowCounts: { mon_fri: 0, sat: 0 },
+    });
+    setSelectedSubjects({});
     try {
       const formattedWeek = weekRange.replace(/\s/g, "").replace(/%20/g, ""); // Ensure no extra spaces or encoded symbols
       console.log("Formatted Week is: --->", formattedWeek);
