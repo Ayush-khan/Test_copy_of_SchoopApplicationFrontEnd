@@ -258,7 +258,7 @@ const TimetablePlanner = () => {
       );
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
-        toast.error("Substitution Weekly Hours Report not found.");
+        toast.error("Time Table Planner for selected teacher not found.");
         setTimetable([]);
       } else {
         setTimetable(response?.data?.data);
@@ -285,9 +285,12 @@ const TimetablePlanner = () => {
       setTabs(sortedTabs);
       //   setActiveTab(sortedTabs[0]?.id || ""); // Set default active tab
     } catch (error) {
-      console.error("Error fetching Substitution Weekly Hours Report:", error);
+      console.error(
+        "Error fetching Time Table Planner for selected teacher :",
+        error
+      );
       toast.error(
-        "Error fetching Substitution Weekly Hours Report. Please try again."
+        "Error fetching Time Table Planner for selected teacher. Please try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -318,70 +321,127 @@ const TimetablePlanner = () => {
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
   // Fetch the timetable data when the active tab changes
+  // const fetchTimetableData = async (teacher_id, class_id, section_id) => {
+  //   setLoadingForTabSwitch(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token found");
+  //     }
+
+  //     // Create the class_section_id based on class_id and section_id
+  //     //  const classSectionId = `${class_id}-${section_id}`;
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_timetablebyclasssection/${class_id}/${section_id}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+  //         },
+  //       }
+  //     );
+
+  //     if (response.data && response.data.data) {
+  //       const transformedData = transformTimetableData(response.data.data); // Transform data
+  //       setTimetableData(transformedData); // Store the transformed data (periods and subjects)
+
+  //       // setTimetableData(response.data.data); // Store the response data
+  //     } else {
+  //       setTimetableData([]); // In case no data is returned
+  //     }
+  //     const subjectsResponse = await axios.get(
+  //       `${API_URL}/api/get_teachersubjectbyclass?teacher_id=${teacher_id}&class_id=${class_id}&section_id=${section_id}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+  //         },
+  //       }
+  //     );
+
+  //     if (subjectsResponse.data && subjectsResponse.data.data) {
+  //       setSubjects(subjectsResponse.data.data); // Store the subjects data
+  //       console.log("setSubject inside funciton: --->", subjects);
+  //     } else {
+  //       setSubjects([]); // In case no subjects data is returned
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching timetable data:", error);
+  //     setTimetableData([]); // Handle error fetching timetable data
+  //     setSubjects([]); // Handle error fetching subjects data
+  //   } finally {
+  //     setLoadingForTabSwitch(false);
+  //   }
+  // };
   const fetchTimetableData = async (teacher_id, class_id, section_id) => {
     setLoadingForTabSwitch(true);
-
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("No authentication token found");
       }
 
-      // Create the class_section_id based on class_id and section_id
-      //  const classSectionId = `${class_id}-${section_id}`;
-
       const response = await axios.get(
         `${API_URL}/api/get_timetablebyclasssection/${class_id}/${section_id}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      if (response.data && response.data.data) {
-        const transformedData = transformTimetableData(response.data.data); // Transform data
-        setTimetableData(transformedData); // Store the transformed data (periods and subjects)
-
-        // setTimetableData(response.data.data); // Store the response data
-      } else {
-        setTimetableData([]); // In case no data is returned
+      // Check for the specific error response
+      if (response.data?.success === false && response.data?.message) {
+        toast.error(response.data.message); // Show toast error message
+        setTimetableData({
+          periods: [],
+          subjects: [],
+          rowCounts: { mon_fri: 0, sat: 0 },
+        }); // Clear any existing data
+        return; // Do not proceed to show the table if the response indicates an error
       }
+
+      if (response.data && response.data.data) {
+        const transformedData = transformTimetableData(response.data.data);
+        setTimetableData(transformedData); // Store the transformed data
+      } else {
+        setTimetableData({
+          periods: [],
+          subjects: [],
+          rowCounts: { mon_fri: 0, sat: 0 },
+        });
+      }
+
       const subjectsResponse = await axios.get(
         `${API_URL}/api/get_teachersubjectbyclass?teacher_id=${teacher_id}&class_id=${class_id}&section_id=${section_id}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
       if (subjectsResponse.data && subjectsResponse.data.data) {
         setSubjects(subjectsResponse.data.data); // Store the subjects data
-        console.log("setSubject inside funciton: --->", subjects);
       } else {
-        setSubjects([]); // In case no subjects data is returned
+        setSubjects([]); // Handle error fetching subjects data
       }
     } catch (error) {
       console.error("Error fetching timetable data:", error);
-      setTimetableData([]); // Handle error fetching timetable data
+      setTimetableData({
+        periods: [],
+        subjects: [],
+        rowCounts: { mon_fri: 0, sat: 0 },
+      }); // Clear any existing data
       setSubjects([]); // Handle error fetching subjects data
+      toast.error("Error fetching timetable data. Please try again.");
     } finally {
       setLoadingForTabSwitch(false);
     }
   };
 
-  // Callback function to handle the data returned from the child component
-  // const handleTableData = (updatedSubjects) => {
-  //   setSelectedSubjects((prevSubjects) => ({
-  //     ...prevSubjects,
-  //     ...updatedSubjects, // Merge new data without overwriting
-  //   }));
-  // console.log(
-  //   "This is the data of the selected subjects[]",
-  //   selectedSubjects
-  // );
-  // };
+  // Ensure to check before rendering the `CommonTable`
+
   const handleTableData = (
     classId,
     sectionId,
@@ -401,17 +461,10 @@ const TimetablePlanner = () => {
         },
       },
     }));
+    console.log("setSelectedSubjects[]----->", selectedSubjects);
   };
 
-  // Call the fetchTimetableData function when the active tab changes
-  //   useEffect(() => {
-  //     fetchTimetableData(activeTab);
-  //   }, [activeTab]);
-
-  // Example of how to transform the timetable data for table display
-  // Transform timetable data for table display
   // Function to transform timetable data
-  //
   const transformTimetableData = (data) => {
     const periods = [];
     const subjects = [];
@@ -432,11 +485,17 @@ const TimetablePlanner = () => {
             subject: period.subject,
           });
 
+          // Check if teacher is not null and handle accordingly
+          const teachers =
+            period.teacher && Array.isArray(period.teacher)
+              ? period.teacher.map((t) => t.t_name).join(", ")
+              : ""; // If null or not an array, leave empty string
+
           subjects.push({
             day,
             period_no: period.period_no,
             subject: period.subject,
-            teachers: period.teacher.map((t) => t.t_name).join(", "), // Join teachers if multiple
+            teachers: teachers, // Join teachers if multiple, otherwise empty string
           });
         });
       }
@@ -445,33 +504,38 @@ const TimetablePlanner = () => {
     return { periods, subjects, rowCounts };
   };
 
+  //working fine:
   // const transformTimetableData = (data) => {
   //   const periods = [];
   //   const subjects = [];
 
-  //   // Loop through each day of the week
+  //   const rowCounts = {
+  //     mon_fri: data.mon_fri, // Number of periods for Monday to Friday
+  //     sat: data.sat, // Number of periods for Saturday
+  //   };
+
   //   Object.keys(data).forEach((day) => {
-  //     const dayData = data[day];
+  //     if (day !== "mon_fri" && day !== "sat") {
+  //       const dayData = data[day];
+  //       dayData.forEach((period) => {
+  //         periods.push({
+  //           period_no: period.period_no,
+  //           time_in: period.time_in,
+  //           time_out: period.time_out,
+  //           subject: period.subject,
+  //         });
 
-  //     dayData.forEach((period) => {
-  //       periods.push({
-  //         period_no: period.period_no,
-  //         time_in: period.time_in,
-  //         time_out: period.time_out,
-  //         subject: period.subject,
+  //         subjects.push({
+  //           day,
+  //           period_no: period.period_no,
+  //           subject: period.subject,
+  //           teachers: period.teacher.map((t) => t.t_name).join(", "), // Join teachers if multiple
+  //         });
   //       });
-
-  //       // For each subject, we will need the list of teachers (if available)
-  //       subjects.push({
-  //         day,
-  //         period_no: period.period_no,
-  //         subject: period.subject,
-  //         teachers: period.teacher.map((t) => t.t_name).join(", "), // Join teachers if multiple
-  //       });
-  //     });
+  //     }
   //   });
 
-  //   return { periods, subjects };
+  //   return { periods, subjects, rowCounts };
   // };
 
   useEffect(() => {
@@ -594,10 +658,10 @@ const TimetablePlanner = () => {
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                             ></path>
                           </svg>
-                          Browsing...
+                          Adding...
                         </span>
                       ) : (
-                        "Browse"
+                        "Add"
                       )}
                     </button>
                   </div>
