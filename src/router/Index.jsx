@@ -211,6 +211,9 @@ import LeavingCertificateReport from "../componants/Reports/LeavingCertificateRe
 import PendingStudentIdCardReport from "../componants/Reports/PendingStudentIdCardReport.jsx";
 import TimetablePlanner from "../componants/TimeTablePlanner/TimetablePlanner.jsx";
 import TeacherPeriodAllocation from "../componants/TimeTablePlanner/CommonTableForAllTable/TeacherPeriodAllocation.jsx";
+import CreateClassWisePeriodAllotment from "../componants/TimeTablePlanner/CommonTableForAllTable/CreateClassWisePeriodAllotment.jsx";
+import ClassWisePeriodAllotment from "../componants/TimeTablePlanner/CommonTableForAllTable/ClassWisePeriodAllotment.jsx";
+
 // import Menus from "../c";
 function Index() {
   return (
@@ -454,6 +457,18 @@ function Index() {
         <Route
           path="/teacherPeriodAlloction"
           element={<PrivateRoute element={<TeacherPeriodAllocation />} />}
+        />
+        {/* CreateClassWisePeriodAllotment module */}
+        <Route
+          path="/createClassWisePAllot"
+          element={
+            <PrivateRoute element={<CreateClassWisePeriodAllotment />} />
+          }
+        />
+        {/* ClassWisePeriodAllotment Module */}
+        <Route
+          path="/classWisePAllot"
+          element={<PrivateRoute element={<ClassWisePeriodAllotment />} />}
         />
         {/* Set Late Time module */}
         <Route

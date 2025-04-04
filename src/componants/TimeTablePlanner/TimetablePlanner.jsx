@@ -42,77 +42,6 @@ const TimetablePlanner = () => {
   const [allocatedPeriods, setAllocatedPeriods] = useState(null); // Store allocated periods
   const [usedPeriods, setUsedPeriods] = useState(null); // Store used periods
   const [occupiedPeriods, setOccupiedPeriods] = useState(0); // Store occupied periods
-  //   const data = {
-  //     tab: [
-  //       { id: "1-A", label: "1-A", periods: 4 },
-  //       { id: "1-B", label: "1-B", periods: 5 },
-  //       { id: "12-A", label: "12-A", periods: 6 },
-  //       { id: "12-B", label: "12-B", periods: 4 },
-  //     ],
-  //     subjects: {
-  //       "1-A": ["Math", "Science", "English", "History"],
-  //       "1-B": ["Biology", "Chemistry", "Physics", "Geography"],
-  //       "12-A": [
-  //         "Economics",
-  //         "Business Studies",
-  //         "Accountancy",
-  //         "Political Science",
-  //       ],
-  //       "12-B": [
-  //         "Computer Science",
-  //         "Art",
-  //         "Physical Education",
-  //         "Environmental Science",
-  //       ],
-  //     },
-  //   };
-  // Original formate
-  //   const data = {
-  //     "1-A": {
-  //       Monday: [
-  //         {
-  //           time_in: "08:30",
-  //           period_no: 1,
-  //           time_out: "09:10",
-  //           subject: "Math",
-  //           teacher: [{ t_name: "John Doe" }],
-  //         },
-  //         {
-  //           time_in: "09:10",
-  //           period_no: 2,
-  //           time_out: "09:45",
-  //           subject: "Science",
-  //           teacher: [{ t_name: "Jane Smith" }],
-  //         },
-  //         // Add other periods for Monday here...
-  //       ],
-  //       Tuesday: [
-  //         {
-  //           time_in: "08:30",
-  //           period_no: 1,
-  //           time_out: "09:10",
-  //           subject: "History",
-  //           teacher: [{ t_name: "John Doe" }],
-  //         },
-  //         // Add other periods for Tuesday here...
-  //       ],
-  //       // Add Wednesday, Thursday, Friday, Saturday for 1-A
-  //     },
-  //     "1-B": {
-  //       Monday: [
-  //         {
-  //           time_in: "08:30",
-  //           period_no: 1,
-  //           time_out: "09:10",
-  //           subject: "Biology",
-  //           teacher: [{ t_name: "Alice Cooper" }],
-  //         },
-  //         // Add other periods for Monday here...
-  //       ],
-  //       // Add Tuesday, Wednesday, Thursday, Friday, Saturday for 1-B
-  //     },
-  //     // Add other tabs for 12-A, 12-B with similar structure
-  //   };
   const data = {
     tab: [
       { id: "1-A", label: "1-A", periods: 6 },
@@ -1394,37 +1323,37 @@ export default TimetablePlanner;
 //     }
 //   };
 //   // Handle subject selection and update occupied periods
-//  const handleSubjectSelect = (
-//    classId,
-//    sectionId,
-//    day,
-//    periodNo,
-//    selectedSubject
-//  ) => {
-//    // Increment the occupied periods correctly by using the previous state
-//    setOccupiedPeriods((prevOccupiedPeriods) => {
-//      const newOccupiedPeriods = prevOccupiedPeriods + 1;
+//   const handleSubjectSelect = (
+//     classId,
+//     sectionId,
+//     day,
+//     periodNo,
+//     selectedSubject
+//   ) => {
+//     // Increment the occupied periods correctly by using the previous state
+//     setOccupiedPeriods((prevOccupiedPeriods) => {
+//       const newOccupiedPeriods = prevOccupiedPeriods + 1;
 
-//      if (newOccupiedPeriods >= allocatedPeriods) {
-//        toast.error("Allocated periods are full, cannot select more subjects.");
-//        return prevOccupiedPeriods; // Return previous state if periods are full
-//      }
+//       if (newOccupiedPeriods >= allocatedPeriods) {
+//         toast.error("Allocated periods are full, cannot select more subjects.");
+//         return prevOccupiedPeriods; // Return previous state if periods are full
+//       }
 
-//      return newOccupiedPeriods;
-//    });
+//       return newOccupiedPeriods;
+//     });
 
-//    // Update selected subjects logic (keep track of subjects)
-//    setSelectedSubjects((prev) => ({
-//      ...prev,
-//      [`${classId}-${sectionId}`]: {
-//        ...prev[`${classId}-${sectionId}`],
-//        [day]: {
-//          ...(prev[`${classId}-${sectionId}`]?.[day] || {}),
-//          [periodNo]: selectedSubject,
-//        },
-//      },
-//    }));
-//  };
+//     // Update selected subjects logic (keep track of subjects)
+//     setSelectedSubjects((prev) => ({
+//       ...prev,
+//       [`${classId}-${sectionId}`]: {
+//         ...prev[`${classId}-${sectionId}`],
+//         [day]: {
+//           ...(prev[`${classId}-${sectionId}`]?.[day] || {}),
+//           [periodNo]: selectedSubject,
+//         },
+//       },
+//     }));
+//   };
 
 //   return (
 //     <>
