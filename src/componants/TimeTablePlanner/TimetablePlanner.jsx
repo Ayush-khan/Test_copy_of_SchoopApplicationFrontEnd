@@ -194,14 +194,17 @@ const TimetablePlanner = () => {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/staff_list`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Class", response);
-      setStudentNameWithClassId(response?.data || []);
+      const response = await axios.get(
+        `${API_URL}/api/get_teacherslistbyperiod`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log("Teachers", response);
+      setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
+      toast.error("Error fetching Teachers");
+      console.error("Error fetching Teachers:", error);
     } finally {
       setLoadingExams(false);
     }
@@ -217,7 +220,7 @@ const TimetablePlanner = () => {
     () =>
       studentNameWithClassId.map((cls) => ({
         value: cls?.teacher_id,
-        label: `${cls.name}`,
+        label: `${cls.teachername}`,
       })),
     [studentNameWithClassId]
   );
@@ -229,7 +232,7 @@ const TimetablePlanner = () => {
     // setSelectedStudent("");
     // setSelectedStudentId("");
     if (!selectedStudentId) {
-      setStudentError("Please select Staff Name.");
+      setStudentError("Please select teacher name.");
       setLoadingForSearch(false);
       return;
     }
@@ -557,6 +560,120 @@ const TimetablePlanner = () => {
       );
     }
   }, [activeTab, selectedStudentId, tabs]); // Fetch data whenever activeTab changes
+  // const handleSubmit = async () => {
+  //   setIsSubmitting(true);
+  //   try {
+  //     // Prepare data to submit
+  //     const submitData = Object.keys(selectedSubjects).map((key) => {
+  //       const [classId, sectionId] = key.split("-"); // Extract class_id and section_id from key
+  //       const classSectionData = selectedSubjects[key];
+
+  //       const subjectsForClassSection = Object.keys(classSectionData).map(
+  //         (day) => {
+  //           const periodsForDay = classSectionData[day];
+
+  //           return {
+  //             day,
+  //             periods: Object.keys(periodsForDay).map((period_no) => ({
+  //               period_no,
+  //               subject: periodsForDay[period_no],
+  //             })),
+  //           };
+  //         }
+  //       );
+
+  //       return {
+  //         class_id: classId,
+  //         section_id: sectionId,
+  //         subjects: subjectsForClassSection,
+  //       };
+  //     });
+
+  //     // Send the data to the server
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await axios.post(
+  //       `${API_URL}/api/submit_timetable`,
+  //       submitData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response?.data?.success) {
+  //       toast.success("Timetable successfully submitted!");
+  //     } else {
+  //       toast.error("Failed to submit timetable.");
+  //     }
+  //   } catch (error) {
+  //     toast.error("An error occurred while submitting the timetable.");
+  //     console.error(error);
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      // Prepare data to submit
+      const submitData = Object.keys(selectedSubjects).map((key) => {
+        const [classId, sectionId] = key.split("-"); // Extract class_id and section_id from key
+        const classSectionData = selectedSubjects[key];
+
+        const subjectsForClassSection = Object.keys(classSectionData).map(
+          (day) => {
+            const periodsForDay = classSectionData[day];
+
+            return {
+              day,
+              periods: Object.keys(periodsForDay).map((period_no) => ({
+                period_no,
+                subject: periodsForDay[period_no],
+              })),
+            };
+          }
+        );
+
+        return {
+          class_id: classId,
+          section_id: sectionId,
+          subjects: subjectsForClassSection,
+        };
+      });
+
+      // Include teacher_id in the data to be submitted
+      const teacherId = selectedStudentId; // Assuming selectedStudentId is the teacher's ID
+
+      const dataToSubmit = {
+        teacher_id: teacherId, // Add teacher_id to the data being sent
+        timetable_data: submitData,
+      };
+
+      // Send the data to the server
+      const token = localStorage.getItem("authToken");
+      const response = await axios.post(
+        `${API_URL}/api/submit_timetable/${teacherId}`,
+        dataToSubmit,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response?.data?.success) {
+        toast.success("Timetable successfully submitted!");
+      } else {
+        toast.error("Failed to submit timetable.");
+      }
+    } catch (error) {
+      toast.error("An error occurred while submitting the timetable.");
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -680,7 +797,7 @@ const TimetablePlanner = () => {
                   <div className="card-body bg-gray-100 border-none w-full border-3 border-black flex">
                     {/* Left Sidebar - Tabs */}
                     <div
-                      className="w-[15%] border-r h-[400px] overflow-y-auto p-3 bg-white rounded-xl shadow-lg"
+                      className="w-[15%] border-r h-[440px] overflow-y-auto p-3 bg-white rounded-xl shadow-lg"
                       style={{
                         scrollbarWidth: "thin",
                         scrollbarColor: "#6366F1 #E5E7EB", // Custom scrollbar colors
@@ -774,6 +891,16 @@ const TimetablePlanner = () => {
                         /> */}
                       </div>
                     </div>
+                  </div>
+                  <div className="flex justify-end px-3 py-1 relative -top-2">
+                    <button
+                      type="button"
+                      className="btn btn-primary px-3 "
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Submiting..." : "Submit"}
+                    </button>
                   </div>
                 </div>
               </>

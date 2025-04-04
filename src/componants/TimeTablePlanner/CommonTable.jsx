@@ -80,7 +80,7 @@ export default function CommonTable({
                 >
                   <option value="">Select</option>
                   {subjects.map((subject) => (
-                    <option key={subject.sm_id} value={subject.subject_id}>
+                    <option key={subject.subject_id} value={subject.subject_id}>
                       {subject.subjectname}
                     </option>
                   ))}
