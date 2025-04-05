@@ -972,7 +972,7 @@ const TimetablePlanner = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Teachers", response);
+      console.log("Teachers", response.data);
       setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching Teachers");
@@ -996,6 +996,9 @@ const TimetablePlanner = () => {
       })),
     [studentNameWithClassId]
   );
+  console.log("studentNameWithClassId[]--->", studentNameWithClassId);
+
+  console.log("studentOptions[]--->", studentOptions);
 
   // Handle search and fetch parent information
 
@@ -1519,6 +1522,9 @@ const TimetablePlanner = () => {
                           scrollbarColor: "#4F46E5 #E5E7EB", // Track and thumb color in Firefox
                         }}
                       >
+                        <h2>Allocated Periods: {allocatedPeriods}</h2>
+                        <h2>Used Periods: {usedPeriods}</h2>
+
                         <CommonTable
                           activeTab={activeTab}
                           tabs={tabs}
@@ -1528,7 +1534,24 @@ const TimetablePlanner = () => {
                           selectedSubjects={selectedSubjects}
                           handleTableData={handleTableData}
                           rowCounts={timetableData.rowCounts} // Pass row counts (mon_fri and sat) to CommonTable
+                          allocatedPeriods={allocatedPeriods}
+                          usedPeriods={usedPeriods}
+                          setUsedPeriods={setUsedPeriods} // Pass setUsedPeriods function to child
+                          showToast={(message, type) =>
+                            console.log(`${type}: ${message}`)
+                          } // Example toast handler
                         />
+
+                        {/* <CommonTable
+                          activeTab={activeTab}
+                          tabs={tabs}
+                          periods={timetableData.periods || []} // Pass periods to CommonTable
+                          subjects={subjects || []} // Pass subjects to CommonTable || []} // Pass subjects to CommonTable
+                          loading={loadingForTabSwitch} // Show loading state if fetching data
+                          selectedSubjects={selectedSubjects}
+                          handleTableData={handleTableData}
+                          rowCounts={timetableData.rowCounts} // Pass row counts (mon_fri and sat) to CommonTable
+                        /> */}
                       </div>
                     </div>
                   </div>
