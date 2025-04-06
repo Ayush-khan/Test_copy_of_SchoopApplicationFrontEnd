@@ -783,80 +783,10 @@ const TimetablePlanner = () => {
   const [selectedSubjects, setSelectedSubjects] = useState({});
   const [allocatedPeriods, setAllocatedPeriods] = useState(null); // Store allocated periods
   const [usedPeriods, setUsedPeriods] = useState(null); // Store used periods
+  const [checkUsedPeriods, setCheckUsedPeriods] = useState("");
   const [occupiedPeriods, setOccupiedPeriods] = useState(0); // Store occupied periods
-  const data = {
-    tab: [
-      { id: "1-A", label: "1-A", periods: 6 },
-      { id: "1-B", label: "1-B", periods: 6 },
-      { id: "12-A", label: "12-A", periods: 6 },
-      { id: "12-B", label: "12-B", periods: 6 },
-    ],
-    "1-A": {
-      Monday: [
-        {
-          time_in: "08:30",
-          period_no: 1,
-          time_out: "09:10",
-          subject: "Math",
-          teacher: [{ t_name: "John Doe" }],
-        },
-        {
-          time_in: "09:10",
-          period_no: 2,
-          time_out: "09:45",
-          subject: "Science",
-          teacher: [{ t_name: "Jane Smith" }],
-        },
-      ],
-      Tuesday: [
-        {
-          time_in: "08:30",
-          period_no: 1,
-          time_out: "09:10",
-          subject: "History",
-          teacher: [{ t_name: "John Doe" }],
-        },
-      ],
-      Wednesday: [],
-      Thursday: [],
-      Friday: [],
-      Saturday: [],
-    },
-    "1-B": {
-      Monday: [
-        {
-          time_in: "08:30",
-          period_no: 1,
-          time_out: "09:10",
-          subject: "Biology",
-          teacher: [{ t_name: "Alice Cooper" }],
-        },
-      ],
-      Tuesday: [],
-      Wednesday: [],
-      Thursday: [],
-      Friday: [],
-      Saturday: [],
-    },
-    "12-A": {
-      Monday: [],
-      Tuesday: [],
-      Wednesday: [],
-      Thursday: [],
-      Friday: [],
-      Saturday: [],
-    },
-    "12-B": {
-      Monday: [],
-      Tuesday: [],
-      Wednesday: [],
-      Thursday: [],
-      Friday: [],
-      Saturday: [],
-    },
-  };
 
-  const [activeTab, setActiveTab] = useState(data.tab[0].id);
+  const [activeTab, setActiveTab] = useState("");
 
   useEffect(() => {
     fetchExams();
@@ -914,14 +844,17 @@ const TimetablePlanner = () => {
     }
 
     setSearchTerm("");
+    setActiveTab("");
     setTimetableData({
       periods: [],
       subjects: [],
       rowCounts: { mon_fri: 0, sat: 0 },
     });
+    setTabs([]);
     setSelectedSubjects({});
     setAllocatedPeriods(null); // Reset periods
     setUsedPeriods(null); // Reset used periods
+    setCheckUsedPeriods("");
     setOccupiedPeriods(0); // Reset occupied periods
     try {
       const formattedWeek = weekRange.replace(/\s/g, "").replace(/%20/g, ""); // Ensure no extra spaces or encoded symbols
@@ -941,6 +874,7 @@ const TimetablePlanner = () => {
       if (periodResponse?.data?.success) {
         setAllocatedPeriods(periodResponse?.data?.data[0]?.periods_allocated);
         setUsedPeriods(periodResponse?.data?.data[0]?.periods_used);
+        setCheckUsedPeriods(periodResponse?.data?.data[0]?.periods_used);
       } else {
         toast.error("Failed to fetch teacher period data.");
       }
@@ -982,6 +916,10 @@ const TimetablePlanner = () => {
       });
 
       setTabs(sortedTabs);
+      // Set the initial active tab to the first tab
+      if (sortedTabs.length > 0) {
+        setActiveTab(sortedTabs[0].id);
+      }
       //   setActiveTab(sortedTabs[0]?.id || ""); // Set default active tab
     } catch (error) {
       console.error(
@@ -998,9 +936,7 @@ const TimetablePlanner = () => {
   };
 
   console.log("row", timetable);
-  const filteredTabs = tabs.filter((tab) =>
-    tab.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
   const filteredSections = timetable.filter((student) => {
     const searchLower = searchTerm.toLowerCase();
 
@@ -1017,8 +953,6 @@ const TimetablePlanner = () => {
       totalHours.includes(searchLower)
     );
   });
-
-  const displayedSections = filteredSections.slice(currentPage * pageSize);
 
   const fetchTimetableData = async (teacher_id, class_id, section_id) => {
     setLoadingForTabSwitch(true);
@@ -1111,50 +1045,6 @@ const TimetablePlanner = () => {
     console.log("setSelectedSubjects[]----->", selectedSubjects);
   };
 
-  // Function to transform timetable data
-  // const transformTimetableData = (data) => {
-  //   const periods = [];
-  //   const subjects = [];
-
-  //   const rowCounts = {
-  //     mon_fri: data.mon_fri, // Number of periods for Monday to Friday
-  //     sat: data.sat, // Number of periods for Saturday
-  //   };
-
-  //   Object.keys(data).forEach((day) => {
-  //     if (day !== "mon_fri" && day !== "sat") {
-  //       const dayData = data[day];
-  //       dayData.forEach((period) => {
-  //         // Extract teacher names, handling empty teacher arrays
-  //         const teachers =
-  //           period.teacher &&
-  //           Array.isArray(period.teacher) &&
-  //           period.teacher.length > 0
-  //             ? period.teacher.map((t) => t.t_name).join(", ")
-  //             : "N/A"; // If no teachers, return "N/A"
-
-  //         // Push period information with subject and teacher names
-  //         periods.push({
-  //           period_no: period.period_no,
-  //           time_in: period.time_in,
-  //           time_out: period.time_out,
-  //           subject: period.subject, // Subject name
-  //           teachers: teachers, // Teacher(s) name(s)
-  //         });
-
-  //         // Push subject and teacher information for later use
-  //         subjects.push({
-  //           day,
-  //           period_no: period.period_no,
-  //           subject: period.subject, // Subject name
-  //           teachers: teachers, // Teacher(s) name(s)
-  //         });
-  //       });
-  //     }
-  //   });
-
-  //   return { periods, subjects, rowCounts };
-  // };
   const transformTimetableData = (data) => {
     const periods = [];
     const subjects = [];
@@ -1215,8 +1105,13 @@ const TimetablePlanner = () => {
     }
   }, [activeTab, selectedStudentId, tabs]); // Fetch data whenever activeTab changes
   const handleSubmit = async () => {
-    setIsSubmitting(true);
+    // Assuming checkUsedPeriods is the expected number of periods to be selected
+    if (usedPeriods == checkUsedPeriods) {
+      toast.error("Please select at least one subject.");
+      return; // Prevent submission if the condition is met
+    }
     try {
+      setIsSubmitting(true);
       // Prepare data to submit
       const submitData = Object.keys(selectedSubjects).map((key) => {
         const [classId, sectionId] = key.split("-"); // Extract class_id and section_id from key
@@ -1248,6 +1143,7 @@ const TimetablePlanner = () => {
 
       const dataToSubmit = {
         teacher_id: teacherId, // Add teacher_id to the data being sent
+        period_used: usedPeriods,
         timetable_data: submitData,
       };
 
@@ -1265,6 +1161,21 @@ const TimetablePlanner = () => {
 
       if (response?.data?.success) {
         toast.success("Timetable successfully submitted!");
+        setTimeout(() => {
+          setActiveTab(""); // Reset active tab
+          setTimetableData({
+            periods: [],
+            subjects: [],
+            rowCounts: { mon_fri: 0, sat: 0 },
+          });
+          setTabs([]); // Clear tabs
+          setSelectedSubjects({}); // Reset selected subjects
+          setAllocatedPeriods(null); // Reset allocated periods
+          setUsedPeriods(null); // Reset used periods
+          setCheckUsedPeriods(""); // Reset used periods check
+          setOccupiedPeriods(0); // Reset occupied periods
+          setTimetable([]);
+        }, 1000); // Delay for 2 seconds (2000ms)
       } else {
         toast.error("Failed to submit timetable.");
       }
