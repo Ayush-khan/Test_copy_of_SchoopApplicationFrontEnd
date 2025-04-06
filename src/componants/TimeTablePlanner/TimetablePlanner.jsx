@@ -1112,6 +1112,49 @@ const TimetablePlanner = () => {
   };
 
   // Function to transform timetable data
+  // const transformTimetableData = (data) => {
+  //   const periods = [];
+  //   const subjects = [];
+
+  //   const rowCounts = {
+  //     mon_fri: data.mon_fri, // Number of periods for Monday to Friday
+  //     sat: data.sat, // Number of periods for Saturday
+  //   };
+
+  //   Object.keys(data).forEach((day) => {
+  //     if (day !== "mon_fri" && day !== "sat") {
+  //       const dayData = data[day];
+  //       dayData.forEach((period) => {
+  //         // Extract teacher names, handling empty teacher arrays
+  //         const teachers =
+  //           period.teacher &&
+  //           Array.isArray(period.teacher) &&
+  //           period.teacher.length > 0
+  //             ? period.teacher.map((t) => t.t_name).join(", ")
+  //             : "N/A"; // If no teachers, return "N/A"
+
+  //         // Push period information with subject and teacher names
+  //         periods.push({
+  //           period_no: period.period_no,
+  //           time_in: period.time_in,
+  //           time_out: period.time_out,
+  //           subject: period.subject, // Subject name
+  //           teachers: teachers, // Teacher(s) name(s)
+  //         });
+
+  //         // Push subject and teacher information for later use
+  //         subjects.push({
+  //           day,
+  //           period_no: period.period_no,
+  //           subject: period.subject, // Subject name
+  //           teachers: teachers, // Teacher(s) name(s)
+  //         });
+  //       });
+  //     }
+  //   });
+
+  //   return { periods, subjects, rowCounts };
+  // };
   const transformTimetableData = (data) => {
     const periods = [];
     const subjects = [];
@@ -1121,6 +1164,7 @@ const TimetablePlanner = () => {
       sat: data.sat, // Number of periods for Saturday
     };
 
+    // Iterate through each day and extract the periods
     Object.keys(data).forEach((day) => {
       if (day !== "mon_fri" && day !== "sat") {
         const dayData = data[day];
@@ -1138,7 +1182,7 @@ const TimetablePlanner = () => {
             period_no: period.period_no,
             time_in: period.time_in,
             time_out: period.time_out,
-            subject: period.subject, // Subject ID
+            subject_id: period.subject, // Subject ID
             teachers: teachers, // Teacher(s) name(s)
           });
 
@@ -1146,7 +1190,7 @@ const TimetablePlanner = () => {
           subjects.push({
             day,
             period_no: period.period_no,
-            subject: period.subject, // Subject ID
+            subject_id: period.subject, // Subject ID
             teachers: teachers, // Teacher(s) name(s)
           });
         });
@@ -1373,12 +1417,7 @@ const TimetablePlanner = () => {
                 </div>
               </div>
             </div>
-            {allocatedPeriods !== null && usedPeriods !== null && (
-              <div className="mt-4">
-                <p>Allocated Periods: {allocatedPeriods}</p>
-                <p>Used Periods: {usedPeriods}</p>
-              </div>
-            )}
+
             {timetable.length > 0 && (
               <>
                 <div className="card mx-auto lg:w-full shadow-lg mt-3">
@@ -1416,10 +1455,21 @@ const TimetablePlanner = () => {
                     {/* Right Table Section */}
                     <div className="w-[85%] overflow-hidden bg-white rounded-lg shadow-md">
                       {/* Header */}
-                      <h2 className="text-xl text-blue-500 font-bold mb-2 text-center">
-                        Class - {activeTab}
-                      </h2>
-
+                      <div className="w-[97%] mx-auto overflow-hidden  flex flex-row justify-between items-center  border-b-2 border-pink-600">
+                        {allocatedPeriods !== null && (
+                          <span className="text-pink-500 text-xl font-medium">
+                            Allocated Periods: {allocatedPeriods}
+                          </span>
+                        )}
+                        <h2 className="text-xl   text-blue-500 font-bold mb-2 text-center">
+                          Class - {activeTab}
+                        </h2>
+                        {usedPeriods !== null && (
+                          <span className="text-pink-500 text-xl font-medium">
+                            Occupied Periods: {usedPeriods}
+                          </span>
+                        )}
+                      </div>
                       {/* Scrollable Table Container */}
                       <div
                         className="overflow-y-auto h-[400px] border rounded-md p-2"
@@ -1428,8 +1478,8 @@ const TimetablePlanner = () => {
                           scrollbarColor: "#4F46E5 #E5E7EB", // Track and thumb color in Firefox
                         }}
                       >
-                        <h2>Allocated Periods: {allocatedPeriods}</h2>
-                        <h2>Used Periods: {usedPeriods}</h2>
+                        {/* <h2>Allocated Periods: {allocatedPeriods}</h2>
+                        <h2>Used Periods: {usedPeriods}</h2> */}
 
                         {/* <CommonTable
                           activeTab={activeTab}
