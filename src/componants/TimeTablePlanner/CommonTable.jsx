@@ -470,7 +470,7 @@ export default function CommonTable({
   return (
     <div className="overflow-x-auto">
       {loading ? (
-        <div className="flex justify-center items-center p-5">
+        <div className="mt-24 border-1 border-white flex justify-center items-center p-5 ">
           <LoaderStyle />
         </div>
       ) : (
