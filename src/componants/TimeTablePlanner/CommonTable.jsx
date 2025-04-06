@@ -284,6 +284,81 @@ export default function CommonTable({
     handleTableData(classId, sectionId, day, period_no, selectedSubject);
   };
 
+  // const renderRows = (days) => {
+  //   const rows = [];
+  //   const maxRows = Math.max(rowCounts.mon_fri, rowCounts.sat);
+
+  //   for (let rowIndex = 0; rowIndex < maxRows; rowIndex++) {
+  //     rows.push(
+  //       <tr key={`row-${rowIndex}`}>
+  //         <td className="border p-2 text-center">{rowIndex + 1}</td>
+  //         {days.map((day) => {
+  //           if (day === "Saturday" && rowIndex >= rowCounts.sat) {
+  //             return <td key={day} className="border p-2"></td>;
+  //           }
+
+  //           const selectedPeriod = localSelectedSubjects?.[day]?.[rowIndex + 1];
+
+  //           // const periodData = periods.find(
+  //           //   (period) =>
+  //           //     period.subject === subjectName &&
+  //           //     period.period_no === rowIndex + 1
+  //           // );
+
+  //           const periodData = periods.find(
+  //             (period) => period.period_no === rowIndex + 1
+  //           );
+
+  //           const subjectName = periodData ? periodData.subject_id : " ";
+  //           const teacherName = periodData ? periodData.teachers : " ";
+
+  //           return (
+  //             <td key={day} className="border p-2">
+  //               {/* Subject Name */}
+  //               <div className="flex flex-col">
+  //                 <span className="w-full border-2 border-black text-gray-600 font-medium text-sm">
+  //                   Subject:
+  //                 </span>{" "}
+  //                 <span className="text-xs ">{subjectName || " "}</span>
+  //                 {/* Teacher Name */}
+  //                 <span className="text-gray-600 font-medium text-sm">
+  //                   Teacher:
+  //                 </span>{" "}
+  //                 <span className="text-xs ">{teacherName || " "}</span>
+  //               </div>
+
+  //               {/* Subject Dropdown */}
+  //               <select
+  //                 className="border p-1 w-full mt-2"
+  //                 value={selectedPeriod?.id || ""}
+  //                 onChange={(e) => {
+  //                   const selectedSub = {
+  //                     id: e.target.value,
+  //                     name:
+  //                       subjects.find((s) => s.id === e.target.value)
+  //                         ?.subjectname || "",
+  //                   };
+  //                   handleSubjectChange(day, rowIndex + 1, selectedSub);
+  //                 }}
+  //                 disabled={
+  //                   usedPeriods >= allocatedPeriods && !selectedPeriod?.id
+  //                 }
+  //               >
+  //                 <option value="">Select</option>
+  //                 {subjects.map((subject) => (
+  //                   <option key={subject.subject_id} value={subject.subject_id}>
+  //                     {subject.subjectname}
+  //                   </option>
+  //                 ))}
+  //               </select>
+  //             </td>
+  //           );
+  //         })}
+  //       </tr>
+  //     );
+  //   }
+  //   return rows;
+  // };
   const renderRows = (days) => {
     const rows = [];
     const maxRows = Math.max(rowCounts.mon_fri, rowCounts.sat);
@@ -291,7 +366,11 @@ export default function CommonTable({
     for (let rowIndex = 0; rowIndex < maxRows; rowIndex++) {
       rows.push(
         <tr key={`row-${rowIndex}`}>
-          <td className="border p-2 text-center">{rowIndex + 1}</td>
+          {/* Periods Column */}
+          <td className="border p-2 text-center bg-gray-100 w-16">
+            {rowIndex + 1}
+          </td>
+
           {days.map((day) => {
             if (day === "Saturday" && rowIndex >= rowCounts.sat) {
               return <td key={day} className="border p-2"></td>;
@@ -299,29 +378,30 @@ export default function CommonTable({
 
             const selectedPeriod = localSelectedSubjects?.[day]?.[rowIndex + 1];
 
-            // const periodData = periods.find(
-            //   (period) =>
-            //     period.subject === subjectName &&
-            //     period.period_no === rowIndex + 1
-            // );
-
             const periodData = periods.find(
               (period) => period.period_no === rowIndex + 1
             );
 
-            const subjectName = periodData ? periodData.subject : "N/A";
-            const teacherName = periodData ? periodData.teachers : "N/A";
+            const subjectName = periodData ? periodData.subject_id : " ";
+            const teacherName = periodData ? periodData.teachers : " ";
 
             return (
               <td key={day} className="border p-2">
-                {/* Subject Name */}
-                <div>
-                  <strong>Subject:</strong> {subjectName || "N/A"}
-                </div>
+                {/* Subject and Teacher Info */}
+                <div className="flex flex-col w-full text-sm text-gray-600">
+                  <div className="mb-1">
+                    <span className="font-medium">Subject: </span>
+                    <span className="break-words text-xs">
+                      {subjectName || " "}
+                    </span>
+                  </div>
 
-                {/* Teacher Name */}
-                <div>
-                  <strong>Teacher:</strong> {teacherName}
+                  <div>
+                    <span className="font-medium">Teacher: </span>
+                    <span className="break-words text-xs">
+                      {teacherName || " "}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Subject Dropdown */}

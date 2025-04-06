@@ -1175,7 +1175,7 @@ const TimetablePlanner = () => {
             Array.isArray(period.teacher) &&
             period.teacher.length > 0
               ? period.teacher.map((t) => t.t_name).join(", ")
-              : "N/A"; // If no teachers, return "N/A"
+              : " "; // If no teachers, return "N/A"
 
           // Push period information with subject and teacher names
           periods.push({
@@ -1304,7 +1304,7 @@ const TimetablePlanner = () => {
   };
   return (
     <>
-      <div className="w-full md:w-[95%] mx-auto p-4 ">
+      <div className="w-full md:w-[99%] mx-auto p-4 ">
         <ToastContainer />
         <div className="card p-4 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
