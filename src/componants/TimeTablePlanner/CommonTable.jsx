@@ -568,7 +568,7 @@ export default function CommonTable({
 
             return (
               <td key={day} className="border p-2">
-                <div className="flex flex-col w-full text-sm text-gray-600">
+                {/* <div className="flex flex-col w-full text-sm text-gray-600">
                   <div className="mb-1">
                     <span className="break-words text-xs">
                       {subjectName || " "}
@@ -580,6 +580,23 @@ export default function CommonTable({
                       {teacherName || " "}
                     </span>
                   </div>
+                </div> */}
+                <div className="flex  text-center flex-col w-full text-sm text-gray-600">
+                  {subjectName && teacherName ? (
+                    <>
+                      <div className="mb-1">
+                        <span className="break-words text-xs font-medium">
+                          {subjectName}
+                        </span>
+                      </div>
+
+                      <div>
+                        <span className="break-words text-pink-600 font-medium text-xs">
+                          {teacherName}
+                        </span>
+                      </div>
+                    </>
+                  ) : null}
                 </div>
 
                 <select
