@@ -439,7 +439,7 @@
 //     </div>
 //   );
 // }
-// TryUP
+// TryUP workin well also condition of same period same day for calss section is not select other
 import { useState, useEffect } from "react";
 import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 
@@ -487,10 +487,11 @@ export default function CommonTable({
   // Check if any subject is already selected for the same period and day in any other section
   const isSubjectDropdownDisabled = (day, period_no) => {
     for (const sectionKey in globalSubjectSelection) {
+      if (sectionKey === key) continue; // Skip the current section (it’s where the subject is being assigned)
       const sectionData = globalSubjectSelection[sectionKey];
       const selectedSubject = sectionData[day]?.[period_no];
       if (selectedSubject) {
-        return true; // Disable the dropdown if any subject is selected
+        return true; // Disable the dropdown if any subject is selected in any other section
       }
     }
     return false;

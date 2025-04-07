@@ -1044,6 +1044,7 @@ const TimetablePlanner = () => {
     }));
     console.log("setSelectedSubjects[]----->", selectedSubjects);
   };
+  // console.log("")
 
   const transformTimetableData = (data) => {
     const periods = [];
