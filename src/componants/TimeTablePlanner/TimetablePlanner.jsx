@@ -1065,7 +1065,7 @@ const TimetablePlanner = () => {
             Array.isArray(period.teacher) &&
             period.teacher.length > 0
               ? period.teacher.map((t) => t.t_name).join(", ")
-              : "N/A"; // If no teachers, return "N/A"
+              : " "; // If no teachers, return "N/A"
 
           // Add the period to the periods array, with subject and teacher names
           periods.push({
