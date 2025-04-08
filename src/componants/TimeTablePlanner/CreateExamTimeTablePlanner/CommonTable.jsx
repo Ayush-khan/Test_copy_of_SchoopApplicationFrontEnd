@@ -441,7 +441,8 @@
 // }
 // TryUP workin well also condition of same period same day for calss section is not select other
 import { useState, useEffect } from "react";
-import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
+// import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
+import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
 
 export default function CommonTable({
   periods,
