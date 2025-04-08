@@ -75,10 +75,10 @@ function TimetablePlanner() {
   };
 
   const handleSubmitEdit = (staffItem) => {
-    console.log("this is the )))))))))", staffItem.get_teacher);
+    console.log("this is the )))))))))", staffItem);
     // navigate(`/editStaff/${staffItem.user_id}`
     navigate(
-      `/CareTacker/edit/${staffItem.teacher_id}`,
+      `/timetablePlanner/edit/${staffItem.teacher_id}`,
 
       {
         state: { staff: staffItem },
@@ -160,7 +160,7 @@ function TimetablePlanner() {
               </div>
               <button
                 className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                onClick={() => navigate("/CreateCareTacker")}
+                onClick={() => navigate("/createTimetablePlanner")}
               >
                 <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
                 Add

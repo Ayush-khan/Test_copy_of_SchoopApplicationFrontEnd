@@ -576,7 +576,7 @@ function Index() {
         />
         {/* EditTimetablePlanner module */}
         <Route
-          path="/editTimetablePlanner"
+          path="/timetablePlanner/edit/:id"
           element={<PrivateRoute element={<EditTimetablePlanner />} />}
         />
         {/* Create TimeTable Module */}

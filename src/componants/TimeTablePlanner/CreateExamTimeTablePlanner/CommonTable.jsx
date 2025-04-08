@@ -600,8 +600,38 @@ export default function CommonTable({
                   ) : null}
                 </div>
 
-                <select
+                {/* <select
                   className="border p-1 w-full mt-2"
+                  value={selectedPeriod?.id || ""}
+                  onChange={(e) => {
+                    const selectedSub = {
+                      id: e.target.value,
+                      name:
+                        subjects.find((s) => s.id === e.target.value)
+                          ?.subjectname || "",
+                    };
+                    handleSubjectChange(day, rowIndex + 1, selectedSub);
+                  }}
+                  disabled={
+                    isSubjectDropdownDisabled(day, rowIndex + 1) ||
+                    (usedPeriods >= allocatedPeriods && !selectedPeriod?.id)
+                  }
+                >
+                  <option value="">Select</option>
+                  {subjects.map((subject) => (
+                    <option key={subject.subject_id} value={subject.sm_id}>
+                      {subject.subjectname}
+                    </option>
+                  ))}
+                </select> */}
+                {/* Disabled select */}
+                <select
+                  className={`border p-1 w-full mt-2 ${
+                    isSubjectDropdownDisabled(day, rowIndex + 1) ||
+                    (usedPeriods >= allocatedPeriods && !selectedPeriod?.id)
+                      ? "bg-gray-300 cursor-not-allowed" // Disabled state styles
+                      : "bg-white" // Default background color when enabled
+                  }`}
                   value={selectedPeriod?.id || ""}
                   onChange={(e) => {
                     const selectedSub = {

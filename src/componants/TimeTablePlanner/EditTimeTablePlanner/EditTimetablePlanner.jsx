@@ -3,7 +3,7 @@ import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import "react-datepicker/dist/react-datepicker.css";
 import EditCommonTimeTable from "./EditCommonTimeTable";
@@ -42,9 +42,14 @@ const EditTimetablePlanner = () => {
   const [checkUsedPeriods, setCheckUsedPeriods] = useState("");
   const [occupiedPeriods, setOccupiedPeriods] = useState(0); // Store occupied periods
   const [activeTab, setActiveTab] = useState("");
-
+  const location = useLocation();
+  const { staff } = location.state || {};
+  console.log("TeacherData is: ", staff);
   useEffect(() => {
     fetchExams();
+    if (staff) {
+      handleSearch();
+    }
   }, []);
 
   const fetchExams = async () => {
@@ -92,11 +97,6 @@ const EditTimetablePlanner = () => {
     setLoadingForSearch(false);
     // setSelectedStudent("");
     // setSelectedStudentId("");
-    if (!selectedStudentId) {
-      setStudentError("Please select teacher name.");
-      setLoadingForSearch(false);
-      return;
-    }
 
     setSearchTerm("");
     setActiveTab("");
@@ -120,7 +120,7 @@ const EditTimetablePlanner = () => {
 
       const token = localStorage.getItem("authToken");
       const periodResponse = await axios.get(
-        `${API_URL}/api/get_teacherperioddata?teacher_id=${selectedStudentId}`,
+        `${API_URL}/api/get_teacherperioddata?teacher_id=${staff?.teacher_id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -134,7 +134,7 @@ const EditTimetablePlanner = () => {
         toast.error("Failed to fetch teacher period data.");
       }
       const params = {
-        teacher_id: selectedStudentId,
+        teacher_id: staff?.teacher_id,
       };
 
       const response = await axios.get(
@@ -311,7 +311,8 @@ const EditTimetablePlanner = () => {
             period_no: period.period_no,
             time_in: period.time_in,
             time_out: period.time_out,
-            subject_id: period.subject, // Subject ID
+            subject_id: period.subject_id, // Subject ID
+            subject: period.subject,
             teachers: teachers, // Teacher(s) name(s)
             day: day, // Add the day to link periods to days
           });
@@ -439,7 +440,7 @@ const EditTimetablePlanner = () => {
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
               onClick={() => {
-                navigate("/dashboard");
+                navigate("/timetablePlanner");
               }}
             />
           </div>
