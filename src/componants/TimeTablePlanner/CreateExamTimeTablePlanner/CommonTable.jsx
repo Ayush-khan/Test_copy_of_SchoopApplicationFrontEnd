@@ -838,6 +838,7 @@ export default function CommonTable({
   const sectionId = activeTabData?.section_id;
   const key = `${classId}-${sectionId}`;
 
+  // Sync local selected subjects with global selected subjects when the active tab or selected subjects change
   useEffect(() => {
     if (selectedSubjects[key]) {
       setLocalSelectedSubjects(selectedSubjects[key]);
@@ -846,6 +847,7 @@ export default function CommonTable({
     }
   }, [selectedSubjects, key]);
 
+  // Update global subject selection when local selections change
   useEffect(() => {
     if (Object.keys(localSelectedSubjects).length) {
       setGlobalSubjectSelection((prevState) => ({
@@ -855,79 +857,71 @@ export default function CommonTable({
     }
   }, [localSelectedSubjects, key]);
 
-  // Disable dropdown if any subject is selected in any other section
-  const isSubjectDropdownDisabled = (day, period_no) => {
-    for (const sectionKey in globalSubjectSelection) {
-      if (sectionKey === key) continue;
-      const sectionData = globalSubjectSelection[sectionKey];
-      const selectedSubject = sectionData[day]?.[period_no];
-      if (selectedSubject) {
-        return true;
-      }
-    }
-    return false;
-  };
-
+  // Check if a subject is already selected in another section for the same period and day
   const isAnySubjectAlreadySelectedInOtherSection = (day, period_no) => {
     for (const sectionKey in globalSubjectSelection) {
-      if (sectionKey === key) continue;
+      if (sectionKey === key) continue; // Skip current section
       const sectionData = globalSubjectSelection[sectionKey];
       const selectedSubject = sectionData[day]?.[period_no];
       if (selectedSubject) {
-        return true;
+        return true; // Subject already selected in another section
       }
     }
     return false;
   };
 
+  // Handle subject selection or deselection
   const handleSubjectChange = (day, period_no, selectedSubject) => {
     if (!classId || !sectionId) return;
-
     const currentSelectedSubject = localSelectedSubjects?.[day]?.[period_no];
 
-    // Prevent selection if subject is already selected in another section for same period and day
+    // If subject is selected in another section, prevent selection
     if (
       selectedSubject.id &&
       isAnySubjectAlreadySelectedInOtherSection(day, period_no)
     ) {
       toast.error(
-        `You cannot select this subject as it's already selected in another section for ${day}, Period ${period_no}.`
+        `Subject already selected in another section for ${day}, Period ${period_no}.`
       );
-      return;
+      return; // Prevent the subject selection
     }
 
+    // Handle subject change (select or swap subjects)
     const updatedSubjects = {
       ...localSelectedSubjects,
       [day]: {
         ...(localSelectedSubjects[day] || {}),
         [period_no]: selectedSubject.id
           ? { id: selectedSubject.id, name: selectedSubject.name }
-          : null,
+          : null, // Clear subject if deselected
       },
     };
 
-    // Handle deselection of the subject and update used periods accordingly
+    // Update used periods count (when deselecting or selecting a subject)
     if (selectedSubject.id) {
+      // New subject selected
       if (!currentSelectedSubject || currentSelectedSubject.id === "") {
         setUsedPeriods((prev) => (prev < allocatedPeriods ? prev + 1 : prev));
       }
     } else {
+      // Subject cleared
       if (currentSelectedSubject) {
         setUsedPeriods((prev) => (prev > 0 ? prev - 1 : 0));
       }
     }
 
-    // Update global subject selections
+    // Update both local and global selections
     setLocalSelectedSubjects(updatedSubjects);
     setGlobalSubjectSelection((prevState) => ({
       ...prevState,
       [key]: updatedSubjects[day],
     }));
 
-    // Persist the subject selection
+    // Call the handleTableData to persist the change
     handleTableData(classId, sectionId, day, period_no, selectedSubject);
   };
 
+  // Render the rows for the table
   const renderRows = (days) => {
     const rows = [];
     const maxRows = Math.max(rowCounts.mon_fri, rowCounts.sat);
@@ -935,6 +929,7 @@ export default function CommonTable({
     for (let rowIndex = 0; rowIndex < maxRows; rowIndex++) {
       rows.push(
         <tr key={`row-${rowIndex}`}>
+          {/* Periods Column */}
           <td className="border p-2 text-center bg-gray-100 w-16">
             {rowIndex + 1}
           </td>
@@ -953,10 +948,7 @@ export default function CommonTable({
             const subjectName = periodData ? periodData.subject_id : " ";
             const teacherName = periodData ? periodData.teachers : " ";
 
-            const isSubjectSelectedInOtherSection =
-              isAnySubjectAlreadySelectedInOtherSection(day, rowIndex + 1);
-            const isMaxPeriodReached = usedPeriods === allocatedPeriods;
-
+            // Handle subject selection
             const handleSubjectSelection = (e) => {
               const selectedSub = {
                 id: e.target.value,
@@ -965,26 +957,13 @@ export default function CommonTable({
                   "",
               };
 
-              if (isMaxPeriodReached && !selectedPeriod) {
-                toast.error("Max periods reached. Cannot select new subject.");
-                return;
-              }
-
-              if (isSubjectSelectedInOtherSection) {
-                toast.error(
-                  `This subject is already selected in another section for ${day}, Period ${
-                    rowIndex + 1
-                  }`
-                );
-                return;
-              }
-
               handleSubjectChange(day, rowIndex + 1, selectedSub);
             };
 
-            const dropdownBgColor = isSubjectSelectedInOtherSection
-              ? "bg-yellow-200"
-              : "bg-white";
+            // Determine if the background should be highlighted (for selected subjects in other class-sections)
+            const isSelectedInOtherSection =
+              isAnySubjectAlreadySelectedInOtherSection(day, rowIndex + 1);
+            const highlightClass = isSelectedInOtherSection ? "bg-red-100" : "";
 
             return (
               <td key={day} className="border p-2">
@@ -1006,14 +985,14 @@ export default function CommonTable({
                   ) : null}
                 </div>
 
+                {/* Subject Dropdown */}
                 <select
-                  className={`border p-1 w-full mt-2 ${dropdownBgColor}`}
+                  className={`border p-1 w-full mt-2 ${highlightClass}`}
                   value={selectedPeriod?.id || ""}
                   onChange={handleSubjectSelection}
                   disabled={
-                    isSubjectDropdownDisabled(day, rowIndex + 1) ||
-                    (usedPeriods >= allocatedPeriods && !selectedPeriod?.id)
-                  }
+                    usedPeriods >= allocatedPeriods && !selectedPeriod?.id
+                  } // Disable if used periods match allocated periods and subject is not already selected
                 >
                   <option value="">Select</option>
                   {subjects.map((subject) => (
