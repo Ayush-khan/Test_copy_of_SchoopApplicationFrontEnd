@@ -77,13 +77,13 @@ function TimetablePlanner() {
   const handleSubmitEdit = (staffItem) => {
     console.log("this is the )))))))))", staffItem);
     // navigate(`/editStaff/${staffItem.user_id}`
-    navigate(
-      `/timetablePlanner/edit/${staffItem.teacher_id}`,
+    // navigate(
+    //   `/timetablePlanner/edit/${staffItem.teacher_id}`,
 
-      {
-        state: { staff: staffItem },
-      }
-    );
+    //   {
+    //     state: { staff: staffItem },
+    //   }
+    // );
   };
 
   const handleDelete = (staffCurrent) => {
@@ -105,35 +105,45 @@ function TimetablePlanner() {
         throw new Error("Caretacker ID is missing");
       }
 
-      const response = await axios.delete(
-        `${API_URL}/api/delete_caretaker/${currentStaff}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await axios.delete(`${API_URL}/api//${currentStaff}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
 
       if (response.status === 200) {
         fetchStaffs(); // Refresh staff list after successful deletion
         handleCloseModal();
-        toast.success("CareTacker deleted successfully!");
+        toast.success("Time Table Planner deleted successfully!");
       } else {
-        toast.error("Failed to delete CareTacker");
+        toast.error("Failed to delete Time Table Planner");
       }
     } catch (error) {
-      console.error("Error deleting CareTacker:", error);
-      toast.error("Failed to delete CareTacker");
+      console.error("Error deleting Time Table Planner:", error);
+      toast.error("Failed to delete Time Table Planner");
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false);
     }
   };
 
-  const filteredStaffs = staffs.filter((staff) =>
-    staff.teachername.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  //   const filteredStaffs = staffs.filter((staff) =>
+  //     staff.teachername.toLowerCase().includes(searchTerm.toLowerCase())
+  //   );
+  const filteredStaffs = staffs.filter((staff) => {
+    const lowerSearch = searchTerm.toLowerCase();
+
+    // Match by name
+    const matchesName = staff.teachername.toLowerCase().includes(lowerSearch);
+
+    // Match by exact numeric fields (as string comparison)
+    const matchesPeriodsAllocated =
+      staff.periods_allocated?.toString() === searchTerm;
+    const matchesPeriodsUsed = staff.periods_used?.toString() === searchTerm;
+
+    return matchesName || matchesPeriodsAllocated || matchesPeriodsUsed;
+  });
 
   const displayedStaffs = filteredStaffs.slice(
     currentPage * pageSize,
@@ -303,7 +313,7 @@ function TimetablePlanner() {
             <div className="modal-dialog  modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title  ">Delete Staff</h5>
+                  <h5 className="modal-title  ">Delete Time Table Planner</h5>
 
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
