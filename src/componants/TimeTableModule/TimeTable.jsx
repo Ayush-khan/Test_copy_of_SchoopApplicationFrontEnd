@@ -27,6 +27,7 @@ const TimeTable = () => {
   const [showTimetable, setShowTimetable] = useState(false);
   const [selectedDay, setSelectedDay] = useState(false);
   const [currentTimetable, setCurrentTimetable] = useState(null);
+  const [loadingForSearch, setLoadingForSearch] = useState(false);
 
   const classOptions = useMemo(
     () =>
@@ -66,6 +67,7 @@ const TimeTable = () => {
   };
 
   const handleSearch = async () => {
+    setLoadingForSearch(false);
     if (!selectedClass) {
       setClassError("Please select a class.");
       return;
@@ -75,6 +77,7 @@ const TimeTable = () => {
     setShowTimetable(true); // Set search action as performed
 
     try {
+      setLoadingForSearch(true);
       const token = localStorage.getItem("authToken");
       const { class_id, section_id } = selectedClass.value;
 
@@ -96,6 +99,7 @@ const TimeTable = () => {
       toast.error("Error fetching class timetable.");
     } finally {
       setLoading(false);
+      setLoadingForSearch(false);
     }
   };
 
@@ -181,7 +185,7 @@ const TimeTable = () => {
           <table border="1" class="table">
             <thead class="bg-gray-200">
               <tr class="bg-gray-100">
-                <th class="px-3 py-2 border border-black text-sm font-semibold">Sr. No.</th>
+                <th class="px-3 py-2 border border-black text-sm font-semibold">Period No.</th>
                 <th class="px-3 py-2 border border-black text-sm font-semibold">Monday</th>
                 <th class="px-3 py-2 border border-black text-sm font-semibold">Tuesday</th>
                 <th class="px-3 py-2 border border-black text-sm font-semibold">Wednesday</th>
@@ -196,7 +200,7 @@ const TimeTable = () => {
                   const assemblyRow =
                     index === 0
                       ? `<tr class="text-sm bg-blue-100">
-                          <td class="px-3 py-2 border border-black font-semibold" colspan="7">Assembly</td>
+                          <td class="px-3 py-2 border border-black font-semibold" colspan="7">Assembly 8.00 - 8.30</td>
                         </tr>`
                       : "";
 
@@ -218,8 +222,8 @@ const TimeTable = () => {
                         .map((day) => {
                           const lecture = entry[day] || {};
                           const subject = lecture.subject || " ";
-                          const timeIn = lecture.time_in || " ";
-                          const timeOut = lecture.time_out || " ";
+                          // const timeIn = lecture.time_in || " ";
+                          // const timeOut = lecture.time_out || " ";
                           const teacherArray = Array.isArray(lecture.teacher)
                             ? lecture.teacher
                                 .map((t) =>
@@ -234,24 +238,25 @@ const TimeTable = () => {
 
                           return `<td class="px-3 py-2 border border-black">
                                     <b>${subject}</b><br>
-                                    ${timeIn} - ${timeOut}<br>
+                                    
                                     ${teacherArray}
                                   </td>`;
                         })
                         .join("")}
                     </tr>`;
+                  // ${timeIn} - ${timeOut}<br>
 
                   const shortBreakRow =
                     index === 1
                       ? `<tr class="text-sm bg-yellow-500">
-                          <td class="px-3 py-2 border border-black font-semibold" colspan="7">Short Break</td>
+                          <td class="px-3 py-2 border border-black font-semibold" colspan="7">Short Break 9.45 - 10.00</td>
                         </tr>`
                       : "";
 
                   const longBreakRow =
                     index === 4
                       ? `<tr class="text-sm bg-red-500">
-                          <td class="px-3 py-2 border border-black font-semibold" colspan="7">Long Break</td>
+                          <td class="px-3 py-2 border border-black font-semibold" colspan="7">Long Break 11.45 - 12.15</td>
                         </tr>`
                       : "";
 
@@ -265,7 +270,7 @@ const TimeTable = () => {
         </div>
       </div>`;
 
-    const printWindow = window.open("", "", "height=1000,width=1200");
+    const printWindow = window.open("", "_blank", "height=1000,width=1200");
 
     printWindow.document.write(`
       <html>
@@ -347,119 +352,193 @@ const TimeTable = () => {
       </body>
       </html>`);
 
+    // printWindow.document.close();
+    // printWindow.print();
+    // console.log(printContent);
     printWindow.document.close();
-    printWindow.print();
-    console.log(printContent);
+
+    // Ensure content is fully loaded before printing
+    printWindow.onload = function () {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close(); // Optional: close after printing
+    };
   };
 
   return (
     <>
       <ToastContainer />
-      <div className="container mx-auto md:mt-4">
-        <div className="card mx-auto w-full md:w-[80%] lg:w-3/4 shadow-lg">
-          <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
-            <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl">
-              TimeTable
-            </h3>
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={() => navigate("/createTimeTable")}
-            >
-              <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
-              Add
-            </button>
-          </div>
-          <div
-            className="relative w-[97%] mb-3 h-1 mx-auto"
-            style={{ backgroundColor: "#C03078" }}
-          ></div>
-          <div className="mb-4">
-            <div className="w-full md:w-[80%] mx-auto">
-              <div className="max-w-full bg-white shadow-md rounded-lg border border-gray-300 mx-auto mt-6 p-6">
-                <div className="w-full flex flex-col md:flex-row items-center justify-center gap-2">
-                  {/* Class Select Section */}
-                  <div className="flex items-center gap-x-2">
-                    <label
-                      htmlFor="classSection"
-                      className="text-sm md:text-base"
+      {!(showTimetable && timetable) && (
+        <div className="container mx-auto md:mt-2">
+          <div className="card mx-auto w-full md:w-[80%] lg:w-3/4 shadow-lg">
+            <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
+              <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl">
+                TimeTable
+              </h3>
+              <button
+                className="btn btn-primary btn-sm"
+                // onClick={() => navigate("/createTimeTable")}
+                onClick={() => navigate("/createTimetablePlanner")}
+              >
+                <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
+                Add
+              </button>
+            </div>
+            <div
+              className="relative w-[97%] mb-3 h-1 mx-auto"
+              style={{ backgroundColor: "#C03078" }}
+            ></div>
+            <div className="mb-4">
+              <div className="w-full md:w-[80%] mx-auto">
+                <div className="max-w-full bg-white shadow-md rounded-lg border border-gray-300 mx-auto mt-6 p-6">
+                  <div className="w-full flex flex-col md:flex-row items-center justify-center gap-2">
+                    {/* Class Select Section */}
+                    <div className="flex items-center gap-x-6">
+                      <label
+                        htmlFor="classSection"
+                        className="text-sm md:text-base"
+                      >
+                        Class <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[200px]">
+                        <Select
+                          id="classSelect"
+                          menuPortalTarget={document.body}
+                          menuPosition="fixed"
+                          value={selectedClass}
+                          onChange={handleClassSelect}
+                          options={classOptions}
+                          placeholder={
+                            loadingClasses ? "Loading classes..." : "Select"
+                          }
+                          isSearchable
+                          isClearable
+                          isDisabled={loadingClasses}
+                          className="text-sm"
+                        />
+                        {classError && (
+                          <div className="text-danger text-xs mt-1">
+                            {classError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Search Button */}
+                    {/* <button
+                      className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm px-4"
+                      onClick={handleSearch}
                     >
-                      Class <span className="text-red-500">*</span>
-                    </label>
-                    <div className="w-[60%] md:w-[200px]">
-                      <Select
-                        id="classSelect"
-                        menuPortalTarget={document.body}
-                        menuPosition="fixed"
-                        value={selectedClass}
-                        onChange={handleClassSelect}
-                        options={classOptions}
-                        placeholder={
-                          loadingClasses ? "Loading classes..." : "Select"
-                        }
-                        isSearchable
-                        isClearable
-                        isDisabled={loadingClasses}
-                        className="text-sm"
-                      />
-                      {classError && (
-                        <div className="text-danger text-xs mt-1">
-                          {classError}
-                        </div>
-                      )}
+                      Search
+                    </button> */}
+                    <div className="mt-1 ">
+                      <button
+                        type="search"
+                        onClick={handleSearch}
+                        style={{ backgroundColor: "#2196F3" }}
+                        className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded  gap-x-6${
+                          loadingForSearch
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={loadingForSearch}
+                      >
+                        {loadingForSearch ? (
+                          <span className="flex items-center">
+                            <svg
+                              className="animate-spin h-4 w-4 mr-2 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              ></path>
+                            </svg>
+                            Searching...
+                          </span>
+                        ) : (
+                          "Search"
+                        )}
+                      </button>
                     </div>
                   </div>
-
-                  {/* Search Button */}
-                  <button
-                    className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm px-4"
-                    onClick={handleSearch}
-                  >
-                    Search
-                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="flex justify-center">
-        <div className="px-4 py-5 border-x-gray-200 mx-auto w-full md:w-[70%]">
+        <div className="px-4 py-3 border-x-gray-200 mx-auto w-full md:w-[60%]">
           {showTimetable && timetable && (
             <>
               {/* Day Selector Buttons */}
-              <div className="p-4 border bg-white rounded-lg shadow-md text-center">
-                <div className="flex justify-end gap-2 w-full mb-3">
-                  {/* <button
-                    className="px-2 py-2 text-sm md:text-md bg-blue-500 text-white rounded-md  hover:bg-blue-600 transition-all flex items-center gap-2"
-                    onClick={() =>
-                      handleEdit(
-                        selectedClass?.value?.class_id,
-                        selectedClass?.value?.section_id
-                      )
-                    }
-                  >
-                    <FontAwesomeIcon icon={faEdit} />
-                  </button> */}
+              <div className="p-3 border bg-white rounded-lg shadow-md text-center">
+                <div className="relative w-full mb-3">
+                  {/* Centered Class Label */}
+                  <h3 className="text-pink-600 font-extrabold text-center text-base md:text-lg absolute left-1/2 transform -translate-x-1/2">
+                    Timetable - {selectedClass.label}
+                  </h3>
 
-                  {/* <button
-                    className="px-2 py-2 text-sm md:text-md bg-red-500 text-white rounded-md hover:bg-red-600 transition-all flex items-center gap-2"
-                    onClick={() =>
-                      handleDelete(
-                        selectedClass?.value?.class_id,
-                        selectedClass?.value?.section_id
-                      )
-                    }
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button> */}
+                  {/* Print Button Aligned Right */}
+                  {/* <div className="flex justify-end">
+                    <button
+                      className="px-2 py-2 text-sm md:text-md bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all flex items-center gap-2"
+                      onClick={handlePrint}
+                    >
+                      <FontAwesomeIcon icon={faPrint} />
+                    </button>
+                    <RxCross1
+                      className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                      onClick={() => {
+                        navigate("/dashboard");
+                      }}
+                    />
+                  </div> */}
+                  <div className="flex justify-end items-center gap-2">
+                    {/* <button
+                      className="px-3 py-2 text-sm md:text-md bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all flex items-center gap-2"
+                      onClick={handlePrint}
+                    >
+                      <FontAwesomeIcon icon={faPrint} />
+                    </button> */}
+                    <button
+                      className="px-2 py-2 text-sm md:text-md bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all flex items-center gap-2"
+                      onClick={handlePrint}
+                    >
+                      <FontAwesomeIcon icon={faPrint} />
+                    </button>
 
-                  <button
-                    className="px-2 py-2 text-sm md:text-md bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-all flex items-center gap-2"
-                    onClick={handlePrint}
-                  >
-                    <FontAwesomeIcon icon={faPrint} />
-                  </button>
+                    {/* <button
+                      onClick={() => navigate("/timeTable")}
+                      className="p-2 py-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-md transition-all"
+                    >
+                      <RxCross1 className="text-sm" />
+                    </button> */}
+                    <button
+                      onClick={() => {
+                        setShowTimetable(false);
+                        setTimetable(null);
+                        setSelectedDay(null); // optional
+                        setSelectedClass(null);
+                      }}
+                      className="p-2 py-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-md transition-all"
+                    >
+                      <RxCross1 className="text-sm" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2 justify-center">
@@ -480,14 +559,14 @@ const TimeTable = () => {
               </div>
 
               {/* Timetable Display */}
-              {selectedDay && (
+              {/* {selectedDay && (
                 <div className="p-4 text-center mx-auto">
                   <div className="space-y-2">
                     <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
                       <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2 ">
                         {" "}
-                        {/* ml-64 */}
-                        <span className="w-[35%] font-bold"></span>
+                       
+                        <span className="w-[30%] font-bold"></span>
                         <span className="font-bold">Assembly</span>
                         <span className="font-bold">8.00 - 8.30</span>
                       </div>
@@ -495,29 +574,26 @@ const TimeTable = () => {
 
                     {timetable[selectedDay].map((lecture, index) => (
                       <React.Fragment key={index}>
-                        {/* Lecture Block */}
-                        <div className="border rounded-lg px-4 py-2 shadow-sm bg-gray-100 text-left">
-                          <div className="flex flex-row justify-between items-center text-md font-medium">
-                            {/* Subject - Left aligned with fixed width */}
-                            <span className="w-[25%] text-left ">
+                        
+                        <div className="border rounded-lg px-4 py-2 shadow-sm bg-gray-100 text-left min-h-[60px] flex items-center">
+                          <div className="flex flex-row justify-between items-center text-md font-medium w-full">
+                            <span className="w-[17%] text-left pl-3">
+                              {lecture.period_no}
+                            </span>
+                            <span className="w-[25%] text-center">
                               {lecture.subject}
                             </span>
-                            {/* Time Slot - Centered */}
-                            <span className="w-[25%] text-center">
-                              {lecture.time_in} - {lecture.time_out}
-                            </span>
-                            {/* Teacher Name - Right aligned */}
-                            <span className="w-[35%] text-right ">
+                            <span className="w-[35%] text-right">
                               {lecture.teacher?.[0]?.t_name || ""}
                             </span>
                           </div>
                         </div>
 
-                        {/* Breaks */}
+                        
                         {index === 1 && (
                           <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
                             <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
-                              <span className="w-[34%] font-bold"></span>
+                              <span className="w-[30%] font-bold"></span>
                               <span className="font-bold">Short Break</span>
                               <span className="font-bold">9.45 - 10.00</span>
                             </div>
@@ -526,7 +602,7 @@ const TimeTable = () => {
                         {index === 4 && (
                           <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
                             <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
-                              <span className="w-[34%] font-bold"></span>
+                              <span className="w-[30%] font-bold"></span>
                               <span className="font-bold">Long Break</span>
                               <span className="font-bold">11.45 - 12.15</span>
                             </div>
@@ -536,6 +612,73 @@ const TimeTable = () => {
                     ))}
                   </div>
                 </div>
+              )} */}
+
+              {selectedDay && (
+                <>
+                  {timetable[selectedDay] &&
+                  timetable[selectedDay].length > 0 ? (
+                    <div className="p-4 text-center mx-auto">
+                      <div className="space-y-2">
+                        {/* Assembly Block */}
+                        <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
+                          <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
+                            <span className="w-[35%] font-bold"></span>
+                            <span className="font-bold">Assembly</span>
+                            <span className="font-bold">8.00 - 8.30</span>
+                          </div>
+                        </div>
+
+                        {timetable[selectedDay].map((lecture, index) => (
+                          <React.Fragment key={index}>
+                            {/* Lecture Block */}
+                            <div className="border rounded-lg px-4 py-2 shadow-sm bg-gray-100 text-left min-h-[60px] flex items-center">
+                              <div className="flex flex-row justify-between items-center text-md font-medium w-full">
+                                <span className="w-[25%] text-left pl-3">
+                                  {lecture.period_no}
+                                </span>
+                                <span className="w-[25%] text-center">
+                                  {lecture.subject}
+                                </span>
+                                <span className="w-[35%] text-right">
+                                  {lecture.teacher?.[0]?.t_name || ""}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Breaks */}
+                            {index === 1 && (
+                              <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
+                                <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
+                                  <span className="w-[32%] font-bold"></span>
+                                  <span className="font-bold">Short Break</span>
+                                  <span className="font-bold">
+                                    9.45 - 10.00
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                            {index === 4 && (
+                              <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
+                                <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
+                                  <span className="w-[32%] font-bold"></span>
+                                  <span className="font-bold">Long Break</span>
+                                  <span className="font-bold">
+                                    11.45 - 12.15
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-black-500 font-extrabold">
+                      No lectures for {selectedDay}
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
