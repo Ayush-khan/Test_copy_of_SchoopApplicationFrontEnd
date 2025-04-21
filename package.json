@@ -8,10 +8,10 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "dev:test": "vite --mode test",
-    "dev:live": "vite --mode live",
-    "build:test": "vite build --mode test",
-    "build:live": "vite build --mode live"
+    "dev:test": "vite --mode test --config vite.config.test.js",
+    "dev:live": "vite --mode live --config vite.config.js",
+    "build:test": "vite build --mode test --config vite.config.test.js",
+    "build:live": "vite build --mode live --config vite.config.js"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
