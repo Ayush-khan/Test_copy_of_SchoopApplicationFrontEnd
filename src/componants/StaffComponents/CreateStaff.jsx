@@ -2138,9 +2138,9 @@ function CreateStaff() {
                   <option className="bg-gray-300" value="">
                     Select
                   </option>{" "}
-                  <option value="trained-PGT">trained-PGT</option>
-                  <option value="trained-TGT">trained-TGT</option>{" "}
-                  <option value="trained-PRT">trained-PRT</option>
+                  <option value="Trained-PGT">Trained-PGT</option>
+                  <option value="Trained-TGT">Trained-TGT</option>{" "}
+                  <option value="Trained-PRT">Trained-PRT</option>
                   <option value="NTT">NTT</option>
                   <option value="ECCE">ECCE</option>
                   <option value="Untrained">Untrained</option>

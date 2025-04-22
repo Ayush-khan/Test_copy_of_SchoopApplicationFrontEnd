@@ -14,6 +14,7 @@ function EditStaff() {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
+  const [isImageCropped, setIsImageCropped] = useState(false);
 
   const { staff } = location.state || {};
   console.log("Staff is in edit form***", staff);
@@ -34,7 +35,7 @@ function EditStaff() {
     designation: "",
     academic_qual: [],
     professional_qual: "",
-    class_teacher_of: "",
+    class_teacher_of: [],
     trained: "",
     experience: "",
     aadhar_card_no: "",
@@ -56,6 +57,10 @@ function EditStaff() {
   console.log("employeeID", staff);
   useEffect(() => {
     if (staff) {
+      const classTeacherOf =
+        staff.classes && staff.classes.length > 0
+          ? `${staff.classes[0].classname}-${staff.classes[0].sectionname}`
+          : "Not applicable";
       setFormData({
         employee_id: staff.employee_id || "NA",
         name: staff.name || "",
@@ -72,6 +77,7 @@ function EditStaff() {
         academic_qual: staff.academic_qual
           ? staff.academic_qual.split(",")
           : [],
+        class_teacher_of: classTeacherOf,
         professional_qual: staff.professional_qual || "",
         special_sub: staff.special_sub || "",
         trained: staff.trained || "",
@@ -252,6 +258,7 @@ function EditStaff() {
 
   // Image Croping funtionlity
   const handleImageCropped = (croppedImageData) => {
+    setIsImageCropped(true); // Mark that cropping has occurred
     setFormData((prevData) => ({
       ...prevData,
       teacher_image_name: croppedImageData,
@@ -276,9 +283,12 @@ function EditStaff() {
     // Format form data for API
     const formattedFormData = {
       ...formData,
+      teacher_image_name: isImageCropped
+        ? String(formData.teacher_image_name)
+        : "",
       academic_qual: formData.academic_qual, // Ensure this is an array
       experience: String(formData.experience), // Ensure this is a string
-      teacher_image_name: String(formData.teacher_image_name),
+      // teacher_image_name: String(formData.teacher_image_name),
     };
 
     try {
@@ -640,9 +650,9 @@ function EditStaff() {
                     <option className="bg-gray-300" value="">
                       Select
                     </option>{" "}
-                    <option value="trained-PGT">trained-PGT</option>
-                    <option value="trained-TGT">trained-TGT</option>{" "}
-                    <option value="trained-PRT">trained-PRT</option>
+                    <option value="Trained-PGT">Trained-PGT</option>
+                    <option value="Trained-TGT">Trained-TGT</option>{" "}
+                    <option value="Trained-PRT">Trained-PRT</option>
                     <option value="NTT">NTT</option>
                     <option value="ECCE">ECCE</option>
                     <option value="Untrained">Untrained</option>
@@ -814,7 +824,7 @@ function EditStaff() {
                     readOnly
                     value={formData.class_teacher_of}
                     onChange={handleChange}
-                    className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                    className="input-field bg-gray-200  no-underline block w-full border border-gray-300 rounded-md py-1 px-3 shadow-inner"
                   />
                 </div>
                 {/* <div>
@@ -1039,7 +1049,7 @@ function EditStaff() {
                     maxLength={30}
                     id="special_sub"
                     name="special_sub"
-                    // value={formData.special_sub}
+                    value={formData.special_sub}
                     onChange={handleChange}
                     placeholder="Special Subject for D.Ed/B.Ed"
                     className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"

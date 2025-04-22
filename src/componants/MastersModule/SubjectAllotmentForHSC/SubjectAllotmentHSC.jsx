@@ -161,9 +161,7 @@ const SubjectAllotmentHSC = () => {
   const classOptions = useMemo(
     () =>
       classesforForm
-        .filter(
-          (cls) => cls.class_id > 125 || cls.name === "11" || cls.name === "12"
-        )
+        .filter((cls) => cls.name === "11" || cls.name === "12")
         .map((cls) => ({
           value: cls.class_id,
           label: `${cls.name}`,
