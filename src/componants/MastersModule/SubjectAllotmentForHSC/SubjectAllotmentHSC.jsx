@@ -154,7 +154,7 @@ const SubjectAllotmentHSC = () => {
   };
 
   const handleStudentSelect = (selectedOption) => {
-    setNameError(""); // Reset student error on selection
+    setNameError(""); // Reset student error on selection is
     setSelectedStudent(selectedOption);
     setSelectedStudentId(selectedOption?.value);
   };
