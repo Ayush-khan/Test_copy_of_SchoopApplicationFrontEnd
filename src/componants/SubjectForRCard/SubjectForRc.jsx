@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 // import NavBar from "../../../Layouts/NavBar";
@@ -33,6 +33,9 @@ function SubjectForRc() {
   const [backendErrors, setBackendErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nameErrorforName, setNameErrorforName] = useState("");
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   const fetchSections = async () => {
     setLoading(true);
@@ -432,13 +435,32 @@ function SubjectForRc() {
     }));
   };
 
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0);
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current);
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
   const filteredSections = sections.filter((section) => {
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    const lowerCaseSearchTerm = searchTerm.trim().toLowerCase();
     return (
       section.name.toLowerCase().includes(lowerCaseSearchTerm) ||
       section.sequence.toString().toLowerCase().includes(lowerCaseSearchTerm)
     );
   });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,

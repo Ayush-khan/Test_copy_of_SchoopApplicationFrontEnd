@@ -40,6 +40,10 @@ function SubjectAllotmentForReportCard() {
   const [isSubmittingForSearch, setIsSubmittingForSearch] = useState(false);
 
   const dropdownRef = useRef(null);
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
+
   //   for allot subject checkboxes
 
   const [error, setError] = useState(null);
@@ -397,6 +401,22 @@ function SubjectAllotmentForReportCard() {
     setShowDeleteModal(false);
   };
 
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0);
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current);
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const searchLower = searchTerm.trim().toLowerCase();
   const filteredSections = subjects.filter((section) => {
     // Convert values to lowercase for case-insensitive comparison
     const className = section?.get_clases?.name?.toLowerCase() || ""; // Class name
@@ -406,11 +426,15 @@ function SubjectAllotmentForReportCard() {
 
     // Check if the search term matches any of the fields
     return (
-      className.includes(searchTerm.toLowerCase()) ||
-      subjectName.includes(searchTerm.toLowerCase()) ||
-      subjectType.includes(searchTerm.toLowerCase())
+      className.toLowerCase().includes(searchLower) ||
+      subjectName.toLowerCase().includes(searchLower) ||
+      subjectType.toLowerCase().includes(searchLower)
     );
   });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,

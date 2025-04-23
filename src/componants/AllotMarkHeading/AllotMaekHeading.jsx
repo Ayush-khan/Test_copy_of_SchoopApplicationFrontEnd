@@ -43,6 +43,9 @@ function AllotMarksHeading() {
   const [marksError, setMarksError] = useState(""); // Error for validation
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
+
   const pageSize = 10;
   useEffect(() => {
     fetchClassNames();
@@ -333,6 +336,23 @@ function AllotMarksHeading() {
     setShowDeleteModal(false);
   };
 
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0);
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current);
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const searchLower = searchTerm.trim().toLowerCase();
+
   const filteredSections = subjects.filter((section) => {
     // Extract relevant fields from each section
     const className = section?.get_class?.name?.toLowerCase() || ""; // Class name
@@ -343,13 +363,17 @@ function AllotMarksHeading() {
 
     // Check if the search term matches any of the fields
     return (
-      className.includes(searchTerm.toLowerCase()) ||
-      subjectName.includes(searchTerm.toLowerCase()) ||
-      examName.includes(searchTerm.toLowerCase()) ||
-      marksHeading.includes(searchTerm.toLowerCase()) ||
-      highestMarks.includes(searchTerm)
+      className.toLowerCase().includes(searchLower) ||
+      subjectName.toLowerCase().includes(searchLower) ||
+      examName.toLowerCase().includes(searchLower) ||
+      marksHeading.toLowerCase().includes(searchLower) ||
+      highestMarks.toLowerCase().includes(searchLower)
     );
   });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,

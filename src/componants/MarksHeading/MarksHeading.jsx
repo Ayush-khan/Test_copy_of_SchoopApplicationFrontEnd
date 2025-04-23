@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -32,6 +32,9 @@ function MarksHeading() {
   const [sequence, setSequence] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nameErrorforName, setNameErrorforName] = useState("");
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   const pageSize = 10;
   //   useEffect(() => {
@@ -116,6 +119,23 @@ function MarksHeading() {
   };
 
   // Filter and paginate sections
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0);
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current);
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const searchLower = searchTerm.trim().toLowerCase();
+  // Filter and paginate sections
   const filteredSections = sections.filter((section) => {
     const gradeName = section?.name?.toLowerCase() || ""; // Convert grade name to lowercase
     const marksHeadingsId = section?.marks_headings_id?.toString() || ""; // Convert ID to string
@@ -124,12 +144,16 @@ function MarksHeading() {
 
     // Combine all fields for search
     return (
-      gradeName.includes(searchTerm.toLowerCase()) || // Search by grade name
-      marksHeadingsId.includes(searchTerm) || // Search by marks_heading_id
-      sequence.includes(searchTerm) || // Search by sequence
-      writtenExam.includes(searchTerm.toLowerCase()) // Search by written_exam
+      gradeName.toLowerCase().includes(searchLower) || // Search by grade name
+      marksHeadingsId.toLowerCase().includes(searchLower) || // Search by marks_heading_id
+      sequence.toLowerCase().includes(searchLower) || // Search by sequence
+      writtenExam.toLowerCase().includes(searchLower) // Search by written_exam
     );
   });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections]);
 
   // Calculate pagination
   const displayedSections = filteredSections.slice(
@@ -614,7 +638,7 @@ function MarksHeading() {
                 </table>
               </div>
             </div>
-            {filteredSections.length > pageSize && (
+            {/* {filteredSections.length > pageSize && (
               <ReactPaginate
                 previousLabel={"Previous"}
                 nextLabel={"Next"}
@@ -634,7 +658,29 @@ function MarksHeading() {
                 breakLinkClassName={"page-link"}
                 activeClassName={"active"}
               />
-            )}
+            )} */}
+
+            <div className=" flex justify-center pt-2 -mb-3">
+              <ReactPaginate
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
+                breakLabel={"..."}
+                breakClassName={"page-item"}
+                breakLinkClassName={"page-link"}
+                pageCount={pageCount}
+                marginPagesDisplayed={1}
+                pageRangeDisplayed={1}
+                onPageChange={handlePageClick}
+                containerClassName={"pagination"}
+                pageClassName={"page-item"}
+                pageLinkClassName={"page-link"}
+                previousClassName={"page-item"}
+                previousLinkClassName={"page-link"}
+                nextClassName={"page-item"}
+                nextLinkClassName={"page-link"}
+                activeClassName={"active"}
+              />
+            </div>
           </div>
         </div>
 
