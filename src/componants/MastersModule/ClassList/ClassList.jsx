@@ -2,7 +2,7 @@ import axios from "axios";
 import ReactPaginate from "react-paginate";
 import NavBar from "../../../Layouts/NavBar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
@@ -29,6 +29,9 @@ function ClassList() {
 
   const pageSize = 10;
   const [validationErrors, setValidationErrors] = useState({});
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   // validations state for unique name
   const [nameAvailable, setNameAvailable] = useState(true);
@@ -553,20 +556,40 @@ function ClassList() {
   //     cls?.get_department?.name.toLowerCase().includes(searchTerm.toLowerCase())
   // );
 
-  const filteredClasses = classes.filter((cls, index) => {
-    const searchLower = searchTerm.toLowerCase();
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
 
-    return (
-      cls.name.toLowerCase().includes(searchLower) || // Filter by name
-      cls?.students_count?.toString().includes(searchLower) || // Filter by students_count
-      cls?.get_department?.name.toLowerCase().includes(searchLower) // Filter by department name
-    );
-  });
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save current page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
 
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  // Apply filtering logic
+  const searchLower = searchTerm.trim().toLowerCase();
+  const filteredClasses = classes.filter(
+    (cls) =>
+      cls.name.toLowerCase().includes(searchLower) ||
+      cls?.students_count?.toString().includes(searchLower) ||
+      cls?.get_department?.name.toLowerCase().includes(searchLower)
+  );
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredClasses.length / pageSize));
+  }, [filteredClasses, pageSize]);
+
+  // Paginate
   const displayedClasses = filteredClasses.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
+
   const handleChangeSectionName = (e) => {
     const { value } = e.target;
     setNameError("");

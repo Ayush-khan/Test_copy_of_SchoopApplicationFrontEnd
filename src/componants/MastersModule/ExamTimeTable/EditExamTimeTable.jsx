@@ -910,15 +910,15 @@ const EditExamTimeTable = () => {
           }}
         ></div>
         {/* Search Section */}
-        <div className="w-full  text-sm md:text-[1.4em] text-opacity-90  text-blue-700  flex flex-row justify-center items-center">
-          Exam Timetable of{" "}
-          <span className="px-1 md:px-2">{staff?.examname}</span> ( Class{" "}
+        <div className="w-full  text-sm md:text-[1.4em] text-opacity-90 font-semibold text-blue-700  flex flex-row justify-center items-center">
+          Timetable of <span className="px-1 md:px-2">{staff?.examname}</span> (
+          Class{" "}
           <span className="text-pink-500 px-1 md:px-2 ">{staff?.name}</span> )
         </div>
         {/* Form Section - Displayed when parentInformation is fetched */}
         {/* // Render the table */}
         <>
-          <div className="w-full mx-auto pb-4 pt-2 px-1 md:px-4">
+          <div className="w-full mx-auto py-4 px-1 md:px-4">
             <div className="card bg-gray-100 py-2 px-3 rounded-md">
               <div className="overflow-x-auto">
                 <table className="table-auto mt-4 w-full border-collapse border bg-gray-50 border-gray-300">

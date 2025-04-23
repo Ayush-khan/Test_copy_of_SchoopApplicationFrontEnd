@@ -74,9 +74,7 @@ const ViewExamTimeTable = () => {
     <div class="flex items-center justify-center min-h-screen bg-white">
       <div id="tableHeading" class="text-center w-3/4">
         <h4 id="tableHeading5" class="text-xl text-center mb-0">
-          Exam Timetable of ${examDetails.examname} (Class ${
-      examDetails.classname
-    })
+          Timetable of ${examDetails.examname} (Class ${examDetails.classname})
         </h4>
         <table class="w-full border-collapse border border-black mx-auto mt-0">
           <thead>
@@ -121,7 +119,7 @@ const ViewExamTimeTable = () => {
     printWindow.document.write(
       `<html>
       <head>
-        <title>Exam Timetable of ${examDetails.examname} (Class ${examDetails.classname})</title>
+        <title>Timetable of ${examDetails.examname} (Class ${examDetails.classname})</title>
         <style>
           @page {
             margin:  0 ; /* Remove browser-added margins and headers/footers */
@@ -211,8 +209,8 @@ const ViewExamTimeTable = () => {
             <FiPrinter />{" "}
           </button>
         </div>
-        <div className="w-full mt-2 text-sm md:text-[1.4em] text-opacity-90  text-blue-700 flex flex-row justify-center items-center">
-          Exam Timetable of{" "}
+        <div className="w-full mt-2 text-sm md:text-[1.4em] text-opacity-90 font-semibold text-blue-700 flex flex-row justify-center items-center">
+          Timetable of{" "}
           <span className="px-1 md:px-2">{examDetails.examname}</span> (Class{" "}
           <span className="text-pink-500 px-1 md:px-2">
             {examDetails.classname}
@@ -222,7 +220,7 @@ const ViewExamTimeTable = () => {
 
         <div
           id="printable-area"
-          className="md:w-[75%] w-full mx-auto pb-4 pt-2 px-1 md:px-4"
+          className="md:w-[75%] w-full mx-auto py-4 px-1 md:px-4"
         >
           <div className="card bg-gray-100 py-2 px-3 rounded-md">
             <div className="overflow-x-auto">

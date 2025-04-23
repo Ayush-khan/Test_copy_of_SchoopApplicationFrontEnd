@@ -1,7 +1,7 @@
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEdit,
@@ -37,6 +37,9 @@ function ExamTImeTable() {
   const [currentStudentDataForActivate, setCurrentStudentDataForActivate] =
     useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -201,11 +204,31 @@ function ExamTImeTable() {
     }
   };
 
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save current page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const searchLower = searchTerm.trim().toLowerCase();
   const filteredStaffs = staffs.filter(
     (staff) =>
-      staff?.examname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      staff?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      staff?.examname?.toLowerCase().includes(searchLower) ||
+      staff?.name?.toLowerCase().includes(searchLower)
   );
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredStaffs.length / pageSize));
+  }, [filteredStaffs, pageSize]);
 
   const displayedStaffs = filteredStaffs.slice(
     currentPage * pageSize,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -35,6 +35,9 @@ function SubjectList() {
     "Co-Scholastic_hsc",
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   const pageSize = 10;
 
@@ -76,15 +79,35 @@ function SubjectList() {
   //   section.name.toLowerCase().includes(searchTerm.toLowerCase())
   // );
 
-  const filteredSections = sections.filter((section) => {
-    const searchLower = searchTerm.trim().toLowerCase();
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
 
-    return (
-      section?.subject_type?.toLowerCase().includes(searchLower) || // Filter by class name
-      section?.name?.toLowerCase().includes(searchLower) // Filter by division name
-    );
-  });
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0);
+    }
 
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current);
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  // Filtering based on subject_type or name
+  const searchLower = searchTerm.trim().toLowerCase();
+  const filteredSections = sections.filter(
+    (section) =>
+      section?.subject_type?.toLowerCase().includes(searchLower) ||
+      section?.name?.toLowerCase().includes(searchLower)
+  );
+
+  // Update page count based on filtered results
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
+
+  // Paginate results
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -475,7 +498,7 @@ function SubjectList() {
                 </table>
               </div>
             </div>
-            {filteredSections.length > pageSize && (
+            {/* {filteredSections.length > pageSize && (
               <ReactPaginate
                 previousLabel={"Previous"}
                 nextLabel={"Next"}
@@ -495,7 +518,28 @@ function SubjectList() {
                 breakLinkClassName={"page-link"}
                 activeClassName={"active"}
               />
-            )}
+            )} */}
+            <div className=" flex justify-center  pt-2 -mb-3">
+              <ReactPaginate
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
+                breakLabel={"..."}
+                breakClassName={"page-item"}
+                breakLinkClassName={"page-link"}
+                pageCount={pageCount}
+                marginPagesDisplayed={1}
+                pageRangeDisplayed={1}
+                onPageChange={handlePageClick}
+                containerClassName={"pagination"}
+                pageClassName={"page-item"}
+                pageLinkClassName={"page-link"}
+                previousClassName={"page-item"}
+                previousLinkClassName={"page-link"}
+                nextClassName={"page-item"}
+                nextLinkClassName={"page-link"}
+                activeClassName={"active"}
+              />
+            </div>
           </div>
         </div>
 

@@ -1324,6 +1324,9 @@ function ManageSubjectList() {
   const [error, setError] = useState(null);
   const [nameError, setNameError] = useState(null);
   const [division, setDivisions] = useState([]);
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
   // errors messages for allot subject tab
   const [classError, setClassError] = useState("");
   const [divisionError, setDivisionError] = useState("");
@@ -1890,10 +1893,22 @@ function ManageSubjectList() {
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
-  // console.log("the name", subjects);
-  // const filteredSections = subjects.filter((section) =>
-  //   section?.get_subject?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0);
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current);
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const searchLower = searchTerm.trim().toLowerCase();
   const filteredSections = subjects.filter((section) => {
     // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
     const teacherName = section?.get_teacher?.name?.toLowerCase() || "";
@@ -1901,14 +1916,20 @@ function ManageSubjectList() {
 
     // Check if the search term is present in either the teacher's name or the subject's name
     return (
-      teacherName.includes(searchTerm.toLowerCase()) ||
-      subjectName.includes(searchTerm.toLowerCase())
+      teacherName.toLowerCase().includes(searchLower) ||
+      subjectName.toLowerCase().includes(searchLower)
     );
   });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
+
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
+
   // handle allot subject close model
   const handleAllotSubjectCloseModal = () => {
     setAllotSubjectTabData([]);

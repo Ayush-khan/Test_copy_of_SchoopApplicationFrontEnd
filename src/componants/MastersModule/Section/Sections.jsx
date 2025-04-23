@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 // import NavBar from "../../../Layouts/NavBar";
@@ -30,6 +30,9 @@ function Sections() {
   const [nameError, setNameError] = useState("");
   const [roleId, setRoleId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   const pageSize = 10;
 
@@ -402,10 +405,37 @@ function Sections() {
     }));
   };
 
-  const filteredSections = sections.filter((section) =>
-    section.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim();
 
+    // When user starts typing (from empty to something)
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // save current page before jumping
+      setCurrentPage(0); // go to first page for search
+    }
+
+    // When user clears search (from something to empty)
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // restore previous page
+    }
+
+    // Always update previous search term
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  // Filtered or full list based on search
+  const isSearching = searchTerm.trim() !== "";
+  const filteredSections = isSearching
+    ? sections.filter((section) =>
+        section.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : sections;
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
+
+  // Paginate
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
