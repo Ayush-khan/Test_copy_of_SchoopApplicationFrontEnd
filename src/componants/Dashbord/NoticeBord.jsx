@@ -78,7 +78,7 @@ function NoticeBord() {
         </button>
       </div>
 
-      <div className="overflow-y-auto max-h-64 ">
+      {/* <div className="overflow-y-auto max-h-64 ">
         {activeTab === "noticeForParents" && (
           <div className={`${Styles.noticeBoard} grid gap-2`}>
             {parentNotices.map((notice, index) => (
@@ -109,6 +109,91 @@ function NoticeBord() {
         )}
 
         {activeTab === "noticeForStaff" && (
+          <div className={`${Styles.noticeBoard} grid gap-2`}>
+            {staffNotices.map((notice, index) => (
+              <div
+                key={index}
+                className={`${Styles.notice} sm:p-4 rounded shadow-md`}
+              >
+                <div className={`${Styles.date} text-xs mb-2`}>
+                  {notice.notice_date}
+                  <span className={`${Styles.time} float-right font-bold`}>
+                    {notice.notice_type}
+                  </span>
+                </div>
+                <div className={`${Styles.author} text-sm mb-2`}>
+                  {notice.subject}
+                  <span
+                    className={`${Styles.time} ml-2 text-xs`}
+                  >{`( ${notice.staff_name} )`}</span>
+                </div>
+                <div className={`${Styles.message} text-sm leading-6`}>
+                  {notice.notice_desc}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div> */}
+      <div className="overflow-y-auto max-h-64">
+        {/* For Parent Notices */}
+        {activeTab === "noticeForParents" && parentNotices.length === 0 && (
+          <div className="relative left-[1%] w-[95%] text-center flex justify-center items-center mt-8 md:mt-14">
+            <div className="flex flex-col items-center justify-center text-center py-10 animate-bounce">
+              <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
+                Oops!{" "}
+              </p>
+
+              <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+                No data available for Notice for Parents.
+              </p>
+            </div>
+          </div>
+        )}
+        {activeTab === "noticeForParents" && parentNotices.length > 0 && (
+          <div className={`${Styles.noticeBoard} grid gap-2`}>
+            {parentNotices.map((notice, index) => (
+              <div
+                key={index}
+                className={`${Styles.notice} sm:border-1 border-gray sm:px-3 sm:py-1 sm:leading-3 mb-0 sm:h-fit bg-white box-border rounded shadow-md `}
+              >
+                <div className={`${Styles.date} text-xs mb-2 sm:mb-1`}>
+                  {notice.notice_date}
+                  <span className={`${Styles.time} float-right font-bold`}>
+                    {notice.notice_type}
+                  </span>
+                </div>
+                <div className={`${Styles.author} text-sm mb-2 sm:mb-1`}>
+                  {notice.subject}
+                  <span
+                    className={`${Styles.time} ml-2 text-xs sm:mb-1`}
+                  >{`( classes-${notice.class_name} )`}</span>
+                </div>
+                <div
+                  className={`${Styles.message} text-sm leading-4 sm:leading-3 sm:mt-0`}
+                >
+                  {notice.notice_desc}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* For Staff Notices */}
+        {activeTab === "noticeForStaff" && staffNotices.length === 0 && (
+          <div className="relative left-[1%] w-[95%] text-center flex justify-center items-center mt-8 md:mt-14">
+            <div className="flex flex-col items-center justify-center text-center py-10 animate-bounce">
+              <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
+                Oops!{" "}
+              </p>
+
+              <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+                No data available for Notice for Staff.
+              </p>
+            </div>
+          </div>
+        )}
+        {activeTab === "noticeForStaff" && staffNotices.length > 0 && (
           <div className={`${Styles.noticeBoard} grid gap-2`}>
             {staffNotices.map((notice, index) => (
               <div

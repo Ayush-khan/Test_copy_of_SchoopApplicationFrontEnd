@@ -529,6 +529,8 @@ function NavBar() {
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(false);
   // const navigate = useNavigate();
+  const [schoolName, setSchoolName] = useState("");
+
   const [navItems, setNavItems] = useState([]);
   const [roleId, setRoleId] = useState(""); // Add roleId state
   function getCurrentDate() {
@@ -743,6 +745,11 @@ function NavBar() {
             Authorization: `Bearer ${token}`,
           },
         });
+        const name = sessionResponse?.data?.custom_claims?.school_name;
+        if (name) {
+          setSchoolName(name);
+          document.title = name; // ✅ Dynamically set the HTML title
+        }
         setSessionData(sessionResponse.data);
         setSelectedYear(sessionResponse?.data?.custom_claims?.academic_year);
         setRoleId(sessionResponse.data.user.role_id); // Store role_id
@@ -1000,7 +1007,8 @@ function NavBar() {
               {localStorage.getItem("academicYear")} */}
               {/* {")"} */}
               {/* St. Arnolds Central School{" ("} */}
-              EvolvU Smart School{" ("}
+              {schoolName}
+              {" ("}
               {sessionData.custom_claims?.academic_year}
               {")"}
             </h1>

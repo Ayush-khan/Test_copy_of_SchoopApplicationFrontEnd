@@ -267,12 +267,81 @@ const StudentsChart = () => {
   ];
 
   return (
+    // <>
+    //   {" "}
+    //   {loading ? (
+    //     <p className="text-center relative top-[50%] w-10  m-auto  ">
+    //       <Loader />
+    //     </p>
+    //   ) : (
+    //     <ResponsiveContainer
+    //       width="100%"
+    //       height="93%"
+    //       style={{
+    //         margin: "auto",
+    //       }}
+    //     >
+    //       <div className="flex flex-row justify-between items-center bg-gray-200 p-1 rounded-t-lg">
+    //         <span className="lg:text-lg sm:text-xs sm:font-semibold text-gray-500">
+    //           Class-wise Student Distribution
+    //         </span>
+    //       </div>
+    //       <BarChart
+    //         data={data}
+    //         margin={{
+    //           top: 20,
+    //           right: 20,
+    //           left: 20,
+    //           bottom: 20,
+    //         }}
+    //         barCategoryGap={barCategoryGap}
+    //       >
+    //         <XAxis
+    //           dataKey="class"
+    //           tick={{ fontSize: xAxisFontSize }}
+    //           interval={0}
+    //           tickMargin={xAxisTickMargin}
+    //           tickSize={xAxisTickWidth}
+    //         />
+    //         <YAxis />
+    //         <Tooltip content={renderTooltip} />
+    //         <Legend />
+    //         {sectionKeys.map((section, index) => (
+    //           <Bar
+    //             key={section}
+    //             dataKey={section}
+    //             stackId="a"
+    //             fill={colors[index % colors.length]}
+    //           >
+    //             <LabelList
+    //               dataKey={section}
+    //               fill="white"
+    //               style={{ fontSize: labelFontSize }}
+    //             />
+    //           </Bar>
+    //         ))}
+    //       </BarChart>
+    //     </ResponsiveContainer>
+    //   )}
+    // </>
     <>
-      {" "}
       {loading ? (
-        <p className="text-center relative top-[50%] w-10  m-auto  ">
+        <p className="text-center relative top-[50%] w-10 m-auto">
           <Loader />
         </p>
+      ) : data.length === 0 ? (
+        // Show the no data available message when data is empty
+        <div className="relative left-[1%] w-[100%] text-center flex justify-center items-center mt-8 md:mt-14">
+          <div className="flex flex-col items-center justify-center text-center py-10 animate-bounce">
+            <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
+              Oops!{" "}
+            </p>
+
+            <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+              No data available.
+            </p>
+          </div>
+        </div>
       ) : (
         <ResponsiveContainer
           width="100%"

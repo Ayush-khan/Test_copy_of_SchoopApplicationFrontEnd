@@ -107,7 +107,7 @@ function ListFinal() {
           <div className="cell font-bold ">Installment</div>
           <div className="cell font-bold text-end">Amount</div>
         </div>
-        <div className="table-body h-52 overflow-y-scroll overflow-x-hidden">
+        {/* <div className="table-body h-52 overflow-y-scroll overflow-x-hidden">
           {filteredInstallments.map((installment, index) => (
             <div
               key={`${installment.account}-${installment.installment}`}
@@ -128,6 +128,41 @@ function ListFinal() {
               </div>
             </div>
           ))}
+        </div> */}
+        <div className="table-body h-52 overflow-y-scroll overflow-x-hidden">
+          {filteredInstallments.length === 0 ? (
+            <div className="w-full h-full flex justify-center items-center">
+              <div className="flex flex-col items-center justify-center text-center py-10 animate-bounce">
+                <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
+                  Oops!{" "}
+                </p>
+                <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+                  No data available.
+                </p>
+              </div>
+            </div>
+          ) : (
+            filteredInstallments.map((installment, index) => (
+              <div
+                key={`${installment.account}-${installment.installment}`}
+                className={`flex w-full px-2 justify-between py-1 border-b border-gray-200 ${
+                  index % 2 !== 0 ? "bg-gray-200" : "bg-white"
+                }`}
+              >
+                {!selectedAccount && (
+                  <div className="cell w-1/3 text-black/80 tracking-wide">
+                    {installment.account}
+                  </div>
+                )}
+                <div className="cell w-1/3 text-black/80 tracking-wide pl-2">
+                  {`installment-${installment.installment}`}
+                </div>
+                <div className="cell w-1/3 text-end text-black/70 tracking-wide">
+                  {installment.amount}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
