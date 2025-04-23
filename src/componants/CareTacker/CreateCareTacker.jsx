@@ -247,7 +247,7 @@ function CreateCareTacker() {
       ...formData,
       birthday: formatDateString(formData.birthday),
       date_of_joining: formatDateString(formData.date_of_joining),
-      teacher_image_name: String(formData.teacher_image_name),
+      // teacher_image_name: String(formData.teacher_image_name),
     };
 
     try {
@@ -279,23 +279,19 @@ function CreateCareTacker() {
       if (error.response && error.response.data) {
         const { errors, message } = error.response.data;
 
-        // If validation errors exist, show them
+        // Show validation errors from the backend
         if (errors) {
           Object.entries(errors).forEach(([field, messages]) => {
             messages.forEach((msg) => {
-              console.log(`${field}: ${msg}`);
-              // toast.error(`${field}: ${msg}`);
+              console.log(`${field}: ${msg}`); // Show field-specific error
             });
           });
 
-          // Set backend validation errors to state
-          setBackendErrors(errors || {});
-          console.log("setbackednErrors", backendErrors);
-          console.log("employeeId backednerro", backendErrors?.employee_id[0]);
-          setEmployeeIdBackendError(backendErrors?.employee_id[0]);
+          // Set backend validation errors for specific fields
+          setBackendErrors(errors);
+          setEmployeeIdBackendError(errors?.employee_id?.[0] || ""); // Handle `employee_id` error
         } else if (message) {
-          // Show the backend message if no detailed errors are provided
-          // setEmployeeIdBackendError(message);
+          // Show generic backend error message
           // toast.error(message);
         }
       } else {
