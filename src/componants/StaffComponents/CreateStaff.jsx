@@ -1994,7 +1994,7 @@ function CreateStaff() {
         >
           {" "}
           {loading ? (
-            <div className=" inset-0 flex items-center justify-center bg-gray-50  z-10">
+            <div className=" inset-0  h-52 flex items-center justify-center bg-gray-50  z-10">
               <Loader /> {/* Replace this with your loader component */}
             </div>
           ) : (

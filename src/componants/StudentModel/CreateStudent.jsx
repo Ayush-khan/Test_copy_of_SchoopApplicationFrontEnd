@@ -1222,7 +1222,7 @@ function Form() {
           className="md:mx-2 overflow-x-hidden shadow-md py-1 bg-gray-50"
         >
           {loading ? (
-            <div className=" inset-0 flex items-center justify-center bg-gray-50  z-10">
+            <div className=" inset-0  h-52 flex items-center justify-center bg-gray-50  z-10">
               <Loader /> {/* Replace this with your loader component */}
             </div>
           ) : (
