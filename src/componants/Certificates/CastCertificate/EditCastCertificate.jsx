@@ -98,6 +98,12 @@ const EditCastCertificate = () => {
             stu_aadhaar_no: fetchedData.stu_aadhaar_no || "",
             teacher_image_name: fetchedData.father_image_name || null, // Assuming this is for a teacher image
             purpose: fetchedData.purpose || " ",
+            prev_school_class: fetchedData.prev_school_class || " ",
+            progress: fetchedData.progress || " ",
+            class_when_learning: fetchedData.class_when_learning || " ",
+            behaviour: fetchedData.behaviour || " ",
+            leaving_reason: fetchedData.leaving_reason || " ",
+            lc_date_n_no: fetchedData.lc_date_n_no || " ",
           });
         } else {
           toast.error("Failed to load data");

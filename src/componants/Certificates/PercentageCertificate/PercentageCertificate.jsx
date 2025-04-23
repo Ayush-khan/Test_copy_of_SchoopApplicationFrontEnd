@@ -70,12 +70,21 @@ function PercentageCertificate() {
   //     value: `${cls?.get_class?.name}-${cls.name}`,
   //     label: `${cls?.get_class?.name} ${cls.name}`,
   //   }));
+  const allowedClasses = ["10", "11", "12"];
+
   const classOptions = classes
-    .filter((cls) => cls?.get_class?.class_id > 123) // filter classes with class_id > 100
+    .filter((cls) => allowedClasses.includes(cls?.get_class?.name)) // filter by class name
     .map((cls) => ({
       value: `${cls?.get_class?.name}-${cls.name}`,
-      label: `${cls?.get_class?.name} ${cls.name}`,
+      label: `Class ${cls?.get_class?.name} ${cls.name}`,
     }));
+
+  // const classOptions = classes
+  //   .filter((cls) => cls?.get_class?.class_id > 123) // filter classes with class_id > 100
+  //   .map((cls) => ({
+  //     value: `${cls?.get_class?.name}-${cls.name}`,
+  //     label: `${cls?.get_class?.name} ${cls.name}`,
+  //   }));
 
   const fetchClassNames = async () => {
     try {

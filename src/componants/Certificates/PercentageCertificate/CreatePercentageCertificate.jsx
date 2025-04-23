@@ -133,19 +133,33 @@ const CreatePercentageCertificate = () => {
   //     })),
   //   [classesforForm]
   // );
-  const classOptions = useMemo(
-    () =>
-      classesforForm
-        .filter((cls) => cls.class_id > 123) // Filter out values less than or equal to 107
-        .map((cls) => ({
-          value: cls.section_id,
-          label: `${cls?.get_class?.name || ""} ${cls.name || ""} (${
-            cls.students_count || ""
-          })`,
-          key: `${cls.class_id}-${cls.section_id}`,
-        })),
-    [classesforForm]
-  );
+
+  const classOptions = useMemo(() => {
+    const allowedClasses = ["10", "11", "12"];
+    return classesforForm
+      .filter((cls) => allowedClasses.includes(cls?.get_class?.name))
+      .map((cls) => ({
+        value: cls.section_id,
+        label: `Class ${cls?.get_class?.name || ""} ${cls.name || ""} (${
+          cls.students_count || 0
+        })`,
+        key: `${cls.class_id}-${cls.section_id}`,
+      }));
+  }, [classesforForm]);
+
+  // const classOptions = useMemo(
+  //   () =>
+  //     classesforForm
+  //       .filter((cls) => cls.class_id > 123) // Filter out values less than or equal to 107
+  //       .map((cls) => ({
+  //         value: cls.section_id,
+  //         label: `${cls?.get_class?.name || ""} ${cls.name || ""} (${
+  //           cls.students_count || ""
+  //         })`,
+  //         key: `${cls.class_id}-${cls.section_id}`,
+  //       })),
+  //   [classesforForm]
+  // );
 
   const studentOptions = useMemo(
     () =>
