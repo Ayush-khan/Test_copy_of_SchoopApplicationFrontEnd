@@ -178,7 +178,7 @@ const DashboardContent = () => {
             title="Teachers"
             TotalValue={staffData.teachingStaff}
             // presentValue={staffData.teachingStaff}
-            presentValue={"present"}
+            presentValue={"Present"}
             color="#2196F3"
             icon={
               <FaUserGroup
