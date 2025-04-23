@@ -578,13 +578,12 @@ const EditLeaveApplication = () => {
             </div>
             <div className="col-span-3 text-right mt-4">
               <button
-                type="submit"
-                style={{ backgroundColor: "#2196F3" }}
-                className="mr-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700"
+                className="mr-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700 
+               disabled:bg-blue-300 disabled:cursor-not-allowed disabled:hover:bg-blue-300"
                 onClick={handleSubmit}
-                // disabled={loadingForSearch}
+                disabled={loading}
               >
-                Update
+                {loading ? "Updating..." : "Update"}
               </button>
             </div>
           </div>

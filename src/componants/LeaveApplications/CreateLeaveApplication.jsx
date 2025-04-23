@@ -192,7 +192,8 @@ const CreateLeaveApplication = () => {
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       Object.values(validationErrors).forEach((error) => {
-        toast.error(error);
+        // toast.error(error);
+        console.log("errors: ", error);
       });
       return;
     }
@@ -440,11 +441,12 @@ const CreateLeaveApplication = () => {
             </div>
             <div className="col-span-3 text-right mt-4">
               <button
-                className="mr-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700"
+                className="mr-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700 
+               disabled:bg-blue-300 disabled:cursor-not-allowed disabled:hover:bg-blue-300"
                 onClick={handleSubmit}
-                // disabled={loadingForSearch}
+                disabled={loading}
               >
-                Save
+                {loading ? "Saving..." : "Save"}
               </button>
             </div>
           </div>
