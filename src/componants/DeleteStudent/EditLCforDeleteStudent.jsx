@@ -1138,7 +1138,7 @@ const EditLCforDeleteStudent = () => {
                   maxLength={10}
                   value={formData.grn_no}
                   onChange={handleChange}
-                  // readOnly
+                  readOnly
                   className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                 />
                 {errors.grn_no && (
