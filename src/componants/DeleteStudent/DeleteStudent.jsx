@@ -436,10 +436,7 @@ function DeleteStudent() {
                               // let showDeleteButton = subject.IsDelete === "N"; // Show delete button if IsDelete is "N"
 
                               return (
-                                <tr
-                                  key={subject.sr_no}
-                                  className=" text-sm font-light"
-                                >
+                                <tr key={subject.sr_no} className=" text-sm ">
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {currentPage * pageSize + index + 1}
                                   </td>
@@ -473,13 +470,27 @@ function DeleteStudent() {
                                     {`${subject?.classname} ${subject?.sectionname}`}
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject.slc_no === "" ||
+                                    subject.slc_no === null ? (
+                                      <button
+                                        onClick={() => handleEditForm(subject)}
+                                        className="text-blue-700 hover:text-blue-900 hover:bg-transparent"
+                                      >
+                                        <LuFileBadge2 className="font-bold text-xl" />
+                                      </button>
+                                    ) : (
+                                      <span>{subject.slc_no}</span>
+                                    )}
+                                  </td>
+
+                                  {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     <button
                                       onClick={() => handleEditForm(subject)}
                                       className="text-blue-700 hover:text-blue-900 hover:bg-transparent "
                                     >
                                       <LuFileBadge2 className="font-bold text-xl" />
                                     </button>
-                                  </td>{" "}
+                                  </td>{" "} */}
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     <button
                                       onClick={() => handleLCDetails(subject)}
