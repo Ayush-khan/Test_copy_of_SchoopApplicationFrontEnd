@@ -25,6 +25,7 @@ function ManageLC() {
   const [currestSubjectNameForDelete, setCurrestSubjectNameForDelete] =
     useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingForSearch, setLoadingForSearch] = useState(false);
 
   // This is hold the allot subjet api response
   const [classIdForManage, setclassIdForManage] = useState("");
@@ -134,6 +135,7 @@ function ManageLC() {
     // API call
     setSearchTerm("");
     try {
+      setLoadingForSearch(true); // Start loading
       const response = await axios.get(
         `${API_URL}/api/get_leavingcertificatelist`,
         {
@@ -153,6 +155,8 @@ function ManageLC() {
       toast.error("Error in fetching certificates Listing");
       console.error("Error fetching Leaving Certificate records:", error);
       setError("Error fetching Leaving Certificate records");
+    } finally {
+      setLoadingForSearch(false);
     }
   };
 
@@ -482,11 +486,43 @@ function ManageLC() {
                       </div>
 
                       <button
+                        type="search"
                         onClick={handleSearch}
-                        type="button"
-                        className="btn h-10 w-18 mt-0.5 md:w-auto relative  btn-primary "
+                        style={{ backgroundColor: "#2196F3" }}
+                        className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                          loadingForSearch
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={loadingForSearch}
                       >
-                        Search
+                        {loadingForSearch ? (
+                          <span className="flex items-center">
+                            <svg
+                              className="animate-spin h-4 w-4 mr-2 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              ></path>
+                            </svg>
+                            Searching...
+                          </span>
+                        ) : (
+                          "Search"
+                        )}
                       </button>
                     </div>{" "}
                   </div>

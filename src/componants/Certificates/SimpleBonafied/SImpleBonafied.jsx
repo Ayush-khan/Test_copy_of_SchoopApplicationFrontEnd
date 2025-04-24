@@ -12,8 +12,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 // import AllotSubjectTab from "./AllotMarksHeadingTab";
 import Select from "react-select";
-import CreateCharacterCertificate from "./CreateCharacterCertificate";
-function CharacterCertificate() {
+import CreateSimpleBonafied from "./CreateSimpleBonafied";
+function SImpleBonafied() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [activeTab, setActiveTab] = useState("Manage");
   const [classes, setClasses] = useState([]);
@@ -29,6 +29,7 @@ function CharacterCertificate() {
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
+
   // This is hold the allot subjet api response
   const [classIdForManage, setclassIdForManage] = useState("");
   //   For the dropdown of Teachers name api
@@ -42,13 +43,7 @@ function CharacterCertificate() {
   const [nameError, setNameError] = useState(null);
   // for react-search of manage tab teacher Edit and select class
   const [selectedClass, setSelectedClass] = useState(null);
-  // for Edit model
-  const [newClassName, setNewClassName] = useState("");
-  const [newSubjectName, setNewSubjectName] = useState("");
-  const [newExamName, setNewExamName] = useState("");
-  const [newMarksHeading, setNewMarksHeading] = useState("");
-  const [highestMarks, setHighestMarks] = useState("");
-  const [marksError, setMarksError] = useState(""); // Error for validation
+
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -137,7 +132,7 @@ function CharacterCertificate() {
       const response = await axios.get(
         // `${API_URL}/api/get_AllotMarkheadingslist`,
 
-        `${API_URL}/api/get_characterbonafidecertificatelist`,
+        `${API_URL}/api/get_simplebonafidecertificatelist`,
         {
           headers: { Authorization: `Bearer ${token}` },
           // params: { q: selectedClass },
@@ -154,12 +149,12 @@ function CharacterCertificate() {
       } else {
         setSubjects([]);
         toast.error(
-          "No Character certificates Listing are found for the selected class."
+          "No Simple Bonafied certificates Listing are found for the selected class."
         );
       }
     } catch (error) {
-      console.error("Error fetching Character certificates Listing:", error);
-      setError("Error fetching Character certificates");
+      console.error("Error fetching Bonafied certificates Listing:", error);
+      setError("Error fetching Simple Bonafied certificates");
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -171,6 +166,7 @@ function CharacterCertificate() {
     setCurrentPage(data.selected);
     // Handle page change logic
   };
+
   const handleDownload = (section) => {
     setCurrentSection(section);
     console.log("currentedit", section);
@@ -180,7 +176,7 @@ function CharacterCertificate() {
   const handleEditForm = (section) => {
     setCurrentSection(section);
     navigate(
-      `/stud_char/edit/${section?.sr_no}`,
+      `/sm_Bonafied/edit/${section?.sr_no}`,
 
       {
         state: { student: section },
@@ -201,7 +197,7 @@ function CharacterCertificate() {
       }
 
       const response = await axios.get(
-        `${API_URL}/api/get_characterisDownload/${currentSection.sr_no}`,
+        `${API_URL}/api/get_simpleisDownload/${currentSection.sr_no}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "blob", // Important for downloading files
@@ -209,7 +205,7 @@ function CharacterCertificate() {
       );
 
       if (response.status === 200) {
-        toast.success("Character certificate downloaded successfully!");
+        toast.success("Simple Bonafied certificate downloaded successfully!");
 
         // Extract filename from Content-Disposition header if available
         const contentDisposition = response.headers["content-disposition"];
@@ -223,9 +219,7 @@ function CharacterCertificate() {
         }
 
         // Create a blob URL for the PDF file
-        const pdfBlob = new Blob([response.data], {
-          type: "application/pdf",
-        });
+        const pdfBlob = new Blob([response.data], { type: "application/pdf" });
         const pdfUrl = URL.createObjectURL(pdfBlob);
 
         // Create a link to initiate the download
@@ -245,14 +239,14 @@ function CharacterCertificate() {
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error in Downloading Character Certificate: ${error.response.data.error}`
+          `Error in Downloading Simple Bonafied Certificate: ${error.response.data.error}`
         );
       } else {
         toast.error(
-          `Error in Downloading Character Certificate: ${error.message}`
+          `Error in Downloading Simple Bonafied Certificate: ${error.message}`
         );
       }
-      console.error("Error in Downloading Character Certificate:", error);
+      console.error("Error in Downloading Simple Bonafied Certificate:", error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -264,16 +258,6 @@ function CharacterCertificate() {
   const handleEdit = (section) => {
     setCurrentSection(section);
     console.log("currentedit", section);
-
-    // // Set values for the edit modal
-    // setNewClassName(section?.get_class?.name);
-    // setNewSubjectName(section?.get_subject?.name);
-    // setNewExamName(section?.get_exam?.name); // Assuming exam details are available
-    // setNewMarksHeading(section?.get_marksheading?.name || ""); // Set marks heading if available
-
-    // setHighestMarks(section?.highest_marks || ""); // Set highest marks or empty
-    // setMarksError(""); // Reset the error message when opening the modal
-
     setShowEditModal(true);
   };
 
@@ -286,11 +270,13 @@ function CharacterCertificate() {
       setCurrestSubjectNameForDelete(classToDelete?.stud_name); // Set subject name for display
       setShowDeleteModal(true); // Show the delete modal
     } else {
-      console.error("Character Certificate not found for deletion");
+      console.error("Bonafied certificate not found for deletion");
     }
   };
 
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -298,22 +284,8 @@ function CharacterCertificate() {
         throw new Error("Token or Serial Number is missing");
       }
 
-      setMarksError("");
-      console.log(
-        "class_name:",
-        newClassName,
-        "subject_name:",
-        newSubjectName,
-        "exam_name:",
-        newExamName,
-        "marks_heading:",
-        newMarksHeading,
-        "highest_marks:",
-        highestMarks
-      );
-
       await axios.put(
-        `${API_URL}/api/update_characterisIssued/${currentSection.sr_no}`,
+        `${API_URL}/api/update_simpleisIssued/${currentSection.sr_no}`,
         {}, // Pass empty object for no payload
         {
           headers: {
@@ -323,17 +295,19 @@ function CharacterCertificate() {
       );
 
       handleSearch(); // Refresh the list or data
-      toast.success("Character issue status updated successfully!");
+      toast.success("Simple Bonafied issue status updated successfully!");
       handleCloseModal(); // Close the modal
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error updating Character issue status: ${error.response.data.error}`
+          `Error updating Simple Bonafied issue status: ${error.response.data.error}`
         );
       } else {
-        toast.error(`Error updating Character issue status: ${error.message}`);
+        toast.error(
+          `Error updating Simple Bonafied issue status: ${error.message}`
+        );
       }
-      console.error("Error Character issue status:", error);
+      console.error("Error Simple Bonafied issue status:", error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -352,7 +326,7 @@ function CharacterCertificate() {
 
       // Send the delete request to the backend
       await axios.delete(
-        `${API_URL}/api/delete_characterisDeleted/${subReportCardId}`,
+        `${API_URL}/api/delete_simpleisDeleted/${subReportCardId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -363,14 +337,16 @@ function CharacterCertificate() {
 
       handleSearch(); // Refresh the data (this seems like the method to refetch data)
       setShowDeleteModal(false); // Close the modal
-      toast.success("Character deleted successfully!");
+      toast.success("Simple Bonafied deleted successfully!");
     } catch (error) {
       if (error.response && error.response.data) {
-        toast.error(`Error deleting Character: ${error.response.data.message}`);
+        toast.error(
+          `Error deleting Simple Bonafied: ${error.response.data.message}`
+        );
       } else {
-        toast.error(`Error deleting Character: ${error.message}`);
+        toast.error(`Error deleting Simple Bonafied: ${error.message}`);
       }
-      console.error("Error deleting Character:", error);
+      console.error("Error deleting Simple Bonafied:", error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false); // Close the modal
@@ -379,7 +355,6 @@ function CharacterCertificate() {
 
   const handleCloseModal = () => {
     setShowDownloadModal(false);
-
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
@@ -400,6 +375,7 @@ function CharacterCertificate() {
   }, [searchTerm]);
 
   const searchLower = searchTerm.trim().toLowerCase();
+
   const filteredSections = subjects.filter((section) => {
     // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
     const subjectNameIs = section?.stud_name.toLowerCase() || "";
@@ -428,7 +404,7 @@ function CharacterCertificate() {
       {/* <ToastContainer /> */}
       <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-          Character Certificate
+          Simple Bonafide Certificate
         </h3>
         <div
           className=" relative  mb-8   h-1  mx-auto bg-red-700"
@@ -438,7 +414,7 @@ function CharacterCertificate() {
         ></div>
         <ul className="grid grid-cols-2 gap-x-10 relative -left-6 md:left-0 md:flex md:flex-row relative -top-4">
           {/* Tab Navigation */}
-          {["Manage", "CreateCharacterCertificate"].map((tab) => (
+          {["Manage", "CreateBonafide"].map((tab) => (
             <li
               key={tab}
               className={`md:-ml-7 shadow-md ${
@@ -526,7 +502,7 @@ function CharacterCertificate() {
                   <div className="card mx-auto lg:w-full shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                        Manage Character Certificate{" "}
+                        Manage Simple Bonafide Certificate
                       </h3>
                       <div className="w-1/2 md:w-fit mr-1 ">
                         <input
@@ -601,7 +577,7 @@ function CharacterCertificate() {
                                 }
 
                                 return (
-                                  <tr key={subject.sr_no} className=" text-sm ">
+                                  <tr key={subject.sr_no} className="text-sm ">
                                     <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                       {currentPage * pageSize + index + 1}
                                     </td>
@@ -709,9 +685,9 @@ function CharacterCertificate() {
               )}
             </div>
           )}
-          {activeTab === "CreateCharacterCertificate" && (
+          {activeTab === "CreateBonafide" && (
             <div>
-              <CreateCharacterCertificate />
+              <CreateSimpleBonafied />
             </div>
           )}
         </div>
@@ -854,4 +830,4 @@ function CharacterCertificate() {
   );
 }
 
-export default CharacterCertificate;
+export default SImpleBonafied;
