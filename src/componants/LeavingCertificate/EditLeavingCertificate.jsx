@@ -13,16 +13,10 @@ import { RxCross1 } from "react-icons/rx";
 const EditLeavingCertificate = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [nameError, setNameError] = useState("");
-  const [nameErrorForClass, setNameErrorForClass] = useState("");
   const [selectedClass, setSelectedClass] = useState(null);
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [loadingForSearch, setLoadingForSearch] = useState(false);
   const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
-
-  const [selectedActivities, setSelectedActivities] = useState([]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -752,7 +746,7 @@ const EditLeavingCertificate = () => {
       attendance: formData.attendance || "",
       fee_month: formData.fee_month || "",
       part_of: formData.part_of || "",
-      games: selectedActivities || [], // Ensure it's an array of game names
+      games: formData.selectedActivities || [], // Ensure it's an array of game names
       application_date: formatDateString(formData.application_date),
       conduct: formData.conduct || "",
       reason_leaving: formData.reason_leaving || "",

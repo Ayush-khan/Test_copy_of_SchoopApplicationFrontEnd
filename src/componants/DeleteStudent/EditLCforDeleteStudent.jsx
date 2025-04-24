@@ -15,7 +15,7 @@ const EditLCforDeleteStudent = () => {
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
-  const [selectedActivities, setSelectedActivities] = useState([]);
+  // const [selectedActivities, setSelectedActivities] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
   const { student } = location.state || {};
@@ -62,7 +62,7 @@ const EditLCforDeleteStudent = () => {
     academicStudent: [],
     academic_yr: "", // Add this to track selected academic year
     part_of: "",
-    // games: "",
+    games: "",
     selectedActivities: [],
   });
 
@@ -76,9 +76,8 @@ const EditLCforDeleteStudent = () => {
 
         let response;
 
-        // Call one API based on slc_no presence
+        // Call correct API based on slc_no availability
         if (student?.slc_no) {
-          // Use slc_no directly
           response = await axios.get(
             `${API_URL}/api/get_getleavingcertificatedata/${student.slc_no}`,
             {
@@ -86,7 +85,6 @@ const EditLCforDeleteStudent = () => {
             }
           );
         } else if (student?.student_id) {
-          // Get data by student_id
           response = await axios.get(
             `${API_URL}/api/get_srnoleavingcertificatedata/${student.student_id}`,
             {
@@ -98,22 +96,27 @@ const EditLCforDeleteStudent = () => {
           return;
         }
 
-        // If data is present from either API
-        if (
-          response?.data?.success &&
-          response.data.data?.leavingcertificatesingle
-        ) {
-          const fetchedData = response.data.data.leavingcertificatesingle;
+        // Check for success in response
+        if (response?.data?.success) {
+          let fetchedData;
           const DataStudentAc = response.data.data;
           const classsubject = DataStudentAc.classsubject || [];
-          console.log(
-            "fetchedData",
-            fetchedData,
-            "DataStudentAc",
-            DataStudentAc,
-            "classsubject",
-            classsubject
-          );
+
+          // API structure check
+          if (DataStudentAc.leavingcertificatesingle) {
+            fetchedData = DataStudentAc.leavingcertificatesingle;
+          } else if (DataStudentAc.studentinformation) {
+            fetchedData = DataStudentAc.studentinformation;
+            // Patch missing fields
+            fetchedData.dob_words = DataStudentAc.dobinwords || "";
+            fetchedData.sr_no = DataStudentAc.sr_no || "";
+            fetchedData.issue_date = DataStudentAc.date || "";
+          } else {
+            toast.error("Unexpected response structure.");
+            return;
+          }
+
+          // Parse subjects and activities
           const selectedSubjects = fetchedData.subjects_studied
             ? fetchedData.subjects_studied.split(",")
             : [];
@@ -121,6 +124,7 @@ const EditLCforDeleteStudent = () => {
             ? fetchedData.games.split(",")
             : [];
 
+          // Set form data
           setFormData({
             sr_no: fetchedData.sr_no || "",
             student_id: fetchedData.student_id || "",
@@ -128,8 +132,9 @@ const EditLCforDeleteStudent = () => {
             academicStudent: DataStudentAc.academicStudent || [],
             issue_date: fetchedData.issue_date || "",
             student_id_no: fetchedData.stud_id_no || "",
-            aadhar_no: fetchedData.aadhar_no || "",
-            first_name: fetchedData.stud_name || "",
+            aadhar_no:
+              fetchedData.stu_aadhaar_no || fetchedData.aadhar_no || "",
+            first_name: fetchedData.first_name || fetchedData.stud_name || "",
             mid_name: fetchedData.mid_name || "",
             last_name: fetchedData.last_name || "",
             father_name: fetchedData.father_name || "",
@@ -144,7 +149,8 @@ const EditLCforDeleteStudent = () => {
             dob: fetchedData.dob || "",
             dob_words: fetchedData.dob_words || "",
             prev_school_class: fetchedData.last_school_attended_standard || "",
-            date_of_admission: fetchedData.date_of_admission || "",
+            date_of_admission:
+              fetchedData.date_of_admission || fetchedData.admission_date || "",
             admission_class: fetchedData.admission_class || "",
             attendance: fetchedData.attendance || "",
             reason_leaving: fetchedData.reason_leaving || "",
@@ -680,11 +686,9 @@ const EditLCforDeleteStudent = () => {
     event.preventDefault();
     console.log("Submit process started");
 
-    // Clear previous errors
     setErrors({});
     setBackendErrors({});
 
-    // Check validation
     if (!validate()) {
       console.log("Validation failed, stopping submission");
       return;
@@ -692,7 +696,6 @@ const EditLCforDeleteStudent = () => {
 
     console.log("Validation passed, proceeding with submission");
 
-    // Format the form data before submission
     const formattedFormData = {
       grn_no: formData.grn_no || "",
       issue_date: formatDateString(formData.issue_date),
@@ -719,12 +722,12 @@ const EditLCforDeleteStudent = () => {
       leaving_date: formatDateString(formData.leaving_date),
       standard_studying: formData.standard_studying || "",
       last_exam: formData.last_exam || "",
-      subjects: formData.selectedSubjects || [], // Ensure it's an array of subject names
+      subjects: formData.selectedSubjects || [],
       promoted_to: formData.promoted_to || "",
       attendance: formData.attendance || "",
       fee_month: formData.fee_month || "",
       part_of: formData.part_of || "",
-      games: selectedActivities || [], // Ensure it's an array of game names
+      games: formData?.selectedActivities || [],
       application_date: formatDateString(formData.application_date),
       conduct: formData.conduct || "",
       reason_leaving: formData.reason_leaving || "",
@@ -739,28 +742,28 @@ const EditLCforDeleteStudent = () => {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
 
-      const response = await axios.put(
-        `${API_URL}/api/update_leavingcertificate/${student?.sr_no}`,
+      const response = await axios.post(
+        `${API_URL}/api/save_pdfleavingcertificate`,
         formattedFormData,
         {
           headers: { Authorization: `Bearer ${token}` },
-          responseType: "blob", // For PDF response
+          responseType: "blob", // To handle PDF download
         }
       );
 
       if (response.status === 200) {
-        toast.success("LC Certificate Updated successfully!");
-        // Extract filename from Content-Disposition header
+        toast.success("LC Certificate saved successfully!");
+
+        // Extract filename from Content-Disposition
         const contentDisposition = response.headers["content-disposition"];
-        let filename = "DownloadedFile.pdf"; // Fallback name
+        let filename = "LeavingCertificate.pdf";
 
         if (contentDisposition) {
           const match = contentDisposition.match(/filename="(.+?)"/);
-          if (match && match[1]) {
-            filename = match[1];
-          }
+          if (match && match[1]) filename = match[1];
         }
-        // Download PDF
+
+        // Trigger PDF download
         const pdfBlob = new Blob([response.data], { type: "application/pdf" });
         const pdfUrl = URL.createObjectURL(pdfBlob);
         const link = document.createElement("a");
@@ -770,7 +773,7 @@ const EditLCforDeleteStudent = () => {
         link.click();
         document.body.removeChild(link);
 
-        // Reset form data
+        // Reset form
         setFormData({
           sr_no: "",
           grn_no: "",
@@ -783,7 +786,6 @@ const EditLCforDeleteStudent = () => {
           promoted_to: " ",
           last_exam: "",
           stud_id: "",
-          // student_UID: "",
           father_name: "",
           mother_name: "",
           religion: "",
@@ -802,7 +804,6 @@ const EditLCforDeleteStudent = () => {
           subjectsFor: [],
           subjects: [],
           selectedActivities: [],
-
           reason_leaving: "",
           application_date: "",
           leaving_date: "",
@@ -812,20 +813,19 @@ const EditLCforDeleteStudent = () => {
           aadhar_no: "",
           teacher_image_name: null,
           academicStudent: [],
-          academic_yr: "", // Add this to track selected academic year
+          academic_yr: "",
           part_of: "",
         });
+
         setSelectedClass(null);
         setSelectedStudent(null);
-
         setTimeout(() => setParentInformation(null), 3000);
 
-        // Navigate to the desired route after successful update
         navigate("/leavingCertificate");
       }
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
-      toast.error("An error occurred while Updated the LC Certificate.");
+      toast.error("An error occurred while saving the LC Certificate.");
 
       if (error.response && error.response.data) {
         setBackendErrors(error.response.data);
@@ -836,6 +836,187 @@ const EditLCforDeleteStudent = () => {
       setLoading(false);
     }
   };
+
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   console.log("Submit process started");
+
+  //   // Clear previous errors
+  //   setErrors({});
+  //   setBackendErrors({});
+
+  //   // Check validation
+  //   if (!validate()) {
+  //     console.log("Validation failed, stopping submission");
+  //     return;
+  //   }
+
+  //   console.log("Validation passed, proceeding with submission");
+
+  //   // Format the form data before submission
+  //   const formattedFormData = {
+  //     grn_no: formData.grn_no || "",
+  //     issue_date: formatDateString(formData.issue_date),
+  //     student_id_no: formData.student_id_no || "",
+  //     aadhar_no: formData.aadhar_no || "",
+  //     first_name: formData.first_name || "",
+  //     mid_name: formData.mid_name || "",
+  //     last_name: formData.last_name || "",
+  //     father_name: formData.father_name || "",
+  //     mother_name: formData.mother_name || "",
+  //     nationality: formData.nationality || "",
+  //     mother_tongue: formData.mother_tongue || "",
+  //     state: formData.state || "",
+  //     religion: formData.religion || "",
+  //     caste: formData.caste || "",
+  //     subcaste: formData.subcaste || "",
+  //     birth_place: formData.birth_place || "",
+  //     dob: formatDateString(formData.dob),
+  //     dob_words: formData.dob_words || "",
+  //     dob_proof: formData.dob_proof || "",
+  //     previous_school_attended: formData.prev_school_class || "",
+  //     date_of_admission: formatDateString(formData.date_of_admission),
+  //     admission_class: formData.admission_class || "",
+  //     leaving_date: formatDateString(formData.leaving_date),
+  //     standard_studying: formData.standard_studying || "",
+  //     last_exam: formData.last_exam || "",
+  //     subjects: formData.selectedSubjects || [], // Ensure it's an array of subject names
+  //     promoted_to: formData.promoted_to || "",
+  //     attendance: formData.attendance || "",
+  //     fee_month: formData.fee_month || "",
+  //     part_of: formData.part_of || "",
+  //     games: selectedActivities || [], // Ensure it's an array of game names
+  //     application_date: formatDateString(formData.application_date),
+  //     conduct: formData.conduct || "",
+  //     reason_leaving: formData.reason_leaving || "",
+  //     remark: formData.remark || "",
+  //     academic_yr: formData.academic_yr || "",
+  //     stud_id: formData.stud_id || "",
+  //     udise_pen_no: formData.udise_pen_no || "",
+  //   };
+
+  //   try {
+  //     setLoading(true);
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) throw new Error("No authentication token found");
+
+  //     // response= await axios.put(
+  //     //   `${API_URL}/api/update_leavingcertificate/${student?.sr_no}`,
+  //     //   formattedFormData,
+  //     //   {
+  //     //     headers: { Authorization: `Bearer ${token}` },
+  //     //     responseType: "blob", // For PDF response
+  //     //   }
+  //     // );
+  //     // 1️⃣ Save First If slc_no is Present
+  //     if (student?.slc_no) {
+  //       var response = await axios.post(
+  //         `${API_URL}/api/save_pdfleavingcertificate`,
+  //         formattedFormData,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+  //     }
+
+  //     // 2️⃣ Then Update and Download
+  //     // const response = await axios.put(
+  //     //   `${API_URL}/api/update_leavingcertificate/${student?.sr_no}`,
+  //     //   formattedFormData,
+  //     //   {
+  //     //     headers: { Authorization: `Bearer ${token}` },
+  //     //     responseType: "blob",
+  //     //   }
+  //     // );
+
+  //     if (response.status === 200) {
+  //       toast.success("LC Certificate Updated successfully!");
+  //       // Extract filename from Content-Disposition header
+  //       const contentDisposition = response.headers["content-disposition"];
+  //       let filename = "DownloadedFile.pdf"; // Fallback name
+
+  //       if (contentDisposition) {
+  //         const match = contentDisposition.match(/filename="(.+?)"/);
+  //         if (match && match[1]) {
+  //           filename = match[1];
+  //         }
+  //       }
+  //       // Download PDF
+  //       const pdfBlob = new Blob([response.data], { type: "application/pdf" });
+  //       const pdfUrl = URL.createObjectURL(pdfBlob);
+  //       const link = document.createElement("a");
+  //       link.href = pdfUrl;
+  //       link.download = filename;
+  //       document.body.appendChild(link);
+  //       link.click();
+  //       document.body.removeChild(link);
+
+  //       // Reset form data
+  //       setFormData({
+  //         sr_no: "",
+  //         grn_no: "",
+  //         date: "",
+  //         first_name: "",
+  //         mid_name: "",
+  //         last_name: "",
+  //         udise_pen_no: "",
+  //         student_id_no: "",
+  //         promoted_to: " ",
+  //         last_exam: "",
+  //         stud_id: "",
+  //         // student_UID: "",
+  //         father_name: "",
+  //         mother_name: "",
+  //         religion: "",
+  //         caste: "",
+  //         subcaste: "",
+  //         birth_place: "",
+  //         state: "",
+  //         mother_tongue: "",
+  //         dob: "",
+  //         dob_words: "",
+  //         nationality: "",
+  //         prev_school_class: "",
+  //         date_of_admission: "",
+  //         admission_class: "",
+  //         attendance: "",
+  //         subjectsFor: [],
+  //         subjects: [],
+  //         selectedActivities: [],
+
+  //         reason_leaving: "",
+  //         application_date: "",
+  //         leaving_date: "",
+  //         standard_studying: "",
+  //         dob_proof: "",
+  //         class_id_for_subj: "",
+  //         aadhar_no: "",
+  //         teacher_image_name: null,
+  //         academicStudent: [],
+  //         academic_yr: "", // Add this to track selected academic year
+  //         part_of: "",
+  //       });
+  //       setSelectedClass(null);
+  //       setSelectedStudent(null);
+
+  //       setTimeout(() => setParentInformation(null), 3000);
+
+  //       // Navigate to the desired route after successful update
+  //       navigate("/leavingCertificate");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error.response?.data || error.message);
+  //     toast.error("An error occurred while Updated the LC Certificate.");
+
+  //     if (error.response && error.response.data) {
+  //       setBackendErrors(error.response.data);
+  //     } else {
+  //       toast.error("Unknown error occurred.");
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
@@ -858,7 +1039,7 @@ const EditLCforDeleteStudent = () => {
   };
 
   // Log or save selectedActivities when needed
-  console.log("____activity", selectedActivities);
+  console.log("____activity--->", formData.selectedActivities);
   // Handle selection of each subject
   const handleSubjectSelection = (e, subjectName) => {
     setFormData((prevData) => {
@@ -957,7 +1138,7 @@ const EditLCforDeleteStudent = () => {
                   maxLength={10}
                   value={formData.grn_no}
                   onChange={handleChange}
-                  readOnly
+                  // readOnly
                   className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                 />
                 {errors.grn_no && (
