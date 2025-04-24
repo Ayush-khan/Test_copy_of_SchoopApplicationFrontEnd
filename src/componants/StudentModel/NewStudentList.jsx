@@ -931,7 +931,7 @@
 
 // export default NewStudentList;
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -970,6 +970,8 @@ function NewStudentList() {
 
   const pageSize = 10;
 
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
   // for react-search of manage tab teacher Edit and select class
   const [selectedClass, setSelectedClass] = useState(null);
   const navigate = useNavigate();
@@ -1481,6 +1483,22 @@ function NewStudentList() {
       console.error("Error uploading file:", showErrorForUploading);
     }
   };
+
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0);
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current);
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
   const filteredSections = subjects.filter((section) => {
     // Convert the search term to lowercase for case-insensitive comparison
     const searchLower = searchTerm.toLowerCase();
@@ -1512,6 +1530,10 @@ function NewStudentList() {
   //     UserId.includes(searchTerm.toLowerCase())
   //   );
   // });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize

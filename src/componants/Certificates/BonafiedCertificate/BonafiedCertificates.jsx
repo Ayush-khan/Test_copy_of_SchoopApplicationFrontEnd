@@ -48,6 +48,9 @@ function BonafiedCertificates() {
   const [marksError, setMarksError] = useState(""); // Error for validation
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
+
   const navigate = useNavigate();
   const pageSize = 10;
   useEffect(() => {
@@ -368,12 +371,28 @@ function BonafiedCertificates() {
     setShowDeleteModal(false);
   };
 
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0);
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current);
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const searchLower = searchTerm.trim().toLowerCase();
   const filteredSections = subjects.filter((section) => {
     // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
     const subjectNameIs = section?.stud_name.toLowerCase() || "";
 
     // Check if the search term is present in either the teacher's name or the subject's name
-    return subjectNameIs.includes(searchTerm.toLowerCase());
+    return subjectNameIs.toLowerCase().includes(searchLower);
   });
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,

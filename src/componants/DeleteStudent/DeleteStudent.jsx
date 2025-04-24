@@ -38,6 +38,9 @@ function DeleteStudent() {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
 
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
+
   //   for allot subject checkboxes
   const [error, setError] = useState(null);
   const [nameError, setNameError] = useState(null);
@@ -280,6 +283,21 @@ function DeleteStudent() {
     setShowDeleteModal(false);
   };
 
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0);
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current);
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
   const filteredSections = subjects.filter((section) => {
     // Convert the fields to lowercase for case-insensitive comparison
     const subjectNameIs = section?.student_name?.toLowerCase() || "";
@@ -292,6 +310,10 @@ function DeleteStudent() {
       slcNoIs.includes(searchTermLower)
     );
   });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,

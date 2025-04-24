@@ -50,6 +50,9 @@ function PercentageCertificate() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
+
   const pageSize = 10;
   useEffect(() => {
     fetchClassNames();
@@ -70,21 +73,12 @@ function PercentageCertificate() {
   //     value: `${cls?.get_class?.name}-${cls.name}`,
   //     label: `${cls?.get_class?.name} ${cls.name}`,
   //   }));
-  const allowedClasses = ["10", "11", "12"];
-
   const classOptions = classes
-    .filter((cls) => allowedClasses.includes(cls?.get_class?.name)) // filter by class name
+    .filter((cls) => cls?.get_class?.class_id > 123) // filter classes with class_id > 100
     .map((cls) => ({
       value: `${cls?.get_class?.name}-${cls.name}`,
-      label: `Class ${cls?.get_class?.name} ${cls.name}`,
+      label: `${cls?.get_class?.name} ${cls.name}`,
     }));
-
-  // const classOptions = classes
-  //   .filter((cls) => cls?.get_class?.class_id > 123) // filter classes with class_id > 100
-  //   .map((cls) => ({
-  //     value: `${cls?.get_class?.name}-${cls.name}`,
-  //     label: `${cls?.get_class?.name} ${cls.name}`,
-  //   }));
 
   const fetchClassNames = async () => {
     try {
@@ -392,13 +386,31 @@ function PercentageCertificate() {
     setShowDeleteModal(false);
   };
 
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0);
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current);
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const searchLower = searchTerm.trim().toLowerCase();
+
   const filteredSections = subjects.filter((section) => {
     // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
     const subjectNameIs = section?.stud_name.toLowerCase() || "";
 
     // Check if the search term is present in either the teacher's name or the subject's name
-    return subjectNameIs.includes(searchTerm.toLowerCase());
+    return subjectNameIs.toLowerCase().includes(searchLower);
   });
+
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize

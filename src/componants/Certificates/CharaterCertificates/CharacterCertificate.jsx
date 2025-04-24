@@ -27,6 +27,8 @@ function CharacterCertificate() {
   const [currestSubjectNameForDelete, setCurrestSubjectNameForDelete] =
     useState("");
 
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
   // This is hold the allot subjet api response
   const [classIdForManage, setclassIdForManage] = useState("");
   //   For the dropdown of Teachers name api
@@ -382,13 +384,34 @@ function CharacterCertificate() {
     setShowDeleteModal(false);
   };
 
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0);
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current);
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const searchLower = searchTerm.trim().toLowerCase();
   const filteredSections = subjects.filter((section) => {
     // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
     const subjectNameIs = section?.stud_name.toLowerCase() || "";
 
     // Check if the search term is present in either the teacher's name or the subject's name
-    return subjectNameIs.includes(searchTerm.toLowerCase());
+    return subjectNameIs.toLowerCase().includes(searchLower);
   });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
+
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize

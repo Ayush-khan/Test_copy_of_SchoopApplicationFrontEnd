@@ -54,6 +54,9 @@ function ManageSubjectList() {
   const [roleId, setRoleId] = useState("");
   const navigate = useNavigate();
 
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
+
   // State for form fields and validation errors
   const [setPassword, setSetpassword] = useState("");
   const [userIdset, setUserIdset] = useState("");
@@ -571,6 +574,20 @@ function ManageSubjectList() {
   //     UserId.includes(searchTerm.toLowerCase())
   //   );
   // });
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0);
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current);
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
 
   const filteredSections = subjects.filter((section) => {
     // Convert the search term to lowercase for case-insensitive comparison
@@ -592,6 +609,10 @@ function ManageSubjectList() {
       studentUserId.includes(searchLower)
     );
   });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,

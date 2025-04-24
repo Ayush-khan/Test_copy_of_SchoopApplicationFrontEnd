@@ -140,7 +140,7 @@ const CreatePercentageCertificate = () => {
       .filter((cls) => allowedClasses.includes(cls?.get_class?.name))
       .map((cls) => ({
         value: cls.section_id,
-        label: `Class ${cls?.get_class?.name || ""} ${cls.name || ""} (${
+        label: `${cls?.get_class?.name || ""} ${cls.name || ""} (${
           cls.students_count || 0
         })`,
         key: `${cls.class_id}-${cls.section_id}`,
