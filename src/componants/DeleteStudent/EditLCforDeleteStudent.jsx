@@ -1073,7 +1073,7 @@ const EditLCforDeleteStudent = () => {
         {/* <div className="card p-4 rounded-md "> */}
         <div className=" card-header mb-4 flex justify-between items-center  ">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-            Edit Deleted Student LC
+            Generate Deleted Student LC
           </h5>
 
           <RxCross1
@@ -2164,10 +2164,10 @@ const EditLCforDeleteStudent = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                     ></path>
                   </svg>
-                  Loading...
+                  Generating...
                 </span>
               ) : (
-                "Update"
+                "Generate PDF"
               )}
             </button>
           </div>
