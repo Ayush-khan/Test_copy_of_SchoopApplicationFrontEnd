@@ -145,7 +145,7 @@ function NoticeBord() {
               </p>
 
               <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-                No data available for Notice for Parents.
+                No data available.
               </p>
             </div>
           </div>
@@ -188,7 +188,7 @@ function NoticeBord() {
               </p>
 
               <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-                No data available for Notice for Staff.
+                No data available.
               </p>
             </div>
           </div>

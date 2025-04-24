@@ -74,7 +74,10 @@ function PercentageCertificate() {
   //     label: `${cls?.get_class?.name} ${cls.name}`,
   //   }));
   const classOptions = classes
-    .filter((cls) => cls?.get_class?.class_id > 123) // filter classes with class_id > 100
+    .filter((cls) => {
+      const className = cls?.get_class?.name?.toString();
+      return ["10", "11", "12"].includes(className);
+    })
     .map((cls) => ({
       value: `${cls?.get_class?.name}-${cls.name}`,
       label: `${cls?.get_class?.name} ${cls.name}`,

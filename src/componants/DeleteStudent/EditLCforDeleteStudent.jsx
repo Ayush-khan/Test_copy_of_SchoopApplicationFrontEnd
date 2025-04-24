@@ -8,22 +8,14 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-// import { RxCross1 } from "react-icons/rx";
-
 const EditLCforDeleteStudent = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [nameError, setNameError] = useState("");
-  const [nameErrorForClass, setNameErrorForClass] = useState("");
   const [selectedClass, setSelectedClass] = useState(null);
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [loadingForSearch, setLoadingForSearch] = useState(false);
   const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
-
   const [selectedActivities, setSelectedActivities] = useState([]);
-
   const navigate = useNavigate();
   const location = useLocation();
   const { student } = location.state || {};
@@ -59,7 +51,6 @@ const EditLCforDeleteStudent = () => {
     attendance: "",
     subjectsFor: [],
     subjects: [],
-
     reason_leaving: "",
     application_date: "",
     leaving_date: "",
@@ -79,33 +70,57 @@ const EditLCforDeleteStudent = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        setLoading(true); // Start loading
+        setLoading(true);
         const token = localStorage.getItem("authToken");
-
         if (!token) throw new Error("No authentication token found");
 
-        const response = await axios.get(
-          //   `${API_URL}/api/get_getleavingcertificatedata/${student?.student_id}`,
-          `${API_URL}/api/get_getleavingcertificatedata/${student?.slc_no}`,
+        let response;
 
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        // Call one API based on slc_no presence
+        if (student?.slc_no) {
+          // Use slc_no directly
+          response = await axios.get(
+            `${API_URL}/api/get_getleavingcertificatedata/${student.slc_no}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+        } else if (student?.student_id) {
+          // Get data by student_id
+          response = await axios.get(
+            `${API_URL}/api/get_srnoleavingcertificatedata/${student.student_id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+        } else {
+          toast.error("Student information is missing.");
+          return;
+        }
 
-        if (response.data.success && response.data.data) {
+        // If data is present from either API
+        if (
+          response?.data?.success &&
+          response.data.data?.leavingcertificatesingle
+        ) {
           const fetchedData = response.data.data.leavingcertificatesingle;
           const DataStudentAc = response.data.data;
-          // Update formData with the fetched data
-          // Inside useEffect, after fetching data and setting formData
-          const { subjects_studied, games } =
-            response.data.data.leavingcertificatesingle;
-          const classsubject = response.data.data.classsubject;
-          // Convert comma-separated strings to arrays
-          const selectedSubjects = subjects_studied
-            ? subjects_studied.split(",")
+          const classsubject = DataStudentAc.classsubject || [];
+          console.log(
+            "fetchedData",
+            fetchedData,
+            "DataStudentAc",
+            DataStudentAc,
+            "classsubject",
+            classsubject
+          );
+          const selectedSubjects = fetchedData.subjects_studied
+            ? fetchedData.subjects_studied.split(",")
             : [];
-          const selectedActivities = games ? games.split(",") : [];
+          const selectedActivities = fetchedData.games
+            ? fetchedData.games.split(",")
+            : [];
+
           setFormData({
             sr_no: fetchedData.sr_no || "",
             student_id: fetchedData.student_id || "",
@@ -145,12 +160,12 @@ const EditLCforDeleteStudent = () => {
             academic_yr: fetchedData.academic_yr || "",
             conduct: fetchedData.conduct || "",
             fee_month: fetchedData.fee_month || "",
-            subjects: DataStudentAc.classsubject || [],
-            // selectedActivities: (fetchedData.games || "").split(","),
-            subjectsFor: classsubject, // All subjects to display
-            selectedSubjects: selectedSubjects, // Only selected subjects checked
-            selectedActivities: selectedActivities, // Only selected activities checked
+            subjects: classsubject,
+            subjectsFor: classsubject,
+            selectedSubjects,
+            selectedActivities,
           });
+
           toast.success("Data loaded successfully");
         } else {
           toast.error("Failed to load data");
@@ -159,12 +174,99 @@ const EditLCforDeleteStudent = () => {
         console.error("Error fetching initial data:", error);
         toast.error("Error fetching initial data");
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     };
 
     fetchInitialData();
   }, []);
+
+  // useEffect(() => {
+  //   const fetchInitialData = async () => {
+  //     try {
+  //       setLoading(true); // Start loading
+  //       const token = localStorage.getItem("authToken");
+
+  //       if (!token) throw new Error("No authentication token found");
+
+  //       const response = await axios.get(
+  //         //   `${API_URL}/api/get_getleavingcertificatedata/${student?.student_id}`,
+  //         `${API_URL}/api/get_getleavingcertificatedata/${student?.slc_no}`,
+
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+
+  //       if (response.data.success && response.data.data) {
+  //         const fetchedData = response.data.data.leavingcertificatesingle;
+  //         const DataStudentAc = response.data.data;
+  //         const { subjects_studied, games } =
+  //           response.data.data.leavingcertificatesingle;
+  //         const classsubject = response.data.data.classsubject;
+  //         const selectedSubjects = subjects_studied
+  //           ? subjects_studied.split(",")
+  //           : [];
+  //         const selectedActivities = games ? games.split(",") : [];
+  //         setFormData({
+  //           sr_no: fetchedData.sr_no || "",
+  //           student_id: fetchedData.student_id || "",
+  //           grn_no: fetchedData.grn_no || "",
+  //           academicStudent: DataStudentAc.academicStudent || [],
+  //           issue_date: fetchedData.issue_date || "",
+  //           student_id_no: fetchedData.stud_id_no || "",
+  //           aadhar_no: fetchedData.aadhar_no || "",
+  //           first_name: fetchedData.stud_name || "",
+  //           mid_name: fetchedData.mid_name || "",
+  //           last_name: fetchedData.last_name || "",
+  //           father_name: fetchedData.father_name || "",
+  //           mother_name: fetchedData.mother_name || "",
+  //           nationality: fetchedData.nationality || "",
+  //           mother_tongue: fetchedData.mother_tongue || "",
+  //           religion: fetchedData.religion || "",
+  //           caste: fetchedData.caste || "",
+  //           subcaste: fetchedData.subcaste || "",
+  //           birth_place: fetchedData.birth_place || "",
+  //           state: fetchedData.state || "",
+  //           dob: fetchedData.dob || "",
+  //           dob_words: fetchedData.dob_words || "",
+  //           prev_school_class: fetchedData.last_school_attended_standard || "",
+  //           date_of_admission: fetchedData.date_of_admission || "",
+  //           admission_class: fetchedData.admission_class || "",
+  //           attendance: fetchedData.attendance || "",
+  //           reason_leaving: fetchedData.reason_leaving || "",
+  //           application_date: fetchedData.application_date || "",
+  //           leaving_date: fetchedData.leaving_date || "",
+  //           standard_studying: fetchedData.standard_studying || "",
+  //           dob_proof: fetchedData.dob_proof || "",
+  //           promoted_to: fetchedData.promoted_to || "",
+  //           last_exam: fetchedData.last_exam || "",
+  //           udise_pen_no: fetchedData.udise_pen_no || "",
+  //           part_of: fetchedData.part_of || "",
+  //           remark: fetchedData.remark || "",
+  //           academic_yr: fetchedData.academic_yr || "",
+  //           conduct: fetchedData.conduct || "",
+  //           fee_month: fetchedData.fee_month || "",
+  //           subjects: DataStudentAc.classsubject || [],
+  //           // selectedActivities: (fetchedData.games || "").split(","),
+  //           subjectsFor: classsubject, // All subjects to display
+  //           selectedSubjects: selectedSubjects, // Only selected subjects checked
+  //           selectedActivities: selectedActivities, // Only selected activities checked
+  //         });
+  //         toast.success("Data loaded successfully");
+  //       } else {
+  //         toast.error("Failed to load data");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching initial data:", error);
+  //       toast.error("Error fetching initial data");
+  //     } finally {
+  //       setLoading(false); // Stop loading
+  //     }
+  //   };
+
+  //   fetchInitialData();
+  // }, []);
 
   const getYearInWords = (year) => {
     if (year < 1000 || year > 9999) return "Year Out of Range"; // Optional range limit
@@ -309,139 +411,6 @@ const EditLCforDeleteStudent = () => {
   // Get today's date in YYYY-MM-DD format
   // Calculate today's date
   const today = new Date().toISOString().split("T")[0];
-
-  // for student and class dropdown
-
-  //   const handleSearch = async () => {
-  //     setNameError("");
-  //     setNameErrorForClass("");
-  //     setErrors({}); // Clears all field-specific errors
-
-  //     if (!selectedClass && !selectedStudent) {
-  //       setNameError("Please select at least one of them.");
-  //       toast.error("Please select at least one of them!");
-  //       return;
-  //     }
-
-  //     setFormData({
-  //       grn_no: "",
-  //       class_id: "",
-  //       issue_date: "",
-  //       student_id_no: "",
-  //       aadhar_no: "",
-  //       first_name: "",
-  //       mid_name: "",
-  //       last_name: "",
-  //       father_name: "",
-  //       mother_name: "",
-  //       nationality: "",
-  //       mother_tongue: "",
-  //       religion: "",
-  //       caste: "",
-  //       subcaste: "",
-  //       birth_place: "",
-  //       dob: "",
-  //       dob_words: "",
-  //       dob_proof: "",
-  //       prev_school_class: "",
-  //       // previous_school_attended: "",
-  //       date_of_admission: "",
-  //       admission_class: "",
-  //       leaving_date: "",
-  //       standard_studying: "",
-  //       last_exam: "",
-  //       subjects: [], // Empty array for selected subjects
-  //       promoted_to: "",
-  //       attendance: "",
-  //       fee_month: "",
-  //       part_of: "",
-  //       selectedActivities: [], // Empty array for selected activities
-  //       application_date: "",
-  //       conduct: "",
-  //       reason_leaving: "",
-  //       remark: "",
-  //       academic_yr: "",
-  //       stud_id: "",
-  //       udise_pen_no: "",
-  //     });
-
-  //     try {
-  //       setLoadingForSearch(true); // Start loading
-  //       const token = localStorage.getItem("authToken");
-  //       const response = await axios.get(
-  //         `${API_URL}/api/get_srnoleavingcertificatedata/${selectedStudentId}`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-
-  //       // Check if data was received and update the form state
-  //       if (response?.data?.data) {
-  //         const fetchedData = response.data.data; // Extract the data
-
-  //         setParentInformation(fetchedData); // Assuming response data contains parent information
-  //         // Extract all subject names for initial selected state
-  //         const allSubjectNames = (fetchedData.classsubject || []).map(
-  //           (subject) => subject.name
-  //         );
-
-  //         console.log("allSubjectNames", allSubjectNames);
-  //         // Populate formData with the fetched data
-  //         setFormData({
-  //           sr_no: fetchedData.sr_no || "",
-  //           class_id: fetchedData.class_id || " ",
-  //           class_id_for_subj: fetchedData.studentinformation.class_id || "",
-  //           grn_no: fetchedData.studentinformation.grn_no || "",
-  //           date: today || "", // Directly from the fetched data
-  //           subjectsFor: fetchedData.classsubject || [],
-  //           academicStudent: fetchedData.academicStudent || [],
-  //           academic_yr: fetchedData.studentinformation?.academic_yr || "", // Preselect first academic year if available
-  //           subjects: allSubjectNames,
-
-  //           selectedSubjects: allSubjectNames, // Initialize with all subjects checked
-  //           // first_name: `${fetchedData.studentinformation?.first_name || ""} ${
-  //           //   fetchedData.studentinformation?.mid_name || ""
-  //           // } ${fetchedData.studentinformation?.last_name || ""}`,
-  //           student_id_no: fetchedData.studentinformation.student_id_no || "",
-  //           first_name: fetchedData.studentinformation.first_name || "",
-  //           mid_name: fetchedData.studentinformation.mid_name || "",
-  //           last_name: fetchedData.studentinformation.last_name || "",
-  //           udise_pen_no: fetchedData.studentinformation.udise_pen_no || "",
-  //           promoted_to: fetchedData.studentinformation.promoted_to || "",
-  //           last_exam: fetchedData.studentinformation.last_exam || "",
-
-  //           stud_id: fetchedData.studentinformation.student_id || " ",
-  //           father_name: fetchedData.studentinformation.father_name || "",
-  //           mother_name: fetchedData.studentinformation.mother_name || "",
-
-  //           date_of_admission:
-  //             fetchedData.studentinformation.date_of_admission || "",
-  //           religion: fetchedData.studentinformation.religion || "",
-  //           caste: fetchedData.studentinformation.caste || "",
-  //           subcaste: fetchedData.studentinformation.subcaste || "",
-  //           birth_place: fetchedData.studentinformation.birth_place || "", // Adjusted according to the fetched data
-  //           state: fetchedData.studentinformation.state || "",
-  //           mother_tongue: fetchedData.studentinformation.mother_tongue || "",
-  //           dob: fetchedData.studentinformation.dob || "",
-  //           // dob_words: fetchedData.dobinwords || "", // Directly from fetched data
-  //           dob_words: convertDateToWords(fetchedData.studentinformation.dob),
-  //           attendance: fetchedData.total_attendance || "",
-  //           nationality: fetchedData.studentinformation.nationality || "",
-  //           aadhar_no: fetchedData.studentinformation.aadhar_no || "",
-  //           teacher_image_name:
-  //             fetchedData.studentinformation.father_image_name || null, // Assuming this is for a teacher image
-  //           purpose: fetchedData.purpose || " ",
-  //         });
-  //       } else {
-  //         toast.error("No data found for the selected student.");
-  //       }
-  //     } catch (error) {
-  //       console.log("error is", error);
-  //       toast.error("Error fetching data for the selected student.");
-  //     } finally {
-  //       setLoadingForSearch(false);
-  //     }
-  //   };
 
   const validate = () => {
     const newErrors = {};
