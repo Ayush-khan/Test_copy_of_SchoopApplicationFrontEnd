@@ -754,7 +754,7 @@ h5 + * { /* Targets the element after h5 */
             <div className="modal-dialog  modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Download Student Id Card</h5>
+                  <h5 className="modal-title">Download Profile Images</h5>
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -770,7 +770,7 @@ h5 + * { /* Targets the element after h5 */
                 ></div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to download student ID card of
+                    Are you sure you want to download profile images of
                     {` ${selectedStudent?.label}?`}
                     {/* {currentClass?.name}? */}
                   </p>
