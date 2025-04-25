@@ -1,7 +1,7 @@
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
@@ -15,6 +15,9 @@ function CareTacker() {
   const [staffs, setStaffs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -145,9 +148,33 @@ function CareTacker() {
     }
   };
 
-  const filteredStaffs = staffs.filter((staff) =>
-    staff.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save current page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const filteredStaffs = staffs.filter((staff) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      staff.name?.toLowerCase().includes(searchLower) ||
+      staff.phone?.toLowerCase().includes(searchLower) ||
+      staff.designation?.toLowerCase().includes(searchLower)
+    );
+  });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredStaffs.length / pageSize));
+  }, [filteredStaffs, pageSize]);
 
   const displayedStaffs = filteredStaffs.slice(
     currentPage * pageSize,
