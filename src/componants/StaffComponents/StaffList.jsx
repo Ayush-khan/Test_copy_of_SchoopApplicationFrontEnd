@@ -2,7 +2,7 @@
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
@@ -29,6 +29,10 @@ function StaffList() {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const pageSize = 10;
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
+
   const navigate = useNavigate();
   const fetchStaffs = async () => {
     setLoading(true);
@@ -277,9 +281,35 @@ function StaffList() {
     }
   };
 
-  const filteredStaffs = staffs.filter((staff) =>
-    staff.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save current page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const filteredStaffs = staffs.filter((staff) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      staff.employee_id?.toLowerCase().includes(searchLower) ||
+      staff.name?.toLowerCase().includes(searchLower) ||
+      staff.email?.toLowerCase().includes(searchLower) ||
+      staff.phone?.toLowerCase().includes(searchLower) ||
+      staff.designation?.toLowerCase().includes(searchLower)
+    );
+  });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredStaffs.length / pageSize));
+  }, [filteredStaffs, pageSize]);
 
   const displayedStaffs = filteredStaffs.slice(
     currentPage * pageSize,
@@ -497,33 +527,6 @@ function StaffList() {
                 </table>
               </div>
             </div>
-            {/* <div className="flex justify-center py-4 md:w-full">
-              <ReactPaginate
-                previousLabel={"Previous"}
-                nextLabel={"Next"}
-                breakLabel={"..."}
-                breakClassName={"page-item"}
-                breakLinkClassName={"page-link"}
-                pageCount={pageCount}
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={5}
-                onPageChange={handlePageClick}
-                containerClassName={"flex space-x-1"}
-                pageClassName={"page-item"}
-                pageLinkClassName={
-                  "page-link px-1 md:px-3 py-1 text-blue-500 border border-gray-300 rounded-md hover:bg-blue-500 hover:text-white"
-                }
-                previousClassName={"page-item"}
-                previousLinkClassName={
-                  "page-link px-1 md:px-3 py-1 text-blue-500 border border-gray-300 rounded-md hover:bg-blue-500 hover:text-white"
-                }
-                nextClassName={"page-item"}
-                nextLinkClassName={
-                  "page-link  px-1 md:px-3 py-1 text-blue-500 border border-gray-300 rounded-md hover:bg-blue-500 hover:text-white"
-                }
-                activeClassName={"bg-blue-500 text-white"}
-              />
-            </div> */}
             <div className=" flex justify-center  pt-2 -mb-3  box-border  overflow-hidden">
               <ReactPaginate
                 previousLabel={"Previous"}
@@ -548,116 +551,6 @@ function StaffList() {
           </div>
         </div>
       </div>
-
-      {/* {showAddModal && (
-        <div className="modal show d-block" tabIndex="-1" role="dialog">
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Add Staff</h5>
-                <button
-                  type="button"
-                  className="close"
-                  onClick={handleCloseModal}
-                >
-                  <span>&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Staff Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={newStaffName}
-                    onChange={(e) => setNewStaffName(e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Designation</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={newDesignation}
-                    onChange={(e) => setNewDesignation(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleCloseModal}
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSubmitAdd}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )} */}
-
-      {/* {showEditModal && (
-        <div className="modal show d-block" tabIndex="-1" role="dialog">
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit Staff</h5>
-                <button
-                  type="button"
-                  className="close"
-                  onClick={handleCloseModal}
-                >
-                  <span>&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Staff Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={newStaffName}
-                    onChange={(e) => setNewStaffName(e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Designation</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={newDesignation}
-                    onChange={(e) => setNewDesignation(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleCloseModal}
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSubmitEdit}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )} */}
 
       {showDeleteModal && (
         <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
@@ -702,420 +595,3 @@ function StaffList() {
 }
 
 export default StaffList;
-
-// // for edit functionality
-// import axios from "axios";
-// import ReactPaginate from "react-paginate";
-// import "bootstrap/dist/css/bootstrap.min.css";
-// import { useState, useEffect } from "react";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
-// import { ToastContainer, toast } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
-// import { MdOutlineRemoveRedEye } from "react-icons/md";
-// import { useNavigate } from "react-router-dom";
-
-// function StaffList() {
-//   const API_URL = import.meta.env.VITE_API_URL; // url for host
-//   const [staffs, setStaffs] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [showAddModal, setShowAddModal] = useState(false);
-//   const [showDeleteModal, setShowDeleteModal] = useState(false);
-//   const [currentStaff, setCurrentStaff] = useState(null);
-//   const [newStaffName, setNewStaffName] = useState("");
-//   const [newDesignation, setNewDesignation] = useState("");
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const [currentPage, setCurrentPage] = useState(0);
-//   const [pageCount, setPageCount] = useState(0);
-//   const pageSize = 10;
-//   const navigate = useNavigate();
-
-//   const fetchStaffs = async () => {
-//     try {
-//       const token = localStorage.getItem("authToken");
-
-//       if (!token) {
-//         throw new Error("No authentication token found");
-//       }
-
-//       const response = await axios.get(`${API_URL}/api/staff_list`, {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//         withCredentials: true,
-//       });
-
-//       setStaffs(response.data);
-//       setPageCount(Math.ceil(response.data.length / pageSize));
-//     } catch (error) {
-//       setError(error.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchStaffs();
-//   }, []);
-
-//   const handlePageClick = (data) => {
-//     setCurrentPage(data.selected);
-//   };
-
-//   const handleEdit = (staffItem) => {
-//     // navigate(`/editStaff/${staffItem.user_id}`
-//     navigate(
-//       `/staff/${staffItem.user_id}/edit`,
-
-//       {
-//         state: { staff: staffItem },
-//       }
-//     );
-//   };
-
-//   const handleAdd = () => {
-//     setShowAddModal(true);
-//   };
-
-//   const handleCloseModal = () => {
-//     setShowAddModal(false);
-//     setShowDeleteModal(false);
-//     setNewStaffName("");
-//     setNewDesignation("");
-//     setCurrentStaff(null);
-//   };
-
-//   const handleSubmitAdd = async () => {
-//     try {
-//       const token = localStorage.getItem("authToken");
-
-//       if (!token) {
-//         throw new Error("No authentication token found");
-//       }
-
-//       const response = await axios.post(
-//         `${API_URL}/api/store_staff`,
-//         {
-//           name: newStaffName,
-//           designation: newDesignation,
-//           // Add other required fields according to your backend validation
-//         },
-//         {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//           withCredentials: true,
-//         }
-//       );
-
-//       if (response.status === 201) {
-//         fetchStaffs(); // Refresh staff list after successful addition
-//         handleCloseModal();
-//         toast.success("Staff added successfully!");
-//       } else {
-//         toast.error("Failed to add staff");
-//       }
-//     } catch (error) {
-//       console.error("Error adding staff:", error);
-//       toast.error("Failed to add staff");
-//     }
-//   };
-
-//   const handleSubmitDelete = async () => {
-//     try {
-//       const token = localStorage.getItem("authToken");
-
-//       if (!token || !currentStaff || !currentStaff.user_id) {
-//         throw new Error("Staff ID is missing");
-//       }
-//       console.log("cureesentstaffId", currentStaff.get_teacher.teacher_id);
-//       const response = await axios.delete(
-//         `${API_URL}/api/teachers/${currentStaff.get_teacher.teacher_id}`,
-//         {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//           withCredentials: true,
-//         }
-//       );
-
-//       if (response.status === 200) {
-//         fetchStaffs(); // Refresh staff list after successful deletion
-//         handleCloseModal();
-//         toast.success("Staff deleted successfully!");
-//       } else {
-//         toast.error("Failed to delete staff");
-//       }
-//     } catch (error) {
-//       console.error("Error deleting staff:", error);
-//       toast.error("Failed to delete staff");
-//     }
-//   };
-
-//   const handleDelete = (id) => {
-//     const staffToDelete = staffs.find((staff) => staff.user_id === id);
-//     setCurrentStaff(staffToDelete);
-//     setShowDeleteModal(true);
-//   };
-
-//   const handleView = () => {
-//     console.log("handleview is running on");
-//   };
-
-//   const filteredStaffs = staffs.filter((staff) =>
-//     staff.name.toLowerCase().includes(searchTerm.toLowerCase())
-//   );
-
-//   const displayedStaffs = filteredStaffs.slice(
-//     currentPage * pageSize,
-//     (currentPage + 1) * pageSize
-//   );
-
-//   if (loading) return <p>Loading...</p>;
-//   if (error) return <p>Error: {error}</p>;
-
-//   return (
-//     <>
-//       <ToastContainer />
-//       <div className="container md:mt-4">
-//         <div className="card mx-auto lg:w-full shadow-lg">
-//           <div className="card-header flex justify-between items-center">
-//             <h3 className="text-gray-700 mt-1 text-md lg:text-xl">
-//               Staff List
-//             </h3>
-//             <div className="box-border flex gap-x-2 justify-end md:h-10">
-//               <div>
-//                 <input
-//                   type="text"
-//                   className="form-control"
-//                   placeholder="Search"
-//                   onChange={(e) => setSearchTerm(e.target.value)}
-//                 />
-//               </div>
-//               <button
-//                 className="btn btn-primary btn-sm h-9"
-//                 onClick={() => navigate("/CreateStaff")}
-//               >
-//                 <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
-//                 Add
-//               </button>
-//             </div>
-//           </div>
-
-//           <div className="card-body w-full box-border">
-//             <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-//               <div className="bg-white rounded-lg shadow-xs">
-//                 <table className="min-w-full leading-normal table-auto">
-//                   <thead>
-//                     <tr className="bg-gray-100">
-//                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-//                         S.No
-//                       </th>
-//                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-//                         Photo
-//                       </th>
-//                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-//                         Employee Id
-//                       </th>
-//                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-//                         Staff Name
-//                       </th>
-//                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-//                         Email
-//                       </th>
-//                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-//                         Phone no.
-//                       </th>
-//                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-//                         Designation
-//                       </th>
-//                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-//                         Edit
-//                       </th>
-//                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-//                         Delete
-//                       </th>
-//                     </tr>
-//                   </thead>
-//                   <tbody>
-//                     {displayedStaffs.map((staffItem, index) => (
-//                       <tr key={staffItem.user_id}>
-//                         <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-//                           {currentPage * pageSize + index + 1}
-//                         </td>
-//                         <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-//                           <img
-//                             src={staffItem.photo}
-//                             alt="Staff"
-//                             className="w-8 h-8 rounded-full mx-auto"
-//                           />
-//                         </td>
-//                         <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-//                           {staffItem.emp_id}
-//                         </td>
-//                         <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-//                           {staffItem.name}
-//                         </td>
-//                         <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-//                           {staffItem.email}
-//                         </td>
-//                         <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-//                           {staffItem.phone}
-//                         </td>
-//                         <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-//                           {staffItem.designation}
-//                         </td>
-//                         <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-//                           <button
-//                             className="btn btn-sm btn-outline-primary"
-//                             onClick={() => handleEdit(staffItem)}
-//                           >
-//                             <FontAwesomeIcon icon={faEdit} />
-//                           </button>
-//                         </td>
-//                         <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-//                           <button
-//                             className="btn btn-sm btn-outline-danger"
-//                             onClick={() => handleDelete(staffItem.user_id)}
-//                           >
-//                             <FontAwesomeIcon icon={faTrash} />
-//                           </button>
-//                         </td>
-//                       </tr>
-//                     ))}
-//                   </tbody>
-//                 </table>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="flex justify-end mt-4">
-//             <ReactPaginate
-//               previousLabel={"Previous"}
-//               nextLabel={"Next"}
-//               breakLabel={"..."}
-//               breakClassName={"break-me"}
-//               pageCount={pageCount}
-//               marginPagesDisplayed={2}
-//               pageRangeDisplayed={5}
-//               onPageChange={handlePageClick}
-//               containerClassName={"pagination"}
-//               subContainerClassName={"pages pagination"}
-//               activeClassName={"active"}
-//             />
-//           </div>
-//         </div>
-//       </div>
-
-//       {showAddModal && (
-//         <div
-//           className="modal fade show"
-//           style={{ display: "block" }}
-//           tabIndex="-1"
-//           role="dialog"
-//         >
-//           <div className="modal-dialog" role="document">
-//             <div className="modal-content">
-//               <div className="modal-header">
-//                 <h5 className="modal-title">Add Staff</h5>
-//                 <button
-//                   type="button"
-//                   className="close"
-//                   onClick={handleCloseModal}
-//                 >
-//                   <span>&times;</span>
-//                 </button>
-//               </div>
-//               <div className="modal-body">
-//                 <form>
-//                   <div className="form-group">
-//                     <label>Staff Name</label>
-//                     <input
-//                       type="text"
-//                       className="form-control"
-//                       value={newStaffName}
-//                       onChange={(e) => setNewStaffName(e.target.value)}
-//                     />
-//                   </div>
-//                   <div className="form-group">
-//                     <label>Designation</label>
-//                     <input
-//                       type="text"
-//                       className="form-control"
-//                       value={newDesignation}
-//                       onChange={(e) => setNewDesignation(e.target.value)}
-//                     />
-//                   </div>
-//                   {/* Add other fields as needed */}
-//                 </form>
-//               </div>
-//               <div className="modal-footer">
-//                 <button
-//                   type="button"
-//                   className="btn btn-secondary"
-//                   onClick={handleCloseModal}
-//                 >
-//                   Close
-//                 </button>
-//                 <button
-//                   type="button"
-//                   className="btn btn-primary"
-//                   onClick={handleSubmitAdd}
-//                 >
-//                   Save
-//                 </button>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-
-//       {showDeleteModal && (
-//         <div
-//           className="modal fade show"
-//           style={{ display: "block" }}
-//           tabIndex="-1"
-//           role="dialog"
-//         >
-//           <div className="modal-dialog" role="document">
-//             <div className="modal-content">
-//               <div className="modal-header">
-//                 <h5 className="modal-title">Delete Staff</h5>
-//                 <button
-//                   type="button"
-//                   className="close"
-//                   onClick={handleCloseModal}
-//                 >
-//                   <span>&times;</span>
-//                 </button>
-//               </div>
-//               <div className="modal-body">
-//                 <p>Are you sure you want to delete this staff?</p>
-//                 <p>{currentStaff?.name}</p>
-//               </div>
-//               <div className="modal-footer">
-//                 <button
-//                   type="button"
-//                   className="btn btn-secondary"
-//                   onClick={handleCloseModal}
-//                 >
-//                   Close
-//                 </button>
-//                 <button
-//                   type="button"
-//                   className="btn btn-danger"
-//                   onClick={handleSubmitDelete}
-//                 >
-//                   Delete
-//                 </button>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </>
-//   );
-// }
-
-// export default StaffList;
