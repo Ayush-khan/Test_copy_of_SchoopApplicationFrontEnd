@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -44,6 +44,9 @@ function LeaveAllocation() {
     fetchSections();
     fetchDataRoleId();
   }, []);
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   const fetchStaffNames = async () => {
     try {
@@ -154,8 +157,24 @@ function LeaveAllocation() {
       console.error("Error fetching data:", error);
     }
   };
+
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save current page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
   const filteredSections = sections.filter((section) => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = searchTerm.trim().toLowerCase();
     return (
       section.teachername.toLowerCase().includes(searchLower) || // Filter by teacher name
       section.leavename.toLowerCase().includes(searchLower) || // Filter by leave type
@@ -163,6 +182,11 @@ function LeaveAllocation() {
       section.leaves_allocated.toLowerCase().includes(searchLower)
     );
   });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
+
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -624,11 +648,13 @@ function LeaveAllocation() {
                 </table>
               </div>
             </div>
-            {filteredSections.length > pageSize && (
+            <div className=" flex justify-center  pt-2 -mb-3  box-border  overflow-hidden">
               <ReactPaginate
                 previousLabel={"Previous"}
                 nextLabel={"Next"}
                 breakLabel={"..."}
+                breakClassName={"page-item"}
+                breakLinkClassName={"page-link"}
                 pageCount={pageCount}
                 marginPagesDisplayed={1}
                 pageRangeDisplayed={1}
@@ -640,11 +666,9 @@ function LeaveAllocation() {
                 previousLinkClassName={"page-link"}
                 nextClassName={"page-item"}
                 nextLinkClassName={"page-link"}
-                breakClassName={"page-item"}
-                breakLinkClassName={"page-link"}
                 activeClassName={"active"}
               />
-            )}
+            </div>
           </div>
         </div>
 
