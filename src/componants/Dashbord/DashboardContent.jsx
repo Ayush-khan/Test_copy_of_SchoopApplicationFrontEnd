@@ -33,12 +33,12 @@ const DashboardContent = () => {
   });
 
   const [staffData, setStaffData] = useState({
-    teachingStaff: 0,
-    nonTeachingStaff: 0,
+    teachingStaff: "",
+    nonTeachingStaff: "",
   });
-  const [staffBirthday, setStaffBirthday] = useState(0);
-  const [ticketCount, setTicketCount] = useState(0);
-  const [pendingFee, setPendingFee] = useState(0);
+  const [staffBirthday, setStaffBirthday] = useState("");
+  const [ticketCount, setTicketCount] = useState("");
+  const [pendingFee, setPendingFee] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const academicYr = localStorage.getItem("academicYear");
@@ -145,18 +145,6 @@ const DashboardContent = () => {
       <ToastContainer />
       <div className="flex flex-col lg:flex-row items-start justify-between w-full gap-4 p-6 ">
         <div className="w-full lg:w-2/3  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* <Card
-            title="Students"
-            value="3256"
-            color="#FF5733"
-            icon={<PiBookOpenUserLight />}
-          />
-          <Card
-            title="Employees"
-            value="68"
-            color="#FFC107"
-            icon={<PiBookOpenUserLight />}
-          /> */}
           {/* {console.log("totalstudent", studentData.total)} */}
           <CardStuStaf
             title="Student"
@@ -178,7 +166,7 @@ const DashboardContent = () => {
             title="Teachers"
             TotalValue={staffData.teachingStaff}
             // presentValue={staffData.teachingStaff}
-            presentValue={"Present"}
+            presentValue={staffData?.teachingStaff}
             color="#2196F3"
             icon={
               <FaUserGroup
@@ -195,7 +183,7 @@ const DashboardContent = () => {
             title="Staff"
             TotalValue={staffData.nonTeachingStaff}
             // presentValue={staffData.nonTeachingStaff}
-            presentValue={"Present"}
+            presentValue={staffData?.nonTeachingStaff}
             color="#2196F3"
             icon={
               <FaUserGroup
@@ -242,21 +230,6 @@ const DashboardContent = () => {
               }
             />
           </Link>
-          {/* <Card
-            title="Acheivements"
-            value="16"
-            color="#4CAF50"
-            icon={
-              <GiAchievement
-                style={{
-                  color: "violet",
-                  backgroundColor: "white",
-                  padding: "10px",
-                  borderRadius: "50%",
-                }}
-              />
-            }
-          /> */}
 
           <Link to="/staffbirthlist" className="no-underline">
             <Card
