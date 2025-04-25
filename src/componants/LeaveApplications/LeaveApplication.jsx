@@ -1,7 +1,7 @@
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
@@ -17,6 +17,9 @@ function LeaveApplicaton() {
   const [error, setError] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   const [currentLeave, setCurrentLeave] = useState(null);
   const [currentLeaveName, setCurrentLeaveName] = useState(null);
@@ -133,18 +136,26 @@ function LeaveApplicaton() {
     const year = String(date.getFullYear()).slice(-2); // Last 2 digits of the year
     return `${day}-${month}-${year}`;
   };
-  // const filteredStaffs = Array.isArray(staffs)
-  //   ? staffs.filter(
-  //       (leave) =>
-  //         String(leave.leave_app_id)
-  //           .toLowerCase()
-  //           .includes(String(searchTerm).toLowerCase()) ||
-  //         leave.name.toLowerCase().includes(searchTerm.toLowerCase())
-  //     )
-  //   : [];
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save current page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  // const searchLower = searchTerm.trim().toLowerCase();
+
   const filteredStaffs = Array.isArray(staffs)
     ? staffs.filter((leave) => {
-        const search = String(searchTerm).toLowerCase();
+        const search = String(searchTerm).trim().toLowerCase();
         return (
           String(leave.name).toLowerCase().includes(search) || // Leave Type
           String(formatDate(leave.leave_start_date))
@@ -160,6 +171,10 @@ function LeaveApplicaton() {
     : [];
 
   console.log("filetred staff leave", filteredStaffs);
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredStaffs.length / pageSize));
+  }, [filteredStaffs, pageSize]);
 
   const displayedStaffs = filteredStaffs.slice(
     currentPage * pageSize,
@@ -320,8 +335,7 @@ function LeaveApplicaton() {
                 </table>
               </div>
             </div>
-            {/* <div className=" flex justify-center  pt-2 -mb-3  box-border  overflow-hidden"> */}
-            {filteredStaffs.length > pageSize && (
+            <div className=" flex justify-center  pt-2 -mb-3  box-border  overflow-hidden">
               <ReactPaginate
                 previousLabel={"Previous"}
                 nextLabel={"Next"}
@@ -341,8 +355,7 @@ function LeaveApplicaton() {
                 nextLinkClassName={"page-link"}
                 activeClassName={"active"}
               />
-            )}
-            {/* </div> */}
+            </div>
           </div>
         </div>
       </div>
