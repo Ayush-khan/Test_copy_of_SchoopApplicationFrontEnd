@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -32,6 +32,9 @@ const PendingStudentId = () => {
   const [parentsData, setParentsData] = useState([]);
   const [selectedFathers, setSelectedFathers] = useState([]);
   const [errors, setErrors] = useState({});
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   // Custom styles for the close button
   const classOptions = useMemo(
@@ -345,9 +348,24 @@ const PendingStudentId = () => {
     setCurrentPage(data.selected);
   };
 
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save current page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
   const filteredSections = Array.isArray(pendingstudents)
     ? pendingstudents.filter((section) => {
-        const searchLower = searchTerm.toLowerCase();
+        const searchLower = searchTerm.toLowerCase().trim();
         const parentName = `${
           section?.parent?.father_name ?? ""
         }`.toLowerCase();
