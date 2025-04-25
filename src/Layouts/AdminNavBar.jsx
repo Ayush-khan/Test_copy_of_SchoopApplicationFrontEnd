@@ -525,7 +525,7 @@
 // working  hover and onclick on navbar
 
 import { NavDropdown } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./AdminNavBar.css"; // Attach the CSS file
 import { IoIosHelpCircleOutline } from "react-icons/io";
 import { useState, useEffect, useRef } from "react";
@@ -535,6 +535,7 @@ const AdminNavBar = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [clickedDropdown, setClickedDropdown] = useState(null);
   const menuRef = useRef(null);
+  const navigate = useNavigate();
 
   // 🔹 Toggle Dropdown on Click
   const toggleDropdown = (dropdownName) => {
@@ -576,7 +577,10 @@ const AdminNavBar = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
+  const handleTicketClick = () => {
+    // Navigate to the "Coming Soon" page
+    navigate("/comingSoon");
+  };
   return (
     <>
       <Nav ref={menuRef}>
@@ -828,27 +832,13 @@ const AdminNavBar = () => {
         {/* View Dropdown */}
 
         <NavDropdown
-          // title=""
           title={<span className="nav-dropdown-title">View</span>}
-          className="custom-nav-dropdown"
-          style={{ color: "black", fontWeight: "700" }}
+          className="relative cursor-pointer"
+          style={{ color: "black", fontWeight: "800" }}
+          onClick={handleTicketClick} // Trigger navigation when clicked
         >
-          <NavDropdown.Item
-            as={Link}
-            to="#"
-            className="text-sm font-bold hover:text-black"
-          >
-            Notices/SMS for Staff
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="#"
-            className="text-sm font-bold hover:text-black"
-          >
-            Book Availability
-          </NavDropdown.Item>
+          {/* You can leave the dropdown empty or add other items if needed */}
         </NavDropdown>
-
         {/* Reports Dropdown */}
         <NavDropdown
           // title=""
@@ -1033,39 +1023,12 @@ const AdminNavBar = () => {
 
         {/* Ticket Dropdown */}
         <NavDropdown
-          // title=""
           title={<span className="nav-dropdown-title">Ticket</span>}
-          className="custom-nav-dropdown"
-          style={{ color: "black", fontWeight: "700" }}
+          className="relative cursor-pointer"
+          style={{ color: "black", fontWeight: "800" }}
+          onClick={handleTicketClick} // Trigger navigation when clicked
         >
-          <NavDropdown.Item
-            as={Link}
-            to="#"
-            className="text-sm font-bold hover:text-black"
-          >
-            T1
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="#"
-            className="text-sm font-bold hover:text-black"
-          >
-            T2
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="#"
-            className="text-sm font-bold hover:text-black"
-          >
-            T3
-          </NavDropdown.Item>
-          <NavDropdown.Item
-            as={Link}
-            to="#"
-            className="text-sm font-bold hover:text-black"
-          >
-            T4
-          </NavDropdown.Item>
+          {/* You can leave the dropdown empty or add other items if needed */}
         </NavDropdown>
 
         {/* Masters Dropdown */}

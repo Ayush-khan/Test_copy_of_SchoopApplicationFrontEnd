@@ -218,6 +218,7 @@ import CreateTimetablePlanner from "../componants/TimeTablePlanner/CreateExamTim
 // import TimetablePlanner from "../componants/TimeTablePlanner/TimetablePlanner.jsx";
 import TimetablePlanner from "../componants/TimeTablePlanner/TimeTablePlanner.jsx";
 import MonthlyAttendenceReport from "../componants/Reports/MonthlyAttendanceReport.jsx";
+import ComingSoon from "../componants/common/CommingSoon/ComingSoon.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -260,6 +261,11 @@ function Index() {
           element={<PrivateRoute element={<DemoTable />} />}
         />
         {/* comming soon file */}
+        <Route
+          path="/comingSoon"
+          // path="#"
+          element={<PrivateRoute element={<ComingSoon />} />}
+        />
         {/* All Certificates  */}
         <Route
           path="/bonafiedCertificates"

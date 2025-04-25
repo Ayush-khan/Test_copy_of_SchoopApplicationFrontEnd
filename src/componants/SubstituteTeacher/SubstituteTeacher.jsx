@@ -998,23 +998,7 @@ const SubstituteTeacher = () => {
 
   return (
     <>
-      <div className="w-full md:w-[80%] mx-auto p-4 ">
-        <div className="card p-4 rounded-md ">
-          <div className=" card-header mb-4 flex justify-between items-center ">
-            <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              Substitution Teacher
-            </h5>
-          </div>
-          <div
-            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
-            style={{
-              backgroundColor: "#C03078",
-            }}
-          ></div>
-
-          <ComingSoon />
-        </div>
-      </div>
+      <ComingSoon />
     </>
   );
 };
