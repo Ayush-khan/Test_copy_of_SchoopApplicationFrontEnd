@@ -47,6 +47,9 @@ function NoticeAndSms() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const dropdownRef = useRef(null);
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
   //   for allot subject checkboxes
 
   const [error, setError] = useState(null);
@@ -627,6 +630,23 @@ function NoticeAndSms() {
     setShowDeleteModal(false);
   };
 
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save current page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const searchLower = searchTerm.trim().toLowerCase();
+
   const filteredSections = notices.filter((section) => {
     // Convert the fields to lowercase for case-insensitive comparison
     const teacherName = section?.classnames?.toLowerCase() || "";
@@ -636,10 +656,10 @@ function NoticeAndSms() {
 
     // Check if the search term is present in any of the specified fields
     return (
-      teacherName.includes(searchTerm.toLowerCase()) ||
-      subjectName.includes(searchTerm.toLowerCase()) ||
-      noticeDesc.includes(searchTerm.toLowerCase()) || // Check notice description
-      teacher.includes(searchTerm.toLowerCase()) // Check teacher name
+      teacherName.toLowerCase().includes(searchLower) ||
+      subjectName.toLowerCase().includes(searchLower) ||
+      noticeDesc.toLowerCase().includes(searchLower) || // Check notice description
+      teacher.toLowerCase().includes(searchLower) // Check teacher name
     );
   });
 
