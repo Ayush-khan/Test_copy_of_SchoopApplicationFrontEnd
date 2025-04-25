@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -23,6 +23,9 @@ function HolidayList() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmittingandPublishing, setIsSubmittingandPublishing] =
     useState(false);
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   const pageSize = 10;
   const navigate = useNavigate();
@@ -766,6 +769,21 @@ function HolidayList() {
     return `${day}-${month}-${year}`;
   };
 
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save current page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
   const filteredSections = (Array.isArray(holidays) ? holidays : [])
     .sort((a, b) => new Date(a.holiday_date) - new Date(b.holiday_date)) // Sort by holiday_date
     .filter((holiday) => {
@@ -788,6 +806,10 @@ function HolidayList() {
         createdBy.includes(searchLower)
       );
     });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,

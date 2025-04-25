@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -35,6 +35,9 @@ function AllotClassTeacher() {
   const [selectedTeacher, setSelectedTeacher] = useState(null);
 
   const pageSize = 10;
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   useEffect(() => {
     fetchClassTeacher();
@@ -347,9 +350,27 @@ function AllotClassTeacher() {
       }
     }
   };
+
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save current page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const searchLower = searchTerm.trim().toLowerCase();
   // Filter and paginate sections
+
   const filteredSections = sections.filter((section) =>
-    section?.get_teacher?.name.toLowerCase().includes(searchTerm.toLowerCase())
+    section?.get_teacher?.name.toLowerCase().includes(searchLower)
   );
 
   // Calculate the total number of pages
@@ -530,11 +551,13 @@ function AllotClassTeacher() {
                 </table>
               </div>
             </div>
-            {filteredSections.length > pageSize && (
+            <div className=" flex justify-center  pt-2 -mb-3  box-border  overflow-hidden">
               <ReactPaginate
                 previousLabel={"Previous"}
                 nextLabel={"Next"}
                 breakLabel={"..."}
+                breakClassName={"page-item"}
+                breakLinkClassName={"page-link"}
                 pageCount={pageCount}
                 marginPagesDisplayed={1}
                 pageRangeDisplayed={1}
@@ -546,11 +569,9 @@ function AllotClassTeacher() {
                 previousLinkClassName={"page-link"}
                 nextClassName={"page-item"}
                 nextLinkClassName={"page-link"}
-                breakClassName={"page-item"}
-                breakLinkClassName={"page-link"}
                 activeClassName={"active"}
               />
-            )}
+            </div>
           </div>
         </div>
 
