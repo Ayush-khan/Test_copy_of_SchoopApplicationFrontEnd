@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import { RxCross1 } from "react-icons/rx";
 import { toast, ToastContainer } from "react-toastify";
@@ -26,6 +26,9 @@ const ClassWisePeriodAllotment = () => {
     "mon-fri": "",
     sat: "",
   });
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   const [loadingForSearch, setLoadingForSearch] = useState(false);
 
@@ -317,6 +320,21 @@ const ClassWisePeriodAllotment = () => {
     setCurrentPage(data.selected);
   };
 
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save current page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
   const filteredSections = timetable.filter((student) => {
     const searchLower = searchTerm.trim().toLowerCase(); // Trim spaces from input for cleaner search
 
@@ -332,6 +350,10 @@ const ClassWisePeriodAllotment = () => {
       sat.includes(searchLower)
     );
   });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
 
   // const displayedSections = filteredSections.slice(currentPage * pageSize);
   const displayedSections = filteredSections.slice(
@@ -467,8 +489,8 @@ const ClassWisePeriodAllotment = () => {
         )} */}
         {
           <>
-            <div className="w-[full%]">
-              <div className="card mx-auto lg:w-full shadow-lg">
+            <div className="w-[full%] ">
+              <div className="card mx-auto lg:w-full shadow-lg ">
                 <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                   <div className="w-full flex flex-row justify-between mr-0 md:mr-4">
                     <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
@@ -510,25 +532,6 @@ const ClassWisePeriodAllotment = () => {
                     }}
                   >
                     <table className="min-w-full leading-normal table-auto">
-                      {/* <thead>
-                        <tr className="bg-gray-100">
-                          {[
-                            "Sr No.",
-                            "Class",
-                            "Mon-Fri Periods",
-                            "Sat Periods",
-                            "Edit",
-                            "Delete",
-                          ].map((header, index) => (
-                            <th
-                              key={index}
-                              className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
-                            >
-                              {header}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead> */}
                       <thead>
                         <tr className="bg-gray-100">
                           <th className="w-16 text-center px-2 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -625,7 +628,7 @@ const ClassWisePeriodAllotment = () => {
                     </table>
                   </div>
                 </div>
-                {filteredSections.length > pageSize && (
+                {/* {filteredSections.length > pageSize && (
                   <ReactPaginate
                     previousLabel={"Previous"}
                     nextLabel={"Next"}
@@ -646,7 +649,29 @@ const ClassWisePeriodAllotment = () => {
                     breakLinkClassName={"page-link"}
                     activeClassName={"active"}
                   />
-                )}
+                )} */}
+
+                <div className=" flex justify-center  pt-2 mb-2  box-border  overflow-hidden">
+                  <ReactPaginate
+                    previousLabel={"Previous"}
+                    nextLabel={"Next"}
+                    breakLabel={"..."}
+                    breakClassName={"page-item"}
+                    breakLinkClassName={"page-link"}
+                    pageCount={pageCount}
+                    marginPagesDisplayed={1}
+                    pageRangeDisplayed={1}
+                    onPageChange={handlePageClick}
+                    containerClassName={"pagination justify-content-center"}
+                    pageClassName={"page-item"}
+                    pageLinkClassName={"page-link"}
+                    previousClassName={"page-item"}
+                    previousLinkClassName={"page-link"}
+                    nextClassName={"page-item"}
+                    nextLinkClassName={"page-link"}
+                    activeClassName={"active"}
+                  />
+                </div>
               </div>
             </div>
           </>
