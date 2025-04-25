@@ -259,6 +259,7 @@ function Index() {
           path="/student-demo-table"
           element={<PrivateRoute element={<DemoTable />} />}
         />
+        {/* comming soon file */}
         {/* All Certificates  */}
         <Route
           path="/bonafiedCertificates"
