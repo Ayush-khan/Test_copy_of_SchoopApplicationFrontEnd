@@ -615,7 +615,7 @@ const WorldlineFeePaymentReport = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
 
     // Generate and download the Excel file
-    const fileName = ` Worldline_Fee_Payment_Report.xlsx`;
+    const fileName = `Worldline_Fee_Payment_Report.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 

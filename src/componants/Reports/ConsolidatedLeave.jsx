@@ -402,7 +402,7 @@ const ConsolidatedLeave = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
 
     // Generate and download the Excel file
-    const fileName = ` Consolidate_Leave_Report_${
+    const fileName = `Consolidate_Leave_Report_${
       selectedStudent?.label || "For All Staff"
     }.xlsx`;
     XLSX.writeFile(workbook, fileName);

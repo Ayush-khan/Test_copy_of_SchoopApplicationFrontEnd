@@ -62,186 +62,6 @@ const StaffReport = () => {
   const capitalize = (str) =>
     str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-  // const handlePrint = () => {
-  //   const printTitle = `Staff Report `;
-  //   const printContent = `
-  //   <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
-  //        <h5 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
-  //   <div id="tableHeading" class="text-center w-3/4">
-  //     <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-2">
-  //       <thead>
-  //         <tr class="bg-gray-100">
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Staff Name</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Date of Birth</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Date of Joining</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Gender</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Blood Group</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Designation</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Phone No.</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Email</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Address</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Aadhaar No.</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Academic Qualification</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Professional Qualification</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Training Status</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Experience</th>
-  //         </tr>
-  //       </thead>
-  //       <tbody>
-  //         ${displayedSections
-  //           .map(
-  //             (subject, index) => `
-  //             <tr class="text-sm">
-  //               <td class="px-2 text-center py-2 border border-black">${
-  //                 index + 1
-  //               }</td>
-  //               <td class="px-2 text-center py-2 border border-black">
-  //               ${capitalize(subject?.name || " ")}
-  //               </td>
-  //               <td class="px-2 text-center py-2 border border-black">${
-  //                 subject?.birthday
-  //                   ? new Date(subject.birthday).toLocaleDateString("en-GB")
-  //                   : ""
-  //               }</td>
-  //              <td className="px-2 text-center py-2 border border-black">
-  //               ${
-  //                 subject?.date_of_joining
-  //                   ? new Date(subject.date_of_joining).toLocaleDateString(
-  //                       "en-GB"
-  //                     )
-  //                   : ""
-  //               }
-  //              </td>
-  //               <td class="px-2 text-center py-2 border border-black">${
-  //                 subject?.sex || " "
-  //               }</td>
-  //                <td class="px-2 text-center py-2 border border-black">${
-  //                  subject?.blood_group || " "
-  //                }</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.designation || " "
-  //                 }</td>
-  //               <td class="px-2 text-center py-2 border border-black">${
-  //                 subject?.phone || " "
-  //               }</td>
-  //               <td class="px-2 text-center py-2 border border-black">${
-  //                 subject?.email || " "
-  //               }</td>
-  //               <td class="px-2 text-center py-2 border border-black">${
-  //                 subject?.address || " "
-  //               }</td>
-  //               <td class="px-2 text-center py-2 border border-black">${
-  //                 subject?.aadhar_card_no || " "
-  //               }</td>
-  //               <td class="px-2 text-center py-2 border border-black">${
-  //                 subject?.academic_qual || " "
-  //               }</td>
-  //               <td class="px-2 text-center py-2 border border-black">${
-  //                 subject?.professional_qual || " "
-  //               }</td>
-  //               <td class="px-2 text-center py-2 border border-black">${
-  //                 subject?.trained || " "
-  //               }</td>
-  //               <td class="px-2 text-center py-2 border border-black">${
-  //                 subject?.experience || " "
-  //               }</td>
-  //             </tr>`
-  //           )
-  //           .join("")}
-  //       </tbody>
-  //     </table>
-  //   </div>
-  //   </div>`;
-
-  //   const printWindow = window.open("", "", "height=800,width=2000");
-  //   printWindow.document.write(`
-  //   <html>
-  //   <head>
-  //       <title>${printTitle}</title>
-  //       <style>
-  //           @page {
-  //               size: A4 landscape; /* Wider format for better fit */
-  //               margin: 10px;
-  //           }
-
-  //           body {
-  //               font-family: Arial, sans-serif;
-  //               margin: 0;
-  //               padding: 0;
-  //               box-sizing: border-box;
-  //           }
-
-  //           /* Scrollable container */
-  //           #printContainer {
-  //               width: 100%;
-  //               overflow-x: auto;  /* Enables horizontal scrolling */
-  //               white-space: nowrap; /* Prevents text wrapping */
-  //           }
-
-  //           #tableMain {
-  //               width: 100%;
-  //               display: flex;
-  //               flex-direction: column;
-  //               align-items: center;
-  //               justify-content: flex-start;
-  //               padding: 0 10px;
-  //           }
-
-  //           table {
-  //               border-spacing: 0;
-  //               width: 100%;
-  //               min-width: 1200px; /* Ensures table doesn't shrink */
-  //               margin: auto;
-  //               table-layout: fixed; /* Ensures even column spacing */
-  //           }
-
-  //           th, td {
-  //               border: 1px solid gray;
-  //               padding: 8px;
-  //               text-align: center;
-  //               font-size: 12px;
-  //               word-wrap: break-word; /* Ensures text breaks properly */
-  //           }
-
-  //           th {
-  //               font-size: 0.8em;
-  //               background-color: #f9f9f9;
-  //           }
-
-  //           .student-photo {
-  //               width: 30px !important;
-  //               height: 30px !important;
-  //               object-fit: cover;
-  //               border-radius: 50%;
-  //           }
-
-  //           /* Ensure scrolling is available in print mode */
-  //           @media print {
-  //               #printContainer {
-  //                   overflow-x: auto;
-  //                   display: block;
-  //                   width: 100%;
-  //                   height: auto;
-  //               }
-  //               table {
-  //                   min-width: 100%;
-  //               }
-  //           }
-  //       </style>
-  //   </head>
-  //   <body>
-  //       <div id="printContainer">
-  //           ${printContent}
-  //       </div>
-  //   </body>
-  //   </html>
-  //   `);
-
-  //   printWindow.document.close();
-  //   printWindow.print();
-  // };
-
   const handlePrint = () => {
     const printTitle = `Staff Report`;
 
@@ -288,7 +108,13 @@ const StaffReport = () => {
                         )
                       : ""
                   }</td>
-                  <td class="border border-black">${subject?.sex || ""}</td>
+                  <td class="border border-black"> ${
+                    subject.gender === "female"
+                      ? "Female"
+                      : subject.gender === "male"
+                      ? "Male"
+                      : " "
+                  }</td>
                   <td class="border border-black">${
                     subject?.blood_group || ""
                   }</td>
@@ -304,9 +130,10 @@ const StaffReport = () => {
                   <td class="border border-black">${
                     subject?.academic_qual || ""
                   }</td>
-                  <td class="border border-black">${
-                    subject?.professional_qual || ""
-                  }</td>
+                  <td class="border border-black">
+                  ${subject?.professional_qual || ""}
+                  ${subject?.special_sub || ""}
+                   </td>
                   <td class="border border-black">${subject?.trained || ""}</td>
                   <td class="border border-black">${
                     subject?.experience || ""
@@ -445,14 +272,18 @@ const StaffReport = () => {
       student?.date_of_joining
         ? new Date(student.date_of_joining).toLocaleDateString("en-GB")
         : " ",
-      student?.sex || " ",
+      student.sex === "female"
+        ? "Female"
+        : student.sex === "male"
+        ? "Male"
+        : " ",
       student?.blood_group || " ",
       student?.designation || " ",
       student?.phone || " ",
       student?.email || " ",
       student?.address || " ",
       student?.academic_qual || " ",
-      student?.professional_qual || " ",
+      `${student?.professional_qual || " "}{" "} ${student?.special_sub || ""}`,
       student?.trained || " ",
       student?.experience || " ",
     ]);
@@ -469,7 +300,7 @@ const StaffReport = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
 
     // Generate and download the Excel file
-    const fileName = ` Staff_Report.xlsx`;
+    const fileName = `Staff_Report.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -688,7 +519,11 @@ const StaffReport = () => {
                                       : " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.sex || " "}
+                                    {student.sex === "female"
+                                      ? "Female"
+                                      : student.sex === "male"
+                                      ? "Male"
+                                      : " "}
                                   </td>
                                   <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
                                     {student?.blood_group || " "}
@@ -714,6 +549,8 @@ const StaffReport = () => {
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.professional_qual || " "}
+                                    <br></br>
+                                    {student?.special_sub || ""}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.trained || " "}

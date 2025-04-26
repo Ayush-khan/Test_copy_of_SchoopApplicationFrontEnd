@@ -432,7 +432,7 @@ const RazorpayFeePaymentReport = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
 
     // Generate and download the Excel file
-    const fileName = ` Razorpay_Fee_Payment_Report.xlsx`;
+    const fileName = `Razorpay_Fee_Payment_Report.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 

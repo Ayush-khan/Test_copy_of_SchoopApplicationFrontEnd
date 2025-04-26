@@ -131,63 +131,7 @@ const ListAdmFrmRep = () => {
       setLoadingForSearch(false);
     }
   };
-  //   const handleDownloadEXL = () => {
-  //     if (!displayedSections || displayedSections.length === 0) {
-  //       toast.error(
-  //         "No data available to download Excel sheet of Student ID Card."
-  //       );
-  //       return;
-  //     }
 
-  //     // Define headers
-  //     const headers = [
-  //       "Sr.No",
-  //       "Roll No",
-  //       "Photo URL",
-  //       "Class",
-  //       "Student Name",
-  //       "DOB",
-  //       "Father Mobile No.",
-  //       "Mother Mobile No.",
-  //       "Address",
-  //       "Blood Group",
-  //       "Grn No.",
-  //       "House",
-  //       "Image Name",
-  //     ];
-
-  //     // Convert table data into an array format
-  //     const data = displayedSections.map((subject, index) => [
-  //       index + 1,
-  //       subject?.roll_no || " ",
-  //       subject?.image_url || " ",
-  //       `${subject?.class_name || ""} ${subject?.sec_name || ""}`,
-  //       `${subject?.first_name || ""} ${subject?.mid_name || ""} ${
-  //         subject?.last_name || ""
-  //       }`,
-  //       subject?.dob || " ",
-  //       subject?.f_mobile || " ",
-  //       subject?.m_mobile || " ",
-  //       subject?.permant_add || " ",
-  //       subject?.blood_group || " ",
-  //       subject?.reg_no || " ",
-  //       subject?.house || " ",
-  //       subject?.image_name || " ",
-  //     ]);
-
-  //     // Create a worksheet
-  //     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
-
-  //     // Create a workbook and append the worksheet
-  //     const workbook = XLSX.utils.book_new();
-  //     XLSX.utils.book_append_sheet(workbook, worksheet, "Student Data");
-
-  //     // Write and download the file
-  //     XLSX.writeFile(
-  //       workbook,
-  //       `Student idCard list of ${selectedStudent.label}.xlsx`
-  //     );
-  //   };
   const handleDownloadEXL = () => {
     if (!displayedSections || displayedSections.length === 0) {
       toast.error("No data available to download the Excel sheet.");
@@ -241,9 +185,15 @@ const ListAdmFrmRep = () => {
         student?.last_name || ""
       }`,
       student?.classname || " ",
-      student?.application_date || " ",
+      `${
+        student?.application_date
+          ? new Date(student?.application_date).toLocaleDateString("en-GB")
+          : ""
+      }`,
       student?.admission_form_status || " ",
-      student?.dob || " ",
+      `${
+        student?.dob ? new Date(student?.dob).toLocaleDateString("en-GB") : ""
+      }`,
       student?.birth_place || " ",
       student?.locality || " ",
       `${student?.city || ""}, ${student?.state || ""}, ${

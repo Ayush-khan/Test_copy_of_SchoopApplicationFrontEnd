@@ -43,17 +43,20 @@ const StudentRemarkReport = () => {
     fetchClassesWithSection();
     fetchTeacherList();
     fetchStudentsList();
-    handleSearch();
+    // handleSearch();
   }, []);
 
   const fetchClassesWithSection = async () => {
     try {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
-
-      const response = await axios.get(`${API_URL}/api/get_class_section`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      //  get_class_section;
+      const response = await axios.get(
+        `${API_URL}/api/getallClassWithStudentCount`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       console.log("Class", response);
       setClassNameWithClassId(response?.data || []);
     } catch (error) {
@@ -74,7 +77,7 @@ const StudentRemarkReport = () => {
     () =>
       classNameWithClassId.map((cls) => ({
         value: cls?.section_id,
-        label: `${cls.get_class.name} ${cls.name}`,
+        label: `${cls.get_class.name} ${cls.name} (${cls.students_count})`,
       })),
     [classNameWithClassId]
   );
@@ -512,7 +515,11 @@ const StudentRemarkReport = () => {
       index + 1,
       `${student?.classname || " "} ${student?.sectionname || ""}`,
 
-      student?.remark_date || " ",
+      `${
+        student?.remark_date
+          ? new Date(student?.remark_date).toLocaleDateString("en-GB")
+          : ""
+      }`,
       student?.remark_type || " ",
       `${student?.first_name || ""} ${student?.mid_name || ""} ${
         student?.last_name || ""

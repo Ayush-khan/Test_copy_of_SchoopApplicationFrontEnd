@@ -266,27 +266,71 @@ const GendrWiseStudRepo = () => {
     };
   };
 
+  // const handleDownloadEXL = () => {
+  //   if (!displayedSections || displayedSections.length === 0) {
+  //     toast.error("No data available to download the Excel sheet.");
+  //     return;
+  //   }
+
+  //   // Define headers matching the print table
+  //   const headers = ["Sr No.", "Class", "Gender", "No. of Students"];
+
+  //   // Convert displayedSections data to array format for Excel
+  //   const data = displayedSections.map((student, index) => [
+  //     index + 1,
+  //     student?.name || " ",
+
+  //     student.gender === "F" ? "Female" : student.gender === "M" ? "Male" : " ",
+
+  //     student?.counts || " ",
+  //   ]);
+  //   // Create a worksheet
+  //   const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+  //   const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
+  //   worksheet["!cols"] = columnWidths;
+
+  //   // Create a workbook and append the worksheet
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
+
+  //   // Generate and download the Excel file
+  //   const fileName = `Genderwise_Student_Report_${
+  //     selectedStudent?.label
+  //       ? `List of Class-${selectedStudent?.label}`
+  //       : "For ALL Students"
+  //   }.xlsx`;
+  //   XLSX.writeFile(workbook, fileName);
+  // };
+
   const handleDownloadEXL = () => {
     if (!displayedSections || displayedSections.length === 0) {
       toast.error("No data available to download the Excel sheet.");
       return;
     }
 
-    // Define headers matching the print table
+    // Define headers
     const headers = ["Sr No.", "Class", "Gender", "No. of Students"];
 
     // Convert displayedSections data to array format for Excel
     const data = displayedSections.map((student, index) => [
       index + 1,
       student?.name || " ",
-
       student.gender === "F" ? "Female" : student.gender === "M" ? "Male" : " ",
-
       student?.counts || " ",
     ]);
+
+    // Add Total Male and Female rows
+    const totalRows = [
+      ["Total Male are", "", "", maleFemale?.male || 0],
+      ["Total Female are", "", "", maleFemale?.female || 0],
+    ];
+
+    // Combine everything
+    const finalData = [headers, ...data, ...totalRows];
+
     // Create a worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
-    const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
+    const worksheet = XLSX.utils.aoa_to_sheet(finalData);
+    const columnWidths = headers.map(() => ({ wch: 20 }));
     worksheet["!cols"] = columnWidths;
 
     // Create a workbook and append the worksheet

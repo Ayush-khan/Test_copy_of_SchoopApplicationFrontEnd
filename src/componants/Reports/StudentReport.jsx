@@ -32,7 +32,7 @@ const StudentReport = () => {
 
   useEffect(() => {
     fetchExams();
-    handleSearch();
+    // handleSearch();
   }, []);
 
   const fetchExams = async () => {
@@ -72,7 +72,13 @@ const StudentReport = () => {
   const handleSearch = async () => {
     setLoadingForSearch(false);
 
+    if (!selectedStudentId) {
+      setStudentError("Please select Class.");
+      setLoadingForSearch(false);
+      return;
+    }
     setSearchTerm("");
+
     try {
       setLoadingForSearch(true); // Start loading
       setTimetable([]);
@@ -151,7 +157,11 @@ const StudentReport = () => {
         student?.last_name || ""
       }`,
       student?.dob || " ",
-      student?.admission_date || " ",
+      `${
+        student?.admission_date
+          ? new Date(student?.admission_date).toLocaleDateString("en-GB")
+          : ""
+      }`,
       student?.permant_add || " ",
       student?.city || " ",
       student?.state || " ",
@@ -182,52 +192,6 @@ const StudentReport = () => {
       student?.total_attendance || " ",
     ]);
 
-    // const data = displayedSections.map((student, index) => [
-    //   index + 1,
-    //   student?.form_id || " ",
-    //   `${student?.first_name || ""} ${student?.mid_name || ""} ${
-    //     student?.last_name || ""
-    //   }`,
-    //   student?.classname || " ",
-    //   student?.application_date || " ",
-    //   student?.admission_form_status || " ",
-    //   student?.dob || " ",
-    //   student?.birth_place || " ",
-    //   student?.locality || " ",
-    //   `${student?.city || ""}, ${student?.state || ""}, ${
-    //     student?.pincode || ""
-    //   }`,
-    //   student?.perm_address || " ",
-    //   student?.gender === "M"
-    //     ? "Male"
-    //     : student?.gender === "F"
-    //     ? "Female"
-    //     : student?.gender || " ",
-    //   student?.religion || " ",
-    //   student?.caste || " ",
-    //   student?.subcaste || " ",
-    //   student?.nationality || " ",
-    //   student?.mother_tongue || " ",
-    //   student?.category || " ",
-    //   student?.blood_group || " ",
-    //   student?.stud_aadhar || " ",
-    //   student?.sibling_student_info || " ",
-    //   student?.father_name || " ",
-    //   student?.father_occupation || " ",
-    //   student?.f_mobile || " ",
-    //   student?.f_email || " ",
-    //   student?.f_aadhar_no || " ",
-    //   student?.f_qualification || " ",
-    //   student?.mother_name || " ",
-    //   student?.mother_occupation || " ",
-    //   student?.m_mobile || " ",
-    //   student?.m_emailid || " ",
-    //   student?.m_aadhar_no || " ",
-    //   student?.m_qualification || " ",
-    //   student?.area_in_which_parent_can_contribute || " ",
-    //   student?.OrderId || " ",
-    // ]);
-    // Create a worksheet
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
     const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
     worksheet["!cols"] = columnWidths;
@@ -354,7 +318,7 @@ const StudentReport = () => {
                       className="md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      Class
+                      Class <span className="text-sm text-red-500">*</span>
                     </label>
                     <div className=" w-full md:w-[65%]">
                       <Select
@@ -549,10 +513,18 @@ const StudentReport = () => {
                                     {student.last_name}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.dob || " "}
+                                    {student.dob
+                                      ? new Date(
+                                          student.dob
+                                        ).toLocaleDateString("en-GB")
+                                      : ""}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.admission_date || " "}
+                                    {student.admission_date
+                                      ? new Date(
+                                          student.admission_date
+                                        ).toLocaleDateString("en-GB")
+                                      : ""}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.permant_add || " "}

@@ -322,7 +322,7 @@ const LeftStudentsRepo = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
 
     // Generate and download the Excel file
-    const fileName = ` Left_Students_Report_${
+    const fileName = `Left_Students_Report_${
       selectedStudent?.label || "For ALL Students"
     }.xlsx`;
     XLSX.writeFile(workbook, fileName);

@@ -5,29 +5,34 @@ export default function NotificationsPanel() {
   return (
     <div className={`${styles.notification} `}>
       <h6 className={styles.notificationHeading}>General Instructions:</h6>
-      <ul className={styles.list}>
-        <li>Lorem ipsum dolor sit amet consectetur adipisicing elit.</li>
+      <ul className={` mb-4 font-medium ${styles.list}`}>
         <li>
-          Molestiae enim laborum soluta aperiam repellat ullam temporibus illum
-          modi provident natus nostrum expedita, blanditiis recusandae debitis
-          at architecto cupiditate non perspiciatis fugit.
+          The application can be accessed from the school website by clicking on
+          the "ACEVENTURA LOGIN" menu.
+        </li>
+        <li>Please login to the application and change your password.</li>
+        <li>
+          If you haven’t received your user id. Please send an email to
+          supportsacs@aceventura.in with the “Name of the student, Class,
+          Division and Roll no.”
         </li>
         <li>
-          Laborum, repellendus dolorum inventore omnis hic ipsam quos suscipit
-          totam.
+          Once you login there are "Help" videos provided in the application to
+          guide you with the use of application.
         </li>
         <li>
-          Excepturi in ut alias aspernatur dicta expedita recusandae nobis eaque
-          voluptates esse minus officia cum quisquam culpa, sed, totam iusto
-          nulla nesciunt deserunt dolorum!
+          The application is best viewed on Mozilla Firefox, Google Chrome
+          browser and on any mobile device.
         </li>
         <li>
-          Sequi, ut? Fuga obcaecati quia quo voluptatem nam impedit adipisci non
-          sequi in quisquam, ipsam, cumque culpa cum!
+          For any change in “Student name, Middle Name, Surname, Father name,
+          Mother name, Date of birth, Date of admission, GRN No., Religion,
+          Caste and Category”, please send an email to
+          nutan@arnoldcentralschool.org
         </li>
         <li>
-          Explicabo eum nobis quisquam atque adipisci illum, commodi aliquam
-          omnis, maiores soluta exercitationem, minus optio voluptate. Tenetur?
+          For any query related to the application, please send an email to
+          supportsacs@aceventura.in
         </li>
       </ul>
     </div>
