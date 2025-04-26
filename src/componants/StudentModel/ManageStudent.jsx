@@ -387,6 +387,7 @@ function ManageSubjectList() {
     );
   };
   const handleCertificateView = (subjectIsPass) => {
+    navigate("/comingSoon");
     console.log("handleCertificateView-->", subjectIsPass);
   };
 
