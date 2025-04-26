@@ -383,20 +383,26 @@ const TimeTable = () => {
     <>
       <ToastContainer />
       {!(showTimetable && timetable) && (
-        <div className="container mx-auto md:mt-2">
+        <div className="container mx-auto md:mt-6">
           <div className="card mx-auto w-full md:w-[80%] lg:w-3/4 shadow-lg">
             <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
               <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl">
                 TimeTable
               </h3>
-              <button
+              <RxCross1
+                className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                onClick={() => {
+                  navigate("/dashboard");
+                }}
+              />
+              {/* <button
                 className="btn btn-primary btn-sm"
                 // onClick={() => navigate("/createTimeTable")}
                 onClick={() => navigate("/createTimetablePlanner")}
               >
                 <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
                 Add
-              </button>
+              </button> */}
             </div>
             <div
               className="relative w-[97%] mb-3 h-1 mx-auto"
