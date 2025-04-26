@@ -31,7 +31,7 @@ function FeePendingList() {
         });
         console.log("resposne of the birthday list is", response.data);
         if (response.data && Array.isArray(response.data)) {
-          setStaffBirthday(response.data);
+          setStaffBirthday(response?.data);
         } else {
           throw new Error("Unexpected response data format");
         }

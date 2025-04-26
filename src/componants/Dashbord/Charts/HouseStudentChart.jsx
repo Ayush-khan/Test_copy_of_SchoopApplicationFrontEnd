@@ -122,11 +122,11 @@ const HouseStudentChart = () => {
         const response = await axios.get(`${API_URL}/api/getHouseViseStudent`, {
           params: {
             class_name: newDepartmentId,
-            "X-Academic-Year": "2022-2023",
+            // "X-Academic-Year": `${academicYr}`,
           },
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": "2022-2023",
+            "X-Academic-Year": `${academicYr}`,
           },
         });
 
