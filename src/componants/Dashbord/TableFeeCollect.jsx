@@ -312,7 +312,7 @@ function ListFinal() {
             filteredInstallments.map((installment, index) => (
               <div
                 key={`${installment.account}-${installment.installment}-${index}`}
-                className={`flex w-full px-2 justify-between py-1 border-b border-gray-200 ${
+                className={`flex w-full px-2  justify-between py-1 border-b border-gray-200 ${
                   index % 2 !== 0 ? "bg-gray-200" : "bg-white"
                 }`}
               >
@@ -321,7 +321,7 @@ function ListFinal() {
                     {installment.account}
                   </div>
                 )}
-                <div className="cell w-1/3 text-black/80 tracking-wide pl-2">
+                <div className="cell w-1/3 text-black/80 tracking-wide ">
                   {`Installment-${installment.installment}`}
                 </div>
                 <div className="cell w-1/3 text-end text-black/70 tracking-wide">
