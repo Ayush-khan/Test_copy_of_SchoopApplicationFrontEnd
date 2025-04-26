@@ -82,8 +82,11 @@ const DashboardContent = () => {
         );
         console.log("reponse of the staffAPI", staffResponse);
         setStaffData({
-          teachingStaff: staffResponse.data.teachingStaff,
-          nonTeachingStaff: staffResponse.data.non_teachingStaff,
+          teachingStaff: staffResponse?.data?.teachingStaff,
+          attendanceteachingstaff: staffResponse?.data?.attendanceteachingstaff,
+          nonTeachingStaff: staffResponse?.data?.non_teachingStaff,
+          attendancenonteachingstaff:
+            staffResponse?.data?.attendancenonteachingstaff,
         });
         // Fetch Tickiting count values
 
@@ -166,7 +169,7 @@ const DashboardContent = () => {
             title="Teachers"
             TotalValue={staffData.teachingStaff}
             // presentValue={staffData.teachingStaff}
-            presentValue={staffData?.teachingStaff}
+            presentValue={staffData?.attendanceteachingstaff}
             color="#2196F3"
             icon={
               <FaUserGroup
@@ -183,7 +186,7 @@ const DashboardContent = () => {
             title="Staff"
             TotalValue={staffData.nonTeachingStaff}
             // presentValue={staffData.nonTeachingStaff}
-            presentValue={staffData?.nonTeachingStaff}
+            presentValue={staffData?.attendancenonteachingstaff}
             color="#2196F3"
             icon={
               <FaUserGroup
