@@ -411,7 +411,9 @@ function ManageLCStudent() {
                             displayedSections.map((subject, index) => {
                               // Determine the status text and button visibility based on conditions
 
-                              let showDeleteButton = subject.IsDelete === "N"; // Show delete button if IsDelete is "N"
+                              let showDeleteButton =
+                                subject?.IsDelete === "N" &&
+                                subject?.isPromoted !== "Y"; // Show delete button if IsDelete is "N"
 
                               return (
                                 <tr key={subject.sr_no} className=" text-sm ">
@@ -445,8 +447,7 @@ function ManageLCStudent() {
                                       .replace(/\s+/g, " ")}
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.classname}
-                                    {subject?.sectionname}
+                                    {subject?.classname} {subject?.sectionname}
                                   </td>
 
                                   {/* Delete button */}
