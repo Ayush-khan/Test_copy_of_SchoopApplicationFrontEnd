@@ -880,7 +880,7 @@ const EditLeavingCertificate = () => {
   };
 
   // Log or save selectedActivities when needed
-  console.log("____activity", selectedActivities);
+  // console.log("____activity", selectedActivities);
   // Handle selection of each subject
   const handleSubjectSelection = (e, subjectName) => {
     setFormData((prevData) => {

@@ -29,7 +29,7 @@ const EditLCforDeleteStudent = () => {
     mid_name: "",
     last_name: "",
     udise_pen_no: "",
-    student_id_no: "",
+    stud_id_no: "",
     promoted_to: " ",
     last_exam: "",
     stud_id: "",
@@ -46,7 +46,7 @@ const EditLCforDeleteStudent = () => {
     dob_words: "",
     nationality: "",
     prev_school_class: "",
-    date_of_admission: "",
+    admission_date: "",
     admission_class: "",
     attendance: "",
     subjectsFor: [],
@@ -57,7 +57,7 @@ const EditLCforDeleteStudent = () => {
     standard_studying: "",
     dob_proof: "",
     class_id_for_subj: "",
-    aadhar_no: "",
+    stu_aadhaar_no: "",
     teacher_image_name: null,
     academicStudent: [],
     academic_yr: "", // Add this to track selected academic year
@@ -127,13 +127,13 @@ const EditLCforDeleteStudent = () => {
           // Set form data
           setFormData({
             sr_no: fetchedData.sr_no || "",
-            student_id: fetchedData.student_id || "",
+            stud_id: student.student_id || "",
             grn_no: fetchedData.grn_no || "",
             academicStudent: DataStudentAc.academicStudent || [],
             issue_date: fetchedData.issue_date || "",
-            student_id_no: fetchedData.stud_id_no || "",
-            aadhar_no:
-              fetchedData.stu_aadhaar_no || fetchedData.aadhar_no || "",
+            stud_id_no: fetchedData.stud_id_no || "",
+            stu_aadhaar_no:
+              fetchedData.stu_aadhaar_no || fetchedData.stu_aadhaar_no || "",
             first_name: fetchedData.first_name || fetchedData.stud_name || "",
             mid_name: fetchedData.mid_name || "",
             last_name: fetchedData.last_name || "",
@@ -149,8 +149,8 @@ const EditLCforDeleteStudent = () => {
             dob: fetchedData.dob || "",
             dob_words: fetchedData.dob_words || "",
             prev_school_class: fetchedData.last_school_attended_standard || "",
-            date_of_admission:
-              fetchedData.date_of_admission || fetchedData.admission_date || "",
+            admission_date:
+              fetchedData.admission_date || fetchedData.admission_date || "",
             admission_class: fetchedData.admission_class || "",
             attendance: fetchedData.attendance || "",
             reason_leaving: fetchedData.reason_leaving || "",
@@ -220,8 +220,8 @@ const EditLCforDeleteStudent = () => {
   //           grn_no: fetchedData.grn_no || "",
   //           academicStudent: DataStudentAc.academicStudent || [],
   //           issue_date: fetchedData.issue_date || "",
-  //           student_id_no: fetchedData.stud_id_no || "",
-  //           aadhar_no: fetchedData.aadhar_no || "",
+  //           stud_id_no: fetchedData.stud_id_no || "",
+  //           stu_aadhaar_no: fetchedData.stu_aadhaar_no || "",
   //           first_name: fetchedData.stud_name || "",
   //           mid_name: fetchedData.mid_name || "",
   //           last_name: fetchedData.last_name || "",
@@ -237,7 +237,7 @@ const EditLCforDeleteStudent = () => {
   //           dob: fetchedData.dob || "",
   //           dob_words: fetchedData.dob_words || "",
   //           prev_school_class: fetchedData.last_school_attended_standard || "",
-  //           date_of_admission: fetchedData.date_of_admission || "",
+  //           admission_date: fetchedData.admission_date || "",
   //           admission_class: fetchedData.admission_class || "",
   //           attendance: fetchedData.attendance || "",
   //           reason_leaving: fetchedData.reason_leaving || "",
@@ -427,7 +427,7 @@ const EditLCforDeleteStudent = () => {
       "issue_date",
       "first_name",
 
-      "student_id_no",
+      "stud_id_no",
       "promoted_to",
       "last_exam",
       "father_name",
@@ -439,14 +439,14 @@ const EditLCforDeleteStudent = () => {
       "dob_words",
       "nationality",
       "prev_school_class",
-      "date_of_admission",
+      "admission_date",
       "admission_class",
       "reason_leaving",
       "application_date",
       "leaving_date",
       "standard_studying",
       "dob_proof",
-      "aadhar_no",
+      "stu_aadhaar_no",
       "attendance",
       "fee_month",
       "remark",
@@ -567,8 +567,8 @@ const EditLCforDeleteStudent = () => {
     setFormData({
       grn_no: "",
       issue_date: "",
-      student_id_no: "",
-      aadhar_no: "",
+      stud_id_no: "",
+      stu_aadhaar_no: "",
       first_name: "",
       mid_name: "",
       last_name: "",
@@ -585,7 +585,7 @@ const EditLCforDeleteStudent = () => {
       dob_proof: "",
       prev_school_class: "",
       // previous_school_attended: "",
-      date_of_admission: "",
+      admission_date: "",
       admission_class: "",
       leaving_date: "",
       standard_studying: "",
@@ -637,7 +637,7 @@ const EditLCforDeleteStudent = () => {
           // subjects: allSubjectNames,
 
           // subjects:selectedSubjects || [],
-          student_id_no: fetchedData.studentinformation.student_id_no || "",
+          stud_id_no: fetchedData.studentinformation.stud_id_no || "",
           first_name: fetchedData.studentinformation.first_name || "",
           mid_name: fetchedData.studentinformation.mid_name || "",
           last_name: fetchedData.studentinformation.last_name || "",
@@ -647,8 +647,7 @@ const EditLCforDeleteStudent = () => {
           stud_id: fetchedData.studentinformation.student_id || " ",
           father_name: fetchedData.studentinformation.father_name || "",
           mother_name: fetchedData.studentinformation.mother_name || "",
-          date_of_admission:
-            fetchedData.studentinformation.date_of_admission || "",
+          admission_date: fetchedData.studentinformation.admission_date || "",
           religion: fetchedData.studentinformation.religion || "",
           caste: fetchedData.studentinformation.caste || "",
           subcaste: fetchedData.studentinformation.subcaste || "",
@@ -659,7 +658,7 @@ const EditLCforDeleteStudent = () => {
           dob_words: convertDateToWords(fetchedData.studentinformation.dob),
           attendance: fetchedData.total_attendance || "",
           nationality: fetchedData.studentinformation.nationality || "",
-          aadhar_no: fetchedData.studentinformation.aadhar_no || "",
+          stu_aadhaar_no: fetchedData.studentinformation.stu_aadhaar_no || "",
           teacher_image_name:
             fetchedData.studentinformation.father_image_name || null,
           purpose: fetchedData.purpose || " ",
@@ -699,8 +698,8 @@ const EditLCforDeleteStudent = () => {
     const formattedFormData = {
       grn_no: formData.grn_no || "",
       issue_date: formatDateString(formData.issue_date),
-      student_id_no: formData.student_id_no || "",
-      aadhar_no: formData.aadhar_no || "",
+      stud_id_no: formData.stud_id_no || "",
+      stu_aadhaar_no: formData.stu_aadhaar_no || "",
       first_name: formData.first_name || "",
       mid_name: formData.mid_name || "",
       last_name: formData.last_name || "",
@@ -717,7 +716,7 @@ const EditLCforDeleteStudent = () => {
       dob_words: formData.dob_words || "",
       dob_proof: formData.dob_proof || "",
       previous_school_attended: formData.prev_school_class || "",
-      date_of_admission: formatDateString(formData.date_of_admission),
+      admission_date: formatDateString(formData.admission_date),
       admission_class: formData.admission_class || "",
       leaving_date: formatDateString(formData.leaving_date),
       standard_studying: formData.standard_studying || "",
@@ -782,7 +781,7 @@ const EditLCforDeleteStudent = () => {
           mid_name: "",
           last_name: "",
           udise_pen_no: "",
-          student_id_no: "",
+          stud_id_no: "",
           promoted_to: " ",
           last_exam: "",
           stud_id: "",
@@ -798,7 +797,7 @@ const EditLCforDeleteStudent = () => {
           dob_words: "",
           nationality: "",
           prev_school_class: "",
-          date_of_admission: "",
+          admission_date: "",
           admission_class: "",
           attendance: "",
           subjectsFor: [],
@@ -810,7 +809,7 @@ const EditLCforDeleteStudent = () => {
           standard_studying: "",
           dob_proof: "",
           class_id_for_subj: "",
-          aadhar_no: "",
+          stu_aadhaar_no: "",
           teacher_image_name: null,
           academicStudent: [],
           academic_yr: "",
@@ -821,7 +820,7 @@ const EditLCforDeleteStudent = () => {
         setSelectedStudent(null);
         setTimeout(() => setParentInformation(null), 3000);
 
-        navigate("/leavingCertificate");
+        navigate("/deleteStudent");
       }
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
@@ -857,8 +856,8 @@ const EditLCforDeleteStudent = () => {
   //   const formattedFormData = {
   //     grn_no: formData.grn_no || "",
   //     issue_date: formatDateString(formData.issue_date),
-  //     student_id_no: formData.student_id_no || "",
-  //     aadhar_no: formData.aadhar_no || "",
+  //     stud_id_no: formData.stud_id_no || "",
+  //     stu_aadhaar_no: formData.stu_aadhaar_no || "",
   //     first_name: formData.first_name || "",
   //     mid_name: formData.mid_name || "",
   //     last_name: formData.last_name || "",
@@ -875,7 +874,7 @@ const EditLCforDeleteStudent = () => {
   //     dob_words: formData.dob_words || "",
   //     dob_proof: formData.dob_proof || "",
   //     previous_school_attended: formData.prev_school_class || "",
-  //     date_of_admission: formatDateString(formData.date_of_admission),
+  //     admission_date: formatDateString(formData.admission_date),
   //     admission_class: formData.admission_class || "",
   //     leaving_date: formatDateString(formData.leaving_date),
   //     standard_studying: formData.standard_studying || "",
@@ -960,7 +959,7 @@ const EditLCforDeleteStudent = () => {
   //         mid_name: "",
   //         last_name: "",
   //         udise_pen_no: "",
-  //         student_id_no: "",
+  //         stud_id_no: "",
   //         promoted_to: " ",
   //         last_exam: "",
   //         stud_id: "",
@@ -977,7 +976,7 @@ const EditLCforDeleteStudent = () => {
   //         dob_words: "",
   //         nationality: "",
   //         prev_school_class: "",
-  //         date_of_admission: "",
+  //         admission_date: "",
   //         admission_class: "",
   //         attendance: "",
   //         subjectsFor: [],
@@ -990,7 +989,7 @@ const EditLCforDeleteStudent = () => {
   //         standard_studying: "",
   //         dob_proof: "",
   //         class_id_for_subj: "",
-  //         aadhar_no: "",
+  //         stu_aadhaar_no: "",
   //         teacher_image_name: null,
   //         academicStudent: [],
   //         academic_yr: "", // Add this to track selected academic year
@@ -1039,7 +1038,7 @@ const EditLCforDeleteStudent = () => {
   };
 
   // Log or save selectedActivities when needed
-  console.log("____activity--->", formData.selectedActivities);
+  // console.log("____activity--->", formData.selectedActivities);
   // Handle selection of each subject
   const handleSubjectSelection = (e, subjectName) => {
     setFormData((prevData) => {
@@ -1234,24 +1233,24 @@ const EditLCforDeleteStudent = () => {
               </div>
               <div>
                 <label
-                  htmlFor="student_id_no"
+                  htmlFor="stud_id_no"
                   className="block font-bold text-xs mb-2"
                 >
                   STUDENT ID NO <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  id="student_id_no"
-                  name="student_id_no"
+                  id="stud_id_no"
+                  name="stud_id_no"
                   maxLength={25}
-                  value={formData.student_id_no}
+                  value={formData.stud_id_no}
                   onChange={handleChange}
                   readOnly
                   className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                 />
-                {errors.student_id_no && (
+                {errors.stud_id_no && (
                   <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.student_id_no}
+                    {errors.stud_id_no}
                   </span>
                 )}
               </div>
@@ -1285,7 +1284,7 @@ const EditLCforDeleteStudent = () => {
               )}
               <div>
                 <label
-                  htmlFor="aadhar_no"
+                  htmlFor="stu_aadhaar_no"
                   className="block font-bold text-xs mb-2"
                 >
                   UDI NO.(Aadhar Card No.){" "}
@@ -1293,17 +1292,17 @@ const EditLCforDeleteStudent = () => {
                 </label>
                 <input
                   type="text"
-                  id="aadhar_no"
-                  name="aadhar_no"
+                  id="stu_aadhaar_no"
+                  name="stu_aadhaar_no"
                   maxLength={12}
-                  value={formData.aadhar_no}
+                  value={formData.stu_aadhaar_no}
                   onChange={handleChange}
                   readOnly
                   className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                 />
-                {errors.aadhar_no && (
+                {errors.stu_aadhaar_no && (
                   <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.aadhar_no}
+                    {errors.stu_aadhaar_no}
                   </span>
                 )}
               </div>
@@ -1706,23 +1705,23 @@ const EditLCforDeleteStudent = () => {
               </div>
               <div>
                 <label
-                  htmlFor="date_of_admission"
+                  htmlFor="admission_date"
                   className="block font-bold text-xs mb-2"
                 >
                   Date of Admission <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
-                  id="date_of_admission"
-                  name="date_of_admission"
-                  value={formData.date_of_admission}
+                  id="admission_date"
+                  name="admission_date"
+                  value={formData.admission_date}
                   onChange={handleChange}
                   readOnly
                   className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                 />
-                {errors.date_of_admission && (
+                {errors.admission_date && (
                   <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.date_of_admission}
+                    {errors.admission_date}
                   </span>
                 )}
               </div>
