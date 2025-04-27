@@ -28,10 +28,12 @@ export default function NotificationsPanel() {
           For any change in “Student name, Middle Name, Surname, Father name,
           Mother name, Date of birth, Date of admission, GRN No., Religion,
           Caste and Category”, please send an email to
+          <br />
           nutan@arnoldcentralschool.org
         </li>
         <li>
           For any query related to the application, please send an email to
+          <br />
           supportsacs@aceventura.in
         </li>
       </ul>
