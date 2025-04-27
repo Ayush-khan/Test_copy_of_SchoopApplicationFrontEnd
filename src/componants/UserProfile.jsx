@@ -1494,9 +1494,9 @@ function UserProfile() {
                     className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                   >
                     <option value="">Select Gender</option>
-                    <option value="M">Male</option>
-                    <option value="F">Female</option>
-                    <option value="O">Other</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
                   </select>
                   {errors.sex && (
                     <div className="text-red-500 text-xs">{errors.sex}</div>
