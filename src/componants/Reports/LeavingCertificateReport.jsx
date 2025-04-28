@@ -154,11 +154,14 @@ const LeavingCertificateReport = () => {
                   subject?.grn_no || " "
                 }</td>
                  <td className="px-2 text-center py-2 border border-black">
-                 ${
-                   subject?.student_name
-                     ? capitalize(subject.student_name)
-                     : " "
-                 }
+                 ${[subject.stud_name, subject.mid_name, subject.last_name]
+                   .filter(Boolean) // removes empty, null, undefined
+                   .map(
+                     (word) =>
+                       word.charAt(0).toUpperCase() +
+                       word.slice(1).toLowerCase()
+                   ) // Capitalizes properly
+                   .join(" ")}
                 </td>
                  <td class="px-2 text-center py-2 border border-black">
                  ${subject?.class_name || " "} ${" "}
@@ -291,7 +294,12 @@ const LeavingCertificateReport = () => {
       index + 1,
       student?.roll_no || " ",
       student?.grn_no || " ",
-      `${capitalize(student?.student_name || "")}`,
+      `${[student.stud_name, student.mid_name, student.last_name]
+        .filter(Boolean) // removes empty, null, undefined
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        ) // Capitalizes properly
+        .join(" ")}`,
       `${student?.class_name || " "} ${" "} ${student?.sec_name || " "}`,
       student?.sr_no || " ",
       student?.leaving_date
@@ -322,7 +330,7 @@ const LeavingCertificateReport = () => {
   console.log("row", timetable);
 
   const filteredSections = timetable.filter((student) => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = searchTerm.trim().toLowerCase();
     const formatDate = (dateString) => {
       if (!dateString) return "";
       const [year, month, day] = dateString.split("-");
@@ -552,19 +560,23 @@ const LeavingCertificateReport = () => {
                                     {index + 1}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.roll_no || " "}
+                                    {student.roll_no}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.grn_no || " "}
                                   </td>
                                   <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
-                                    {[student.student_name]
-                                      .filter(Boolean) // Removes empty or undefined values
+                                    {[
+                                      student.stud_name,
+                                      student.mid_name,
+                                      student.last_name,
+                                    ]
+                                      .filter(Boolean) // removes empty, null, undefined
                                       .map(
                                         (word) =>
                                           word.charAt(0).toUpperCase() +
                                           word.slice(1).toLowerCase()
-                                      ) // Capitalizes each word properly
+                                      ) // Capitalizes properly
                                       .join(" ")}
                                   </td>
 

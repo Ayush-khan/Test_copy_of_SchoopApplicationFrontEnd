@@ -424,9 +424,17 @@ function ManageLC() {
     <>
       {/* <ToastContainer /> */}
       <div className="md:mx-auto md:w-[90%] p-4 bg-white mt-4 ">
-        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-          Leaving Certificate
-        </h3>
+        <div className=" card-header  flex justify-between items-center  ">
+          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+            Leaving Certificate
+          </h3>
+          <RxCross1
+            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() => {
+              navigate("/dashboard");
+            }}
+          />
+        </div>
         <div
           className=" relative  mb-8   h-1  mx-auto bg-red-700"
           style={{
@@ -645,7 +653,17 @@ function ManageLC() {
                                       {subject?.sr_no}
                                     </td>
                                     <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                      {subject?.stud_name}
+                                      {subject?.stud_name ||
+                                      subject?.mid_name ||
+                                      subject?.last_name
+                                        ? [
+                                            subject?.stud_name,
+                                            subject?.mid_name,
+                                            subject?.last_name,
+                                          ]
+                                            .filter(Boolean)
+                                            .join(" ")
+                                        : ""}
                                     </td>
                                     <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                       {subject?.classname}{" "}

@@ -327,9 +327,17 @@ const SendUserIdToParent = () => {
       <ToastContainer />
 
       <div className="md:mx-auto md:w-[90%] p-4 bg-white mt-4 ">
-        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-          Send User ID To Parents
-        </h3>
+        <div className=" card-header  flex justify-between items-center  ">
+          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+            Send User ID To Parents
+          </h3>
+          <RxCross1
+            className="float-end relative -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() => {
+              navigate("/dashboard");
+            }}
+          />
+        </div>
         <div
           className=" relative  mb-8   h-1  mx-auto bg-red-700"
           style={{

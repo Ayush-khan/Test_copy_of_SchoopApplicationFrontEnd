@@ -324,9 +324,17 @@ function DeleteStudent() {
     <>
       {/* <ToastContainer /> */}
       <div className="md:mx-auto md:w-[80%] p-4 bg-white mt-4 ">
-        <h3 className=" mt-1 text-[1.2em] lg:text-xl text-nowrap">
-          Deleted Students
-        </h3>
+        <div className=" card-header  flex justify-between items-center  ">
+          <h3 className=" mt-1 text-[1.2em] lg:text-xl text-nowrap">
+            Deleted Students
+          </h3>
+          <RxCross1
+            className="float-end relative  -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() => {
+              navigate("/dashboard");
+            }}
+          />
+        </div>
         <div
           className=" relative  mb-8   h-1  mx-auto bg-red-700"
           style={{
@@ -375,6 +383,7 @@ function DeleteStudent() {
                     <h3 className=" mt-1 text-[1.2em] lg:text-xl text-nowrap">
                       Manage Deleted Student
                     </h3>
+
                     <div className="w-1/2 md:w-fit mr-1 ">
                       <input
                         type="text"

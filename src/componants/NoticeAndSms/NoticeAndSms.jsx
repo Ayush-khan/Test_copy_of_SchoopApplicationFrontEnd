@@ -16,6 +16,7 @@ import CreateNotice from "./CreateNotice";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
 import { ImDownload } from "react-icons/im";
+import { Navigate, useNavigate } from "react-router-dom";
 
 function NoticeAndSms() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -51,7 +52,7 @@ function NoticeAndSms() {
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
   //   for allot subject checkboxes
-
+  const navigate = useNavigate();
   const [error, setError] = useState(null);
 
   // errors messages for allot subject tab
@@ -743,9 +744,17 @@ function NoticeAndSms() {
     <>
       {/* <ToastContainer /> */}
       <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
-        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-          Notice/SMS For Parents
-        </h3>
+        <div className=" card-header  flex justify-between items-center  ">
+          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+            Notice/SMS For Parents
+          </h3>
+          <RxCross1
+            className="float-end relative -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() => {
+              navigate("/dashboard");
+            }}
+          />
+        </div>
         <div
           className=" relative  mb-8   h-1  mx-auto bg-red-700"
           style={{

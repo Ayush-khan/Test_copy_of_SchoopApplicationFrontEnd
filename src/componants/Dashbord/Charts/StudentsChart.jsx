@@ -47,82 +47,6 @@ const StudentsChart = () => {
     return () => window.removeEventListener("resize", updateBarCategoryGap);
   }, []);
 
-  // useEffect(() => {
-  //   setLoading(true);
-
-  //   const fetchData = async () => {
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-  //       const academicYear = localStorage.getItem("academicYear");
-  //       if (!token) {
-  //         throw new Error("No authentication token found");
-  //       }
-
-  //       const response = await axios.get(
-  //         `${API_URL}/api/getClassDivisionTotalStudents`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //             "X-Academic-Year": academicYear,
-  //           },
-  //         }
-  //       );
-  //       console.log("The response response of charts", response.data);
-
-  //       // Process the data to aggregate sections under each class
-
-  //       const apiData = response?.data.reduce((acc, item) => {
-  //         const existingClass = acc.find(
-  //           (entry) => entry.class === item.class_name
-  //         );
-  //         const students = isNaN(parseInt(item.total_students, 10))
-  //           ? 0
-  //           : parseInt(item.total_students, 10);
-
-  //         if (existingClass) {
-  //           existingClass[`Section-${item.section_name}`] = students;
-  //         } else {
-  //           acc.push({
-  //             class: item.class_name,
-  //             [`Section-${item.section_name}`]: students,
-  //           });
-  //         }
-  //         return acc;
-  //       }, []);
-
-  //       // Sort data by class name
-  //       const classOrder = [
-  //         "Nursery",
-  //         "LKG",
-  //         "UKG",
-  //         "1",
-  //         "2",
-  //         "3",
-  //         "4",
-  //         "5",
-  //         "6",
-  //         "7",
-  //         "8",
-  //         "9",
-  //         "10",
-  //         "11",
-  //         "12",
-  //       ];
-  //       const sortedData = apiData.sort(
-  //         (a, b) => classOrder.indexOf(a.class) - classOrder.indexOf(b.class)
-  //       );
-
-  //       setData(sortedData);
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
   useEffect(() => {
     setLoading(true);
 
@@ -352,7 +276,7 @@ const StudentsChart = () => {
         >
           <div className="flex flex-row justify-between items-center bg-gray-200 p-1 rounded-t-lg">
             <span className="lg:text-lg sm:text-xs sm:font-semibold text-gray-500">
-              Class-wise Student Distribution
+              Class-wise Student Distribution hh
             </span>
           </div>
           <BarChart
@@ -375,6 +299,34 @@ const StudentsChart = () => {
             <YAxis />
             <Tooltip content={renderTooltip} />
             <Legend />
+            {/* Tatal is show in the top of the each graphbar */}
+            {/* {sectionKeys.map((section, index) => (
+              <Bar
+                key={section}
+                dataKey={section}
+                stackId="a"
+                fill={colors[index % colors.length]}
+              >
+                <LabelList
+                  content={({ value, x, y, width, height }) =>
+                    value > 0 ? (
+                      <text
+                        x={x + width / 2}
+                        y={y}
+                        dy={-4}
+                        fill="black"
+                        fontSize={labelFontSize}
+                        textAnchor="middle"
+                      >
+                        {value}
+                      </text>
+                    ) : null
+                  }
+                />
+              </Bar>
+            ))} */}
+
+            {/* old code */}
             {sectionKeys.map((section, index) => (
               <Bar
                 key={section}

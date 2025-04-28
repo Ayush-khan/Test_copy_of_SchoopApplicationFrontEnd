@@ -5,6 +5,7 @@ import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../../Layouts/NavBar";
 import { useState, useEffect } from "react";
+import ComingSoon from "../common/CommingSoon/ComingSoon";
 function TickitingCountList() {
   const API_URL = import.meta.env.VITE_API_URL;
   const [staffBirthday, setStaffBirthday] = useState([]);
@@ -18,10 +19,6 @@ function TickitingCountList() {
         const token = localStorage.getItem("authToken");
         const academicYr = localStorage.getItem("academicYear");
         const rollId = localStorage.getItem("roleId");
-
-        // if (!token || !rollId) {
-        //   throw new Error("No authentication token or academic year found");
-        // }
 
         if (!token) {
           throw new Error("No authentication token or academic year found");
@@ -65,17 +62,10 @@ function TickitingCountList() {
   }
   return (
     <>
-      {/* <div
-      className="  "
-      style={{
-        height: "100vh",
-        background: "   linear-gradient(to bottom, #E91E63, #2196F3)",
-      }}
-    > */}
-      {/* <NavBar /> */}
       <div className="container mt-4 ">
-        <div className="  card mx-auto lg:w-3/4  shadow-lg ">
-          {/* <div className="card mx-auto w-3/4"> */}
+        <ComingSoon />
+        {/* COrrect code but the component is not complete so we hide it for goining to live */}
+        {/* <div className="  card mx-auto lg:w-3/4  shadow-lg ">
           <div className="card-header flex justify-between items-center">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Ticketing List
@@ -107,9 +97,7 @@ function TickitingCountList() {
                       <th className=" px-0.5 lg:px-2 py-2 text-center  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                         Name
                       </th>
-                      {/* <th className="lg:px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
-                        Date Of Birth
-                      </th> */}
+                    
                       <th className=" px-0.5 lg:px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                         Title
                       </th>
@@ -157,14 +145,9 @@ function TickitingCountList() {
                                   staff.mid_name.slice(1).toLowerCase()}
                                 {staff.last_name.charAt(0).toUpperCase() +
                                   staff.last_name.slice(1).toLowerCase()}
-                                {/* {staff.last_name.slice(0).toLowerCase()} */}
                               </p>
                             </td>
-                            {/* <td className="lg:px-3 py-2 text-center border border-gray-950  text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap">
-                            {staff.birthday}
-                          </p>
-                        </td> */}
+                          
                             <td className="px-0.5 lg:px-3  text-start border border-gray-950  text-sm">
                               <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                 {staff.title}
@@ -176,7 +159,6 @@ function TickitingCountList() {
                                 <span className=" font-semibold text-blue-500 ">
                                   {formattedTime}
                                 </span>
-                                {/* {staff.description} */}
                               </p>
                             </td>
                             <td className="px-0.5 lg:px-4  border border-gray-950  text-sm">
@@ -199,9 +181,8 @@ function TickitingCountList() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
-      {/* </div> */}
     </>
   );
 }

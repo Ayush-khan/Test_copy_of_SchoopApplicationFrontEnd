@@ -23,7 +23,7 @@ const EditLCforDeleteStudent = () => {
   const [formData, setFormData] = useState({
     sr_no: "",
     class_id: "",
-    grn_no: "",
+    reg_no: "",
     date: "",
     first_name: "",
     mid_name: "",
@@ -128,7 +128,7 @@ const EditLCforDeleteStudent = () => {
           setFormData({
             sr_no: fetchedData.sr_no || "",
             stud_id: student.student_id || "",
-            grn_no: fetchedData.grn_no || "",
+            reg_no: fetchedData.reg_no || "",
             academicStudent: DataStudentAc.academicStudent || [],
             issue_date: fetchedData.issue_date || "",
             stud_id_no: fetchedData.stud_id_no || "",
@@ -217,7 +217,7 @@ const EditLCforDeleteStudent = () => {
   //         setFormData({
   //           sr_no: fetchedData.sr_no || "",
   //           student_id: fetchedData.student_id || "",
-  //           grn_no: fetchedData.grn_no || "",
+  //           reg_no: fetchedData.reg_no || "",
   //           academicStudent: DataStudentAc.academicStudent || [],
   //           issue_date: fetchedData.issue_date || "",
   //           stud_id_no: fetchedData.stud_id_no || "",
@@ -423,7 +423,7 @@ const EditLCforDeleteStudent = () => {
 
     // Required fields validation
     const requiredFields = [
-      "grn_no",
+      "reg_no",
       "issue_date",
       "first_name",
 
@@ -565,7 +565,7 @@ const EditLCforDeleteStudent = () => {
 
     // Reset form data to ensure it updates with fresh data
     setFormData({
-      grn_no: "",
+      reg_no: "",
       issue_date: "",
       stud_id_no: "",
       stu_aadhaar_no: "",
@@ -627,7 +627,7 @@ const EditLCforDeleteStudent = () => {
           academic_yr: selectedAcademicYear, // Make sure to retain the selected academic year
           sr_no: fetchedData.sr_no || "",
           class_id_for_subj: fetchedData.studentinformation.class_id || "",
-          grn_no: fetchedData.studentinformation.grn_no || "",
+          reg_no: fetchedData.studentinformation.reg_no || "",
           issue_date: today || "",
           subjectsFor: fetchedData.classsubject || [],
           academicStudent: fetchedData.academicStudent || [],
@@ -696,7 +696,7 @@ const EditLCforDeleteStudent = () => {
     console.log("Validation passed, proceeding with submission");
 
     const formattedFormData = {
-      grn_no: formData.grn_no || "",
+      reg_no: formData.reg_no || "",
       issue_date: formatDateString(formData.issue_date),
       stud_id_no: formData.stud_id_no || "",
       stu_aadhaar_no: formData.stu_aadhaar_no || "",
@@ -775,7 +775,7 @@ const EditLCforDeleteStudent = () => {
         // Reset form
         setFormData({
           sr_no: "",
-          grn_no: "",
+          reg_no: "",
           date: "",
           first_name: "",
           mid_name: "",
@@ -854,7 +854,7 @@ const EditLCforDeleteStudent = () => {
 
   //   // Format the form data before submission
   //   const formattedFormData = {
-  //     grn_no: formData.grn_no || "",
+  //     reg_no: formData.reg_no || "",
   //     issue_date: formatDateString(formData.issue_date),
   //     stud_id_no: formData.stud_id_no || "",
   //     stu_aadhaar_no: formData.stu_aadhaar_no || "",
@@ -953,7 +953,7 @@ const EditLCforDeleteStudent = () => {
   //       // Reset form data
   //       setFormData({
   //         sr_no: "",
-  //         grn_no: "",
+  //         reg_no: "",
   //         date: "",
   //         first_name: "",
   //         mid_name: "",
@@ -1125,24 +1125,24 @@ const EditLCforDeleteStudent = () => {
               </div>
               <div>
                 <label
-                  htmlFor="grn_no"
+                  htmlFor="reg_no"
                   className="block font-bold text-xs mb-2"
                 >
                   General Register No. <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  id="grn_no"
-                  name="grn_no"
+                  id="reg_no"
+                  name="reg_no"
                   maxLength={10}
-                  value={formData.grn_no}
+                  value={formData.reg_no}
                   onChange={handleChange}
                   readOnly
                   className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                 />
-                {errors.grn_no && (
+                {errors.reg_no && (
                   <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.grn_no}
+                    {errors.reg_no}
                   </span>
                 )}
               </div>
