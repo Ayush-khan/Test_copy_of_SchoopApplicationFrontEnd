@@ -321,8 +321,12 @@ function ListFinal() {
                     {installment.account}
                   </div>
                 )}
-                <div className="cell w-1/3 text-black/80 tracking-wide ">
-                  {`Installment-${installment.installment}`}
+                <div
+                  className={`cell w-1/3 text-black/80 tracking-wide ${
+                    selectedAccount ? "text-start ml-1" : "text-center"
+                  }`}
+                >
+                  {`${installment.installment}`}
                 </div>
                 <div className="cell w-1/3 text-end text-black/70 tracking-wide">
                   {installment.amount}
