@@ -62,7 +62,8 @@ function StaffBirthdayTabList() {
           {/* <div className="card mx-auto w-3/4"> */}
           <div className="card-header flex justify-between items-center">
             <h5 className="text-gray-700 mt-1  text-md lg:text-lg">
-              Staff Birthday List
+              {/* Staff Birthday List */}
+              Today's Birthday List
             </h5>
 
             <RxCross1
