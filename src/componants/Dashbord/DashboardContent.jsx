@@ -236,7 +236,7 @@ const DashboardContent = () => {
 
           <Link to="/staffbirthlist" className="no-underline">
             <Card
-              title="BirthDay"
+              title="Today's Birthdays"
               value={staffBirthday}
               // {loading ? <LoadingSpinner /> :   value={staffBirthday}}
 
