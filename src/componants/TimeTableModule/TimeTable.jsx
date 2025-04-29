@@ -352,9 +352,6 @@ const TimeTable = () => {
       </body>
       </html>`);
 
-    // printWindow.document.close();
-    // printWindow.print();
-    // console.log(printContent);
     printWindow.document.close();
 
     // Ensure content is fully loaded before printing
@@ -395,103 +392,74 @@ const TimeTable = () => {
                   navigate("/dashboard");
                 }}
               />
-              {/* <button
-                className="btn btn-primary btn-sm"
-                // onClick={() => navigate("/createTimeTable")}
-                onClick={() => navigate("/createTimetablePlanner")}
-              >
-                <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
-                Add
-              </button> */}
             </div>
             <div
-              className="relative w-[97%] mb-3 h-1 mx-auto"
+              className="relative w-[97%]  h-1 mx-auto"
               style={{ backgroundColor: "#C03078" }}
             ></div>
             <div className="mb-4">
-              <div className="w-full md:w-[80%] mx-auto">
-                <div className="max-w-full bg-white shadow-md rounded-lg border border-gray-300 mx-auto mt-6 p-6">
-                  <div className="w-full flex flex-col md:flex-row items-center justify-center gap-2">
-                    {/* Class Select Section */}
-                    <div className="flex items-center gap-x-6">
-                      <label
-                        htmlFor="classSection"
-                        className="text-sm md:text-base"
-                      >
-                        Class <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[200px]">
-                        <Select
-                          id="classSelect"
-                          menuPortalTarget={document.body}
-                          menuPosition="fixed"
-                          value={selectedClass}
-                          onChange={handleClassSelect}
-                          options={classOptions}
-                          placeholder={
-                            loadingClasses ? "Loading classes..." : "Select"
-                          }
-                          isSearchable
-                          isClearable
-                          isDisabled={loadingClasses}
-                          className="text-sm"
-                        />
-                        {classError && (
-                          <div className="text-danger text-xs mt-1">
-                            {classError}
-                          </div>
-                        )}
+              <div className="relative right-0 md:right-10 w-full md:w-[80%] mx-auto">
+                <div className="form-group mt-6 md:mt-10 w-full md:w-[90%] flex flex-row justify-start gap-x-1 md:gap-x-6">
+                  <label
+                    htmlFor="classSection"
+                    className="w-[30%] pt-2 items-center text-center"
+                  >
+                    Select Class <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full">
+                    <Select
+                      value={selectedClass}
+                      onChange={handleClassSelect}
+                      options={classOptions}
+                      placeholder="Class"
+                      isSearchable
+                      isClearable
+                      className=" text-sm w-full md:w-[60%] item-center relative left-0 md:left-4"
+                    />
+                    {classError && (
+                      <div className="text-danger relative left-4 text-xs mt-1">
+                        {classError}
                       </div>
-                    </div>
-
-                    {/* Search Button */}
-                    {/* <button
-                      className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm px-4"
+                    )}
+                  </div>
+                  <div className="relative right-0 md:right-16 ">
+                    <button
+                      type="search"
                       onClick={handleSearch}
+                      style={{ backgroundColor: "#2196F3" }}
+                      className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded  gap-x-6${
+                        loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                      disabled={loadingForSearch}
                     >
-                      Search
-                    </button> */}
-                    <div className="mt-1 ">
-                      <button
-                        type="search"
-                        onClick={handleSearch}
-                        style={{ backgroundColor: "#2196F3" }}
-                        className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded  gap-x-6${
-                          loadingForSearch
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
-                        disabled={loadingForSearch}
-                      >
-                        {loadingForSearch ? (
-                          <span className="flex items-center">
-                            <svg
-                              className="animate-spin h-4 w-4 mr-2 text-white"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              ></circle>
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                              ></path>
-                            </svg>
-                            Searching...
-                          </span>
-                        ) : (
-                          "Search"
-                        )}
-                      </button>
-                    </div>
+                      {loadingForSearch ? (
+                        <span className="flex items-center">
+                          <svg
+                            className="animate-spin h-4 w-4 mr-2 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            ></path>
+                          </svg>
+                          Searching...
+                        </span>
+                      ) : (
+                        "Search"
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -585,11 +553,22 @@ const TimeTable = () => {
                     <div className="p-4 text-center mx-auto">
                       <div className="space-y-2">
                         {/* Assembly Block */}
-                        <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
+                        {/* <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
                           <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
                             <span className="w-[35%] font-bold"></span>
                             <span className="font-bold">Assembly</span>
                             <span className="font-bold">8.00 - 8.30</span>
+                          </div>
+                        </div> */}
+                        <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
+                          <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
+                            <span className="w-[35%] font-bold"></span>
+                            <span className="font-bold">Assembly</span>
+                            <span className="font-bold">
+                              {selectedDay?.toLowerCase() === "saturday"
+                                ? "8.00 - 8.20"
+                                : "8.00 - 8.30"}
+                            </span>
                           </div>
                         </div>
 
@@ -615,7 +594,7 @@ const TimeTable = () => {
                             </div>
 
                             {/* Breaks */}
-                            {index === 1 && (
+                            {/* {index === 1 && (
                               <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
                                 <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
                                   <span className="w-[32%] font-bold"></span>
@@ -636,6 +615,49 @@ const TimeTable = () => {
                                   </span>
                                 </div>
                               </div>
+                            )} */}
+
+                            {selectedDay?.toLowerCase() === "saturday" ? (
+                              index === 3 && (
+                                <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
+                                  <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
+                                    <span className="w-[35%] font-bold"></span>
+                                    <span className="font-bold">Break</span>
+                                    <span className="font-bold">
+                                      10.00 - 10.30
+                                    </span>
+                                  </div>
+                                </div>
+                              )
+                            ) : (
+                              <>
+                                {index === 1 && (
+                                  <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
+                                    <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
+                                      <span className="w-[32%] font-bold"></span>
+                                      <span className="font-bold">
+                                        Short Break
+                                      </span>
+                                      <span className="font-bold">
+                                        9.45 - 10.00
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                                {index === 4 && (
+                                  <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
+                                    <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
+                                      <span className="w-[32%] font-bold"></span>
+                                      <span className="font-bold">
+                                        Long Break
+                                      </span>
+                                      <span className="font-bold">
+                                        11.45 - 12.15
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                              </>
                             )}
                           </React.Fragment>
                         ))}

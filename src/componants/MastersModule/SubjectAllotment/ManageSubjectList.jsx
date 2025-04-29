@@ -2124,7 +2124,7 @@ function ManageSubjectList() {
         ></div>
         {/* <hr className="relative -top-3" /> */}
 
-        <ul className="grid grid-cols-2 gap-x-10 relative -left-6 md:left-0 md:flex md:flex-row relative -top-4">
+        <ul className="grid grid-cols-2 gap-x-10 relative -left-6 md:left-0 md:flex md:flex-row  -top-4">
           {/* Tab Navigation */}
           {[
             "Manage",
@@ -2180,7 +2180,7 @@ function ManageSubjectList() {
                         value={selectedClass}
                         onChange={handleClassSelect}
                         options={classOptions}
-                        placeholder="Select Class"
+                        placeholder="Class"
                         isSearchable
                         isClearable
                         className=" text-sm w-full md:w-[60%] item-center relative left-0 md:left-4"
