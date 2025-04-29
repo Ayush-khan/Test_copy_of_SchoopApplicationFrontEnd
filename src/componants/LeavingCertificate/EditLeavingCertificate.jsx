@@ -30,7 +30,7 @@ const EditLeavingCertificate = () => {
     mid_name: "",
     last_name: "",
     udise_pen_no: "",
-    stud_id_no: "",
+    student_id_no: "",
     promoted_to: " ",
     last_exam: "",
     stud_id: "",
@@ -103,7 +103,7 @@ const EditLeavingCertificate = () => {
             grn_no: fetchedData.grn_no || "",
             academicStudent: DataStudentAc.academicStudent || [],
             issue_date: fetchedData.issue_date || "",
-            stud_id_no: fetchedData.stud_id_no || "",
+            student_id_no: fetchedData.stud_id_no || "",
             aadhar_no: fetchedData.aadhar_no || "",
             first_name: fetchedData.stud_name || "",
             mid_name: fetchedData.mid_name || "",
@@ -318,7 +318,7 @@ const EditLeavingCertificate = () => {
   //       grn_no: "",
   //       class_id: "",
   //       issue_date: "",
-  //       stud_id_no: "",
+  //       student_id_no: "",
   //       aadhar_no: "",
   //       first_name: "",
   //       mid_name: "",
@@ -393,7 +393,7 @@ const EditLeavingCertificate = () => {
   //           // first_name: `${fetchedData.studentinformation?.first_name || ""} ${
   //           //   fetchedData.studentinformation?.mid_name || ""
   //           // } ${fetchedData.studentinformation?.last_name || ""}`,
-  //           stud_id_no: fetchedData.studentinformation.stud_id_no || "",
+  //           student_id_no: fetchedData.studentinformation.student_id_no || "",
   //           first_name: fetchedData.studentinformation.first_name || "",
   //           mid_name: fetchedData.studentinformation.mid_name || "",
   //           last_name: fetchedData.studentinformation.last_name || "",
@@ -443,7 +443,7 @@ const EditLeavingCertificate = () => {
       "issue_date",
       "first_name",
 
-      "stud_id_no",
+      "student_id_no",
       "promoted_to",
       "last_exam",
       "father_name",
@@ -583,7 +583,7 @@ const EditLeavingCertificate = () => {
     setFormData({
       grn_no: "",
       issue_date: "",
-      stud_id_no: "",
+      student_id_no: "",
       aadhar_no: "",
       first_name: "",
       mid_name: "",
@@ -653,7 +653,7 @@ const EditLeavingCertificate = () => {
           // subjects: allSubjectNames,
 
           // subjects:selectedSubjects || [],
-          stud_id_no: fetchedData.studentinformation.stud_id_no || "",
+          student_id_no: fetchedData.studentinformation.stud_id_no || "",
           first_name: fetchedData.studentinformation.first_name || "",
           mid_name: fetchedData.studentinformation.mid_name || "",
           last_name: fetchedData.studentinformation.last_name || "",
@@ -718,7 +718,7 @@ const EditLeavingCertificate = () => {
     const formattedFormData = {
       grn_no: formData.grn_no || "",
       issue_date: formatDateString(formData.issue_date),
-      stud_id_no: formData.stud_id_no || "",
+      student_id_no: formData.student_id_no || "",
       aadhar_no: formData.aadhar_no || "",
       first_name: formData.first_name || "",
       mid_name: formData.mid_name || "",
@@ -801,7 +801,7 @@ const EditLeavingCertificate = () => {
           mid_name: "",
           last_name: "",
           udise_pen_no: "",
-          stud_id_no: "",
+          student_id_no: "",
           promoted_to: " ",
           last_exam: "",
           stud_id: "",
@@ -1075,24 +1075,24 @@ const EditLeavingCertificate = () => {
               </div>
               <div>
                 <label
-                  htmlFor="stud_id_no"
+                  htmlFor="student_id_no"
                   className="block font-bold text-xs mb-2"
                 >
                   STUDENT ID NO <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  id="stud_id_no"
-                  name="stud_id_no"
+                  id="student_id_no"
+                  name="student_id_no"
                   maxLength={25}
-                  value={formData.stud_id_no}
+                  value={formData.student_id_no}
                   onChange={handleChange}
-                  readOnly
+                  // readOnly
                   className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                 />
-                {errors.stud_id_no && (
+                {errors.student_id_no && (
                   <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.stud_id_no}
+                    {errors.student_id_no}
                   </span>
                 )}
               </div>
@@ -1413,7 +1413,7 @@ const EditLeavingCertificate = () => {
                   maxLength={50}
                   value={formData.state}
                   onChange={handleChange}
-                  // readOnly
+                  readOnly
                   className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                 />
                 {errors.state && (
