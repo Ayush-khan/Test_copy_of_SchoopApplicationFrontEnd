@@ -2150,20 +2150,6 @@ function ManageSubjectList() {
 
         <div className="bg-white  rounded-md -mt-5">
           {activeTab === "Manage" && (
-            // <ManageSubjectsTab
-            //   classSection={classSection}
-            //   nameError={nameError}
-            //   handleChangeClassSection={handleChangeClassSection}
-            //   handleSearch={handleSearch}
-            //   classes={classes}
-            //   subjects={subjects}
-            //   displayedSections={displayedSections}
-            //   setSearchTerm={setSearchTerm}
-            //   handleEdit={handleEdit}
-            //   handleDelete={handleDelete}
-            //   pageCount={pageCount}
-            //   handlePageClick={handlePageClick}
-            // />
             <div>
               <ToastContainer />
               <div className="mb-4">
