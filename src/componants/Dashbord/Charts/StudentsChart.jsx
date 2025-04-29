@@ -276,7 +276,7 @@ const StudentsChart = () => {
         >
           <div className="flex flex-row justify-between items-center bg-gray-200 p-1 rounded-t-lg">
             <span className="lg:text-lg sm:text-xs sm:font-semibold text-gray-500">
-              Class-wise Student Distribution hh
+              Class-wise Student Distribution
             </span>
           </div>
           <BarChart
