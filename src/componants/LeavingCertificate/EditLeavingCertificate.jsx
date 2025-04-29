@@ -30,7 +30,7 @@ const EditLeavingCertificate = () => {
     mid_name: "",
     last_name: "",
     udise_pen_no: "",
-    student_id_no: "",
+    stud_id_no: "",
     promoted_to: " ",
     last_exam: "",
     stud_id: "",
@@ -99,11 +99,11 @@ const EditLeavingCertificate = () => {
           const selectedActivities = games ? games.split(",") : [];
           setFormData({
             sr_no: fetchedData.sr_no || "",
-            student_id: fetchedData.student_id || "",
+            stud_id: fetchedData.stud_id || "",
             grn_no: fetchedData.grn_no || "",
             academicStudent: DataStudentAc.academicStudent || [],
             issue_date: fetchedData.issue_date || "",
-            student_id_no: fetchedData.stud_id_no || "",
+            stud_id_no: fetchedData.stud_id_no || "",
             aadhar_no: fetchedData.aadhar_no || "",
             first_name: fetchedData.stud_name || "",
             mid_name: fetchedData.mid_name || "",
@@ -318,7 +318,7 @@ const EditLeavingCertificate = () => {
   //       grn_no: "",
   //       class_id: "",
   //       issue_date: "",
-  //       student_id_no: "",
+  //       stud_id_no: "",
   //       aadhar_no: "",
   //       first_name: "",
   //       mid_name: "",
@@ -393,7 +393,7 @@ const EditLeavingCertificate = () => {
   //           // first_name: `${fetchedData.studentinformation?.first_name || ""} ${
   //           //   fetchedData.studentinformation?.mid_name || ""
   //           // } ${fetchedData.studentinformation?.last_name || ""}`,
-  //           student_id_no: fetchedData.studentinformation.student_id_no || "",
+  //           stud_id_no: fetchedData.studentinformation.stud_id_no || "",
   //           first_name: fetchedData.studentinformation.first_name || "",
   //           mid_name: fetchedData.studentinformation.mid_name || "",
   //           last_name: fetchedData.studentinformation.last_name || "",
@@ -401,7 +401,7 @@ const EditLeavingCertificate = () => {
   //           promoted_to: fetchedData.studentinformation.promoted_to || "",
   //           last_exam: fetchedData.studentinformation.last_exam || "",
 
-  //           stud_id: fetchedData.studentinformation.student_id || " ",
+  //           stud_id: fetchedData.studentinformation.stud_id || " ",
   //           father_name: fetchedData.studentinformation.father_name || "",
   //           mother_name: fetchedData.studentinformation.mother_name || "",
 
@@ -443,7 +443,7 @@ const EditLeavingCertificate = () => {
       "issue_date",
       "first_name",
 
-      "student_id_no",
+      "stud_id_no",
       "promoted_to",
       "last_exam",
       "father_name",
@@ -583,7 +583,7 @@ const EditLeavingCertificate = () => {
     setFormData({
       grn_no: "",
       issue_date: "",
-      student_id_no: "",
+      stud_id_no: "",
       aadhar_no: "",
       first_name: "",
       mid_name: "",
@@ -653,14 +653,14 @@ const EditLeavingCertificate = () => {
           // subjects: allSubjectNames,
 
           // subjects:selectedSubjects || [],
-          student_id_no: fetchedData.studentinformation.student_id_no || "",
+          stud_id_no: fetchedData.studentinformation.stud_id_no || "",
           first_name: fetchedData.studentinformation.first_name || "",
           mid_name: fetchedData.studentinformation.mid_name || "",
           last_name: fetchedData.studentinformation.last_name || "",
           udise_pen_no: fetchedData.studentinformation.udise_pen_no || "",
           promoted_to: fetchedData.studentinformation.promoted_to || "",
           last_exam: fetchedData.studentinformation.last_exam || "",
-          stud_id: fetchedData.studentinformation.student_id || " ",
+          stud_id: fetchedData.studentinformation.stud_id || " ",
           father_name: fetchedData.studentinformation.father_name || "",
           mother_name: fetchedData.studentinformation.mother_name || "",
           date_of_admission:
@@ -718,7 +718,7 @@ const EditLeavingCertificate = () => {
     const formattedFormData = {
       grn_no: formData.grn_no || "",
       issue_date: formatDateString(formData.issue_date),
-      student_id_no: formData.student_id_no || "",
+      stud_id_no: formData.stud_id_no || "",
       aadhar_no: formData.aadhar_no || "",
       first_name: formData.first_name || "",
       mid_name: formData.mid_name || "",
@@ -801,7 +801,7 @@ const EditLeavingCertificate = () => {
           mid_name: "",
           last_name: "",
           udise_pen_no: "",
-          student_id_no: "",
+          stud_id_no: "",
           promoted_to: " ",
           last_exam: "",
           stud_id: "",
@@ -1075,24 +1075,24 @@ const EditLeavingCertificate = () => {
               </div>
               <div>
                 <label
-                  htmlFor="student_id_no"
+                  htmlFor="stud_id_no"
                   className="block font-bold text-xs mb-2"
                 >
                   STUDENT ID NO <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  id="student_id_no"
-                  name="student_id_no"
+                  id="stud_id_no"
+                  name="stud_id_no"
                   maxLength={25}
-                  value={formData.student_id_no}
+                  value={formData.stud_id_no}
                   onChange={handleChange}
                   readOnly
                   className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                 />
-                {errors.student_id_no && (
+                {errors.stud_id_no && (
                   <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.student_id_no}
+                    {errors.stud_id_no}
                   </span>
                 )}
               </div>
@@ -1413,7 +1413,7 @@ const EditLeavingCertificate = () => {
                   maxLength={50}
                   value={formData.state}
                   onChange={handleChange}
-                  readOnly
+                  // readOnly
                   className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                 />
                 {errors.state && (
