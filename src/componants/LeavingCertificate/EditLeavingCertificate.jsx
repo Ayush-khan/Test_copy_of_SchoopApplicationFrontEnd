@@ -1087,7 +1087,7 @@ const EditLeavingCertificate = () => {
                   maxLength={25}
                   value={formData.student_id_no}
                   onChange={handleChange}
-                  // readOnly
+                  readOnly
                   className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                 />
                 {errors.student_id_no && (

@@ -994,7 +994,7 @@ function NewStudentList() {
     () =>
       classes.map((cls) => ({
         value: cls.section_id,
-        label: `${cls?.get_class?.name} ${cls.name} `,
+        label: `${cls?.classname} ${cls.sectionname} `,
       })),
     [classes]
   );
@@ -1016,7 +1016,7 @@ function NewStudentList() {
     try {
       const token = localStorage.getItem("authToken");
       const classResponse = await axios.get(
-        `${API_URL}/api/getallClassWithStudentCount`,
+        `${API_URL}/api/get_classesfornewstudentlist`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setClasses(classResponse.data || []);
