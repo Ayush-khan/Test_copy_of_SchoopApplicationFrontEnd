@@ -140,7 +140,8 @@ function StaffBirthdayTabList() {
                         <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
                           <p className="text-gray-900 whitespace-no-wrap relative top-2">
                             {" "}
-                            {student.classname} {student.sectionname}
+                            {student?.classname || " "}{" "}
+                            {student?.sectionname || " "}
                           </p>
                         </td>
                         <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
