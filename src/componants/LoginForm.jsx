@@ -21,14 +21,10 @@ const LoginForm = () => {
     setErrors({});
     setLoading(true); // Set loading to true when form is submitted
     try {
-      const response = await axios.post(
-        // "http://127.0.0.1:8000/api/login",
-        `${API_URL}/api/login`,
-        {
-          user_id: email,
-          password: password,
-        }
-      );
+      const response = await axios.post(`${API_URL}/api/login`, {
+        user_id: email,
+        password: password,
+      });
       console.log(
         "responseerror",
         response.data.success,
@@ -47,13 +43,6 @@ const LoginForm = () => {
 
       console.log("the message of the response of the login", response);
 
-      //  {"message": "Login successfully",
-      //     "token": "390|8ICSKML4LjrZ7lv0AgPZArTRuBzVzUZKnsEWxld0302755c6",
-      //     "success": true,
-      //     "reg_id": 0,
-      //     "role_id": "",
-      //     "academic_yr": "2023-2024",
-      //     "institutename": "St. Arnold's Central School"}
       if (response.status === 200) {
         localStorage.setItem("authToken", response.data.token);
 
@@ -67,18 +56,43 @@ const LoginForm = () => {
         return;
       }
     } catch (error) {
+      // catch (error) {
+      //   const newErrors = {};
+      //   if (error.response) {
+      //     if (error.response.status === 404) {
+      //       newErrors.email = "Invalid username";
+      //     } else if (error.response.status === 401) {
+      //       newErrors.password = "Invalid password";
+      //     } else {
+      //       newErrors.api = "An unexpected error. Please try again later.";
+      //     }
+      //   } else {
+      //     newErrors.api = "An unexpected error. Please try again later.";
+      //   }
+      //   setErrors(newErrors);
+      // }
       const newErrors = {};
+
       if (error.response) {
-        if (error.response.status === 404) {
+        const status = error.response.status;
+        const message = error.response.data?.message;
+
+        if (status === 404) {
           newErrors.email = "Invalid username";
-        } else if (error.response.status === 401) {
+        } else if (status === 401) {
           newErrors.password = "Invalid password";
+        } else if (
+          message === "This password does not use the Bcrypt algorithm."
+        ) {
+          newErrors.password = "This password is not using Bcrypt encryption.";
         } else {
-          newErrors.api = "An unexpected error. Please try again later.";
+          newErrors.api =
+            message || "An unexpected error occurred. Please try again later.";
         }
       } else {
-        newErrors.api = "An unexpected error. Please try again later.";
+        newErrors.api = "Network error or server is unreachable.";
       }
+
       setErrors(newErrors);
     } finally {
       setLoading(false); // Set loading to false after the request is complete
