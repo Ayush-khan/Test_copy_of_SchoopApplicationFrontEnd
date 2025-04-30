@@ -689,8 +689,8 @@ function HolidayList() {
       return;
     }
 
-    const fileNamePattern = /^holidaylist(\s\(\d+\))?\.csv$/;
-    const rejectedFileName = /^rejected_template(\s\(\d+\))?\.csv$/;
+    const fileNamePattern = /^holidaylist(\s?\(\d+\))?\.csv$/;
+    const rejectedFileName = /^rejected_template(\s?\(\d+\))?\.csv$/;
 
     const fileName = selectedFile.name.trim();
 
@@ -878,14 +878,12 @@ function HolidayList() {
                       </h5>
 
                       <p className="text-sm text-gray-600 mb-4">
-                        # Do not change the name of the file. Do not change the
-                        contents of first 4 columns in the downloaded
-                        excelsheet.
+                        # Do not change the name of the file.
                         <br /># Please click on the button below to select the
                         file which was downloaded in the previous step.
                       </p>
 
-                      <label className="mt-2 bg-blue-600 md:w-[45%] overflow-hidden text-white rounded-full text-xs  px-6 py-3 hover:bg-blue-700 cursor-pointer transition duration-200 whitespace-nowrap">
+                      <label className="mt-4 bg-blue-600 md:w-[45%] overflow-hidden text-white rounded-full text-xs  px-6 py-3 hover:bg-blue-700 cursor-pointer transition duration-200 whitespace-nowrap">
                         <i className="fas fa-upload text-lg "></i>{" "}
                         {selectedFile
                           ? selectedFile.name.length > 20
@@ -937,7 +935,7 @@ function HolidayList() {
 
                       <button
                         onClick={handleUpload}
-                        className="mt-16 bg-blue-600 text-white text-xs rounded-full px-6 py-3 hover:bg-blue-700 transition duration-200"
+                        className="mt-12 bg-blue-600 text-white text-xs rounded-full px-6 py-3 hover:bg-blue-700 transition duration-200"
                         disabled={loading} // Disable button during loading
                       >
                         {" "}
