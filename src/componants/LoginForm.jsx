@@ -84,7 +84,7 @@ const LoginForm = () => {
         } else if (
           message === "This password does not use the Bcrypt algorithm."
         ) {
-          newErrors.password = "This password is not using Bcrypt encryption.";
+          newErrors.password = "This password not using Bcrypt encryption.";
         } else {
           newErrors.api =
             message || "An unexpected error occurred. Please try again later.";
