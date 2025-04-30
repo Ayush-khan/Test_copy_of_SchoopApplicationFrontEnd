@@ -120,7 +120,7 @@ function HolidayList() {
     fetchSessionData();
     console.log("session.data", fetchSessionData);
 
-    // fetchHolidays();
+    fetchHolidays();
 
     // If data is posted successfully, reset the flag and refetch
     if (isDataPosted) {
@@ -689,15 +689,16 @@ function HolidayList() {
       return;
     }
 
-    // Regular expression to allow "holidaylist.csv", "holidaylist(1).csv", "holidaylist(2).csv", etc.
     const fileNamePattern = /^holidaylist(\s\(\d+\))?\.csv$/;
+    const rejectedFileName = /^rejected_template(\s\(\d+\))?\.csv$/;
 
     const fileName = selectedFile.name.trim();
 
     // Check if the file name matches the allowed pattern
-    if (!fileNamePattern.test(fileName)) {
+    if (!fileNamePattern.test(fileName) && !rejectedFileName.test(fileName)) {
       toast.warning(
-        "⚠️ Invalid file name! Please select 'holidaylist.csv' or 'holidaylist(x).csv' (e.g., 'holidaylist(1).csv')."
+        "⚠️ Please check if correct file is selected for upload. The file name should be holidaylist or rejected_template."
+        //  Invalid file name! Please select 'holidaylist.csv' or 'holidaylist(x).csv' (e.g., 'holidaylist(1).csv').
       );
       return;
     }
