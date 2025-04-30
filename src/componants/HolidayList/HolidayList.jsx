@@ -1076,13 +1076,17 @@ function HolidayList() {
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {formatDate(holiday.holiday_date)}
+                                  {holiday.holiday_date == "0000-00-00"
+                                    ? " "
+                                    : formatDate(holiday.holiday_date)}
                                   {/* {holiday.holiday_date} */}
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {formatDate(holiday.to_date || "")}
-                                  {/* {holiday.to_date} */}
+                                  {/* {formatDate(holiday.to_date || "")} */}
+                                  {holiday.to_date == "0000-00-00"
+                                    ? " "
+                                    : formatDate(holiday.to_date)}
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
