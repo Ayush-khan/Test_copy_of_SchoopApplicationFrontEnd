@@ -405,7 +405,7 @@ h5 + * { /* Targets the element after h5 */
     if (subject) {
       // window.location.href = `/iDCardDetails?subject=${subject}`;
       navigate(
-        `/iDCardDetails/${subject?.parent_id}`,
+        `/iDCardDetails/${subject?.student_id}`,
 
         {
           state: { staff: subject },

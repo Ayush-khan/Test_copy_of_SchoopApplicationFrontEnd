@@ -20,42 +20,28 @@ const IDCardDetails = () => {
   const { staff } = location.state || {};
   console.log("IdCardDetails***", staff);
   const [data, setData] = useState(null);
+  // const [selectedClassId, setSelectedClassId] = useState("");
+  // const [selectedSectionId, setSelectedSectionId] = useState("");
+
   const fetchStudentData = async () => {
-    setFormErrors([]); // Reset errors if no validation issues
+    // Reset errors if no validation issues
 
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
 
       const response = await axios.get(
-        `${API_URL}/api/get_studentdatawithparentdata?parent_id=${staff?.parent_id}`,
+        `${API_URL}/api/get_studentidcarddetails?student_id=${staff?.student_id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Class", response);
-      //   await setData(response?.data?.data || []);
+      // console.log("studentiddetails", response);
 
       const data = response?.data?.data || {};
       setData(data);
-
-      setStudents(data.students || []);
-      setParents(Array.isArray(data.parents) ? data.parents : []);
-      //   setGuardian(Array.isArray(data.guardian) ? data.guardian : []);
-      //   setGuardian(
-      //     Array.isArray(data.guardian) ? data.guardian : [data.guardian]
-      //   );
-      setGuardian(
-        Array.isArray(data.guardian)
-          ? data.guardian
-          : data.guardian
-          ? [data.guardian]
-          : []
-      );
-
-      console.log("setParents", parents);
-
-      console.log("setGuardian", guardian);
+      setStudents(data || []);
+      // console.log("after setStudents", data);
     } catch (error) {
       toast.error("Error fetching Student Data");
       console.error("Error fetching Student Data:", error);
@@ -63,9 +49,12 @@ const IDCardDetails = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchStudentData();
   }, []);
+
+  console.log("Students", students);
 
   // Handle Input Changes Separately
   const handleStudentChange = (e, index) => {
@@ -77,28 +66,7 @@ const IDCardDetails = () => {
     );
   };
 
-  console.log("student", students);
-  const handleParentChange = (e, index) => {
-    const { name, value } = e.target;
-    setParents((prev) =>
-      prev.map((parent, i) =>
-        i === index ? { ...parent, [name]: value } : parent
-      )
-    );
-  };
-
-  console.log("parent", parent);
-
-  const handleGuardianChange = (e, index) => {
-    const { name, value } = e.target;
-    setGuardian((prev) =>
-      prev.map((guardian, i) =>
-        i === index ? { ...guardian, [name]: value } : guardian
-      )
-    );
-  };
-
-  console.log("guardian", guardian);
+  // console.log("student", students);
 
   // Handle Image Cropping Separately
   const handleStudentImageCropped = (croppedImageData, index) => {
@@ -112,40 +80,9 @@ const IDCardDetails = () => {
           : student
       )
     );
-  };
 
-  //   const handleStudentImageCropped = (croppedImageData) => {
-  //     setStudents((prev) => ({ ...prev, image_url: croppedImageData }));
-  //   };
-
-  const handleParentImageCropped = (croppedImageData, index, type) => {
-    setParents((prev) =>
-      prev.map((parent, i) =>
-        i === index
-          ? {
-              ...parent,
-              // Dynamic key: father_image_url or mother_image_url
-              [`${type}_image_base`]: croppedImageData ? croppedImageData : "",
-            }
-          : parent
-      )
-    );
-  };
-
-  //   const handleParentImageCropped = (croppedImageData) => {
-  //     setParents((prev) => ({ ...prev, image_url: croppedImageData }));
-  //   };
-  const handleGuardianImageCropped = (croppedImageData, index) => {
-    setGuardian((prev) =>
-      prev.map((guardian, i) =>
-        i === index
-          ? {
-              ...guardian,
-
-              guardian_image_base: croppedImageData ? croppedImageData : "", // Store base64 or empty
-            }
-          : guardian
-      )
+    setFormErrors((prevErrors) =>
+      prevErrors.filter((err) => err.field !== `student_image_name_${index}`)
     );
   };
 
@@ -155,7 +92,6 @@ const IDCardDetails = () => {
     // Prevent double submissions
     if (loadingForSubmit) return;
     setFormErrors([]); // Reset errors if no validation issues
-    // Validation checks
     let errors = [];
 
     console.log("Start submitting...");
@@ -174,35 +110,19 @@ const IDCardDetails = () => {
           message: "Permanent Address is required.",
         });
       }
-    });
-
-    // Collect parent-related errors
-    parents.forEach((parent, index) => {
-      if (!parent.f_mobile) {
+      if (!student.house) {
         errors.push({
-          field: `parent_f_mobile_${index}`,
-          message: "Father's Mobile Number is required.",
+          field: `student_house_${index}`,
+          message: "House is required.",
         });
       }
-      if (!parent.m_mobile) {
+      if (!student.image_base) {
         errors.push({
-          field: `parent_m_mobile_${index}`,
-          message: "Mother's Mobile Number is required.",
+          field: `student_image_base_${index}`,
+          message: "Please Upload Photo.",
         });
       }
     });
-
-    // Collect guardian-related errors
-    guardian.forEach((g, index) => {
-      if (!g.guardian_mobile) {
-        errors.push({
-          field: `guardian_mobile_${index}`,
-          message: "Guardian's Mobile Number is required.",
-        });
-      }
-    });
-
-    console.log("Collected errors:", errors);
 
     if (errors.length > 0) {
       setFormErrors(errors); // Store structured errors in state
@@ -213,33 +133,23 @@ const IDCardDetails = () => {
 
     console.log("Student Data Submit---->", data);
 
-    const formattedStudents = students.map((student) => ({
-      ...student,
-      image_url: student.image_url || "",
+    const student = students[0] || {};
+
+    const formattedStudent = {
+      student_id: student.student_id || "",
+      blood_group: student.blood_group || "",
+      house: student.house || "",
+      permant_add: student.permant_add || "",
       image_base: student.image_base || "",
-    }));
-
-    const formattedParents = parents.map((parent) => ({
-      ...parent,
-      father_image_url: parent.father_image_url || "",
-      mother_image_url: parent.mother_image_url || "",
-      father_image_base: parent.father_image_base || "",
-      mother_image_base: parent.mother_image_base || "",
-    }));
-
-    const formattedGuardians = guardian.map((g) => ({
-      ...g,
-      guardian_image_url: g.guardian_image_url,
-      guardian_image_base: g.guardian_image_base || "",
-    }));
-
-    const finalData = {
-      student: formattedStudents,
-      parent: formattedParents,
-      guardian: formattedGuardians,
     };
 
-    console.log("Submitting Data----->", finalData);
+    // const formattedArray = [formattedStudent];
+
+    const finalData = {
+      ...formattedStudent,
+    };
+
+    console.log("Before Submitting data ", finalData);
 
     try {
       setLoadingForSubmit(true); // Start loading state
@@ -249,7 +159,7 @@ const IDCardDetails = () => {
       }
 
       const response = await axios.post(
-        `${API_URL}/api/save_studentparentguardianimage`,
+        `${API_URL}/api/save_studentdetailsforidcard`,
         finalData,
         {
           headers: {
@@ -264,8 +174,13 @@ const IDCardDetails = () => {
         setFormErrors([]); // Reset errors if no validation issues
 
         setTimeout(() => {
-          navigate("/studentIdCard");
-        }, 500);
+          navigate("/studentIdCard", {
+            state: {
+              selectedClassId: response?.data?.data?.class_id, // e.g., 5
+              selectedDivisionId: response?.data?.data?.section_id, // optional
+            },
+          });
+        }, 1000);
       }
     } catch (error) {
       console.error(
@@ -278,7 +193,6 @@ const IDCardDetails = () => {
     }
   };
 
-  //   if (loading) return <p>Loading...</p>;
   if (!students || !parents || !guardian)
     return (
       <>
@@ -290,10 +204,9 @@ const IDCardDetails = () => {
     );
 
   return (
-    <div className="mt-4 bg-gray-200 w-full md:w-[95%] mx-auto">
+    <div className="mt-4 bg-gray-200 w-full md:w-[60%] mx-auto">
       <ToastContainer />
-
-      <div className="card p-4 rounded-md ">
+      <div className="card p-4 rounded-md w-full ">
         <div className=" card-header mb-4 flex justify-between items-center ">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             ID Card Details
@@ -312,9 +225,9 @@ const IDCardDetails = () => {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <p className="  md:absolute md:right-10  md:top-[10%]   text-gray-500 ">
+        {/* <p className="  md:absolute md:right-10  md:top-[25%]   text-gray-500 ">
           <span className="text-red-500">*</span>indicates mandatory information
-        </p>
+        </p> */}
         <form
           onSubmit={handleSubmit}
           className="   p-0 overflow-x-hidden shadow-md  bg-gray-50 "
@@ -328,10 +241,10 @@ const IDCardDetails = () => {
               <div className="w-full  mx-auto  flex flex-wrap p-4 gap-4 justify-center">
                 {students.map((student, index) => (
                   <>
-                    <div className="w-full md:w-[48%] border p-4 pt-2 rounded-lg shadow-lg bg-white">
-                      <h2 className="text-xl font-bold mb-4 text-center text-gray-500">
+                    <div className="w-full md:w-[70%] border p-4 pt-2 rounded-lg shadow-lg bg-white">
+                      {/* <h2 className="text-xl font-bold mb-4 text-center text-gray-500">
                         Student {index + 1}
-                      </h2>
+                      </h2> */}
 
                       {/* Grid Layout for Fields */}
                       <div className="flex flex-col md:grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -339,11 +252,25 @@ const IDCardDetails = () => {
                         <div className=" md:row-span-2 md:col-span-1  flex justify-center mb-4 ">
                           <div className="rounded-full">
                             <ImageCropper
-                              photoPreview={student?.image_url}
+                              photoPreview={student?.image_name}
                               onImageCropped={(croppedImage) =>
                                 handleStudentImageCropped(croppedImage, index)
                               }
                             />
+                            {formErrors.some(
+                              (err) =>
+                                err.field === `student_image_base_${index}`
+                            ) && (
+                              <p className="text-red-500 text-xs ml-3">
+                                {
+                                  formErrors.find(
+                                    (err) =>
+                                      err.field ===
+                                      `student_image_base_${index}`
+                                  )?.message
+                                }
+                              </p>
+                            )}
                           </div>
                         </div>
                         <div className="flex flex-col mt-2">
@@ -425,6 +352,18 @@ const IDCardDetails = () => {
                             <option value="S">Sapphire</option>
                             <option value="D">Diamond</option>
                           </select>
+                          {formErrors.some(
+                            (err) => err.field === `student_house_${index}`
+                          ) && (
+                            <p className="text-red-500 text-xs">
+                              {
+                                formErrors.find(
+                                  (err) =>
+                                    err.field === `student_house_${index}`
+                                )?.message
+                              }
+                            </p>
+                          )}
                         </div>
                         {/* Address */}
                         <div className="col-span-2 flex flex-col">
@@ -456,228 +395,6 @@ const IDCardDetails = () => {
                   </>
                 ))}
               </div>
-
-              <div className="w-full md:w-[95%] mx-auto flex flex-col md:flex-row justify-between gap-x-4">
-                {/* Parent Information */}
-                {parents.map((parent, index) => (
-                  <div
-                    key={index}
-                    className="w-full md:w-[80%] border p-4 pt-2 rounded-lg shadow-lg bg-white"
-                  >
-                    <h2 className="text-xl font-bold mb-4 text-center text-gray-500">
-                      Parent Information
-                    </h2>
-                    <div className="flex flex-col md:flex-row gap-x-6 gap-y-6 md:gap-y-1 justify-normal md:justify-between items-center">
-                      {/* Father Information */}
-                      <div className="w-full md:w-[50%]">
-                        <div className="flex justify-center mb-4">
-                          <div className="rounded-full">
-                            <ImageCropper
-                              photoPreview={parent?.father_image_url}
-                              onImageCropped={(croppedImage) =>
-                                handleParentImageCropped(
-                                  croppedImage,
-                                  index,
-                                  "father"
-                                )
-                              }
-                            />
-                          </div>
-                        </div>
-                        <div className="flex flex-row justify-start gap-x-1 md:gap-x-5  px-1 ">
-                          <label className="block mt-2 font-bold text-sm w-full md:w-[35%]">
-                            Father Name
-                          </label>
-                          <p className="w-full md:w-[58%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
-                            {parent.father_name || " "}
-                          </p>
-                        </div>
-                        <div className="mb-2 flex flex-row justify-start gap-x-1 md:gap-x-5  px-1 ">
-                          <label className="block mt-2 font-bold text-sm w-full md:w-[35%]">
-                            Father Mobile{" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="f_mobile"
-                            value={parent.f_mobile || ""}
-                            // onChange={handleParentChange}
-                            onChange={(e) => {
-                              let value = e.target.value;
-
-                              // Remove any non-digit characters
-                              value = value.replace(/\D/g, "");
-
-                              // Limit input to 10 digits
-                              if (value.length > 10) {
-                                value = value.slice(0, 10);
-                              }
-
-                              handleParentChange(
-                                { target: { name: "f_mobile", value } },
-                                index
-                              );
-                            }}
-                            // onChange={(e) => handleParentChange(e, index)}
-                            className=" md:w-[58%] mx-auto border-1 border-gray-400 rounded-md p-2 shadow-inner w-full "
-                          />{" "}
-                        </div>
-                        {formErrors.some(
-                          (err) => err.field === `parent_f_mobile_${index}`
-                        ) && (
-                          <p className="text-red-500 text-xs mx-2 relative -top-1  float-right">
-                            {
-                              formErrors.find(
-                                (err) =>
-                                  err.field === `parent_f_mobile_${index}`
-                              )?.message
-                            }
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Mother Information */}
-                      <div className="w-full md:w-[50%]">
-                        <div className="flex justify-center mb-4">
-                          <div className="rounded-full">
-                            <ImageCropper
-                              photoPreview={parent?.mother_image_url}
-                              onImageCropped={(croppedImage) =>
-                                handleParentImageCropped(
-                                  croppedImage,
-                                  index,
-                                  "mother"
-                                )
-                              }
-                            />
-                          </div>
-                        </div>
-                        <div className="flex flex-row justify-start gap-x-1 md:gap-x-5  px-1  ">
-                          <label className="block mt-2 font-bold text-sm w-full md:w-[30%]">
-                            Mother Name
-                          </label>
-                          <p className="w-full md:w-[58%]  mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
-                            {parent.mother_name || " "}
-                          </p>
-                        </div>
-                        <div className="mb-2 flex flex-row justify-start gap-x-1 md:gap-x-5    ">
-                          <label className="block font-bold   mt-2 text-sm w-full md:w-[33%]">
-                            Mother Mobile{" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="m_mobile"
-                            value={parent.m_mobile || ""}
-                            // onChange={handleParentChange}
-                            onChange={(e) => {
-                              let value = e.target.value;
-
-                              // Remove any non-digit characters
-                              value = value.replace(/\D/g, "");
-
-                              // Limit input to 10 digits
-                              if (value.length > 10) {
-                                value = value.slice(0, 10);
-                              }
-
-                              handleParentChange(
-                                { target: { name: "m_mobile", value } },
-                                index
-                              );
-                            }}
-                            // onChange={(e) => handleParentChange(e, index)}
-                            className=" md:w-[58%] border-1 border-gray-400 rounded-md p-2 shadow-inner w-full"
-                          />
-                        </div>
-                        {formErrors.some(
-                          (err) => err.field === `parent_m_mobile_${index}`
-                        ) && (
-                          <p className="text-red-500 relative -top-1 text-xs mx-3  float-right">
-                            {
-                              formErrors.find(
-                                (err) =>
-                                  err.field === `parent_m_mobile_${index}`
-                              )?.message
-                            }
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Guardian Information */}
-                {guardian &&
-                  guardian.map((guardians, index) => (
-                    <div
-                      key={index}
-                      className="w-full md:w-[40%] border p-4 pt-2 rounded-lg shadow-lg bg-white"
-                    >
-                      <h2 className="text-xl font-bold mb-4 text-center text-gray-500">
-                        Guardian Information
-                      </h2>
-                      <div className="flex justify-center mb-4">
-                        <div className="rounded-full">
-                          <ImageCropper
-                            photoPreview={guardians.guardian_image_url}
-                            onImageCropped={(croppedImage) =>
-                              handleGuardianImageCropped(croppedImage, index)
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div className="flex flex-row justify-start gap-x-1 md:gap-x-5">
-                        <label className="block mt-2 font-bold text-sm w-full md:w-[35%]">
-                          Guardian Name
-                        </label>
-                        <p className="w-full md:w-[58%] mx-auto bg-gray-200 border-1 border-gray-400 rounded-md p-2 shadow-inner">
-                          {guardians.guardian_name || " "}
-                        </p>
-                      </div>
-                      <div className="flex flex-row justify-start gap-x-6 ">
-                        <label className=" block mt-2 font-bold text-sm w-full md:w-[60%] ">
-                          Mobile Number <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="guardian_mobile"
-                          value={guardians.guardian_mobile || ""}
-                          onChange={(e) => {
-                            let value = e.target.value;
-
-                            // Remove any non-digit characters
-                            value = value.replace(/\D/g, "");
-
-                            // Limit input to 10 digits
-                            if (value.length > 10) {
-                              value = value.slice(0, 10);
-                            }
-
-                            handleGuardianChange(
-                              { target: { name: "guardian_mobile", value } },
-                              index
-                            );
-                          }}
-                          //   onChange={(e) => handleGuardianChange(e, index)}
-                          className="border-1 border-gray-400 rounded-md p-2 shadow-inner w-full"
-                        />{" "}
-                      </div>
-                      {formErrors.some(
-                        (err) => err.field === `guardian_mobile_${index}`
-                      ) && (
-                        <p className="text-red-500  text-xs   float-right">
-                          {
-                            formErrors.find(
-                              (err) => err.field === `guardian_mobile_${index}`
-                            )?.message
-                          }
-                        </p>
-                      )}
-                    </div>
-                  ))}
-              </div>
-
               <div className="col-span-3 md:mr-9 my-2 text-right">
                 <button
                   type="submit"
