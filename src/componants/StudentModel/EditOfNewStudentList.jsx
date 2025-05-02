@@ -970,12 +970,36 @@ function EditOfNewStudentList() {
     const newErrors = {};
 
     // Required field validations
+    // if (
+    //   !formData?.SetEmailIDAsUsername ||
+    //   formData.SetEmailIDAsUsername == null ||
+    //   formData.SetEmailIDAsUsername == ""
+    // ) {
+    //   newErrors.SetEmailIDAsUsername = "User name is required";
+    // }
+    const allValidUsernames = [
+      formData.f_mobile,
+      formData.f_email,
+      formData.m_mobile,
+      formData.m_emailid,
+    ];
+
+    // Check if user_id exists
+    const userIdExists = student.user_master?.user_id;
+
+    // Show error only if username is null or doesn't match
     if (
-      !formData?.SetEmailIDAsUsername ||
-      formData.SetEmailIDAsUsername == null ||
-      formData.SetEmailIDAsUsername == ""
+      !selectedUsername && // If username is not selected (null or empty)
+      (!formData?.SetEmailIDAsUsername ||
+        formData.SetEmailIDAsUsername == null ||
+        formData.SetEmailIDAsUsername == "" ||
+        (userIdExists && // If user ID exists
+          !allValidUsernames.includes(formData.SetEmailIDAsUsername))) // And username doesn't match any formData field
     ) {
       newErrors.SetEmailIDAsUsername = "User name is required";
+    } else {
+      // If selectedUsername is not null or error is resolved
+      delete newErrors.SetEmailIDAsUsername;
     }
     if (
       !formData?.SetToReceiveSMS ||
