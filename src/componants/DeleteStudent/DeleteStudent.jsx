@@ -510,7 +510,7 @@ function DeleteStudent() {
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     <button
-                                      // onClick={() => handleView(subject)}
+                                      onClick={() => navigate("/comingSoon")}
                                       className="text-green-600 hover:text-green-800 hover:bg-transparent "
                                     >
                                       <PiCertificateBold className="font-bold text-xl" />

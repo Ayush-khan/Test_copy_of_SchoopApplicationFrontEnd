@@ -1282,6 +1282,16 @@ function ViewStudent() {
             </div>
             {/*  */}
           </div>
+          <div className="col-span-3 md:mr-9 my-2 text-right">
+            <button
+              onClick={() => {
+                navigate("/manageStudent");
+              }}
+              className=" text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
+            >
+              Back
+            </button>
+          </div>
         </form>
       </div>
     </div>

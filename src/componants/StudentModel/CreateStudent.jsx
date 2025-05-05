@@ -2794,7 +2794,7 @@ function Form() {
               </div>
               {/*  */}
               {/* added father feilds here */}
-              <div className="col-span-3 md:mr-9 my-2 text-right">
+              <div className="  col-span-3  mt-4 text-right space-x-4">
                 <button
                   // type="submit"
                   // type="button"
@@ -2802,6 +2802,14 @@ function Form() {
                   className=" text-white font-bold py-1 border-1 border-blue-500 px-4 rounded"
                 >
                   Update
+                </button>
+                <button
+                  onClick={() => {
+                    navigate("/manageStudent");
+                  }}
+                  className=" text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
+                >
+                  Back
                 </button>
               </div>
             </div>

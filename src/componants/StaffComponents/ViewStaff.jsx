@@ -273,6 +273,16 @@ function ViewStaff() {
                   className="input-field block w-full border border-gray-300 rounded-md py-1 px-3  shadow-inner outline-none bg-gray-300"
                 />
               </div>
+              <div className="  col-span-3   text-right space-x-4">
+                <button
+                  onClick={() => {
+                    navigate("/StaffList");
+                  }}
+                  className=" text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
+                >
+                  Back
+                </button>
+              </div>
             </div>
           </div>
         </div>

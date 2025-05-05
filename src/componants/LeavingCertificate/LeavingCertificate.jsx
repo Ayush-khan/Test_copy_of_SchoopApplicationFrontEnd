@@ -1087,7 +1087,53 @@ const LeavingCertificate = () => {
       setLoading(false);
     }
   };
+  const handleBack = () => {
+    setFormData({
+      sr_no: "",
+      grn_no: "",
+      date: "",
+      first_name: "",
+      mid_name: "",
+      last_name: "",
+      udise_pen_no: "",
+      stud_id_no: "",
+      promoted_to: " ",
+      last_exam: "",
+      stud_id: "",
+      // student_UID: "",
+      father_name: "",
+      mother_name: "",
+      religion: "",
+      caste: "",
+      subcaste: "",
+      birth_place: "",
+      state: "",
+      mother_tongue: "",
+      dob: "",
+      dob_words: "",
+      nationality: "",
+      prev_school_class: "",
+      admission_date: "",
+      admission_class: "",
+      attendance: "",
+      subjectsFor: [],
+      subjects: [],
+      selectedActivities: [],
 
+      reason_leaving: "",
+      application_date: "",
+      leaving_date: "",
+      standard_studying: "",
+      dob_proof: "",
+      class_id_for_subj: "",
+      stu_aadhaar_no: "",
+      teacher_image_name: null,
+      academicStudent: [],
+      academic_yr: "", // Add this to track selected academic year
+      part_of: "",
+    });
+    setParentInformation(null);
+  };
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
     let updatedActivities;
@@ -2334,9 +2380,10 @@ const LeavingCertificate = () => {
                   </div>
                 </fieldset>
 
-                <div className="col-span-3 text-right">
+                <div className="col-span-3 space-x-2 text-right">
+                  {/* Generate PDF Button */}
                   <button
-                    type="submit"
+                    type="submit" // triggers form submission
                     onClick={handleSubmit}
                     style={{ backgroundColor: "#2196F3" }}
                     className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
@@ -2371,6 +2418,15 @@ const LeavingCertificate = () => {
                     ) : (
                       "Generate PDF"
                     )}
+                  </button>
+
+                  {/* Back Button */}
+                  <button
+                    type="button" // prevents form submission
+                    onClick={handleBack}
+                    className="text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
+                  >
+                    Back
                   </button>
                 </div>
               </form>

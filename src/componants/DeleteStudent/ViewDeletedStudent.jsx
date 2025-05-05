@@ -1351,6 +1351,16 @@ function ViewDeletedStudent() {
                 // onBlur={handleBlur}
               />
             </div>
+            <div className="  col-span-3  mt-4 text-right space-x-4">
+              <button
+                onClick={() => {
+                  navigate("/deleteStudent");
+                }}
+                className=" text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
+              >
+                Back
+              </button>
+            </div>
             {/*  */}
           </div>
         </form>

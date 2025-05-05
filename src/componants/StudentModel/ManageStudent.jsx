@@ -76,14 +76,6 @@ function ManageSubjectList() {
     [classes]
   );
 
-  // const studentOptions = useMemo(
-  //   () =>
-  //     studentNameWithClassId.map((stu) => ({
-  //       value: stu.student_id,
-  //       label: `${stu?.first_name} ${stu?.mid_name} ${stu.last_name}`,
-  //     })),
-  //   [studentNameWithClassId]
-  // );
   const studentOptions = useMemo(
     () =>
       studentNameWithClassId
@@ -97,19 +89,6 @@ function ManageSubjectList() {
     [studentNameWithClassId]
   );
 
-  // const handleClassSelect = (selectedOption) => {
-  //   setNameError("");
-  //   setSelectedClass(selectedOption);
-  // setclassIdForManage(selectedOption ? selectedOption.value : null); // Assuming value is the class ID
-  // // fetchStudentNameWithClassId(selectedOption ? selectedOption.value : null); // Fetch students for selected class
-  // setSectionIdForStudentList(selectedOption ? selectedOption.value : null); //
-  // };
-
-  // const handleStudentSelect = (selectedOption) => {
-  //   setNameError("");
-  //   setSelectedStudent(selectedOption);
-  //   setSelectedStudentId(selectedOption ? selectedOption.value : null);
-  // };
   const fetchStudentNameWithClassId = async (section_id = null) => {
     try {
       setLoadingStudents(true);
@@ -246,6 +225,15 @@ function ManageSubjectList() {
         response?.data?.students || response?.data?.student || [];
       setSubjects(studentList);
       setPageCount(Math.ceil(studentList.length / pageSize)); // Set page count based on response size
+      // ✅ Save only necessary values
+      localStorage.setItem(
+        "studentSearchState",
+        JSON.stringify({
+          selectedStudentId,
+          classIdForManage,
+          grNumber,
+        })
+      );
     } catch (error) {
       console.log("error", error.response.data.message);
       toast.error(error.response.data.message || "student not found!");
@@ -398,42 +386,6 @@ function ManageSubjectList() {
 
     setShowEditModal(true);
   };
-  // Handle Reset Password form submission
-  // const handleSubmitResetPassword = async () => {
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     console.log("toekn", token);
-  //     if (!token) {
-  //       toast.error("Authentication token missing");
-  //       return;
-  //     }
-  //     await axios.put(`${API_URL}/api/resetPasssword/${userIdset}`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-  //     // API call to reset the password
-
-  //     toast.success("Password updated successfully!");
-  //     setShowEditModal(false); // Close modal after success
-  //   } catch (error) {
-  //     console.error("Error resetting password:", error);
-
-  //     // Reset previous errors
-  //     setPasswordError("");
-  //     setUserIdError("");
-
-  //     if (error.response && error.response.data && error.response.data.errors) {
-  //       const backendErrors = error.response.data.errors;
-
-  //       // Display each error message for specific fields
-
-  //       if (backendErrors.user_id) {
-  //         setUserIdError(backendErrors.user_id.join(", "));
-  //       }
-  //     } else {
-  //       toast.error("Server error. Please try again later.");
-  //     }
-  //   }
-  // };
   const [errorMessage, setErrorMessage] = useState(""); // State to store error message
 
   const handleSubmitResetPassword = async () => {
@@ -562,19 +514,6 @@ function ManageSubjectList() {
     setShowDActiveModal(false);
   };
 
-  // const filteredSections = subjects.filter((section) => {
-  //   // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
-  //   const studentFullName =
-  //     `${section?.first_name} ${section?.mid_name} ${section?.last_name}`?.toLowerCase() ||
-  //     "";
-  //   const UserId = section?.user?.user_id?.toLowerCase() || "";
-
-  //   // Check if the search term is present in either the teacher's name or the subject's name
-  //   return (
-  //     studentFullName.includes(searchTerm.toLowerCase()) ||
-  //     UserId.includes(searchTerm.toLowerCase())
-  //   );
-  // });
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
 

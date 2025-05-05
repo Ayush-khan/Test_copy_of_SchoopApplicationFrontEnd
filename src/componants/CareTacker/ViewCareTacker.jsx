@@ -284,14 +284,15 @@ function ViewCareTacker() {
               </p>
             </div>
 
-            <div className="col-span-3  text-right">
-              {/* <button
-                type="submit"
-                style={{ backgroundColor: "#2196F3" }}
-                className=" text-white font-bold py-1 border-1 border-blue-500 px-4 rounded"
+            <div className="  col-span-3  text-right space-x-4">
+              <button
+                onClick={() => {
+                  navigate("/careTacker");
+                }}
+                className=" text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
               >
-                Update
-              </button> */}
+                Back
+              </button>
             </div>
           </div>
         </form>

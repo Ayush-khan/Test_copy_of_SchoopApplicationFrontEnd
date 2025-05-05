@@ -170,12 +170,12 @@ const LoginForm = () => {
         <div
           className={`${styles.forgotPassword} w-full flex justify-center items-center mx-auto `}
         >
-          <a
+          {/* <a
             onClick={() => navigate("/forgotPassword")}
             className="text-blue-600 text-sm font-semibold cursor-pointer border-b-2 border-transparent hover:border-blue-800 hover:text-blue-800 transition duration-200 ease-in-out"
           >
             I forgot my password?
-          </a>
+          </a> */}
         </div>
         <div className={styles.formFooter}></div>
       </form>

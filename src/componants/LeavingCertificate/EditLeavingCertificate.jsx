@@ -1973,7 +1973,7 @@ const EditLeavingCertificate = () => {
             </div>
           </fieldset>
 
-          <div className="col-span-3 text-right">
+          <div className="col-span-3 space-x-2 text-right">
             <button
               type="submit"
               onClick={handleSubmit}
@@ -2010,6 +2010,14 @@ const EditLeavingCertificate = () => {
               ) : (
                 "Update"
               )}
+            </button>
+            <button
+              onClick={() => {
+                navigate("/leavingCertificate");
+              }}
+              className=" text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
+            >
+              Back
             </button>
           </div>
         </form>
