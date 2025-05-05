@@ -15,6 +15,7 @@ import { RxCross1 } from "react-icons/rx";
 // import AllotSubjectTab from "./AllotMarksHeadingTab";
 import Select from "react-select";
 import { MdDescription, MdOutlineRemoveRedEye } from "react-icons/md";
+import { TbFileCertificate } from "react-icons/tb";
 // import CreateSimpleBonafied from "./CreateSimpleBonafied";
 function DeleteStudent() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -510,10 +511,10 @@ function DeleteStudent() {
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     <button
-                                      onClick={() => navigate("/comingSoon")}
-                                      className="text-green-600 hover:text-green-800 hover:bg-transparent "
+                                      // onClick={() => navigate("/comingSoon")}
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                                     >
-                                      <PiCertificateBold className="font-bold text-xl" />
+                                      <TbFileCertificate className="font-bold text-xl" />
                                     </button>
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">

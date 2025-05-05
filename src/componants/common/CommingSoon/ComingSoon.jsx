@@ -14,8 +14,8 @@ const ComingSoon = () => {
   }, []);
 
   const handleGoBack = () => {
-    // navigate("/dashboard");
-    navigate(-1);
+    navigate("/dashboard");
+    // navigate(-1);
   };
 
   return (
@@ -48,7 +48,7 @@ const ComingSoon = () => {
           onClick={handleGoBack}
           className="mt-6 px-6 py-3 text-[1.1em] bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition duration-300 relative z-10 pointer-events-auto"
         >
-          Go Back
+          Go to Dashboard
         </button>
       </div>
     </div>

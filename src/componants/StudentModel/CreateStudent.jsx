@@ -2794,7 +2794,7 @@ function Form() {
               </div>
               {/*  */}
               {/* added father feilds here */}
-              <div className="  col-span-3  mt-4 text-right space-x-4">
+              <div className="  col-span-3  mt-4 text-right space-x-2">
                 <button
                   // type="submit"
                   // type="button"
