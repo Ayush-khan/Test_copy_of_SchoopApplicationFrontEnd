@@ -183,7 +183,7 @@ const DashboardContent = () => {
             }
           />
           <CardStuStaf
-            title="Staff"
+            title="Non-Teaching Staff"
             TotalValue={staffData.nonTeachingStaff}
             // presentValue={staffData.nonTeachingStaff}
             presentValue={staffData?.attendancenonteachingstaff}

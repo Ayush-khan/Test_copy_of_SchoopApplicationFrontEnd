@@ -934,7 +934,9 @@ const ClassWisePeriodAllotment = () => {
       console.log("Classwise Period Allocation Data", response);
 
       if (!response?.data?.data || response?.data?.data.length === 0) {
-        toast.error("Classwise Period Allocation data not found.");
+        toast.error(
+          "Class-wise period allocation data not found. Please  add class-wise period allocation data"
+        );
         setTimetable([]);
       } else if (Array.isArray(response.data.data)) {
         setTimetable(response?.data?.data);
