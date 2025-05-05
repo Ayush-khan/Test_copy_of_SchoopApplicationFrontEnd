@@ -219,6 +219,7 @@ import CreateTimetablePlanner from "../componants/TimeTablePlanner/CreateExamTim
 import TimetablePlanner from "../componants/TimeTablePlanner/TimeTablePlanner.jsx";
 import MonthlyAttendenceReport from "../componants/Reports/MonthlyAttendanceReport.jsx";
 import ComingSoon from "../componants/common/CommingSoon/ComingSoon.jsx";
+import ForgotPassword from "../Layouts/ForgotPassword.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -227,6 +228,7 @@ function Index() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/notification" element={<NotificationPage />} />
+      <Route path="/forgotPassword" element={<ForgotPassword />} />
       <Route path="/" element={<MainLayout />}>
         {/* Role Management */}
         <Route path="/menus" element={<PrivateRoute element={<Menus />} />} />
