@@ -85,7 +85,6 @@ const ForgotPassword = () => {
     });
 
     if (!isValid) {
-      toast.error("Please fill in all required fields.");
       return;
     }
 
@@ -352,8 +351,6 @@ const ForgotPassword = () => {
         <div className="w-full">
           <Footer />
         </div>
-        {/* <div className="bg-gray-300 h-10"></div> */}
-        {/* Forgot Password Box */}
       </div>{" "}
     </>
   );
