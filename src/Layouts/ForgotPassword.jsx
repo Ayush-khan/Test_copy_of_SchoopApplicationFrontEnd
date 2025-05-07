@@ -209,7 +209,7 @@ const ForgotPassword = () => {
                     maxLength={50}
                     onChange={(e) => setUserId(e.target.value)}
                     onBlur={() => handleBlur("userId")}
-                    className="w-full px-4 py-1  border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full px-4 py-1  border-1 border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                   <div className="min-h-[1rem]">
                     {touched.userId && !userId.trim() && (
@@ -231,7 +231,7 @@ const ForgotPassword = () => {
                     maxLength={100}
                     onChange={(e) => setMotherName(e.target.value)}
                     onBlur={() => handleBlur("motherName")}
-                    className="w-full px-4 py-1  border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full px-4 py-1  border-1 border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                   <div className="min-h-[1rem]">
                     {touched.motherName && !motherName.trim() && (
@@ -253,7 +253,7 @@ const ForgotPassword = () => {
                     value={dob}
                     onChange={(e) => setDob(e.target.value)}
                     onBlur={() => handleBlur("dob")}
-                    className="w-full px-4 py-1  border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full px-4 py-1  border-1 border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                   <div className="min-h-[1rem]">
                     {touched.dob && !dob && (
