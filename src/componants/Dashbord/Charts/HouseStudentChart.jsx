@@ -1,20 +1,13 @@
 // Second try WIth API calling
 import { useState, useEffect } from "react";
-import { PieChart, Pie, ResponsiveContainer, Cell } from "recharts";
+import { PieChart, Pie, Cell } from "recharts";
 import axios from "axios";
 import styles from "../Charts/StudentStyle.module.css";
-import LoadingSpinner from "../../common/LoadingSpinner";
 import Loader from "../../common/Loader";
-// const API_URL = import.meta.env.VITE_API_URL; // Base URL for your API
-// const API_URL = "http://127.0.0.1:8000";
-
 const COLORS = ["#00FFFF", "#A287F3", "#34D399", "#EE82EE"]; // Define your colors
-
 const HouseStudentChart = () => {
   const API_URL = import.meta.env.VITE_API_URL;
-  const [selectedClass, setSelectedClass] = useState("1"); // Default class set to "1"
   const [newDepartmentId, setNewDepartmentId] = useState("Nursery");
-
   const [sectionsData, setSectionsData] = useState({});
   const [houseNames, setHouseNames] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -44,64 +37,6 @@ const HouseStudentChart = () => {
     fetchClassNames();
   }, []);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setLoading(true);
-  //     setError("");
-
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-  //       const academicYr = localStorage.getItem("academicYear");
-  //       console.log("academic year", academicYr);
-  //       console.log("token is", token);
-
-  //       if (!token) {
-  //         throw new Error("No authentication token or academic year found");
-  //       }
-  //       const response = await axios.get(`${API_URL}/api/getHouseViseStudent`, {
-  //         params: {
-  //           class_name: newDepartmentId,
-  //           // "X-Academic-Year": academicYr,
-  //           "X-Academic-Year": "2022-2023",
-  //         },
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "X-Academic-Year": "2022-2023",
-  //         },
-  //       });
-
-  //       const data = response.data;
-
-  //       // Transforming data into the structure needed for the pie charts
-  //       const transformedData = data.reduce((acc, curr) => {
-  //         if (!acc[curr.class_section]) {
-  //           acc[curr.class_section] = [];
-  //         }
-  //         acc[curr.class_section].push({
-  //           name: curr.house_name || "No House",
-  //           value: curr.student_counts,
-  //         });
-  //         return acc;
-  //       }, {});
-
-  //       setSectionsData(transformedData);
-
-  //       // Extract unique house names
-  //       const uniqueHouseNames = [
-  //         ...new Set(data.map((item) => item.house_name || "No House")),
-  //       ];
-  //       setHouseNames(uniqueHouseNames);
-  //     } catch (error) {
-  //       setError("Error fetching class data");
-  //       console.error("Error fetching class data:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, [newDepartmentId]);
-
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -122,11 +57,9 @@ const HouseStudentChart = () => {
         const response = await axios.get(`${API_URL}/api/getHouseViseStudent`, {
           params: {
             class_name: newDepartmentId,
-            // "X-Academic-Year": `${academicYr}`,
           },
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": `${academicYr}`,
           },
         });
 
@@ -146,6 +79,7 @@ const HouseStudentChart = () => {
           acc[curr.class_section].push({
             name: curr.house_name || "No House",
             value: curr.student_counts,
+            color: curr.color_code || "#CCCCCC", // fallback color
           });
           return acc;
         }, {});
@@ -174,28 +108,6 @@ const HouseStudentChart = () => {
     setNewDepartmentId(value);
   };
 
-  // const renderPieChart = (section) => (
-  //   <ResponsiveContainer width={227} height={118}>
-  //     <PieChart>
-  //       <Pie
-  //         dataKey="value"
-  //         startAngle={180}
-  //         endAngle={0}
-  //         data={sectionsData[section]}
-  //         cx="48%"
-  //         cy="100%"
-  //         outerRadius={80}
-  //         fill="#8884d8"
-  //         label
-  //       >
-  //         {sectionsData[section]?.map((entry, index) => (
-  //           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-  //         ))}
-  //       </Pie>
-  //     </PieChart>
-  //   </ResponsiveContainer>
-  // );
-
   const renderPieChart = (section) => (
     <PieChart width={157} height={118}>
       <Pie
@@ -210,7 +122,8 @@ const HouseStudentChart = () => {
         label
       >
         {sectionsData[section]?.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          // <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          <Cell key={`cell-${index}`} fill={entry.color || "#CCCCCC"} />
         ))}
       </Pie>
     </PieChart>
@@ -280,7 +193,8 @@ const HouseStudentChart = () => {
                 {sectionsData[section]?.map((entry, index) => (
                   <li
                     key={entry.name || `house-no-${index}`}
-                    style={{ color: COLORS[index % COLORS.length] }}
+                    // style={{ color: COLORS[index % COLORS.length] }}
+                    style={{ color: entry.color || "#CCCCCC" }}
                   >
                     {entry.name ? `${entry.name}` : "House-NO"}
                   </li>
