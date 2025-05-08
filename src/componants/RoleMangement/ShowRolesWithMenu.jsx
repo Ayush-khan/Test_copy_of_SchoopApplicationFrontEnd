@@ -65,7 +65,7 @@ function ShowRolesWithMenu() {
   };
 
   const filteredRoles = roles.filter((role) =>
-    role.rolename.toLowerCase().includes(searchTerm.toLowerCase())
+    role?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const displayedRoles = filteredRoles.slice(
@@ -122,7 +122,7 @@ function ShowRolesWithMenu() {
                           {currentPage * pageSize + index + 1}
                         </td>
                         <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                          {role.rolename}
+                          {role.name}
                         </td>
                         <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                           <button

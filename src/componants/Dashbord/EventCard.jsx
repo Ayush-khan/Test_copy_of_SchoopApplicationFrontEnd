@@ -48,8 +48,6 @@ const EventCard = () => {
           },
           headers: {
             Authorization: `Bearer ${token}`,
-            // "X-Academic-Year": academicYr,
-            // "X-Academic-Year": "2023-2024",
           },
         }
       );
@@ -115,9 +113,9 @@ const EventCard = () => {
         >
           {filteredEvents.length ? (
             filteredEvents.map((event, index) => (
-              <div key={index} className={`${Styles.eventCard} rounded-lg `}>
+              <div key={index} className={`${Styles.eventCard}  rounded-lg `}>
                 <div
-                  className={` h-full box-border max-w-3/4 px-2  bg-gray-500   text-cyan-900 text-lg rounded-l-lg      `}
+                  className={` h-full box-border  max-w-3/4 px-2  bg-gray-500   text-cyan-900 text-lg rounded-l-lg      `}
                   style={{ background: "#00FFFF", color: "#C3347D" }}
                 >
                   <div

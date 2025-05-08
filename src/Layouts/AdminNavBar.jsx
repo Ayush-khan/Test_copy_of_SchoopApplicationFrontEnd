@@ -585,7 +585,7 @@ const AdminNavBar = () => {
     <>
       <Nav ref={menuRef}>
         {/* Role Dropdown now we have hide this*/}
-        {/* <NavDropdown
+        <NavDropdown
           title={<span className="nav-dropdown-title">Role</span>}
           className="custom-nav-dropdown"
         >
@@ -598,7 +598,7 @@ const AdminNavBar = () => {
           <NavDropdown.Item as={Link} to="/show_roles">
             Manage Access
           </NavDropdown.Item>
-        </NavDropdown> */}
+        </NavDropdown>
 
         {/* My Actions Dropdown */}
         <NavDropdown

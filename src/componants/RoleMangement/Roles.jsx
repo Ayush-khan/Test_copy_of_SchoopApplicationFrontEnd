@@ -170,7 +170,9 @@ function Roles() {
   };
 
   const filteredRoles = roles.filter((role) =>
-    role.rolename.toLowerCase().includes(searchTerm.toLowerCase())
+    [role?.name, role?.role_id, role?.is_active].some((field) =>
+      field?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
   const displayedRoles = filteredRoles.slice(
@@ -251,12 +253,12 @@ function Roles() {
                         </td>
                         <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                           <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {role.rolename}
+                            {role?.name}
                           </p>
                         </td>
                         <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                           <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {role.role_id}
+                            {role?.role_id}
                           </p>
                         </td>
                         <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
