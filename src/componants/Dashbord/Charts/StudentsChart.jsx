@@ -1,5 +1,5 @@
-// // Arranged the classs for accending order and make changes in the secions PCM and PCB etc baranches
-// // SECOND TRY FOR IMPLEMENTING THE CLASS FOR 11 AND 12 LIKE PCM AND MATHS
+// Arranged the classs for accending order and make changes in the secions PCM and PCB etc baranches
+// SECOND TRY FOR IMPLEMENTING THE CLASS FOR 11 AND 12 LIKE PCM AND MATHS
 import { useState, useEffect } from "react";
 import {
   BarChart,
