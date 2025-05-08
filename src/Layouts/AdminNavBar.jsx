@@ -578,7 +578,7 @@ const AdminNavBar = () => {
     };
   }, []);
   const handleTicketClick = () => {
-    // Navigate to the "Coming Soon" page
+    // Navigate to the "Coming Soon" page f
     navigate("/comingSoon");
   };
   return (
