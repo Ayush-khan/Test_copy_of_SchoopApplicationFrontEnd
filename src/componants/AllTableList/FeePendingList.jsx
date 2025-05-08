@@ -82,11 +82,12 @@ function FeePendingList() {
                       S.No
                     </th>
                     <th className=" text-center px-2  lg:px-2 py-2   border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                      Account
+                    </th>
+                    <th className=" text-center px-2  lg:px-2 py-2   border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                       Installment
                     </th>
-                    {/* <th className="sm:px-0.5 lg:px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
-                        Date Of Birth
-                      </th> */}
+
                     <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                       Pending Fee
                     </th>
@@ -94,7 +95,7 @@ function FeePendingList() {
                 </thead>
                 <tbody>
                   {loading ? (
-                    <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                    <div className="relative  left-0 md:left-[50%] w-[100%]  text-center flex justify-center items-center mt-14">
                       <div className=" text-center text-xl text-blue-700">
                         Please wait while data is loading...
                       </div>
@@ -114,7 +115,12 @@ function FeePendingList() {
                         </td>
                         <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
                           <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staff.installment}
+                            {staff?.Account || " "}
+                          </p>
+                        </td>
+                        <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
+                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                            {staff?.installment || " "}
                           </p>
                         </td>
                         {/* <td className="sm:px-0.5 text-center lg:px-3 py-2 text-center border border-gray-950  text-sm">
@@ -124,7 +130,7 @@ function FeePendingList() {
                         </td> */}
                         <td className="px-2 text-center lg:px-3  border border-gray-950  text-sm">
                           <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staff.pending_fee}
+                            {staff?.pending_fee || " "}
                           </p>
                         </td>
                       </tr>
