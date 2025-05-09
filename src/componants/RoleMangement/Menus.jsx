@@ -28,6 +28,7 @@ function Menus() {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const pageSize = 10;
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
   const fetchMenus = async () => {
@@ -99,15 +100,85 @@ function Menus() {
     setErrors({});
   };
 
+  // const handleSubmitAdd = async () => {
+  //   if (isSubmitting) return;
+  //   setIsSubmitting(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) throw new Error("No authentication token found");
+
+  //     await axios.post(`${API_URL}/api/menus`, formData, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       withCredentials: true,
+  //     });
+
+  //     fetchMenus();
+  //     handleCloseModal();
+  //     toast.success("Menu added successfully!");
+  //   } catch (error) {
+  //     if (error.response && error.response.data.errors) {
+  //       setErrors(error.response.data.errors);
+  //     } else {
+  //       console.error("Error adding menu:", error);
+  //       setErrors({ add: error.message });
+  //     }
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+  // const handleSubmitEdit = async () => {
+  //   if (isSubmitting) return;
+  //   setIsSubmitting(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     if (!token) throw new Error("No authentication token found");
+
+  //     await axios.put(`${API_URL}/api/menus/${currentMenu.menu_id}`, formData, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       withCredentials: true,
+  //     });
+
+  //     fetchMenus();
+  //     handleCloseModal();
+  //     toast.success("Menu updated successfully!");
+  //   } catch (error) {
+  //     if (error.response && error.response.data.errors) {
+  //       setErrors(error.response.data.errors);
+  //     } else {
+  //       console.error("Error editing menu:", error);
+  //       setErrors({ edit: error.message });
+  //     }
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
   const handleSubmitAdd = async () => {
+    if (isSubmitting) return;
+
+    const newErrors = {};
+    if (!formData.name?.trim()) newErrors.name = "This field is required";
+    if (!formData.url?.trim()) newErrors.url = "This field is required";
+    if (!formData.sequence?.toString().trim())
+      newErrors.sequence = "This field is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
 
       await axios.post(`${API_URL}/api/menus`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
 
@@ -115,25 +186,37 @@ function Menus() {
       handleCloseModal();
       toast.success("Menu added successfully!");
     } catch (error) {
-      if (error.response && error.response.data.errors) {
+      if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
       } else {
         console.error("Error adding menu:", error);
         setErrors({ add: error.message });
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return;
+
+    const newErrors = {};
+    if (!formData.name?.trim()) newErrors.name = "This field is required";
+    if (!formData.url?.trim()) newErrors.url = "This field is required";
+    if (!formData.sequence?.toString().trim())
+      newErrors.sequence = "This field is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
-
       if (!token) throw new Error("No authentication token found");
 
       await axios.put(`${API_URL}/api/menus/${currentMenu.menu_id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
 
@@ -141,12 +224,14 @@ function Menus() {
       handleCloseModal();
       toast.success("Menu updated successfully!");
     } catch (error) {
-      if (error.response && error.response.data.errors) {
+      if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
       } else {
         console.error("Error editing menu:", error);
         setErrors({ edit: error.message });
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -388,7 +473,7 @@ function Menus() {
                   className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
                   style={{ backgroundColor: "#C03078" }}
                 ></div>
-                <div className="modal-body w-full md:w-[90%] mx-auto">
+                <div className="modal-body w-full md:w-[85%] mx-auto">
                   {/* Name */}
                   <div className="relative mb-3 flex justify-center mx-2">
                     <label htmlFor="menuName" className="w-1/2 mt-2">
@@ -396,12 +481,13 @@ function Menus() {
                     </label>
                     <input
                       type="text"
-                      className="form-control shadow-md"
+                      className="form-control shadow-md mb-2"
                       id="menuName"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
+                      value={formData?.name}
+                      onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        setErrors((prev) => ({ ...prev, name: "" }));
+                      }}
                     />
                     <div className="absolute top-9 left-1/3">
                       {errors.name && (
@@ -419,12 +505,13 @@ function Menus() {
                     </label>
                     <input
                       type="text"
-                      className="form-control shadow-md"
+                      className="form-control shadow-md mb-2"
                       id="menuUrl"
                       value={formData.url}
-                      onChange={(e) =>
-                        setFormData({ ...formData, url: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, url: e.target.value });
+                        setErrors((prev) => ({ ...prev, url: "" }));
+                      }}
                     />
                     <div className="absolute top-9 left-1/3">
                       {errors.url && (
@@ -441,12 +528,13 @@ function Menus() {
                       Parent
                     </label>
                     <select
-                      className="form-control shadow-md"
+                      className="form-control shadow-md mb-2"
                       id="parentId"
                       value={formData.parent_id}
-                      onChange={(e) =>
-                        setFormData({ ...formData, parent_id: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, parent_id: e.target.value });
+                        setErrors((prev) => ({ ...prev, parent_id: "" }));
+                      }}
                     >
                       <option value="">None</option>
                       {allMenus
@@ -473,12 +561,13 @@ function Menus() {
                     </label>
                     <input
                       type="number"
-                      className="form-control shadow-md"
+                      className="form-control shadow-md "
                       id="menuSequence"
                       value={formData.sequence}
-                      onChange={(e) =>
-                        setFormData({ ...formData, sequence: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, sequence: e.target.value });
+                        setErrors((prev) => ({ ...prev, sequence: "" }));
+                      }}
                     />
                     <div className="absolute top-9 left-1/3">
                       {errors.sequence && (
@@ -489,17 +578,17 @@ function Menus() {
                     </div>
                   </div>
                 </div>
-
-                {/* Submit Button */}
-                <div className="flex justify-end p-3">
+                <div className=" flex justify-end p-3">
                   <button
                     type="button"
-                    className="btn btn-primary px-3 mb-2"
+                    className="btn btn-primary px-3 mb-2 "
                     onClick={handleSubmitAdd}
+                    disabled={isSubmitting}
                   >
-                    Add
+                    {isSubmitting ? "Adding..." : "Add"}
                   </button>
                 </div>
+                {/* Submit Button */}
               </div>
             </div>
           </div>
@@ -523,7 +612,7 @@ function Menus() {
                   className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
                   style={{ backgroundColor: "#C03078" }}
                 ></div>
-                <div className="modal-body w-full md:w-[90%] mx-auto">
+                <div className="modal-body w-full md:w-[85%] mx-auto">
                   {/* Name */}
                   <div className="relative mb-3 flex justify-center mx-2">
                     <label htmlFor="editMenuName" className="w-1/2 mt-2">
@@ -531,12 +620,13 @@ function Menus() {
                     </label>
                     <input
                       type="text"
-                      className="form-control shadow-md"
+                      className="form-control shadow-md mb-2"
                       id="editMenuName"
                       value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        setErrors((prev) => ({ ...prev, name: "" }));
+                      }}
                     />
                     <div className="absolute top-9 left-1/3">
                       {errors.name && (
@@ -554,12 +644,13 @@ function Menus() {
                     </label>
                     <input
                       type="text"
-                      className="form-control shadow-md"
+                      className="form-control shadow-md mb-2"
                       id="editMenuUrl"
                       value={formData.url}
-                      onChange={(e) =>
-                        setFormData({ ...formData, url: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, url: e.target.value });
+                        setErrors((prev) => ({ ...prev, url: "" }));
+                      }}
                     />
                     <div className="absolute top-9 left-1/3">
                       {errors.url && (
@@ -576,12 +667,13 @@ function Menus() {
                       Parent
                     </label>
                     <select
-                      className="form-control shadow-md"
+                      className="form-control shadow-md mb-2"
                       id="editParentId"
                       value={formData.parent_id}
-                      onChange={(e) =>
-                        setFormData({ ...formData, parent_id: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, parent_id: e.target.value });
+                        setErrors((prev) => ({ ...prev, parent_id: "" }));
+                      }}
                     >
                       <option value="">None</option>
                       {allMenus
@@ -603,17 +695,18 @@ function Menus() {
 
                   {/* Sequence */}
                   <div className="relative mb-3 flex justify-center mx-2">
-                    <label htmlFor="editMenuSequence" className="w-1/2 mt-2">
+                    <label htmlFor="editMenuSequence" className="w-1/2  mt-2">
                       Sequence <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
-                      className="form-control shadow-md"
+                      className="form-control shadow-md "
                       id="editMenuSequence"
                       value={formData.sequence}
-                      onChange={(e) =>
-                        setFormData({ ...formData, sequence: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, sequence: e.target.value });
+                        setErrors((prev) => ({ ...prev, sequence: "" }));
+                      }}
                     />
                     <div className="absolute top-9 left-1/3">
                       {errors.sequence && (
@@ -631,8 +724,9 @@ function Menus() {
                     type="button"
                     className="btn btn-primary px-3 mb-2"
                     onClick={handleSubmitEdit}
+                    disabled={isSubmitting}
                   >
-                    Update
+                    {isSubmitting ? "Updating..." : "Update"}
                   </button>
                 </div>
               </div>
