@@ -231,14 +231,20 @@ function Index() {
       <Route path="/forgotPassword" element={<ForgotPassword />} />
       <Route path="/" element={<MainLayout />}>
         {/* Role Management */}
-        <Route path="/menus" element={<PrivateRoute element={<Menus />} />} />
-        <Route path="/roles" element={<PrivateRoute element={<Roles />} />} />
         <Route
-          path="/show_roles"
+          path="/manageMenus"
+          element={<PrivateRoute element={<Menus />} />}
+        />
+        <Route
+          path="/manageRoles"
+          element={<PrivateRoute element={<Roles />} />}
+        />
+        <Route
+          path="/manageRoleAccess"
           element={<PrivateRoute element={<ShowRolesWithMenu />} />}
         />
         <Route
-          path="//manage-role-access/:roleId"
+          path="/manageRoleAccess/:roleId"
           element={<PrivateRoute element={<ManageRoleAccess />} />}
         />
         {/* <Route

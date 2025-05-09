@@ -589,13 +589,13 @@ const AdminNavBar = () => {
           title={<span className="nav-dropdown-title">Role</span>}
           className="custom-nav-dropdown"
         >
-          <NavDropdown.Item as={Link} to="/roles">
+          <NavDropdown.Item as={Link} to="/manageRoles">
             Manage Role
           </NavDropdown.Item>
-          <NavDropdown.Item as={Link} to="/menus">
+          <NavDropdown.Item as={Link} to="/manageMenus">
             Manage Menu
           </NavDropdown.Item>
-          <NavDropdown.Item as={Link} to="/show_roles">
+          <NavDropdown.Item as={Link} to="/manageRoleAccess">
             Manage Access
           </NavDropdown.Item>
         </NavDropdown>

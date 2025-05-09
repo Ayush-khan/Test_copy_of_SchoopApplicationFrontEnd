@@ -59,7 +59,7 @@ function ShowRolesWithMenu() {
   }, [location.search]);
 
   const handleManage = (role) => {
-    navigate(`/manage-role-access/${role.role_id}`);
+    navigate(`/manageRoleAccess/${role.role_id}`);
   };
   // ✅ Update page when search changes
   useEffect(() => {
