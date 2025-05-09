@@ -21,9 +21,10 @@ function Roles() {
   const [newRoleID, setNewnewRoleID] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
-  const [newStatus, setNewStatus] = useState("Active");
-
+  const [newStatus, setNewStatus] = useState("A");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [pageCount, setPageCount] = useState(0);
+  const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
   const pageSize = 10;
 
   const fetchRoles = async () => {
@@ -60,7 +61,9 @@ function Roles() {
 
   const handleEdit = (role) => {
     setCurrentRole(role);
-    setNewRoleName(role.rolename);
+    setNewRoleName(role.name);
+    setNewnewRoleID(role?.role_id);
+    setNewStatus(role?.is_active);
     setShowEditModal(true);
   };
 
@@ -69,20 +72,75 @@ function Roles() {
   };
 
   const handleCloseModal = () => {
+    setFieldErrors({});
+    setError(null);
     setShowAddModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
     setNewRoleName("");
+    setNewnewRoleID("");
+    setNewStatus("");
     setCurrentRole(null);
+  };
+  const validateRoleForm = (rolename, role_id) => {
+    const errors = {};
+
+    if (!role_id || role_id.trim() === "") {
+      errors.role_id = "Role ID is required.";
+    }
+
+    if (!rolename || rolename.trim() === "") {
+      errors.rolename = "Role Name is required.";
+    } else if (!/^[A-Za-z0-9 ]+$/.test(rolename)) {
+      errors.rolename =
+        "Role Name can only contain letters, numbers, and spaces.";
+    } else if (rolename.length > 30) {
+      errors.rolename = "Role Name must not exceed 30 characters.";
+    }
+
+    return errors;
+  };
+  const handleChangeRoleID = (e) => {
+    const value = e.target.value;
+    setNewnewRoleID(value);
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      role_id: validateRoleForm(newRoleName, value).role_id,
+    }));
+  };
+
+  const handleChangeRoleName = (e) => {
+    const value = e.target.value;
+    setNewRoleName(value);
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      rolename: validateRoleForm(value, newRoleID).rolename,
+    }));
+  };
+  const handleChangeStatus = (e) => {
+    const value = e.target.value;
+    console.log("value:-->", value);
+    setNewStatus(value);
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      is_active: "", // Clear backend error if present
+    }));
   };
 
   const handleSubmitAdd = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const validationErrors = validateRoleForm(newRoleName, newRoleID);
+    if (Object.keys(validationErrors).length > 0) {
+      setFieldErrors(validationErrors);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("authToken");
-
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
+      if (!token) throw new Error("No authentication token found");
 
       await axios.post(
         `${API_URL}/api/roles`,
@@ -100,23 +158,53 @@ function Roles() {
       toast.success("Role added successfully!");
     } catch (error) {
       console.error("Error adding role:", error);
-      toast.error("Error adding role.");
+
+      // Handle backend validation errors
+      if (error.response?.data?.errors) {
+        const backendErrors = error.response.data.errors;
+        const formattedErrors = {};
+
+        if (backendErrors.role_id) {
+          formattedErrors.role_id = backendErrors.role_id[0];
+        }
+
+        if (backendErrors.rolename) {
+          formattedErrors.rolename = backendErrors.rolename[0];
+        }
+
+        setFieldErrors(formattedErrors);
+      } else {
+        toast.error("Error adding role.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const validationErrors = validateRoleForm(newRoleName, newRoleID);
+    console.log("validationErrors", validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      setFieldErrors(validationErrors);
+      console.log("error");
+      setIsSubmitting(false);
+      return;
+    }
+    console.log("no error");
     try {
       const token = localStorage.getItem("authToken");
-
-      if (!token) {
-        throw new Error("No authentication token or academic year found");
-      }
+      if (!token) throw new Error("No authentication token found");
 
       await axios.put(
         `${API_URL}/api/roles/${currentRole.role_id}`,
         {
           rolename: newRoleName,
-          is_active: newStatus === "Active" ? "Y" : "N",
+          is_active: newStatus,
+
+          // is_active: newStatus === "Active" ? "Y" : "N",
         },
         {
           headers: {
@@ -131,7 +219,36 @@ function Roles() {
       toast.success("Role updated successfully!");
     } catch (error) {
       console.error("Error editing role:", error);
-      toast.error("Error updating role.");
+
+      const errData = error.response?.data;
+
+      // Handle known backend errors
+      if (errData?.errors || errData?.message) {
+        const formattedErrors = {};
+
+        if (errData.errors?.rolename) {
+          formattedErrors.rolename = errData.errors.rolename[0];
+        }
+
+        // Assign general message (like status-related) to a field key
+        if (
+          errData.message ===
+          "Role cannot be deactivated as it is being used in another table."
+        ) {
+          // formattedErrors.is_active = errData.message;
+          formattedErrors.is_active =
+            "Role can not be deactivated as it's being used.";
+        }
+
+        setFieldErrors((prev) => ({
+          ...prev,
+          ...formattedErrors,
+        }));
+      } else {
+        toast.error("Error updating role.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -142,6 +259,8 @@ function Roles() {
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       const academicYr = localStorage.getItem("academicYear");
@@ -166,6 +285,8 @@ function Roles() {
       console.error("Error deleting role:", error);
       setError(error.message);
       toast.error("Error deleting role.");
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
 
@@ -179,9 +300,6 @@ function Roles() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
 
   return (
     <>
@@ -211,6 +329,12 @@ function Roles() {
               </button>
             </div>
           </div>
+          <div
+            className=" relative w-[97%]  -top-0.5 mb-3 h-1  mx-auto bg-red-700"
+            style={{
+              backgroundColor: "#C03078",
+            }}
+          ></div>
 
           <div className="card-body w-full">
             <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
@@ -239,63 +363,71 @@ function Roles() {
                     </tr>
                   </thead>
                   <tbody>
-                    {displayedRoles.map((role, index) => (
-                      <tr
-                        key={role.id}
-                        className={`${
-                          index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                        } hover:bg-gray-50`}
-                      >
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {index + 1}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {role?.name}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {role?.role_id}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {role.is_active === "Y" ? "Active" : "Inactive"}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                          <button
-                            className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                            onClick={() => handleEdit(role)}
-                          >
-                            <FontAwesomeIcon icon={faEdit} />
-                          </button>
-                        </td>
-                        {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                                    <button
-                                                        className="text-red-600 hover:text-red-800 hover:bg-transparent"
-                                                        onClick={() => handleDelete(role.id)}
-                                                    >
-                                                        <FontAwesomeIcon icon={faTrash} />
-                                                    </button>
-                                                </td> */}
-                      </tr>
-                    ))}
+                    {loading ? (
+                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
+                          Please wait while data is loading...
+                        </div>
+                      </div>
+                    ) : displayedRoles.length ? (
+                      displayedRoles.map((role, index) => (
+                        <tr
+                          key={role.id}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50`}
+                        >
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {index + 1}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {role?.name}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {role?.role_id}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {role.is_active === "Y" ? "Active" : "Inactive"}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                              onClick={() => handleEdit(role)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-red-700">
+                          Oops! No data found..
+                        </div>
+                      </div>
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
             <div className="flex justify-center mt-4">
               <ReactPaginate
-                previousLabel={"previous"}
-                nextLabel={"next"}
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
                 breakLabel={"..."}
+                breakClassName={"page-item"}
+                breakLinkClassName={"page-link"}
                 pageCount={pageCount}
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={5}
+                marginPagesDisplayed={1}
+                pageRangeDisplayed={1}
                 onPageChange={handlePageClick}
                 containerClassName={"pagination"}
                 pageClassName={"page-item"}
@@ -304,8 +436,6 @@ function Roles() {
                 previousLinkClassName={"page-link"}
                 nextClassName={"page-item"}
                 nextLinkClassName={"page-link"}
-                breakClassName={"page-item"}
-                breakLinkClassName={"page-link"}
                 activeClassName={"active"}
               />
             </div>
@@ -316,45 +446,74 @@ function Roles() {
       {/* Add Role Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
-          <div className="modal fade show d-block" tabIndex="-1" role="dialog">
-            <div className="modal-dialog modal-dialog-centered" role="document">
+          <div className="modal show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
-                <div className=" modal-header flex justify-between items-center">
-                  <h5 className="modal-title ">Add Role</h5>
+                <div className="flex justify-between px-3 py-2">
+                  <h5 className="modal-title">Create New Role</h5>
                   <RxCross1
-                    className=" float-right  text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
                     onClick={handleCloseModal}
                   />
                 </div>
-                <div className="modal-body">
-                  <div className="form-group">
-                    <label htmlFor="role_id">Role ID</label>
+                <div
+                  className=" relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="modal-body w-full md:w-[90%] mx-auto  ">
+                  <div className="  relative mb-3 flex justify-center  mx-2">
+                    <label htmlFor="role_id" className="w-1/2 mt-2">
+                      Role ID <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
-                      className="form-control"
+                      className="form-control shadow-md mb-3"
                       id="role_id"
+                      maxLength={1}
                       value={newRoleID}
-                      onChange={(e) => setNewnewRoleID(e.target.value)}
+                      onChange={handleChangeRoleID}
                     />
+                    <div className="absolute  top-9 left-1/3">
+                      {fieldErrors.role_id && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.role_id}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="roleName">Role Name</label>
+                  <div className=" relative -top-1 flex justify-center  mx-2">
+                    <label htmlFor="roleName" className="w-1/2 mt-2">
+                      Role Name<span className="text-red-500">*</span>
+                    </label>
+
                     <input
                       type="text"
-                      className="form-control"
+                      maxLength={30}
+                      className="form-control shadow-md "
                       id="roleName"
                       value={newRoleName}
-                      onChange={(e) => setNewRoleName(e.target.value)}
+                      onChange={handleChangeRoleName}
                     />
+                    <div className="absolute  top-9 left-1/3">
+                      {fieldErrors.rolename && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.rolename}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="modal-footer">
+                <div className=" flex justify-end p-3">
                   <button
                     type="button"
-                    className="btn btn-primary"
+                    className="btn btn-primary px-3 mb-2 "
                     onClick={handleSubmitAdd}
+                    disabled={isSubmitting}
                   >
-                    Add Role
+                    {isSubmitting ? "Adding..." : "Add"}
                   </button>
                 </div>
               </div>
@@ -366,53 +525,79 @@ function Roles() {
       {/* Edit Role Modal */}
       {showEditModal && currentRole && (
         <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
-          <div className="modal fade show d-block" tabIndex="-1" role="dialog">
-            <div
-              className="modal-dialog  modal-dialog-centered"
-              role="document"
-            >
-              <div className="modal-content">
-                <div className="modal-header flex justify-between items-center">
+          <div className="modal show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content ">
+                <div className="flex justify-between px-3 py-2">
                   <h5 className="modal-title">Edit Role</h5>
                   <RxCross1
-                    className=" float-right  text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
                     onClick={handleCloseModal}
                   />
                 </div>
-                <div className="modal-body">
-                  <div className="form-group" style={{ marginBottom: "-15px" }}>
-                    <label htmlFor="roleName">Role Name</label>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="modal-body w-full md:w-[90%] mx-auto  ">
+                  <div className=" relative  flex justify-center  mx-2">
+                    <label htmlFor="roleName" className="w-1/2 mt-2">
+                      Role Name<span className="text-red-500">*</span>{" "}
+                    </label>
                     <input
                       type="text"
-                      className="form-control"
+                      maxLength={30}
+                      className="form-control shadow-md "
                       id="roleName"
                       value={newRoleName}
-                      onChange={(e) => setNewRoleName(e.target.value)}
-                    />
+                      onChange={handleChangeRoleName}
+                    />{" "}
+                    <div className="absolute top-9 left-1/3 ">
+                      {fieldErrors.rolename && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.rolename}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="modal-body">
-                  <div className="form-group">
-                    <label htmlFor="roleStatus">Status</label>
+                <div className="modal-body w-full md:w-[90%] mx-auto">
+                  <div className="relative mb-3 flex justify-center mx-2">
+                    <label htmlFor="roleStatus" className="w-1/2 mt-2">
+                      Status<span className="text-red-500">*</span>
+                    </label>
+
                     <select
-                      className="form-control"
+                      className="form-control shadow-md mb-2"
                       id="roleStatus"
                       value={newStatus}
-                      onChange={(e) => setNewStatus(e.target.value)}
+                      onChange={handleChangeStatus}
                     >
                       <option value="Y">Active</option>
                       <option value="N">Inactive</option>
                     </select>
+
+                    <div className="absolute top-9 left-1/3">
+                      {fieldErrors.is_active && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.is_active}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <div className="modal-footer">
+                <div className=" flex justify-end p-3 ">
                   <button
                     type="button"
-                    className="btn btn-primary"
+                    className="btn btn-primary px-3 mb-2 "
                     onClick={handleSubmitEdit}
+                    disabled={isSubmitting}
                   >
-                    Save Changes
+                    {isSubmitting ? "Updating..." : "Update"}
                   </button>
                 </div>
               </div>
@@ -442,7 +627,7 @@ function Roles() {
                   <strong>{currentRole.rolename}</strong>?
                 </p>
               </div>
-              <div className="modal-footer">
+              <div className=" flex justify-end p-3 space-x-2">
                 <button
                   type="button"
                   className="btn btn-secondary"
@@ -452,10 +637,11 @@ function Roles() {
                 </button>
                 <button
                   type="button"
-                  className="btn btn-danger"
+                  className="btn btn-primary px-3 mb-2 "
                   onClick={handleSubmitDelete}
+                  disabled={isSubmitting}
                 >
-                  Delete
+                  {isSubmitting ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </div>

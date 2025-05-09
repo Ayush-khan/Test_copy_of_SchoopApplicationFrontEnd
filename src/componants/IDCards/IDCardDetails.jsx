@@ -116,7 +116,7 @@ const IDCardDetails = () => {
           message: "House is required.",
         });
       }
-      if (!student.image_base) {
+      if (!student.image_base && !student.image_name) {
         errors.push({
           field: `student_image_base_${index}`,
           message: "Please Upload Photo.",
@@ -252,7 +252,9 @@ const IDCardDetails = () => {
                         <div className=" md:row-span-2 md:col-span-1  flex justify-center mb-4 ">
                           <div className="rounded-full">
                             <ImageCropper
-                              photoPreview={student?.image_name}
+                              photoPreview={
+                                student?.image_name || student?.image_base
+                              }
                               onImageCropped={(croppedImage) =>
                                 handleStudentImageCropped(croppedImage, index)
                               }

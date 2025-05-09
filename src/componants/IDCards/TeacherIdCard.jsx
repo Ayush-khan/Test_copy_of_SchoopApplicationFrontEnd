@@ -250,7 +250,7 @@ const TeacherIdCard = () => {
     </div>
   </div>`;
 
-    const printWindow = window.open("", "", "height=800,width=1000");
+    const printWindow = window.open("", "_blank", "width=1000,height=800");
     printWindow.document.write(`
   <html>
   <head>
@@ -324,7 +324,11 @@ h5 + * { /* Targets the element after h5 */
   </body>
   </html>`);
     printWindow.document.close();
-    printWindow.print();
+    printWindow.onload = function () {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close(); // Optional: close after printing
+    };
   };
 
   const filteredSections = timetable.filter((section) => {
@@ -452,9 +456,10 @@ h5 + * { /* Targets the element after h5 */
                         ></div>
 
                         <div className="card-body w-full">
-                          <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-                            <table className="min-w-full leading-normal table-auto">
-                              <thead>
+                          <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden ">
+                            {/* <table className="min-w-full leading-normal table-auto"> */}
+                            <table className="min-w-full leading-normal table-fixed">
+                              {/* <thead>
                                 <tr className="bg-gray-100">
                                   <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                     Sr.No
@@ -488,8 +493,40 @@ h5 + * { /* Targets the element after h5 */
                                     Profile Image Name
                                   </th>
                                 </tr>
+                              </thead> */}
+                              <thead>
+                                <tr className="bg-gray-100">
+                                  <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[50px]">
+                                    Sr.No
+                                  </th>
+                                  <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[100px]">
+                                    Photo
+                                  </th>
+                                  <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[120px]">
+                                    Employee Id
+                                  </th>
+                                  <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[250px]">
+                                    Name
+                                  </th>
+                                  <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[150px]">
+                                    Phone No.
+                                  </th>
+                                  <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[350px]">
+                                    Address
+                                  </th>
+                                  <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[100px]">
+                                    Gender
+                                  </th>
+                                  <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[120px]">
+                                    Blood Group
+                                  </th>
+                                  <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[200px]">
+                                    Profile Image Name
+                                  </th>
+                                </tr>
                               </thead>
-                              <tbody>
+
+                              {/* <tbody>
                                 {displayedSections.length ? (
                                   displayedSections.map((subject, index) => (
                                     <tr
@@ -550,6 +587,71 @@ h5 + * { /* Targets the element after h5 */
                                       Oops! No data found..
                                     </div>
                                   </div>
+                                )}
+                              </tbody> */}
+
+                              <tbody>
+                                {displayedSections.length ? (
+                                  displayedSections.map((subject, index) => (
+                                    <tr
+                                      key={subject.student_id}
+                                      className="text-sm"
+                                    >
+                                      <td className="px-2 text-center py-2 border border-gray-950 w-[50px]">
+                                        {currentPage * pageSize + index + 1}
+                                      </td>
+                                      <td className="px-2 py-2 border border-gray-950 w-[80px]">
+                                        <div className="flex justify-center items-center">
+                                          <img
+                                            src={
+                                              subject?.teacher_image_url
+                                                ? `${subject?.teacher_image_url}`
+                                                : "https://via.placeholder.com/50"
+                                            }
+                                            alt={subject?.name}
+                                            className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
+                                          />
+                                        </div>
+                                      </td>
+
+                                      <td className="px-2 text-center py-2 border border-gray-950 w-[150px]">
+                                        {subject?.employee_id}
+                                      </td>
+
+                                      <td className="px-2 text-center py-2 border border-gray-950 w-[250px]">
+                                        {`${subject?.name ?? ""}`.trim()}
+                                      </td>
+
+                                      <td className="px-2 text-center py-2 border border-gray-950 w-[150px]">
+                                        {subject?.phone}
+                                      </td>
+
+                                      <td className="px-2 text-center py-2 border border-gray-950 w-[300px]">
+                                        {subject?.address}
+                                      </td>
+
+                                      <td className="px-2 text-center py-2 border border-gray-950 w-[100px]">
+                                        {subject?.sex || " "}
+                                      </td>
+
+                                      <td className="px-2 text-center py-2 border border-gray-950 w-[120px]">
+                                        {subject?.blood_group}
+                                      </td>
+
+                                      <td className="px-2 text-center py-2 border border-gray-950 w-[200px]">
+                                        {subject?.teacher_image_name}
+                                      </td>
+                                    </tr>
+                                  ))
+                                ) : (
+                                  <tr>
+                                    <td
+                                      colSpan="9"
+                                      className="text-center py-10 text-red-700 text-xl"
+                                    >
+                                      Oops! No data found..
+                                    </td>
+                                  </tr>
                                 )}
                               </tbody>
                             </table>

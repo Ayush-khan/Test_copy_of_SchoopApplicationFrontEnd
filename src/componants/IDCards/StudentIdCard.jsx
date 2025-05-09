@@ -153,7 +153,9 @@ const StudentIdCard = () => {
       `${subject?.first_name || ""} ${subject?.mid_name || ""} ${
         subject?.last_name || ""
       }`,
-      subject?.dob || " ",
+      `${
+        subject?.dob ? new Date(subject.dob).toLocaleDateString("en-GB") : ""
+      }`,
       subject?.f_mobile || " ",
       subject?.m_mobile || " ",
       subject?.permant_add || " ",
@@ -176,9 +178,11 @@ const StudentIdCard = () => {
       `Student idCard list of ${selectedStudent.label}.xlsx`
     );
   };
+
   const handleDownloadZip = () => {
     setShowDeleteModal(true);
   };
+
   const handleSubmitDownloadZip = async () => {
     if (isSubmitting) return; // Prevent multiple submissions
     setIsSubmitting(true);
@@ -246,6 +250,7 @@ const StudentIdCard = () => {
   };
 
   console.log("row", timetable);
+
   const handlePrint = () => {
     const printTitle = `Student ID Card List of ${selectedStudent.label}`;
 
@@ -293,8 +298,11 @@ const StudentIdCard = () => {
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.first_name || ""
                 } ${subject?.mid_name || ""} ${subject?.last_name || ""}</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.dob || " "
+                <td class="px-2 text-center py-2 border border-black">
+                ${
+                  subject?.dob
+                    ? new Date(subject.dob).toLocaleDateString("en-GB")
+                    : ""
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.f_mobile || " "
@@ -325,7 +333,7 @@ const StudentIdCard = () => {
     </div>
   </div>`;
 
-    const printWindow = window.open("", "", "height=800,width=1000");
+    const printWindow = window.open("", "_blank", "height=800,width=1000");
     printWindow.document.write(`
   <html>
   <head>
@@ -345,20 +353,14 @@ const StudentIdCard = () => {
   width: 100%; /* Ensures the table fills its container */
   margin:auto;
   padding:0 10em 0 10em;
-
-  
-
-
 }
 
 #tableContainer {
   display: flex;
   justify-content: center; /* Centers the table horizontally */
   width: 80%;
-  
 }
 
- 
 h5 {  
   width: 100%;  
   text-align: center;  
@@ -381,7 +383,6 @@ h5 + * { /* Targets the element after h5 */
   margin-top: 0; /* Ensures no extra space after h5 */
 }
 
-
       table { border-spacing: 0; width: 70%; margin: auto;   }
       th { font-size: 0.8em; background-color: #f9f9f9; }
       td { font-size: 12px; }
@@ -399,8 +400,13 @@ h5 + * { /* Targets the element after h5 */
   </body>
   </html>`);
     printWindow.document.close();
-    printWindow.print();
+    printWindow.onload = function () {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close(); // Optional: close after printing
+    };
   };
+
   const handleSubjectClick = (subject) => {
     if (subject) {
       // window.location.href = `/iDCardDetails?subject=${subject}`;
@@ -700,7 +706,11 @@ h5 + * { /* Targets the element after h5 */
                                     }${subject?.last_name ?? ""}`.trim()}
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {subject?.dob}
+                                    {subject?.dob
+                                      ? new Date(
+                                          subject.dob
+                                        ).toLocaleDateString("en-GB")
+                                      : ""}
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {subject?.f_mobile}
