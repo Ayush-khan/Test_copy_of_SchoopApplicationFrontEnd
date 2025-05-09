@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -25,6 +25,8 @@ function Roles() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pageCount, setPageCount] = useState(0);
   const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
   const pageSize = 10;
 
   const fetchRoles = async () => {
@@ -289,12 +291,30 @@ function Roles() {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
 
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const searchLower = searchTerm.trim().toLowerCase();
   const filteredRoles = roles.filter((role) =>
     [role?.name, role?.role_id, role?.is_active].some((field) =>
-      field?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      field?.toString().toLowerCase().includes(searchLower)
     )
   );
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredRoles.length / pageSize));
+  }, [filteredRoles, pageSize]);
 
   const displayedRoles = filteredRoles.slice(
     currentPage * pageSize,
@@ -343,7 +363,7 @@ function Roles() {
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        S.No
+                        Sr.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Name

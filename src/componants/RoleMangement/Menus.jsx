@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -27,7 +27,8 @@ function Menus() {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const pageSize = 10;
-
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
   const fetchMenus = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -179,27 +180,52 @@ function Menus() {
       setErrors({ delete: error.message });
     }
   };
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
 
-  const filteredMenus = menus.filter((menu) =>
-    menu.name.toLowerCase().includes(searchTerm.toLowerCase())
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage;
+      setCurrentPage(0); // Go to first page on new search
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore previous page on clear
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
+  const searchLower = searchTerm.trim().toLowerCase();
+  const filteredMenus = menus.filter(
+    (menu) =>
+      menu.name?.toLowerCase().includes(searchLower) ||
+      menu.url?.toLowerCase().includes(searchLower) ||
+      String(menu.parent_id).includes(searchLower) ||
+      String(menu.sequence).includes(searchLower)
   );
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredMenus.length / pageSize));
+  }, [filteredMenus, pageSize]);
 
   const displayedMenus = filteredMenus.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
 
-  if (loading) return <p>Loading...</p>;
-  if (errors.fetch) return <p>Error: {errors.fetch}</p>;
+  // if (loading) return <p>Loading...</p>;
+  // if (errors.fetch) return <p>Error: {errors.fetch}</p>;
 
   return (
     <>
       <ToastContainer />
-
-      <div className="container mt-4">
+      <div className="container md:mt-4">
         <div className="card mx-auto lg:w-3/4 shadow-lg">
-          <div className="card-header d-flex justify-content-between align-items-center">
-            <h3 className="text-lg font-semibold">Menus</h3>
+          <div className="card-header flex justify-between items-center">
+            <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+              Menus
+            </h3>
+
             <div className="d-flex align-items-center">
               <input
                 type="text"
@@ -222,65 +248,123 @@ function Menus() {
               </button>
             </div>
           </div>
+          <div
+            className=" relative w-[97%]  -top-0.5 mb-3 h-1  mx-auto bg-red-700"
+            style={{
+              backgroundColor: "#C03078",
+            }}
+          ></div>
 
-          <div className="card-body">
-            <table className="table table-bordered">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>URL</th>
-                  <th>Parent</th>
-                  <th>Sequence</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayedMenus.map((menu) => (
-                  <tr key={menu.menu_id}>
-                    <td>{menu.name}</td>
-                    <td>{menu.url}</td>
-                    <td>{getParentName(menu.parent_id)}</td>
-                    <td>{menu.sequence}</td>
-                    <td>
-                      <button
-                        className="text-blue-600 hover:text-blue-800"
-                        onClick={() => handleEdit(menu)}
-                      >
-                        <FontAwesomeIcon icon={faEdit} />
-                      </button>
-                      {/* <button
-                                                className="text-red-600 hover:text-red-800 ms-2"
-                                                onClick={() => handleDelete(menu.menu_id)}
-                                            >
-                                                <FontAwesomeIcon icon={faTrash} />
-                                            </button> */}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <div className="card-body w-full">
+            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+              <div className="bg-white rounded-lg shadow-xs">
+                <table className="min-w-full leading-normal table-auto">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Sr.No
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        URL
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Parent
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Sequence
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
 
-          <div className="card-footer">
-            <ReactPaginate
-              previousLabel={"Previous"}
-              nextLabel={"Next"}
-              breakLabel={"..."}
-              pageCount={pageCount}
-              marginPagesDisplayed={2}
-              pageRangeDisplayed={5}
-              onPageChange={handlePageClick}
-              containerClassName={"pagination"}
-              pageClassName={"page-item"}
-              pageLinkClassName={"page-link"}
-              previousClassName={"page-item"}
-              previousLinkClassName={"page-link"}
-              nextClassName={"page-item"}
-              nextLinkClassName={"page-link"}
-              breakClassName={"page-item"}
-              breakLinkClassName={"page-link"}
-              activeClassName={"active"}
-            />
+                  <tbody>
+                    {loading ? (
+                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
+                          Please wait while data is loading...
+                        </div>
+                      </div>
+                    ) : displayedMenus.length ? (
+                      displayedMenus.map((menu, index) => (
+                        <tr
+                          key={menu?.menu_id}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50`}
+                        >
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {index + 1}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {menu?.name}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {menu?.url}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {getParentName(menu.parent_id)}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {menu?.sequence}
+                            </p>
+                          </td>{" "}
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                              onClick={() => handleEdit(menu)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-red-700">
+                          Oops! No data found..
+                        </div>
+                      </div>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="flex justify-center mt-4">
+              <ReactPaginate
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
+                breakLabel={"..."}
+                pageCount={pageCount}
+                marginPagesDisplayed={1}
+                pageRangeDisplayed={1}
+                onPageChange={handlePageClick}
+                containerClassName={"pagination"}
+                activeClassName={"active"}
+                pageClassName={"page-item"}
+                pageLinkClassName={"page-link"}
+                previousClassName={"page-item"}
+                nextClassName={"page-item"}
+                previousLinkClassName={"page-link"}
+                nextLinkClassName={"page-link"}
+                breakClassName={"page-item"}
+                breakLinkClassName={"page-link"}
+              />
+            </div>
           </div>
         </div>
       </div>
