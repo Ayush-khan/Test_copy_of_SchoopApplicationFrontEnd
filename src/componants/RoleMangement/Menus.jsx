@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { RxCross1 } from "react-icons/rx";
 
 function Menus() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -370,230 +371,275 @@ function Menus() {
       </div>
 
       {/* Add Menu Modal */}
-      <div
-        className={`modal fade ${showAddModal ? "show" : ""}`}
-        style={{ display: showAddModal ? "block" : "none" }}
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="addMenuModalLabel"
-        aria-hidden={!showAddModal}
-      >
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="addMenuModalLabel">
-                Add Menu
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={handleCloseModal}
-                aria-label="Close"
-              />
-            </div>
-            <div className="modal-body">
-              <form>
-                <div className="mb-3">
-                  <label htmlFor="menuName" className="form-label">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="menuName"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between px-3 py-2">
+                  <h5 className="modal-title">Add New Menu</h5>
+                  <RxCross1
+                    className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    onClick={handleCloseModal}
                   />
-                  {errors.name && (
-                    <small className="text-danger">{errors.name}</small>
-                  )}
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="menuUrl" className="form-label">
-                    URL
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="menuUrl"
-                    value={formData.url}
-                    onChange={(e) =>
-                      setFormData({ ...formData, url: e.target.value })
-                    }
-                  />
-                  {errors.url && (
-                    <small className="text-danger">{errors.url}</small>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="parentId" className="form-label">
-                    Parent
-                  </label>
-                  <select
-                    className="form-control"
-                    id="parentId"
-                    value={formData.parent_id}
-                    onChange={(e) =>
-                      setFormData({ ...formData, parent_id: e.target.value })
-                    }
-                  >
-                    <option value="">None</option>
-                    {allMenus
-                      .filter((menu) => menu.parent_id === 0)
-                      .map((menu) => (
-                        <option key={menu.menu_id} value={menu.menu_id}>
-                          {menu.name}
-                        </option>
-                      ))}
-                  </select>
-                  {errors.parent_id && (
-                    <small className="text-danger">{errors.parent_id}</small>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="menuSequence" className="form-label">
-                    Sequence
-                  </label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="menuSequence"
-                    value={formData.sequence}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sequence: e.target.value })
-                    }
-                  />
-                  {errors.sequence && (
-                    <small className="text-danger">{errors.sequence}</small>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSubmitAdd}
-                >
-                  Add Menu
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
+                <div
+                  className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{ backgroundColor: "#C03078" }}
+                ></div>
+                <div className="modal-body w-full md:w-[90%] mx-auto">
+                  {/* Name */}
+                  <div className="relative mb-3 flex justify-center mx-2">
+                    <label htmlFor="menuName" className="w-1/2 mt-2">
+                      Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control shadow-md"
+                      id="menuName"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                    />
+                    <div className="absolute top-9 left-1/3">
+                      {errors.name && (
+                        <span className="text-danger text-xs">
+                          {errors.name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-      {/* Edit Menu Modal */}
-      <div
-        className={`modal fade ${showEditModal ? "show" : ""}`}
-        style={{ display: showEditModal ? "block" : "none" }}
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="editMenuModalLabel"
-        aria-hidden={!showEditModal}
-      >
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="editMenuModalLabel">
-                Edit Menu
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={handleCloseModal}
-                aria-label="Close"
-              />
-            </div>
-            <div className="modal-body">
-              <form>
-                <div className="mb-3">
-                  <label htmlFor="editMenuName" className="form-label">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="editMenuName"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                  />
-                  {errors.name && (
-                    <small className="text-danger">{errors.name}</small>
-                  )}
+                  {/* URL */}
+                  <div className="relative mb-3 flex justify-center mx-2">
+                    <label htmlFor="menuUrl" className="w-1/2 mt-2">
+                      URL <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control shadow-md"
+                      id="menuUrl"
+                      value={formData.url}
+                      onChange={(e) =>
+                        setFormData({ ...formData, url: e.target.value })
+                      }
+                    />
+                    <div className="absolute top-9 left-1/3">
+                      {errors.url && (
+                        <span className="text-danger text-xs">
+                          {errors.url}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Parent Menu */}
+                  <div className="relative mb-3 flex justify-center mx-2">
+                    <label htmlFor="parentId" className="w-1/2 mt-2">
+                      Parent
+                    </label>
+                    <select
+                      className="form-control shadow-md"
+                      id="parentId"
+                      value={formData.parent_id}
+                      onChange={(e) =>
+                        setFormData({ ...formData, parent_id: e.target.value })
+                      }
+                    >
+                      <option value="">None</option>
+                      {allMenus
+                        .filter((menu) => menu.parent_id === 0)
+                        .map((menu) => (
+                          <option key={menu.menu_id} value={menu.menu_id}>
+                            {menu.name}
+                          </option>
+                        ))}
+                    </select>
+                    <div className="absolute top-9 left-1/3">
+                      {errors.parent_id && (
+                        <span className="text-danger text-xs">
+                          {errors.parent_id}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Sequence */}
+                  <div className="relative mb-3 flex justify-center mx-2">
+                    <label htmlFor="menuSequence" className="w-1/2 mt-2">
+                      Sequence <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      className="form-control shadow-md"
+                      id="menuSequence"
+                      value={formData.sequence}
+                      onChange={(e) =>
+                        setFormData({ ...formData, sequence: e.target.value })
+                      }
+                    />
+                    <div className="absolute top-9 left-1/3">
+                      {errors.sequence && (
+                        <span className="text-danger text-xs">
+                          {errors.sequence}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="editMenuUrl" className="form-label">
-                    URL
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="editMenuUrl"
-                    value={formData.url}
-                    onChange={(e) =>
-                      setFormData({ ...formData, url: e.target.value })
-                    }
-                  />
-                  {errors.url && (
-                    <small className="text-danger">{errors.url}</small>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="editParentId" className="form-label">
-                    Parent
-                  </label>
-                  <select
-                    className="form-control"
-                    id="editParentId"
-                    value={formData.parent_id}
-                    onChange={(e) =>
-                      setFormData({ ...formData, parent_id: e.target.value })
-                    }
+
+                {/* Submit Button */}
+                <div className="flex justify-end p-3">
+                  <button
+                    type="button"
+                    className="btn btn-primary px-3 mb-2"
+                    onClick={handleSubmitAdd}
                   >
-                    <option value="">None</option>
-                    {allMenus
-                      .filter((menu) => menu.parent_id === 0)
-                      .map((menu) => (
-                        <option key={menu.menu_id} value={menu.menu_id}>
-                          {menu.name}
-                        </option>
-                      ))}
-                  </select>
-                  {errors.parent_id && (
-                    <small className="text-danger">{errors.parent_id}</small>
-                  )}
+                    Add
+                  </button>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="editMenuSequence" className="form-label">
-                    Sequence
-                  </label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="editMenuSequence"
-                    value={formData.sequence}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sequence: e.target.value })
-                    }
-                  />
-                  {errors.sequence && (
-                    <small className="text-danger">{errors.sequence}</small>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSubmitEdit}
-                >
-                  Update Menu
-                </button>
-              </form>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+      {/* Edit Menu Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between px-3 py-2">
+                  <h5 className="modal-title">Edit Menu</h5>
+                  <RxCross1
+                    className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    onClick={handleCloseModal}
+                  />
+                </div>
+                <div
+                  className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{ backgroundColor: "#C03078" }}
+                ></div>
+                <div className="modal-body w-full md:w-[90%] mx-auto">
+                  {/* Name */}
+                  <div className="relative mb-3 flex justify-center mx-2">
+                    <label htmlFor="editMenuName" className="w-1/2 mt-2">
+                      Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control shadow-md"
+                      id="editMenuName"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                    />
+                    <div className="absolute top-9 left-1/3">
+                      {errors.name && (
+                        <span className="text-danger text-xs">
+                          {errors.name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* URL */}
+                  <div className="relative mb-3 flex justify-center mx-2">
+                    <label htmlFor="editMenuUrl" className="w-1/2 mt-2">
+                      URL <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control shadow-md"
+                      id="editMenuUrl"
+                      value={formData.url}
+                      onChange={(e) =>
+                        setFormData({ ...formData, url: e.target.value })
+                      }
+                    />
+                    <div className="absolute top-9 left-1/3">
+                      {errors.url && (
+                        <span className="text-danger text-xs">
+                          {errors.url}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Parent */}
+                  <div className="relative mb-3 flex justify-center mx-2">
+                    <label htmlFor="editParentId" className="w-1/2 mt-2">
+                      Parent
+                    </label>
+                    <select
+                      className="form-control shadow-md"
+                      id="editParentId"
+                      value={formData.parent_id}
+                      onChange={(e) =>
+                        setFormData({ ...formData, parent_id: e.target.value })
+                      }
+                    >
+                      <option value="">None</option>
+                      {allMenus
+                        .filter((menu) => menu.parent_id === 0)
+                        .map((menu) => (
+                          <option key={menu.menu_id} value={menu.menu_id}>
+                            {menu.name}
+                          </option>
+                        ))}
+                    </select>
+                    <div className="absolute top-9 left-1/3">
+                      {errors.parent_id && (
+                        <span className="text-danger text-xs">
+                          {errors.parent_id}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Sequence */}
+                  <div className="relative mb-3 flex justify-center mx-2">
+                    <label htmlFor="editMenuSequence" className="w-1/2 mt-2">
+                      Sequence <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      className="form-control shadow-md"
+                      id="editMenuSequence"
+                      value={formData.sequence}
+                      onChange={(e) =>
+                        setFormData({ ...formData, sequence: e.target.value })
+                      }
+                    />
+                    <div className="absolute top-9 left-1/3">
+                      {errors.sequence && (
+                        <span className="text-danger text-xs">
+                          {errors.sequence}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <div className="flex justify-end p-3">
+                  <button
+                    type="button"
+                    className="btn btn-primary px-3 mb-2"
+                    onClick={handleSubmitEdit}
+                  >
+                    Update
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Menu Modal */}
       <div
