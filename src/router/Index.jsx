@@ -220,6 +220,9 @@ import TimetablePlanner from "../componants/TimeTablePlanner/TimeTablePlanner.js
 import MonthlyAttendenceReport from "../componants/Reports/MonthlyAttendanceReport.jsx";
 import ComingSoon from "../componants/common/CommingSoon/ComingSoon.jsx";
 import ForgotPassword from "../Layouts/ForgotPassword.jsx";
+import UpdateStudentIdCards from "../componants/IDCards/UpdateStudentIdCards.jsx";
+import UploadStudentPhoto from "../componants/IDCards/UploadStudentPhoto.jsx";
+import UploadParentPhoto from "../componants/IDCards/UploadParentPhoto.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -662,6 +665,22 @@ function Index() {
           path="/teacherIdCard"
           element={<PrivateRoute element={<TeacherIdCard />} />}
         />
+
+        <Route
+          path="/updateStudentIdCard"
+          element={<PrivateRoute element={<UpdateStudentIdCards />} />}
+        />
+        {/* ID card Photo Upload */}
+        <Route
+          path="/uploadStudentPhoto/:id"
+          element={<PrivateRoute element={<UploadStudentPhoto />} />}
+        />
+
+        <Route
+          path="/uploadParentPhoto/:id"
+          element={<PrivateRoute element={<UploadParentPhoto />} />}
+        />
+
         {/* Pending StudentID Card Module */}
         <Route
           path="/pendingStudentId"

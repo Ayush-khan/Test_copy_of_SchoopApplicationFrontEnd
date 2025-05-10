@@ -827,6 +827,13 @@ const AdminNavBar = () => {
           >
             Pending Student ID Card
           </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
+            to="/updateStudentIdCard"
+            className="text-sm font-bold hover:text-black"
+          >
+            Update student ID Card
+          </NavDropdown.Item>
         </NavDropdown>
 
         {/* View Dropdown */}
