@@ -820,13 +820,13 @@ const AdminNavBar = () => {
           >
             Teacher ID Card
           </NavDropdown.Item>
-          <NavDropdown.Item
+          {/* <NavDropdown.Item
             as={Link}
             to="/pendingStudentId"
             className="text-sm font-bold hover:text-black"
           >
             Pending Student ID Card
-          </NavDropdown.Item>
+          </NavDropdown.Item> */}
           <NavDropdown.Item
             as={Link}
             to="/updateStudentIdCard"

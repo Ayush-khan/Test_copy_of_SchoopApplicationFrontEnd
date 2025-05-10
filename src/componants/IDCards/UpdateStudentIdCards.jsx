@@ -421,7 +421,7 @@ const UpdateStudentIdCards = () => {
             <ToastContainer />
 
             <div className="max-w-full  bg-white  p-2">
-              <div className="border-3 border-black relative left-0 md:left-[5%] w-full md:w-[49%]   flex  flex-col md:flex-row gap-x-1 md:gap-x-6 ">
+              <div className=" relative left-0 md:left-[5%] w-full md:w-[49%]   flex  flex-col md:flex-row gap-x-1 md:gap-x-6 ">
                 <div className="w-full  md:w-[60%]   gap-x-3 md:justify-center justify-around  my-1 md:my-4 flex  md:flex-row  ">
                   <label
                     htmlFor="classSection"
