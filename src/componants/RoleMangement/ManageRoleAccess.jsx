@@ -533,18 +533,18 @@ function ManageRoleAccess() {
                   <table className="min-w-full leading-normal table-auto">
                     <thead>
                       <tr className="bg-gray-200">
-                        <th className=" w-full md:w-[15%] text-center px-3 py-2 border border-gray-950 text-sm font-semibold">
+                        <th className="pb-4 w-full md:w-[15%] text-center px-3 border border-gray-950 text-sm font-semibold">
                           Menu ID
                         </th>
-                        <th className=" text-center px-3 py-2 border border-gray-950 text-sm font-semibold">
+                        <th className=" pb-4 text-center px-3  border border-gray-950 text-sm font-semibold">
                           Menu Name
                         </th>
 
-                        <th className=" w-full md:w-[20%] text-center px-3 py-2 border border-gray-950 text-sm font-semibold">
-                          <div className="form-check flex  font-semibold">
+                        <th className=" w-full md:w-[20%] text-center px-3 border border-gray-950 text-sm font-semibold">
+                          <div className="form-check flex  relative   font-semibold">
                             <label
                               htmlFor="select_all"
-                              className="form-check-label text-blue-600 relative right-3 "
+                              className="form-check-label  relative right-3 "
                             >
                               Select All
                             </label>
@@ -561,8 +561,8 @@ function ManageRoleAccess() {
                                   )
                                 }
                               />
-                              <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer-checked:bg-blue-600 transition-all duration-300"></div>
-                              <span className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-all duration-300 transform peer-checked:translate-x-full"></span>
+                              <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer-checked:bg-blue-600 transition-all duration-300"></div>
+                              <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 transform peer-checked:translate-x-full"></span>
                             </label>
                           </div>
                         </th>
@@ -601,8 +601,8 @@ function ManageRoleAccess() {
                                   handleCheckboxChange(menu.menu_id)
                                 }
                               />
-                              <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600 transition-all duration-300"></div>
-                              <span className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-all duration-300 transform peer-checked:translate-x-full"></span>
+                              <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600 transition-all duration-300"></div>
+                              <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 transform peer-checked:translate-x-full"></span>
                             </label>
                           </td>
                         </tr>
