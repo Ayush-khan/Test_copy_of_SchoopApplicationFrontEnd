@@ -160,7 +160,7 @@ const UploadStudentPhoto = () => {
             Upload Student Photo
           </h5>
           <RxCross1
-            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100 rounded-full p-1"
+            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100 rounded-full "
             onClick={() => {
               navigate("/updateStudentIdCard");
             }}
