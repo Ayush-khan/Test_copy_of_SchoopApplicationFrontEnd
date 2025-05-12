@@ -182,20 +182,17 @@ function Roles() {
       setIsSubmitting(false);
     }
   };
-
   const handleSubmitEdit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     const validationErrors = validateRoleForm(newRoleName, newRoleID);
-    console.log("validationErrors", validationErrors);
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
-      console.log("error");
       setIsSubmitting(false);
       return;
     }
-    console.log("no error");
+
     try {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
@@ -204,9 +201,8 @@ function Roles() {
         `${API_URL}/api/roles/${currentRole.role_id}`,
         {
           rolename: newRoleName,
-          is_active: newStatus,
-
-          // is_active: newStatus === "Active" ? "Y" : "N",
+          role_id: newRoleID, // include this if your backend allows updating the ID
+          // is_active: newStatus, // Removed since you excluded status from the form
         },
         {
           headers: {
@@ -224,7 +220,6 @@ function Roles() {
 
       const errData = error.response?.data;
 
-      // Handle known backend errors
       if (errData?.errors || errData?.message) {
         const formattedErrors = {};
 
@@ -232,12 +227,14 @@ function Roles() {
           formattedErrors.rolename = errData.errors.rolename[0];
         }
 
-        // Assign general message (like status-related) to a field key
+        if (errData.errors?.role_id) {
+          formattedErrors.role_id = errData.errors.role_id[0];
+        }
+
         if (
           errData.message ===
           "Role cannot be deactivated as it is being used in another table."
         ) {
-          // formattedErrors.is_active = errData.message;
           formattedErrors.is_active =
             "Role can not be deactivated as it's being used.";
         }
@@ -484,7 +481,28 @@ function Roles() {
                   }}
                 ></div>
                 <div className="modal-body w-full md:w-[90%] mx-auto  ">
-                  <div className="  relative mb-3 flex justify-center  mx-2">
+                  <div className="  relative -top-1 flex justify-center  mx-2">
+                    <label htmlFor="roleName" className="w-1/2 mt-2">
+                      Role Name<span className="text-red-500">*</span>
+                    </label>
+
+                    <input
+                      type="text"
+                      maxLength={30}
+                      className="form-control shadow-md mb-3 "
+                      id="roleName"
+                      value={newRoleName}
+                      onChange={handleChangeRoleName}
+                    />
+                    <div className="absolute  top-9 left-1/3">
+                      {fieldErrors.rolename && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.rolename}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="  relative  flex justify-center  mx-2">
                     <label htmlFor="role_id" className="w-1/2 mt-2">
                       Role ID <span className="text-red-500">*</span>
                     </label>
@@ -500,27 +518,6 @@ function Roles() {
                       {fieldErrors.role_id && (
                         <span className="text-danger text-xs">
                           {fieldErrors.role_id}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className=" relative -top-1 flex justify-center  mx-2">
-                    <label htmlFor="roleName" className="w-1/2 mt-2">
-                      Role Name<span className="text-red-500">*</span>
-                    </label>
-
-                    <input
-                      type="text"
-                      maxLength={30}
-                      className="form-control shadow-md "
-                      id="roleName"
-                      value={newRoleName}
-                      onChange={handleChangeRoleName}
-                    />
-                    <div className="absolute  top-9 left-1/3">
-                      {fieldErrors.rolename && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.rolename}
                         </span>
                       )}
                     </div>
@@ -544,10 +541,10 @@ function Roles() {
 
       {/* Edit Role Modal */}
       {showEditModal && currentRole && (
-        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="modal show" style={{ display: "block" }}>
             <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content ">
+              <div className="modal-content">
                 <div className="flex justify-between px-3 py-2">
                   <h5 className="modal-title">Edit Role</h5>
                   <RxCross1
@@ -557,25 +554,23 @@ function Roles() {
                   />
                 </div>
                 <div
-                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                  style={{
-                    backgroundColor: "#C03078",
-                  }}
+                  className="relative mb-3 h-1 w-[97%] mx-auto"
+                  style={{ backgroundColor: "#C03078" }}
                 ></div>
-                <div className="modal-body w-full md:w-[90%] mx-auto  ">
-                  <div className=" relative  flex justify-center  mx-2">
+                <div className="modal-body w-full md:w-[90%] mx-auto">
+                  <div className="relative flex justify-center mx-2">
                     <label htmlFor="roleName" className="w-1/2 mt-2">
-                      Role Name<span className="text-red-500">*</span>{" "}
+                      Role Name<span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       maxLength={30}
-                      className="form-control shadow-md "
+                      className="form-control shadow-md mb-4"
                       id="roleName"
                       value={newRoleName}
                       onChange={handleChangeRoleName}
-                    />{" "}
-                    <div className="absolute top-9 left-1/3 ">
+                    />
+                    <div className="absolute top-9 left-1/3">
                       {fieldErrors.rolename && (
                         <span className="text-danger text-xs">
                           {fieldErrors.rolename}
@@ -583,37 +578,33 @@ function Roles() {
                       )}
                     </div>
                   </div>
-                </div>
-                <div className="modal-body w-full md:w-[90%] mx-auto">
-                  <div className="relative mb-3 flex justify-center mx-2">
-                    <label htmlFor="roleStatus" className="w-1/2 mt-2">
-                      Status<span className="text-red-500">*</span>
+
+                  <div className="relative flex justify-center mx-2">
+                    <label htmlFor="role_id" className="w-1/2 mt-2">
+                      Role ID<span className="text-red-500">*</span>
                     </label>
-
-                    <select
-                      className="form-control shadow-md mb-2"
-                      id="roleStatus"
-                      value={newStatus}
-                      onChange={handleChangeStatus}
-                    >
-                      <option value="Y">Active</option>
-                      <option value="N">Inactive</option>
-                    </select>
-
+                    <input
+                      type="text"
+                      maxLength={1}
+                      className="form-control shadow-md mb-3"
+                      id="role_id"
+                      value={newRoleID}
+                      onChange={handleChangeRoleID}
+                    />
                     <div className="absolute top-9 left-1/3">
-                      {fieldErrors.is_active && (
+                      {fieldErrors.role_id && (
                         <span className="text-danger text-xs">
-                          {fieldErrors.is_active}
+                          {fieldErrors.role_id}
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className=" flex justify-end p-3 ">
+                <div className="flex justify-end p-3">
                   <button
                     type="button"
-                    className="btn btn-primary px-3 mb-2 "
+                    className="btn btn-primary px-3 mb-2"
                     onClick={handleSubmitEdit}
                     disabled={isSubmitting}
                   >
