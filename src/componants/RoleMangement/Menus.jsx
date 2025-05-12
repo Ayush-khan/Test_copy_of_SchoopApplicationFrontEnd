@@ -3,7 +3,7 @@ import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
@@ -99,65 +99,6 @@ function Menus() {
     setCurrentMenu(null);
     setErrors({});
   };
-
-  // const handleSubmitAdd = async () => {
-  //   if (isSubmitting) return;
-  //   setIsSubmitting(true);
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) throw new Error("No authentication token found");
-
-  //     await axios.post(`${API_URL}/api/menus`, formData, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //       withCredentials: true,
-  //     });
-
-  //     fetchMenus();
-  //     handleCloseModal();
-  //     toast.success("Menu added successfully!");
-  //   } catch (error) {
-  //     if (error.response && error.response.data.errors) {
-  //       setErrors(error.response.data.errors);
-  //     } else {
-  //       console.error("Error adding menu:", error);
-  //       setErrors({ add: error.message });
-  //     }
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
-  // const handleSubmitEdit = async () => {
-  //   if (isSubmitting) return;
-  //   setIsSubmitting(true);
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     if (!token) throw new Error("No authentication token found");
-
-  //     await axios.put(`${API_URL}/api/menus/${currentMenu.menu_id}`, formData, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //       withCredentials: true,
-  //     });
-
-  //     fetchMenus();
-  //     handleCloseModal();
-  //     toast.success("Menu updated successfully!");
-  //   } catch (error) {
-  //     if (error.response && error.response.data.errors) {
-  //       setErrors(error.response.data.errors);
-  //     } else {
-  //       console.error("Error editing menu:", error);
-  //       setErrors({ edit: error.message });
-  //     }
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
   const handleSubmitAdd = async () => {
     if (isSubmitting) return;
 
@@ -194,6 +135,7 @@ function Menus() {
       }
     } finally {
       setIsSubmitting(false);
+      setShowAddModal(false);
     }
   };
   const handleSubmitEdit = async () => {
@@ -232,38 +174,52 @@ function Menus() {
       }
     } finally {
       setIsSubmitting(false);
+      setShowEditModal(false);
     }
   };
 
   const handleDelete = (id) => {
     const menuToDelete = menus.find((menu) => menu.menu_id === id);
-    setCurrentMenu(menuToDelete);
+    setCurrentMenu({ menuToDelete });
     setShowDeleteModal(true);
   };
 
   const handleSubmitDelete = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
-      if (!token || !currentMenu || !currentMenu.menu_id)
+      if (!token || !currentMenu?.menuToDelete?.menu_id)
         throw new Error("Menu ID is missing");
 
-      await axios.delete(`${API_URL}/api/menus/${currentMenu.menu_id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "X-Academic-Year": academicYr,
-        },
-        withCredentials: true,
-      });
+      await axios.delete(
+        `${API_URL}/api/menus/${currentMenu.menuToDelete.menu_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
 
       fetchMenus();
       setShowDeleteModal(false);
       setCurrentMenu(null);
       toast.success("Menu deleted successfully!");
     } catch (error) {
-      console.error("Error deleting menu:", error);
-      setErrors({ delete: error.message });
+      console.error("Error deleting role:", error);
+
+      // Prefer backend message if available
+      const backendMessage = error?.response?.data?.message;
+      if (backendMessage) {
+        toast.error(backendMessage);
+      } else {
+        toast.error("Error deleting role.");
+      }
+    } finally {
+      setIsSubmitting(false);
+      setShowDeleteModal(false);
     }
   };
   useEffect(() => {
@@ -306,7 +262,7 @@ function Menus() {
     <>
       <ToastContainer />
       <div className="container md:mt-4">
-        <div className="card mx-auto lg:w-3/4 shadow-lg">
+        <div className="card mx-auto lg:w-[90%] shadow-lg">
           <div className="card-header flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Menus
@@ -347,7 +303,7 @@ function Menus() {
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
                     <tr className="bg-gray-200">
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="w-full md:w-[8%] px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Sr.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -359,11 +315,14 @@ function Menus() {
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Parent
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="w-full md:w-[10%] px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Sequence
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Actions
+                      <th className=" w-full md:w-[10%] px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Edit
+                      </th>
+                      <th className=" w-full md:w-[10%] px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Delete
                       </th>
                     </tr>
                   </thead>
@@ -414,6 +373,14 @@ function Menus() {
                               onClick={() => handleEdit(menu)}
                             >
                               <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </td>
+                          <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                            <button
+                              onClick={() => handleDelete(menu.menu_id)}
+                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
                             </button>
                           </td>
                         </tr>
@@ -736,51 +703,48 @@ function Menus() {
       )}
 
       {/* Delete Menu Modal */}
-      <div
-        className={`modal fade ${showDeleteModal ? "show" : ""}`}
-        style={{ display: showDeleteModal ? "block" : "none" }}
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="deleteMenuModalLabel"
-        aria-hidden={!showDeleteModal}
-      >
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="deleteMenuModalLabel">
-                Delete Menu
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={handleCloseModal}
-                aria-label="Close"
-              />
-            </div>
-            <div className="modal-body">
-              <p>
-                Are you sure you want to delete the menu "{currentMenu?.name}"?
-              </p>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={handleCloseModal}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={handleSubmitDelete}
-              >
-                Delete
-              </button>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">Confirm Delete</h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    // className="btn-close text-red-600"
+                    onClick={handleCloseModal}
+                  />
+
+                  {console.log("Delete-->", currentMenu)}
+                </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="modal-body">
+                  Are you sure you want to delete this menu{" "}
+                  {` ${currentMenu?.menuToDelete?.name} `} ?
+                </div>
+                <div className=" flex justify-end p-3">
+                  <button
+                    type="button"
+                    className="btn btn-danger px-3 mb-2"
+                    onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

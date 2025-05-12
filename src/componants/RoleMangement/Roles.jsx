@@ -3,10 +3,16 @@ import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faTrash,
+  faPlus,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import { FaCheck } from "react-icons/fa";
 
 function Roles() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -28,7 +34,9 @@ function Roles() {
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
   const pageSize = 10;
-
+  const [showDActiveModal, setShowDActiveModal] = useState(false);
+  const [currentStudentDataForActivate, setCurrentStudentDataForActivate] =
+    useState(null);
   const fetchRoles = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -74,6 +82,7 @@ function Roles() {
   };
 
   const handleCloseModal = () => {
+    setShowDActiveModal(false);
     setFieldErrors({});
     setError(null);
     setShowAddModal(false);
@@ -118,6 +127,60 @@ function Roles() {
       ...prevErrors,
       rolename: validateRoleForm(value, newRoleID).rolename,
     }));
+  };
+  const handleActiveAndInactive = (roleIsPass) => {
+    console.log("handleActiveAndInactive-->", roleIsPass.role_id);
+    const studentToActiveOrDeactive = roles.find(
+      (cls) => cls.role_id === roleIsPass.role_id
+    );
+    setCurrentStudentDataForActivate({ studentToActiveOrDeactive });
+    console.log("studentToActiveOrDeactive", studentToActiveOrDeactive);
+    setShowDActiveModal(true);
+  };
+  const handleActivateOrNot = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem("authToken");
+
+      console.log(
+        "the classes inside the delete",
+        currentStudentDataForActivate?.studentToActiveOrDeactive?.role_id
+      );
+
+      if (
+        !token ||
+        !currentStudentDataForActivate ||
+        !currentStudentDataForActivate?.studentToActiveOrDeactive?.role_id
+      ) {
+        throw new Error("Role ID is missing");
+      }
+
+      const response = await axios.put(
+        `${API_URL}/api/update_activeinactiverole/${currentStudentDataForActivate?.studentToActiveOrDeactive?.role_id}`,
+        {}, // Empty data object
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      fetchRoles();
+
+      setShowDActiveModal(false);
+      toast.success(response?.data?.message);
+    } catch (error) {
+      if (error.response && error.response.data) {
+        toast.error(`Error: ${error.response.data.message}`);
+      } else {
+        toast.error(`Error in active or deactive roles: ${error.message}`);
+      }
+      console.error("Error in active or deactive roles:", error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
+      setShowDActiveModal(false);
+    }
   };
   const handleChangeStatus = (e) => {
     const value = e.target.value;
@@ -180,6 +243,7 @@ function Roles() {
       }
     } finally {
       setIsSubmitting(false);
+      setShowAddModal(false);
     }
   };
   const handleSubmitEdit = async () => {
@@ -248,12 +312,14 @@ function Roles() {
       }
     } finally {
       setIsSubmitting(false);
+      setShowEditModal(false);
     }
   };
 
   const handleDelete = (id) => {
-    const roleToDelete = roles.find((role) => role.id === id);
-    setCurrentRole(roleToDelete);
+    console.log("fdh");
+    const roleToDelete = roles.find((role) => role.role_id === id);
+    setCurrentRole({ roleToDelete });
     setShowDeleteModal(true);
   };
 
@@ -262,19 +328,20 @@ function Roles() {
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
-      const academicYr = localStorage.getItem("academicYear");
 
-      if (!token || !currentRole || !currentRole.role_id) {
+      if (!token || !currentRole?.roleToDelete?.role_id) {
         throw new Error("Role ID is missing");
       }
 
-      await axios.delete(`${API_URL}/api/roles/${currentRole.role_id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "X-Academic-Year": academicYr,
-        },
-        withCredentials: true,
-      });
+      await axios.delete(
+        `${API_URL}/api/roles/${currentRole.roleToDelete.role_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
 
       fetchRoles();
       setShowDeleteModal(false);
@@ -282,12 +349,22 @@ function Roles() {
       toast.success("Role deleted successfully!");
     } catch (error) {
       console.error("Error deleting role:", error);
+
+      // Prefer backend message if available
+      const backendMessage = error?.response?.data?.message;
+      if (backendMessage) {
+        toast.error(backendMessage);
+      } else {
+        toast.error("Error deleting role.");
+      }
+
       setError(error.message);
-      toast.error("Error deleting role.");
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
+      setShowDeleteModal(false);
     }
   };
+
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
 
@@ -359,24 +436,24 @@ function Roles() {
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
                     <tr className="bg-gray-200">
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="w-full md:w-[11%] px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Sr.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Name
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="w-full md:w-[11%] px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Role Id
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="w-full md:w-[11%] px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Status
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="w-full md:w-[11%] px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Edit
                       </th>
-                      {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                                Delete
-                                            </th> */}
+                      <th className="w-full md:w-[11%] px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Delete
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -409,17 +486,44 @@ function Roles() {
                               {role?.role_id}
                             </p>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
+                            <button
+                              onClick={() => handleActiveAndInactive(role)}
+                              className={`  font-bold hover:bg-none ${
+                                role?.is_active === "Y"
+                                  ? "text-green-600 hover:text-green-800 hover:bg-transparent"
+                                  : "text-red-700 hover:text-red-900  hover:bg-transparent"
+                              }`}
+                            >
+                              {role?.is_active === "Y" ? (
+                                <FaCheck className="text-xl" />
+                              ) : (
+                                <FontAwesomeIcon
+                                  icon={faXmark}
+                                  className="text-xl"
+                                />
+                              )}
+                            </button>
+                          </td>
+                          {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {role.is_active === "Y" ? "Active" : "Inactive"}
                             </p>
-                          </td>
+                          </td> */}
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <button
                               className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
                               onClick={() => handleEdit(role)}
                             >
                               <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </td>
+                          <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                            <button
+                              onClick={() => handleDelete(role.role_id)}
+                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
                             </button>
                           </td>
                         </tr>
@@ -617,43 +721,97 @@ function Roles() {
         </div>
       )}
 
+      {showDActiveModal && (
+        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">
+                    {/* Confirm Activate or Deactivate */}
+                    {currentStudentDataForActivate?.studentToActiveOrDeactive
+                      ?.is_active === "Y"
+                      ? `Confirm Deactive`
+                      : `Confirm Active`}
+                  </h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    // className="btn-close text-red-600"
+                    onClick={handleCloseModal}
+                  />
+                  {console.log(
+                    "the currecnt section inside activate or not of the managesubjhect",
+                    currentStudentDataForActivate
+                  )}
+                </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="modal-body">
+                  {currentStudentDataForActivate?.studentToActiveOrDeactive
+                    ?.is_active === "Y"
+                    ? `Are you sure you want to deactive this role ${currentStudentDataForActivate?.studentToActiveOrDeactive?.name}?`
+                    : `Are you sure you want to active this role ${currentStudentDataForActivate?.studentToActiveOrDeactive?.name}?`}
+                </div>
+
+                <div className=" flex justify-end p-3">
+                  <button
+                    type="button"
+                    className="btn btn-primary px-3 mb-2"
+                    onClick={handleActivateOrNot}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Activating..." : "Active"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Role Modal */}
+
       {showDeleteModal && currentRole && (
-        <div className="modal fade show d-block" tabIndex="-1" role="dialog">
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Delete Role</h5>
-                <button
-                  type="button"
-                  className="close"
-                  onClick={handleCloseModal}
-                >
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <p>
-                  Are you sure you want to delete the role{" "}
-                  <strong>{currentRole.rolename}</strong>?
-                </p>
-              </div>
-              <div className=" flex justify-end p-3 space-x-2">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleCloseModal}
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary px-3 mb-2 "
-                  onClick={handleSubmitDelete}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Deleting..." : "Delete"}
-                </button>
+        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">Confirm Delete</h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    // className="btn-close text-red-600"
+                    onClick={handleCloseModal}
+                  />
+
+                  {console.log("Delete-->", currentRole)}
+                </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="modal-body">
+                  Are you sure you want to delete this role{" "}
+                  {` ${currentRole?.roleToDelete?.name} `} ?
+                </div>
+                <div className=" flex justify-end p-3">
+                  <button
+                    type="button"
+                    className="btn btn-danger px-3 mb-2"
+                    onClick={handleSubmitDelete}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
