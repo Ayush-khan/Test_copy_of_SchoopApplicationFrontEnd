@@ -201,7 +201,7 @@ const DashboardContent = () => {
           />
           <Link to="/feependinglist" className="no-underline">
             <Card
-              title="Pending Fee-Collection "
+              title="Fee-Collection "
               value={pendingFee}
               color="#FF5733"
               icon={
