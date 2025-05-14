@@ -61,15 +61,11 @@ const ViewExamTimeTable = () => {
 
   const contentRef = useRef(); // Create a reference to the content to be printed
 
-  // Set up the print functionality
-  //   const handlePrint = useReactToPrint({
-  //     content: () => contentRef.current, // Set content to be printed
-  //     documentTitle: "Exam Timetable", // Title for the print window
-  //     // Optional styles for print
-  //     pageStyle: "@media print { table { width: 100%; } }",
-  //   });
   const handlePrint = () => {
     // Prepare the content for printing
+    const filteredTimetable = timetable.filter(
+      (row) => !(row.study_leave === null && row.subjects === null)
+    );
     const printContent = `
     <div class="flex items-center justify-center min-h-screen bg-white">
       <div id="tableHeading" class="text-center w-3/4">
@@ -84,7 +80,7 @@ const ViewExamTimeTable = () => {
             </tr>
           </thead>
           <tbody>
-            ${timetable
+            ${filteredTimetable
               .map(
                 (row) => `
                 <tr>
@@ -245,27 +241,34 @@ const ViewExamTimeTable = () => {
                         </div>
                       </tr>
                     ) : (
-                      timetable.map((row, index) => (
-                        <tr
-                          key={index}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-200`}
-                        >
-                          <td className="border p-2 text-center">{row.date}</td>
-                          <td
-                            className={`border p-2 text-center ${
-                              row.study_leave
-                                ? "text-red-500 font-semibold"
-                                : ""
-                            }`}
+                      timetable
+                        .filter(
+                          (row) =>
+                            !(row.study_leave === null && row.subjects === null)
+                        ) // skip if both are null
+                        .map((row, index) => (
+                          <tr
+                            key={index}
+                            className={`${
+                              index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-200`}
                           >
-                            {row.study_leave
-                              ? row.study_leave
-                              : row.subjects || "-"}
-                          </td>
-                        </tr>
-                      ))
+                            <td className="border p-2 text-center">
+                              {row.date}
+                            </td>
+                            <td
+                              className={`border p-2 text-center ${
+                                row.study_leave
+                                  ? "text-red-500 font-semibold"
+                                  : ""
+                              }`}
+                            >
+                              {row.study_leave
+                                ? row.study_leave
+                                : row.subjects || "-"}
+                            </td>
+                          </tr>
+                        ))
                     )}
                   </tbody>
                 </table>
