@@ -36,9 +36,10 @@ const IDCardDetails = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      // console.log("studentiddetails", response);
 
       const data = response?.data?.data || {};
+      const sectionID = data[0]?.section_id;
+      console.log("section data", sectionID);
       setData(data);
       setStudents(data || []);
       // console.log("after setStudents", data);
@@ -66,9 +67,6 @@ const IDCardDetails = () => {
     );
   };
 
-  // console.log("student", students);
-
-  // Handle Image Cropping Separately
   const handleStudentImageCropped = (croppedImageData, index) => {
     setStudents((prev) =>
       prev.map((student, i) =>
@@ -108,12 +106,6 @@ const IDCardDetails = () => {
         errors.push({
           field: `student_address_${index}`,
           message: "Permanent Address is required.",
-        });
-      }
-      if (!student.house) {
-        errors.push({
-          field: `student_house_${index}`,
-          message: "House is required.",
         });
       }
       if (!student.image_base && !student.image_name) {
@@ -171,13 +163,15 @@ const IDCardDetails = () => {
 
       if (response.status === 200) {
         toast.success("ID Card Saved successfully!");
-        setFormErrors([]); // Reset errors if no validation issues
+        setFormErrors([]);
+
+        const sectionIDToPass = data[0]?.section_id;
+        console.log("Navigating with sectionID:", sectionIDToPass);
 
         setTimeout(() => {
           navigate("/studentIdCard", {
             state: {
-              selectedClassId: response?.data?.data?.class_id, // e.g., 5
-              selectedDivisionId: response?.data?.data?.section_id, // optional
+              sectionID: sectionIDToPass,
             },
           });
         }, 1000);
@@ -212,12 +206,18 @@ const IDCardDetails = () => {
             ID Card Details
           </h5>
 
-          <RxCross1
-            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-            onClick={() => {
-              navigate("/studentIdCard");
-            }}
-          />
+          {data?.length > 0 && (
+            <RxCross1
+              className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+              onClick={() => {
+                navigate("/studentIdCard", {
+                  state: {
+                    sectionID: data?.[0]?.section_id,
+                  },
+                });
+              }}
+            />
+          )}
         </div>
         <div
           className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
@@ -339,7 +339,8 @@ const IDCardDetails = () => {
                         {/* House */}
                         <div className="flex flex-col">
                           <label className="font-bold text-sm">
-                            House <span className="text-red-500">*</span>
+                            House
+                            {/* <span className="text-red-500">*</span> */}
                           </label>
                           <select
                             name="house"
