@@ -8,6 +8,7 @@ import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
 import { useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import { useLocation } from "react-router-dom";
 
 const UpdateStudentIdCards = () => {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -34,9 +35,17 @@ const UpdateStudentIdCards = () => {
   const [parentsData, setParentsData] = useState([]);
   const [selectedFathers, setSelectedFathers] = useState([]);
   const [errors, setErrors] = useState({});
+  const [fieldErrors, setFieldErrors] = useState({});
+  const inputRefs = useRef({});
+  const topRef = useRef(null);
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
+  const location = useLocation();
+  const { sectionID } = location.state || {};
+
+  console.log("update id card section id", sectionID);
+  const [classId, setClassId] = useState("");
 
   // Custom styles for the close button
   const classOptions = useMemo(
@@ -72,20 +81,17 @@ const UpdateStudentIdCards = () => {
     }
   };
 
+  useEffect(() => {
+    if (sectionID) {
+      handleSearch(); // or your data-fetching logic
+    }
+  }, [sectionID]);
+
   const handleSearch = async () => {
     if (isSubmitting) return; // Prevent multiple submissions
     setIsSubmitting(true);
-
-    // Reset selectedClass when search is triggered
-
+    setFieldErrors({}); // clear error message
     setNameError("");
-
-    if (!classIdForManage) {
-      setNameError("Please select a Class.");
-      setIsSubmitting(false);
-      return;
-    }
-
     setLoading(true);
     setSearchTerm(""); // Reset search term before starting a new search
 
@@ -96,10 +102,18 @@ const UpdateStudentIdCards = () => {
         throw new Error("Authentication token is missing.");
       }
 
-      const { class_id, section_id } = classIdForManage || {};
-      if (!class_id || !section_id) {
-        toast.error("Invalid class selection. Please try again.");
-        throw new Error("Class ID or Section ID is missing.");
+      let section_id;
+
+      if (classIdForManage && classIdForManage.section_id) {
+        section_id = classIdForManage.section_id;
+      } else if (sectionID) {
+        section_id = sectionID;
+      } else {
+        setNameError("Please select a Class.");
+        // toast.error("Please select Class.");
+        setIsSubmitting(false);
+        setLoading(false);
+        return;
       }
 
       const response = await axios.get(
@@ -119,9 +133,10 @@ const UpdateStudentIdCards = () => {
 
       console.log("Extracted Update Student List:", studentData);
 
-      setPendingstudents(studentData); // Update student data in state
-      setParentsData(studentData); // Store parents data for editing
-      setPageCount(Math.ceil(studentData.length / pageSize)); // Update pagination
+      console.error(response.data);
+      setPendingstudents(studentData);
+      setParentsData(studentData);
+      setPageCount(Math.ceil(studentData.length / pageSize));
       setCurrentPage(0);
     } catch (error) {
       console.error("Error fetching student details:", error);
@@ -131,7 +146,7 @@ const UpdateStudentIdCards = () => {
       );
     } finally {
       setLoading(false);
-      setIsSubmitting(false); // Set submitting state back to false
+      setIsSubmitting(false);
     }
   };
 
@@ -140,10 +155,13 @@ const UpdateStudentIdCards = () => {
   }, [searchTerm]);
 
   // const handleInputChange = (e, field, index) => {
-  //   const { value } = e.target;
+  //   const { value, dataset } = e.target;
+  //   const parent_id = dataset.parentId;
+
+  //   console.log("parent_id", parent_id);
 
   //   // Update validation errors
-  //   setErrors((prev) => ({
+  //   setFieldErrors((prev) => ({
   //     ...prev,
   //     [`${index}-${field}`]: value.trim() ? "" : `${field} is required`,
   //   }));
@@ -154,33 +172,43 @@ const UpdateStudentIdCards = () => {
   //       i === index
   //         ? {
   //             ...student,
-  //             [field]: value, // 👈 Update top-level field here
+  //             [field]: value,
+  //             parent_id: parent_id || student.parent_id, // ensure parent_id stays consistent
   //           }
   //         : student
   //     )
   //   );
   // };
 
+  const fieldLabelMap = {
+    f_mobile: "Father Mobile No.",
+    m_mobile: "Mother Mobile No.",
+    blood_group: "Blood Group",
+    permanent_address: "Permanent Address",
+    image_name: "Student Image",
+  };
+
   const handleInputChange = (e, field, index) => {
     const { value, dataset } = e.target;
     const parent_id = dataset.parentId;
 
-    console.log("parent_id", parent_id);
+    const errorKey = `${field}_${parent_id}`;
+    const label =
+      fieldLabelMap[field] ||
+      field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 
-    // Update validation errors
-    setErrors((prev) => ({
+    setFieldErrors((prev) => ({
       ...prev,
-      [`${index}-${field}`]: value.trim() ? "" : `${field} is required`,
+      [errorKey]: value.trim() ? "" : `${label} is required`,
     }));
 
-    // Update the pending student directly
     setPendingstudents((prev) =>
       prev.map((student, i) =>
         i === index
           ? {
               ...student,
               [field]: value,
-              parent_id: parent_id || student.parent_id, // ensure parent_id stays consistent
+              parent_id: parent_id || student.parent_id,
             }
           : student
       )
@@ -211,12 +239,13 @@ const UpdateStudentIdCards = () => {
     if (Array.isArray(pendingstudents) && pendingstudents.length > 0) {
       const formattedParentsData = pendingstudents.map((student) => {
         return {
-          parent_id: student.parent_id, // ✅ Important
-          f_mobile: student.f_mobile || "", // ✅ Directly from top-level
+          parent_id: student.parent_id,
+          f_mobile: student.f_mobile || "",
           m_mobile: student.m_mobile || "",
           permant_add: student.permant_add || "",
           blood_group: student.blood_group || "",
           house: student.house || "",
+          image_name: student.image_name || "",
           section_id: student.section_id || "",
         };
       });
@@ -232,10 +261,24 @@ const UpdateStudentIdCards = () => {
     }
 
     const token = localStorage.getItem("authToken");
-    const { class_id, section_id } = classIdForManage || {};
+    // const { class_id, section_id } = classIdForManage || {};
 
-    if (!class_id || !section_id) {
-      toast.error("Invalid class selection. Please try again.");
+    // if (!class_id || !section_id) {
+    //   toast.error("Invalid class selection. Please try again.");
+    //   return;
+    // }
+
+    let section_id;
+
+    if (classIdForManage && classIdForManage.section_id) {
+      section_id = classIdForManage.section_id;
+    } else if (sectionID) {
+      section_id = sectionID;
+    } else {
+      setNameError("Please select a Class.");
+      toast.error("Class or section not selected.");
+      setIsSubmitting(false);
+      setLoading(false);
       return;
     }
 
@@ -272,6 +315,8 @@ const UpdateStudentIdCards = () => {
       if (response.status === 200) {
         toast.success("ID Card details saved successfully.");
         handleSearch(); // Reload updated data
+        topRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
         toast.error("Failed to saved ID Card details.");
       }
@@ -283,40 +328,252 @@ const UpdateStudentIdCards = () => {
     }
   };
 
+  // All errors fileds show at a time error messages
+  // const handleSubmitConfirm = async () => {
+  //   setLoadingConfirm(true);
+  //   setFieldErrors({}); // Clear old errors
+
+  //   if (!parentsData || parentsData.length === 0) {
+  //     toast.error("Data is still loading. Please wait.");
+  //     setLoadingConfirm(false);
+  //     return;
+  //   }
+
+  //   const token = localStorage.getItem("authToken");
+
+  //   let section_id;
+
+  //   if (classIdForManage && classIdForManage.section_id) {
+  //     section_id = classIdForManage.section_id;
+  //   } else if (sectionID) {
+  //     section_id = sectionID;
+  //   } else {
+  //     setNameError("Please select a Class.");
+  //     toast.error("Class or section not selected.");
+  //     setIsSubmitting(false);
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   const errors = {};
+  //   let firstErrorKey = null;
+
+  //   parentsData.forEach((student, index) => {
+  //     const pid = student.parent_id;
+  //     if (!pid) return;
+
+  //     const requiredFields = [
+  //       {
+  //         key: `f_mobile_${pid}`,
+  //         label: "Father's Mobile No.",
+  //         value: student.f_mobile,
+  //       },
+  //       {
+  //         key: `m_mobile_${pid}`,
+  //         label: "Mother's Mobile No.",
+  //         value: student.m_mobile,
+  //       },
+  //       {
+  //         key: `permant_add_${pid}`,
+  //         label: "Permanent Address",
+  //         value: student.permant_add,
+  //       },
+  //       {
+  //         key: `blood_group_${pid}`,
+  //         label: "Blood Group",
+  //         value: student.blood_group,
+  //       },
+  //     ];
+
+  //     requiredFields.forEach((field) => {
+  //       if (!field.value) {
+  //         errors[field.key] = `${field.label} is required`;
+  //         if (!firstErrorKey) firstErrorKey = field.key;
+  //       }
+  //     });
+  //   });
+
+  //   if (Object.keys(errors).length > 0) {
+  //     setFieldErrors(errors);
+
+  //     // Wait for errors to render
+  //     setTimeout(() => {
+  //       requestAnimationFrame(() => {
+  //         const input = inputRefs.current[firstErrorKey];
+  //         if (input && typeof input.scrollIntoView === "function") {
+  //           input.scrollIntoView({ behavior: "smooth", block: "center" });
+  //           input.focus();
+  //         }
+  //       });
+  //     }, 100); // enough delay for DOM to re-render
+
+  //     setLoadingConfirm(false);
+  //     return;
+  //   }
+
+  //   // Construct requestData
+  //   const requestData = { section_id };
+  //   parentsData.forEach((student) => {
+  //     const pid = student.parent_id;
+  //     if (!pid) return;
+
+  //     requestData[`f_mobile_${pid}`] = student.f_mobile || "";
+  //     requestData[`m_mobile_${pid}`] = student.m_mobile || "";
+  //     requestData[`permant_add_${pid}`] = student.permant_add || "";
+  //     requestData[`blood_group_${pid}`] = student.blood_group || "";
+  //     requestData[`house_${pid}`] = student.house || "";
+  //   });
+
+  //   try {
+  //     const response = await axios.put(
+  //       `${API_URL}/api/update_idcarddataandconfirm`,
+  //       requestData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       toast.success("ID Card details saved and confirmed successfully.");
+  //       handleSearch();
+  //     } else {
+  //       toast.error("Failed to save ID Card details.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating student ID card:", error);
+  //     toast.error("Something went wrong. Please try again.");
+  //   } finally {
+  //     setLoadingConfirm(false);
+  //   }
+  // };
+
   const handleSubmitConfirm = async () => {
     setLoadingConfirm(true);
+    setFieldErrors({}); // Clear previous errors
+
     if (!parentsData || parentsData.length === 0) {
       toast.error("Data is still loading. Please wait.");
+      setLoadingConfirm(false);
       return;
     }
 
     const token = localStorage.getItem("authToken");
-    const { class_id, section_id } = classIdForManage || {};
 
-    if (!class_id || !section_id) {
-      toast.error("Invalid class selection. Please try again.");
+    let section_id;
+
+    if (classIdForManage && classIdForManage.section_id) {
+      section_id = classIdForManage.section_id;
+    } else if (sectionID) {
+      section_id = sectionID;
+    } else {
+      setNameError("Please select a Class.");
+      toast.error("Class or section not selected.");
+      setIsSubmitting(false);
+      setLoading(false);
       return;
     }
 
+    const errors = {};
+    let firstErrorKey = null;
+    let stopValidation = false;
+
+    for (let index = 0; index < parentsData.length; index++) {
+      const student = parentsData[index];
+      const pid = student.parent_id;
+      if (!pid) continue;
+
+      console.warn(parentsData[index]);
+      console.log(`Student ${index + 1} Image Name:`, student.image_name);
+
+      const requiredFields = [
+        {
+          key: `f_mobile_${pid}`,
+          label: "Father Mobile No.",
+          value: student.f_mobile,
+        },
+        {
+          key: `m_mobile_${pid}`,
+          label: "Mother Mobile No.",
+          value: student.m_mobile,
+        },
+        {
+          key: `permant_add_${pid}`,
+          label: "Permanent Address",
+          value: student.permant_add,
+        },
+        {
+          key: `blood_group_${pid}`,
+          label: "Blood Group",
+          value: student.blood_group,
+        },
+        {
+          key: `image_name_${pid}`,
+          label: "Student Photo",
+          value: student.image_name,
+        },
+      ];
+
+      for (const field of requiredFields) {
+        let isEmpty = false;
+
+        // Check image differently
+        if (field.key.startsWith("image_name_")) {
+          isEmpty =
+            !field.value ||
+            typeof field.value !== "string" ||
+            field.value.trim() === "" ||
+            field.value === "null";
+        } else {
+          isEmpty =
+            !field.value ||
+            (typeof field.value === "string" && field.value.trim() === "");
+        }
+
+        if (isEmpty) {
+          errors[field.key] = `${field.label} is required`;
+          firstErrorKey = field.key;
+          stopValidation = true;
+          break;
+        }
+      }
+
+      if (stopValidation) break;
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          const input = inputRefs.current[firstErrorKey];
+          if (input && typeof input.scrollIntoView === "function") {
+            input.scrollIntoView({ behavior: "smooth", block: "center" });
+            input.focus();
+          }
+        });
+      }, 100);
+
+      setLoadingConfirm(false);
+      return;
+    }
+
+    // Construct requestData
+    const requestData = { section_id };
+    parentsData.forEach((student) => {
+      const pid = student.parent_id;
+      if (!pid) return;
+
+      requestData[`f_mobile_${pid}`] = student.f_mobile || "";
+      requestData[`m_mobile_${pid}`] = student.m_mobile || "";
+      requestData[`permant_add_${pid}`] = student.permant_add || "";
+      requestData[`blood_group_${pid}`] = student.blood_group || "";
+      requestData[`house_${pid}`] = student.house || "";
+    });
+
     try {
-      //Construct requestData for all students
-      const requestData = {
-        section_id: section_id,
-      };
-
-      parentsData.forEach((student) => {
-        const pid = student.parent_id;
-        if (!pid) return;
-
-        requestData[`f_mobile_${pid}`] = student.f_mobile || "";
-        requestData[`m_mobile_${pid}`] = student.m_mobile || "";
-        requestData[`permant_add_${pid}`] = student.permant_add || "";
-        requestData[`blood_group_${pid}`] = student.blood_group || "";
-        requestData[`house_${pid}`] = student.house || "";
-      });
-
-      console.log("Submitting Request Data:", requestData);
-
       const response = await axios.put(
         `${API_URL}/api/update_idcarddataandconfirm`,
         requestData,
@@ -330,9 +587,9 @@ const UpdateStudentIdCards = () => {
 
       if (response.status === 200) {
         toast.success("ID Card details saved and confirmed successfully.");
-        handleSearch(); // Reload updated data
+        handleSearch();
       } else {
-        toast.error("Failed to saved ID Card details.");
+        toast.error("Failed to save ID Card details.");
       }
     } catch (error) {
       console.error("Error updating student ID card:", error);
@@ -340,10 +597,6 @@ const UpdateStudentIdCards = () => {
     } finally {
       setLoadingConfirm(false);
     }
-  };
-
-  const handlePageClick = (data) => {
-    setCurrentPage(data.selected);
   };
 
   useEffect(() => {
@@ -360,6 +613,15 @@ const UpdateStudentIdCards = () => {
 
     prevSearchTermRef.current = trimmedSearch;
   }, [searchTerm]);
+
+  useEffect(() => {
+    const savedClassId = localStorage.getItem("selectedClassId");
+    if (savedClassId) {
+      setClassId(savedClassId); // update the dropdown value
+      handleSearch(savedClassId); // auto-trigger search
+      localStorage.removeItem("selectedClassId"); // optional cleanup
+    }
+  }, []);
 
   const filteredSections = Array.isArray(pendingstudents)
     ? pendingstudents.filter((section) => {
@@ -390,11 +652,20 @@ const UpdateStudentIdCards = () => {
 
   console.log("filteredsections", filteredSections);
   const displayedSections = filteredSections.slice(
-    currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    currentPage * pageSize
+    // , (currentPage + 1) * pageSize
   );
 
   console.log("displayedSections", displayedSections);
+
+  useEffect(() => {
+    const savedClassId = localStorage.getItem("selectedClassId");
+    if (savedClassId) {
+      setClassId(savedClassId); // update the dropdown value
+      handleSearch(savedClassId); // auto-trigger search
+      localStorage.removeItem("selectedClassId"); // optional cleanup
+    }
+  }, []);
 
   return (
     <>
@@ -482,7 +753,10 @@ const UpdateStudentIdCards = () => {
                   ></div>
 
                   <div className="card-body w-full">
-                    <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full  md:w-[100%] mx-auto">
+                    <div
+                      ref={topRef}
+                      className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full  md:w-[100%] mx-auto"
+                    >
                       <table className="min-w-full leading-normal table-auto">
                         <thead>
                           <tr className="bg-gray-200">
@@ -582,16 +856,27 @@ const UpdateStudentIdCards = () => {
                                             index
                                           )
                                         }
+                                        ref={(el) =>
+                                          (inputRefs.current[
+                                            `permant_add_${pendingstudent.parent_id}`
+                                          ] = el)
+                                        }
                                         data-parent-id={
                                           pendingstudent?.parent_id
                                         }
                                         className=" text-base bg-white border border-gray-400 rounded-md p-1 "
                                         required
                                       />
-                                      {errors[`${index}-permant_add`] && (
-                                        <span className="error text-xs text-red-500">
-                                          Address is required!{" "}
-                                        </span>
+                                      {fieldErrors[
+                                        `permant_add_${pendingstudent.parent_id}`
+                                      ] && (
+                                        <div className="error-message text-xs text-red-500">
+                                          {
+                                            fieldErrors[
+                                              `permant_add_${pendingstudent.parent_id}`
+                                            ]
+                                          }
+                                        </div>
                                       )}
                                     </div>
                                   </div>
@@ -608,6 +893,11 @@ const UpdateStudentIdCards = () => {
                                           index
                                         )
                                       }
+                                      ref={(el) =>
+                                        (inputRefs.current[
+                                          `blood_group_${pendingstudent.parent_id}`
+                                        ] = el)
+                                      }
                                       data-parent-id={pendingstudent?.parent_id}
                                       className="w-full border border-gray-400 rounded-md py-2 px-3 bg-white text-base"
                                       required
@@ -622,19 +912,31 @@ const UpdateStudentIdCards = () => {
                                       <option value="O+">O+</option>
                                       <option value="O-">O-</option>
                                     </select>
-                                    {errors[`${index}-blood_group`] && (
-                                      <span className="error text-xs text-red-500">
-                                        Blood group is required!{" "}
-                                      </span>
+                                    {fieldErrors[
+                                      `blood_group_${pendingstudent.parent_id}`
+                                    ] && (
+                                      <div className="error-message text-xs text-red-500">
+                                        {
+                                          fieldErrors[
+                                            `blood_group_${pendingstudent.parent_id}`
+                                          ]
+                                        }
+                                      </div>
                                     )}
                                   </div>
                                 </td>
+
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <div className="flex flex-col items-center">
                                     <select
                                       value={pendingstudent.house || ""}
                                       onChange={(e) =>
                                         handleInputChange(e, "house", index)
+                                      }
+                                      ref={(el) =>
+                                        (inputRefs.current[
+                                          `house_${pendingstudent.parent_id}`
+                                        ] = el)
                                       }
                                       data-parent-id={pendingstudent?.parent_id}
                                       className="w-full border border-gray-400 rounded-md py-2 px-3 bg-white text-base"
@@ -646,14 +948,9 @@ const UpdateStudentIdCards = () => {
                                       <option value="E">Emerald</option>
                                       <option value="S">Sapphire</option>
                                     </select>
-                                    {errors[`${index}-house`] && (
-                                      <span className="error text-xs text-red-500">
-                                        House is required!{" "}
-                                        {/* Custom error message */}
-                                      </span>
-                                    )}
                                   </div>
                                 </td>
+
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <div className="flex flex-col items-center">
                                     {pendingstudent?.father_name}
@@ -668,15 +965,25 @@ const UpdateStudentIdCards = () => {
                                     onChange={(e) =>
                                       handleInputChange(e, "f_mobile", index)
                                     }
+                                    ref={(el) =>
+                                      (inputRefs.current[
+                                        `f_mobile_${pendingstudent.parent_id}`
+                                      ] = el)
+                                    }
                                     data-parent-id={pendingstudent?.parent_id}
                                     maxLength={10}
                                   />
                                   <div>
-                                    {errors[`${index}-f_mobile`] && (
-                                      <span className="error text-xs text-red-500">
-                                        Father No. is required!{" "}
-                                        {/* Custom error message */}
-                                      </span>
+                                    {fieldErrors[
+                                      `f_mobile_${pendingstudent.parent_id}`
+                                    ] && (
+                                      <div className="error-message text-xs text-red-500">
+                                        {
+                                          fieldErrors[
+                                            `f_mobile_${pendingstudent.parent_id}`
+                                          ]
+                                        }
+                                      </div>
                                     )}
                                   </div>
                                 </td>
@@ -689,15 +996,25 @@ const UpdateStudentIdCards = () => {
                                     onChange={(e) =>
                                       handleInputChange(e, "m_mobile", index)
                                     }
+                                    ref={(el) =>
+                                      (inputRefs.current[
+                                        `m_mobile_${pendingstudent.parent_id}`
+                                      ] = el)
+                                    }
                                     data-parent-id={pendingstudent?.parent_id}
                                     maxLength={10}
                                   />
                                   <div>
-                                    {errors[`${index}-m_mobile`] && (
-                                      <span className="error text-xs text-red-500">
-                                        Mother No. is required!{" "}
-                                        {/* Custom error message */}
-                                      </span>
+                                    {fieldErrors[
+                                      `m_mobile_${pendingstudent.parent_id}`
+                                    ] && (
+                                      <div className="error-message text-xs text-red-500">
+                                        {
+                                          fieldErrors[
+                                            `m_mobile_${pendingstudent.parent_id}`
+                                          ]
+                                        }
+                                      </div>
                                     )}
                                   </div>
                                 </td>
@@ -708,10 +1025,27 @@ const UpdateStudentIdCards = () => {
                                       onClick={() =>
                                         handleStudentPhotoClick(pendingstudent)
                                       }
+                                      ref={(el) =>
+                                        (inputRefs.current[
+                                          `image_name_${pendingstudent.parent_id}`
+                                        ] = el)
+                                      }
                                       className="text-blue-600 hover:underline cursor-pointer text-base"
                                     >
                                       Student
                                     </span>
+                                    {fieldErrors[
+                                      `image_name_${pendingstudent.parent_id}`
+                                    ] && (
+                                      <p className="text-red-500 text-sm mt-1">
+                                        {
+                                          fieldErrors[
+                                            `image_name_${pendingstudent.parent_id}`
+                                          ]
+                                        }
+                                      </p>
+                                    )}
+
                                     <br />
                                     <span
                                       onClick={() =>
@@ -740,6 +1074,16 @@ const UpdateStudentIdCards = () => {
                       <div className="flex justify-end">
                         <button
                           className="text-white bg-yellow-500 hover:bg-yellow-500 px-4 py-2 rounded m-2"
+                          onClick={() => {
+                            setPendingstudents([]);
+                            setSelectedClass("");
+                          }}
+                        >
+                          Back
+                        </button>
+
+                        <button
+                          className="text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded m-2"
                           onClick={handleSubmitConfirm}
                           disabled={loadingConfirm} // Disable button during loading
                         >
@@ -754,7 +1098,7 @@ const UpdateStudentIdCards = () => {
                         </button>
                       </div>
                     </div>
-                    <div className=" flex justify-center pt-2 -mb-3">
+                    {/* <div className=" flex justify-center pt-2 -mb-3">
                       <ReactPaginate
                         previousLabel={"Previous"}
                         nextLabel={"Next"}
@@ -774,7 +1118,7 @@ const UpdateStudentIdCards = () => {
                         nextLinkClassName={"page-link"}
                         activeClassName={"active"}
                       />
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>
