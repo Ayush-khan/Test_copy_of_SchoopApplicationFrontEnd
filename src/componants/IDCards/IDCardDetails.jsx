@@ -206,13 +206,24 @@ const IDCardDetails = () => {
             ID Card Details
           </h5>
 
-          {data?.length > 0 && (
+          {data?.length > 0 ? (
             <RxCross1
               className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
               onClick={() => {
                 navigate("/studentIdCard", {
                   state: {
-                    sectionID: data?.[0]?.section_id,
+                    sectionID: data[0].section_id,
+                  },
+                });
+              }}
+            />
+          ) : (
+            <RxCross1
+              className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+              onClick={() => {
+                navigate("/studentIdCard", {
+                  state: {
+                    sectionID: data[0].section_id, // or a default fallback
                   },
                 });
               }}
@@ -399,6 +410,21 @@ const IDCardDetails = () => {
                 ))}
               </div>
               <div className="col-span-3 md:mr-9 my-2 text-right">
+                {data?.length > 0 && (
+                  <button
+                    type="submit"
+                    className="bg-yellow-500 hover:bg-yellow-500 text-white px-6 py-2 rounded-md mr-3"
+                    onClick={() => {
+                      navigate("/studentIdCard", {
+                        state: {
+                          sectionID: data?.[0]?.section_id,
+                        },
+                      });
+                    }}
+                  >
+                    Back
+                  </button>
+                )}
                 <button
                   type="submit"
                   style={{ backgroundColor: "#2196F3" }}
