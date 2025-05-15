@@ -72,19 +72,19 @@ function FeePendingList() {
           }}
         ></div>
 
-        <div className="card-body w-full">
+        <div className="card-body w-full md:w-[90%] mx-auto">
           <div className="bg-white rounded-lg shadow-xs  w-full md:w-[80%] mx-auto">
             <div className="bg-white rounded-lg  shadow-xs ">
               <table className="min-w-full leading-normal table-auto">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className=" px-0.5 text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                    <th className=" w-full md:w-[10%] px-0.5 text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                       S.No
                     </th>
                     <th className=" text-center px-2  lg:px-2 py-2   border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                       Account
                     </th>
-                    <th className=" text-center px-2  lg:px-2 py-2   border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                    <th className=" w-full md:w-[10%] text-center px-2  lg:px-2 py-2   border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                       Installment
                     </th>
 
