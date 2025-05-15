@@ -243,7 +243,7 @@ function Roles() {
       }
     } finally {
       setIsSubmitting(false);
-      setShowAddModal(false);
+      // setShowAddModal(false);
     }
   };
   const handleSubmitEdit = async () => {
@@ -312,7 +312,7 @@ function Roles() {
       }
     } finally {
       setIsSubmitting(false);
-      setShowEditModal(false);
+      // setShowEditModal(false);
     }
   };
 

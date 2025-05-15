@@ -135,7 +135,7 @@ function Menus() {
       }
     } finally {
       setIsSubmitting(false);
-      setShowAddModal(false);
+      // setShowAddModal(false);
     }
   };
   const handleSubmitEdit = async () => {
@@ -168,13 +168,15 @@ function Menus() {
     } catch (error) {
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
+        // return;
       } else {
         console.error("Error editing menu:", error);
         setErrors({ edit: error.message });
+        // return;
       }
     } finally {
       setIsSubmitting(false);
-      setShowEditModal(false);
+      // setShowEditModal(false);
     }
   };
 
