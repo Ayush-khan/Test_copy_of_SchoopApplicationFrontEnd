@@ -78,13 +78,22 @@ function FeePendingList() {
               <table className="min-w-full leading-normal table-auto">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className=" w-full md:w-[10%] px-0.5 text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                    <th
+                      className={`px-0.5 text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${
+                        !loading ? " md:w-[10%]" : "w-full"
+                      }`}
+                      // className=" w-full md:w-[10%] px-0.5 text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider"
+                    >
                       S.No
                     </th>
                     <th className=" text-center px-2  lg:px-2 py-2   border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                       Account
                     </th>
-                    <th className=" w-full md:w-[10%] text-center px-2  lg:px-2 py-2   border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                    <th
+                      className={`px-0.5 text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${
+                        !loading ? " md:w-[10%]" : "w-full"
+                      }`}
+                    >
                       Installment
                     </th>
 
@@ -95,7 +104,7 @@ function FeePendingList() {
                 </thead>
                 <tbody>
                   {loading ? (
-                    <div className="relative  left-0 md:left-[50%] w-[100%]  text-center flex justify-center items-center mt-14">
+                    <div className=" relative  left-0 md:left-[50%] w-[100%]  text-center flex justify-center items-center mt-14">
                       <div className=" text-center text-xl text-blue-700">
                         Please wait while data is loading...
                       </div>
