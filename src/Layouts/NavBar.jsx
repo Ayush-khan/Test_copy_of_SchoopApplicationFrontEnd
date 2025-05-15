@@ -257,7 +257,7 @@ function NavBar() {
         }
         setSessionData(sessionResponse.data);
         setSelectedYear(sessionResponse?.data?.custom_claims?.academic_year);
-        setRoleId(sessionResponse.data.user.role_id); // Store role_id
+        setRoleId(sessionResponse?.data?.user?.role_id); // Store role_id
         // setRoleId("A"); // Store role_id
         // Fetch academic year data
         const academicYearResponse = await axios.get(
