@@ -506,7 +506,7 @@ function Menus() {
                       }}
                     >
                       <option value="">None</option>
-                      {[
+                      {/* {[
                         ...new Map(
                           allMenus.map((menu) => [menu.menu_id, menu])
                         ).values(),
@@ -514,15 +514,15 @@ function Menus() {
                         <option key={menu.menu_id} value={menu.menu_id}>
                           {menu.name}
                         </option>
-                      ))}
+                      ))} */}
 
-                      {/* {allMenus
+                      {allMenus
                         .filter((menu) => menu.parent_id === 0)
                         .map((menu) => (
                           <option key={menu.menu_id} value={menu.menu_id}>
                             {menu.name}
                           </option>
-                        ))} */}
+                        ))}
                     </select>
                     <div className="absolute top-9 left-1/3">
                       {errors.parent_id && (
@@ -655,6 +655,15 @@ function Menus() {
                       }}
                     >
                       <option value="">None</option>
+                      {/* {[
+                        ...new Map(
+                          allMenus.map((menu) => [menu.menu_id, menu])
+                        ).values(),
+                      ].map((menu) => (
+                        <option key={menu.menu_id} value={menu.menu_id}>
+                          {menu.name}
+                        </option>
+                      ))} */}
                       {allMenus
                         .filter((menu) => menu.parent_id === 0)
                         .map((menu) => (
