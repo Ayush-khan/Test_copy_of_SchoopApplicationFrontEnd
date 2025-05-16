@@ -564,12 +564,13 @@ function ManageRoleAccess() {
                                 className="sr-only peer"
                                 onChange={handleSelectAllChange}
                                 checked={
-                                  displayedMenus.length > 0 &&
-                                  displayedMenus.every((menu) =>
+                                  menuList.length > 0 &&
+                                  menuList.every((menu) =>
                                     selectedMenus.has(menu.menu_id)
                                   )
                                 }
                               />
+
                               <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer-checked:bg-blue-600 transition-all duration-300"></div>
                               <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 transform peer-checked:translate-x-full"></span>
                             </label>
