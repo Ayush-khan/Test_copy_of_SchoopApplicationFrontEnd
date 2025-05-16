@@ -7,6 +7,7 @@ import { faEdit, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import Select from "react-select";
 
 function Menus() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -179,7 +180,15 @@ function Menus() {
       // setShowEditModal(false);
     }
   };
-
+  const menuOptions = [
+    { value: 0, label: "None" },
+    ...[...new Map(allMenus.map((menu) => [menu.menu_id, menu])).values()].map(
+      (menu) => ({
+        value: menu.menu_id,
+        label: menu.name,
+      })
+    ),
+  ];
   const handleDelete = (id) => {
     const menuToDelete = menus.find((menu) => menu.menu_id === id);
     setCurrentMenu({ menuToDelete });
@@ -493,43 +502,35 @@ function Menus() {
 
                   {/* Parent Menu */}
                   <div className="relative mb-3 flex justify-center mx-2">
-                    <label htmlFor="parentId" className="w-1/2 mt-2">
+                    <label htmlFor="editParentId" className="w-1/2 mt-2">
                       Parent
                     </label>
-                    <select
-                      className="form-control shadow-md mb-2"
-                      id="parentId"
-                      value={formData.parent_id}
-                      onChange={(e) => {
-                        setFormData({ ...formData, parent_id: e.target.value });
-                        setErrors((prev) => ({ ...prev, parent_id: "" }));
-                      }}
-                    >
-                      <option value="">None</option>
-                      {/* {[
-                        ...new Map(
-                          allMenus.map((menu) => [menu.menu_id, menu])
-                        ).values(),
-                      ].map((menu) => (
-                        <option key={menu.menu_id} value={menu.menu_id}>
-                          {menu.name}
-                        </option>
-                      ))} */}
 
-                      {allMenus
-                        .filter((menu) => menu.parent_id === 0)
-                        .map((menu) => (
-                          <option key={menu.menu_id} value={menu.menu_id}>
-                            {menu.name}
-                          </option>
-                        ))}
-                    </select>
-                    <div className="absolute top-9 left-1/3">
-                      {errors.parent_id && (
-                        <span className="text-danger text-xs">
-                          {errors.parent_id}
-                        </span>
-                      )}
+                    <div className="w-full">
+                      <Select
+                        inputId="editParentId"
+                        className="shadow-md mb-2"
+                        value={menuOptions.find(
+                          (option) => option.value === formData.parent_id
+                        )}
+                        onChange={(selectedOption) => {
+                          setFormData({
+                            ...formData,
+                            parent_id: selectedOption?.value || "",
+                          });
+                          setErrors((prev) => ({ ...prev, parent_id: "" }));
+                        }}
+                        options={menuOptions}
+                        isClearable
+                      />
+
+                      <div className="absolute top-14 left-1/3">
+                        {errors.parent_id && (
+                          <span className="text-danger text-xs">
+                            {errors.parent_id}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -645,39 +646,32 @@ function Menus() {
                     <label htmlFor="editParentId" className="w-1/2 mt-2">
                       Parent
                     </label>
-                    <select
-                      className="form-control shadow-md mb-2"
-                      id="editParentId"
-                      value={formData.parent_id}
-                      onChange={(e) => {
-                        setFormData({ ...formData, parent_id: e.target.value });
-                        setErrors((prev) => ({ ...prev, parent_id: "" }));
-                      }}
-                    >
-                      <option value="">None</option>
-                      {/* {[
-                        ...new Map(
-                          allMenus.map((menu) => [menu.menu_id, menu])
-                        ).values(),
-                      ].map((menu) => (
-                        <option key={menu.menu_id} value={menu.menu_id}>
-                          {menu.name}
-                        </option>
-                      ))} */}
-                      {allMenus
-                        .filter((menu) => menu.parent_id === 0)
-                        .map((menu) => (
-                          <option key={menu.menu_id} value={menu.menu_id}>
-                            {menu.name}
-                          </option>
-                        ))}
-                    </select>
-                    <div className="absolute top-9 left-1/3">
-                      {errors.parent_id && (
-                        <span className="text-danger text-xs">
-                          {errors.parent_id}
-                        </span>
-                      )}
+
+                    <div className="w-full">
+                      <Select
+                        inputId="editParentId"
+                        className="shadow-md mb-2"
+                        value={menuOptions.find(
+                          (option) => option.value === formData.parent_id
+                        )}
+                        onChange={(selectedOption) => {
+                          setFormData({
+                            ...formData,
+                            parent_id: selectedOption?.value || "",
+                          });
+                          setErrors((prev) => ({ ...prev, parent_id: "" }));
+                        }}
+                        options={menuOptions}
+                        isClearable
+                      />
+
+                      <div className="absolute top-14 left-1/3">
+                        {errors.parent_id && (
+                          <span className="text-danger text-xs">
+                            {errors.parent_id}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
