@@ -5,6 +5,7 @@ import { IoIosArrowForward } from "react-icons/io";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../../Layouts/NavBar";
+import TableFeeCollect from "../../componants/Dashbord/TableFeeCollect.jsx";
 import { useState, useEffect } from "react";
 function FeePendingList() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -12,6 +13,42 @@ function FeePendingList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const [totalPendingFee, setTotalPendingFee] = useState(0);
+
+  const [activeTab, setActiveTab] = useState("Pending Fee List");
+
+  // useEffect(() => {
+  //   const fetchStaffBirthday = async () => {
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+  //       const academicYr = localStorage.getItem("academicYear");
+
+  //       if (!token) {
+  //         throw new Error("No authentication token or academic year found");
+  //       }
+
+  //       const response = await axios.get(`${API_URL}/api/fee_collection_list`, {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "X-Academic-Year": academicYr,
+  //         },
+  //       });
+  //       console.log("resposne of the birthday list is", response.data);
+  //       if (response.data && Array.isArray(response.data)) {
+  //         setStaffBirthday(response?.data);
+  //       } else {
+  //         throw new Error("Unexpected response data format");
+  //       }
+  //       // setStaffBirthday(response.data);
+  //     } catch (error) {
+  //       setError(error.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchStaffBirthday();
+  // }, []);
 
   useEffect(() => {
     const fetchStaffBirthday = async () => {
@@ -29,13 +66,21 @@ function FeePendingList() {
             "X-Academic-Year": academicYr,
           },
         });
-        console.log("resposne of the birthday list is", response.data);
+
+        console.log("Response of the birthday list is", response.data);
+
         if (response.data && Array.isArray(response.data)) {
-          setStaffBirthday(response?.data);
+          setStaffBirthday(response.data);
+
+          // ✅ Calculate and store total pending fee
+          const total = response.data.reduce(
+            (acc, item) => acc + parseFloat(item.pending_fee || 0),
+            0
+          );
+          setTotalPendingFee(total);
         } else {
           throw new Error("Unexpected response data format");
         }
-        // setStaffBirthday(response.data);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -45,10 +90,13 @@ function FeePendingList() {
 
     fetchStaffBirthday();
   }, []);
+
   console.log("the staffbirthlis", staffBirthday);
   // if (loading) return <p>Loading...</p>;
   // if (error) return <p>Error: {error}</p>;
-
+  const handleTabChange = (tab) => {
+    setActiveTab(tab); // Update the active tab state
+  };
   return (
     <div className="container mt-4 ">
       <div className="  card mx-auto lg:w-3/4  shadow-lg ">
@@ -71,88 +119,122 @@ function FeePendingList() {
             backgroundColor: "#C03078",
           }}
         ></div>
+        <ul className="  w-full md:w-[98%] mx-auto grid grid-cols-2 gap-x-10 relative -left-6 md:left-0 md:flex md:flex-row  ">
+          {/* Tab Navigation */}
+          {["Pending Fee List", "Fee Collection"].map((tab) => (
+            <li
+              key={tab}
+              className={`md:-ml-7 shadow-md ${
+                activeTab === tab ? "text-blue-500 font-bold" : ""
+              }`}
+            >
+              <button
+                onClick={() => handleTabChange(tab)}
+                className="px-2 md:px-4 py-1 hover:bg-gray-200 text-[1em] md:text-sm text-nowrap"
+              >
+                {tab.replace(/([A-Z])/g, " $1")}
+              </button>
+            </li>
+          ))}
+        </ul>
 
         <div className="card-body w-full md:w-[90%] mx-auto">
           <div className="bg-white rounded-lg shadow-xs  w-full md:w-[80%] mx-auto">
             <div className="bg-white rounded-lg  shadow-xs ">
-              <table className="min-w-full leading-normal table-auto">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th
-                      className={`px-0.5 text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${
-                        !loading ? " md:w-[10%]" : "w-full"
-                      }`}
-                      // className=" w-full md:w-[10%] px-0.5 text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider"
-                    >
-                      S.No
-                    </th>
-                    <th className=" text-center px-2  lg:px-2 py-2   border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
-                      Account
-                    </th>
-                    <th
-                      className={`px-0.5 text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${
-                        !loading ? " md:w-[10%]" : "w-full"
-                      }`}
-                    >
-                      Installment
-                    </th>
+              {activeTab === "Pending Fee List" ? (
+                <>
+                  {" "}
+                  <table className="min-w-full leading-normal table-auto">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th
+                          className={`px-0.5 text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${
+                            !loading ? " md:w-[10%]" : "w-full"
+                          }`}
+                          // className=" w-full md:w-[10%] px-0.5 text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider"
+                        >
+                          S.No
+                        </th>
+                        <th className=" text-center px-2  lg:px-2 py-2   border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                          Account
+                        </th>
+                        <th
+                          className={`px-0.5 text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${
+                            !loading ? " md:w-[10%]" : "w-full"
+                          }`}
+                        >
+                          Installment
+                        </th>
 
-                    <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
-                      Pending Fee
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <div className=" relative  left-0 md:left-[50%] w-[100%]  text-center flex justify-center items-center mt-14">
-                      <div className=" text-center text-xl text-blue-700">
-                        Please wait while data is loading...
-                      </div>
-                    </div>
-                  ) : staffBirthday.length ? (
-                    staffBirthday.map((staff, index) => (
-                      <tr
-                        key={index}
-                        className={`${
-                          index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                        } hover:bg-gray-50  `}
-                      >
-                        <td className=" sm:px-0.5 text-center lg:px-1   border  border-gray-950   text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap text-center relative top-2 ">
-                            {index + 1}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staff?.Account || " "}
-                          </p>
-                        </td>
-                        <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staff?.installment || " "}
-                          </p>
-                        </td>
-                        {/* <td className="sm:px-0.5 text-center lg:px-3 py-2 text-center border border-gray-950  text-sm">
+                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                          Pending Fee
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {loading ? (
+                        <div className=" relative  left-0 md:left-[50%] w-[100%]  text-center flex justify-center items-center mt-14">
+                          <div className=" text-center text-xl text-blue-700">
+                            Please wait while data is loading...
+                          </div>
+                        </div>
+                      ) : staffBirthday.length ? (
+                        staffBirthday.map((staff, index) => (
+                          <tr
+                            key={index}
+                            className={`${
+                              index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-50  `}
+                          >
+                            <td className=" sm:px-0.5 text-center lg:px-1   border  border-gray-950   text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap text-center relative top-2 ">
+                                {index + 1}
+                              </p>
+                            </td>
+                            <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {staff?.Account || " "}
+                              </p>
+                            </td>
+                            <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {staff?.installment || " "}
+                              </p>
+                            </td>
+                            {/* <td className="sm:px-0.5 text-center lg:px-3 py-2 text-center border border-gray-950  text-sm">
                           <p className="text-gray-900 whitespace-no-wrap">
                             {staff.birthday}
                           </p>
                         </td> */}
-                        <td className="px-2 text-center lg:px-3  border border-gray-950  text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                            {staff?.pending_fee || " "}
-                          </p>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                      <div className=" text-center text-xl text-red-700">
-                        Oops! No data found..
-                      </div>
+                            <td className="px-2 text-center lg:px-3  border border-gray-950  text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {staff?.pending_fee || " "}
+                              </p>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                          <div className=" text-center text-xl text-red-700">
+                            Oops! No data found..
+                          </div>
+                        </div>
+                      )}
+                    </tbody>
+                  </table>
+                  {staffBirthday.length > 0 ? (
+                    <div className="text-blue-500 relative top-3 text-[1.1em] font-medium text-center w-full">
+                      Total Pending Fee: ₹{" "}
+                      {Number(totalPendingFee).toLocaleString("en-IN")}
+                      {/* Total Pending Fee: {} */}
                     </div>
+                  ) : (
+                    " "
                   )}
-                </tbody>
-              </table>
+                </>
+              ) : (
+                <TableFeeCollect />
+              )}
             </div>
           </div>
         </div>

@@ -41,107 +41,132 @@ const DashboardContent = () => {
   const [pendingFee, setPendingFee] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [roleId, setRoleId] = useState("");
   const academicYr = localStorage.getItem("academicYear");
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        // const academicYr=localStorage.getItem("user");
-        const academicYr = localStorage.getItem("academicYear");
-        const roleId = localStorage.getItem("roleId");
-        console.log("**** role ID******", roleId);
-
-        if (!token) {
-          throw new Error("No authentication token or academic year found");
-        }
-
-        // Fetch student data
-        const studentResponse = await axios.get(`${API_URL}/api/studentss`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-
-            "X-Academic-Year": academicYr,
-          },
-        });
-
-        setStudentData({
-          total: studentResponse.data.count,
-          present: studentResponse.data.present,
-        });
-
-        // Fetch staff data
-        const staffResponse = await axios.get(
-          // "http://127.0.0.1:8000/api/staff",
-          `${API_URL}/api/staff`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "X-Academic-Year": academicYr,
-            },
-          }
-        );
-        console.log("reponse of the staffAPI", staffResponse);
-        setStaffData({
-          teachingStaff: staffResponse?.data?.teachingStaff,
-          attendanceteachingstaff: staffResponse?.data?.attendanceteachingstaff,
-          nonTeachingStaff: staffResponse?.data?.non_teachingStaff,
-          attendancenonteachingstaff:
-            staffResponse?.data?.attendancenonteachingstaff,
-        });
-        // Fetch Tickiting count values
-
-        const responseTickingCount = await axios.get(
-          `${API_URL}/api/ticketcount`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "X-Academic-Year": academicYr,
-              "Role-Id": roleId, // add roleId for different role
-            },
-          }
-        );
-        console.log(
-          "***the roleiD count*******",
-          responseTickingCount.data.count
-        );
-        setTicketCount(responseTickingCount.data.count);
-        // Fetch Pending Fee Records counts
-        const pendingFeeCount = await axios.get(
-          `${API_URL}/api/feecollection`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "X-Academic-Year": academicYr,
-            },
-          }
-        );
-        setPendingFee(pendingFeeCount.data);
-        console.log("pendingFee count is here******", pendingFeeCount.data);
-
-        // Fetch birthday Count
-        const Birthdaycount = await axios.get(
-          `${API_URL}/api/staffbirthdaycount`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "X-Academic-Year": academicYr,
-            },
-          }
-        );
-        console.log(
-          "the birthday count and it's value is=",
-          Birthdaycount.data.count
-        );
-        setStaffBirthday(Birthdaycount.data.count);
-      } catch (error) {
-        setError(error.message);
-        console.error("Error fetching data:", error);
-      }
-    };
-
+    fetchRoleId();
     fetchData();
   }, []);
+  const fetchRoleId = async () => {
+    const token = localStorage.getItem("authToken");
 
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const roleId = response?.data?.user?.role_id;
+
+      if (roleId) {
+        setRoleId(roleId); // ✅ Save only roleId to state
+      } else {
+        console.warn("role_id not found in sessionData response");
+      }
+    } catch (error) {
+      console.error("Failed to fetch session data:", error);
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      // const academicYr=localStorage.getItem("user");
+      const academicYr = localStorage.getItem("academicYear");
+      const roleId = localStorage.getItem("roleId");
+      console.log("**** role ID******", roleId);
+
+      if (!token) {
+        throw new Error("No authentication token or academic year found");
+      }
+
+      // Fetch student data
+      const studentResponse = await axios.get(`${API_URL}/api/studentss`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+
+          "X-Academic-Year": academicYr,
+        },
+      });
+
+      setStudentData({
+        total: studentResponse.data.count,
+        present: studentResponse.data.present,
+      });
+
+      // Fetch staff data
+      const staffResponse = await axios.get(
+        // "http://127.0.0.1:8000/api/staff",
+        `${API_URL}/api/staff`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-Academic-Year": academicYr,
+          },
+        }
+      );
+      console.log("reponse of the staffAPI", staffResponse);
+      setStaffData({
+        teachingStaff: staffResponse?.data?.teachingStaff,
+        attendanceteachingstaff: staffResponse?.data?.attendanceteachingstaff,
+        nonTeachingStaff: staffResponse?.data?.non_teachingStaff,
+        attendancenonteachingstaff:
+          staffResponse?.data?.attendancenonteachingstaff,
+      });
+      // Fetch Tickiting count values
+
+      const responseTickingCount = await axios.get(
+        `${API_URL}/api/ticketcount`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-Academic-Year": academicYr,
+            "Role-Id": roleId, // add roleId for different role
+          },
+        }
+      );
+      console.log(
+        "***the roleiD count*******",
+        responseTickingCount.data.count
+      );
+      setTicketCount(responseTickingCount.data.count);
+      // Fetch Pending Fee Records counts
+      const pendingFeeCount = await axios.get(`${API_URL}/api/feecollection`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-Academic-Year": academicYr,
+        },
+      });
+      setPendingFee(pendingFeeCount.data);
+      console.log("pendingFee count is here******", pendingFeeCount.data);
+
+      // Fetch birthday Count
+      const Birthdaycount = await axios.get(
+        `${API_URL}/api/staffbirthdaycount`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-Academic-Year": academicYr,
+          },
+        }
+      );
+      console.log(
+        "the birthday count and it's value is=",
+        Birthdaycount.data.count
+      );
+      setStaffBirthday(Birthdaycount.data.count);
+    } catch (error) {
+      setError(error.message);
+      console.error("Error fetching data:", error);
+    }
+  };
   return (
     <>
       {/* {error && <div className="error-message">{error}</div>} */}
@@ -298,22 +323,25 @@ const DashboardContent = () => {
           }}
         >
           {" "}
-          <TableFeeCollect />
+          {roleId !== "M" && <TableFeeCollect />}
+          {/* <TableFeeCollect /> */}
           {/* <div className="flex justify-between bg-gray-200">
             <h5 className="text-gray-500 pl-2">Filter Fee </h5>
             <TableFeeCollect />
           </div> */}
         </div>
-        <div
-          className=" w-full lg:w-[69%] border-2 border-solid  bg-slate-50 rounded-lg lg:h-full sm:h-3/4 "
-          style={{
-            boxShadow:
-              "rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px",
-          }}
-        >
-          {/* <NoticeBord /> */}
-          <HouseStudentChart />
-        </div>
+        {roleId !== "M" && (
+          <div
+            className=" w-full lg:w-[69%] border-2 border-solid  bg-slate-50 rounded-lg lg:h-full sm:h-3/4 "
+            style={{
+              boxShadow:
+                "rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px",
+            }}
+          >
+            {/* <NoticeBord /> */}
+            <HouseStudentChart />
+          </div>
+        )}
       </div>
       {/* <div className=" mt-6 ">
         <Footer />
