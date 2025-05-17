@@ -459,6 +459,7 @@ function Menus() {
                     </label>
                     <input
                       type="text"
+                      maxLength={255}
                       className="form-control shadow-md mb-2"
                       id="menuName"
                       value={formData?.name}
@@ -483,6 +484,7 @@ function Menus() {
                     </label>
                     <input
                       type="text"
+                      maxLength={255}
                       className="form-control shadow-md mb-2"
                       id="menuUrl"
                       value={formData.url}
@@ -541,6 +543,7 @@ function Menus() {
                     </label>
                     <input
                       type="number"
+                      maxLength={11}
                       className="form-control shadow-md "
                       id="menuSequence"
                       value={formData.sequence}
@@ -600,6 +603,7 @@ function Menus() {
                     </label>
                     <input
                       type="text"
+                      maxLength={255}
                       className="form-control shadow-md mb-2"
                       id="editMenuName"
                       value={formData.name}
@@ -624,6 +628,7 @@ function Menus() {
                     </label>
                     <input
                       type="text"
+                      maxLength={255}
                       className="form-control shadow-md mb-2"
                       id="editMenuUrl"
                       value={formData.url}
@@ -682,6 +687,7 @@ function Menus() {
                     </label>
                     <input
                       type="number"
+                      maxLength={11}
                       className="form-control shadow-md "
                       id="editMenuSequence"
                       value={formData.sequence}
