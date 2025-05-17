@@ -173,64 +173,86 @@ function FeePendingList() {
                     </thead>
                     <tbody>
                       {loading ? (
-                        <div className=" relative  left-0 md:left-[50%] w-[100%]  text-center flex justify-center items-center mt-14">
-                          <div className=" text-center text-xl text-blue-700">
-                            Please wait while data is loading...
-                          </div>
-                        </div>
+                        <tr>
+                          <td colSpan={4}>
+                            <div className="w-full text-center flex justify-center items-center mt-14">
+                              <div className="text-center text-xl text-blue-700">
+                                Please wait while data is loading...
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
                       ) : staffBirthday.length ? (
-                        staffBirthday.map((staff, index) => (
-                          <tr
-                            key={index}
-                            className={`${
-                              index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                            } hover:bg-gray-50  `}
-                          >
-                            <td className=" sm:px-0.5 text-center lg:px-1   border  border-gray-950   text-sm">
-                              <p className="text-gray-900 whitespace-no-wrap text-center relative top-2 ">
-                                {index + 1}
-                              </p>
+                        <>
+                          {staffBirthday.map((staff, index) => (
+                            <tr
+                              key={index}
+                              className={`${
+                                index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                              } hover:bg-gray-50`}
+                            >
+                              <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap text-center relative top-2">
+                                  {index + 1}
+                                </p>
+                              </td>
+                              <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                  {staff?.Account || " "}
+                                </p>
+                              </td>
+                              <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                  {staff?.installment || " "}
+                                </p>
+                              </td>
+                              <td className="px-2 text-center lg:px-3 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                  {staff?.pending_fee || " "}
+                                </p>
+                              </td>
+                            </tr>
+                          ))}
+                          {/* ✅ Total row here */}
+                          <tr className="bg-yellow-100 font-semibold">
+                            <td
+                              colSpan={3}
+                              className=" text-right px-4 py-2 border border-gray-950 text-sm"
+                            >
+                              Total Pending Fee
                             </td>
-                            <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
-                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                {staff?.Account || " "}
-                              </p>
-                            </td>
-                            <td className="text-center px-2 lg:px-2  border border-gray-950  text-sm">
-                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                {staff?.installment || " "}
-                              </p>
-                            </td>
-                            {/* <td className="sm:px-0.5 text-center lg:px-3 py-2 text-center border border-gray-950  text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap">
-                            {staff.birthday}
-                          </p>
-                        </td> */}
-                            <td className="px-2 text-center lg:px-3  border border-gray-950  text-sm">
-                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                {staff?.pending_fee || " "}
+                            <td className="px-2 text-center lg:px-3 border border-gray-950 text-sm">
+                              <p className="text-blue-600 whitespace-no-wrap relative top-2 right-2.5">
+                                ₹{" "}
+                                {Number(totalPendingFee).toLocaleString(
+                                  "en-IN"
+                                )}
+                                .00
                               </p>
                             </td>
                           </tr>
-                        ))
+                        </>
                       ) : (
-                        <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                          <div className=" text-center text-xl text-red-700">
-                            Oops! No data found..
-                          </div>
-                        </div>
+                        <tr>
+                          <td colSpan={4}>
+                            <div className="w-full text-center flex justify-center items-center mt-14">
+                              <div className="text-center text-xl text-red-700">
+                                Oops! No data found..
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
                       )}
                     </tbody>
                   </table>
-                  {staffBirthday.length > 0 ? (
+                  {/* {staffBirthday.length > 0 ? (
                     <div className="text-blue-500 relative top-3 text-[1.1em] font-medium text-center w-full">
                       Total Pending Fee: ₹{" "}
                       {Number(totalPendingFee).toLocaleString("en-IN")}
-                      {/* Total Pending Fee: {} */}
                     </div>
                   ) : (
                     " "
-                  )}
+                  )} */}
                 </>
               ) : (
                 <TableFeeCollect />
