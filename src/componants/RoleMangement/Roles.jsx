@@ -440,13 +440,13 @@ function Roles() {
                         Sr.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Name
+                        Role Name
                       </th>
                       <th className="w-full md:w-[11%] px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Role Id
                       </th>
                       <th className="w-full md:w-[11%] px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Status
+                        Active
                       </th>
                       <th className="w-full md:w-[11%] px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Edit
