@@ -1,0 +1,121 @@
+/* Main navbar link styling */
+.custom-nav-dropdown .nav-dropdown-title {
+  color: black;
+  font-weight: 400;
+  display: inline-block;
+  transition: background-color 0.2s ease;
+}
+
+/*  Hover: only background color changes */
+.nav-dropdown-title:hover {
+  font-weight: 400;
+  background-color: #408cdd !important;
+  color: white !important;
+  border-right: 2px double rgb(207, 10, 102);
+  border-left: 2px double rgb(207, 10, 102);
+}
+
+/* Dropdown menu default background */
+.custom-submenu .dropdown-menu {
+  background-color: #c1d1e0 !important;
+  display: none;
+  margin-top: 0;
+  border-radius: 4px;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Show submenu on hover */
+.custom-submenu:hover > .dropdown-menu {
+  display: block !important;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Top-level dropdown items */
+.custom-nav-dropdown .dropdown-item {
+  color: black;
+  font-weight: 500;
+  background-color: white;
+  /* padding: 8px 14px; */
+  transition: background-color 0.2s ease;
+}
+
+.custom-nav-dropdown .dropdown-item:hover {
+  color: white !important;
+  background-color: #408cdd !important;
+  font-weight: 400 !important;
+  /* keep same weight */
+  font-size: 14px !important;
+  /* lock font size */
+}
+
+/* Nested dropdown title styling */
+.nav-dropdown-titleSubUnder {
+  display: inline-block;
+  width: 100%;
+  /* padding: 6px 10px; */
+  color: black;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+/* Hover: only background color changes */
+.nav-dropdown-titleSubUnder:hover {
+  background-color: #408cdd !important;
+  color: white !important;
+}
+
+/* Submenu dropdown items */
+.custom-submenu .dropdown-item {
+  color: black !important;
+  /* background-color: #89939e !important; */
+  font-weight: 500;
+  font-size: 14px !important;
+  background-color: white !important;
+}
+
+/*  Hover: only background color changes */
+.custom-submenu .dropdown-item:hover {
+  background-color: #408cdd !important;
+  color: white !important;
+}
+
+/* Hide Bootstrap arrow on toggle */
+/* .custom-submenu .dropdown-toggle::after {
+    display: none !important;
+} */
+
+/* Nested submenu positioning */
+.custom-submenu {
+  position: relative;
+}
+
+.custom-submenu .dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -1px;
+}
+
+/* Top-level menu title */
+.nav-title-top {
+  color: black;
+  font-weight: 900;
+  padding: 0px 10px;
+  display: inline-block;
+}
+
+/* Submenu title */
+.nav-title-sub {
+  display: inline-block;
+  width: 100%;
+  /* padding: 6px 10px; */
+  color: black;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+/* ✅ Hover: only background color changes */
+.nav-title-sub:hover {
+  background-color: #408cdd !important;
+  color: white !important;
+}
