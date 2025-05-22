@@ -130,7 +130,7 @@ function NonTeachingStaff() {
         <div className="card mx-auto lg:w-3/4 shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              List of Students Absent Today
+              Non-Teaching Staff Absent Today{" "}
             </h3>
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
