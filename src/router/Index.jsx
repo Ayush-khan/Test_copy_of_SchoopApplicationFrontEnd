@@ -223,6 +223,8 @@ import ForgotPassword from "../Layouts/ForgotPassword.jsx";
 import UpdateStudentIdCards from "../componants/IDCards/UpdateStudentIdCards.jsx";
 import UploadStudentPhoto from "../componants/IDCards/UploadStudentPhoto.jsx";
 import UploadParentPhoto from "../componants/IDCards/UploadParentPhoto.jsx";
+import StudentAbsent from "../componants/AllTableList/StudentAbsent.jsx";
+import NonTeachingStaff from "../componants/AllTableList/NonTeachingStaff.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -821,10 +823,19 @@ function Index() {
           element={<PrivateRoute element={<FeePendingList />} />}
         />
         <Route
+          path="/StudentAbsent"
+          element={<PrivateRoute element={<StudentAbsent />} />}
+        />
+        <Route
+          path="/nonTeachingStaff"
+          element={<PrivateRoute element={<NonTeachingStaff />} />}
+        />
+        <Route
           path="/staffbirthlist"
           element={<PrivateRoute element={<StaffBirthdayTabList />} />}
         />
       </Route>
+
       {/* Page Not FOund Routes */}
       <Route path="*" element={<PrivateRoute element={<PageNotFounde />} />} />
     </Routes>

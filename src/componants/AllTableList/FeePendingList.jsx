@@ -73,10 +73,11 @@ function FeePendingList() {
           setStaffBirthday(response.data);
 
           // ✅ Calculate and store total pending fee
-          const total = response.data.reduce(
-            (acc, item) => acc + parseFloat(item.pending_fee || 0),
-            0
-          );
+          const total = response.data.reduce((acc, item) => {
+            const feeStr = (item.pending_fee || "0").replace(/,/g, "");
+            const fee = parseFloat(feeStr);
+            return acc + (isNaN(fee) ? 0 : fee);
+          }, 0);
           setTotalPendingFee(total);
         } else {
           throw new Error("Unexpected response data format");

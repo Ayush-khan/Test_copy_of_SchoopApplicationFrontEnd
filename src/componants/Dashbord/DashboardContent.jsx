@@ -174,22 +174,24 @@ const DashboardContent = () => {
       <div className="flex flex-col lg:flex-row items-start justify-between w-full gap-4 p-6 ">
         <div className="w-full lg:w-2/3  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* {console.log("totalstudent", studentData.total)} */}
-          <CardStuStaf
-            title="Student"
-            TotalValue={studentData.total}
-            presentValue={studentData.present}
-            color="#4CAF50"
-            icon={
-              <FaUsersLine
-                style={{
-                  color: "violet",
-                  backgroundColor: "white",
-                  padding: "10px",
-                  borderRadius: "50%",
-                }}
-              />
-            }
-          />
+          <Link to="/StudentAbsent" className="no-underline">
+            <CardStuStaf
+              title="Student"
+              TotalValue={studentData.total}
+              presentValue={studentData.present}
+              color="#4CAF50"
+              icon={
+                <FaUsersLine
+                  style={{
+                    color: "violet",
+                    backgroundColor: "white",
+                    padding: "10px",
+                    borderRadius: "50%",
+                  }}
+                />
+              }
+            />
+          </Link>
           <CardStuStaf
             title="Teachers"
             TotalValue={staffData.teachingStaff}
@@ -207,23 +209,25 @@ const DashboardContent = () => {
               />
             }
           />
-          <CardStuStaf
-            title="Non-Teaching Staff"
-            TotalValue={staffData.nonTeachingStaff}
-            // presentValue={staffData.nonTeachingStaff}
-            presentValue={staffData?.attendancenonteachingstaff}
-            color="#2196F3"
-            icon={
-              <FaUserGroup
-                style={{
-                  color: "#A287F3",
-                  backgroundColor: "white",
-                  padding: "10px",
-                  borderRadius: "50%",
-                }}
-              />
-            }
-          />
+          <Link to="/nonTeachingStaff" className="no-underline">
+            <CardStuStaf
+              title="Non-Teaching Staff"
+              TotalValue={staffData.nonTeachingStaff}
+              // presentValue={staffData.nonTeachingStaff}
+              presentValue={staffData?.attendancenonteachingstaff}
+              color="#2196F3"
+              icon={
+                <FaUserGroup
+                  style={{
+                    color: "#A287F3",
+                    backgroundColor: "white",
+                    padding: "10px",
+                    borderRadius: "50%",
+                  }}
+                />
+              }
+            />
+          </Link>
           <Link to="/feependinglist" className="no-underline">
             <Card
               title="Fee-Collection "
