@@ -31,7 +31,7 @@ function NonTeachingStaff() {
       }
 
       const response = await axios.get(
-        `${API_URL}/api/get_absentstudentfortoday`,
+        `${API_URL}/api/get_absentnonteacherfortoday`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -99,17 +99,33 @@ function NonTeachingStaff() {
 
   // Apply filtering logic
   const searchLower = searchTerm.trim().toLowerCase();
-  const filteredClasses = classes.filter((student) => {
-    const fullName = `${student.first_name} ${student.mid_name || ""} ${
-      student.last_name
-    }`.toLowerCase();
-    const className = student.classname?.toString().toLowerCase() || "";
-    const sectionName = student.sectionname?.toString().toLowerCase() || "";
+  //   const filteredClasses = classes.filter((student) => {
+  //     const fullName = `${student.first_name} ${student.mid_name || ""} ${
+  //       student.last_name
+  //     }`.toLowerCase();
+  //     const className = student.classname?.toString().toLowerCase() || "";
+  //     const sectionName = student.sectionname?.toString().toLowerCase() || "";
+
+  //     return (
+  //       fullName.includes(searchLower) ||
+  //       className.includes(searchLower) ||
+  //       sectionName.includes(searchLower)
+  //     );
+  //   });
+
+  const filteredClasses = classes.filter((staff) => {
+    const name = staff.name?.toLowerCase() || "";
+    const designation = staff.designation?.toLowerCase() || "";
+    const phone = staff.phone?.toLowerCase() || "";
+    const email = staff.email?.toLowerCase() || "";
+    // const className = staff.classname?.toLowerCase() || ""; // optional if you plan to include class label
 
     return (
-      fullName.includes(searchLower) ||
-      className.includes(searchLower) ||
-      sectionName.includes(searchLower)
+      name.includes(searchLower) ||
+      designation.includes(searchLower) ||
+      //   className.includes(searchLower) ||
+      phone.includes(searchLower) ||
+      email.includes(searchLower)
     );
   });
 
@@ -127,7 +143,7 @@ function NonTeachingStaff() {
     <>
       <ToastContainer />
       <div className="container mt-4">
-        <div className="card mx-auto lg:w-3/4 shadow-lg">
+        <div className="card mx-auto lg:w-[80%] shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Non-Teaching Staff Absent Today{" "}
@@ -150,7 +166,7 @@ function NonTeachingStaff() {
             }}
           ></div>
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full md:w-[84%] mx-auto">
+            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full  mx-auto">
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
@@ -159,26 +175,29 @@ function NonTeachingStaff() {
                         Sr.No
                       </th>
                       <th className="px-2 text-center   lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Student Name
+                        Staff Name
+                      </th>
+                      <th className="px-2 text-center   lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Designation{" "}
                       </th>
                       <th className="px-2  text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Class
                       </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Section
+                      <th className="px-2 text-center   lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Phone No.
+                      </th>
+                      <th className="px-2 text-center   lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Email
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {loading ? (
-                      <tr>
-                        <td
-                          colSpan="4"
-                          className="text-center py-6 text-blue-700"
-                        >
+                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-blue-700">
                           Please wait while data is loading...
-                        </td>
-                      </tr>
+                        </div>
+                      </div>
                     ) : displayedClasses.length ? (
                       displayedClasses.map((classItem, index) => (
                         <tr
@@ -194,31 +213,39 @@ function NonTeachingStaff() {
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {classItem.first_name} {classItem.mid_name || ""}{" "}
-                              {classItem.last_name}
+                              {classItem.name}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {classItem.classname}
+                              {classItem.designation}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {classItem.sectionname}
+                              {"-"}
+                              {classItem.sectionname}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {classItem.phone}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {classItem.email}
                             </p>
                           </td>
                         </tr>
                       ))
                     ) : (
-                      <tr>
-                        <td
-                          colSpan="4"
-                          className="text-center py-6 text-red-700"
-                        >
-                          Oops! No data found...
-                        </td>
-                      </tr>
+                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-red-700">
+                          Oops! No data found..
+                        </div>
+                      </div>
                     )}
                   </tbody>
                 </table>

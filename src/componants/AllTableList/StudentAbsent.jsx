@@ -15,8 +15,9 @@ function StudentAbsent() {
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [classIdForManage, setclassIdForManage] = useState("");
+  const [sectionIdForManage, setSectionIdForManage] = useState("");
   //   For the dropdown of Teachers name api
-  const [departments, setDepartments] = useState([]);
+  const [countAbsentStudent, setCountAbsentStudents] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
@@ -27,10 +28,6 @@ function StudentAbsent() {
   // for react-search of manage tab teacher Edit and select class
   const [selectedClass, setSelectedClass] = useState(null);
   // for Edit model
-  const [newClassName, setNewClassName] = useState("");
-  const [newSubjectName, setNewSubjectName] = useState("");
-  const [newExamName, setNewExamName] = useState("");
-  const [newMarksHeading, setNewMarksHeading] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const previousPageRef = useRef(0);
@@ -42,21 +39,28 @@ function StudentAbsent() {
     fetchClassNames();
     handleSearch();
   }, []);
-  const handleClassSelect = (selectedOption) => {
-    setNameError("");
-    setSelectedClass(selectedOption);
-    setclassIdForManage(selectedOption ? selectedOption.value : null); // Set to null if cleared
-  };
-
-  const teacherOptions = departments.map((dept) => ({
-    value: dept.reg_id,
-    label: dept.name,
-  }));
-  console.log("teacherOptions", teacherOptions);
   const classOptions = classes.map((cls) => ({
     value: `${cls?.get_class?.name}-${cls.name}`,
     label: `${cls?.get_class?.name} ${cls.name}`,
+    class_id: cls.class_id,
+    section_id: cls.section_id,
   }));
+
+  const handleClassSelect = (selectedOption) => {
+    setNameError("");
+    setSelectedClass(selectedOption);
+
+    if (selectedOption) {
+      setclassIdForManage(selectedOption.class_id);
+      setSectionIdForManage(selectedOption.section_id);
+    } else {
+      setclassIdForManage(" ");
+      setSectionIdForManage(" ");
+    }
+    console.log("setSelectedClass", selectedClass);
+    console.log("setclassIdForManage", classIdForManage);
+    console.log("setSectionIdForManage", sectionIdForManage);
+  };
 
   const fetchClassNames = async () => {
     try {
@@ -93,20 +97,28 @@ function StudentAbsent() {
         `${API_URL}/api/get_absentstudentfortoday`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          // params: { q: selectedClass },
-          //   params: { classIdForManage },
+          params: {
+            class_id: classIdForManage,
+            section_id: sectionIdForManage,
+          },
         }
       );
       console.log(
         "the response of the AllotMarksHeadingTab is *******",
         response.data
       );
-      if (response?.data?.data.length > 0) {
-        setSubjects(response?.data?.data);
-        setPageCount(Math.ceil(response?.data?.data.length / 10)); // Example pagination logic
+      if (response?.data?.data.absent_student.length > 0) {
+        setSubjects(response?.data?.data.absent_student);
+        setPageCount(
+          Math.ceil(response?.data?.data.absent_student.length / 10)
+        ); // Example pagination logic
+        setCountAbsentStudents(response?.data?.data?.count_absent_student);
       } else {
         setSubjects([]);
-        toast.error("Hooray! No students are absent today.✅");
+        setCountAbsentStudents("");
+        toast.error(
+          `Hooray! No students are absent today in ${selectedClass.label} `
+        );
       }
     } catch (error) {
       console.error(
@@ -234,7 +246,13 @@ function StudentAbsent() {
                   <div className="card mx-auto lg:w-full shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                        List of Students Absent Today
+                        {/* List of Students Absent Today{" "} */}
+                        Today's Absentee List{" "}
+                        <span className="text-[.8em] pb-1 text-blue-500">
+                          {selectedClass?.label
+                            ? `(Class - ${selectedClass.label})`
+                            : `(Total Absent - ${countAbsentStudent})`}
+                        </span>
                       </h3>
                       <div className="w-1/2 md:w-fit mr-1 ">
                         <input
