@@ -39,6 +39,7 @@ const DashboardContent = () => {
   const [staffBirthday, setStaffBirthday] = useState("");
   const [ticketCount, setTicketCount] = useState("");
   const [pendingFee, setPendingFee] = useState("");
+  const [approvedLessonPlaneCount, setApprovedLessonPlaneCount] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [roleId, setRoleId] = useState("");
@@ -162,6 +163,18 @@ const DashboardContent = () => {
         Birthdaycount.data.count
       );
       setStaffBirthday(Birthdaycount.data.count);
+
+      // fetch Approved lesson plane count
+      const ApprovedLessonPlane = await axios.get(
+        `${API_URL}/api/get_count_non_approved_lesson_plan`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setApprovedLessonPlaneCount(ApprovedLessonPlane.data.data);
+      console.log("pendingFee count is here******", pendingFeeCount.data);
     } catch (error) {
       setError(error.message);
       console.error("Error fetching data:", error);
@@ -288,7 +301,7 @@ const DashboardContent = () => {
               <Card
                 title="Approve Lesson Plans"
                 // value={pendingPlansCount} // Replace with your actual value
-                value={0} // Replace with your actual value
+                value={approvedLessonPlaneCount} // Replace with your actual value
                 color="#4CAF50"
                 icon={
                   <FaClipboardCheck
