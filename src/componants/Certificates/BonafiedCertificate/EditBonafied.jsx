@@ -470,7 +470,7 @@ const EditBonafied = () => {
         toast.error(error.response.sr_no);
       }
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false); // Stop loadings
     }
   };
 
