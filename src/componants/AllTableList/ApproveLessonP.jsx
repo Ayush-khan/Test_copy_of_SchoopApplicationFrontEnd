@@ -38,14 +38,17 @@ const ApproveLessonP = () => {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/staff_list`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_lesson_plan_created_teachers`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       console.log("Staff", response);
-      setStudentNameWithClassId(response?.data || []);
+      setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
+      toast.error("Error fetching Teachers");
+      console.error("Error fetching Teachers:", error);
     } finally {
       setLoadingExams(false);
     }
