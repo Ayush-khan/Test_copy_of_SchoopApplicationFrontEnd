@@ -22,6 +22,7 @@ function EditOfNewStudentList() {
   const navigate = useNavigate();
   const location = useLocation();
   const { student } = location.state || {};
+  // console.log("new Student list for check ", student);
   const [classForSiblingMapping, setClassForSiblingMapping] = useState(null);
 
   const [classes, setClasses] = useState([]);

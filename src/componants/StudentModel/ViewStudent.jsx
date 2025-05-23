@@ -17,6 +17,10 @@ function ViewStudent() {
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedDivision, setSelectedDivision] = useState(null);
   console.log("student data for view", student);
+
+  const section_id = location.state?.section_id || null;
+  console.log("view student for back navigation:", section_id);
+
   // Fetch class names
   useEffect(() => {
     const fetchClassNames = async () => {
@@ -98,11 +102,8 @@ function ViewStudent() {
     SetToReceiveSMS: "",
     SetEmailIDAsUsername: "",
   });
-  const [photoPreview, setPhotoPreview] = useState(null);
 
-  // // Convert class change and division change to non-functional
-  // const handleClassChange = async (e) => {}; // Disable handler
-  // const handleDivisionChange = (e) => {}; // Disable handler
+  const [photoPreview, setPhotoPreview] = useState(null);
 
   useEffect(() => {
     if (student) {
@@ -180,26 +181,9 @@ function ViewStudent() {
       }
     }
   }, [student]);
+
   console.log("setPhotoPreview", photoPreview);
   return (
-    // <div>
-    //   <h2>View Student</h2>
-    //   <form>
-    //     <div>
-    //       <label>First Name:</label>
-    //       <input type="text" value={formData.first_name} disabled />
-    //     </div>
-    //     <div>
-    //       <label>Middle Name:</label>
-    //       <input type="text" value={formData.mid_name} disabled />
-    //     </div>
-    //     <div>
-    //       <label>Last Name:</label>
-    //       <input type="text" value={formData.last_name} disabled />
-    //     </div>
-    //     {/* Add the rest of the form fields in a similar way */}
-    //   </form>
-    // </div>
     <div className=" w-[95%] mx-auto p-4">
       <ToastContainer />
       <div className="card p-3  rounded-md">
@@ -207,9 +191,15 @@ function ViewStudent() {
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             View Student Information
           </h5>
-          <RxCross1
+          {/* <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => navigate("/manageStudent")}
+          /> */}
+          <RxCross1
+            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() =>
+              navigate("/manageStudent", { state: { section_id } })
+            }
           />
         </div>
         <div
@@ -1285,9 +1275,13 @@ function ViewStudent() {
           <div className="col-span-3 md:mr-9 my-2 text-right">
             <button
               onClick={() => {
-                navigate("/manageStudent");
+                navigate("/manageStudent", {
+                  state: {
+                    section_id: section_id,
+                  },
+                });
               }}
-              className=" text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
+              className="text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
             >
               Back
             </button>

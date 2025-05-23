@@ -17,6 +17,9 @@ function ViewStudentLC() {
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedDivision, setSelectedDivision] = useState(null);
   console.log("student data for view", student);
+
+  const section_id = location.state?.section_id || null;
+  console.log("view student for back navigation:", section_id);
   // Fetch class names
   useEffect(() => {
     const fetchClassNames = async () => {
@@ -278,9 +281,15 @@ function ViewStudentLC() {
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             View LC Student Information
           </h5>
-          <RxCross1
+          {/* <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => navigate("/manageStudentLC")}
+          /> */}
+          <RxCross1
+            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() =>
+              navigate("/manageStudentLC", { state: { section_id } })
+            }
           />
         </div>
         <div

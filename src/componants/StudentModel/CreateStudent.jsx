@@ -37,6 +37,11 @@ function Form() {
   const [loading, setLoading] = useState(false);
   const [selectedUsername, setSelectedUsername] = useState(null);
 
+  const studentData = location.state?.student || null;
+  const section_id = location.state?.section_id || null;
+  console.log("Student being edited:", studentData);
+  console.log("Section ID passed for back navigation:", section_id);
+
   // Fetch class names
   useEffect(() => {
     const fetchClassNames = async () => {
@@ -1144,6 +1149,7 @@ function Form() {
     //   return;
     // }
     // Check for username-specific errors
+
     const hasUsernameErrors = Object.values(usernameErrors).some(
       (error) => error !== ""
     );
@@ -1229,9 +1235,15 @@ function Form() {
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             Edit Student Information
           </h5>
-          <RxCross1
+          {/* <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => navigate("/manageStudent")}
+          /> */}
+          <RxCross1
+            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() =>
+              navigate("/manageStudent", { state: { section_id } })
+            }
           />
         </div>
         <div
@@ -2805,9 +2817,13 @@ function Form() {
                 </button>
                 <button
                   onClick={() => {
-                    navigate("/manageStudent");
+                    navigate("/manageStudent", {
+                      state: {
+                        section_id: section_id,
+                      },
+                    });
                   }}
-                  className=" text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
+                  className="text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
                 >
                   Back
                 </button>

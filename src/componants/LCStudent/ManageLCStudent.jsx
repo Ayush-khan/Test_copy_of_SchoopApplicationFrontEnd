@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ImCheckboxChecked, ImDownload } from "react-icons/im";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -54,28 +54,43 @@ function ManageLCStudent() {
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
 
+  const location = useLocation();
+  const section_id = location.state?.section_id || null;
+  console.log("cast section id", section_id);
+
   const pageSize = 10;
   useEffect(() => {
     fetchClassNames();
     fetchDepartments();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.section_id) {
+      setclassIdForManage(location.state.section_id);
+
+      handleSearch(location.state.section_id);
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
   const handleClassSelect = (selectedOption) => {
     setNameError("");
     setSelectedClass(selectedOption);
     setclassIdForManage(selectedOption ? selectedOption.value : null); // Set to null if cleared
-
-    // setclassIdForManage(selectedOption.value); // Assuming value is the class ID
   };
 
   const classOptions = classes.map((cls) => ({
     value: `${cls?.section_id}`,
     label: `${cls?.get_class?.name} ${cls.name}`,
   }));
+
   const teacherOptions = departments.map((dept) => ({
     value: dept.reg_id,
     label: dept.name,
   }));
   console.log("teacherOptions", teacherOptions);
+
   const fetchClassNames = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -160,12 +175,71 @@ function ManageLCStudent() {
     }
   };
 
-  // Handle division checkbox change
+  // const handleSearch = async (customSectionId) => {
+  //   if (isSubmitting) return;
+  //   setIsSubmitting(true);
+  //   setNameError("");
+  //   setSearchTerm("");
 
+  //   const sectionIdToUse =
+  //     customSectionId !== undefined && customSectionId !== null
+  //       ? customSectionId
+  //       : classIdForManage !== undefined && classIdForManage !== null
+  //       ? classIdForManage
+  //       : location.state?.section_id;
+
+  //   if (!sectionIdToUse) {
+  //     setNameError("Please select the class.");
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     console.log("Searching with section ID:", sectionIdToUse);
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_leavingcertificatestudentlist`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         params: { q: sectionIdToUse },
+  //       }
+  //     );
+
+  //     console.log("Leaving Certificate List Response:", response.data);
+
+  //     if (response?.data?.data?.length > 0) {
+  //       setSubjects(response.data.data);
+  //       setPageCount(Math.ceil(response.data.data.length / 10));
+  //     } else {
+  //       setSubjects([]);
+  //       toast.error("No Leaving certificates found for the selected class.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching Leaving certificates:", error);
+  //     setError("Error fetching Leaving certificates");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+  // Handle division checkbox change
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
     // Handle page change logic
   };
+
+  // const handleView = (subjectIsPassForView) => {
+  //   console.log("HandleView-->", subjectIsPassForView);
+  //   setCurrentSection(subjectIsPassForView);
+  //   navigate(
+  //     `/studentLC/view/${subjectIsPassForView?.student_id}`,
+
+  //     {
+  //       state: { student: subjectIsPassForView },
+  //     }
+  //   );
+  // };
 
   const handleView = (subjectIsPassForView) => {
     console.log("HandleView-->", subjectIsPassForView);
@@ -174,10 +248,14 @@ function ManageLCStudent() {
       `/studentLC/view/${subjectIsPassForView?.student_id}`,
 
       {
-        state: { student: subjectIsPassForView },
+        state: {
+          student: subjectIsPassForView,
+          section_id: section_id || classIdForManage,
+        },
       }
     );
   };
+
   const handleDelete = (sectionId) => {
     const classToDelete = subjects.find((cls) => cls.student_id === sectionId);
     console.log("classsToDelete", classToDelete);
