@@ -98,7 +98,7 @@ const ApproveLessonP = () => {
     setLoadingForSearch(false);
 
     if (!selectedStudentId) {
-      setStudentError("Please select Staff Name.");
+      setStudentError("Please select teacher Name.");
       setLoadingForSearch(false);
       return;
     }
@@ -120,7 +120,9 @@ const ApproveLessonP = () => {
       };
 
       const response = await axios.get(
-        `${API_URL}/api/getsubstituteteacherweeklyreport`,
+        // `${API_URL}/api/getsubstituteteacherweeklyreport`,
+        `${API_URL}/api/`,
+
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
@@ -128,17 +130,16 @@ const ApproveLessonP = () => {
       );
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
-        toast.error("Substitution Weekly Hours Report not found.");
+        toast.error("Approve Lesson Plan not found.");
         setTimetable([]);
       } else {
         setTimetable(response?.data?.data);
         setPageCount(Math.ceil(response?.data?.data?.length / pageSize));
       }
     } catch (error) {
-      console.error("Error fetching Substitution Weekly Hours Report:", error);
-      toast.error(
-        "Error fetching Substitution Weekly Hours Report. Please try again."
-      );
+      console.error("Error fetching Approve Lesson Plan:", error);
+      //   toast.error("Error fetching Approve Lesson Plan. Please try again.");
+      toast.error("Comming Soon Approve Lesson Plan.");
     } finally {
       setIsSubmitting(false);
       setLoadingForSearch(false);
@@ -321,7 +322,7 @@ ${selectedStudent?.label || "For All Staff"}.xlsx`;
         <div className="card p-4 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              Substitution Weekly Hours Report
+              Approve Lesson Plan
             </h5>
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -338,16 +339,16 @@ ${selectedStudent?.label || "For All Staff"}.xlsx`;
           ></div>
 
           <>
-            <div className=" w-full md:w-[85%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+            <div className=" w-full md:w-[90%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
               <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full md:w-[90%] gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                <div className="  w-full md:w-[100%] gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                   {/* Class Dropdown */}
                   <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
-                      className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="w-full md:w-[45%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      Staff <span className="text-red-500">*</span>
+                      Select Teacher <span className="text-red-500">*</span>
                     </label>
                     <div className="w-full md:w-[65%]">
                       <Select
@@ -374,7 +375,7 @@ ${selectedStudent?.label || "For All Staff"}.xlsx`;
                           }),
                           option: (provided) => ({
                             ...provided,
-                            fontSize: ".9em", // Adjust font size for each option
+                            fontSize: ".8em", // Adjust font size for each option
                           }),
                         }}
                       />
@@ -463,7 +464,7 @@ ${selectedStudent?.label || "For All Staff"}.xlsx`;
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          List Of Substitution Weekly Hours Report
+                          List Of Approve Lesson Plan
                         </h3>
                         <div className="w-1/2 md:w-[18%] mr-1 ">
                           <input
