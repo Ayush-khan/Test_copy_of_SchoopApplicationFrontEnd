@@ -11,7 +11,7 @@ import EventCard from "./EventCard.jsx";
 import CardStuStaf from "../common/CardStuStaf.jsx";
 import StudentsChart from "../Dashbord/Charts/StudentsChart.jsx";
 import Footer from "../../Layouts/Footer.jsx";
-import { FaBirthdayCake } from "react-icons/fa";
+import { FaBirthdayCake, FaClipboardCheck } from "react-icons/fa";
 import { GiAchievement } from "react-icons/gi";
 import { HiCollection } from "react-icons/hi";
 import { IoTicket } from "react-icons/io5";
@@ -174,7 +174,7 @@ const DashboardContent = () => {
       <div className="flex flex-col lg:flex-row items-start justify-between w-full gap-4 p-6 ">
         <div className="w-full lg:w-2/3  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* {console.log("totalstudent", studentData.total)} */}
-          <Link to="/StudentAbsent" className="no-underline">
+          <Link to="/studentAbsent" className="no-underline">
             <CardStuStaf
               title="Student"
               TotalValue={studentData.total}
@@ -263,7 +263,7 @@ const DashboardContent = () => {
             />
           </Link>
 
-          <Link to="/staffbirthlist" className="no-underline">
+          {/* <Link to="/staffbirthlist" className="no-underline">
             <Card
               title="Today's Birthdays"
               value={staffBirthday}
@@ -281,7 +281,48 @@ const DashboardContent = () => {
                 />
               }
             />
-          </Link>
+          </Link> */}
+          {roleId === "M" ? (
+            // Approve Lesson Plan Card
+            <Link to="/approveLessonP" className="no-underline">
+              <Card
+                title="Approve Lesson Plans"
+                // value={pendingPlansCount} // Replace with your actual value
+                value={0} // Replace with your actual value
+                color="#4CAF50"
+                icon={
+                  <FaClipboardCheck
+                    style={{
+                      color: "green",
+                      backgroundColor: "white",
+                      padding: "10px",
+                      borderRadius: "50%",
+                    }}
+                  />
+                }
+              />
+            </Link>
+          ) : (
+            // Staff Birthday Card
+            <Link to="/staffbirthlist" className="no-underline">
+              <Card
+                title="Today's Birthdays"
+                value={staffBirthday}
+                color="#2196F3"
+                icon={
+                  <FaBirthdayCake
+                    style={{
+                      color: "cyan",
+                      backgroundColor: "white",
+                      padding: "10px",
+                      borderRadius: "50%",
+                    }}
+                  />
+                }
+              />
+            </Link>
+          )}
+
           {/* you can add more cards here just add on */}
         </div>
 

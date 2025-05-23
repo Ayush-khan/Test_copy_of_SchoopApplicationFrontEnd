@@ -225,6 +225,7 @@ import UploadStudentPhoto from "../componants/IDCards/UploadStudentPhoto.jsx";
 import UploadParentPhoto from "../componants/IDCards/UploadParentPhoto.jsx";
 import StudentAbsent from "../componants/AllTableList/StudentAbsent.jsx";
 import NonTeachingStaff from "../componants/AllTableList/NonTeachingStaff.jsx";
+import ApproveLessonP from "../componants/AllTableList/ApproveLessonP.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -823,12 +824,16 @@ function Index() {
           element={<PrivateRoute element={<FeePendingList />} />}
         />
         <Route
-          path="/StudentAbsent"
+          path="/studentAbsent"
           element={<PrivateRoute element={<StudentAbsent />} />}
         />
         <Route
           path="/nonTeachingStaff"
           element={<PrivateRoute element={<NonTeachingStaff />} />}
+        />
+        <Route
+          path="/approveLessonP"
+          element={<PrivateRoute element={<ApproveLessonP />} />}
         />
         <Route
           path="/staffbirthlist"
