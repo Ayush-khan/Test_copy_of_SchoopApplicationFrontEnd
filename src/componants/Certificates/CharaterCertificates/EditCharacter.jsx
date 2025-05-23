@@ -16,9 +16,14 @@ const EditCharacter = () => {
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const { student } = location.state || {};
+
+  const section_id =
+    location.state?.section_id || location.state?.student?.section_id || null;
+  console.log("edit page bonafied student for back navigation:", section_id);
   const [formData, setFormData] = useState({
     sr_no: "",
     stud_name: "",
@@ -460,11 +465,23 @@ const EditCharacter = () => {
             Edit Character Certificate
           </h5>
 
-          <RxCross1
+          {/* <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               setErrors({});
               navigate("/characterCertificate");
+            }}
+          /> */}
+
+          <RxCross1
+            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() => {
+              setErrors({});
+              if (section_id) {
+                navigate("/characterCertificate", { state: { section_id } });
+              } else {
+                navigate("/characterCertificate"); // fallback
+              }
             }}
           />
         </div>

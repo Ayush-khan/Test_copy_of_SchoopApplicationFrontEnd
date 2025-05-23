@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ImCheckboxChecked, ImDownload } from "react-icons/im";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -51,12 +51,29 @@ function BonafiedCertificates() {
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
 
+  const location = useLocation();
+  const section_id = location.state?.section_id || null;
+  console.log("bobafiled section id", section_id);
+
   const navigate = useNavigate();
   const pageSize = 10;
   useEffect(() => {
     fetchClassNames();
     fetchDepartments();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.section_id) {
+      setclassIdForManage(location.state.section_id);
+
+      // Trigger the search with the incoming section_id
+      handleSearch(location.state.section_id);
+
+      // Optional: clear state from URL history
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
   const handleClassSelect = (selectedOption) => {
     setNameError("");
     setSelectedClass(selectedOption);
@@ -118,49 +135,93 @@ function BonafiedCertificates() {
   };
 
   // Listing tabs data for diffrente tabs
+  // const handleSearch = async () => {
+  //   if (isSubmitting) return; // Prevent re-submitting
+  //   setIsSubmitting(true);
+  //   if (!classIdForManage) {
+  //     setNameError("Please select the class.");
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+  //   setSearchTerm("");
+  //   try {
+  //     console.log(
+  //       "for this sectiong id in seaching inside AllotMarksHeadingTab",
+  //       classIdForManage
+  //     );
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await axios.get(
+  //       // `${API_URL}/api/get_AllotMarkheadingslist`,
+
+  //       `${API_URL}/api/get_bonafidecertificatelist`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         // params: { q: selectedClass },
+  //         params: { q: classIdForManage },
+  //       }
+  //     );
+  //     console.log(
+  //       "the response of the AllotMarksHeadingTab is *******",
+  //       response.data
+  //     );
+  //     if (response?.data?.data.length > 0) {
+  //       setSubjects(response?.data?.data);
+  //       setPageCount(Math.ceil(response?.data?.data.length / 10)); // Example pagination logic
+  //     } else {
+  //       setSubjects([]);
+  //       toast.error(
+  //         "No Bonafied certificates Listing are found for the selected class."
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching Bonafied certificates Listing:", error);
+  //     setError("Error fetching Bonafied certificates");
+  //   } finally {
+  //     setIsSubmitting(false); // Re-enable the button after the operation
+  //   }
+  // };
+
   const handleSearch = async () => {
-    if (isSubmitting) return; // Prevent re-submitting
+    if (isSubmitting) return;
     setIsSubmitting(true);
-    if (!classIdForManage) {
+    setNameError(""); // Clear any error
+    setSearchTerm("");
+
+    // Priority: classIdForManage > location.state?.section_id
+    const sectionIdToUse = classIdForManage || location.state?.section_id;
+
+    if (!sectionIdToUse) {
       setNameError("Please select the class.");
       setIsSubmitting(false);
       return;
     }
-    setSearchTerm("");
-    try {
-      console.log(
-        "for this sectiong id in seaching inside AllotMarksHeadingTab",
-        classIdForManage
-      );
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(
-        // `${API_URL}/api/get_AllotMarkheadingslist`,
 
+    try {
+      console.log("Searching with section ID:", sectionIdToUse);
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(
         `${API_URL}/api/get_bonafidecertificatelist`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          // params: { q: selectedClass },
-          params: { q: classIdForManage },
+          params: { q: sectionIdToUse },
         }
       );
-      console.log(
-        "the response of the AllotMarksHeadingTab is *******",
-        response.data
-      );
-      if (response?.data?.data.length > 0) {
-        setSubjects(response?.data?.data);
-        setPageCount(Math.ceil(response?.data?.data.length / 10)); // Example pagination logic
+
+      console.log("Bonafide Certificate List Response:", response.data);
+
+      if (response?.data?.data?.length > 0) {
+        setSubjects(response.data.data);
+        setPageCount(Math.ceil(response.data.data.length / 10));
       } else {
         setSubjects([]);
-        toast.error(
-          "No Bonafied certificates Listing are found for the selected class."
-        );
+        toast.error("No Bonafide certificates found for the selected class.");
       }
     } catch (error) {
-      console.error("Error fetching Bonafied certificates Listing:", error);
-      setError("Error fetching Bonafied certificates");
+      console.error("Error fetching Bonafide certificates:", error);
+      setError("Error fetching Bonafide certificates");
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
     }
   };
 
@@ -177,16 +238,29 @@ function BonafiedCertificates() {
     setShowDownloadModal(true);
   };
 
-  const handleEditForm = (section) => {
-    setCurrentSection(section);
-    navigate(
-      `/bonafied/edit/${section?.sr_no}`,
+  // const handleEditForm = (section) => {
+  //   setCurrentSection(section);
+  //   navigate(`/bonafied/edit/${section?.sr_no}`, {
+  //     state: {
+  //       student: section,
+  //       section_id: section.section_id, // ✅ FIXED: use section_id here
+  //     },
+  //   });
+  // };
 
-      {
-        state: { student: section },
-      }
-    );
-    // console.log("the currecne t section", currentSection);
+  const handleEditForm = (section) => {
+    console.log("Full section object for edit:", section);
+
+    const sectionId = section.class_division; // <-- Use class_division here
+
+    console.log("Navigating with section_id:", sectionId);
+
+    navigate(`/bonafied/edit/${section?.sr_no}`, {
+      state: {
+        student: section,
+        section_id: sectionId, // Pass correct section_id (like "11-A")
+      },
+    });
   };
 
   const handleDownloadSumbit = async () => {
@@ -387,6 +461,7 @@ function BonafiedCertificates() {
   }, [searchTerm]);
 
   const searchLower = searchTerm.trim().toLowerCase();
+
   const filteredSections = subjects.filter((section) => {
     // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
     const subjectNameIs = section?.stud_name.toLowerCase() || "";
@@ -394,6 +469,7 @@ function BonafiedCertificates() {
     // Check if the search term is present in either the teacher's name or the subject's name
     return subjectNameIs.toLowerCase().includes(searchLower);
   });
+
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -405,6 +481,7 @@ function BonafiedCertificates() {
       handleSearch();
     }
   };
+
   return (
     <>
       {/* <ToastContainer /> */}

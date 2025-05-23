@@ -46,6 +46,10 @@ const EditBonafied = () => {
     teacher_image_name: null,
   });
 
+  const section_id =
+    location.state?.section_id || location.state?.student?.section_id || null;
+  console.log("edit page bonafied student for back navigation:", section_id);
+
   // Fetch initial data on component load
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -471,7 +475,7 @@ const EditBonafied = () => {
   };
 
   return (
-    <div className=" w-full  md:container mx-auto py-4 p-4 px-4  ">
+    <div className=" w-full  md:w-[70%] mx-auto py-4 p-4 px-4  ">
       <ToastContainer />
       {loading && (
         <div className="fixed  inset-0 z-50   flex items-center justify-center bg-gray-700 bg-opacity-50">
@@ -485,11 +489,22 @@ const EditBonafied = () => {
             Edit Bonafied Certificate
           </h5>
 
+          {/* <RxCross1
+            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() => {
+              setErrors({});
+              navigate("/bonafiedCertificates", { state: { section_id } });
+            }}
+          /> */}
           <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               setErrors({});
-              navigate("/bonafiedCertificates");
+              if (section_id) {
+                navigate("/bonafiedCertificates", { state: { section_id } });
+              } else {
+                navigate("/bonafiedCertificates"); // fallback
+              }
             }}
           />
         </div>

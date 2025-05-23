@@ -51,6 +51,10 @@ const EditCastCertificate = () => {
     teacher_image_name: null,
   });
 
+  const section_id =
+    location.state?.section_id || location.state?.student?.section_id || null;
+  console.log("edit page bonafied student for back navigation:", section_id);
+
   // Fetch initial data on component load
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -488,11 +492,23 @@ const EditCastCertificate = () => {
             Edit Cast Certificate
           </h5>
 
-          <RxCross1
+          {/* <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               setErrors({});
               navigate("/castCertificate");
+            }}
+          /> */}
+
+          <RxCross1
+            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() => {
+              setErrors({});
+              if (section_id) {
+                navigate("/castCertificate", { state: { section_id } });
+              } else {
+                navigate("/castCertificate"); // fallback
+              }
             }}
           />
         </div>

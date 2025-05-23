@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ImCheckboxChecked, ImDownload } from "react-icons/im";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -52,11 +52,26 @@ function CharacterCertificate() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const location = useLocation();
+  const section_id = location.state?.section_id || null;
+  console.log("chracter section id", section_id);
+
   const pageSize = 10;
   useEffect(() => {
     fetchClassNames();
     fetchDepartments();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.section_id) {
+      setclassIdForManage(location.state.section_id);
+
+      handleSearch(location.state.section_id);
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
   const handleClassSelect = (selectedOption) => {
     setNameError("");
     setSelectedClass(selectedOption);
@@ -117,51 +132,95 @@ function CharacterCertificate() {
     }
   };
 
-  // Listing tabs data for diffrente tabs
+  // // Listing tabs data for diffrente tabs
+  // const handleSearch = async () => {
+  //   if (isSubmitting) return; // Prevent re-submitting
+  //   setIsSubmitting(true);
+  //   if (!classIdForManage) {
+  //     setNameError("Please select the class.");
+  //     setIsSubmitting(false);
+
+  //     return;
+  //   }
+  //   setSearchTerm("");
+  //   try {
+  //     console.log(
+  //       "for this sectiong id in seaching inside AllotMarksHeadingTab",
+  //       classIdForManage
+  //     );
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await axios.get(
+  //       // `${API_URL}/api/get_AllotMarkheadingslist`,
+
+  //       `${API_URL}/api/get_characterbonafidecertificatelist`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         // params: { q: selectedClass },
+  //         params: { q: classIdForManage },
+  //       }
+  //     );
+  //     console.log(
+  //       "the response of the AllotMarksHeadingTab is *******",
+  //       response.data
+  //     );
+  //     if (response?.data?.data.length > 0) {
+  //       setSubjects(response?.data?.data);
+  //       setPageCount(Math.ceil(response?.data?.data.length / 10)); // Example pagination logic
+  //     } else {
+  //       setSubjects([]);
+  //       toast.error(
+  //         "No Character certificates Listing are found for the selected class."
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching Character certificates Listing:", error);
+  //     setError("Error fetching Character certificates");
+  //   } finally {
+  //     setIsSubmitting(false); // Re-enable the button after the operation
+  //   }
+  // };
+
   const handleSearch = async () => {
-    if (isSubmitting) return; // Prevent re-submitting
+    if (isSubmitting) return;
     setIsSubmitting(true);
-    if (!classIdForManage) {
+    setNameError(""); // Clear any error
+    setSearchTerm("");
+
+    // Priority: classIdForManage > location.state?.section_id
+    const sectionIdToUse = classIdForManage || location.state?.section_id;
+
+    if (!sectionIdToUse) {
       setNameError("Please select the class.");
       setIsSubmitting(false);
-
       return;
     }
-    setSearchTerm("");
-    try {
-      console.log(
-        "for this sectiong id in seaching inside AllotMarksHeadingTab",
-        classIdForManage
-      );
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(
-        // `${API_URL}/api/get_AllotMarkheadingslist`,
 
+    try {
+      console.log("Searching with section ID:", sectionIdToUse);
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(
         `${API_URL}/api/get_characterbonafidecertificatelist`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          // params: { q: selectedClass },
-          params: { q: classIdForManage },
+          params: { q: sectionIdToUse },
         }
       );
-      console.log(
-        "the response of the AllotMarksHeadingTab is *******",
-        response.data
-      );
-      if (response?.data?.data.length > 0) {
-        setSubjects(response?.data?.data);
-        setPageCount(Math.ceil(response?.data?.data.length / 10)); // Example pagination logic
+
+      console.log("Chracter Certificate List Response:", response.data);
+
+      if (response?.data?.data?.length > 0) {
+        setSubjects(response.data.data);
+        setPageCount(Math.ceil(response.data.data.length / 10));
       } else {
         setSubjects([]);
-        toast.error(
-          "No Character certificates Listing are found for the selected class."
-        );
+        toast.error("No Chracter certificates found for the selected class.");
       }
     } catch (error) {
-      console.error("Error fetching Character certificates Listing:", error);
-      setError("Error fetching Character certificates");
+      console.error("Error fetching Chracter certificates:", error);
+      setError("Error fetching Chracter certificates");
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
     }
   };
 
@@ -177,16 +236,31 @@ function CharacterCertificate() {
     setShowDownloadModal(true);
   };
 
+  // const handleEditForm = (section) => {
+  //   setCurrentSection(section);
+  //   navigate(
+  //     `/stud_char/edit/${section?.sr_no}`,
+
+  //     {
+  //       state: { student: section },
+  //     }
+  //   );
+  //   // console.log("the currecne t section", currentSection);
+  // };
+
   const handleEditForm = (section) => {
     setCurrentSection(section);
-    navigate(
-      `/stud_char/edit/${section?.sr_no}`,
 
-      {
-        state: { student: section },
-      }
-    );
-    // console.log("the currecne t section", currentSection);
+    const sectionId = section.class_division; // or section.section_id if it exists
+
+    console.log("Navigating to edit with section_id:", sectionId);
+
+    navigate(`/stud_char/edit/${section?.sr_no}`, {
+      state: {
+        student: section,
+        section_id: sectionId, // ✅ Add this line
+      },
+    });
   };
 
   const handleDownloadSumbit = async () => {
