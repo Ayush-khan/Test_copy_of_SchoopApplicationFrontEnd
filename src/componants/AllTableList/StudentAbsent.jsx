@@ -250,7 +250,7 @@ function StudentAbsent() {
                         Today's Absentee List{" "}
                         <span className="text-[.8em] pb-1 text-blue-500">
                           {selectedClass?.label
-                            ? `(Class - ${selectedClass.label})`
+                            ? `(${selectedClass.label} | Absent: ${countAbsentStudent} Students)`
                             : `(Total Absent - ${countAbsentStudent})`}
                         </span>
                       </h3>
