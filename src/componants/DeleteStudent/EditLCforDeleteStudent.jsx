@@ -1,4 +1,3 @@
-// Try UP
 import { useState, useEffect, useMemo } from "react";
 // import debounce from "lodash/debounce";
 import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
@@ -20,6 +19,10 @@ const EditLCforDeleteStudent = () => {
   const location = useLocation();
   const { student } = location.state || {};
   console.log("Student -->", student);
+
+  const section_id = location.state?.section_id || null;
+  console.log("view student for back navigation:", section_id);
+
   const [formData, setFormData] = useState({
     sr_no: "",
     class_id: "",
@@ -1079,7 +1082,7 @@ const EditLCforDeleteStudent = () => {
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               setErrors({});
-              navigate("/deleteStudent");
+              navigate("/deleteStudent", { state: { section_id } });
             }}
           />
         </div>
@@ -2172,7 +2175,7 @@ const EditLCforDeleteStudent = () => {
 
             <button
               onClick={() => {
-                navigate("/deleteStudent");
+                navigate("/deleteStudent", { state: { section_id } });
               }}
               className=" text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
             >

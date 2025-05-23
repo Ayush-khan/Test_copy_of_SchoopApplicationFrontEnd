@@ -9,7 +9,7 @@ import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 // import AllotSubjectTab from "./AllotMarksHeadingTab";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Select from "react-select";
 import LeavingCertificate from "./LeavingCertificate";
 function ManageLC() {
@@ -53,11 +53,31 @@ function ManageLC() {
   const [srNo, setSrNo] = useState("");
   const [cancellationReason, setCancellationReason] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const srno = location.state?.sr_no || location.state?.student?.sr_no || null;
+  const classId =
+    location.state?.class_id || location.state?.student?.class_id || null;
+
+  console.log("LC - srNo:", srno, "classId:", classId);
+
   const pageSize = 10;
   useEffect(() => {
     fetchClassNames();
     fetchDepartments();
   }, []);
+
+  useEffect(() => {
+    // const srFromNav = location.state?.sr_no || location.state?.student?.sr_no;
+    const classFromNav =
+      location.state?.class_id || location.state?.student?.class_id;
+
+    if (classFromNav) {
+      handleSearch();
+      // Optional: clean up state from browser history
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
   const handleClassSelect = (selectedOption) => {
     setNameError("");
     setSelectedClass(selectedOption);
@@ -69,6 +89,7 @@ function ManageLC() {
     label: dept.name,
   }));
   console.log("teacherOptions", teacherOptions);
+
   const classOptions = classes.map((cls) => ({
     // value: `${cls?.get_class?.name}-${cls.name}`,
     value: `${cls.class_id}`,
@@ -119,31 +140,79 @@ function ManageLC() {
     }
   };
 
+  // const handleSearch = async () => {
+  //   const token = localStorage.getItem("authToken");
+
+  //   let params = null; // Initialize params as null
+  //   // Conditional logic for API query parameters
+  //   if (srNo && selectedClass) {
+  //     params = { sr_no: srNo, class_id: classIdForManage };
+  //   } else if (srNo) {
+  //     params = { sr_no: srNo };
+  //   } else if (selectedClass) {
+  //     params = { class_id: classIdForManage };
+  //   }
+
+  //   // API call
+  //   setSearchTerm("");
+  //   try {
+  //     setLoadingForSearch(true); // Start loading
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_leavingcertificatelist`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         ...(params ? { params } : {}), // Only include params if they are defined
+  //       }
+  //     );
+
+  //     if (response?.data?.data?.length > 0) {
+  //       setSubjects(response.data.data);
+  //       setPageCount(Math.ceil(response.data.data.length / 10));
+  //     } else {
+  //       setSubjects([]);
+  //       toast.error("No Leaving Certificate records found.");
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error in fetching certificates Listing");
+  //     console.error("Error fetching Leaving Certificate records:", error);
+  //     setError("Error fetching Leaving Certificate records");
+  //   } finally {
+  //     setLoadingForSearch(false);
+  //   }
+  // };
+
   const handleSearch = async () => {
     const token = localStorage.getItem("authToken");
-    // const currentAcademicYear = localStorage.getItem("ac");
 
-    // const currentAcademicYear = "2023-2024"; // example, replace with dynamic value if available
-    // const params = {};
-    let params = null; // Initialize params as null
-    // Conditional logic for API query parameters
-    if (srNo && selectedClass) {
-      params = { sr_no: srNo, class_id: classIdForManage };
-    } else if (srNo) {
-      params = { sr_no: srNo };
-    } else if (selectedClass) {
-      params = { class_id: classIdForManage };
+    // Fallback values from navigation (location.state)
+    // const locationSrNo =
+    //   location.state?.sr_no || location.state?.student?.sr_no || null;
+    const locationClassId =
+      location.state?.class_id || location.state?.student?.class_id || null;
+
+    // Priority: user input > location.state
+    const finalSrNo = srNo;
+    const finalClassId = classIdForManage || locationClassId;
+
+    let params = null;
+    if (finalSrNo && finalClassId) {
+      params = { sr_no: finalSrNo, class_id: finalClassId };
+    } else if (finalSrNo) {
+      params = { sr_no: finalSrNo };
+    } else if (finalClassId) {
+      params = { class_id: finalClassId };
     }
 
     // API call
     setSearchTerm("");
     try {
-      setLoadingForSearch(true); // Start loading
+      setLoadingForSearch(true);
+
       const response = await axios.get(
         `${API_URL}/api/get_leavingcertificatelist`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          ...(params ? { params } : {}), // Only include params if they are defined
+          ...(params ? { params } : {}),
         }
       );
 
@@ -174,16 +243,38 @@ function ManageLC() {
     setShowEditModal(true);
   };
 
+  // const handleEditForm = (section) => {
+  //   setCurrentSection(section);
+  //   navigate(
+  //     `/studentLC/edit/${section?.sr_no}`,
+
+  //     {
+  //       state: { student: section },
+  //     }
+  //   );
+  // };
+
   const handleEditForm = (section) => {
     setCurrentSection(section);
-    navigate(
-      `/studentLC/edit/${section?.sr_no}`,
 
-      {
-        state: { student: section },
-      }
+    const srNo = section.sr_no;
+    const classId =
+      section.class_id || section.class_division || section.section_id; // pick whichever is correct
+
+    console.log(
+      "Navigating to edit with sr_no:",
+      srno,
+      "and class_id:",
+      classId
     );
-    // console.log("the currecne t section", currentSection);
+
+    navigate(`/studentLC/edit/${srNo}`, {
+      state: {
+        student: section,
+        sr_no: srno,
+        class_id: classId,
+      },
+    });
   };
 
   const handleDownload = (section) => {

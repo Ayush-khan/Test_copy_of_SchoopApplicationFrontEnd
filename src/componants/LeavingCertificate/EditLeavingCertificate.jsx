@@ -21,6 +21,13 @@ const EditLeavingCertificate = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { student } = location.state || {};
+
+  const srNo = location.state?.sr_no || location.state?.student?.sr_no || null;
+  const classId =
+    location.state?.class_id || location.state?.student?.class_id || null;
+
+  console.log("edit page LC - srNo:", srNo, "classId:", classId);
+
   const [formData, setFormData] = useState({
     sr_no: "",
     class_id: "",
@@ -917,11 +924,27 @@ const EditLeavingCertificate = () => {
             Edit Leaving Certificate
           </h5>
 
-          <RxCross1
+          {/* <RxCross1
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               setErrors({});
               navigate("/leavingCertificate");
+            }}
+          /> */}
+          <RxCross1
+            className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+            onClick={() => {
+              setErrors({});
+
+              navigate("/leavingCertificate", {
+                state: {
+                  sr_no:
+                    location.state?.sr_no || location.state?.student?.sr_no,
+                  class_id:
+                    location.state?.class_id ||
+                    location.state?.student?.class_id,
+                },
+              });
             }}
           />
         </div>

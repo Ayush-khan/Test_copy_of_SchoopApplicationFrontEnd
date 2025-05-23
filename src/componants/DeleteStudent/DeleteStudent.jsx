@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { PiCertificateBold } from "react-icons/pi";
 import { LuFileBadge2 } from "react-icons/lu";
 import { FaUndoAlt } from "react-icons/fa";
@@ -56,11 +56,30 @@ function DeleteStudent() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const location = useLocation();
+  const section_id = location.state?.section_id || null;
+  console.log("ddeleted section id", section_id);
+
   const pageSize = 10;
+
   useEffect(() => {
     fetchClassNames();
     fetchDepartments();
   }, []);
+
+  // 3. Runs when coming from another page with section_id via router state
+  useEffect(() => {
+    if (location.state?.section_id) {
+      setclassIdForManage(location.state.section_id);
+
+      // Clear browser history to prevent repeat behavior on back navigation
+      window.history.replaceState({}, document.title);
+
+      // Automatically trigger a search based on passed section_id
+      handleSearch(location.state.section_id);
+    }
+  }, [location.state]);
+
   const handleClassSelect = (selectedOption) => {
     setNameError("");
     setSelectedClass(selectedOption);
@@ -73,11 +92,14 @@ function DeleteStudent() {
     value: `${cls?.section_id}`,
     label: `${cls?.get_class?.name} ${cls.name}`,
   }));
+
   const teacherOptions = departments.map((dept) => ({
     value: dept.reg_id,
     label: dept.name,
   }));
+
   console.log("teacherOptions", teacherOptions);
+
   const fetchClassNames = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -123,17 +145,56 @@ function DeleteStudent() {
   };
 
   // Listing tabs data for diffrente tabs
+  // const handleSearch = async () => {
+  //   if (isSubmitting) return; // Prevent re-submitting
+  //   setIsSubmitting(true);
+  //   // Clear any existing error messages
+  //   setNameError("");
+  //   setSearchTerm("");
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const params = classIdForManage ? { section_id: classIdForManage } : {};
+
+  //     // Perform the API call
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_deletedstudentlist`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         params,
+  //       }
+  //     );
+
+  //     // Check if response data is valid
+  //     if (response?.data?.status === 200 && response?.data?.data.length > 0) {
+  //       const studentData = response.data.data;
+  //       setSubjects(studentData);
+  //       setPageCount(Math.ceil(studentData.length / 10)); // Adjust per your pagination requirements
+  //       console.log("Subjects data:", studentData); // Debugging output
+  //     } else {
+  //       setSubjects([]);
+  //       toast.error("No Deleted Students List found for the selected Class.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching Deleted Students List:", error);
+  //     setError("Error fetching data. Please try again later.");
+  //   } finally {
+  //     setIsSubmitting(false); // Re-enable the button after the operation
+  //   }
+  // };
   const handleSearch = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
-    // Clear any existing error messages
-    setNameError("");
+    setNameError(""); // Clear any existing error messages
     setSearchTerm("");
+
     try {
       const token = localStorage.getItem("authToken");
-      const params = classIdForManage ? { section_id: classIdForManage } : {};
 
-      // Perform the API call
+      // Priority: classIdForManage > location.state.section_id
+      const sectionIdToUse = classIdForManage || location.state?.section_id;
+
+      const params = sectionIdToUse ? { section_id: sectionIdToUse } : {};
+
       const response = await axios.get(
         `${API_URL}/api/get_deletedstudentlist`,
         {
@@ -142,12 +203,11 @@ function DeleteStudent() {
         }
       );
 
-      // Check if response data is valid
       if (response?.data?.status === 200 && response?.data?.data.length > 0) {
         const studentData = response.data.data;
         setSubjects(studentData);
-        setPageCount(Math.ceil(studentData.length / 10)); // Adjust per your pagination requirements
-        console.log("Subjects data:", studentData); // Debugging output
+        setPageCount(Math.ceil(studentData.length / 10));
+        console.log("Subjects data:", studentData);
       } else {
         setSubjects([]);
         toast.error("No Deleted Students List found for the selected Class.");
@@ -156,7 +216,7 @@ function DeleteStudent() {
       console.error("Error fetching Deleted Students List:", error);
       setError("Error fetching data. Please try again later.");
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
     }
   };
 
@@ -174,10 +234,14 @@ function DeleteStudent() {
       `/deletedStudent/view/${subjectIsPassForView?.student_id}`,
 
       {
-        state: { student: subjectIsPassForView },
+        state: {
+          student: subjectIsPassForView,
+          section_id: section_id || classIdForManage,
+        },
       }
     );
   };
+
   const handleDelete = (sectionId) => {
     const classToDelete = subjects.find((cls) => cls.student_id === sectionId);
     console.log("classsToDelete", classToDelete);
@@ -232,14 +296,12 @@ function DeleteStudent() {
 
   const handleEditForm = (section) => {
     setCurrentSection(section);
-    navigate(
-      `/deletedStudent/edit/${section?.student_id}`,
-
-      {
-        state: { student: section },
-      }
-    );
-    // console.log("the currecne t section", currentSection);
+    navigate(`/deletedStudent/edit/${section?.student_id}`, {
+      state: {
+        student: section,
+        section_id: section.section_id,
+      },
+    });
   };
 
   const handleLCDetails = async (section) => {

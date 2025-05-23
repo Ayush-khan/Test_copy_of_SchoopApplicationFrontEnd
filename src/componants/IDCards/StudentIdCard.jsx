@@ -88,14 +88,6 @@ const StudentIdCard = () => {
     [studentNameWithClassId]
   );
 
-  // useEffect(() => {
-  //   if (sectionID) {
-  //     setSelectedStudentId(sectionID);
-  //     handleSearch(sectionID);
-  //     setTimetable([]);
-  //   }
-  // }, []);
-
   useEffect(() => {
     if (sectionID && studentOptions.length > 0) {
       const selectedOption = studentOptions.find(
@@ -162,6 +154,197 @@ const StudentIdCard = () => {
     }
   };
 
+  // working
+  // const handleDownloadEXL = () => {
+  //   if (!displayedSections || displayedSections.length === 0) {
+  //     toast.error(
+  //       "No data available to download Excel sheet of Student ID Card."
+  //     );
+  //     return;
+  //   }
+
+  //   // Define headers
+  //   const headers = [
+  //     "Sr.No",
+  //     "Roll No",
+  //     "Photo URL",
+  //     "Class",
+  //     "Student Name",
+  //     "DOB",
+  //     "Father Mobile No.",
+  //     "Mother Mobile No.",
+  //     "Address",
+  //     "Blood Group",
+  //     "Grn No.",
+  //     "House",
+  //     "Image Name",
+  //   ];
+
+  //   // Convert table data into an array format
+  //   // const data = displayedSections.map((subject, index) => [
+  //   //   index + 1,
+  //   //   subject?.roll_no || " ",
+  //   //   subject?.image_url || " ",
+  //   //   `${subject?.class_name || ""} ${subject?.sec_name || ""}`,
+  //   //   `${subject?.first_name || ""} ${subject?.mid_name || ""} ${
+  //   //     subject?.last_name || ""
+  //   //   }`,
+  //   //   `${
+  //   //     subject?.dob ? new Date(subject.dob).toLocaleDateString("en-GB") : ""
+  //   //   }`,
+  //   //   subject?.f_mobile || " ",
+  //   //   subject?.m_mobile || " ",
+  //   //   subject?.permant_add || " ",
+  //   //   subject?.blood_group || " ",
+  //   //   subject?.reg_no || " ",
+  //   //   `${subject?.house === "Unknown House" ? "" : subject?.house}`,
+  //   //   subject?.image_name || " ",
+  //   // ]);
+
+  //   const handleDownloadEXL = () => {
+  //     if (!displayedSections || displayedSections.length === 0) {
+  //       toast.error(
+  //         "No data available to download Excel sheet of Student ID Card."
+  //       );
+  //       return;
+  //     }
+
+  //     const headers = [
+  //       "Sr.No",
+  //       "Roll No",
+  //       "Photo URL",
+  //       "Class",
+  //       "Student Name",
+  //       "DOB",
+  //       "Father Mobile No.",
+  //       "Mother Mobile No.",
+  //       "Address",
+  //       "Blood Group",
+  //       "Grn No.",
+  //       "House",
+  //       "Image Name",
+  //     ];
+
+  //     const data = displayedSections.map((subject, index) => [
+  //       index + 1,
+  //       subject?.roll_no || "",
+  //       subject?.image_url || "",
+  //       `${subject?.class_name || ""} ${subject?.sec_name || ""}`,
+  //       `${subject?.first_name || ""} ${subject?.mid_name || ""} ${
+  //         subject?.last_name || ""
+  //       }`,
+  //       subject?.dob ? new Date(subject.dob).toLocaleDateString("en-GB") : "",
+  //       subject?.f_mobile || "",
+  //       subject?.m_mobile || "",
+  //       subject?.permant_add || "",
+  //       subject?.blood_group || "",
+  //       subject?.reg_no || "",
+  //       subject?.house === "Unknown House" ? "" : subject?.house,
+  //       subject?.image_name || "",
+  //     ]);
+
+  //     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+
+  //     // Add hyperlinks manually to the "Image Name" column (index 12, or column "M")
+  //     displayedSections.forEach((subject, i) => {
+  //       if (subject?.image_name) {
+  //         const row = i + 2; // +2 because headers are in row 1 and Excel rows are 1-indexed
+  //         const cellRef = `M${row}`;
+  //         worksheet[cellRef] = {
+  //           t: "s",
+  //           v: subject.image_name,
+  //           l: {
+  //             Target: `https://your-site.com/student-profile?id=${subject?.id}`, // Adjust ID key accordingly
+  //           },
+  //         };
+  //       }
+  //     });
+
+  //     const workbook = XLSX.utils.book_new();
+  //     XLSX.utils.book_append_sheet(workbook, worksheet, "Student Data");
+
+  //     XLSX.writeFile(
+  //       workbook,
+  //       `Student idCard list of ${selectedStudent.label}.xlsx`
+  //     );
+  //   };
+
+  //   // Create a worksheet
+  //   const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+
+  //   // Create a workbook and append the worksheet
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Student Data");
+
+  //   // Write and download the file
+  //   XLSX.writeFile(
+  //     workbook,
+  //     `Student idCard list of ${selectedStudent.label}.xlsx`
+  //   );
+  // };
+
+  // open browswe
+  // const handleDownloadEXL = async () => {
+  //   if (!displayedSections || displayedSections.length === 0) {
+  //     toast.error(
+  //       "No data available to download Excel sheet of Student ID Card."
+  //     );
+  //     return;
+  //   }
+
+  //   // Define column headers
+  //   const headers = [
+  //     "Sr.No",
+  //     "Roll No",
+  //     "Photo (Click to View)",
+  //     "Class",
+  //     "Student Name",
+  //     "DOB",
+  //     "Father Mobile No.",
+  //     "Mother Mobile No.",
+  //     "Address",
+  //     "Blood Group",
+  //     "Grn No.",
+  //     "House",
+  //     "Image Name",
+  //   ];
+
+  //   // Convert each row
+  //   const data = displayedSections.map((subject, index) => {
+  //     const imageUrl = subject?.image_url || "https://via.placeholder.com/50";
+  //     return [
+  //       index + 1,
+  //       subject?.roll_no || "",
+  //       { t: "s", v: "View", l: { Target: imageUrl } }, // Excel hyperlink
+  //       `${subject?.class_name || ""} ${subject?.sec_name || ""}`,
+  //       `${subject?.first_name || ""} ${subject?.mid_name || ""} ${
+  //         subject?.last_name || ""
+  //       }`,
+  //       subject?.dob ? new Date(subject.dob).toLocaleDateString("en-GB") : "",
+  //       subject?.f_mobile || "",
+  //       subject?.m_mobile || "",
+  //       subject?.permant_add || "",
+  //       subject?.blood_group || "",
+  //       subject?.reg_no || "",
+  //       subject?.house === "Unknown House" ? "" : subject?.house,
+  //       subject?.image_name || "",
+  //     ];
+  //   });
+
+  //   // Create worksheet from headers + data
+  //   const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+
+  //   // Create workbook and add worksheet
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Student Data");
+
+  //   // Download Excel file
+  //   XLSX.writeFile(
+  //     workbook,
+  //     `Student idCard list of ${selectedStudent.label}.xlsx`
+  //   );
+  // };
+
   const handleDownloadEXL = () => {
     if (!displayedSections || displayedSections.length === 0) {
       toast.error(
@@ -170,7 +353,6 @@ const StudentIdCard = () => {
       return;
     }
 
-    // Define headers
     const headers = [
       "Sr.No",
       "Roll No",
@@ -187,35 +369,43 @@ const StudentIdCard = () => {
       "Image Name",
     ];
 
-    // Convert table data into an array format
     const data = displayedSections.map((subject, index) => [
       index + 1,
-      subject?.roll_no || " ",
-      subject?.image_url || " ",
+      subject?.roll_no || "",
+      subject?.image_url || "",
       `${subject?.class_name || ""} ${subject?.sec_name || ""}`,
       `${subject?.first_name || ""} ${subject?.mid_name || ""} ${
         subject?.last_name || ""
       }`,
-      `${
-        subject?.dob ? new Date(subject.dob).toLocaleDateString("en-GB") : ""
-      }`,
-      subject?.f_mobile || " ",
-      subject?.m_mobile || " ",
-      subject?.permant_add || " ",
-      subject?.blood_group || " ",
-      subject?.reg_no || " ",
-      `${subject?.house === "Unknown House" ? "" : subject?.house}`,
-      subject?.image_name || " ",
+      subject?.dob ? new Date(subject.dob).toLocaleDateString("en-GB") : "",
+      subject?.f_mobile || "",
+      subject?.m_mobile || "",
+      subject?.permant_add || "",
+      subject?.blood_group || "",
+      subject?.reg_no || "",
+      subject?.house === "Unknown House" ? "" : subject?.house,
+      subject?.image_name || "",
     ]);
 
-    // Create a worksheet
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
 
-    // Create a workbook and append the worksheet
+    displayedSections.forEach((subject, i) => {
+      if (subject?.image_name) {
+        const row = i + 2; // +2 to account for 1-based index + header row
+        const cellRef = `M${row}`;
+        worksheet[cellRef] = {
+          t: "s",
+          v: subject.image_name, // Visible text in Excel (like "1604.jpg")
+          l: {
+            Target: `http://localhost:5173/iDCardDetails/${subject?.student_id}`, // Clickable link
+          },
+        };
+      }
+    });
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Student Data");
 
-    // Write and download the file
     XLSX.writeFile(
       workbook,
       `Student idCard list of ${selectedStudent.label}.xlsx`
@@ -298,9 +488,9 @@ const StudentIdCard = () => {
     const printTitle = `Student ID Card List of ${selectedStudent.label}`;
 
     const printContent = `
-  <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
+     <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
          <h5 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
- <div id="tableHeading" class="text-center w-3/4">
+     <div id="tableHeading" class="text-center w-3/4">
       <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-2">
         <thead>
           <tr class="bg-gray-100">
@@ -452,7 +642,6 @@ h5 + * { /* Targets the element after h5 */
 
   const handleSubjectClick = (subject) => {
     if (subject) {
-      // window.location.href = `/iDCardDetails?subject=${subject}`;
       navigate(
         `/iDCardDetails/${subject?.student_id}`,
 
@@ -514,6 +703,7 @@ h5 + * { /* Targets the element after h5 */
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
+
   return (
     <>
       <div className="w-full md:w-[95%] mx-auto p-4 ">
@@ -747,8 +937,7 @@ h5 + * { /* Targets the element after h5 */
                                     <img
                                       src={
                                         subject?.image_url
-                                          ? // ? `https://sms.evolvu.in/storage/app/public/student_images/${subject?.image_name}`
-                                            `${subject?.image_url}`
+                                          ? `${subject?.image_url}`
                                           : "https://via.placeholder.com/50"
                                       }
                                       alt={subject?.name}
