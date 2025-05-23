@@ -322,7 +322,7 @@ function ListFinal() {
 
           {/* ✅ TOTAL AMOUNT SECTION - Outside scroll, aligned below */}
           {filteredInstallments.length > 0 && (
-            <div className=" bg-yellow-100 font-semibold grid grid-cols-3 px-2 py-2 bg-gray-100 border-t border-gray-300 font-semibold text-gray-800">
+            <div className=" bg-yellow-100  grid grid-cols-3 px-2 py-2  border-t border-gray-300 font-semibold text-gray-800">
               {!selectedAccount && <div></div>}
               <div className={`${selectedAccount ? "col-start-1" : ""}`}>
                 Total Amount

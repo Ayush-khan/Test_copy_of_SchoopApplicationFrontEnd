@@ -17,44 +17,10 @@ function FeePendingList() {
 
   const [activeTab, setActiveTab] = useState("Pending Fee List");
 
-  // useEffect(() => {
-  //   const fetchStaffBirthday = async () => {
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-  //       const academicYr = localStorage.getItem("academicYear");
-
-  //       if (!token) {
-  //         throw new Error("No authentication token or academic year found");
-  //       }
-
-  //       const response = await axios.get(`${API_URL}/api/fee_collection_list`, {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "X-Academic-Year": academicYr,
-  //         },
-  //       });
-  //       console.log("resposne of the birthday list is", response.data);
-  //       if (response.data && Array.isArray(response.data)) {
-  //         setStaffBirthday(response?.data);
-  //       } else {
-  //         throw new Error("Unexpected response data format");
-  //       }
-  //       // setStaffBirthday(response.data);
-  //     } catch (error) {
-  //       setError(error.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStaffBirthday();
-  // }, []);
-
   useEffect(() => {
     const fetchStaffBirthday = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        const academicYr = localStorage.getItem("academicYear");
 
         if (!token) {
           throw new Error("No authentication token or academic year found");
@@ -63,7 +29,6 @@ function FeePendingList() {
         const response = await axios.get(`${API_URL}/api/fee_collection_list`, {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
         });
 
@@ -93,8 +58,7 @@ function FeePendingList() {
   }, []);
 
   console.log("the staffbirthlis", staffBirthday);
-  // if (loading) return <p>Loading...</p>;
-  // if (error) return <p>Error: {error}</p>;
+
   const handleTabChange = (tab) => {
     setActiveTab(tab); // Update the active tab state
   };
@@ -223,7 +187,7 @@ function FeePendingList() {
                               Total Pending Fee
                             </td>
                             <td className="px-2 text-center lg:px-3 border border-gray-950 text-sm">
-                              <p className="text-blue-600 whitespace-no-wrap relative top-2 right-2.5">
+                              <p className="text-blue-600 font-medium whitespace-no-wrap relative top-2 right-2">
                                 ₹{" "}
                                 {Number(totalPendingFee).toLocaleString(
                                   "en-IN"
