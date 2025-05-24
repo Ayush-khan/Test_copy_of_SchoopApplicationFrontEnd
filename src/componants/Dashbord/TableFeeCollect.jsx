@@ -274,7 +274,7 @@ function ListFinal() {
         {/* Table Header */}
         <div className="grid grid-cols-3 px-2 text-gray-500 bg-gray-200 border-b border-gray-200 font-bold ">
           {!selectedAccount && <div>Account</div>}
-          <div className={`${selectedAccount ? "col-start-1" : ""}`}>
+          <div className={`${selectedAccount ? "col-start-1" : "text-center"}`}>
             Installment
           </div>
           <div className="text-end">Amount</div>
@@ -282,7 +282,7 @@ function ListFinal() {
         {/* Table Body */}
         <div className="relative">
           {/* Scrollable Data List */}
-          <div className="h-38 overflow-y-auto overflow-x-hidden">
+          {/* <div className="h-38 overflow-y-auto overflow-x-hidden">
             {filteredInstallments.length === 0 ? (
               <div className="w-full h-full flex justify-center items-center">
                 <div className="flex flex-col items-center py-10 animate-bounce">
@@ -307,7 +307,47 @@ function ListFinal() {
                   )}
                   <div
                     className={`text-black/80 ${
-                      selectedAccount ? "col-start-1" : ""
+                      selectedAccount ? "col-start-1" : "text-center"
+                    }`}
+                  >
+                    {installment.installment}
+                  </div>
+                  <div className="text-end text-black/70">
+                    {formatAmount(parseAmount(installment.amount))}
+                  </div>
+                </div>
+              ))
+            )}
+          </div> */}
+          <div
+            style={{ maxHeight: "10.5rem" }}
+            className="  overflow-y-auto overflow-x-hidden"
+          >
+            {filteredInstallments.length === 0 ? (
+              <div className="w-full h-full flex justify-center items-center">
+                <div className="flex flex-col items-center py-10 animate-bounce">
+                  <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 mb-3">
+                    Oops!
+                  </p>
+                  <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+                    No data available.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              filteredInstallments.map((installment, index) => (
+                <div
+                  key={`${installment.account}-${installment.installment}-${index}`}
+                  className={`grid grid-cols-3 px-2 py-2 border-b border-gray-200 ${
+                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                  }`}
+                >
+                  {!selectedAccount && (
+                    <div className="text-black/80">{installment.account}</div>
+                  )}
+                  <div
+                    className={`text-black/80 ${
+                      selectedAccount ? "col-start-1" : "text-center"
                     }`}
                   >
                     {installment.installment}
@@ -324,7 +364,9 @@ function ListFinal() {
           {filteredInstallments.length > 0 && (
             <div className=" bg-yellow-100  grid grid-cols-3 px-2 py-2  border-t border-gray-300 font-semibold text-gray-800">
               {!selectedAccount && <div></div>}
-              <div className={`${selectedAccount ? "col-start-1" : ""}`}>
+              <div
+                className={`${selectedAccount ? "col-start-1" : "text-center"}`}
+              >
                 Total Amount
                 {/* Grand Total */}
               </div>
