@@ -167,7 +167,7 @@ function ManageRoleAccess() {
           <div className="card-header flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Role-Based Access For{" "}
-              <span className="text-pink-500 font-semibold border-b-2  hover:border-pink-500 hover:text-pink-600 cursor-pointer ">
+              <span className="text-pink-500 font-semibold border-b-2 border-gray-50 hover:border-pink-500 hover:text-pink-600 cursor-pointer ">
                 {role?.name || " "}
               </span>{" "}
               – Menu Permissions
@@ -508,7 +508,7 @@ export default ManageRoleAccess;
 //           <div className="card-header flex justify-between items-center">
 //             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
 //               Role-Based Access For{" "}
-//               <span className="text-pink-500 font-semibold border-b-2  hover:border-pink-500 hover:text-pink-600 cursor-pointer ">
+//               <span className="text-pink-500 font-semibold border-b-2 border-gray-50  hover:border-pink-500 hover:text-pink-600 cursor-pointer ">
 //                 {role?.name || " "}
 //               </span>{" "}
 //               – Menu Permissions
