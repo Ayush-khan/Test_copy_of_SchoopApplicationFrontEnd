@@ -157,7 +157,7 @@ function Menus() {
     try {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
-
+      console.log("uupdate data:", formData);
       await axios.put(`${API_URL}/api/menus/${currentMenu.menu_id}`, formData, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
@@ -518,7 +518,11 @@ function Menus() {
                         onChange={(selectedOption) => {
                           setFormData({
                             ...formData,
-                            parent_id: selectedOption?.value || "",
+                            parent_id: selectedOption
+                              ? selectedOption.value
+                              : 0,
+
+                            // parent_id: selectedOption?.value || "",
                           });
                           setErrors((prev) => ({ ...prev, parent_id: "" }));
                         }}
@@ -662,7 +666,11 @@ function Menus() {
                         onChange={(selectedOption) => {
                           setFormData({
                             ...formData,
-                            parent_id: selectedOption?.value || "",
+                            parent_id: selectedOption
+                              ? selectedOption.value
+                              : 0,
+
+                            // parent_id: selectedOption?.value || "",
                           });
                           setErrors((prev) => ({ ...prev, parent_id: "" }));
                         }}
