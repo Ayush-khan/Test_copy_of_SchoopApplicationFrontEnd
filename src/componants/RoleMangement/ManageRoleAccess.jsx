@@ -209,7 +209,7 @@ function ManageRoleAccess() {
                   <table className="min-w-full leading-normal table-auto">
                     <thead>
                       <tr className="bg-gray-200 ">
-                        <th className="pb-4 w-full md:w-[15%] text-center px-3 border border-gray-950 text-sm font-bold">
+                        <th className="pb-4 w-full md:w-[15%] text-center px-3 border border-gray-950 text-sm font-bold ">
                           Menu ID
                         </th>
                         <th className=" pb-4 text-center px-3  border border-gray-950 text-sm font-bold">
@@ -217,7 +217,7 @@ function ManageRoleAccess() {
                         </th>
 
                         <th className=" w-full md:w-[20%] text-center px-3 border border-gray-950 text-sm font-bold ">
-                          <div className="form-check flex  relative   ">
+                          <div className="form-check flex space-y-2 relative   ">
                             <label
                               htmlFor="select_all"
                               className="form-check-label  relative right-3 "
@@ -248,7 +248,7 @@ function ManageRoleAccess() {
                       {displayedMenus.map((menu, index) => (
                         <tr
                           key={menu.menu_id}
-                          className={`${
+                          className={`  ${
                             index % 2 === 0 ? "bg-white" : "bg-gray-100"
                           } hover:bg-gray-50`}
                         >
