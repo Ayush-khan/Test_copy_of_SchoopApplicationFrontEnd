@@ -167,8 +167,8 @@ function Menus() {
       handleCloseModal();
       toast.success("Menu updated successfully!");
     } catch (error) {
-      if (error.response?.data?.errors) {
-        setErrors(error.response.data.errors);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
         // return;
       } else {
         console.error("Error editing menu:", error);
