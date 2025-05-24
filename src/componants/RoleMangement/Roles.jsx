@@ -765,7 +765,17 @@ function Roles() {
                     onClick={handleActivateOrNot}
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Activating..." : "Active"}
+                    {isSubmitting
+                      ? currentStudentDataForActivate?.studentToActiveOrDeactive
+                          ?.is_active === "Y"
+                        ? "Deactivating..."
+                        : "Activating..."
+                      : currentStudentDataForActivate?.studentToActiveOrDeactive
+                          ?.is_active === "Y"
+                      ? "Deactive"
+                      : "Active"}
+
+                    {/* {isSubmitting ? "Activating..." : "Active"} */}
                   </button>
                 </div>
               </div>

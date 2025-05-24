@@ -165,11 +165,12 @@ function ManageRoleAccess() {
         <div className="card mx-auto lg:w-3/4 shadow-lg">
           <div className="card-header flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Role:{" "}
-              <span className="text-blue-500 font-semibold hover:text-blue-600 cursor-pointer ">
+              Role-Based Access For{" "}
+              <span className="text-pink-500 font-semibold border-b-2  hover:border-pink-500 hover:text-pink-600 cursor-pointer ">
                 {role?.name || " "}
               </span>{" "}
-              Access Details
+              – Menu Permissions
+              {/* Menu Permissions Overview Role:{" "} */}
             </h3>
             <RxCross1
               className="text-xl  text-red-600 hover:cursor-pointer"
@@ -185,7 +186,8 @@ function ManageRoleAccess() {
           <div className="card-body w-full md:w-[85%] mx-auto">
             <div className="flex flex-row w-full justify-end items-center gap-2 relative top-2">
               <h5 className=" w-[50%] text-center text-blue-500 ">
-                List of Menus URLs
+                {/* List of Menus URLs */}
+                List of Accessible Menu Items
               </h5>
               <div className="mb-3">
                 <input
@@ -206,16 +208,16 @@ function ManageRoleAccess() {
                 <div className="h-[400px] overflow-y-scroll">
                   <table className="min-w-full leading-normal table-auto">
                     <thead>
-                      <tr className="bg-gray-200">
-                        <th className="pb-4 w-full md:w-[15%] text-center px-3 border border-gray-950 text-sm font-semibold">
+                      <tr className="bg-gray-200 ">
+                        <th className="pb-4 w-full md:w-[15%] text-center px-3 border border-gray-950 text-sm font-bold">
                           Menu ID
                         </th>
-                        <th className=" pb-4 text-center px-3  border border-gray-950 text-sm font-semibold">
+                        <th className=" pb-4 text-center px-3  border border-gray-950 text-sm font-bold">
                           Menu Name
                         </th>
 
-                        <th className=" w-full md:w-[20%] text-center px-3 border border-gray-950 text-sm font-semibold">
-                          <div className="form-check flex  relative   font-semibold">
+                        <th className=" w-full md:w-[20%] text-center px-3 border border-gray-950 text-sm font-bold ">
+                          <div className="form-check flex  relative   ">
                             <label
                               htmlFor="select_all"
                               className="form-check-label  relative right-3 "
@@ -257,7 +259,8 @@ function ManageRoleAccess() {
                             className="text-center px-3 py-2 border border-gray-950 text-sm"
                             style={{
                               fontWeight:
-                                menu.parent_id === 0 ? "bold" : "normal",
+                                menu.parent_id === 0 ? "900" : "normal",
+                              color: menu.parent_id === 0 ? "gray" : "normal",
                               paddingLeft:
                                 menu.parent_id !== 0 ? "30px" : "12px",
                             }}
