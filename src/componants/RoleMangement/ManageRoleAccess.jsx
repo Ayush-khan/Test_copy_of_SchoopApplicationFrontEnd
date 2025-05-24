@@ -77,6 +77,7 @@ function ManageRoleAccess() {
       setSelectedMenus(new Set());
     }
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -237,6 +238,7 @@ function ManageRoleAccess() {
                                   )
                                 }
                               />
+
                               <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer-checked:bg-blue-600 transition-all duration-300"></div>
                               <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 transform peer-checked:translate-x-full"></span>
                             </label>
@@ -278,6 +280,7 @@ function ManageRoleAccess() {
                                   handleCheckboxChange(menu.menu_id)
                                 }
                               />
+
                               <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600 transition-all duration-300"></div>
                               <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 transform peer-checked:translate-x-full"></span>
                             </label>
@@ -335,7 +338,7 @@ function ManageRoleAccess() {
 
 export default ManageRoleAccess;
 
-// try UP
+// Try up and full working
 // import { useEffect, useState, useRef } from "react";
 // import axios from "axios";
 // import { useParams, useNavigate } from "react-router-dom";
@@ -415,6 +418,7 @@ export default ManageRoleAccess;
 //       setSelectedMenus(new Set());
 //     }
 //   };
+
 //   const handleSubmit = async (event) => {
 //     event.preventDefault();
 
@@ -503,11 +507,12 @@ export default ManageRoleAccess;
 //         <div className="card mx-auto lg:w-3/4 shadow-lg">
 //           <div className="card-header flex justify-between items-center">
 //             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-//               Role:{" "}
-//               <span className="text-blue-500 font-semibold hover:text-blue-600 cursor-pointer ">
+//               Role-Based Access For{" "}
+//               <span className="text-pink-500 font-semibold border-b-2  hover:border-pink-500 hover:text-pink-600 cursor-pointer ">
 //                 {role?.name || " "}
 //               </span>{" "}
-//               Access Details
+//               – Menu Permissions
+//               {/* Menu Permissions Overview Role:{" "} */}
 //             </h3>
 //             <RxCross1
 //               className="text-xl  text-red-600 hover:cursor-pointer"
@@ -523,7 +528,8 @@ export default ManageRoleAccess;
 //           <div className="card-body w-full md:w-[85%] mx-auto">
 //             <div className="flex flex-row w-full justify-end items-center gap-2 relative top-2">
 //               <h5 className=" w-[50%] text-center text-blue-500 ">
-//                 List of Menus URLs
+//                 {/* List of Menus URLs */}
+//                 List of Accessible Menu Items
 //               </h5>
 //               <div className="mb-3">
 //                 <input
@@ -544,16 +550,16 @@ export default ManageRoleAccess;
 //                 <div className="h-[400px] overflow-y-scroll">
 //                   <table className="min-w-full leading-normal table-auto">
 //                     <thead>
-//                       <tr className="bg-gray-200">
-//                         <th className="pb-4 w-full md:w-[15%] text-center px-3 border border-gray-950 text-sm font-semibold">
+//                       <tr className="bg-gray-200 ">
+//                         <th className="pb-4 w-full md:w-[15%] text-center px-3 border border-gray-950 text-sm font-bold ">
 //                           Menu ID
 //                         </th>
-//                         <th className=" pb-4 text-center px-3  border border-gray-950 text-sm font-semibold">
+//                         <th className=" pb-4 text-center px-3  border border-gray-950 text-sm font-bold">
 //                           Menu Name
 //                         </th>
 
-//                         <th className=" w-full md:w-[20%] text-center px-3 border border-gray-950 text-sm font-semibold">
-//                           <div className="form-check flex  relative   font-semibold">
+//                         <th className=" w-full md:w-[20%] text-center px-3 border border-gray-950 text-sm font-bold ">
+//                           <div className="form-check flex space-y-2 relative   ">
 //                             <label
 //                               htmlFor="select_all"
 //                               className="form-check-label  relative right-3 "
@@ -561,6 +567,7 @@ export default ManageRoleAccess;
 //                               Select All
 //                             </label>
 //                             <label className="relative right-3  items-center cursor-pointer">
+
 //                               <input
 //                                 type="checkbox"
 //                                 id="select_all"
@@ -573,7 +580,6 @@ export default ManageRoleAccess;
 //                                   )
 //                                 }
 //                               />
-
 //                               <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer-checked:bg-blue-600 transition-all duration-300"></div>
 //                               <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 transform peer-checked:translate-x-full"></span>
 //                             </label>
@@ -585,7 +591,7 @@ export default ManageRoleAccess;
 //                       {displayedMenus.map((menu, index) => (
 //                         <tr
 //                           key={menu.menu_id}
-//                           className={`${
+//                           className={`  ${
 //                             index % 2 === 0 ? "bg-white" : "bg-gray-100"
 //                           } hover:bg-gray-50`}
 //                         >
@@ -596,7 +602,8 @@ export default ManageRoleAccess;
 //                             className="text-center px-3 py-2 border border-gray-950 text-sm"
 //                             style={{
 //                               fontWeight:
-//                                 menu.parent_id === 0 ? "bold" : "normal",
+//                                 menu.parent_id === 0 ? "900" : "normal",
+//                               color: menu.parent_id === 0 ? "gray" : "normal",
 //                               paddingLeft:
 //                                 menu.parent_id !== 0 ? "30px" : "12px",
 //                             }}
@@ -606,6 +613,7 @@ export default ManageRoleAccess;
 
 //                           <td className="text-center px-3 py-2 border border-gray-950 text-sm">
 //                             <label className="relative inline-flex items-center cursor-pointer">
+
 //                               <input
 //                                 type="checkbox"
 //                                 className="sr-only peer"
