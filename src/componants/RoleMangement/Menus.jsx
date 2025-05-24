@@ -22,7 +22,7 @@ function Menus() {
   const [formData, setFormData] = useState({
     name: "",
     url: "",
-    parent_id: "",
+    parent_id: 0,
     sequence: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
@@ -105,7 +105,7 @@ function Menus() {
 
     const newErrors = {};
     if (!formData.name?.trim()) newErrors.name = "This field is required";
-    if (!formData.url?.trim()) newErrors.url = "This field is required";
+    // if (!formData.url?.trim()) newErrors.url = "This field is required";
     if (!formData.sequence?.toString().trim())
       newErrors.sequence = "This field is required";
 
@@ -144,7 +144,7 @@ function Menus() {
 
     const newErrors = {};
     if (!formData.name?.trim()) newErrors.name = "This field is required";
-    if (!formData.url?.trim()) newErrors.url = "This field is required";
+    // if (!formData.url?.trim()) newErrors.url = "This field is required";
     if (!formData.sequence?.toString().trim())
       newErrors.sequence = "This field is required";
 
@@ -480,7 +480,8 @@ function Menus() {
                   {/* URL */}
                   <div className="relative mb-3 flex justify-center mx-2">
                     <label htmlFor="menuUrl" className="w-1/2 mt-2">
-                      URL <span className="text-red-500">*</span>
+                      {/* URL <span className="text-red-500">*</span> */}
+                      URL
                     </label>
                     <input
                       type="text"
@@ -493,13 +494,13 @@ function Menus() {
                         setErrors((prev) => ({ ...prev, url: "" }));
                       }}
                     />
-                    <div className="absolute top-9 left-1/3">
+                    {/* <div className="absolute top-9 left-1/3">
                       {errors.url && (
                         <span className="text-danger text-xs">
                           {errors.url}
                         </span>
                       )}
-                    </div>
+                    </div> */}
                   </div>
 
                   {/* Parent Menu */}
@@ -628,7 +629,8 @@ function Menus() {
                   {/* URL */}
                   <div className="relative mb-3 flex justify-center mx-2">
                     <label htmlFor="editMenuUrl" className="w-1/2 mt-2">
-                      URL <span className="text-red-500">*</span>
+                      {/* URL <span className="text-red-500">*</span> */}
+                      URL
                     </label>
                     <input
                       type="text"
@@ -641,13 +643,13 @@ function Menus() {
                         setErrors((prev) => ({ ...prev, url: "" }));
                       }}
                     />
-                    <div className="absolute top-9 left-1/3">
+                    {/* <div className="absolute top-9 left-1/3">
                       {errors.url && (
                         <span className="text-danger text-xs">
                           {errors.url}
                         </span>
                       )}
-                    </div>
+                    </div> */}
                   </div>
 
                   {/* Parent */}
