@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import NavBar from "../../Layouts/NavBar";
 import TableFeeCollect from "../../componants/Dashbord/TableFeeCollect.jsx";
 import { useState, useEffect } from "react";
+import TableFeeCollectForFeependignList from "./TableFeeCollectForFeependignList.jsx";
 function FeePendingList() {
   const API_URL = import.meta.env.VITE_API_URL;
   const [staffBirthday, setStaffBirthday] = useState([]);
@@ -68,7 +69,7 @@ function FeePendingList() {
         {/* <div className="card mx-auto w-3/4"> */}
         <div className="card-header flex justify-between items-center">
           <h5 className="text-gray-700 mt-1  text-md lg:text-lg">
-            Pending Fee-List
+            Fee Dues & Collection Summary
           </h5>
 
           <RxCross1
@@ -220,7 +221,7 @@ function FeePendingList() {
                   )} */}
                 </>
               ) : (
-                <TableFeeCollect />
+                <TableFeeCollectForFeependignList />
               )}
             </div>
           </div>
