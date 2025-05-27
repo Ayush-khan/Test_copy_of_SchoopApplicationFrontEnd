@@ -119,13 +119,17 @@ function NoticeBord() {
                     {notice.subject}
                   </div>
                   <div
-                    // className="text-xs mt-1 overflow-x-auto whitespace-nowrap max-w-full text-gray-600"
-                    className={` text-xs sm:mb-1 font-bold mt-1 overflow-x-auto whitespace-nowrap max-w-full text-blue-600`}
+                    className={` text-xs sm:mb-1 font-bold mt-1 overflow-x-auto whitespace-wrap max-w-full text-blue-600`}
                     style={{
-                      scrollbarWidth: "thin", // For Firefox
-                      scrollbarColor: "pink transparent", // For Firefox
-                      maxHeight: "100px",
-                      overflowX: "auto",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word", // better wrap support
+                      whiteSpace: "normal", // allow wrapping instead of nowrap
+                      maxHeight: "100px", // max height if you want vertical scroll
+                      // maxWidth: "100%",
+                      // scrollbarWidth: "thin", // For Firefox
+                      // scrollbarColor: "pink transparent", // For Firefox
+                      // maxHeight: "100px",
+                      // overflowX: "auto",
                     }}
                     // style={{ scrollbarWidth: "thin" }}
                   >
@@ -142,31 +146,6 @@ function NoticeBord() {
                 </div>
               </div>
             ))}
-
-            {/* {parentNotices.map((notice, index) => (
-              <div
-                key={index}
-                className={`${Styles.notice}  w-full md:w-[60%] border-4 border-black sm:border-1 border-gray sm:px-3 sm:py-1 sm:leading-3 mb-0 sm:h-fit bg-white box-border rounded shadow-md `}
-              >
-                <div className={`${Styles.date} text-xs mb-2 sm:mb-1`}>
-                  {notice.notice_date}
-                  <span className={`${Styles.time} float-right font-bold`}>
-                    {notice.notice_type}
-                  </span>
-                </div>
-                <div className={`${Styles.author} text-sm mb-2 sm:mb-1`}>
-                  {notice.subject}
-                  <span
-                    className={`${Styles.time} ml-2 text-xs sm:mb-1`}
-                  >{`( classes-${notice.class_name} )`}</span>
-                </div>
-                <div
-                  className={`${Styles.message} text-sm leading-4 sm:leading-3 sm:mt-0 max-h-[80px] overflow-y-auto break-words max-w-[70%]`}
-                >
-                  {notice.notice_desc}
-                </div>
-              </div>
-            ))} */}
           </div>
         )}
 
