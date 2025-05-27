@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import { useNavigate } from "react-router-dom";
 
 function NonTeachingStaff() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -14,7 +15,7 @@ function NonTeachingStaff() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
-
+  const navigate = useNavigate();
   const pageSize = 10;
 
   const previousPageRef = useRef(0);
@@ -148,7 +149,8 @@ function NonTeachingStaff() {
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Non-Teaching Staff Absent Today{" "}
             </h3>
-            <div className="box-border flex md:gap-x-2 justify-end md:h-10">
+
+            <div className=" w-full  box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
                 <input
                   type="text"
@@ -157,6 +159,12 @@ function NonTeachingStaff() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
+              <RxCross1
+                className="relative top-2  text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                onClick={() => {
+                  navigate("/dashboard");
+                }}
+              />
             </div>
           </div>
           <div

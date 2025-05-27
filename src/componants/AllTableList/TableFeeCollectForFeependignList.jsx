@@ -118,20 +118,17 @@ function TableFeeCollectForFeependignList() {
 
         <div className="border border-gray-300 rounded-b-lg shadow overflow-hidden">
           {/* Table Header */}
-          <div className="grid grid-cols-3 bg-gray-100 text-sm font-semibold text-gray-900 border-b border-gray-400">
-            {!selectedAccount && (
-              <div className="px-2 py-2 text-center border-r border-gray-300">
-                Account
-              </div>
-            )}
-            <div
-              className={`px-2 py-2 ${
-                selectedAccount ? "col-start-1" : "text-center"
-              } border-r border-gray-300`}
-            >
+          <div className="grid grid-cols-4 bg-gray-100 text-sm font-semibold text-gray-900 border-b border-gray-400">
+            <div className=" w-full md:w-[50%] py-2 border-r border-gray-300 text-center">
+              Sr No.
+            </div>
+            <div className="py-2 border-r border-gray-300 text-start">
+              Account
+            </div>
+            <div className="py-2 border-r border-gray-300 text-center">
               Installment
             </div>
-            <div className="px-2 py-2 text-center">Amount</div>
+            <div className="py-2 text-center">Amount</div>
           </div>
 
           {/* Table Body */}
@@ -146,20 +143,17 @@ function TableFeeCollectForFeependignList() {
               filteredInstallments.map((installment, index) => (
                 <div
                   key={`${installment.account}-${installment.installment}-${index}`}
-                  className={`grid grid-cols-3 text-sm border-b border-gray-200 ${
+                  className={`grid grid-cols-4 text-sm border-b border-gray-200 ${
                     index % 2 === 0 ? "bg-white" : "bg-gray-50"
                   }`}
                 >
-                  {!selectedAccount && (
-                    <div className="px-2 py-2 text-center text-gray-800 border-r border-gray-100">
-                      {installment.account}
-                    </div>
-                  )}
-                  <div
-                    className={`px-2 py-2 text-gray-800 ${
-                      selectedAccount ? "col-start-1" : "text-center"
-                    } border-r border-gray-100`}
-                  >
+                  <div className="w-full md:w-[50%] px-2 py-2 border-r border-gray-100 text-center text-gray-700">
+                    {index + 1}
+                  </div>
+                  <div className="px-2 py-2 border-r border-gray-100 text-start text-gray-800">
+                    {selectedAccount ? selectedAccount : installment.account}
+                  </div>
+                  <div className="px-2 py-2 border-r border-gray-100 text-center text-gray-800">
                     {installment.installment}
                   </div>
                   <div className="px-2 py-2 text-right text-gray-700">
@@ -178,21 +172,16 @@ function TableFeeCollectForFeependignList() {
 
           {/* Total Row */}
           {filteredInstallments.length > 0 && (
-            <div className="grid grid-cols-3 bg-yellow-100 border-t border-gray-300 text-sm font-semibold text-gray-800">
-              {!selectedAccount && (
-                <div className="px-2 py-2 border-r border-gray-300"></div>
-              )}
-              <div
-                className={`px-2 py-2 ${
-                  selectedAccount ? "col-start-1" : "text-center"
-                } border-r border-gray-300`}
-              >
+            <div className="grid grid-cols-4 bg-yellow-100 border-t border-gray-300 text-sm font-semibold text-gray-800">
+              <div className="px-2 py-2 border-r border-gray-300"></div>
+              <div className="px-2 py-2 border-r border-gray-300"></div>
+              <div className="px-2 py-2 border-r border-gray-300 text-center">
                 Total Amount
               </div>
               <div className="px-2 py-2 text-right text-blue-600">
-                {selectedAccount
-                  ? formatAmount(totalFilteredAmount)
-                  : formatAmount(totalOverallAmount)}
+                {formatAmount(
+                  selectedAccount ? totalFilteredAmount : totalOverallAmount
+                )}
               </div>
             </div>
           )}
