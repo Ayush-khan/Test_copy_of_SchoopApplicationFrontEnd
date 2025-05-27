@@ -536,10 +536,10 @@ const CreateNotice = () => {
                         <h5 className="px-2 mt-2 lg:px-3 py-2 text-[1em] text-gray-700">
                           Description <span className="text-red-500">*</span>
                         </h5>
-                        <div className="w-full md:w-[70%] flex flex-col gap-0 ">
-                          <p className="font-light">Dear Parent,</p>
+                        <div className="w-full mb-4 md:w-[70%] flex flex-col gap-0 ">
+                          {/* <p className="font-light">Dear Parent,</p> */}
                           <textarea
-                            className="relative -top-4 px-2 py-1 border border-gray-700 rounded-md shadow-md  "
+                            className="  px-2 py-1 border border-gray-700 rounded-md shadow-md  "
                             rows="2"
                             value={noticeDesc}
                             onChange={(e) => setNoticeDesc(e.target.value)}
@@ -565,7 +565,7 @@ const CreateNotice = () => {
                             }}
                           />
                           {errors.noticeDescError && (
-                            <p className="relative -top-4 text-red-500">
+                            <p className=" text-red-500">
                               {errors.noticeDescError}
                             </p>
                           )}
@@ -573,7 +573,7 @@ const CreateNotice = () => {
                       </div>
                       .{/* File Upload */}
                       <div className="w-full relative -top-14 md:w-[85%]  flex flex-row justify-start gap-x-2 space-x-2 md:space-x-11 ">
-                        <h5 className="px-2 mt-2 lg:px-3 py-2 text-[1em] text-nowrap text-gray-700">
+                        <h5 className="px-2  lg:px-3 py-2 text-[1em] text-nowrap text-gray-700">
                           Upload Files
                         </h5>
                         <input

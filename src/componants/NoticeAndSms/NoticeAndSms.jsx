@@ -21,7 +21,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 function NoticeAndSms() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const [activeTab, setActiveTab] = useState("Manage");
   const [classes, setClasses] = useState([]);
@@ -130,6 +130,7 @@ function NoticeAndSms() {
     setIsSubmitting(true);
     setSearchTerm("");
     try {
+      setLoading(true);
       const token = localStorage.getItem("authToken");
       const params = {};
       if (status) params.status = status;
@@ -163,6 +164,7 @@ function NoticeAndSms() {
       toast.error("Error fetching SMS notices. Please try again.");
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
+      setLoading(false);
     }
   };
 
@@ -897,7 +899,13 @@ function NoticeAndSms() {
                           </tr>
                         </thead>
                         <tbody>
-                          {displayedSections.length ? (
+                          {loading ? (
+                            <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                              <div className=" text-center text-xl text-blue-700">
+                                Please wait while data is loading...
+                              </div>
+                            </div>
+                          ) : displayedSections.length ? (
                             displayedSections.map((subject, index) => (
                               <tr key={subject.notice_id} className="text-sm ">
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
