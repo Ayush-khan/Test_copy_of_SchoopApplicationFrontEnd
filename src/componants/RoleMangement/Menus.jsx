@@ -176,7 +176,8 @@ function Menus() {
       toast.success("Menu updated successfully!");
     } catch (error) {
       if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
+        setErrors(error.response.data.errors);
+        // toast.error(error.response.data.message);
         // return;
       } else {
         console.error("Error editing menu:", error);
@@ -632,7 +633,7 @@ function Menus() {
                         setErrors((prev) => ({ ...prev, sequence: "" }));
                       }}
                     />
-                    <div className="absolute top-9 left-1/3">
+                    <div className=" left-1/3">
                       {errors.sequence && (
                         <span className="text-danger text-xs">
                           {errors.sequence}
