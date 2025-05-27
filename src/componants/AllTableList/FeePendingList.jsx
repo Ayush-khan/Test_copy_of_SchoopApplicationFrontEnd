@@ -69,7 +69,7 @@ function FeePendingList() {
         {/* <div className="card mx-auto w-3/4"> */}
         <div className="card-header flex justify-between items-center">
           <h5 className="text-gray-700 mt-1  text-md lg:text-lg">
-            Fee Dues & Collection Summary
+            Fee Pending & Collection Summary
           </h5>
 
           <RxCross1
@@ -211,14 +211,6 @@ function FeePendingList() {
                       )}
                     </tbody>
                   </table>
-                  {/* {staffBirthday.length > 0 ? (
-                    <div className="text-blue-500 relative top-3 text-[1.1em] font-medium text-center w-full">
-                      Total Pending Fee: ₹{" "}
-                      {Number(totalPendingFee).toLocaleString("en-IN")}
-                    </div>
-                  ) : (
-                    " "
-                  )} */}
                 </>
               ) : (
                 <TableFeeCollectForFeependignList />
