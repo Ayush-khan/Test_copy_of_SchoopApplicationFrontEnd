@@ -145,7 +145,9 @@ const DashboardContent = () => {
           "X-Academic-Year": academicYr,
         },
       });
+      // setPendingFee(pendingFeeCount.data.pendingFee);
       setPendingFee(pendingFeeCount.data);
+
       console.log("pendingFee count is here******", pendingFeeCount.data);
 
       // Fetch birthday Count
@@ -174,7 +176,7 @@ const DashboardContent = () => {
         }
       );
       setApprovedLessonPlaneCount(ApprovedLessonPlane.data.data);
-      console.log("pendingFee count is here******", pendingFeeCount.data);
+      console.log("pendingFee count is here******", pendingFeeCount.data.data);
     } catch (error) {
       setError(error.message);
       console.error("Error fetching data:", error);
@@ -299,7 +301,7 @@ const DashboardContent = () => {
             // Approve Lesson Plan Card
             <Link to="/approveLessonP" className="no-underline">
               <Card
-                title="Approve Lesson Plans"
+                title="Pending Lesson Plans"
                 // value={pendingPlansCount} // Replace with your actual value
                 value={approvedLessonPlaneCount} // Replace with your actual value
                 color="#4CAF50"
@@ -401,9 +403,6 @@ const DashboardContent = () => {
           </div>
         )}
       </div>
-      {/* <div className=" mt-6 ">
-        <Footer />
-      </div> */}
     </>
   );
 };

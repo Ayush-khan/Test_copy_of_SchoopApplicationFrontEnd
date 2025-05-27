@@ -860,7 +860,7 @@ const StudentsChart = () => {
         </p>
       ) : data.length === 0 ? (
         <div className="relative left-[1%] w-[100%] text-center flex justify-center items-center mt-8 md:mt-14">
-          <div className="flex flex-col items-center justify-center text-center py-10 animate-bounce">
+          <div className="flex flex-col items-center justify-center text-center ">
             <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
               Oops!
             </p>
