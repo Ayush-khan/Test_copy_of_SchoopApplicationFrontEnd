@@ -43,7 +43,6 @@ const DashboardContent = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [roleId, setRoleId] = useState("");
-  const academicYr = localStorage.getItem("academicYear");
 
   useEffect(() => {
     fetchRoleId();
@@ -79,8 +78,6 @@ const DashboardContent = () => {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      // const academicYr=localStorage.getItem("user");
-      const academicYr = localStorage.getItem("academicYear");
       const roleId = localStorage.getItem("roleId");
       console.log("**** role ID******", roleId);
 
@@ -92,8 +89,6 @@ const DashboardContent = () => {
       const studentResponse = await axios.get(`${API_URL}/api/studentss`, {
         headers: {
           Authorization: `Bearer ${token}`,
-
-          "X-Academic-Year": academicYr,
         },
       });
 
@@ -109,7 +104,6 @@ const DashboardContent = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
         }
       );
@@ -128,7 +122,7 @@ const DashboardContent = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
+
             "Role-Id": roleId, // add roleId for different role
           },
         }
@@ -142,7 +136,6 @@ const DashboardContent = () => {
       const pendingFeeCount = await axios.get(`${API_URL}/api/feecollection`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "X-Academic-Year": academicYr,
         },
       });
       // setPendingFee(pendingFeeCount.data.pendingFee);
@@ -156,7 +149,6 @@ const DashboardContent = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": academicYr,
           },
         }
       );
