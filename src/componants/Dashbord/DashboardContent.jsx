@@ -1,18 +1,10 @@
-import { PiBookOpenUserLight } from "react-icons/pi";
-// import { PiBookOpenUserLight } from "react-icons/pi";
-import { FaUserGroup, FaUsers, FaUsersLine } from "react-icons/fa6";
-import { FiUsers } from "react-icons/fi";
-import { MdOutlinePayment } from "react-icons/md";
-// import Card from "../components/common/Card.jsx";
+import { FaUserGroup, FaUsersLine } from "react-icons/fa6";
 import Style from "../../CSS/DashbordCss/Card.module.css";
-// import NewCard from "../components/common/NewCard.jsx";
 import Card from "../common/Card.jsx";
 import EventCard from "./EventCard.jsx";
 import CardStuStaf from "../common/CardStuStaf.jsx";
 import StudentsChart from "../Dashbord/Charts/StudentsChart.jsx";
-import Footer from "../../Layouts/Footer.jsx";
 import { FaBirthdayCake, FaClipboardCheck } from "react-icons/fa";
-import { GiAchievement } from "react-icons/gi";
 import { HiCollection } from "react-icons/hi";
 import { IoTicket } from "react-icons/io5";
 import NoticeBord from "./NoticeBord.jsx";
@@ -42,7 +34,7 @@ const DashboardContent = () => {
   const [approvedLessonPlaneCount, setApprovedLessonPlaneCount] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [roleId, setRoleId] = useState("");
+  const [roleId, setRoleId] = useState(null);
 
   useEffect(() => {
     fetchRoleId();
@@ -270,32 +262,17 @@ const DashboardContent = () => {
             />
           </Link>
 
-          {/* <Link to="/staffbirthlist" className="no-underline">
-            <Card
-              title="Today's Birthdays"
-              value={staffBirthday}
-              // {loading ? <LoadingSpinner /> :   value={staffBirthday}}
-
-              color="#2196F3"
-              icon={
-                <FaBirthdayCake
-                  style={{
-                    color: "cyan",
-                    backgroundColor: "white",
-                    padding: "10px",
-                    borderRadius: "50%",
-                  }}
-                />
-              }
-            />
-          </Link> */}
-          {roleId === "M" ? (
-            // Approve Lesson Plan Card
+          {roleId === null ? (
+            // Skeleton card
+            <div className="flex justify-between animate-pulse bg-white rounded shadow-md p-4 w-full h-[114px] border border-gray-200">
+              <div className=" relative -top-2 h-20 bg-gray-300 rounded w-1/2 "></div>
+              <div className=" relative top-3 h-10 bg-gray-300 rounded w-1/3"></div>
+            </div>
+          ) : roleId === "M" ? (
             <Link to="/approveLessonP" className="no-underline">
               <Card
                 title="Pending Lesson Plans"
-                // value={pendingPlansCount} // Replace with your actual value
-                value={approvedLessonPlaneCount} // Replace with your actual value
+                value={approvedLessonPlaneCount}
                 color="#4CAF50"
                 icon={
                   <FaClipboardCheck
@@ -310,7 +287,6 @@ const DashboardContent = () => {
               />
             </Link>
           ) : (
-            // Staff Birthday Card
             <Link to="/staffbirthlist" className="no-underline">
               <Card
                 title="Today's Birthdays"
