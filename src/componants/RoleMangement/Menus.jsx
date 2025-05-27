@@ -32,6 +32,9 @@ function Menus() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
+  const [SequenceIs, setSequenceIs] = useState(0);
+  const [sequenceIsCheck, setSequenceIsCheck] = useState(false);
+
   const fetchMenus = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -79,12 +82,14 @@ function Menus() {
 
   const handleEdit = (menu) => {
     setCurrentMenu(menu);
+    fetchMaxSequenceByParent(menu.parent_id);
     setFormData({
       name: menu.name,
       url: menu.url,
       parent_id: menu.parent_id,
       sequence: menu.sequence,
     });
+
     setShowEditModal(true);
   };
 
@@ -98,6 +103,9 @@ function Menus() {
     setShowEditModal(false);
     setShowDeleteModal(false);
     setCurrentMenu(null);
+    setSequenceIsCheck(false);
+    setSequenceIs(0);
+
     setErrors({});
   };
   const handleSubmitAdd = async () => {
@@ -233,6 +241,46 @@ function Menus() {
       setShowDeleteModal(false);
     }
   };
+
+  const fetchMaxSequenceByParent = async (parentId) => {
+    if (!parentId) {
+      setSequenceIs(0);
+      setSequenceIsCheck(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) toast.error("No authentication token found");
+
+      const response = await fetch(
+        `${API_URL}/api/get_maximumsequenceforparent?parent_id=${parentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        toast.error("Failed to fetch sequence data");
+      }
+
+      const data = await response.json();
+      const maxSequence = data?.data?.[0]?.max_sequence || 0;
+
+      setSequenceIs(maxSequence);
+      setSequenceIsCheck(true);
+    } catch (error) {
+      console.error("Error fetching sequence:", error);
+      setErrors((prev) => ({ ...prev, fetch: error.message }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
 
@@ -253,7 +301,7 @@ function Menus() {
     (menu) =>
       menu.name?.toLowerCase().includes(searchLower) ||
       menu.url?.toLowerCase().includes(searchLower) ||
-      String(menu.parent_id).includes(searchLower) ||
+      menu.parent_name?.toLowerCase().includes(searchLower) ||
       String(menu.sequence).includes(searchLower)
   );
 
@@ -516,16 +564,42 @@ function Menus() {
                         value={menuOptions.find(
                           (option) => option.value === formData.parent_id
                         )}
-                        onChange={(selectedOption) => {
-                          setFormData({
-                            ...formData,
-                            parent_id: selectedOption
-                              ? selectedOption.value
-                              : 0,
+                        // onChange={(selectedOption) => {
+                        //   setFormData({
+                        //     ...formData,
+                        //     parent_id: selectedOption
+                        //       ? selectedOption.value
+                        //       : 0,
 
-                            // parent_id: selectedOption?.value || "",
-                          });
+                        //     // parent_id: selectedOption?.value || "",
+                        //   });
+                        //   setErrors((prev) => ({ ...prev, parent_id: "" }));
+                        // }}
+                        onChange={(selectedOption) => {
+                          const selectedParentId = selectedOption
+                            ? selectedOption.value
+                            : 0;
+
+                          setFormData((prev) => ({
+                            ...prev,
+                            parent_id: selectedParentId,
+                          }));
+
                           setErrors((prev) => ({ ...prev, parent_id: "" }));
+
+                          // ✅ Just pass parentId
+                          fetchMaxSequenceByParent(selectedParentId);
+                        }}
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            minHeight: "32px",
+                            fontSize: "0.85rem", // Equivalent to Tailwind's text-xs
+                          }),
+                          option: (provided) => ({
+                            ...provided,
+                            fontSize: "0.90rem",
+                          }),
                         }}
                         options={menuOptions}
                         isClearable
@@ -552,6 +626,7 @@ function Menus() {
                       className="form-control shadow-md "
                       id="menuSequence"
                       value={formData.sequence}
+                      // value={SequenceIs + 1}
                       onChange={(e) => {
                         setFormData({ ...formData, sequence: e.target.value });
                         setErrors((prev) => ({ ...prev, sequence: "" }));
@@ -566,10 +641,19 @@ function Menus() {
                     </div>
                   </div>
                 </div>
-                <div className=" flex justify-end p-3">
+
+                <div className="flex justify-end p-3 ">
+                  {sequenceIsCheck && (
+                    <div className=" relative left-[8%] text-md text-center  mx-auto text-gray-800 mt-1">
+                      Last Sequence No:{" "}
+                      <span className="font-semibold text-blue-500">
+                        {SequenceIs}
+                      </span>
+                    </div>
+                  )}
                   <button
                     type="button"
-                    className="btn btn-primary px-3 mb-2 "
+                    className="btn btn-primary  mb-2 "
                     onClick={handleSubmitAdd}
                     disabled={isSubmitting}
                   >
@@ -665,16 +749,43 @@ function Menus() {
                         value={menuOptions.find(
                           (option) => option.value === formData.parent_id
                         )}
-                        onChange={(selectedOption) => {
-                          setFormData({
-                            ...formData,
-                            parent_id: selectedOption
-                              ? selectedOption.value
-                              : 0,
+                        // onChange={(selectedOption) => {
+                        //   setFormData({
+                        //     ...formData,
+                        //     parent_id: selectedOption
+                        //       ? selectedOption.value
+                        //       : 0,
 
-                            // parent_id: selectedOption?.value || "",
-                          });
+                        //     // parent_id: selectedOption?.value || "",
+                        //   });
+                        //   setErrors((prev) => ({ ...prev, parent_id: "" }));
+                        // }}
+
+                        onChange={(selectedOption) => {
+                          const selectedParentId = selectedOption
+                            ? selectedOption.value
+                            : 0;
+
+                          setFormData((prev) => ({
+                            ...prev,
+                            parent_id: selectedParentId,
+                          }));
+
                           setErrors((prev) => ({ ...prev, parent_id: "" }));
+
+                          // ✅ Just pass parentId
+                          fetchMaxSequenceByParent(selectedParentId);
+                        }}
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            minHeight: "32px",
+                            fontSize: "0.85rem", // Equivalent to Tailwind's text-xs
+                          }),
+                          option: (provided) => ({
+                            ...provided,
+                            fontSize: "0.90rem",
+                          }),
                         }}
                         options={menuOptions}
                         isClearable
@@ -718,6 +829,14 @@ function Menus() {
 
                 {/* Submit */}
                 <div className="flex justify-end p-3">
+                  {sequenceIsCheck && (
+                    <div className=" relative left-[12%] text-md text-center  mx-auto text-gray-800 mt-1">
+                      Last Sequence No:{" "}
+                      <span className="font-semibold text-blue-500">
+                        {SequenceIs}
+                      </span>
+                    </div>
+                  )}
                   <button
                     type="button"
                     className="btn btn-primary px-3 mb-2"
