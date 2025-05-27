@@ -94,11 +94,59 @@ function NoticeBord() {
           </div>
         )}
         {activeTab === "noticeForParents" && parentNotices.length > 0 && (
-          <div className={`${Styles.noticeBoard} grid gap-2`}>
+          <div
+            className={`${Styles.noticeBoard} grid gap-2 border-4 box-border `}
+          >
             {parentNotices.map((notice, index) => (
               <div
                 key={index}
-                className={`${Styles.notice} sm:border-1 border-gray sm:px-3 sm:py-1 sm:leading-3 mb-0 sm:h-fit bg-white box-border rounded shadow-md `}
+                className={`w-full md:w-[100%] border border-gray-300 sm:px-3 sm:py-2 bg-white rounded shadow-md overflow-hidden`}
+              >
+                {/* Date and Type */}
+                <div className="text-xs mb-1 flex justify-between items-center text-gray-700">
+                  <span>{notice.notice_date}</span>
+                  <span className="font-bold text-blue-600">
+                    {notice.notice_type}
+                  </span>
+                </div>
+
+                {/* Subject and Classes */}
+                <div className="text-sm mb-1 text-gray-800">
+                  <div
+                    // className="font-medium"
+                    className={`${Styles.author} text-sm `}
+                  >
+                    {notice.subject}
+                  </div>
+                  <div
+                    // className="text-xs mt-1 overflow-x-auto whitespace-nowrap max-w-full text-gray-600"
+                    className={` text-xs sm:mb-1 font-bold mt-1 overflow-x-auto whitespace-nowrap max-w-full text-blue-600`}
+                    style={{
+                      scrollbarWidth: "thin", // For Firefox
+                      scrollbarColor: "pink transparent", // For Firefox
+                      maxHeight: "100px",
+                      overflowX: "auto",
+                    }}
+                    // style={{ scrollbarWidth: "thin" }}
+                  >
+                    {`( classes-${notice.class_name} )`}
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div
+                  className="text-sm leading-4 max-h-[80px] overflow-y-auto break-words text-gray-700"
+                  style={{ wordBreak: "break-word", maxWidth: "100%" }}
+                >
+                  {notice.notice_desc}
+                </div>
+              </div>
+            ))}
+
+            {/* {parentNotices.map((notice, index) => (
+              <div
+                key={index}
+                className={`${Styles.notice}  w-full md:w-[60%] border-4 border-black sm:border-1 border-gray sm:px-3 sm:py-1 sm:leading-3 mb-0 sm:h-fit bg-white box-border rounded shadow-md `}
               >
                 <div className={`${Styles.date} text-xs mb-2 sm:mb-1`}>
                   {notice.notice_date}
@@ -113,12 +161,12 @@ function NoticeBord() {
                   >{`( classes-${notice.class_name} )`}</span>
                 </div>
                 <div
-                  className={`${Styles.message} text-sm leading-4 sm:leading-3 sm:mt-0`}
+                  className={`${Styles.message} text-sm leading-4 sm:leading-3 sm:mt-0 max-h-[80px] overflow-y-auto break-words max-w-[70%]`}
                 >
                   {notice.notice_desc}
                 </div>
               </div>
-            ))}
+            ))} */}
           </div>
         )}
 
@@ -155,9 +203,14 @@ function NoticeBord() {
                     className={`${Styles.time} ml-2 text-xs`}
                   >{`( ${notice.staff_name} )`}</span>
                 </div>
-                <div className={`${Styles.message} text-sm leading-6`}>
+
+                <div
+                  className="text-sm leading-4 max-h-[80px] overflow-y-auto break-words text-gray-700"
+                  style={{ wordBreak: "break-word", maxWidth: "100%" }}
+                >
                   {notice.notice_desc}
                 </div>
+                {/* <div className={`${Styles.message} text-sm leading-6`}></div> */}
               </div>
             ))}
           </div>
