@@ -633,7 +633,7 @@ function Menus() {
                         setErrors((prev) => ({ ...prev, sequence: "" }));
                       }}
                     />
-                    <div className=" left-1/3">
+                    <div className="absolute top-9 left-1/3">
                       {errors.sequence && (
                         <span className="text-danger text-xs">
                           {errors.sequence}
