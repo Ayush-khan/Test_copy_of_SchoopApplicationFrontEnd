@@ -39,7 +39,7 @@
 import styles from "../../CSS/DashbordCss/Card.module.css";
 import { FaSpinner } from "react-icons/fa"; // Import the spinner icon
 
-const Card = ({ title, value, color, icon }) => {
+const Card = ({ title, value, spanLabel, color, icon }) => {
   // Check if value is empty string, undefined, null, or empty array
   const isLoading =
     value === "" ||
@@ -77,7 +77,18 @@ const Card = ({ title, value, color, icon }) => {
         }}
       >
         {/* If loading (value is missing, empty string, or empty array), show the loader */}
-        {isLoading ? renderLoader() : value}
+        {/* {isLoading ? renderLoader() : value} */}
+        <div
+          className="flex justify-center items-center gap-x-1   w-full text-center"
+          style={{ textAlign: "center" }}
+        >
+          {spanLabel && (
+            <div className="text-green-700 text-xs" style={styles.label}>
+              {spanLabel}
+            </div>
+          )}
+          <div>{isLoading ? renderLoader() : value}</div>
+        </div>
       </div>
     </div>
   );

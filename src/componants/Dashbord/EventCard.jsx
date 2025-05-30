@@ -82,7 +82,7 @@ const EventCard = () => {
     <div className={`  border-2 border-solid h-64 bg-slate-100`}>
       <div className="  m-auto header p-1 flex justify-between items-center bg-gray-200 rounded-t-lg mb-3">
         <span className="lg:text-lg sm:text-xs sm:font-semibold text-gray-500 mb-1">
-          Events_List
+          Events List
         </span>
 
         {/* <div

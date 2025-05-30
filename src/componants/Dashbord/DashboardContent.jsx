@@ -271,8 +271,9 @@ const DashboardContent = () => {
           ) : roleId === "M" ? (
             <Link to="/approveLessonP" className="no-underline">
               <Card
-                title="Pending Lesson Plans"
+                title="Approve Lesson Plans"
                 value={approvedLessonPlaneCount}
+                spanLabel="Pending LP"
                 color="#4CAF50"
                 icon={
                   <FaClipboardCheck
