@@ -124,19 +124,20 @@ const EventCard = () => {
                     {" "}
                     <span className="    flex flex-col justify-start max-h-10px">
                       <p className=" relative top-4 text-2.5em w-8 mx-auto font-medium text-center h-8 bg-gray-600 text-white rounded-lg">
-                        {new Date(event.start_date).getDate() + 1}{" "}
+                        {event.start_date.split("-")[2] || ""}
+                        {/* {new Date(event.start_date).getDate() + 1}{" "} */}
                       </p>
                       <p>
                         {new Date(event.start_date).toLocaleString("default", {
                           month: "long",
-                        })}
+                        }) || " "}
                       </p>
                       <p>
                         <span
                           style={{ color: "#C3347D" }}
                           className=" relative bottom-4 text-[.8em]"
                         >
-                          {event.start_time}
+                          {event?.start_time || " "}
                         </span>
                       </p>
                     </span>
@@ -156,11 +157,11 @@ const EventCard = () => {
                     {event.title}{" "}
                     <span
                       style={{ color: "#C334A2" }}
-                    >{` (class-${event.class_name})`}</span>
+                    >{` (class-${event?.class_name})`}</span>
                   </h5>
                   <div className="mb-3">
                     <div
-                      className={`${Styles.discription} box-border shadow-inner mb-0 p-2 text-sm sm:mb-1 mt-0 text-gray-800`}
+                      className={`${Styles?.discription} box-border shadow-inner mb-0 p-2 text-sm sm:mb-1 mt-0 text-gray-800`}
                       style={{
                         maxHeight: "80px", // Adjust height as needed
                         overflowY: "auto", // Enables vertical scrolling
@@ -169,7 +170,7 @@ const EventCard = () => {
                         backgroundColor: "#f9f9f9", // Optional: Light background
                       }}
                     >
-                      {event.event_desc}
+                      {event?.event_desc}
                     </div>
                     <p
                       style={{
@@ -184,7 +185,7 @@ const EventCard = () => {
                         new Date(event.end_date).getDate() + 1
                       } ${new Date(event.end_date).toLocaleString("default", {
                         month: "long",
-                      })} at ${event.end_time}`}
+                      })} at ${event?.end_time}`}
                     </p>
                   </div>
                 </div>

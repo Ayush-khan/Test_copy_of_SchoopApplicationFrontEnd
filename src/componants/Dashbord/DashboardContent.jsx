@@ -229,7 +229,7 @@ const DashboardContent = () => {
           </Link>
           <Link to="/feependinglist" className="no-underline">
             <Card
-              title="Fee-Collection "
+              title="Fee"
               value={pendingFee}
               color="#FF5733"
               icon={
