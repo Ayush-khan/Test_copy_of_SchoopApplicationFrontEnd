@@ -31,6 +31,7 @@ const DashboardContent = () => {
   const [staffBirthday, setStaffBirthday] = useState("");
   const [ticketCount, setTicketCount] = useState("");
   const [pendingFee, setPendingFee] = useState("");
+  const [collectedFee, setCollectedFee] = useState("");
   const [approvedLessonPlaneCount, setApprovedLessonPlaneCount] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -131,8 +132,8 @@ const DashboardContent = () => {
         },
       });
       // setPendingFee(pendingFeeCount.data.pendingFee);
-      setPendingFee(pendingFeeCount.data);
-
+      setCollectedFee(pendingFeeCount.data["Collected Fees"]);
+      setPendingFee(pendingFeeCount.data["Pending Fees"]);
       console.log("pendingFee count is here******", pendingFeeCount.data);
 
       // Fetch birthday Count
@@ -231,7 +232,7 @@ const DashboardContent = () => {
             <Card
               title="Fee"
               value={pendingFee}
-              valuePendingFee={145900531.0}
+              valuePendingFee={collectedFee}
               color="#FF5733"
               icon={
                 <HiCollection
