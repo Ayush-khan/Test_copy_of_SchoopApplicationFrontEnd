@@ -47,7 +47,7 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
           style={{ textAlign: "center" }}
         >
           {spanLabel && (
-            <div className="text-green-700 text-xs" style={styles.label}>
+            <div className="text-red-600 text-xs" style={styles.label}>
               {spanLabel}
             </div>
           )}
@@ -56,7 +56,7 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
           ) : title === "Fee" ? (
             <div className="mx-2  -space-y-2 text-[.7em]  ">
               <div className="flex justify-between item-center gap-x-2">
-                <span className="text-gray-700 font-semibold">Collected:</span>
+                <span className="text-green-700 font-semibold">Collected:</span>
                 <span className="text-green-600 font-semibold">
                   {new Intl.NumberFormat("en-IN", {
                     minimumFractionDigits: 2,
@@ -65,7 +65,7 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-700 font-semibold">Pending:</span>
+                <span className="text-red-700 font-semibold">Pending:</span>
                 <span className="text-red-600 font-semibold">
                   {new Intl.NumberFormat("en-IN", {
                     minimumFractionDigits: 2,
@@ -76,7 +76,15 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
             </div>
           ) : (
             <div>
-              <div>{value}</div>
+              {/* <div>{value}</div> */}
+              <div
+                className={
+                  title === "Approve Lesson Plans" ? "text-red-600" : ""
+                }
+              >
+                {value}
+              </div>
+
               <div>{valuePendingFee}</div>
             </div>
           )}

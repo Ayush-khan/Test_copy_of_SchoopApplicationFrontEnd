@@ -181,11 +181,14 @@ const EventCard = () => {
                         marginBottom: "-10px",
                       }}
                     >
-                      {`The event will conclude on ${
-                        new Date(event.end_date).getDate() + 1
-                      } ${new Date(event.end_date).toLocaleString("default", {
-                        month: "long",
-                      })} at ${event?.end_time}`}
+                      {`The event will conclude on ${new Date(
+                        event.end_date
+                      ).getDate()} ${new Date(event.end_date).toLocaleString(
+                        "default",
+                        {
+                          month: "long",
+                        }
+                      )} at ${event?.end_time}`}
                     </p>
                   </div>
                 </div>

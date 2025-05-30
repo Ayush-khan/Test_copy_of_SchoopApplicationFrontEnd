@@ -313,7 +313,7 @@ function NoticeBord() {
                   {notice.subject}
                   <span
                     className={`${Styles.time} ml-2 text-xs sm:mb-1`}
-                  >{`( classes-${notice.class_name} )`}</span>
+                  >{`( class-${notice.class_name} )`}</span>
                 </div>
                 <div
                   className={`${Styles.message} text-sm leading-4 sm:leading-3 sm:mt-0`}

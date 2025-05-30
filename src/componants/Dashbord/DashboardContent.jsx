@@ -274,7 +274,7 @@ const DashboardContent = () => {
               <Card
                 title="Approve Lesson Plans"
                 value={approvedLessonPlaneCount}
-                spanLabel="Pending LP"
+                spanLabel="Pending"
                 color="#4CAF50"
                 icon={
                   <FaClipboardCheck
