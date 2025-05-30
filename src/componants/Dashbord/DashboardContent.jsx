@@ -231,6 +231,7 @@ const DashboardContent = () => {
             <Card
               title="Fee"
               value={pendingFee}
+              valuePendingFee={145900531.0}
               color="#FF5733"
               icon={
                 <HiCollection
