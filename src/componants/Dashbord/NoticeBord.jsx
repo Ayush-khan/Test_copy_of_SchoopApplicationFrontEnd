@@ -255,9 +255,7 @@ function NoticeBord() {
   };
 
   return (
-    <div
-      className={`${Styles.container} bg-slate-100 px-2 rounded-lg shadow-md `}
-    >
+    <div className={`  px-2 rounded-lg `}>
       <div
         className={` flex justify-between sm:mb-2  w-full  sm:flex flex-row mb-2`}
       >
@@ -327,7 +325,7 @@ function NoticeBord() {
 
         {/* For Staff Notices */}
         {activeTab === "noticeForStaff" && staffNotices.length === 0 && (
-          <div className="relative left-[1%] w-[95%] text-center flex justify-center items-center mt-8 md:mt-14">
+          <div className="relative  left-[1%] w-[95%] text-center flex justify-center items-center mt-8 md:mt-14">
             <div className="flex flex-col items-center justify-center text-center ">
               <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
                 Oops!{" "}

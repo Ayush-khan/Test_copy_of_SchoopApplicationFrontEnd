@@ -859,16 +859,23 @@ const StudentsChart = () => {
           <Loader />
         </p>
       ) : data.length === 0 ? (
-        <div className="relative left-[1%] w-[100%] text-center flex justify-center items-center mt-8 md:mt-14">
-          <div className="flex flex-col items-center justify-center text-center ">
-            <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
-              Oops!
-            </p>
-            <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-              No data available.
-            </p>
+        <>
+          <div className="flex flex-row justify-between items-center bg-gray-200 p-1 rounded-t-lg">
+            <span className="lg:text-lg sm:text-xs sm:font-semibold text-gray-500">
+              Class-wise Student Distribution
+            </span>
           </div>
-        </div>
+          <div className="relative top-10 left-[1%] w-[100%] text-center flex justify-center items-center mt-8 md:mt-14">
+            <div className="flex flex-col items-center justify-center text-center ">
+              <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
+                Oops!
+              </p>
+              <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+                No data available.
+              </p>
+            </div>
+          </div>
+        </>
       ) : (
         <ResponsiveContainer width="100%" height="93%">
           <div className="flex flex-row justify-between items-center bg-gray-200 p-1 rounded-t-lg">
