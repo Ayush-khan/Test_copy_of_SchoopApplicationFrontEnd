@@ -54,8 +54,8 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
           {isLoading ? (
             <div>{renderLoader()}</div>
           ) : title === "Fee" ? (
-            <div className="mx-2  -space-y-2 text-[.7em]  ">
-              <div className="flex justify-between item-center gap-x-2">
+            <div className="mx-2   -space-y-2 text-[.7em]  ">
+              <div className="flex justify-between item-center gap-x-4">
                 <span className="text-green-700 font-semibold">Collected:</span>
                 <span className="text-green-600 font-semibold">
                   {new Intl.NumberFormat("en-IN", {
