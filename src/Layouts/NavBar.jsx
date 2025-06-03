@@ -1140,13 +1140,25 @@ function NavBar() {
                             <NavDropdown
                               key={childKey}
                               title={
-                                <span className="nav-dropdown-titleSubUnderIs">
-                                  {childItem.name}
+                                <span
+                                  style={{
+                                    color: isHovered ? "white" : "black",
+
+                                    cursor: "pointer",
+                                  }}
+                                  onMouseEnter={() => setIsHovered(true)}
+                                  onMouseLeave={() => setIsHovered(false)}
+                                  className=" custom-hover-styleForchildLeve  ml-2"
+                                >
+                                  {childItem.name}is
                                 </span>
                               }
-                              className={`dropend custom-submenuIs ${
-                                isChildOpen ? "show" : ""
-                              }`}
+                              // className={`dropend custom-submenuIs ${
+                              //   isChildOpen ? "show" : ""
+                              // }`}
+                              className={`  nav-dropdown-sub-new dropend w-auto ${
+                                isSubOpen ? "show" : ""
+                              } `}
                               show={isChildOpen}
                               onClick={(e) => {
                                 e.preventDefault();
