@@ -40,7 +40,7 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
           fontWeight: "500",
         }}
       >
-        {/* If loading (value is missing, empty string, or empty array), show the loader */}
+        {/* If is loading (value is missing, empty string, or empty array), show the loader */}
         {/* {isLoading ? renderLoader() : value} */}
         <div
           className="flex justify-center items-center gap-x-1   w-full text-center"
