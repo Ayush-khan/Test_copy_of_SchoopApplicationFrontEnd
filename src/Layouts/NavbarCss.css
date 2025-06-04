@@ -295,17 +295,3 @@
 .nav-dropdown-sub-new:hover .nav-dropdown-sub-new-Dynamic {
   color: white !important;
 }
-.custom-hover-styleForchildLevel {
-  color: black;
-  border: 2px solid red;
-}
-
-.custom-hover-styleForchildLevel:hover {
-  color: white !important;
-}
-/* This one for the scoller in the navbar in dynamic for student in the report */
-.dropdown-scrollableForChild {
-  max-height: 300px; /* 👈 set your desired height here */
-  overflow-y: auto; /* 👈 vertical scrollbar */
-  overflow-x: hidden; /* optional: avoid horizontal scroll */
-}

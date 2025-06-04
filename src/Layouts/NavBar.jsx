@@ -759,11 +759,13 @@ import { LuSchool } from "react-icons/lu";
 import { RxHamburgerMenu } from "react-icons/rx";
 import Sidebar from "./Sidebar";
 import RecursiveDropdown from "./RecursiveDropdown";
+import GrandChildMenu from "./GrandChildMenu";
 
 import "./NavbarCss.css";
 import AdminNavBar from "./AdminNavBar";
 import { toast } from "react-toastify";
 import "./styles.css";
+import { IoMdArrowDropright } from "react-icons/io";
 function NavBar() {
   const API_URL = import.meta.env.VITE_API_URL; //thsis is test url
   const navigate = useNavigate();
@@ -785,6 +787,8 @@ function NavBar() {
   const [isHovered, setIsHovered] = useState(false);
   const [navItems, setNavItems] = useState([]);
   const [roleId, setRoleId] = useState(""); // Add roleId state
+  const [openGrandChildKey, setOpenGrandChildKey] = useState(null);
+  const childItemRef = useRef(null);
   function getCurrentDate() {
     const months = [
       "January",
@@ -1131,68 +1135,100 @@ function NavBar() {
                       onMouseEnter={() => handleMouseEnter(subKey, level + 1)} // hover opens
                       onMouseLeave={() => handleMouseLeave(level + 1)} // hover out closes (if not clicked)
                     >
-                      <div className="dropdown-scrollableForChild">
-                        {subItem.sub_menus.map((childItem) => {
-                          const childKey = `${childItem.menu_id}-${level + 2}`;
-                          const isChildOpen = openDropdowns.includes(childKey);
+                      {/* <div
+                        style={{
+                          maxHeight: "400px", // Set fixed height
+                          overflowY: "auto", // Enable vertical scroll only
+                          position: "relative", // Required for absolutely positioned dropdowns inside
+                          zIndex: 1,
+                        }}
+                      > */}
+                      {subItem.sub_menus.map((childItem) => {
+                        const childKey = `${childItem.menu_id}-${level + 2}`;
+                        const isChildOpen = openDropdowns.includes(childKey);
 
-                          if (childItem.sub_menus?.length > 0) {
-                            return (
-                              <NavDropdown
-                                key={childKey}
-                                title={
-                                  <span
-                                    style={{
-                                      color: isHovered ? "white" : "black",
+                        if (childItem.sub_menus?.length > 0) {
+                          return (
+                            <NavDropdown
+                              key={childKey}
+                              title={
+                                <span
+                                  style={{
+                                    cursor: "pointer",
+                                  }}
+                                  className="  custom-hover-styleForchildLeve  ml-2"
+                                >
+                                  {childItem.name}
+                                </span>
+                              }
+                              // className={`dropend custom-submenuIs ${
+                              //   isChildOpen ? "show" : ""
+                              // }`}
+                              className={`  nav-dropdown-sub-new dropend w-auto ${
+                                isSubOpen ? "show" : ""
+                              } `}
+                              show={isChildOpen}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                toggleDropdown(childKey, level + 2);
+                              }}
+                              onMouseEnter={() =>
+                                handleMouseEnter(childKey, level + 2)
+                              }
+                              onMouseLeave={() => handleMouseLeave(level + 2)} // <-- pass level+2 here
+                            >
+                              {childItem.sub_menus.map((grandChildItem) => (
+                                <NavDropdown.Item
+                                  key={grandChildItem.menu_id}
+                                  onClick={() => navigate(grandChildItem.url)}
+                                >
+                                  {grandChildItem.name}
+                                </NavDropdown.Item>
+                              ))}
+                            </NavDropdown>
+                            // <NavDropdown.Item
+                            //   key={childKey}
+                            //   className="relative"
+                            //   onMouseEnter={() =>
+                            //     setOpenGrandChildKey(childKey)
+                            //   }
+                            //   onMouseLeave={() => setOpenGrandChildKey(null)}
+                            // >
+                            //   <span
+                            //     ref={childItemRef}
+                            //     className=" w-full  cursor-pointer flex justify-between items-center  "
+                            //   >
+                            //     <span className="text-left">
+                            //       {childItem.name}
+                            //     </span>
+                            //     {/* <span className="text-right">&raquo;</span> */}
+                            //     <span className="relative left-4 font-extrabold text-[1.3em] text-right">
+                            //       <IoMdArrowDropright />
+                            //     </span>
+                            //   </span>
 
-                                      cursor: "pointer",
-                                    }}
-                                    onMouseEnter={() => setIsHovered(true)}
-                                    onMouseLeave={() => setIsHovered(false)}
-                                    className=" custom-hover-styleForchildLeve  ml-2"
-                                  >
-                                    {childItem.name}
-                                  </span>
-                                }
-                                // className={`dropend custom-submenuIs ${
-                                //   isChildOpen ? "show" : ""
-                                // }`}
-                                className={`  nav-dropdown-sub-new dropend w-auto ${
-                                  isSubOpen ? "show" : ""
-                                } `}
-                                show={isChildOpen}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  toggleDropdown(childKey, level + 2);
-                                }}
-                                onMouseEnter={() =>
-                                  handleMouseEnter(childKey, level + 2)
-                                }
-                                onMouseLeave={() => handleMouseLeave(level + 2)} // <-- pass level+2 here
-                              >
-                                {childItem.sub_menus.map((grandChildItem) => (
-                                  <NavDropdown.Item
-                                    key={grandChildItem.menu_id}
-                                    onClick={() => navigate(grandChildItem.url)}
-                                  >
-                                    {grandChildItem.name}
-                                  </NavDropdown.Item>
-                                ))}
-                              </NavDropdown>
-                            );
-                          } else {
-                            return (
-                              <NavDropdown.Item
-                                key={childKey}
-                                onClick={() => navigate(childItem.url)}
-                                className="hover:bg-gray-100 hover:text-blue-600 text-sm"
-                              >
-                                {childItem.name}
-                              </NavDropdown.Item>
-                            );
-                          }
-                        })}
-                      </div>
+                            //   {openGrandChildKey === childKey && (
+                            //     <GrandChildMenu
+                            //       anchorRef={childItemRef}
+                            //       items={childItem.sub_menus}
+                            //       onClose={() => setOpenGrandChildKey(null)}
+                            //     />
+                            //   )}
+                            // </NavDropdown.Item>
+                          );
+                        } else {
+                          return (
+                            <NavDropdown.Item
+                              key={childKey}
+                              onClick={() => navigate(childItem.url)}
+                              className="hover:bg-gray-100 hover:text-blue-600 text-sm"
+                            >
+                              {childItem.name}
+                            </NavDropdown.Item>
+                          );
+                        }
+                      })}
+                      {/* </div> */}
                     </NavDropdown>
                   );
                 } else {
