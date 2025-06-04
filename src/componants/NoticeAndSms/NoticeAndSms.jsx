@@ -133,9 +133,8 @@ function NoticeAndSms() {
       setLoading(true);
       const token = localStorage.getItem("authToken");
       const params = {};
-      if (status) params.status = status;
       if (selectedDate) params.notice_date = selectedDate;
-
+      if (status) params.status = status;
       const response = await axios.get(`${API_URL}/api/get_smsnoticelist`, {
         headers: { Authorization: `Bearer ${token}` },
         params,
@@ -649,22 +648,41 @@ function NoticeAndSms() {
   }, [searchTerm]);
 
   const searchLower = searchTerm.trim().toLowerCase();
-
   const filteredSections = notices.filter((section) => {
     // Convert the fields to lowercase for case-insensitive comparison
     const teacherName = section?.classnames?.toLowerCase() || "";
     const subjectName = section?.subject?.toLowerCase() || "";
-    const noticeDesc = section?.notice_type?.toLowerCase() || ""; // New field to filter
-    const teacher = section?.name?.toLowerCase() || ""; // Example for teacher's name, update as needed
+    const noticeDesc = section?.notice_type?.toLowerCase() || "";
+    const teacher = section?.name?.toLowerCase() || "";
 
-    // Check if the search term is present in any of the specified fields
+    // Format `notice_date` to a readable string (optional: you can also use raw date)
+    const noticeDate = section?.notice_date || ""; // e.g. "2025-05-29"
+
+    // Check if the search term is in any of the fields (assumes `searchLower` is already .toLowerCase())
     return (
-      teacherName.toLowerCase().includes(searchLower) ||
-      subjectName.toLowerCase().includes(searchLower) ||
-      noticeDesc.toLowerCase().includes(searchLower) || // Check notice description
-      teacher.toLowerCase().includes(searchLower) // Check teacher name
+      teacherName.includes(searchLower) ||
+      subjectName.includes(searchLower) ||
+      noticeDesc.includes(searchLower) ||
+      teacher.includes(searchLower) ||
+      noticeDate.includes(searchLower) // ✅ Now filters by notice date
     );
   });
+
+  // const filteredSections = notices.filter((section) => {
+  //   // Convert the fields to lowercase for case-insensitive comparison
+  //   const teacherName = section?.classnames?.toLowerCase() || "";
+  //   const subjectName = section?.subject?.toLowerCase() || "";
+  //   const noticeDesc = section?.notice_type?.toLowerCase() || ""; // New field to filter
+  //   const teacher = section?.name?.toLowerCase() || ""; // Example for teacher's name, update as needed
+
+  //   // Check if the search term is present in any of the specified fields
+  //   return (
+  //     teacherName.toLowerCase().includes(searchLower) ||
+  //     subjectName.toLowerCase().includes(searchLower) ||
+  //     noticeDesc.toLowerCase().includes(searchLower) || // Check notice description
+  //     teacher.toLowerCase().includes(searchLower) // Check teacher name
+  //   );
+  // });
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
