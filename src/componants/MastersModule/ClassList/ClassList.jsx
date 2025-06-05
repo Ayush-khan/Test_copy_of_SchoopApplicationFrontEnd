@@ -40,6 +40,11 @@ function ClassList() {
   const [sectionNameis, newSectionNameis] = useState({});
   const [backendErrors, setBackendErrors] = useState({});
   const [roleId, setRoleId] = useState("");
+  useEffect(() => {
+    fetchDataRoleId();
+    fetchClasses();
+    fetchDepartments();
+  }, []);
   const fetchClasses = async () => {
     setLoading(true);
 
@@ -114,11 +119,6 @@ function ClassList() {
       console.error("Error fetching data:", error);
     }
   };
-  useEffect(() => {
-    fetchClasses();
-    fetchDepartments();
-    fetchDataRoleId();
-  }, []);
 
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);

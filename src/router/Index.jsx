@@ -226,6 +226,7 @@ import UploadParentPhoto from "../componants/IDCards/UploadParentPhoto.jsx";
 import StudentAbsent from "../componants/AllTableList/StudentAbsent.jsx";
 import NonTeachingStaff from "../componants/AllTableList/NonTeachingStaff.jsx";
 import ApproveLessonP from "../componants/AllTableList/ApproveLessonP.jsx";
+import ManageSubjectPrinciple from "../componants/MastersModule/SubjectAllotment/SubjectAllotmentForPrinciple/ManageSubjectPrinciple.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -838,6 +839,13 @@ function Index() {
         <Route
           path="/staffbirthlist"
           element={<PrivateRoute element={<StaffBirthdayTabList />} />}
+        />
+
+        {/* For Principle or management login routes RoleId is M */}
+
+        <Route
+          path="/manageSubjectP"
+          element={<PrivateRoute element={<ManageSubjectPrinciple />} />}
         />
       </Route>
 
