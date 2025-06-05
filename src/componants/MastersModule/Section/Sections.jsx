@@ -464,14 +464,22 @@ function Sections() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <button
-                className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                onClick={handleAdd}
-                // onClick={() => navigate("/CreateStaff")}
-              >
-                <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
-                Add
-              </button>
+              {roleId !== "M" ? (
+                loading ? ( // Replace isLoading with your actual loading flag
+                  <div className="h-9 w-20 bg-gray-300 animate-pulse rounded-sm"></div>
+                ) : (
+                  <button
+                    className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
+                    onClick={handleAdd}
+                  >
+                    <FontAwesomeIcon
+                      icon={faPlus}
+                      style={{ marginRight: "5px" }}
+                    />
+                    Add
+                  </button>
+                )
+              ) : null}
             </div>
           </div>{" "}
           <div
@@ -480,135 +488,116 @@ function Sections() {
               backgroundColor: "#C03078",
             }}
           ></div>
-          {/* <div className="card-header flex justify-between items-center">
-            <h3 className="text-gray-700 mt-1 text-md lg:text-xl">
-              Department
-            </h3>
-            <div className=" box-border flex gap-x-2  justify-end md:h-10 ">
-              <div className="">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search "
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <button
-                className="btn btn-primary btn-sm h-9"
-                // style={{ width: "80px" }}
-                onClick={handleAdd}
-              >
-                <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
-                Add
-              </button>
-            </div>
-          </div> */}
           <div className="card-body w-full">
             <div className="h-96 lg:h-96 overflow-y-auto lg:overflow-x-hidden">
               {" "}
-              <div className="bg-white rounded-lg shadow-xs  w-full md:w-[80%] mx-auto">
-                <table className="min-w-full  leading-normal table-auto">
-                  <thead>
-                    <tr className="bg-gray-200">
-                      <th className="px-2 text-center  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Sr.No
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Section name
-                      </th>
+              <div
+                className={`bg-white rounded-lg shadow-xs   mx-auto ${
+                  roleId === "M" ? "w-full md:w-[50%]" : "w-full md:w-[80%]"
+                }`}
+                // className="bg-white rounded-lg shadow-xs  w-full md:w-[80%] mx-auto"
+              >
+                {!roleId ? (
+                  <div className="flex justify-center items-center w-full h-[50vh]">
+                    <div className="text-xl text-blue-700 text-center">
+                      Please wait while data is loading...
+                    </div>
+                  </div>
+                ) : loading ? (
+                  <div className="flex justify-center items-center w-full h-[50vh]">
+                    <div className="text-xl text-blue-700 text-center">
+                      Please wait while data is loading...
+                    </div>
+                  </div>
+                ) : (
+                  <table className="min-w-full  leading-normal table-auto">
+                    <thead>
+                      <tr className="bg-gray-200">
+                        <th className="px-2 text-center  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Sr.No
+                        </th>
+                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Section name
+                        </th>
 
-                      <th className="px-2  text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Edit
-                      </th>
-                      <th className="px-2  text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Delete
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <tr>
-                        <td
-                          colSpan="6"
-                          className="text-center text-blue-700 text-xl py-10"
-                        >
-                          Please wait while data is loading...
-                        </td>
+                        {roleId !== "M" && (
+                          <>
+                            <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Edit
+                            </th>
+                            <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Delete
+                            </th>
+                          </>
+                        )}
                       </tr>
-                    ) : displayedSections.length ? (
-                      displayedSections.map((section, index) => (
-                        <tr
-                          key={section?.department_id}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
-                        >
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {currentPage * pageSize + index + 1}
-                            </p>
+                    </thead>
+                    <tbody>
+                      {loading ? (
+                        <tr>
+                          <td
+                            colSpan="6"
+                            className="text-center text-blue-700 text-xl py-10"
+                          >
+                            Please wait while data is loading...
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.name}
-                            </p>
-                          </td>
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-pink-600 hover:text-pink-800 hover:bg-transparent "
-                                // onClick={() => handleEdit(section)}
-                              >
-                                {/* <FontAwesomeIcon icon={faEdit} /> */}
-                              </button>
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                onClick={() => handleEdit(section)}
-                              >
-                                <FontAwesomeIcon icon={faEdit} />
-                              </button>
-                            </td>
-                          )}
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-green-600 hover:green-red-800 hover:bg-transparent "
-                                // onClick={() =>
-                                //   handleDelete(section.department_id)
-                                // }
-                              >
-                                {/* <FontAwesomeIcon icon={faTrash} /> */}
-                              </button>
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                onClick={() =>
-                                  handleDelete(section.department_id)
-                                }
-                              >
-                                <FontAwesomeIcon icon={faTrash} />
-                              </button>
-                            </td>
-                          )}
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan="6"
-                          className="text-center text-red-700 text-xl py-10"
-                        >
-                          Oops! No data found.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      ) : displayedSections.length ? (
+                        displayedSections.map((section, index) => (
+                          <tr
+                            key={section?.department_id}
+                            className={`${
+                              index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-50`}
+                          >
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {currentPage * pageSize + index + 1}
+                              </p>
+                            </td>
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {section?.name}
+                              </p>
+                            </td>
+                            {roleId !== "M" && (
+                              <>
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                  <button
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                    onClick={() => handleEdit(section)}
+                                  >
+                                    <FontAwesomeIcon icon={faEdit} />
+                                  </button>
+                                </td>
+
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                  <button
+                                    className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                    onClick={() =>
+                                      handleDelete(section.department_id)
+                                    }
+                                  >
+                                    <FontAwesomeIcon icon={faTrash} />
+                                  </button>
+                                </td>
+                              </>
+                            )}
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan="6"
+                            className="text-center text-red-700 text-xl py-10"
+                          >
+                            Oops! No data found.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
             <div className=" flex justify-center  pt-2 -mb-3">

@@ -643,14 +643,22 @@ function ClassList() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <button
-                className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                onClick={handleAdd}
-                // onClick={() => navigate("/CreateStaff")}
-              >
-                <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
-                Add
-              </button>
+              {roleId !== "M" ? (
+                loading ? ( // Replace isLoading with your actual loading flag
+                  <div className="h-9 w-20 bg-gray-300 animate-pulse rounded-sm"></div>
+                ) : (
+                  <button
+                    className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
+                    onClick={handleAdd}
+                  >
+                    <FontAwesomeIcon
+                      icon={faPlus}
+                      style={{ marginRight: "5px" }}
+                    />
+                    Add
+                  </button>
+                )
+              ) : null}
             </div>
           </div>
           <div
@@ -666,108 +674,6 @@ function ClassList() {
               }`}
             >
               <div className="bg-white rounded-lg shadow-xs">
-                {/* <table className="min-w-full leading-normal table-auto">
-                  <thead>
-                    <tr className="bg-gray-200">
-                      <th className="px-2 text-center w-full md:w-[10%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Sr.No
-                      </th>
-                      <th className="px-2 text-center w-full md:w-[14%]  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Class
-                      </th>
-                      <th className="px-2 w-full md:w-[19%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Total student
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Section
-                      </th>
-                      {roleId !== "M" && (
-                        <>
-                          <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Edit
-                          </th>
-                          <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Delete
-                          </th>
-                        </>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {console.log("classLIst module api", displayedClasses)}
-                    {loading ? (
-                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                        <div className=" text-center text-xl text-blue-700">
-                          Please wait while data is loading...
-                        </div>
-                      </div>
-                    ) : displayedClasses.length ? (
-                      displayedClasses.map((classItem, index) => (
-                        <tr
-                          key={classItem.class_id}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
-                        >
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {currentPage * pageSize + index + 1}
-                            </p>
-                          </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {classItem.name}
-                            </p>
-                          </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {classItem.students_count}
-                            </p>
-                          </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {
-                                departments.find(
-                                  (dep) =>
-                                    dep.department_id ===
-                                    classItem.department_id
-                                )?.name
-                              }
-                            </p>
-                          </td>
-                          {roleId !== "M" && (
-                            <>
-                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                <button
-                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                  onClick={() => handleEdit(classItem)}
-                                >
-                                  <FontAwesomeIcon icon={faEdit} />
-                                </button>
-                              </td>
-                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                <button
-                                  className="text-red-600 hover:text-red-800 hover:bg-transparent"
-                                  onClick={() =>
-                                    handleDelete(classItem.class_id)
-                                  }
-                                >
-                                  <FontAwesomeIcon icon={faTrash} />
-                                </button>
-                              </td>
-                            </>
-                          )}
-                        </tr>
-                      ))
-                    ) : (
-                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                        <div className=" text-center text-xl text-red-700">
-                          Oops! No data found..
-                        </div>
-                      </div>
-                    )}
-                  </tbody>
-                </table> */}
                 {!roleId ? (
                   <div className="flex justify-center items-center w-full h-[50vh]">
                     <div className="text-xl text-blue-700 text-center">
