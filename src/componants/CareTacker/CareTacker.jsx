@@ -15,6 +15,7 @@ function CareTacker() {
   const [staffs, setStaffs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [roleId, setRoleId] = useState("");
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
@@ -33,6 +34,34 @@ function CareTacker() {
   const [pageCount, setPageCount] = useState(0);
   const pageSize = 10;
   const navigate = useNavigate();
+  useEffect(() => {
+    fetchDataRoleId();
+    fetchStaffs();
+  }, []);
+  // for role_id
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      // Fetch session data
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRoleId(sessionResponse?.data?.user.role_id); // Store role_id
+      // setRoleId("A"); // Store role_id
+      console.log("roleIDis:", roleId);
+      // Fetch academic year data
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   const fetchStaffs = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -57,20 +86,10 @@ function CareTacker() {
     }
   };
 
-  useEffect(() => {
-    fetchStaffs();
-  }, []);
   console.log("the response of the stafflist", staffs);
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
   };
-
-  // const handleEdit = (staffItem) => {
-  //   setCurrentStaff(staffItem);
-  //   setNewStaffName(staffItem.get_teacher.name);
-  //   setNewDesignation(staffItem.get_teacher.designation);
-  //   setShowEditModal(true);
-  // };
 
   const handleCloseModal = () => {
     setShowAddModal(false);
@@ -202,13 +221,22 @@ function CareTacker() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <button
-                className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                onClick={() => navigate("/CreateCareTacker")}
-              >
-                <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
-                Add
-              </button>
+              {roleId !== "M" ? (
+                loading ? ( // Replace isLoading with your actual loading flag
+                  <div className="h-9 w-20 bg-gray-300 animate-pulse rounded-sm"></div>
+                ) : (
+                  <button
+                    className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
+                    onClick={() => navigate("/CreateCareTacker")}
+                  >
+                    <FontAwesomeIcon
+                      icon={faPlus}
+                      style={{ marginRight: "5px" }}
+                    />
+                    Add
+                  </button>
+                )
+              ) : null}
             </div>
           </div>
           <div

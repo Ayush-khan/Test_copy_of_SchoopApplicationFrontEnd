@@ -22,7 +22,7 @@ function StaffList() {
   const [currentStaff, setCurrentStaff] = useState(null);
   const [currentStaffName, setCurrentStaffName] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [roleId, setRoleId] = useState("");
   const [newStaffName, setNewStaffName] = useState("");
   const [newDesignation, setNewDesignation] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,6 +34,34 @@ function StaffList() {
   const prevSearchTermRef = useRef("");
 
   const navigate = useNavigate();
+  useEffect(() => {
+    fetchDataRoleId();
+    fetchStaffs();
+  }, []);
+  // for role_id
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      // Fetch session data
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRoleId(sessionResponse?.data?.user.role_id); // Store role_id
+      // setRoleId("A"); // Store role_id
+      console.log("roleIDis:", roleId);
+      // Fetch academic year data
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   const fetchStaffs = async () => {
     setLoading(true);
     try {
@@ -59,9 +87,6 @@ function StaffList() {
     }
   };
 
-  useEffect(() => {
-    fetchStaffs();
-  }, []);
   console.log("the response of the stafflist", staffs);
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
@@ -337,13 +362,22 @@ function StaffList() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <button
-                className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                onClick={() => navigate("/CreateStaff")}
-              >
-                <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
-                Add
-              </button>
+              {roleId !== "M" ? (
+                loading ? ( // Replace isLoading with your actual loading flag
+                  <div className="h-9 w-20 bg-gray-300 animate-pulse rounded-sm"></div>
+                ) : (
+                  <button
+                    className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
+                    onClick={() => navigate("/CreateStaff")}
+                  >
+                    <FontAwesomeIcon
+                      icon={faPlus}
+                      style={{ marginRight: "5px" }}
+                    />
+                    Add
+                  </button>
+                )
+              ) : null}
             </div>
           </div>
           <div

@@ -727,24 +727,45 @@ function ClassList() {
                               }
                             </p>
                           </td>
+                          {roleId === "M" ? (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-pink-600 hover:text-pink-800 hover:bg-transparent "
+                                // onClick={() => handleEdit(classItem)}
+                              >
+                                {/* <FontAwesomeIcon icon={faEdit} /> */}
+                              </button>
+                            </td>
+                          ) : (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                onClick={() => handleEdit(classItem)}
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                              </button>
+                            </td>
+                          )}
 
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                              onClick={() => handleEdit(classItem)}
-                            >
-                              <FontAwesomeIcon icon={faEdit} />
-                            </button>
-                          </td>
-
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                              onClick={() => handleDelete(classItem.class_id)}
-                            >
-                              <FontAwesomeIcon icon={faTrash} />
-                            </button>
-                          </td>
+                          {roleId === "M" ? (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-green-600 hover:text-green-800 hover:bg-transparent "
+                                // onClick={() => handleDelete(classItem.class_id)}
+                              >
+                                {/* <FontAwesomeIcon icon={faTrash} /> */}
+                              </button>
+                            </td>
+                          ) : (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                onClick={() => handleDelete(classItem.class_id)}
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                            </td>
+                          )}
                         </tr>
                       ))
                     ) : (
