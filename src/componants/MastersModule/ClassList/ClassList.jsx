@@ -660,9 +660,13 @@ function ClassList() {
             }}
           ></div>
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full md:w-[84%] mx-auto">
+            <div
+              className={`h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden mx-auto ${
+                roleId === "M" ? "w-full md:w-[75%]" : "w-full md:w-[84%]"
+              }`}
+            >
               <div className="bg-white rounded-lg shadow-xs">
-                <table className="min-w-full leading-normal table-auto">
+                {/* <table className="min-w-full leading-normal table-auto">
                   <thead>
                     <tr className="bg-gray-200">
                       <th className="px-2 text-center w-full md:w-[10%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -677,12 +681,16 @@ function ClassList() {
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Section
                       </th>
-                      <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Edit
-                      </th>
-                      <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Delete
-                      </th>
+                      {roleId !== "M" && (
+                        <>
+                          <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Edit
+                          </th>
+                          <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Delete
+                          </th>
+                        </>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
@@ -727,44 +735,27 @@ function ClassList() {
                               }
                             </p>
                           </td>
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-pink-600 hover:text-pink-800 hover:bg-transparent "
-                                // onClick={() => handleEdit(classItem)}
-                              >
-                                {/* <FontAwesomeIcon icon={faEdit} /> */}
-                              </button>
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                onClick={() => handleEdit(classItem)}
-                              >
-                                <FontAwesomeIcon icon={faEdit} />
-                              </button>
-                            </td>
-                          )}
-
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-green-600 hover:text-green-800 hover:bg-transparent "
-                                // onClick={() => handleDelete(classItem.class_id)}
-                              >
-                                {/* <FontAwesomeIcon icon={faTrash} /> */}
-                              </button>
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                onClick={() => handleDelete(classItem.class_id)}
-                              >
-                                <FontAwesomeIcon icon={faTrash} />
-                              </button>
-                            </td>
+                          {roleId !== "M" && (
+                            <>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <button
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                  onClick={() => handleEdit(classItem)}
+                                >
+                                  <FontAwesomeIcon icon={faEdit} />
+                                </button>
+                              </td>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <button
+                                  className="text-red-600 hover:text-red-800 hover:bg-transparent"
+                                  onClick={() =>
+                                    handleDelete(classItem.class_id)
+                                  }
+                                >
+                                  <FontAwesomeIcon icon={faTrash} />
+                                </button>
+                              </td>
+                            </>
                           )}
                         </tr>
                       ))
@@ -776,7 +767,119 @@ function ClassList() {
                       </div>
                     )}
                   </tbody>
-                </table>
+                </table> */}
+                {!roleId ? (
+                  <div className="flex justify-center items-center w-full h-[50vh]">
+                    <div className="text-xl text-blue-700 text-center">
+                      Please wait while data is loading...
+                    </div>
+                  </div>
+                ) : loading ? (
+                  <div className="flex justify-center items-center w-full h-[50vh]">
+                    <div className="text-xl text-blue-700 text-center">
+                      Please wait while data is loading...
+                    </div>
+                  </div>
+                ) : (
+                  <table className="min-w-full leading-normal table-auto">
+                    <thead>
+                      <tr className="bg-gray-200">
+                        <th className="px-2 text-center w-full md:w-[10%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Sr.No
+                        </th>
+                        <th className="px-2 text-center w-full md:w-[14%]  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Class
+                        </th>
+                        <th className="px-2 w-full md:w-[19%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Total student
+                        </th>
+                        <th className="px-2 w-full md:w-[25%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Section
+                        </th>
+                        {roleId !== "M" && (
+                          <>
+                            <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Edit
+                            </th>
+                            <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Delete
+                            </th>
+                          </>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {displayedClasses.length ? (
+                        displayedClasses.map((classItem, index) => (
+                          <tr
+                            key={classItem.class_id}
+                            className={`${
+                              index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-50`}
+                          >
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {currentPage * pageSize + index + 1}
+                              </p>
+                            </td>
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {classItem.name}
+                              </p>
+                            </td>
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {classItem.students_count}
+                              </p>
+                            </td>
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {
+                                  departments.find(
+                                    (dep) =>
+                                      dep.department_id ===
+                                      classItem.department_id
+                                  )?.name
+                                }
+                              </p>
+                            </td>
+                            {roleId !== "M" && (
+                              <>
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                  <button
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                    onClick={() => handleEdit(classItem)}
+                                  >
+                                    <FontAwesomeIcon icon={faEdit} />
+                                  </button>
+                                </td>
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                  <button
+                                    className="text-red-600 hover:text-red-800 hover:bg-transparent"
+                                    onClick={() =>
+                                      handleDelete(classItem.class_id)
+                                    }
+                                  >
+                                    <FontAwesomeIcon icon={faTrash} />
+                                  </button>
+                                </td>
+                              </>
+                            )}
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={roleId !== "M" ? 6 : 4}
+                            className="text-center py-6 text-red-700 text-lg"
+                          >
+                            Oops! No data found..
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
             <div className=" flex justify-center  pt-2 -mb-3">

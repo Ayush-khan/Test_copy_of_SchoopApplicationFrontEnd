@@ -34,13 +34,42 @@ function SubjectList() {
     "Optional",
     "Co-Scholastic_hsc",
   ]);
+  const [roleId, setRoleId] = useState("");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
 
   const pageSize = 10;
+  useEffect(() => {
+    fetchDataRoleId();
+    fetchSections();
+  }, []);
+  // for role_id
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
 
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      // Fetch session data
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRoleId(sessionResponse?.data?.user.role_id); // Store role_id
+      // setRoleId("A"); // Store role_id
+      console.log("roleIDis:", roleId);
+      // Fetch academic year data
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   const fetchSections = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -69,15 +98,6 @@ function SubjectList() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchSections();
-  }, []);
-
-  // Filter and paginate sections
-  // const filteredSections = sections.filter((section) =>
-  //   section.name.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
 
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
@@ -469,22 +489,34 @@ function SubjectList() {
                               {section?.subject_type}
                             </p>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                              onClick={() => handleEdit(section)}
-                            >
-                              <FontAwesomeIcon icon={faEdit} />
-                            </button>{" "}
-                          </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                              onClick={() => handleDelete(section.sm_id)}
-                            >
-                              <FontAwesomeIcon icon={faTrash} />
-                            </button>
-                          </td>
+                          {roleId === "M" ? (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button className="text-pink-600 hover:text-pink-800 hover:bg-transparent "></button>{" "}
+                            </td>
+                          ) : (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                onClick={() => handleEdit(section)}
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                              </button>{" "}
+                            </td>
+                          )}
+                          {roleId === "M" ? (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button className="text-pink-600 hover:text-pink-800 hover:bg-transparent "></button>{" "}
+                            </td>
+                          ) : (
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                onClick={() => handleDelete(section.sm_id)}
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                            </td>
+                          )}
                         </tr>
                       ))
                     ) : (
