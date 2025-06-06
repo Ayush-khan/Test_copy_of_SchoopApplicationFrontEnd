@@ -2591,11 +2591,6 @@ function ManageSubjectList() {
                         .join(" ")}?`}
                 </div>
 
-                {/* <div className="modal-body">
-                  Are you sure you want to Activate or Deactivate this student{" "}
-                  {` ${currentStudentDataForActivate?.studentToActiveOrDeactive?.student_name} `}{" "}
-                  ?
-                </div> */}
                 <div className=" flex justify-end p-3">
                   <button
                     type="button"
@@ -2603,7 +2598,16 @@ function ManageSubjectList() {
                     onClick={handleActivateOrNot}
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Activating..." : "Active"}
+                    {isSubmitting
+                      ? currentStudentDataForActivate?.studentToActiveOrDeactive
+                          ?.isActive === "Y"
+                        ? "Deactivating..."
+                        : "Activating..."
+                      : currentStudentDataForActivate?.studentToActiveOrDeactive
+                          ?.isActive === "Y"
+                      ? "Deactivate"
+                      : "Activate"}
+                    {/* {isSubmitting ? "Activating..." : "Active"} */}
                   </button>
                 </div>
               </div>

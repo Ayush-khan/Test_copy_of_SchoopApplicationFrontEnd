@@ -699,7 +699,7 @@ const EditLCforDeleteStudent = () => {
     console.log("Validation passed, proceeding with submission");
 
     const formattedFormData = {
-      reg_no: formData.reg_no || "",
+      grn_no: formData.reg_no || "",
       issue_date: formatDateString(formData.issue_date),
       stud_id_no: formData.stud_id_no || "",
       stu_aadhaar_no: formData.stu_aadhaar_no || "",
