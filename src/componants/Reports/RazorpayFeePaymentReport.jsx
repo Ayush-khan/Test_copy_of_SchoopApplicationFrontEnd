@@ -9,7 +9,6 @@ import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
-
 const RazorpayFeePaymentReport = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -131,17 +130,9 @@ const RazorpayFeePaymentReport = () => {
     if (field === "fromDate") {
       setFromDate(value);
       setFormDateError(""); // ✅ Remove error when user selects a date
-
-      // Ensure 'To Date' is not earlier than 'From Date'
-      //   if (toDate && value > toDate) {
-      //     setToDate(value);
-      //   }
     } else if (field === "toDate") {
-      // Prevent selecting 'To Date' earlier than 'From Date'
-      //   if (value >= fromDate) {
       setToDate(value);
       setToDateError(""); // ✅ Remove error when user selects a valid date
-      //   }
     }
   };
 
@@ -438,49 +429,6 @@ const RazorpayFeePaymentReport = () => {
 
   console.log("row", timetable);
 
-  // const filteredSections = timetable.filter((student) => {
-  //   const searchLower = searchTerm.toLowerCase();
-  //   const formatDate = (dateString) => {
-  //     if (!dateString) return "";
-
-  //     // Ensure we remove the time part if present
-  //     const cleanDate = dateString.split(" ")[0]; // Extract only YYYY-MM-DD
-
-  //     const [year, month, day] = cleanDate.split("-");
-  //     return `${day}/${month}/${year} || ${day}-${month}-${year}`;
-  //   };
-
-  //   // Extract relevant fields and convert them to lowercase for case-insensitive search
-  //   const studentName = student?.student_name?.toLowerCase() || "";
-  //   const orderId = student?.OrderId?.toLowerCase() || "";
-  //   const className = student?.class_name?.toLowerCase() || "";
-  //   const dateofTrnx = formatDate(student?.Trnx_date).toLowerCase();
-  //   const installmentNo =
-  //     student?.installment_no
-  //       ?.toString()
-  //       ?.toLowerCase()
-  //       .replace(/\s+/g, " ")
-  //       .trim() || "";
-  //   const paymentId =
-  //     student?.razorpay_payment_id?.toString().toLowerCase() || "";
-  //   const status = student?.Status_code?.toLowerCase() || "";
-  //   const amount = student?.Amount?.toLowerCase() || "";
-  //   const receiptNo = student?.receipt_no?.toLowerCase() || "";
-
-  //   // Check if the search term is present in any of the specified fields
-  //   return (
-  //     studentName.includes(searchLower) ||
-  //     orderId.includes(searchLower) ||
-  //     className.includes(searchLower) ||
-  //     dateofTrnx.includes(searchLower) ||
-  //     installmentNo.includes(searchLower) ||
-  //     paymentId.includes(searchLower) ||
-  //     status.includes(searchLower) ||
-  //     amount.includes(searchLower) ||
-  //     receiptNo.includes(searchLower)
-  //   );
-  // });
-
   const filteredSections = timetable.filter((student) => {
     // Normalize search term: Trim and replace multiple spaces with a single space
     const searchLower = searchTerm.trim().replace(/\s+/g, " ").toLowerCase();
@@ -548,8 +496,8 @@ const RazorpayFeePaymentReport = () => {
           ></div>
 
           <>
-            <div className="container mx-auto px-4">
-              <div className="w-full flex flex-wrap items-start gap-6 p-2">
+            <div className="w-full mx-auto ">
+              <div className="w-full md:w-[97%] mx-auto   flex flex-wrap items-start  justify-end  gap-x-6 p-2">
                 {/* Order ID */}
                 <div className="flex flex-col h-[80px]">
                   <label className="text-md mb-1" htmlFor="orderId">
