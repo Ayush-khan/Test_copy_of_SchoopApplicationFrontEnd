@@ -227,6 +227,7 @@ import StudentAbsent from "../componants/AllTableList/StudentAbsent.jsx";
 import NonTeachingStaff from "../componants/AllTableList/NonTeachingStaff.jsx";
 import ApproveLessonP from "../componants/AllTableList/ApproveLessonP.jsx";
 import ManageSubjectPrinciple from "../componants/MastersModule/SubjectAllotment/SubjectAllotmentForPrinciple/ManageSubjectPrinciple.jsx";
+import NoticeAndSmsforStaff from "../componants/NoticeAndSms/NotiveAndSmsForStaff/NoticeAndSmsforStaff.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -846,6 +847,11 @@ function Index() {
         <Route
           path="/manageSubjectP"
           element={<PrivateRoute element={<ManageSubjectPrinciple />} />}
+        />
+        {/* For notice and sms for staff */}
+        <Route
+          path="/staffNoticeAndSms"
+          element={<PrivateRoute element={<NoticeAndSmsforStaff />} />}
         />
       </Route>
 
