@@ -9,9 +9,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 // import Select from "react-select";
 import { IoMdSend } from "react-icons/io";
-
-// import CreateShortSMS from "./CreateShortSms";
-// import CreateNotice from "./CreateNotice";
 import CreateShortSMS from "./CreateShortSmsforStaff";
 import CreateNotice from "./CreateNoticeforStaff";
 // import { PiCertificateBold } from "react-icons/pi";
@@ -455,7 +452,7 @@ function NoticeAndSmsforStaff() {
       }
 
       await axios.delete(
-        `${API_URL}/api/delete_smsnotice/${currentSection?.classToDelete?.unq_id}`,
+        `${API_URL}/api/delete_staffshortsmsnotice/${currentSection?.classToDelete?.unq_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -516,21 +513,21 @@ function NoticeAndSmsforStaff() {
     prevSearchTermRef.current = trimmedSearch;
   }, [searchTerm]);
 
-  const searchLower = searchTerm.trim().toLowerCase();
-  console.log("NOtivce data-------->", notices);
-  const filteredSections = notices.filter((section) => {
-    // Convert the fields to lowercase for case-insensitive comparison
-    const teacherName = section?.classnames?.toLowerCase() || "";
-    const subjectName = section?.subject?.toLowerCase() || "";
-    const noticeDesc = section?.notice_type?.toLowerCase() || ""; // New field to filter
-    const teacher = section?.name?.toLowerCase() || ""; // Example for teacher's name, update as needed
+  const searchLower = searchTerm.toLowerCase();
 
-    // Check if the search term is present in any of the specified fields
+  const filteredSections = notices.filter((notice) => {
+    const subject = notice?.subject?.toLowerCase() || "";
+    const department = notice?.dept_name?.toLowerCase() || "";
+    const type = notice?.notice_type?.toLowerCase() || "";
+    const noticeDate = notice?.notice_date?.toLowerCase() || "";
+    const createdBy = notice?.name?.toLowerCase() || "";
+
     return (
-      teacherName.toLowerCase().includes(searchLower) ||
-      subjectName.toLowerCase().includes(searchLower) ||
-      noticeDesc.toLowerCase().includes(searchLower) || // Check notice description
-      teacher.toLowerCase().includes(searchLower) // Check teacher name
+      subject.includes(searchLower) ||
+      department.includes(searchLower) ||
+      type.includes(searchLower) ||
+      noticeDate.includes(searchLower) ||
+      createdBy.includes(searchLower)
     );
   });
 
