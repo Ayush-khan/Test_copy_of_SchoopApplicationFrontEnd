@@ -391,14 +391,15 @@ function LeaveApplicaton() {
                             </button>
                           </td> */}
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            {leave.status === "A" && (
-                              <button
-                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                onClick={() => handleSubmitEdit(leave)}
-                              >
-                                <FontAwesomeIcon icon={faEdit} />
-                              </button>
-                            )}
+                            {leave.status === "A" ||
+                              (leave.status === "H" && (
+                                <button
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                  onClick={() => handleSubmitEdit(leave)}
+                                >
+                                  <FontAwesomeIcon icon={faEdit} />
+                                </button>
+                              ))}
                             {(leave.status === "C" ||
                               leave.status === "R" ||
                               leave.status === "P") && (

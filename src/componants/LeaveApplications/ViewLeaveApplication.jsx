@@ -10,10 +10,11 @@ const ViewLeaveApplication = () => {
   const [loading, setLoading] = useState(false);
 
   const { staffleave } = location.state || {};
-  console.log("staff leave for view application", staffleave);
+  console.log("staff leave for editing", staffleave);
 
   const [formData, setFormData] = useState({
     staff_name: "",
+    staff_id: "",
     leave_type_id: "",
     leave_start_date: "",
     leave_end_date: "",
@@ -22,23 +23,47 @@ const ViewLeaveApplication = () => {
     reason: "",
     reason_for_rejection: "",
   });
+  const statusOptions = [
+    { value: "A", label: "Applied" },
+    { value: "H", label: "Hold" },
+    { value: "R", label: "Rejected" },
+    { value: "P", label: "Approved" },
+    { value: "C", label: "Canceled" },
+  ];
+  useEffect(() => {
+    if (staffleave) {
+      setFormData({
+        staff_name: staffleave.teachername || "",
+        staff_id: staffleave.staff_id || "",
+        leave_type_id: staffleave.leave_type_id || "",
+        leave_start_date: staffleave.leave_start_date || "",
+        leave_end_date: staffleave.leave_end_date || "",
+        status: staffleave.status || "",
+        no_of_days: staffleave.no_of_days || "",
+        reason: staffleave.reason || "",
+        reason_for_rejection: staffleave.reason_for_rejection || "",
+      });
+
+      // ✅ Fetch leave type if staff_id exists
+      if (staffleave.staff_id) {
+        fetchLeaveType(staffleave.staff_id);
+      }
+    }
+  }, [staffleave, API_URL]);
 
   const [errors, setErrors] = useState({});
   const [leaveType, setLeaveType] = useState([]);
-  const [newLeaveType, setNewLeaveType] = useState("");
   const [error, setError] = useState(null);
-  const [fieldErrors, setFieldErrors] = useState({});
-
   const navigate = useNavigate();
   const MAX_DATE = "2006-12-31";
   const today = new Date().toISOString().split("T")[0];
-
-  const formatDateString = (dateString) => {
-    if (!dateString) return "NA"; // Handle empty dates
-    const [year, month, day] = dateString.split("-");
-    return `${day}-${month}-${year}`; // Convert to DD-MM-YYYY format
+  const statusMap = {
+    R: "Rejected",
+    A: "Applied",
+    H: "Hold",
+    C: "Canceled",
+    P: "Approved",
   };
-
   const validateDays = (days) => {
     if (!days) return "Number of days is required";
     if (!/^\d{1,2}(\.\d{1,2})?$/.test(days)) {
@@ -68,6 +93,10 @@ const ViewLeaveApplication = () => {
       newErrors.leave_end_date = "Leave end date is required";
     }
 
+    // if (!formData.reason) {
+    //   newErrors.reason = "Reason for leave is required";
+    // }
+
     const daysError = validateDays(formData.no_of_days);
     if (daysError) {
       newErrors.no_of_days = daysError;
@@ -77,40 +106,7 @@ const ViewLeaveApplication = () => {
     return newErrors;
   };
 
-  const fetchSessionData = async () => {
-    const token = localStorage.getItem("authToken");
-
-    try {
-      const response = await axios.get(`${API_URL}/api/sessionData`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
-
-      console.log("response session data", response.data);
-
-      if (response.data && response.data.user) {
-        const { name, reg_id } = response.data.user;
-        console.log("user reg id", response.data.user.reg_id);
-        // Set staff name and reg_id
-        setFormData((prevData) => ({
-          ...prevData,
-          staff_name: name,
-          reg_id: reg_id,
-        }));
-
-        fetchLeaveType(reg_id);
-        console.log("user fetch reg id", reg_id);
-      } else {
-        console.error("User data not found in the response");
-      }
-    } catch (error) {
-      console.error("Error fetching session data:", error);
-    }
-  };
-
-  const fetchLeaveType = async () => {
+  const fetchLeaveType = async (reg_id) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
@@ -119,12 +115,16 @@ const ViewLeaveApplication = () => {
         throw new Error("No Authentication token found.");
       }
 
-      const response = await axios.get(`${API_URL}/api/get_leavetype`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_leavetypedata/${reg_id}`,
+        {
+          // ${API_URL}/api/get_leavetype
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
 
       if (Array.isArray(response.data.data)) {
         setLeaveType(response.data.data);
@@ -139,175 +139,16 @@ const ViewLeaveApplication = () => {
     }
   };
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    setFormData((prevData) => {
-      let updatedData = {
-        ...prevData,
-        [name]: value,
-      };
-
-      // Recalculate no_of_days only if the dates are changed, and no manual editing is done
-      if (
-        updatedData.leave_start_date &&
-        updatedData.leave_end_date &&
-        name !== "no_of_days"
-      ) {
-        const startDate = new Date(updatedData.leave_start_date);
-        const endDate = new Date(updatedData.leave_end_date);
-
-        // Calculate day difference as a decimal (including fractional days)
-        const timeDiff = endDate - startDate;
-        const dayDiff = timeDiff / (1000 * 60 * 60 * 24) + 1; // Including fractional days
-
-        // Set the calculated value
-        updatedData.no_of_days = dayDiff > 0 ? dayDiff.toFixed(0) : "";
-      }
-
-      return updatedData;
-    });
-
-    // When manually editing no_of_days field, accept decimals and validate
-    if (name === "no_of_days") {
-      // Allow decimal values (positive only)
-      const decimalPattern = /^\d+(\.\d+)?$/;
-      if (decimalPattern.test(value)) {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          no_of_days: "", // Clear any existing errors
-        }));
-      } else {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          no_of_days: "Please enter a valid positive number (e.g., 0.5).",
-        }));
-      }
-    }
-  };
-
-  useEffect(() => {
-    fetchSessionData();
-    fetchLeaveType();
-  }, []);
-
-  const handleChangeLeaveType = (e) => {
-    const { value } = e.target;
-
-    setFormData((prevData) => ({
-      ...prevData,
-      leave_type_id: value,
-    }));
-
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      leave_type_id: value ? null : "Leave type is required",
-    }));
-  };
-
-  useEffect(() => {
-    if (staffleave) {
-      setFormData({
-        staff_name: staffleave.staff_name || "",
-        leave_type_id: staffleave.leave_type_id || "",
-        leave_start_date: staffleave.leave_start_date || "",
-        leave_end_date: staffleave.leave_end_date || "",
-        status: staffleave.status || "",
-        no_of_days: staffleave.no_of_days || "",
-        reason: staffleave.reason || "",
-        reason_for_rejection: staffleave.reason_for_rejection || "",
-      });
-    }
-  }, [staffleave, API_URL]);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    // Prevent double submissions
-    if (loading) return;
-
-    // Validate the form data
-    const validationErrors = validate();
-    if (validationErrors && Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      Object.values(validationErrors).forEach((error) => {
-        toast.error(error); // Display validation errors
-      });
-      return;
-    }
-
-    // Format form data for API
-    const formattedFormData = {
-      ...formData,
-      leave_start_date: formatDateString(formData.leave_start_date),
-      leave_end_date: formatDateString(formData.leave_end_date),
-      staff_id: formData.reg_id,
-      staff_name: formData.staff_name,
-    };
-
-    try {
-      setLoading(true); // Start loading state
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      console.log("Submitting data:", formattedFormData);
-      const response = await axios.put(
-        `${API_URL}/api/update_leaveapplication/${staffleave.leave_app_id}`,
-        formattedFormData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Handle successful response
-      if (response.status === 200) {
-        toast.success("Leave updated successfully!");
-        setTimeout(() => {
-          navigate("/leaveApplication");
-        }, 500);
-      }
-    } catch (error) {
-      console.error(
-        "Error updating leave:",
-        error.response?.data || error.message
-      );
-
-      // Handle backend errors
-      if (error.response && error.response.data) {
-        const { errors, message } = error.response.data;
-
-        // Show validation errors from the backend
-        if (errors) {
-          Object.entries(errors).forEach(([field, messages]) => {
-            messages.forEach((msg) => {
-              console.log(`${field}: ${msg}`); // Show field-specific error
-            });
-          });
-
-          // Set backend validation errors for specific fields
-          setBackendErrors(errors);
-          setEmployeeIdBackendError(errors?.leave_app_id_id?.[0] || ""); // Handle `employee_id` error
-        } else if (message) {
-          // Show generic backend error message
-          // toast.error(message);
-        }
-      } else {
-        toast.error("An unexpected error occurred.");
-      }
-    } finally {
-      setLoading(false); // End loading state
-    }
+  const formatDateString = (dateString) => {
+    if (!dateString) return "";
+    const [year, month, day] = dateString.split("-");
+    return `${year}-${month}-${day}`;
   };
 
   return (
     <div className="container mx-auto min-h-screen flex items-center justify-center mt-3 ">
       <ToastContainer />
-      <div className="card p-4 rounded-md w-[66%] ">
+      <div className="card p-4 rounded-md w-[80%]">
         <div className=" card-header mb-4 flex justify-between items-center">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             View Leave Application
@@ -327,100 +168,184 @@ const ViewLeaveApplication = () => {
             backgroundColor: "#C03078",
           }}
         ></div>
+
         <form
           // onSubmit={handleSubmit}
           className="flex items-center justify-center overflow-x-hidden shadow-md p-3 bg-gray-50 space-y-2" //min-h-screen flex items-center justify-center overflow-x-hidden shadow-md p-4 bg-gray-50
         >
-          <div className="w-full max-w-3xl rounded-lg mt-0">
-            <div className="flex flex-col mt-0 md:grid md:grid-cols-2 md:gap-x-0 md:gap-y-4">
-              <label htmlFor="staffName" className="w-1/2 mt-2 ml-7">
-                Staff Name
+          <div className="modal-body grid grid-cols-3 gap-4 px-4">
+            {/* Staff Name */}
+            <div className="flex flex-col">
+              <label htmlFor="staff_name" className="mb-1">
+                Staff Name <span className="text-red-500">*</span>
               </label>
-              <div
+              <input
+                type="text"
+                maxLength={100}
                 id="staff_name"
                 name="staff_name"
-                className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-              >
-                {formData.staff_name}
-              </div>
-              <label htmlFor="leavetype" className="w-1/2 mt-2 ml-7">
-                Leave Type<span className="text-red-500">*</span>
-              </label>
-              <div
-                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                id="leave_type"
-              >
-                {leaveType.find(
-                  (leave) => leave.leave_type_id === formData.leave_type_id
-                )?.name || "Select"}
-              </div>
+                pattern="^[^\d].*"
+                title="Name should not start with a number"
+                required
+                value={formData.staff_name}
+                disabled
+                className="form-control shadow-md bg-gray-200"
+              />
+              {errors.staff_name && (
+                <span className="text-danger text-xs mt-1">
+                  {errors.staff_name}
+                </span>
+              )}
+            </div>
 
-              <label htmlFor="leavestartdate" className="w-1/2 mt-2 ml-7">
+            {/* Leave Type */}
+            <div className="flex flex-col">
+              <label htmlFor="leave_type" className="mb-1">
+                Leave Type <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="leave_type"
+                name="leave_type"
+                value={formData.leave_type_id}
+                disabled
+                required
+                className="form-control shadow-md bg-gray-200"
+              >
+                <option className="bg-gray-300" value="">
+                  Select Leave
+                </option>
+                {leaveType.length === 0 ? (
+                  <option>No Options</option>
+                ) : (
+                  leaveType.map((leave) => (
+                    <option
+                      key={leave.leave_type_id}
+                      value={leave.leave_type_id}
+                    >
+                      {leave.name}
+                    </option>
+                  ))
+                )}
+              </select>
+              {errors.leave_type_id && (
+                <span className="text-danger text-xs mt-1">
+                  {errors.leave_type_id}
+                </span>
+              )}
+            </div>
+
+            {/* Leave Start Date */}
+            <div className="flex flex-col">
+              <label htmlFor="leave_start_date" className="mb-1">
                 Leave Start Date <span className="text-red-500">*</span>
               </label>
-              <div
+              <input
+                type="date"
                 id="leave_start_date"
                 name="leave_start_date"
-                className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-              >
-                {formatDateString(formData.leave_start_date || "NA")}
-              </div>
+                value={formData.leave_start_date}
+                disabled
+                max={formData.leave_end_date || ""}
+                required
+                className="form-control shadow-md bg-gray-200"
+              />
+              {errors.leave_start_date && (
+                <span className="text-danger text-xs mt-1">
+                  {errors.leave_start_date}
+                </span>
+              )}
+            </div>
 
-              <label htmlFor="leaveenddate" className="w-1/2 mt-2 ml-7">
-                Leave End Date<span className="text-red-500">*</span>
+            {/* Leave End Date */}
+            <div className="flex flex-col">
+              <label htmlFor="leave_end_date" className="mb-1">
+                Leave End Date <span className="text-red-500">*</span>
               </label>
-              <div
+              <input
+                type="date"
                 id="leave_end_date"
                 name="leave_end_date"
-                className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-              >
-                {formatDateString(formData.leave_end_date || "NA")}
-              </div>
+                value={formData.leave_end_date}
+                disabled
+                min={formData.leave_start_date || ""}
+                required
+                className="form-control shadow-md bg-gray-200"
+              />
+              {errors.leave_end_date && (
+                <span className="text-danger text-xs mt-1">
+                  {errors.leave_end_date}
+                </span>
+              )}
+            </div>
 
-              <label htmlFor="status" className="w-1/2 mt-2 ml-7">
-                Status <span className="text-red-500">*</span>
-              </label>
-              <div
-                id="status"
-                name="status"
-                className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-              >
-                {formData.status || "NA"}
-              </div>
-
-              <label htmlFor="days" className="w-1/2 mt-2 ml-7">
+            {/* No of Days */}
+            <div className="flex flex-col">
+              <label htmlFor="no_of_days" className="mb-1">
                 No. of Days <span className="text-red-500">*</span>
               </label>
-              <div
+              <input
+                type="number"
                 id="no_of_days"
                 name="no_of_days"
-                className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-              >
-                {formData.no_of_days || "NA"}
+                value={formData.no_of_days}
+                step="0.5"
+                min="0.5"
+                disabled
+                className="form-control shadow-md bg-gray-200"
+              />
+              {errors.no_of_days && (
+                <span className="text-danger text-xs mt-1">
+                  {errors.no_of_days}
+                </span>
+              )}
+            </div>
+
+            {/* Status */}
+            <div className="flex flex-col">
+              <label htmlFor="status" className="mb-1">
+                Status <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="status"
+                name="status"
+                value={statusMap[formData.status] || ""}
+                readOnly
+                disabled
+                className=" bg-gray-200 p-2 rounded-md shadow-inner"
+              />
+            </div>
+
+            {/* Reason and Approver's Comment */}
+            <div className="col-span-3 grid grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <label htmlFor="reason" className="mb-1">
+                  Reason
+                </label>
+                <textarea
+                  id="reason"
+                  name="reason"
+                  value={formData.reason}
+                  readOnly
+                  rows="2"
+                  disabled
+                  className=" bg-gray-200 p-2 rounded-md shadow-inner"
+                />
               </div>
 
-              <label htmlFor="reason" className="w-1/2 mt-2 ml-7">
-                Reason
-              </label>
-              <div
-                id="reason"
-                name="reason"
-                className="input-field resize-none block w-full border border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                style={{ minHeight: "2rem" }}
-              >
-                {formData.reason}
-              </div>
-              <label htmlFor="reasonforrejection" className="w-1/2 mt-2 ml-7">
-                Approver's Comment
-              </label>
-              <div
-                id="reason_for_rejection"
-                name="reason_for_rejection"
-                className="input-field resize-none block w-full border border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                style={{ minHeight: "2rem" }}
-                rows="2"
-              >
-                {formData.reason_for_rejection}
+              <div className="flex flex-col">
+                <label htmlFor="reason_for_rejection" className="mb-1">
+                  Approver's Comment
+                </label>
+                <textarea
+                  id="reason_for_rejection"
+                  name="reason_for_rejection"
+                  value={formData.reason_for_rejection}
+                  readOnly
+                  rows="2"
+                  disabled
+                  className=" bg-gray-200 p-2 rounded-md shadow-inner"
+                />
               </div>
             </div>
           </div>

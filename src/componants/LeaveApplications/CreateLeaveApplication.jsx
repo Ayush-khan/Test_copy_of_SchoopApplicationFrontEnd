@@ -811,7 +811,7 @@ const CreateLeaveApplication = () => {
       ...formData,
       leave_start_date: formatDateString(formData.leave_start_date),
       leave_end_date: formatDateString(formData.leave_end_date),
-      staff_id: formData.reg_id,
+      staff_id: selectedStudentId,
       staff_name: formData.staff_name,
     };
 
@@ -822,7 +822,7 @@ const CreateLeaveApplication = () => {
         throw new Error("No authentication token found");
       }
       const response = await axios.post(
-        `${API_URL}/api/save_leaveapplication`,
+        `${API_URL}/api/save_leaveapplicatstaffprincipal`,
         formattedFormData,
         {
           headers: {
