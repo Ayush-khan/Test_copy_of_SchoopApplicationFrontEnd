@@ -43,7 +43,7 @@ function LeaveApplicaton() {
       }
 
       const response = await axios.get(
-        `${API_URL}/api/get_leaveapplicationlist`,
+        `${API_URL}/api/get_leaveapplicationdata`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -225,6 +225,9 @@ function LeaveApplicaton() {
                         Sr.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Staff Name
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Leave Type
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -272,7 +275,12 @@ function LeaveApplicaton() {
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {leave.name}
+                              {leave.teachername}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {leave.leavetypename}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">

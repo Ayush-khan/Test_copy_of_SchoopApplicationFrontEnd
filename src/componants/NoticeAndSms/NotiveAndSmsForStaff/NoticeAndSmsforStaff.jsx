@@ -37,7 +37,7 @@ function NoticeAndSmsforStaff() {
 
   const [newSection, setnewSectionName] = useState("");
   const [newSubject, setnewSubjectnName] = useState("");
-  const [newclassnames, setnewclassnames] = useState("");
+  const [newStaffNames, setNewStaffNames] = useState("");
   const [teacherIdIs, setteacherIdIs] = useState("");
   const [teacherNameIs, setTeacherNameIs] = useState("");
 
@@ -174,7 +174,7 @@ function NoticeAndSmsforStaff() {
   const handleView = (section) => {
     console.log("view data", section);
     setCurrentSection(section);
-    setnewclassnames(section?.classnames);
+    setNewStaffNames(section?.teacher_names);
     setnewSectionName(section?.notice_date);
     setnewSubjectnName(section?.subject);
     setTeacherNameIs(section?.notice_desc);
@@ -249,12 +249,54 @@ function NoticeAndSmsforStaff() {
   };
   const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
 
+  // const handleEdit = async (section) => {
+  //   setCurrentSection(section);
+  //   setSubject(section?.subject || "");
+  //   setNoticeDesc(section?.notice_desc || "");
+  //   setNewStaffNames(section?.name || "");
+  //   console.log("enter notice", section);
+  //   if (section?.notice_type === "Notice") {
+  //     console.log("enter notice-->start");
+
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+  //       if (!token) {
+  //         throw new Error("No authentication token found");
+  //       }
+  //       const response = await axios.get(
+  //         `${API_URL}/api/get_staffnoticedata/${section.unq_id}`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+  //       console.log("responsedata of notice edit", response);
+  //       if (response.data.success) {
+  //         const noticedata = response.data.data.noticedata[0];
+  //         const imageUrls = response.data.data.imageurl || [];
+
+  //         setSubject(noticedata.subject || "");
+  //         setNoticeDesc(noticedata.notice_desc || "");
+  //         setNewStaffNames(noticedata.name || "");
+  //         setPreselectedFiles(imageUrls); // Set preselected files
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching notice data:", error);
+  //       toast.error("Failed to fetch notice data.");
+  //     }
+  //   } else {
+  //     setPreselectedFiles([]); // Clear preselected files for non-NOTICE types
+  //   }
+
+  //   setShowEditModal(true);
+  // };
   const handleEdit = async (section) => {
     setCurrentSection(section);
     setSubject(section?.subject || "");
     setNoticeDesc(section?.notice_desc || "");
-    setnewclassnames(section?.classnames || "");
+    setNewStaffNames(section?.teacher_names || ""); // Changed from section?.name
+
     console.log("enter notice", section);
+
     if (section?.notice_type === "Notice") {
       console.log("enter notice-->start");
 
@@ -263,21 +305,24 @@ function NoticeAndSmsforStaff() {
         if (!token) {
           throw new Error("No authentication token found");
         }
+
         const response = await axios.get(
-          `${API_URL}/api/get_smsnoticedata/${section.unq_id}`,
+          `${API_URL}/api/get_staffnoticedata/${section.unq_id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+
         console.log("responsedata of notice edit", response);
+
         if (response.data.success) {
-          const noticedata = response.data.data.noticedata[0];
+          const noticedata = response.data.data.noticedata; // ✅ No [0]
           const imageUrls = response.data.data.imageurl || [];
 
           setSubject(noticedata.subject || "");
           setNoticeDesc(noticedata.notice_desc || "");
-          setnewclassnames(noticedata.classnames || "");
-          setPreselectedFiles(imageUrls); // Set preselected files
+          setNewStaffNames(noticedata.teacher_names || ""); // Updated key
+          setPreselectedFiles(imageUrls); // Set preselected file URLs
         }
       } catch (error) {
         console.error("Error fetching notice data:", error);
@@ -345,8 +390,8 @@ function NoticeAndSmsforStaff() {
 
       console.log("formated data of the edit sms part", formData);
       console.log("seletd files", uploadedFiles);
-      await axios.post(
-        `${API_URL}/api/update_smsnotice/${currentSection?.unq_id}`,
+      const response = await axios.post(
+        `${API_URL}/api/update_staffsmsnotice/${currentSection?.unq_id}`,
         formData,
         {
           headers: {
@@ -357,11 +402,16 @@ function NoticeAndSmsforStaff() {
         }
       );
 
-      toast.success("Notice updated successfully!");
+      toast.success(
+        `${response.data.message} ` || "Notice updated successfully!"
+      );
       handleSearch();
       handleCloseModal();
     } catch (error) {
-      toast.error("Error updating notice. Please try again.");
+      toast.error(
+        `Error In updating ${currestSubjectNameForDelete}: ${error.response.data.message}`
+      );
+      // toast.error("Error updating notice. Please try again.");
       console.error(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
@@ -397,8 +447,8 @@ function NoticeAndSmsforStaff() {
         throw new Error("Unique ID is missing");
       }
 
-      await axios.put(
-        `${API_URL}/api/update_publishsmsnotice/${currentSection?.unq_id}`,
+      const response = await axios.put(
+        `${API_URL}/api/update_staffnoticesmspublish/${currentSection?.unq_id}`,
         {},
         {
           headers: {
@@ -413,7 +463,11 @@ function NoticeAndSmsforStaff() {
 
       // setShowPublishModal(false);
       // setSubjects([]);
-      toast.success(`${currestSubjectNameForDelete} Publish successfully!`);
+      // Show message from API response
+      toast.success(
+        response.data.message ||
+          `${currestSubjectNameForDelete} published successfully!`
+      );
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
@@ -488,7 +542,7 @@ function NoticeAndSmsforStaff() {
   const handleCloseModal = () => {
     setSubject("");
     setNoticeDesc("");
-    setnewclassnames("");
+    setNewStaffNames("");
     setPreselectedFiles([]);
     setUploadedFiles([]);
     // removeUploadedFile;
@@ -887,10 +941,10 @@ function NoticeAndSmsforStaff() {
 
       {/* Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="modal show" style={{ display: "block" }}>
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
+        <div className="  fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className=" modal show" style={{ display: "block" }}>
+            <div className=" modal-dialog modal-dialog-centered">
+              <div className=" modal-content">
                 <div className="flex justify-between p-3">
                   <h5 className="modal-title">Edit Notice/SMS</h5>
                   <RxCross1
@@ -909,14 +963,14 @@ function NoticeAndSmsforStaff() {
                       Staff Name
                     </label>
                     <div
-                      className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner break-words"
+                      className=" text-xs input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner break-words"
                       style={{
                         maxWidth: "262px", // Set maximum width for text wrapping
                         height: "auto", // Allow height to grow dynamically
                         wordWrap: "break-word", // Ensure text wraps within the box
                       }}
                     >
-                      {newclassnames}
+                      {newStaffNames}
                     </div>
                   </div>
 
@@ -981,7 +1035,7 @@ function NoticeAndSmsforStaff() {
                       <div className="modal-body">
                         {/* Attachments */}
 
-                        <div className="  relative -top-5 w-full  flex flex-row justify-between gap-x-2 ">
+                        <div className="   relative -top-5 w-full  flex flex-row justify-between gap-x-2 ">
                           <label className="px-2 mt-2 lg:px-3 py-2 ">
                             Upload Files
                           </label>
@@ -997,7 +1051,7 @@ function NoticeAndSmsforStaff() {
                           {uploadedFiles.map((file, index) => (
                             <div
                               key={index}
-                              className="flex items-center gap-x-2"
+                              className=" w-full flex items-center gap-x-2"
                             >
                               <span className="bg-gray-100 border-1 text-[.8em] p-0.5 shadow-sm">
                                 {file.name}
@@ -1083,14 +1137,14 @@ function NoticeAndSmsforStaff() {
                     </label>
 
                     <div
-                      className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner break-words"
+                      className=" text-xs input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner break-words"
                       style={{
                         maxWidth: "262px", // Set maximum width for text wrapping
                         height: "auto", // Allow height to grow dynamically
                         wordWrap: "break-word", // Ensure text wraps within the box
                       }}
                     >
-                      {newclassnames}
+                      {newStaffNames}
                     </div>
                   </div>
                   {/* Notice Date */}
@@ -1130,7 +1184,7 @@ function NoticeAndSmsforStaff() {
                   {/* Download Links */}
 
                   {imageUrls && imageUrls.length > 0 && (
-                    <div className=" flex flex-row">
+                    <div className="w-full  flex flex-row">
                       <label className=" px-4 mb-2 ">Attachments:</label>
 
                       <div className="relative mt-2 flex flex-col mx-4 gap-y-2">

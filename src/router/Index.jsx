@@ -228,6 +228,8 @@ import NonTeachingStaff from "../componants/AllTableList/NonTeachingStaff.jsx";
 import ApproveLessonP from "../componants/AllTableList/ApproveLessonP.jsx";
 import ManageSubjectPrinciple from "../componants/MastersModule/SubjectAllotment/SubjectAllotmentForPrinciple/ManageSubjectPrinciple.jsx";
 import NoticeAndSmsforStaff from "../componants/NoticeAndSms/NotiveAndSmsForStaff/NoticeAndSmsforStaff.jsx";
+import DuplicatePaymentReport from "../componants/Reports/FinanceReport/DuplicatePaymentReport.jsx";
+import DiscrepancyWorldlinePaymentReport from "../componants/Reports/FinanceReport/DiscrepancyWorldlinePaymentReport.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -852,6 +854,17 @@ function Index() {
         <Route
           path="/staffNoticeAndSms"
           element={<PrivateRoute element={<NoticeAndSmsforStaff />} />}
+        />
+        {/* Finacne Report */}
+        <Route
+          path="/duplicatePaymentReport"
+          element={<PrivateRoute element={<DuplicatePaymentReport />} />}
+        />
+        <Route
+          path="/dwPaymentReport"
+          element={
+            <PrivateRoute element={<DiscrepancyWorldlinePaymentReport />} />
+          }
         />
       </Route>
 
