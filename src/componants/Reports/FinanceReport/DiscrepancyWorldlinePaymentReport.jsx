@@ -5,11 +5,9 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1, RxPadding } from "react-icons/rx";
-// import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
-// import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
 
 const DiscrepancyWorldlinePaymentReport = () => {
@@ -40,9 +38,12 @@ const DiscrepancyWorldlinePaymentReport = () => {
       setLoadingForSearch(true); // Start loading
       setTimetable([]);
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_staff_report`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_discrepancy_in_WL_payment_report`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       console.log("Discrepancy in worldline payment report", response);
       if (!response?.data?.data || response?.data?.length === 0) {
         toast.error("Discrepancy in worldline payment report data not found.");
@@ -89,45 +90,45 @@ const DiscrepancyWorldlinePaymentReport = () => {
             </tr>
           </thead>
           <tbody>
-            ${displayedSections
-              .map(
-                (subject, index) => `
-                <tr>
-                  <td class="border border-black">${index + 1}</td>
-                  <td class="border border-black">${subject?.name || ""}</td>
-                  <td class="border border-black">${
-                    subject?.birthday
-                      ? new Date(subject.birthday).toLocaleDateString("en-GB")
-                      : ""
+          ${displayedSections
+            .map(
+              (student, index) => `
+                <tr class="border border-gray-300 text-center">
+                  <td class="px-2 py-2 border border-gray-300">${index + 1}</td>
+                  <td class="px-2 py-2 border border-gray-300">${
+                    student?.student_name || " "
                   }</td>
-                  <td class="border border-black">${
-                    subject?.date_of_joining
-                      ? new Date(subject.date_of_joining).toLocaleDateString(
-                          "en-GB"
-                        )
-                      : ""
-                  }</td>
-                  <td class="border border-black"> ${
-                    subject.gender === "female"
-                      ? "Female"
-                      : subject.gender === "male"
-                      ? "Male"
+                  <td class="px-2 py-2 border border-gray-300">${
+                    student?.Trnx_date
+                      ? new Date(student.Trnx_date)
+                          .toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })
+                          .replace(/\//g, " ")
                       : " "
                   }</td>
-                  <td class="border border-black">${
-                    subject?.blood_group || ""
+                  <td class="px-2 py-2 border border-gray-300">${
+                    student?.class_name || " "
                   }</td>
-                  <td class="border border-black">${
-                    subject?.blood_group || ""
+                  <td class="px-2 py-2 border border-gray-300">${
+                    student?.installment_no || " "
                   }</td>
-                  <td class="border border-black">${
-                    subject?.designation || ""
+                  <td class="px-2 py-2 border border-gray-300">${
+                    student?.Amount || " "
                   }</td>
-                
-               
-                </tr>`
-              )
-              .join("")}
+                  <td class="px-2 py-2 border border-gray-300">${
+                    student?.WL_Amount || " "
+                  }</td>
+                  <td class="px-2 py-2 border border-gray-300">${
+                    student?.receipt_nos || " "
+                  }</td>
+                </tr>
+              `
+            )
+            .join("")}
+          
           </tbody>
         </table>
       </div>
@@ -242,23 +243,41 @@ const DiscrepancyWorldlinePaymentReport = () => {
     ];
 
     // Convert displayedSections data to array format for Excel
+    // const data = displayedSections.map((student, index) => [
+    //   index + 1,
+    //   student?.name || " ",
+    //   student?.birthday
+    //     ? new Date(student.birthday).toLocaleDateString("en-GB")
+    //     : " ",
+    //   student?.date_of_joining
+    //     ? new Date(student.date_of_joining).toLocaleDateString("en-GB")
+    //     : " ",
+    //   student.sex === "female"
+    //     ? "Female"
+    //     : student.sex === "male"
+    //     ? "Male"
+    //     : " ",
+    //   student?.blood_group || " ",
+    //   student?.blood_group || " ",
+    //   student?.designation || " ",
+    // ]);
     const data = displayedSections.map((student, index) => [
       index + 1,
-      student?.name || " ",
-      student?.birthday
-        ? new Date(student.birthday).toLocaleDateString("en-GB")
+      student?.student_name || " ",
+      student?.Trnx_date
+        ? new Date(student.Trnx_date)
+            .toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })
+            .replace(/\//g, " ")
         : " ",
-      student?.date_of_joining
-        ? new Date(student.date_of_joining).toLocaleDateString("en-GB")
-        : " ",
-      student.sex === "female"
-        ? "Female"
-        : student.sex === "male"
-        ? "Male"
-        : " ",
-      student?.blood_group || " ",
-      student?.blood_group || " ",
-      student?.designation || " ",
+      student?.class_name || " ",
+      student?.installment_no || " ",
+      student?.Amount || " ",
+      student?.WL_Amount || " ",
+      student?.receipt_nos || " ",
     ]);
 
     // Create a worksheet
@@ -279,41 +298,71 @@ const DiscrepancyWorldlinePaymentReport = () => {
 
   console.log("row", timetable);
 
-  const filteredSections = timetable.filter((student) => {
+  //   const filteredSections = timetable.filter((student) => {
+  //     const searchLower = searchTerm.toLowerCase();
+  //     const formatDate = (dateString) => {
+  //       if (!dateString) return "";
+  //       const [year, month, day] = dateString.split("-");
+  //       return `${day}/${month}/${year} || ${day}-${month}-${year}`;
+  //     };
+
+  //     // Extract relevant fields and convert them to lowercase for case-insensitive search
+
+  //     const staffName = student?.name?.toLowerCase() || ""; // Convert entire name to lowercase
+  //     const dateofBirth = formatDate(student?.birthday).toLowerCase();
+  //     const dateofJoining = formatDate(student?.date_of_joining).toLowerCase();
+  //     const gender = student?.sex?.toLowerCase() || "";
+  //     const bloodGroup = student?.blood_group?.toLowerCase() || "";
+  //     const designation = student?.designation?.toLowerCase() || "";
+  //     const phoneNo =
+  //       student?.phone?.toLowerCase() || "" ? String(student.experience) : "";
+
+  //     // Check if the search term is present in any of the specified fields
+  //     return (
+  //       staffName.includes(searchLower) ||
+  //       dateofBirth.includes(searchLower) ||
+  //       dateofJoining.includes(searchLower) ||
+  //       gender.includes(searchLower) ||
+  //       bloodGroup.includes(searchLower) ||
+  //       designation.includes(searchLower) ||
+  //       phoneNo.includes(searchLower)
+  //     );
+  //   });
+  const filteredSections = timetable.filter((payment) => {
     const searchLower = searchTerm.toLowerCase();
+
+    // Format the transaction date to dd/mm/yyyy for filtering
     const formatDate = (dateString) => {
       if (!dateString) return "";
-      const [year, month, day] = dateString.split("-");
-      return `${day}/${month}/${year} || ${day}-${month}-${year}`;
+      const [year, month, day] = dateString.split(" ")[0].split("-");
+      return `${day}/${month}/${year}`;
     };
 
-    // Extract relevant fields and convert them to lowercase for case-insensitive search
+    // Prepare the fields for searching (all lowercase for case-insensitive)
+    const studentName = (payment.student_name || "").toLowerCase();
+    const paymentDate = formatDate(payment.Trnx_date).toLowerCase();
+    const className = (payment.class_name || "").toLowerCase();
+    const installment = (payment.installment_no || "").toLowerCase();
+    const amount = (payment.Amount || "").toString().toLowerCase();
+    const wlAmount = (payment.WL_Amount || "").toString().toLowerCase();
+    const receiptNo = (payment.receipt_nos || "").toLowerCase();
 
-    const staffName = student?.name?.toLowerCase() || ""; // Convert entire name to lowercase
-    const dateofBirth = formatDate(student?.birthday).toLowerCase();
-    const dateofJoining = formatDate(student?.date_of_joining).toLowerCase();
-    const gender = student?.sex?.toLowerCase() || "";
-    const bloodGroup = student?.blood_group?.toLowerCase() || "";
-    const designation = student?.designation?.toLowerCase() || "";
-    const phoneNo =
-      student?.phone?.toLowerCase() || "" ? String(student.experience) : "";
-
-    // Check if the search term is present in any of the specified fields
+    // Check if searchTerm is in any of the fields
     return (
-      staffName.includes(searchLower) ||
-      dateofBirth.includes(searchLower) ||
-      dateofJoining.includes(searchLower) ||
-      gender.includes(searchLower) ||
-      bloodGroup.includes(searchLower) ||
-      designation.includes(searchLower) ||
-      phoneNo.includes(searchLower)
+      studentName.includes(searchLower) ||
+      paymentDate.includes(searchLower) ||
+      className.includes(searchLower) ||
+      installment.includes(searchLower) ||
+      amount.includes(searchLower) ||
+      wlAmount.includes(searchLower) ||
+      receiptNo.includes(searchLower)
     );
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
   return (
     <>
-      <div className="w-full md:w-[100%] mx-auto p-4 ">
+      <div className="w-full md:w-[100%] mx-auto p-4 mt-4">
         <ToastContainer />
         <div className="card rounded-md ">
           {loadingForSearch ? (
@@ -421,38 +470,35 @@ const DiscrepancyWorldlinePaymentReport = () => {
                                     {index + 1}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.name || " "}
+                                    {student?.student_name || " "}
                                   </td>
 
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.birthday
-                                      ? new Date(
-                                          student.birthday
-                                        ).toLocaleDateString("en-GB")
+                                    {student?.Trnx_date
+                                      ? new Date(student.Trnx_date)
+                                          .toLocaleDateString("en-GB", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                          })
+                                          .replace(/\//g, " ")
                                       : " "}
                                   </td>
+
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.date_of_joining
-                                      ? new Date(
-                                          student.date_of_joining
-                                        ).toLocaleDateString("en-GB")
-                                      : " "}
+                                    {student?.class_name || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.sex === "female"
-                                      ? "Female"
-                                      : student.sex === "male"
-                                      ? "Male"
-                                      : " "}
+                                    {student?.installment_no || " "}
                                   </td>
                                   <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
-                                    {student?.blood_group || " "}
+                                    {student?.Amount || " "}
                                   </td>
                                   <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
-                                    {student?.blood_group || " "}
+                                    {student?.WL_Amount || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.designation || " "}
+                                    {student?.receipt_nos || " "}
                                   </td>
                                 </tr>
                               ))

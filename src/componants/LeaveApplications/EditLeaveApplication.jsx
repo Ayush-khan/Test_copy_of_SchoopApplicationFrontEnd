@@ -530,7 +530,7 @@
 // };
 
 // export default EditLeaveApplication;
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
