@@ -156,7 +156,7 @@ function NoticeAndSmsforStaff() {
 
     try {
       const response = await axios.get(
-        `${API_URL}/api/get_smsnoticedata/${currentSection?.unq_id}`,
+        `${API_URL}/api/get_staffnoticedata/${currentSection?.unq_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
