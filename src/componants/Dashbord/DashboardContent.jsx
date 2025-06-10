@@ -45,8 +45,9 @@ const DashboardContent = () => {
     const token = localStorage.getItem("authToken");
 
     if (!token) {
-      console.error("No authentication token found");
-      return;
+      toast.error("Authentication token not found Please login again");
+      navigate("/"); // 👈 Redirect to login
+      return; // 👈 Prevent further execution
     }
 
     try {
@@ -75,7 +76,9 @@ const DashboardContent = () => {
       console.log("**** role ID******", roleId);
 
       if (!token) {
-        throw new Error("No authentication token or academic year found");
+        toast.error("Authentication token not found Please login again");
+        navigate("/"); // 👈 Redirect to login
+        return; // 👈 Prevent further execution
       }
 
       // Fetch student data
@@ -354,14 +357,23 @@ const DashboardContent = () => {
           }}
         >
           {" "}
-          {roleId !== "M" && <TableFeeCollect />}
+          {roleId === null ? (
+            // Skeleton card
+            <div className="flex justify-between animate-pulse bg-white rounded shadow-md p-4 w-full h-[114px] border border-gray-200">
+              <div className=" relative -top-2 h-20 bg-gray-300 rounded w-1/2 "></div>
+              <div className=" relative top-3 h-10 bg-gray-300 rounded w-1/3"></div>
+            </div>
+          ) : roleId === "M" ? null : (
+            roleId !== "M" && <TableFeeCollect />
+          )}
           {/* <TableFeeCollect /> */}
           {/* <div className="flex justify-between bg-gray-200">
             <h5 className="text-gray-500 pl-2">Filter Fee </h5>
             <TableFeeCollect />
           </div> */}
         </div>
-        {roleId !== "M" && (
+        {roleId === null ? (
+          // Skeleton card
           <div
             className=" w-full lg:w-[69%] border-2 border-solid  bg-slate-50 rounded-lg lg:h-full sm:h-3/4 "
             style={{
@@ -369,9 +381,24 @@ const DashboardContent = () => {
                 "rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px",
             }}
           >
-            {/* <NoticeBord /> */}
-            <HouseStudentChart />
+            <div className="flex justify-between animate-pulse bg-white rounded shadow-md p-4 w-full h-[114px] border border-gray-200">
+              <div className=" relative -top-2 h-20 bg-gray-300 rounded w-1/2 "></div>
+              <div className=" relative top-3 h-10 bg-gray-300 rounded w-1/3"></div>
+            </div>
           </div>
+        ) : roleId === "M" ? null : (
+          roleId !== "M" && (
+            <div
+              className=" w-full lg:w-[69%] border-2 border-solid  bg-slate-50 rounded-lg lg:h-full sm:h-3/4 "
+              style={{
+                boxShadow:
+                  "rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px",
+              }}
+            >
+              {/* <NoticeBord /> */}
+              <HouseStudentChart />
+            </div>
+          )
         )}
       </div>
     </>

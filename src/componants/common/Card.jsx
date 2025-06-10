@@ -18,7 +18,11 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
 
   return (
     <div className="w-full bg-white flex items-center justify-around shadow-card h-28 rounded-lg">
-      <div className="flex items-center justify-between flex-col w-1/2">
+      <div
+        className={`flex items-center justify-between flex-col ${
+          title === "Fee" ? "w-[35%] " : "w-1/2"
+        }`}
+      >
         {icon && (
           <div className={`${styles.icon} text-6xl text-blue-500`}>{icon}</div>
         )}
@@ -36,7 +40,8 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
         style={{
           width: "50%",
           display: "flex",
-          justifyContent: "center",
+          justifyContent: title === "Fee" ? "flex-start" : "center",
+          // justifyContent: "center",
           fontWeight: "500",
         }}
       >
@@ -55,7 +60,7 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
             <div>{renderLoader()}</div>
           ) : title === "Fee" ? (
             <div className="mx-2   -space-y-2 text-[.7em]  ">
-              <div className="flex justify-between item-center gap-x-4">
+              <div className="flex justify-between item-center gap-x-6">
                 <span className="text-green-700 font-semibold">Collected:</span>
                 <span className="text-green-600 font-semibold">
                   {new Intl.NumberFormat("en-IN", {

@@ -201,9 +201,11 @@
 
 // export default NoticeBord;
 // Try UP
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Styles from "../../CSS/DashbordCss/NoticeBord.module.css";
+import { useNavigate } from "react-router-dom";
+import Loader from "../common/LoaderFinal/DashboardLoadder/Loader";
 
 function NoticeBord() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -211,6 +213,8 @@ function NoticeBord() {
   const [parentNotices, setParentNotices] = useState([]);
   const [staffNotices, setStaffNotices] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchNotices = async () => {
@@ -218,7 +222,8 @@ function NoticeBord() {
         const token = localStorage.getItem("authToken");
         const academicYr = localStorage.getItem("academicYear");
         if (!token) {
-          throw new Error("No authentication token  found");
+          navigate("/"); // 👈 Redirect to login
+          return; // 👈 Prevent further execution
         }
 
         // Fetch parent notices
@@ -244,6 +249,8 @@ function NoticeBord() {
       } catch (error) {
         setError(error.message);
         console.error("Error fetching notices:", error);
+      } finally {
+        setLoading(false); // ✅ Always set loading to false after fetch
       }
     };
 
@@ -281,7 +288,7 @@ function NoticeBord() {
 
       <div className="overflow-y-auto max-h-64">
         {/* For Parent Notices */}
-        {activeTab === "noticeForParents" && parentNotices.length === 0 && (
+        {/* {activeTab === "noticeForParents" && parentNotices.length === 0 && (
           <div className="relative left-[1%] w-[95%] text-center flex justify-center items-center mt-8 md:mt-14">
             <div className="flex flex-col items-center justify-center text-center ">
               <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
@@ -293,7 +300,31 @@ function NoticeBord() {
               </p>
             </div>
           </div>
+        )} */}
+        {activeTab === "noticeForParents" && loading && (
+          <div className="text-center mt-10">
+            <div className="loader animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full mx-auto" />
+            <p className="text-center relative top-[16%]  w-10 mt-10 mx-auto  ">
+              <Loader />
+            </p>{" "}
+          </div>
         )}
+
+        {activeTab === "noticeForParents" &&
+          !loading &&
+          parentNotices.length === 0 && (
+            <div className="relative left-[1%] w-[95%] text-center flex justify-center items-center mt-8 md:mt-14">
+              <div className="flex flex-col items-center justify-center text-center ">
+                <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
+                  Oops!
+                </p>
+                <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+                  No data available.
+                </p>
+              </div>
+            </div>
+          )}
+
         {activeTab === "noticeForParents" && parentNotices.length > 0 && (
           <div className={`${Styles.noticeBoard} grid gap-2`}>
             {parentNotices.map((notice, index) => (
@@ -324,7 +355,7 @@ function NoticeBord() {
         )}
 
         {/* For Staff Notices */}
-        {activeTab === "noticeForStaff" && staffNotices.length === 0 && (
+        {/* {activeTab === "noticeForStaff" && staffNotices.length === 0 && (
           <div className="relative  left-[1%] w-[95%] text-center flex justify-center items-center mt-8 md:mt-14">
             <div className="flex flex-col items-center justify-center text-center ">
               <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
@@ -336,7 +367,31 @@ function NoticeBord() {
               </p>
             </div>
           </div>
+        )} */}
+        {activeTab === "noticeForStaff" && loading && (
+          <div className="text-center mt-10">
+            <div className="loader animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full mx-auto" />
+            <p className="text-center relative top-[16%]  w-10 mt-10 mx-auto  ">
+              <Loader />
+            </p>{" "}
+          </div>
         )}
+
+        {activeTab === "noticeForStaff" &&
+          !loading &&
+          staffNotices.length === 0 && (
+            <div className="relative  left-[1%] w-[95%] text-center flex justify-center items-center mt-8 md:mt-14">
+              <div className="flex flex-col items-center justify-center text-center ">
+                <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
+                  Oops!
+                </p>
+                <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+                  No data available.
+                </p>
+              </div>
+            </div>
+          )}
+
         {activeTab === "noticeForStaff" && staffNotices.length > 0 && (
           <div className={`${Styles.noticeBoard} grid gap-2`}>
             {staffNotices.map((notice, index) => (

@@ -8,7 +8,7 @@ import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
-import Loader from "../../common/Loader";
+// import Loader from "../../common/Loader";
 import LoadingSpinner from "../../common/LoadingSpinner";
 
 function Sections() {

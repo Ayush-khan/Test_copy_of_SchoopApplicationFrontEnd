@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell } from "recharts";
 import axios from "axios";
 import styles from "../Charts/StudentStyle.module.css";
-import Loader from "../../common/Loader";
+import Loader from "../../common/LoaderFinal/DashboardLoadder/Loader";
 const COLORS = ["#00FFFF", "#A287F3", "#34D399", "#EE82EE"]; // Define your colors
 const HouseStudentChart = () => {
   const API_URL = import.meta.env.VITE_API_URL;

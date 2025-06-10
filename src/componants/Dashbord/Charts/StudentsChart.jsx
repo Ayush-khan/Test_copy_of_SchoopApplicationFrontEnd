@@ -673,7 +673,7 @@ import {
   LabelList,
 } from "recharts";
 import axios from "axios";
-import Loader from "../../common/Loader";
+import Loader from "../../common/LoaderFinal/DashboardLoadder/Loader";
 
 const StudentsChart = () => {
   const API_URL = import.meta.env.VITE_API_URL;
