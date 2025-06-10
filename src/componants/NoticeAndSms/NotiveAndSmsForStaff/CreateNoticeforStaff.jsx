@@ -492,9 +492,7 @@ const CreateShortSMS = () => {
                           Description <span className="text-red-500">*</span>
                         </h5>
                         <div className="flex flex-col">
-                          <p className="font-light relative top-3">
-                            Dear Staff,
-                          </p>
+                          <p className="font-light relative top-3"></p>
                           <textarea
                             className="px-2 border border-gray-700 rounded-md shadow-md"
                             rows="3"

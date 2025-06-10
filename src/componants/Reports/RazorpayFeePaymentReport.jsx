@@ -497,7 +497,7 @@ const RazorpayFeePaymentReport = () => {
 
           <>
             <div className="w-full mx-auto ">
-              <div className="w-full md:w-[97%] mx-auto   flex flex-wrap items-start  justify-end  gap-x-6 p-2">
+              <div className="w-full md:w-[97%] mx-auto   flex flex-wrap items-start  justify-start  gap-x-6 p-2">
                 {/* Order ID */}
                 <div className="flex flex-col h-[80px]">
                   <label className="text-md mb-1" htmlFor="orderId">

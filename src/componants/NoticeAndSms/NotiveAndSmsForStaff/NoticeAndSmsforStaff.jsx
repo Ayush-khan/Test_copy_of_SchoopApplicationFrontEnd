@@ -220,7 +220,6 @@ function NoticeAndSmsforStaff() {
   const downloadFile = (fileUrl, fileName) => {
     const baseUrl = "https://sms.evolvu.in/"; // Base URL
     const fullUrl = `${fileUrl}`; // Construct the full file URL
-
     // Create an anchor element
     const link = document.createElement("a");
     link.href = fullUrl; // Set the file URL
@@ -243,8 +242,11 @@ function NoticeAndSmsforStaff() {
     setCurrentSection({ classToDelete });
     console.log("the currecne t section", currentSection);
     setCurrestSubjectNameForDelete(currentSection?.classToDelete?.notice_type);
-    console.log("cureendtsungjeg", currentSection?.classToDelete?.notice_type);
-    console.log("currestSubjectNameForDelete", currestSubjectNameForDelete);
+    // console.log("cureendtsungjeg", currentSection?.classToDelete?.notice_type);
+    console.log(
+      "currestSubjectNameForDelete----->",
+      currestSubjectNameForDelete
+    );
     setShowDeleteModal(true);
   };
   const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
@@ -520,7 +522,7 @@ function NoticeAndSmsforStaff() {
 
       setShowDeleteModal(false);
       // setSubjects([]);
-      toast.success(`${currestSubjectNameForDelete} Deleted successfully!`);
+      toast.success(` ${currestSubjectNameForDelete} Deleted successfully!`);
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
