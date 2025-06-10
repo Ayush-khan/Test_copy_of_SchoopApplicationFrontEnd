@@ -865,7 +865,7 @@ const CreateLeaveApplication = () => {
   };
 
   return (
-    <div className="container mx-auto min-h-screen flex items-center justify-center mt-3 ">
+    <div className="container mx-auto min-h-screen flex items-center justify-center  ">
       <ToastContainer />
       <div className="card p-4 rounded-md w-[80%] ">
         <div className=" card-header mb-4 flex justify-between items-center">

@@ -742,11 +742,11 @@ const StudentsChart = () => {
           );
 
           if (existingClass) {
-            existingClass[`Section-${item.section_name}`] = students;
+            existingClass[`Division-${item.section_name}`] = students;
           } else {
             acc.push({
               class: item.class_name,
-              [`Section-${item.section_name}`]: students,
+              [`Division-${item.section_name}`]: students,
             });
           }
           return acc;
@@ -797,7 +797,7 @@ const StudentsChart = () => {
     if (active && payload && payload.length) {
       const sectionData = payload[0].payload;
       const totalStudents = Object.keys(sectionData)
-        .filter((key) => key.startsWith("Section-"))
+        .filter((key) => key.startsWith("Division-"))
         .reduce((total, key) => total + (sectionData[key] || 0), 0);
 
       return (
@@ -847,7 +847,7 @@ const StudentsChart = () => {
   const sectionKeys = [
     ...new Set(
       data.flatMap((entry) =>
-        Object.keys(entry).filter((key) => key.startsWith("Section-"))
+        Object.keys(entry).filter((key) => key.startsWith("Division-"))
       )
     ),
   ];
