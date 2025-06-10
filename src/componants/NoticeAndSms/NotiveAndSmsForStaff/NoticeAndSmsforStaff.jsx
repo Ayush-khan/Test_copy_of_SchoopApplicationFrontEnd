@@ -507,7 +507,7 @@ function NoticeAndSmsforStaff() {
         throw new Error("Unique ID is missing");
       }
 
-      await axios.delete(
+      const response = await axios.delete(
         `${API_URL}/api/delete_staffshortsmsnotice/${currentSection?.classToDelete?.unq_id}`,
         {
           headers: {
@@ -522,7 +522,10 @@ function NoticeAndSmsforStaff() {
 
       setShowDeleteModal(false);
       // setSubjects([]);
-      toast.success(` ${currestSubjectNameForDelete} Deleted successfully!`);
+      toast.success(
+        response.data.message ||
+          `${currestSubjectNameForDelete} deleted successfully!`
+      );
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
