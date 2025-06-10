@@ -1,22 +1,32 @@
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faTrash,
+  faPlus,
+  faBan,
+} from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import { RxCross1 } from "react-icons/rx";
+import { RxCross1, RxCross2 } from "react-icons/rx";
 
-function LeaveApplicaton() {
+function LeaveApplicatonForPrinciple() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
   const [staffs, setStaffs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   const [currentLeave, setCurrentLeave] = useState(null);
   const [currentLeaveName, setCurrentLeaveName] = useState(null);
@@ -26,6 +36,13 @@ function LeaveApplicaton() {
   const [pageCount, setPageCount] = useState(0);
   const pageSize = 10;
   const navigate = useNavigate();
+  const statusMap = {
+    R: "Rejected",
+    A: "Applied",
+    H: "Hold",
+    C: "Canceled",
+    P: "Approved",
+  };
   useEffect(() => {
     fetchLeaves();
   }, []);
@@ -40,7 +57,7 @@ function LeaveApplicaton() {
       }
 
       const response = await axios.get(
-        `${API_URL}/api/get_leaveapplicationlist`,
+        `${API_URL}/api/get_leaveapplicationdata`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -65,13 +82,14 @@ function LeaveApplicaton() {
   };
 
   const handleCloseModal = () => {
+    setShowCancelModal(false);
     setShowDeleteModal(false);
     setCurrentLeave(null);
   };
 
   const handleSubmitEdit = (leave) => {
     console.log("this is the inside handle submit", leave.leave_app_id);
-    navigate(`/leaveApplication/edit/${leave.leave_app_id}`, {
+    navigate(`/leaveApplicationP/edit/${leave.leave_app_id}`, {
       state: { staffleave: leave },
     });
   };
@@ -79,17 +97,58 @@ function LeaveApplicaton() {
   const handleDelete = (leaveCurrent) => {
     console.log("this is staffUe leave", leaveCurrent.leave_app_id);
     setCurrentLeave(leaveCurrent.leave_app_id);
-    setCurrentLeaveName(leaveCurrent.name);
+    setCurrentLeaveName(leaveCurrent.teachername);
     setShowDeleteModal(true);
+  };
+  const handleCancel = (leaveCurrent) => {
+    console.log("this is staffUe leave", leaveCurrent.leave_app_id);
+    setCurrentLeave(leaveCurrent.leave_app_id);
+    setCurrentLeaveName(leaveCurrent.teachername);
+    setShowCancelModal(true);
   };
 
   const handleView = async (leave) => {
     console.log("handleview is running on");
-    navigate(`/leaveApplication/view/${leave.leave_app_id}`, {
+    navigate(`/leaveApplicationP/view/${leave.leave_app_id}`, {
       state: { staffleave: leave },
     });
   };
+  const handleSubmitCancel = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem("authToken");
 
+      if (!token || !currentLeave) {
+        throw new Error("Leave Id is missing");
+      }
+
+      const response = await axios.put(
+        `${API_URL}/api/update_leaveapplicationcancel/${currentLeave}`,
+        {}, // Empty body (or include body data here if needed)
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      fetchLeaves();
+      if (response.status === 200) {
+        handleCloseModal();
+        toast.success(`${currentLeaveName} Cancel successfully!`);
+      } else {
+        toast.error("Leave Application not found");
+      }
+    } catch (error) {
+      console.error("Error Canceling staff:", error);
+      toast.error("Failed to Cancel staff");
+      toast.error(error.response.data.error);
+    } finally {
+      setIsSubmitting(false); // Re-enable the button after the operation
+      setShowCancelModal(false);
+    }
+  };
   const handleSubmitDelete = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
@@ -133,33 +192,50 @@ function LeaveApplicaton() {
     const year = String(date.getFullYear()).slice(-2); // Last 2 digits of the year
     return `${day}-${month}-${year}`;
   };
-  // const filteredStaffs = Array.isArray(staffs)
-  //   ? staffs.filter(
-  //       (leave) =>
-  //         String(leave.leave_app_id)
-  //           .toLowerCase()
-  //           .includes(String(searchTerm).toLowerCase()) ||
-  //         leave.name.toLowerCase().includes(searchTerm.toLowerCase())
-  //     )
-  //   : [];
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // Save current page before search
+      setCurrentPage(0); // Jump to first page when searching
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+
   const filteredStaffs = Array.isArray(staffs)
     ? staffs.filter((leave) => {
-        const search = String(searchTerm).toLowerCase();
+        const search = String(searchTerm).trim().toLowerCase();
+
+        const statusText = statusMap[leave?.status] || ""; // Convert code to readable
+
         return (
-          String(leave.name).toLowerCase().includes(search) || // Leave Type
-          String(formatDate(leave.leave_start_date))
+          String(leave?.teachername || "")
+            .toLowerCase()
+            .includes(search) || // Staff Name
+          formatDate(leave?.leave_start_date || "")
             .toLowerCase()
             .includes(search) || // Leave Start Date
-          String(formatDate(leave.leave_end_date))
+          formatDate(leave?.leave_end_date || "")
             .toLowerCase()
             .includes(search) || // Leave End Date
-          String(leave.no_of_days).toLowerCase().includes(search) || // No. of Days
-          String(leave.status).toLowerCase().includes(search) // Status
+          String(leave?.no_of_days || "")
+            .toLowerCase()
+            .includes(search) || // No. of Days
+          statusText.toLowerCase().includes(search) // Status (Mapped)
         );
       })
     : [];
 
   console.log("filetred staff leave", filteredStaffs);
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredStaffs.length / pageSize));
+  }, [filteredStaffs, pageSize]);
 
   const displayedStaffs = filteredStaffs.slice(
     currentPage * pageSize,
@@ -169,7 +245,7 @@ function LeaveApplicaton() {
   return (
     <>
       <ToastContainer />
-      <div className="md:container w-full md:w-2/3 md:mx-auto md:mt-4">
+      <div className="md:container w-full md:w-[80%] md:mx-auto md:mt-4">
         <div className="card mx-auto lg:w-full shadow-lg mt-4">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
@@ -186,7 +262,7 @@ function LeaveApplicaton() {
               </div>
               <button
                 className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                onClick={() => navigate("/createLeaveApplication")}
+                onClick={() => navigate("/createLeaveApplicationP")}
               >
                 <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
                 Add
@@ -210,6 +286,9 @@ function LeaveApplicaton() {
                         Sr.No
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Staff Name
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Leave Type
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -225,13 +304,13 @@ function LeaveApplicaton() {
                         Status
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Edit
+                        Edit/View
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Cancel
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Delete
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        View
                       </th>
                     </tr>
                   </thead>
@@ -257,7 +336,12 @@ function LeaveApplicaton() {
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {leave.name}
+                              {leave.teachername}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {leave.leavetypename}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
@@ -278,11 +362,11 @@ function LeaveApplicaton() {
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {leave.status || "-"}
+                              {statusMap[leave.status] || "-"}{" "}
                             </p>
                           </td>
 
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <button
                               className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                               onClick={() => handleSubmitEdit(leave)}
@@ -304,8 +388,50 @@ function LeaveApplicaton() {
                               onClick={() => handleView(leave)}
                             >
                               <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                              {/* <FontAwesomeIcon icon={faEdit} /> */}
                             </button>
+                          </td> */}
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            {leave.status === "A" ||
+                              (leave.status === "H" && (
+                                <button
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                  onClick={() => handleSubmitEdit(leave)}
+                                >
+                                  <FontAwesomeIcon icon={faEdit} />
+                                </button>
+                              ))}
+                            {(leave.status === "C" ||
+                              leave.status === "R" ||
+                              leave.status === "P") && (
+                              <button
+                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                onClick={() => handleView(leave)}
+                              >
+                                <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                              </button>
+                            )}
+                          </td>
+
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            {leave.status === "P" && (
+                              <button
+                                className="text-red-600 hover:text-red-800 hover:bg-transparent font-extrabold "
+                                onClick={() => handleCancel(leave)}
+                              >
+                                <RxCross2 className="font-extrabold text-xl" />
+                              </button>
+                            )}
+                          </td>
+
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            {leave.status === "P" && (
+                              <button
+                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                onClick={() => handleDelete(leave)}
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))
@@ -320,8 +446,7 @@ function LeaveApplicaton() {
                 </table>
               </div>
             </div>
-            {/* <div className=" flex justify-center  pt-2 -mb-3  box-border  overflow-hidden"> */}
-            {filteredStaffs.length > pageSize && (
+            <div className=" flex justify-center  pt-2 -mb-3  box-border  overflow-hidden">
               <ReactPaginate
                 previousLabel={"Previous"}
                 nextLabel={"Next"}
@@ -341,8 +466,7 @@ function LeaveApplicaton() {
                 nextLinkClassName={"page-link"}
                 activeClassName={"active"}
               />
-            )}
-            {/* </div> */}
+            </div>
           </div>
         </div>
       </div>
@@ -384,8 +508,46 @@ function LeaveApplicaton() {
           </div>
         </div>
       )}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal show " style={{ display: "block" }}>
+            <div className="modal-dialog  modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title  ">Cancel Staff</h5>
+
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    onClick={handleCloseModal}
+                  />
+                </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="modal-body">
+                  <p>Are you sure you want to Cancel: {currentLeaveName}?</p>
+                  {console.log("currestStaffDelete", currentLeave)}
+                </div>
+                <div className=" flex justify-end p-3">
+                  <button
+                    type="button"
+                    className="btn btn-danger px-3 mb-2"
+                    onClick={handleSubmitCancel}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Canceling..." : "Cancel"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
 
-export default LeaveApplicaton;
+export default LeaveApplicatonForPrinciple;

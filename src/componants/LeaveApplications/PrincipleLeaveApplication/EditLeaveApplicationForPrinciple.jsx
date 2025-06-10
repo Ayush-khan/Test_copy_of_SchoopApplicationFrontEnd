@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 
-const EditLeaveApplication = () => {
+const EditLeaveApplicationForPrinciple = () => {
   const location = useLocation();
   const API_URL = import.meta.env.VITE_API_URL;
   const [loading, setLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { staffleave } = location.state || {};
   console.log("staff leave for editing", staffleave);
 
   const [formData, setFormData] = useState({
     staff_name: "",
+    staff_id: "",
     leave_type_id: "",
     leave_start_date: "",
     leave_end_date: "",
@@ -23,17 +23,47 @@ const EditLeaveApplication = () => {
     reason: "",
     reason_for_rejection: "",
   });
+  const statusOptions = [
+    { value: "A", label: "Applied" },
+    { value: "H", label: "Hold" },
+    { value: "R", label: "Rejected" },
+    { value: "P", label: "Approved" },
+    { value: "C", label: "Canceled" },
+  ];
+  useEffect(() => {
+    if (staffleave) {
+      setFormData({
+        staff_name: staffleave.teachername || "",
+        staff_id: staffleave.staff_id || "",
+        leave_type_id: staffleave.leave_type_id || "",
+        leave_start_date: staffleave.leave_start_date || "",
+        leave_end_date: staffleave.leave_end_date || "",
+        status: staffleave.status || "",
+        no_of_days: staffleave.no_of_days || "",
+        reason: staffleave.reason || "",
+        reason_for_rejection: staffleave.reason_for_rejection || "",
+      });
+
+      // ✅ Fetch leave type if staff_id exists
+      if (staffleave.staff_id) {
+        fetchLeaveType(staffleave.staff_id);
+      }
+    }
+  }, [staffleave, API_URL]);
 
   const [errors, setErrors] = useState({});
   const [leaveType, setLeaveType] = useState([]);
-  const [newLeaveType, setNewLeaveType] = useState("");
   const [error, setError] = useState(null);
-  const [fieldErrors, setFieldErrors] = useState({});
-
   const navigate = useNavigate();
   const MAX_DATE = "2006-12-31";
   const today = new Date().toISOString().split("T")[0];
-
+  const statusMap = {
+    R: "Rejected",
+    A: "Applied",
+    H: "Hold",
+    C: "Canceled",
+    P: "Approved",
+  };
   const validateDays = (days) => {
     if (!days) return "Number of days is required";
     if (!/^\d{1,2}(\.\d{1,2})?$/.test(days)) {
@@ -76,40 +106,7 @@ const EditLeaveApplication = () => {
     return newErrors;
   };
 
-  const fetchSessionData = async () => {
-    const token = localStorage.getItem("authToken");
-
-    try {
-      const response = await axios.get(`${API_URL}/api/sessionData`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
-
-      console.log("response session data", response.data);
-
-      if (response.data && response.data.user) {
-        const { name, reg_id } = response.data.user;
-        console.log("user reg id", response.data.user.reg_id);
-        // Set staff name and reg_id
-        setFormData((prevData) => ({
-          ...prevData,
-          staff_name: name,
-          reg_id: reg_id,
-        }));
-
-        fetchLeaveType(reg_id);
-        console.log("user fetch reg id", reg_id);
-      } else {
-        console.error("User data not found in the response");
-      }
-    } catch (error) {
-      console.error("Error fetching session data:", error);
-    }
-  };
-
-  const fetchLeaveType = async () => {
+  const fetchLeaveType = async (reg_id) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
@@ -118,12 +115,16 @@ const EditLeaveApplication = () => {
         throw new Error("No Authentication token found.");
       }
 
-      const response = await axios.get(`${API_URL}/api/get_leavetype`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_leavetypedata/${reg_id}`,
+        {
+          // ${API_URL}/api/get_leavetype
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
 
       if (Array.isArray(response.data.data)) {
         setLeaveType(response.data.data);
@@ -191,58 +192,6 @@ const EditLeaveApplication = () => {
     return `${year}-${month}-${day}`;
   };
 
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   const validationErrors = validate();
-
-  //   if (Object.keys(validationErrors).length > 0) {
-  //     setErrors(validationErrors);
-  //     Object.values(validationErrors).forEach((error) => {
-  //       toast.error(error);
-  //     });
-  //     return;
-  //   }
-
-  //   const formattedFormData = {
-  //     ...formData,
-  //     leave_start_date: formatDateString(formData.leave_start_date),
-  //     leave_end_date: formatDateString(formData.leave_end_date),
-  //   };
-
-  //   try {
-  //     setLoading(true);
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       throw new Error("No authentication token found");
-  //     }
-  //     const response = await axios.post(
-  //       `${API_URL}/api/store_staff`,
-  //       formattedFormData,
-  //       {
-  //         headers: {
-  //           "Content-Type": "multipart/form-data",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-  //     if (response.status === 201) {
-  //       toast.success("Leave Application Created Successfully!");
-  //       setTimeout(() => {
-  //         navigate("/leaveApplication");
-  //       }, 500);
-  //     }
-  //   } catch (error) {
-  //     handleErrors(error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  useEffect(() => {
-    fetchSessionData();
-    fetchLeaveType();
-  }, []);
-
   const handleChangeLeaveType = (e) => {
     const { value } = e.target;
 
@@ -257,24 +206,7 @@ const EditLeaveApplication = () => {
     }));
   };
 
-  useEffect(() => {
-    if (staffleave) {
-      setFormData({
-        staff_name: staffleave.staff_name || "",
-        leave_type_id: staffleave.leave_type_id || "",
-        leave_start_date: staffleave.leave_start_date || "",
-        leave_end_date: staffleave.leave_end_date || "",
-        status: staffleave.status || "",
-        no_of_days: staffleave.no_of_days || "",
-        reason: staffleave.reason || "",
-        reason_for_rejection: staffleave.reason_for_rejection || "",
-      });
-    }
-  }, [staffleave, API_URL]);
-
   const handleSubmit = async (event) => {
-    if (isSubmitting) return; // Prevent re-submitting
-    setIsSubmitting(true);
     event.preventDefault();
 
     // Prevent double submissions
@@ -284,11 +216,8 @@ const EditLeaveApplication = () => {
     const validationErrors = validate();
     if (validationErrors && Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      setIsSubmitting(false); // Reset submitting state if validation fails
-
       Object.values(validationErrors).forEach((error) => {
-        console.log("error", error);
-        // toast.error(error);
+        toast.error(error); // Display validation errors
       });
       return;
     }
@@ -298,8 +227,9 @@ const EditLeaveApplication = () => {
       ...formData,
       leave_start_date: formatDateString(formData.leave_start_date),
       leave_end_date: formatDateString(formData.leave_end_date),
-      staff_id: formData.reg_id,
-      staff_name: formData.staff_name,
+      approvercomment: formData.reason_for_rejection,
+      // staff_id: formData.reg_id,
+      // staff_name: formData.staff_name
     };
 
     try {
@@ -311,7 +241,7 @@ const EditLeaveApplication = () => {
 
       console.log("Submitting data:", formattedFormData);
       const response = await axios.put(
-        `${API_URL}/api/update_leaveapplication/${staffleave.leave_app_id}`,
+        `${API_URL}/api/update_leaveapplicationdata/${staffleave.leave_app_id}`,
         formattedFormData,
         {
           headers: {
@@ -325,7 +255,7 @@ const EditLeaveApplication = () => {
       if (response.status === 200) {
         toast.success("Leave updated successfully!");
         setTimeout(() => {
-          navigate("/leaveApplication");
+          navigate("/leaveApplicationP");
         }, 500);
       }
     } catch (error) {
@@ -347,8 +277,8 @@ const EditLeaveApplication = () => {
           });
 
           // Set backend validation errors for specific fields
-          setBackendErrors(errors);
-          setEmployeeIdBackendError(errors?.leave_app_id_id?.[0] || ""); // Handle `employee_id` error
+          // setBackendErrors(errors);
+          // setEmployeeIdBackendError(errors?.leave_app_id_id?.[0] || ""); // Handle `employee_id` error
         } else if (message) {
           // Show generic backend error message
           // toast.error(message);
@@ -357,16 +287,14 @@ const EditLeaveApplication = () => {
         toast.error("An unexpected error occurred.");
       }
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
-
       setLoading(false); // End loading state
     }
   };
 
   return (
-    <div className="container mx-auto min-h-screen flex items-center justify-center mt-3 ">
+    <div className="container mx-auto min-h-screen flex items-center justify-center  ">
       <ToastContainer />
-      <div className="card p-4 rounded-md w-[66%] ">
+      <div className="card p-4 rounded-md w-[80%]">
         <div className=" card-header mb-4 flex justify-between items-center">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             Edit Leave Application
@@ -376,7 +304,7 @@ const EditLeaveApplication = () => {
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               setErrors({});
-              navigate("/leaveApplication");
+              navigate("/leaveApplicationP");
             }}
           />
         </div>
@@ -386,7 +314,7 @@ const EditLeaveApplication = () => {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <p className="  md:absolute md:right-10  md:top-[11%]  text-gray-500  ">
+        <p className="  md:absolute md:right-6  md:top-[18%]  text-gray-500  ">
           <span className="text-red-500">*</span>indicates mandatory information
         </p>
 
@@ -394,9 +322,10 @@ const EditLeaveApplication = () => {
           // onSubmit={handleSubmit}
           className="flex items-center justify-center overflow-x-hidden shadow-md p-3 bg-gray-50 space-y-2" //min-h-screen flex items-center justify-center overflow-x-hidden shadow-md p-4 bg-gray-50
         >
-          <div className="modal-body">
-            <div className=" relative mb-3 flex justify-center  mx-4">
-              <label htmlFor="sectionName" className="w-1/2 mt-2">
+          <div className="modal-body grid grid-cols-3 gap-4 px-4">
+            {/* Staff Name */}
+            <div className="flex flex-col">
+              <label htmlFor="staff_name" className="mb-1">
                 Staff Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -408,19 +337,19 @@ const EditLeaveApplication = () => {
                 title="Name should not start with a number"
                 required
                 value={formData.staff_name}
-                readOnly
-                className="w-full bg-gray-200 no-underline p-1.5 shadow-md mb-2 pl-2 "
+                disabled
+                className="form-control shadow-md"
               />
-              <div className="absolute top-9 left-1/3">
-                {errors.staff_name && (
-                  <span className="text-danger text-xs">
-                    {errors.staff_name}
-                  </span>
-                )}
-              </div>
+              {errors.staff_name && (
+                <span className="text-danger text-xs mt-1">
+                  {errors.staff_name}
+                </span>
+              )}
             </div>
-            <div className="relative mb-3 flex justify-center mx-4">
-              <label htmlFor="departmentId" className="w-1/2 mt-2">
+
+            {/* Leave Type */}
+            <div className="flex flex-col">
+              <label htmlFor="leave_type" className="mb-1">
                 Leave Type <span className="text-red-500">*</span>
               </label>
               <select
@@ -432,7 +361,7 @@ const EditLeaveApplication = () => {
                 className="form-control shadow-md"
               >
                 <option className="bg-gray-300" value="">
-                  Select{" "}
+                  Select Leave
                 </option>
                 {leaveType.length === 0 ? (
                   <option>No Options</option>
@@ -441,31 +370,27 @@ const EditLeaveApplication = () => {
                     <option
                       key={leave.leave_type_id}
                       value={leave.leave_type_id}
-                      className="max-h-20 overflow-y-scroll"
                     >
                       {leave.name}
                     </option>
                   ))
                 )}
               </select>
-              <div className="absolute top-9 left-1/3">
-                {errors.leave_type_id && (
-                  <span className="text-danger text-xs">
-                    {errors.leave_type_id}
-                  </span>
-                )}
-              </div>
+              {errors.leave_type_id && (
+                <span className="text-danger text-xs mt-1">
+                  {errors.leave_type_id}
+                </span>
+              )}
             </div>
 
-            <div className="mt-4 relative mb-3 flex justify-center  mx-4">
-              <label htmlFor="startDate" className="w-1/2 mt-2">
+            {/* Leave Start Date */}
+            <div className="flex flex-col">
+              <label htmlFor="leave_start_date" className="mb-1">
                 Leave Start Date <span className="text-red-500">*</span>
               </label>
-
               <input
                 type="date"
                 id="leave_start_date"
-                // max={today}
                 name="leave_start_date"
                 value={formData.leave_start_date}
                 onChange={handleChange}
@@ -473,23 +398,21 @@ const EditLeaveApplication = () => {
                 required
                 className="form-control shadow-md"
               />
-              <div className="absolute top-9 left-1/3">
-                {errors.leave_start_date && (
-                  <span className="text-danger text-xs">
-                    {errors.leave_start_date}
-                  </span>
-                )}
-              </div>
+              {errors.leave_start_date && (
+                <span className="text-danger text-xs mt-1">
+                  {errors.leave_start_date}
+                </span>
+              )}
             </div>
-            <div className="mt-4 relative mb-3 flex justify-center  mx-4">
-              <label htmlFor="endDate" className="w-1/2 mt-2">
+
+            {/* Leave End Date */}
+            <div className="flex flex-col">
+              <label htmlFor="leave_end_date" className="mb-1">
                 Leave End Date <span className="text-red-500">*</span>
               </label>
-
               <input
                 type="date"
                 id="leave_end_date"
-                // max={today}
                 name="leave_end_date"
                 value={formData.leave_end_date}
                 onChange={handleChange}
@@ -497,99 +420,111 @@ const EditLeaveApplication = () => {
                 required
                 className="form-control shadow-md"
               />
-              <div className="absolute top-9 left-1/3 ">
-                {errors.leave_end_date && (
-                  <span className="text-danger text-xs">
-                    {errors.leave_end_date}
-                  </span>
-                )}
-              </div>
+              {errors.leave_end_date && (
+                <span className="text-danger text-xs mt-1">
+                  {errors.leave_end_date}
+                </span>
+              )}
             </div>
-            <div className="mt-4 relative mb-3 flex justify-center  mx-4">
-              <label htmlFor="openDay" className="w-1/2 mt-2">
-                No. of days<span className="text-red-500">*</span>
+
+            {/* No of Days */}
+            <div className="flex flex-col">
+              <label htmlFor="no_of_days" className="mb-1">
+                No. of Days <span className="text-red-500">*</span>
               </label>
               <input
-                type="number" // Change to "number" to support decimals
+                type="number"
                 id="no_of_days"
                 name="no_of_days"
                 value={formData.no_of_days}
-                step="0.5" // Allows decimals (e.g., 0.5, 1.75)
-                min="0.5" // Ensures that 0.01 or more is entered
+                step="0.5"
+                min="0.5"
                 onChange={handleChange}
-                className="form-control shadow-md mb-2"
+                className="form-control shadow-md"
               />
-              <div className="absolute top-9 left-1/3 ">
-                {errors.no_of_days && (
-                  <span className="text-danger text-xs">
-                    {errors.no_of_days}
-                  </span>
-                )}
-              </div>
+              {errors.no_of_days && (
+                <span className="text-danger text-xs mt-1">
+                  {errors.no_of_days}
+                </span>
+              )}
             </div>
 
-            <div className="mt-4 relative mb-3 flex justify-center  mx-4">
-              <label htmlFor="openDay" className="w-1/2 mt-2">
+            {/* Status */}
+            {/* <div className="flex flex-col">
+              <label htmlFor="status" className="mb-1">
                 Status <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                maxLength={100}
                 id="status"
                 name="status"
-                pattern="^[^\d].*"
-                // title="Name should not start with a number"
-                required
-                value={formData.status}
-                // onChange={handleChange}
-                // placeholder="Name"
-                className="block border w-full border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                value={statusMap[formData.status] || ""}
                 readOnly
-                // className="form-control shadow-md mb-2"
+                className="form-control bg-gray-200 shadow-inner"
               />
-            </div>
-            <div className=" relative mb-3 flex justify-center  mx-4">
-              <label htmlFor="comment" className="w-1/2 mt-2">
-                Reason
+            </div> */}
+            <div className="flex flex-col">
+              <label htmlFor="status" className="mb-1">
+                Status <span className="text-red-500">*</span>
               </label>
-              <textarea
-                type="text"
-                maxLength={200}
-                id="reason"
-                name="reason"
-                value={formData.reason}
-                onChange={handleChange}
-                rows="2"
-                className="form-control shadow-md mb-2"
-              />{" "}
+              <select
+                id="status"
+                name="status"
+                value={formData.status || ""}
+                onChange={handleChange} // make sure your handleChange updates formData.status
+                required
+                className="form-control shadow-md"
+              >
+                <option value="" disabled>
+                  Select Status
+                </option>
+                {statusOptions.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className=" relative mb-3 flex justify-center  mx-4">
-              <label htmlFor="comment" className="w-1/2 mt-2">
-                Approver's Comment
-              </label>
-              <textarea
-                type="text"
-                maxLength={200}
-                id="approval"
-                name="approval"
-                value={formData.reason_for_rejection}
-                // onChange={handleChange}
-                className="input-field resize block w-full border border-gray-300 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                rows="2"
-                readOnly
-                // className="form-control shadow-md mb-2 "
-              />{" "}
+
+            <div className="col-span-3 grid grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <label htmlFor="reason" className="mb-1">
+                  Reason
+                </label>
+                <textarea
+                  id="reason"
+                  name="reason"
+                  value={formData.reason}
+                  onChange={handleChange}
+                  readOnly
+                  rows="2"
+                  className="form-control bg-gray-200 shadow-inner"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label htmlFor="reason_for_rejection" className="mb-1">
+                  Approver's Comment
+                </label>
+                <textarea
+                  id="reason_for_rejection"
+                  name="reason_for_rejection"
+                  value={formData.reason_for_rejection}
+                  onChange={handleChange}
+                  rows="2"
+                  className="form-control shadow-md"
+                />
+              </div>
             </div>
+
+            {/* Submit button spans full width */}
             <div className="col-span-3 text-right mt-4">
               <button
-                type="submit"
-                style={{ backgroundColor: "#2196F3" }}
-                className="mr-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700"
+                className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
                 onClick={handleSubmit}
-                disabled={isSubmitting}
-                // disabled={loadingForSearch}
+                disabled={loading}
               >
-                {isSubmitting ? "Updating..." : "Update"}
+                {loading ? "Updating..." : "Update"}
               </button>
             </div>
           </div>
@@ -599,4 +534,4 @@ const EditLeaveApplication = () => {
   );
 };
 
-export default EditLeaveApplication;
+export default EditLeaveApplicationForPrinciple;

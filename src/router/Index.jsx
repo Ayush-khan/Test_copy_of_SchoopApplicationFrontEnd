@@ -230,6 +230,10 @@ import ManageSubjectPrinciple from "../componants/MastersModule/SubjectAllotment
 import NoticeAndSmsforStaff from "../componants/NoticeAndSms/NotiveAndSmsForStaff/NoticeAndSmsforStaff.jsx";
 import DuplicatePaymentReport from "../componants/Reports/FinanceReport/DuplicatePaymentReport.jsx";
 import DiscrepancyWorldlinePaymentReport from "../componants/Reports/FinanceReport/DiscrepancyWorldlinePaymentReport.jsx";
+import ViewLeaveApplicationForPrinciple from "../componants/LeaveApplications/PrincipleLeaveApplication/ViewLeaveApplicationForPrinciple.jsx";
+import LeaveApplicatonForPrinciple from "../componants/LeaveApplications/PrincipleLeaveApplication/LeaveApplicatonForPrinciple.jsx";
+import EditLeaveApplicationForPrinciple from "../componants/LeaveApplications/PrincipleLeaveApplication/EditLeaveApplicationForPrinciple.jsx";
+import CreateLeaveApplicationForPrinciple from "../componants/LeaveApplications/PrincipleLeaveApplication/CreateLeaveApplicationForPrinciple.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -860,6 +864,30 @@ function Index() {
           path="/duplicatePaymentReport"
           element={<PrivateRoute element={<DuplicatePaymentReport />} />}
         />
+        {/* Leave APplication for principle */}
+        <Route
+          path="/LeaveApplicationP"
+          element={<PrivateRoute element={<LeaveApplicatonForPrinciple />} />}
+        />
+        <Route
+          path="/createLeaveApplicationP"
+          element={
+            <PrivateRoute element={<CreateLeaveApplicationForPrinciple />} />
+          }
+        />
+        <Route
+          path="/leaveApplicationP/edit/:id"
+          element={
+            <PrivateRoute element={<EditLeaveApplicationForPrinciple />} />
+          }
+        />
+        <Route
+          path="/leaveApplicationP/view/:id"
+          element={
+            <PrivateRoute element={<ViewLeaveApplicationForPrinciple />} />
+          }
+        />
+        {/* dw pay report */}
         <Route
           path="/dwPaymentReport"
           element={
