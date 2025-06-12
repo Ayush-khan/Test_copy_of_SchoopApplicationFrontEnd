@@ -556,7 +556,7 @@
 // };
 
 // export default CreateLeaveApplicationForPrinciple;
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -636,6 +636,7 @@ const CreateLeaveApplicationForPrinciple = () => {
     fetchExams();
     fetchLeaveType();
   }, []);
+
   const fetchLeaveType = async (reg_id) => {
     setLoadingForLT(true);
     try {
@@ -668,6 +669,7 @@ const CreateLeaveApplicationForPrinciple = () => {
       setLoadingForLT(false);
     }
   };
+
   const fetchExams = async () => {
     try {
       setLoadingExams(true);
@@ -685,6 +687,7 @@ const CreateLeaveApplicationForPrinciple = () => {
       setLoadingExams(false);
     }
   };
+
   // const handleStudentSelect = (selectedOption) => {
   //   setSelectedStudent(selectedOption);
   //   setSelectedStudentId(selectedOption?.value);
@@ -703,6 +706,7 @@ const CreateLeaveApplicationForPrinciple = () => {
   //     return newErrors;
   //   });
   // };
+
   const handleStudentSelect = (selectedOption) => {
     setSelectedStudent(selectedOption);
     setSelectedStudentId(selectedOption?.value);
@@ -711,15 +715,15 @@ const CreateLeaveApplicationForPrinciple = () => {
       fetchLeaveType(selectedOption.value);
     }
 
-    // ✅ Update form data
+    // Update form data
     setFormData((prev) => ({
       ...prev,
       staff_name: selectedOption?.label || "",
       selectedStudent: selectedOption,
-      leave_type_id: "", // ✅ Reset leave type if student is removed
+      leave_type_id: "", // Reset leave type if student is removed
     }));
 
-    // ✅ Handle errors
+    //Handle errors
     setErrors((prev) => {
       const newErrors = { ...prev };
       if (selectedOption?.value) {
@@ -741,8 +745,67 @@ const CreateLeaveApplicationForPrinciple = () => {
     [studentNameWithClassId]
   );
 
+  // const handleChange = (event) => {
+  //   const { name, value } = event.target;
+
+  //   setFormData((prevData) => {
+  //     let updatedData = {
+  //       ...prevData,
+  //       [name]: value,
+  //     };
+
+  //     // Recalculate no_of_days only if the dates are changed, and no manual editing is done
+  //     if (
+  //       updatedData.leave_start_date &&
+  //       updatedData.leave_end_date &&
+  //       name !== "no_of_days"
+  //     ) {
+  //       const startDate = new Date(updatedData.leave_start_date);
+  //       const endDate = new Date(updatedData.leave_end_date);
+
+  //       // Calculate day difference as a decimal (including fractional days)
+  //       const timeDiff = endDate - startDate;
+  //       const dayDiff = timeDiff / (1000 * 60 * 60 * 24) + 1; // Including fractional days
+
+  //       // Set the calculated value
+  //       updatedData.no_of_days = dayDiff > 0 ? dayDiff.toFixed(0) : "";
+  //     }
+
+  //     return updatedData;
+  //   });
+
+  //   // When manually editing no_of_days field, accept decimals and validate
+  //   if (name === "no_of_days") {
+  //     // Allow decimal values (positive only)
+  //     const decimalPattern = /^\d+(\.\d+)?$/;
+  //     if (decimalPattern.test(value)) {
+  //       setErrors((prevErrors) => ({
+  //         ...prevErrors,
+  //         no_of_days: "", // Clear any existing errors
+  //       }));
+  //     } else {
+  //       setErrors((prevErrors) => ({
+  //         ...prevErrors,
+  //         no_of_days: "Please enter a valid positive number (e.g., 0.5).",
+  //       }));
+  //     }
+  //   }
+  // };
+
+  const manuallyEditedNoOfDaysRef = useRef(false);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    // If user edits no_of_days manually, mark it
+    if (name === "no_of_days") {
+      manuallyEditedNoOfDaysRef.current = true;
+    }
+
+    // If user changes the start or end date, allow auto-calc again
+    if (name === "leave_start_date" || name === "leave_end_date") {
+      manuallyEditedNoOfDaysRef.current = false;
+    }
 
     setFormData((prevData) => {
       let updatedData = {
@@ -750,34 +813,31 @@ const CreateLeaveApplicationForPrinciple = () => {
         [name]: value,
       };
 
-      // Recalculate no_of_days only if the dates are changed, and no manual editing is done
+      // Recalculate no_of_days if dates are changed and not manually edited
       if (
         updatedData.leave_start_date &&
         updatedData.leave_end_date &&
-        name !== "no_of_days"
+        !manuallyEditedNoOfDaysRef.current
       ) {
         const startDate = new Date(updatedData.leave_start_date);
         const endDate = new Date(updatedData.leave_end_date);
 
-        // Calculate day difference as a decimal (including fractional days)
         const timeDiff = endDate - startDate;
-        const dayDiff = timeDiff / (1000 * 60 * 60 * 24) + 1; // Including fractional days
+        const dayDiff = timeDiff / (1000 * 60 * 60 * 24) + 1;
 
-        // Set the calculated value
-        updatedData.no_of_days = dayDiff > 0 ? dayDiff.toFixed(0) : "";
+        updatedData.no_of_days = dayDiff > 0 ? dayDiff.toFixed(1) : "";
       }
 
       return updatedData;
     });
 
-    // When manually editing no_of_days field, accept decimals and validate
+    // Validate manual no_of_days input
     if (name === "no_of_days") {
-      // Allow decimal values (positive only)
       const decimalPattern = /^\d+(\.\d+)?$/;
       if (decimalPattern.test(value)) {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          no_of_days: "", // Clear any existing errors
+          no_of_days: "",
         }));
       } else {
         setErrors((prevErrors) => ({
@@ -1031,6 +1091,26 @@ const CreateLeaveApplicationForPrinciple = () => {
               </div>
 
               {/* No. of Days */}
+              {/* <div className="flex flex-col">
+                <label htmlFor="no_of_days" className="mb-1">
+                  No. of Days <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  id="no_of_days"
+                  name="no_of_days"
+                  value={formData.no_of_days}
+                  step="0.5"
+                  min="0.5"
+                  onChange={handleChange}
+                  className="form-control shadow-md"
+                />
+                {errors.no_of_days && (
+                  <span className="text-danger text-xs mt-1">
+                    {errors.no_of_days}
+                  </span>
+                )}
+              </div> */}
               <div className="flex flex-col">
                 <label htmlFor="no_of_days" className="mb-1">
                   No. of Days <span className="text-red-500">*</span>
@@ -1043,6 +1123,12 @@ const CreateLeaveApplicationForPrinciple = () => {
                   step="0.5"
                   min="0.5"
                   onChange={handleChange}
+                  onBlur={() => {
+                    // Optionally mark manual editing complete
+                    if (formData.no_of_days) {
+                      manuallyEditedNoOfDaysRef.current = true;
+                    }
+                  }}
                   className="form-control shadow-md"
                 />
                 {errors.no_of_days && (

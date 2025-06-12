@@ -62,10 +62,19 @@ const CreateShortSMS = () => {
       setLoading(false); // Stop loader
     }
   };
-  const departmentOptions = allDepartments.map((dept) => ({
-    label: dept.name,
-    value: dept.department_id,
-  }));
+  // const departmentOptions = allDepartments.map((dept) => ({
+  //   label: dept.name,
+  //   value: dept.department_id,
+  // }));
+
+  const departmentOptions = [
+    ...allDepartments.map((dept) => ({
+      label: dept.name,
+      value: dept.department_id,
+    })),
+    { label: "Non-teaching Staff", value: "N" },
+  ];
+
   const handleDepartmentChange = async (selectedOption) => {
     if (!selectedOption) {
       setSelectedDepartment(null);

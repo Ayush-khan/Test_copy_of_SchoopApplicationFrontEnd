@@ -9,7 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 // import Loader from "../../common/Loader";
-import LoadingSpinner from "../../common/LoadingSpinner";
+// import LoadingSpinner from "../../common/LoadingSpinner";
 
 function Sections() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host

@@ -245,66 +245,50 @@ const SubjectAllotmentHSC = () => {
       setLoadingForSearch(false);
     }
   };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // let hasError = false;
-
-    // Validate if `selectedStudents` array is empty
-
-    // Validate if `selectedClassForStudent` or `selectedStudentForStudent` are missing
-    // if (!selectedClass.value) {
-    //   setNameErrorForClassForStudent("Please select a class.");
-    //   hasError = true;
-    // }
-    // if (!setSelectedStudentId) {
-    //   setNameErrorForStudent("Please select division.");
-    //   hasError = true;
-    // }
-    // if (selectedStudents.length === 0) {
-    //   toast.error("Please select at least one student to promote.");
-    //   hasError = true;
-    // }
-    // Exit if there are validation errors
-    // if (hasError){
-    //     console.log()
-    //     return};
-
     let hasValidSelection = false;
 
-    // Check if at least one student has both `sub_group_id` and `opt_subject_id` filled
     for (const student of studentsData) {
-      if (student.sub_group_id !== "" && student.opt_subject_id !== "") {
+      const { sub_group_id, opt_subject_id, first_name, last_name } = student;
+
+      const hasOneFilled =
+        (sub_group_id !== "" && opt_subject_id === "") ||
+        (sub_group_id === "" && opt_subject_id !== "");
+
+      // ❌ If only one of them is filled, show error
+      if (hasOneFilled) {
+        toast.error(
+          `Please select both subject group and optional subject for student: ${first_name} ${last_name}`
+        );
+        return;
+      }
+
+      // ✅ If both are filled, mark as valid
+      if (sub_group_id !== "" && opt_subject_id !== "") {
         hasValidSelection = true;
-        break; // Exit the loop early since we found a valid entry
       }
     }
 
-    // If no valid selection, show a validation error toast
+    // ❌ If no valid selection at all, show this general error
     if (!hasValidSelection) {
       toast.error(
         "Please select both a student subject group and an optional subject for at least one student."
       );
-      return; // Exit the function if validation fails
+      return;
     }
 
     try {
-      setLoading(true); // Start loading
+      setLoading(true);
 
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("No authentication token is found");
       }
 
-      // Prepare data for the API request
-      //   const postData = {
-      //     selector: selectedStudents,
-      //     tclass_id: selectedClassForStudent.value, // Replace with actual target class ID
-      //     tsection_id: selectedStudentForStudent.value, // Replace with actual target section ID
-      //   };
       console.log("students Data submissions", studentsData);
-      // Make the API call
+
       const response = await axios.post(
         `${API_URL}/api/save_subjectforhsc`,
         studentsData,
@@ -315,16 +299,14 @@ const SubjectAllotmentHSC = () => {
         }
       );
 
-      // Handle successful response
       if (response.status === 200) {
         toast.success("Subject allotment for HSC has been successfully added!");
         setOptionalSubject("");
         setSubjectGroup("");
-        setSelectedClass(null); // Reset class selection
-        setSelectedStudent(null); // Reset student selection
-        setSelectedStudents([]); // Clear selected students
+        setSelectedClass(null);
+        setSelectedStudent(null);
+        setSelectedStudents([]);
         setErrors({});
-
         setSelectedStudentForStudent(null);
         setSelectedStudentForStudent([]);
         setSelectedClassForStudent(null);
@@ -339,17 +321,114 @@ const SubjectAllotmentHSC = () => {
       }
     } catch (error) {
       console.error("Error:", error.response?.data);
-
-      // Display error message
-      toast.error("An error occurred while allot subjects for HSC.");
-
+      toast.error("An error occurred while allotting subjects for HSC.");
       if (error.response && error.response.data) {
         setBackendErrors(error.response.data || {});
       }
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
+
+  // workin well just add one more conditon in the above code
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+
+  //   // let hasError = false;
+
+  //   // Validate if `selectedStudents` array is empty
+
+  //   // Validate if `selectedClassForStudent` or `selectedStudentForStudent` are missing
+  //   // if (!selectedClass.value) {
+  //   //   setNameErrorForClassForStudent("Please select a class.");
+  //   //   hasError = true;
+  //   // }
+  //   // if (!setSelectedStudentId) {
+  //   //   setNameErrorForStudent("Please select division.");
+  //   //   hasError = true;
+  //   // }
+  //   // if (selectedStudents.length === 0) {
+  //   //   toast.error("Please select at least one student to promote.");
+  //   //   hasError = true;
+  //   // }
+  //   // Exit if there are validation errors
+  //   // if (hasError){
+  //   //     console.log()
+  //   //     return};
+
+  //   let hasValidSelection = false;
+
+  //   // Check if at least one student has both `sub_group_id` and `opt_subject_id` filled
+  //   for (const student of studentsData) {
+  //     if (student.sub_group_id !== "" && student.opt_subject_id !== "") {
+  //       hasValidSelection = true;
+  //       break; // Exit the loop early since we found a valid entry
+  //     }
+  //   }
+
+  //   // If no valid selection, show a validation error toast
+  //   if (!hasValidSelection) {
+  //     toast.error(
+  //       "Please select both a student subject group and an optional subject for at least one student."
+  //     );
+  //     return; // Exit the function if validation fails
+  //   }
+
+  //   try {
+  //     setLoading(true); // Start loading
+
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token is found");
+  //     }
+
+  //     console.log("students Data submissions", studentsData);
+  //     // Make the API call
+  //     const response = await axios.post(
+  //       `${API_URL}/api/save_subjectforhsc`,
+  //       studentsData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     // Handle successful response
+  //     if (response.status === 200) {
+  //       toast.success("Subject allotment for HSC has been successfully added!");
+  //       setOptionalSubject("");
+  //       setSubjectGroup("");
+  //       setSelectedClass(null); // Reset class selection
+  //       setSelectedStudent(null); // Reset student selection
+  //       setSelectedStudents([]); // Clear selected students
+  //       setErrors({});
+
+  //       setSelectedStudentForStudent(null);
+  //       setSelectedStudentForStudent([]);
+  //       setSelectedClassForStudent(null);
+  //       setSelectedClassForStudent([]);
+  //       setNameErrorForClassForStudent("");
+  //       setNameErrorForStudent("");
+  //       setSelectAll(null);
+  //       setBackendErrors({});
+  //       setTimeout(() => {
+  //         setParentInformation(null);
+  //       }, 500);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error.response?.data);
+
+  //     // Display error message
+  //     toast.error("An error occurred while allot subjects for HSC.");
+
+  //     if (error.response && error.response.data) {
+  //       setBackendErrors(error.response.data || {});
+  //     }
+  //   } finally {
+  //     setLoading(false); // Stop loading
+  //   }
+  // };
 
   const handleNavigation = () => {
     navigate("/dashboard");

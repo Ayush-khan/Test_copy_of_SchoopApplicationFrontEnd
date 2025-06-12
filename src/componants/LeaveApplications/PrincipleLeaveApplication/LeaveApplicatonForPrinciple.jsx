@@ -100,6 +100,7 @@ function LeaveApplicatonForPrinciple() {
     setCurrentLeaveName(leaveCurrent.teachername);
     setShowDeleteModal(true);
   };
+
   const handleCancel = (leaveCurrent) => {
     console.log("this is staffUe leave", leaveCurrent.leave_app_id);
     setCurrentLeave(leaveCurrent.leave_app_id);
@@ -113,6 +114,7 @@ function LeaveApplicatonForPrinciple() {
       state: { staffleave: leave },
     });
   };
+
   const handleSubmitCancel = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
@@ -149,6 +151,7 @@ function LeaveApplicatonForPrinciple() {
       setShowCancelModal(false);
     }
   };
+
   const handleSubmitDelete = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
@@ -171,7 +174,9 @@ function LeaveApplicatonForPrinciple() {
       fetchLeaves();
       if (response.status === 200) {
         handleCloseModal();
-        toast.success(`${currentLeaveName} deleted successfully!`);
+        toast.success(
+          `Leave Application for ${currentLeaveName} deleted successfully!`
+        );
       } else {
         toast.error("Leave Application not found");
       }
@@ -184,6 +189,7 @@ function LeaveApplicatonForPrinciple() {
       setShowDeleteModal(false);
     }
   };
+
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     const date = new Date(dateString);
@@ -192,6 +198,7 @@ function LeaveApplicatonForPrinciple() {
     const year = String(date.getFullYear()).slice(-2); // Last 2 digits of the year
     return `${day}-${month}-${year}`;
   };
+
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
 
@@ -233,11 +240,11 @@ function LeaveApplicatonForPrinciple() {
 
   console.log("filetred staff leave", filteredStaffs);
 
-  useEffect(() => {
-    setPageCount(Math.ceil(filteredStaffs.length / pageSize));
-  }, [filteredStaffs, pageSize]);
+  const sortedLeaveApplications = filteredStaffs.sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
 
-  const displayedStaffs = filteredStaffs.slice(
+  const displayedStaffs = sortedLeaveApplications.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
@@ -390,21 +397,22 @@ function LeaveApplicatonForPrinciple() {
                               <MdOutlineRemoveRedEye className="font-bold text-xl" />
                             </button>
                           </td> */}
+
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            {leave.status === "A" ||
-                              (leave.status === "H" && (
-                                <button
-                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                  onClick={() => handleSubmitEdit(leave)}
-                                >
-                                  <FontAwesomeIcon icon={faEdit} />
-                                </button>
-                              ))}
+                            {(leave.status === "A" || leave.status === "H") && (
+                              <button
+                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                onClick={() => handleSubmitEdit(leave)}
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                              </button>
+                            )}
+
                             {(leave.status === "C" ||
                               leave.status === "R" ||
                               leave.status === "P") && (
                               <button
-                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
                                 onClick={() => handleView(leave)}
                               >
                                 <MdOutlineRemoveRedEye className="font-bold text-xl" />

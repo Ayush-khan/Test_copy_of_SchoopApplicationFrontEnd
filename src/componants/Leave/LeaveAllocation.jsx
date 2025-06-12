@@ -589,52 +589,39 @@ function LeaveAllocation() {
                               {section.leavename}
                             </p>
                           </td>
-
                           <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section.leaves_allocated}
                             </p>
                           </td>
-
                           <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section.balance_leave}
                             </p>
                           </td>
 
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button className="text-pink-600 hover:text-pink-800 hover:bg-transparent "></button>{" "}
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                onClick={() => handleEdit(section)}
-                              >
-                                <FontAwesomeIcon icon={faEdit} />
-                              </button>{" "}
-                            </td>
-                          )}
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button className="text-green-600 hover:text-green-800 hover:bg-transparent "></button>
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                onClick={() =>
-                                  handleDelete(
-                                    section.staff_id,
-                                    section.leave_type_id
-                                  )
-                                }
-                              >
-                                <FontAwesomeIcon icon={faTrash} />
-                              </button>
-                            </td>
-                          )}
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleEdit(section)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>{" "}
+                          </td>
+
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                              onClick={() =>
+                                handleDelete(
+                                  section.staff_id,
+                                  section.leave_type_id
+                                )
+                              }
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </td>
                         </tr>
                       ))
                     ) : (

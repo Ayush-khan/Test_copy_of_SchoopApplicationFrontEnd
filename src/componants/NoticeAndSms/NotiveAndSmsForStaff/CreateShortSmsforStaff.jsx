@@ -61,10 +61,18 @@ const CreateShortSMS = () => {
     }
   };
 
-  const departmentOptions = allDepartments.map((dept) => ({
-    label: dept.name,
-    value: dept.department_id,
-  }));
+  // const departmentOptions = allDepartments.map((dept) => ({
+  //   label: dept.name,
+  //   value: dept.department_id,
+  // }));
+  const departmentOptions = [
+    ...allDepartments.map((dept) => ({
+      label: dept.name,
+      value: dept.department_id,
+    })),
+    { label: "Non-teaching Staff", value: "S" },
+  ];
+
   const handleDepartmentChange = async (selectedOption) => {
     if (!selectedOption) {
       setSelectedDepartment(null);
@@ -103,6 +111,7 @@ const CreateShortSMS = () => {
   //       : [...prev, teacherId]
   //   );
   // };
+
   const handleTeacherToggle = (teacherId) => {
     let updated;
     if (selectedTeachers.includes(teacherId)) {
@@ -138,6 +147,7 @@ const CreateShortSMS = () => {
     setNoticeDescError("");
     setClassError("");
   };
+
   // const handleSubmit = async (isPublish = false) => {
   //   let hasError = false;
 
@@ -215,6 +225,7 @@ const CreateShortSMS = () => {
   //     setLoading(false);
   //   }
   // };
+
   const handleSubmit = async (isPublish = false) => {
     let hasError = false;
 
