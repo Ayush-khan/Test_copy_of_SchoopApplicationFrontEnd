@@ -172,19 +172,26 @@ const RazorpayFeePaymentReport = () => {
         accounttype: selectedAccount.value === "" ? "" : selectedAccount.label,
       };
 
-      if (orderId) {
-        params.order_id = orderId; // ✅ match this key exactly as backend expects
-      }
-
-      if (selectedStudentId) {
-        params.student_id = selectedStudentId; // ✅ again, use exact API key
-      }
-
-      // Add from_date and to_date if both orderId and studentId are missing
-      if (!orderId && !selectedStudentId) {
+      if (selectedStudentId && fromDate && toDate) {
+        params.student_id = selectedStudentId;
         params.fromdate = fromDate;
         params.todate = toDate;
+      } else {
+        if (orderId) {
+          params.order_id = orderId; // match this key exactly as backend expects
+        }
+
+        if (selectedStudentId) {
+          params.student_id = selectedStudentId; // again, use exact API key
+        }
+
+        // Add from_date and to_date if both orderId and studentId are missing
+        if (!orderId && !selectedStudentId) {
+          params.fromdate = fromDate;
+          params.todate = toDate;
+        }
       }
+
       console.log("API Params:", params); // Debugging API request
 
       const response = await axios.get(

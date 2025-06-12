@@ -62,6 +62,7 @@ const ConsolidatedLeave = () => {
     H: "Hold",
     S: "Scheduled",
     V: "Verified",
+    C: "Cancelled",
   };
 
   const handleStudentSelect = (selectedOption) => {
@@ -130,9 +131,9 @@ const ConsolidatedLeave = () => {
         : ": Complete List of All Staff "
     }`;
     const printContent = `
-  <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
+    <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
          <h5 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
- <div id="tableHeading" class="text-center w-3/4">
+    <div id="tableHeading" class="text-center w-3/4">
       <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-2">
         <thead>
           <tr class="bg-gray-100">

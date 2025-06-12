@@ -230,21 +230,30 @@ const WorldlineFeePaymentReport = () => {
         accounttype: selectedAccount.value === "" ? "" : selectedAccount.label,
       };
 
-      if (orderId) {
-        params.order_id = orderId; // ✅ match this key exactly as backend expects
-      }
-
-      if (selectedStudentId) {
-        params.student_id = selectedStudentId; // ✅ again, use exact API key
-      }
-
-      // Add from_date and to_date if both orderId and studentId are missing
-      if (!orderId && !selectedStudentId) {
+      // Use all 3 if studentId + fromDate + toDate are provided
+      if (selectedStudentId && fromDate && toDate) {
+        params.student_id = selectedStudentId;
         params.fromdate = fromDate;
         params.todate = toDate;
+      } else {
+        // Use only orderId if provided
+        if (orderId) {
+          params.order_id = orderId;
+        }
+
+        // Use only studentId if provided without from-to dates
+        if (selectedStudentId && (!fromDate || !toDate)) {
+          params.student_id = selectedStudentId;
+        }
+
+        // Use only fromDate and toDate if both orderId and studentId are missing
+        if (!orderId && !selectedStudentId && fromDate && toDate) {
+          params.fromdate = fromDate;
+          params.todate = toDate;
+        }
       }
 
-      console.log("API Params:", params); // Will show final params
+      console.log("API Params:", params);
 
       const response = await axios.get(
         `${API_URL}/api/getworldfeepaymentrecordreport`,
@@ -257,9 +266,7 @@ const WorldlineFeePaymentReport = () => {
         }
       );
 
-      // Use response here
-
-      console.log("API Response:", response?.data); // Debug API response
+      console.log("API Response:", response?.data);
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
         setTimetable([]);
@@ -730,8 +737,139 @@ const WorldlineFeePaymentReport = () => {
           ></div>
 
           <>
-            <div className="container mx-auto px-4">
+            {/* <div className="container mx-auto px-4">
               <div className="w-full md:w-[110%] relative right-0 md:right-[5%] mx-auto   flex flex-wrap items-start gap-6 p-2">
+                <div className="flex flex-col h-[80px]">
+                  <label className="text-md mb-1" htmlFor="orderId">
+                    Order ID
+                  </label>
+                  <input
+                    type="text"
+                    id="orderId"
+                    className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-[180px]"
+                    value={orderId}
+                    onChange={(e) => setOrderId(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex flex-col h-[80px]">
+                  <label className="text-md mb-1" htmlFor="studentSelect">
+                    Student Name
+                  </label>
+                  <Select
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                    id="studentSelect"
+                    value={selectedStudent}
+                    onChange={handleStudentSelect}
+                    options={studentOptions}
+                    placeholder={loadingExams ? "Loading..." : "Select"}
+                    isSearchable
+                    isClearable
+                    isDisabled={loadingExams}
+                    className="text-sm w-[220px]"
+                  />
+                </div>
+
+                <div className="flex flex-col h-[80px]">
+                  <label className="text-md mb-1" htmlFor="fromDate">
+                    From Date <span className="text-sm text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    id="fromDate"
+                    value={fromDate}
+                    onChange={(e) => handleChangeDate(e, "fromDate")}
+                    className="text-sm border border-gray-300 rounded px-2 py-2 w-[180px]"
+                  />
+                  <div className="h-[16px] text-red-500 text-xs mt-1">
+                    {formDateError && <span>{formDateError}</span>}
+                  </div>
+                </div>
+
+                <div className="flex flex-col h-[80px]">
+                  <label className="text-md mb-1" htmlFor="toDate">
+                    To Date <span className="text-sm text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    id="toDate"
+                    value={toDate}
+                    onChange={(e) => handleChangeDate(e, "toDate")}
+                    className="text-sm border border-gray-300 rounded px-2 py-2 w-[180px]"
+                    min={fromDate}
+                    max={new Date().toISOString().split("T")[0]}
+                  />
+                  <div className="h-[16px] text-red-500 text-xs mt-1">
+                    {toDateError && <span>{toDateError}</span>}
+                  </div>
+                </div>
+
+                <div className="flex flex-col h-[80px]">
+                  <label className="text-md mb-1" htmlFor="accountType">
+                    Account Type <span className="text-sm text-red-500">*</span>
+                  </label>
+                  <Select
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                    id="accountType"
+                    value={selectedAccount}
+                    onChange={handleAccountSelect}
+                    options={accountOptions}
+                    placeholder="Select"
+                    isSearchable
+                    isClearable={false}
+                    className="text-sm w-[180px]"
+                  />
+                  <div className="h-[16px] text-red-500 text-xs mt-1">
+                    {accountError && <span>{accountError}</span>}
+                  </div>
+                </div>
+
+                <div className="flex items-end mt-4">
+                  <button
+                    type="search"
+                    onClick={handleSearch}
+                    style={{ backgroundColor: "#2196F3" }}
+                    className={`btn h-10 btn-primary text-white font-bold py-1 px-6 rounded ${
+                      loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    disabled={loadingForSearch}
+                  >
+                    {loadingForSearch ? (
+                      <span className="flex items-center">
+                        <svg
+                          className="animate-spin h-4 w-4 mr-2 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          ></path>
+                        </svg>
+                        Searching...
+                      </span>
+                    ) : (
+                      "Search"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div> */}
+
+            <div className="w-full mx-auto ">
+              <div className="w-full md:w-[97%] mx-auto   flex flex-wrap items-start  justify-start  gap-x-6 p-2">
                 {/* Order ID */}
                 <div className="flex flex-col h-[80px]">
                   <label className="text-md mb-1" htmlFor="orderId">

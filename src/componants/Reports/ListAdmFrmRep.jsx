@@ -71,7 +71,7 @@ const ListAdmFrmRep = () => {
     { value: "Verified", label: "Verified" },
     { value: "Approved", label: "Approved" },
     { value: "Hold", label: "Hold" },
-    { value: "Reject", label: "Reject" },
+    { value: "Rejected", label: "Rejected" },
   ];
 
   const customStyles = {

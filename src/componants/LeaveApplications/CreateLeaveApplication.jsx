@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -21,6 +21,7 @@ const CreateLeaveApplication = () => {
   const [newLeaveType, setNewLeaveType] = useState("");
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
+  // const [manuallyEditedNoOfDays, setManuallyEditedNoOfDays] = useState(false);
 
   // const [regId, setRegId] = useState(null);
 
@@ -132,51 +133,115 @@ const CreateLeaveApplication = () => {
     }
   };
 
+  // const handleChange = (event) => {
+  //   const { name, value } = event.target;
+
+  //   setFormData((prevData) => {
+  //     let updatedData = {
+  //       ...prevData,
+  //       [name]: value,
+  //     };
+
+  //     // Recalculate no_of_days only if the dates are changed, and no manual editing is done
+  //     if (
+  //       updatedData.leave_start_date &&
+  //       updatedData.leave_end_date &&
+  //       name !== "no_of_days"
+  //     ) {
+  //       const startDate = new Date(updatedData.leave_start_date);
+  //       const endDate = new Date(updatedData.leave_end_date);
+
+  //       // Calculate day difference as a decimal (including fractional days)
+  //       const timeDiff = endDate - startDate;
+  //       const dayDiff = timeDiff / (1000 * 60 * 60 * 24) + 1; // Including fractional days
+
+  //       // Set the calculated value
+  //       updatedData.no_of_days = dayDiff > 0 ? dayDiff.toFixed(0) : "";
+  //     }
+
+  //     return updatedData;
+  //   });
+
+  //   // When manually editing no_of_days field, accept decimals and validate
+  //   if (name === "no_of_days") {
+  //     // Allow decimal values (positive only)
+  //     const decimalPattern = /^\d+(\.\d+)?$/;
+  //     if (decimalPattern.test(value)) {
+  //       setErrors((prevErrors) => ({
+  //         ...prevErrors,
+  //         no_of_days: "", // Clear any existing errors
+  //       }));
+  //     } else {
+  //       setErrors((prevErrors) => ({
+  //         ...prevErrors,
+  //         no_of_days: "Please enter a valid positive number (e.g., 0.5).",
+  //       }));
+  //     }
+  //   }
+  // };
+
+  const manuallyEditedNoOfDaysRef = useRef(false);
+
+  useEffect(() => {
+    if (
+      formData.leave_start_date &&
+      formData.leave_end_date &&
+      !manuallyEditedNoOfDaysRef.current
+    ) {
+      const startDate = new Date(formData.leave_start_date);
+      const endDate = new Date(formData.leave_end_date);
+
+      if (!isNaN(startDate) && !isNaN(endDate)) {
+        const timeDiff = endDate.getTime() - startDate.getTime();
+        const dayDiff = timeDiff / (1000 * 60 * 60 * 24) + 1;
+
+        if (dayDiff > 0) {
+          setFormData((prevData) => ({
+            ...prevData,
+            no_of_days: dayDiff.toFixed(1),
+          }));
+        } else {
+          setFormData((prevData) => ({
+            ...prevData,
+            no_of_days: "",
+          }));
+        }
+      }
+    }
+  }, [formData.leave_start_date, formData.leave_end_date]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
 
-    setFormData((prevData) => {
-      let updatedData = {
-        ...prevData,
-        [name]: value,
-      };
+    // Clear error
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }));
 
-      // Recalculate no_of_days only if the dates are changed, and no manual editing is done
-      if (
-        updatedData.leave_start_date &&
-        updatedData.leave_end_date &&
-        name !== "no_of_days"
-      ) {
-        const startDate = new Date(updatedData.leave_start_date);
-        const endDate = new Date(updatedData.leave_end_date);
-
-        // Calculate day difference as a decimal (including fractional days)
-        const timeDiff = endDate - startDate;
-        const dayDiff = timeDiff / (1000 * 60 * 60 * 24) + 1; // Including fractional days
-
-        // Set the calculated value
-        updatedData.no_of_days = dayDiff > 0 ? dayDiff.toFixed(0) : "";
-      }
-
-      return updatedData;
-    });
-
-    // When manually editing no_of_days field, accept decimals and validate
+    // Set manual flag on editing no_of_days
     if (name === "no_of_days") {
-      // Allow decimal values (positive only)
+      manuallyEditedNoOfDaysRef.current = true;
+
       const decimalPattern = /^\d+(\.\d+)?$/;
-      if (decimalPattern.test(value)) {
+      if (!decimalPattern.test(value)) {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          no_of_days: "", // Clear any existing errors
-        }));
-      } else {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          no_of_days: "Please enter a valid positive number (e.g., 0.5).",
+          no_of_days: "Please enter a valid positive number (e.g., 0.5)",
         }));
       }
     }
+
+    // Reset manual flag on date change
+    if (name === "leave_start_date" || name === "leave_end_date") {
+      manuallyEditedNoOfDaysRef.current = false;
+    }
+
+    // Finally update form data
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const formatDateString = (dateString) => {
@@ -377,6 +442,7 @@ const CreateLeaveApplication = () => {
                 )}
               </div>
             </div>
+
             <div className="mt-4 relative mb-3 flex justify-center  mx-4">
               <label htmlFor="endDate" className="w-1/2 mt-2">
                 Leave End Date <span className="text-red-500">*</span>
@@ -401,7 +467,8 @@ const CreateLeaveApplication = () => {
                 )}
               </div>
             </div>
-            <div className="mt-4 relative mb-3 flex justify-center  mx-4">
+
+            {/* <div className="mt-4 relative mb-3 flex justify-center  mx-4">
               <label htmlFor="openDay" className="w-1/2 mt-2">
                 No. of days<span className="text-red-500">*</span>
               </label>
@@ -422,7 +489,35 @@ const CreateLeaveApplication = () => {
                   </span>
                 )}
               </div>
+            </div> */}
+
+            <div className="mt-4 relative mb-3 flex justify-center mx-4">
+              <label htmlFor="openDay" className="w-1/2 mt-2">
+                No. of days<span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                id="no_of_days"
+                name="no_of_days"
+                value={formData.no_of_days}
+                step="0.5"
+                min="0.5"
+                onChange={handleChange}
+                onFocus={() => {
+                  manuallyEditedNoOfDaysRef.current = true; // 👈 This is crucial
+                }}
+                className="form-control shadow-md mb-2"
+                aria-label="No of Days"
+              />
+              <div className="absolute top-9 left-1/3 ">
+                {errors.no_of_days && (
+                  <span className="text-danger text-xs">
+                    {errors.no_of_days}
+                  </span>
+                )}
+              </div>
             </div>
+
             <div className=" relative mb-3 flex justify-center  mx-4">
               <label htmlFor="comment" className="w-1/2 mt-2">
                 Reason

@@ -473,7 +473,7 @@ const DiscrepancyWorldlinePaymentReport = () => {
                                     {student?.student_name || " "}
                                   </td>
 
-                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                  {/* <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.Trnx_date
                                       ? new Date(student.Trnx_date)
                                           .toLocaleDateString("en-GB", {
@@ -482,6 +482,17 @@ const DiscrepancyWorldlinePaymentReport = () => {
                                             year: "numeric",
                                           })
                                           .replace(/\//g, " ")
+                                      : " "}
+                                  </td> */}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.Trnx_date
+                                      ? new Date(student.Trnx_date)
+                                          .toLocaleDateString("en-GB", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                          })
+                                          .replace(/\//g, "-") // <- use "-" instead of " "
                                       : " "}
                                   </td>
 
