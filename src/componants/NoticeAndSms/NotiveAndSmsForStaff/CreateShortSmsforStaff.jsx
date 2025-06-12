@@ -61,10 +61,6 @@ const CreateShortSMS = () => {
     }
   };
 
-  // const departmentOptions = allDepartments.map((dept) => ({
-  //   label: dept.name,
-  //   value: dept.department_id,
-  // }));
   const departmentOptions = [
     ...allDepartments.map((dept) => ({
       label: dept.name,
@@ -104,14 +100,6 @@ const CreateShortSMS = () => {
     }
   };
 
-  // const handleTeacherToggle = (teacherId) => {
-  //   setSelectedTeachers((prev) =>
-  //     prev.includes(teacherId)
-  //       ? prev.filter((id) => id !== teacherId)
-  //       : [...prev, teacherId]
-  //   );
-  // };
-
   const handleTeacherToggle = (teacherId) => {
     let updated;
     if (selectedTeachers.includes(teacherId)) {
@@ -148,84 +136,6 @@ const CreateShortSMS = () => {
     setClassError("");
   };
 
-  // const handleSubmit = async (isPublish = false) => {
-  //   let hasError = false;
-
-  //   // Validate Subject
-  //   if (!subject.trim()) {
-  //     setSubjectError("Subject is required.");
-  //     hasError = true;
-  //   } else {
-  //     setSubjectError("");
-  //   }
-
-  //   // Validate Description
-  //   if (!noticeDesc.trim()) {
-  //     setNoticeDescError("SMS description is required.");
-  //     hasError = true;
-  //   } else {
-  //     setNoticeDescError("");
-  //   }
-
-  //   // Validate Department
-  //   if (!selectedDepartment) {
-  //     setDepatmentError("Please select a department.");
-  //     hasError = true;
-  //   } else {
-  //     setDepatmentError("");
-  //   }
-
-  //   // Validate Staff Selection
-  //   const teacherList = teachersByDepartment[selectedDepartment?.value] || [];
-  //   if (teacherList.length > 0 && selectedTeachers.length === 0) {
-  //     setClassError("Please select at least one staff member.");
-  //     hasError = true;
-  //   } else {
-  //     setClassError("");
-  //   }
-
-  //   if (hasError) return;
-
-  //   // Continue with submission
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) throw new Error("No authentication token found");
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/${
-  //         isPublish ? "save_publish_smsnotice" : "save_smsnotice"
-  //       }`,
-  //       {
-  //         subject,
-  //         notice_desc: noticeDesc,
-  //         checkbxevent: selectedClasses, // If this is meant to be selectedTeachers, update it accordingly
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success(
-  //         isPublish
-  //           ? "Notice saved and published!"
-  //           : "Notice saved successfully!"
-  //       );
-  //       resetForm();
-  //     } else {
-  //       toast.error("Unexpected server response.");
-  //     }
-  //   } catch (error) {
-  //     toast.error(
-  //       error.response?.data?.message || "Error while saving the notice."
-  //     );
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleSubmit = async (isPublish = false) => {
     let hasError = false;
 
@@ -239,7 +149,7 @@ const CreateShortSMS = () => {
 
     // Validate Description
     if (!noticeDesc.trim()) {
-      setNoticeDescError("SMS description is required.");
+      setNoticeDescError("Short SMS description is required.");
       hasError = true;
     } else {
       setNoticeDescError("");
@@ -292,8 +202,8 @@ const CreateShortSMS = () => {
       if (response.status === 200) {
         toast.success(
           isPublish
-            ? "SMS saved and published successfully!"
-            : "SMS saved as draft successfully!"
+            ? "Short SMS saved and published successfully!"
+            : "Short SMS saved as draft successfully!"
         );
         resetForm();
       } else {
@@ -301,7 +211,7 @@ const CreateShortSMS = () => {
       }
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Error while saving the SMS."
+        error.response?.data?.message || "Error while saving the Short SMS."
       );
     } finally {
       setLoading(false);
