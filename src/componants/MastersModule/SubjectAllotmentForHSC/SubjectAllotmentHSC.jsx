@@ -872,11 +872,9 @@ const SubjectAllotmentHSC = () => {
                       <button
                         type="reset"
                         onClick={reset}
-                        className={` bg-red-500 mr-2 text-white font-bold py-1 border-1 border-red-500 px-4 rounded ${
-                          loading ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                        className="text-white mr-2 font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
                       >
-                        Reset
+                        Back
                       </button>
                       <button
                         type="submit"

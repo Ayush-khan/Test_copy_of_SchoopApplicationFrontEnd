@@ -9,6 +9,7 @@ import { RxCross1 } from "react-icons/rx";
 function LeaveAllocationtoAllStaff() {
   const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
+  const [loadingForSubmit, setLoadingForSubmit] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,6 +79,7 @@ function LeaveAllocationtoAllStaff() {
 
     setIsSubmitting(true);
     try {
+      setLoadingForSubmit(true);
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found.");
 
@@ -105,7 +107,7 @@ function LeaveAllocationtoAllStaff() {
     } catch (error) {
       toast.error(error.message || "Failed to allocate leave.");
     } finally {
-      setIsSubmitting(false);
+      setLoadingForSubmit(false);
     }
   };
 
@@ -188,11 +190,11 @@ function LeaveAllocationtoAllStaff() {
                 Reset
               </button>{" "}
               <button
-                className="mr-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700"
+                className="mr-2 bg-blue-500 text-white py-1 px-3 rounded  hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
                 onClick={handleSubmit}
-                disabled={isSubmitting}
+                disabled={loadingForSubmit}
               >
-                Save
+                {loadingForSubmit ? "Saving..." : "Save"}
               </button>
               {/* <button
                 className="mr-2 bg-yellow-500 text-white py-1 px-3 rounded hover:bg-yellow-700"
