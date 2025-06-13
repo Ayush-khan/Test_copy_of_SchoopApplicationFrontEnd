@@ -235,6 +235,7 @@ import LeaveApplicatonForPrinciple from "../componants/LeaveApplications/Princip
 import EditLeaveApplicationForPrinciple from "../componants/LeaveApplications/PrincipleLeaveApplication/EditLeaveApplicationForPrinciple.jsx";
 import CreateLeaveApplicationForPrinciple from "../componants/LeaveApplications/PrincipleLeaveApplication/CreateLeaveApplicationForPrinciple.jsx";
 import StudentIdCardDetailedReport from "../componants/Reports/StudentReportPrinciple/StudentIdCardDetailedReport.jsx";
+import TeacherAttendanceDailyReport from "../componants/Reports/TeacherAttendanceDailyReport.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -899,6 +900,12 @@ function Index() {
         <Route
           path="/studentIdcDReport"
           element={<PrivateRoute element={<StudentIdCardDetailedReport />} />}
+        />
+
+        {/* TeacherAttendance Daily Report  report */}
+        <Route
+          path="/TeacherADReport"
+          element={<PrivateRoute element={<TeacherAttendanceDailyReport />} />}
         />
       </Route>
 

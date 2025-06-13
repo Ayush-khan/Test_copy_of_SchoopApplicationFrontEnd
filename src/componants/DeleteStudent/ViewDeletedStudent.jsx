@@ -142,7 +142,7 @@ function ViewDeletedStudent() {
             city: student.city || " ",
             state: student.state || "",
             roll_no: student.roll_no || "",
-            student_id: student.student_id || " ",
+            student_id: student.stud_id_no || " ",
             reg_id: student.reg_no || " ",
             blood_group: student.blood_group || " ",
 

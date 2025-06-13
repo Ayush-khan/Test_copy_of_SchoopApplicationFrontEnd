@@ -2266,7 +2266,14 @@ function Form() {
                   name="height"
                   value={formData.height}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-                  onChange={handleChange}
+                  // onChange={handleChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Allow only numbers and one dot (.)
+                    if (/^\d*\.?\d*$/.test(value)) {
+                      handleChange(e);
+                    }
+                  }}
                   // onBlur={handleBlur}
                 />
               </div>
@@ -2284,7 +2291,14 @@ function Form() {
                   maxLength={4.1}
                   value={formData.weight}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-                  onChange={handleChange}
+                  // onChange={handleChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Allow only numbers and one dot (.)
+                    if (/^\d*\.?\d*$/.test(value)) {
+                      handleChange(e);
+                    }
+                  }}
                   // onBlur={handleBlur}
                 />
               </div>

@@ -141,7 +141,7 @@ function ViewStudentLC() {
             city: student.city || " ",
             state: student.state || "",
             roll_no: student.roll_no || "",
-            student_id: student.student_id || " ",
+            student_id: student.stud_id_no || " ",
             reg_id: student.reg_no || " ",
             blood_group: student.blood_group || " ",
 
@@ -669,7 +669,7 @@ function ViewStudentLC() {
               <input
                 type="text"
                 disabled
-                value={formData.student_id}
+                value={formData.stud_id_no}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}

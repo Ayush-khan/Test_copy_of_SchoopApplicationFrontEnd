@@ -282,7 +282,8 @@ function LeaveApplicaton() {
                             </p>
                           </td>
                           {leave.status !== "Cancelled" &&
-                          leave.status !== "Rejected" ? (
+                          leave.status !== "Rejected" &&
+                          leave.status !== "Approve" ? (
                             <>
                               <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                 <button

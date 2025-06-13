@@ -138,9 +138,11 @@ function LeaveApplicatonForPrinciple() {
       fetchLeaves();
       if (response.status === 200) {
         handleCloseModal();
-        toast.success(`${currentLeaveName} Cancel successfully!`);
+        toast.success(
+          `Leave Application for ${currentLeaveName} Cancel successfully!`
+        );
       } else {
-        toast.error("Leave Application not found");
+        toast.error(`Leave Application for for ${currentLeaveName} not found`);
       }
     } catch (error) {
       console.error("Error Canceling staff:", error);

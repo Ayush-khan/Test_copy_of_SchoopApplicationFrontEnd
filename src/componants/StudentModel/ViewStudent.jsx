@@ -579,7 +579,7 @@ function ViewStudent() {
               <input
                 type="text"
                 disabled
-                value={formData.student_id}
+                value={formData.stud_id_no}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
