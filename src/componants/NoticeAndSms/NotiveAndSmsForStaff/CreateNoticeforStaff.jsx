@@ -299,10 +299,13 @@ const CreateShortSMS = () => {
 
       if (response.status === 200) {
         toast.success(
-          isPublish
+          response.data.message
+            ? response.data.message
+            : isPublish
             ? "Notice saved and published successfully!"
             : "Notice saved successfully!"
         );
+
         resetForm();
       } else {
         toast.error("Unexpected server response.");

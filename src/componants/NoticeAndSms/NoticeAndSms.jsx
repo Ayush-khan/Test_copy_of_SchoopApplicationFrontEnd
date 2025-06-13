@@ -481,7 +481,7 @@ function NoticeAndSms() {
 
       console.log("formated data of the edit sms part", formData);
       console.log("seletd files", uploadedFiles);
-      await axios.post(
+      const response = await axios.post(
         `${API_URL}/api/update_smsnotice/${currentSection?.unq_id}`,
         formData,
         {
@@ -493,7 +493,7 @@ function NoticeAndSms() {
         }
       );
 
-      toast.success("Notice updated successfully!");
+      toast.success(response.data.message || "Notice updated successfully!");
       handleSearch();
       handleCloseModal();
     } catch (error) {
@@ -532,7 +532,7 @@ function NoticeAndSms() {
         throw new Error("Unique ID is missing");
       }
 
-      await axios.put(
+      const response = await axios.put(
         `${API_URL}/api/update_publishsmsnotice/${currentSection?.unq_id}`,
         {},
         {
@@ -548,7 +548,10 @@ function NoticeAndSms() {
 
       // setShowPublishModal(false);
       // setSubjects([]);
-      toast.success(`${currestSubjectNameForDelete} Publish successfully!`);
+      toast.success(
+        response.data.message ||
+          `${currestSubjectNameForDelete} Publish successfully!`
+      );
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
@@ -585,7 +588,7 @@ function NoticeAndSms() {
         throw new Error("Unique ID is missing");
       }
 
-      await axios.delete(
+      const response = await axios.delete(
         `${API_URL}/api/delete_smsnotice/${currentSection?.classToDelete?.unq_id}`,
         {
           headers: {
@@ -600,7 +603,10 @@ function NoticeAndSms() {
 
       setShowDeleteModal(false);
       // setSubjects([]);
-      toast.success(`${currestSubjectNameForDelete} Deleted successfully!`);
+      toast.success(
+        response.data.message ||
+          `${currestSubjectNameForDelete} Deleted successfully!`
+      );
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(

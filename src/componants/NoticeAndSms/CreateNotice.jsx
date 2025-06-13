@@ -417,13 +417,15 @@ const CreateNotice = () => {
 
       if (response.status === 200) {
         toast.success(
-          isPublish
-            ? "Notice saved and published!"
+          response.data.message
+            ? response.data.message
+            : isPublish
+            ? "Notice saved and published successfully!"
             : "Notice saved successfully!"
         );
         resetForm();
       } else {
-        toast.error("Unexpected server response.");
+        toast.error("Unexpected server response whilte saving the Notice.");
       }
     } catch (error) {
       toast.error(

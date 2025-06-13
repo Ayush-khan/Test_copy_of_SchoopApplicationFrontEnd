@@ -201,17 +201,20 @@ const CreateShortSMS = () => {
 
       if (response.status === 200) {
         toast.success(
-          isPublish
-            ? "Short SMS saved and published successfully!"
-            : "Short SMS saved as draft successfully!"
+          response.data.message
+            ? response.data.message
+            : isPublish
+            ? "SMS saved and published successfully!"
+            : "SMS saved successfully!"
         );
+
         resetForm();
       } else {
         toast.error("Unexpected server response.");
       }
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Error while saving the Short SMS."
+        error.response?.data?.message || "Error while saving the SMS."
       );
     } finally {
       setLoading(false);

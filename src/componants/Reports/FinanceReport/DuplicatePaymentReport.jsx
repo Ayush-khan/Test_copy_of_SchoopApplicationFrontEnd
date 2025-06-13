@@ -38,11 +38,14 @@ const DuplicatePaymentReport = () => {
       setLoadingForSearch(true); // Start loading
       setTimetable([]);
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_staff_report`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_duplicatepaymentreportFinance`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       console.log("Duplicate Payment Report", response);
-      if (!response?.data?.data || response?.data?.length === 0) {
+      if (!response?.data?.data) {
         toast.error("Duplicate Payment Report data not found.");
         setTimetable([]);
       } else {
@@ -86,31 +89,15 @@ const DuplicatePaymentReport = () => {
                 (subject, index) => `
                 <tr>
                   <td class="border border-black">${index + 1}</td>
-                  <td class="border border-black">${subject?.name || ""}</td>
                   <td class="border border-black">${
-                    subject?.birthday
-                      ? new Date(subject.birthday).toLocaleDateString("en-GB")
-                      : ""
+                    subject?.student_name || ""
                   }</td>
+                  <td class="border border-black">${subject?.payment_date}</td>
+                  <td class="border border-black">${subject?.class}</td>
+                  <td class="border border-black"> ${subject.installment}</td>
+                  <td class="border border-black">${subject?.amount || ""}</td>
                   <td class="border border-black">${
-                    subject?.date_of_joining
-                      ? new Date(subject.date_of_joining).toLocaleDateString(
-                          "en-GB"
-                        )
-                      : ""
-                  }</td>
-                  <td class="border border-black"> ${
-                    subject.gender === "female"
-                      ? "Female"
-                      : subject.gender === "male"
-                      ? "Male"
-                      : " "
-                  }</td>
-                  <td class="border border-black">${
-                    subject?.blood_group || ""
-                  }</td>
-                  <td class="border border-black">${
-                    subject?.designation || ""
+                    subject?.receipt_no || ""
                   }</td>
                 
                
@@ -122,7 +109,7 @@ const DuplicatePaymentReport = () => {
       </div>
     </div>
   `;
-    const printWindow = window.open("", "_blank", "width=1000,height=1000");
+    const printWindow = window.open("", "_blank", "width=800,height=1000");
 
     printWindow.document.write(`
     <html>
@@ -149,7 +136,7 @@ const DuplicatePaymentReport = () => {
             }
 
                       #tableMain {
-                width: 100%;
+                width: 90%;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -232,20 +219,12 @@ const DuplicatePaymentReport = () => {
     // Convert displayedSections data to array format for Excel
     const data = displayedSections.map((student, index) => [
       index + 1,
-      student?.name || " ",
-      student?.birthday
-        ? new Date(student.birthday).toLocaleDateString("en-GB")
-        : " ",
-      student?.date_of_joining
-        ? new Date(student.date_of_joining).toLocaleDateString("en-GB")
-        : " ",
-      student.sex === "female"
-        ? "Female"
-        : student.sex === "male"
-        ? "Male"
-        : " ",
-      student?.blood_group || " ",
-      student?.designation || " ",
+      student?.student_name || " ",
+      student?.payment_date || " ",
+      student?.class || " ",
+      student.installment,
+      student?.amount || " ",
+      student?.receipt_no || " ",
     ]);
 
     // Create a worksheet
@@ -257,58 +236,47 @@ const DuplicatePaymentReport = () => {
 
     // Create a workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "Duplicate Payment Report"
+    );
 
     // Generate and download the Excel file
-    const fileName = `Staff_Report.xlsx`;
+    const fileName = `Duplicate_Payment_Report.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
   console.log("row", timetable);
 
   const filteredSections = timetable.filter((student) => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = searchTerm.trim().replace(/\s+/g, " ").toLowerCase();
     const formatDate = (dateString) => {
       if (!dateString) return "";
       const [year, month, day] = dateString.split("-");
       return `${day}/${month}/${year} || ${day}-${month}-${year}`;
     };
 
+    const normalize = (value) =>
+      value?.toString().trim().replace(/\s+/g, " ").toLowerCase() || "";
+
     // Extract relevant fields and convert them to lowercase for case-insensitive search
 
-    const staffName = student?.name?.toLowerCase() || ""; // Convert entire name to lowercase
-    const dateofBirth = formatDate(student?.birthday).toLowerCase();
-    const dateofJoining = formatDate(student?.date_of_joining).toLowerCase();
-    const gender = student?.sex?.toLowerCase() || "";
-    const bloodGroup = student?.blood_group?.toLowerCase() || "";
-    const designation = student?.designation?.toLowerCase() || "";
-    const phoneNo = student?.phone?.toLowerCase() || "";
-    const staffEmail = student?.email?.toLowerCase() || "";
-    const address = student?.address?.toLowerCase() || "";
-    const aadharCardNo = student?.aadhar_card_no?.toLowerCase() || "";
-    const academicQual = student?.academic_qual?.toLowerCase() || "";
-    const professionalQual = student?.professional_qual?.toLowerCase() || "";
-    const trainingStatus = student?.trained?.toLowerCase() || "";
-    const experienceStaff = student?.experience
-      ? String(student.experience)
-      : "";
+    const staffName = normalize(student?.student_name); // Convert entire name to lowercase
+    const paymentDate = normalize(student?.payment_date);
+    const sectionClass = normalize(student?.class);
+    const installmentAmount = normalize(student?.amount);
+    const installment = normalize(student?.installment);
+    const receiptNo = normalize(student?.receipt_no);
 
     // Check if the search term is present in any of the specified fields
     return (
       staffName.includes(searchLower) ||
-      dateofBirth.includes(searchLower) ||
-      dateofJoining.includes(searchLower) ||
-      gender.includes(searchLower) ||
-      bloodGroup.includes(searchLower) ||
-      designation.includes(searchLower) ||
-      phoneNo.includes(searchLower) ||
-      staffEmail.includes(searchLower) ||
-      address.includes(searchLower) ||
-      aadharCardNo.includes(searchLower) ||
-      academicQual.includes(searchLower) ||
-      professionalQual.includes(searchLower) ||
-      trainingStatus.includes(searchLower) ||
-      experienceStaff.includes(searchLower)
+      paymentDate.includes(searchLower) ||
+      sectionClass.includes(searchLower) ||
+      installmentAmount.includes(searchLower) ||
+      installment.includes(searchLower) ||
+      receiptNo.includes(searchLower)
     );
   });
 
@@ -420,35 +388,23 @@ const DuplicatePaymentReport = () => {
                                     {index + 1}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.name || " "}
+                                    {student?.student_name || " "}
                                   </td>
 
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.birthday
-                                      ? new Date(
-                                          student.birthday
-                                        ).toLocaleDateString("en-GB")
-                                      : " "}
+                                    {student?.payment_date}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.date_of_joining
-                                      ? new Date(
-                                          student.date_of_joining
-                                        ).toLocaleDateString("en-GB")
-                                      : " "}
+                                    {student?.class}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.sex === "female"
-                                      ? "Female"
-                                      : student.sex === "male"
-                                      ? "Male"
-                                      : " "}
+                                    {student?.installment}
                                   </td>
                                   <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
-                                    {student?.blood_group || " "}
+                                    {student?.amount || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.designation || " "}
+                                    {student?.receipt_no || " "}
                                   </td>
                                 </tr>
                               ))

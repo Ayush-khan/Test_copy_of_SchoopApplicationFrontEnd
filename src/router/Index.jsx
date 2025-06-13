@@ -234,6 +234,7 @@ import ViewLeaveApplicationForPrinciple from "../componants/LeaveApplications/Pr
 import LeaveApplicatonForPrinciple from "../componants/LeaveApplications/PrincipleLeaveApplication/LeaveApplicatonForPrinciple.jsx";
 import EditLeaveApplicationForPrinciple from "../componants/LeaveApplications/PrincipleLeaveApplication/EditLeaveApplicationForPrinciple.jsx";
 import CreateLeaveApplicationForPrinciple from "../componants/LeaveApplications/PrincipleLeaveApplication/CreateLeaveApplicationForPrinciple.jsx";
+import StudentIdCardDetailedReport from "../componants/Reports/StudentReportPrinciple/StudentIdCardDetailedReport.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -893,6 +894,11 @@ function Index() {
           element={
             <PrivateRoute element={<DiscrepancyWorldlinePaymentReport />} />
           }
+        />
+        {/* StudenIdCard Detailed report */}
+        <Route
+          path="/studentIdcDReport"
+          element={<PrivateRoute element={<StudentIdCardDetailedReport />} />}
         />
       </Route>
 

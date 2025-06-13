@@ -40,7 +40,7 @@ function LeaveApplicatonForPrinciple() {
     R: "Rejected",
     A: "Applied",
     H: "Hold",
-    C: "Canceled",
+    C: "Cancelled",
     P: "Approved",
   };
   useEffect(() => {
@@ -163,7 +163,7 @@ function LeaveApplicatonForPrinciple() {
       }
 
       const response = await axios.delete(
-        `${API_URL}/api/delete_leaveapplication/${currentLeave}`,
+        `${API_URL}/api/delete_leaveapplicationprincipal/${currentLeave}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

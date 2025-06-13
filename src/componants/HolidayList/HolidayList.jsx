@@ -50,6 +50,7 @@ function HolidayList() {
   const [dateLimits, setDateLimits] = useState({ min: "", max: "" });
   // const [formData, setFormData] = useState({ holiday_date: "" });
 
+  const today = new Date().toISOString().split("T")[0];
   const [formData, setFormData] = useState({
     title: "",
     holiday_date: "",
@@ -895,6 +896,8 @@ function HolidayList() {
       );
     });
 
+  console.warn("Filtered Sections ", filteredSections);
+
   useEffect(() => {
     setPageCount(Math.ceil(filteredSections.length / pageSize));
   }, [filteredSections, pageSize]);
@@ -903,7 +906,7 @@ function HolidayList() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
-  // console.log("displayted sections", displayedSections);
+  console.log("displayted sections", displayedSections);
 
   return (
     <>
@@ -1228,6 +1231,7 @@ function HolidayList() {
                       </table>
                     </div>
                     <div className=" flex justify-center pt-2 -mb-3">
+                      {/* {filteredSections.length > pageSize && ( */}
                       <ReactPaginate
                         previousLabel={"Previous"}
                         nextLabel={"Next"}
@@ -1238,7 +1242,7 @@ function HolidayList() {
                         marginPagesDisplayed={1}
                         pageRangeDisplayed={1}
                         onPageChange={handlePageClick}
-                        containerClassName={"pagination"}
+                        containerClassName={"pagination justify-content-center"}
                         pageClassName={"page-item"}
                         pageLinkClassName={"page-link"}
                         previousClassName={"page-item"}
@@ -1247,6 +1251,7 @@ function HolidayList() {
                         nextLinkClassName={"page-link"}
                         activeClassName={"active"}
                       />
+                      {/* )} */}
                     </div>
                   </div>
                 </div>
@@ -1356,7 +1361,7 @@ function HolidayList() {
                       name="holiday_date"
                       value={formData.holiday_date}
                       onChange={handleChangeInput}
-                      min={dateLimits.min}
+                      min={dateLimits.min || today}
                       max={dateLimits.max}
                     />
                     <div className="absolute top-9 left-1/3">
@@ -1379,15 +1384,15 @@ function HolidayList() {
                       name="to_date"
                       value={formData.to_date}
                       onChange={handleChangeInput}
-                      min={formData.holiday_date || dateLimits.min} // Dynamically set min
-                      max={dateLimits.max}
+                      min={formData.holiday_date || today} // Use Start Date as min, fallback to today
+                      max={dateLimits.max || ""}
                     />
                     {/* <div className="absolute top-9 left-1/3">
-                      {fieldErrors.to_date && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.to_date}
-                        </span>
-                      )}
+                    {fieldErrors.to_date && (
+                    <span className="text-danger text-xs">
+                        {fieldErrors.to_date}
+                    </span>
+                     )}
                     </div> */}
                   </div>
                 </div>

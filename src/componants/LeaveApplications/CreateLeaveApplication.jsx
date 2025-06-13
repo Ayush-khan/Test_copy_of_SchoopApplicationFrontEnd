@@ -7,6 +7,8 @@ import { ToastContainer, toast } from "react-toastify";
 const CreateLeaveApplication = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [loading, setLoading] = useState(false);
+  const [loadingForSubmit, setLoadingForSubmit] = useState(false);
+
   const [formData, setFormData] = useState({
     staff_name: "",
     leave_type_id: "",
@@ -271,7 +273,7 @@ const CreateLeaveApplication = () => {
     };
 
     try {
-      setLoading(true);
+      setLoadingForSubmit(true);
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("No authentication token found");
@@ -301,7 +303,7 @@ const CreateLeaveApplication = () => {
       toast.error("Error submitting leave application");
       console.error("Error:", error);
     } finally {
-      setLoading(false);
+      setLoadingForSubmit(false);
     }
   };
 
@@ -537,9 +539,11 @@ const CreateLeaveApplication = () => {
               <button
                 className="mr-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700"
                 onClick={handleSubmit}
+                disabled={loadingForSubmit}
+
                 // disabled={loadingForSearch}
               >
-                Save
+                {loadingForSubmit ? "Saving..." : "Save"}
               </button>
             </div>
           </div>
