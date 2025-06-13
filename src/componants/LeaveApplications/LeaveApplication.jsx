@@ -281,8 +281,38 @@ function LeaveApplicaton() {
                               {leave.status || "-"}
                             </p>
                           </td>
+                          {leave.status !== "Cancelled" &&
+                          leave.status !== "Rejected" ? (
+                            <>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <button
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                  onClick={() => handleSubmitEdit(leave)}
+                                >
+                                  <FontAwesomeIcon icon={faEdit} />
+                                </button>
+                              </td>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <button
+                                  className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                  onClick={() => handleDelete(leave)}
+                                >
+                                  <FontAwesomeIcon icon={faTrash} />
+                                </button>
+                              </td>
+                            </>
+                          ) : (
+                            <>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                {" "}
+                              </td>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                {" "}
+                              </td>
+                            </>
+                          )}
 
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <button
                               className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                               onClick={() => handleSubmitEdit(leave)}
@@ -297,7 +327,7 @@ function LeaveApplicaton() {
                             >
                               <FontAwesomeIcon icon={faTrash} />
                             </button>
-                          </td>
+                          </td> */}
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <button
                               className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
