@@ -268,7 +268,54 @@ const DashboardContent = () => {
               }
             />
           </Link> */}
-          <Link to="/approveLeavelist" className="no-underline">
+
+          {roleId === null ? (
+            // Skeleton card
+            <div className="flex justify-between animate-pulse bg-white rounded shadow-md p-4 w-full h-[114px] border border-gray-200">
+              <div className="relative -top-2 h-20 bg-gray-300 rounded w-1/2"></div>
+              <div className="relative top-3 h-10 bg-gray-300 rounded w-1/3"></div>
+            </div>
+          ) : roleId === "M" ? (
+            // Approve Leave card for roleId "M"
+            <Link to="/approveLeavelist" className="no-underline">
+              <Card
+                title="Approve Leave"
+                value={ticketCount}
+                color="#FFC107"
+                icon={
+                  <RiPassValidFill
+                    style={{
+                      color: "#C03078",
+                      backgroundColor: "white",
+                      padding: "10px",
+                      borderRadius: "50%",
+                    }}
+                  />
+                }
+              />
+            </Link>
+          ) : (
+            // Ticketing Module card for all other roles
+            <Link to="/ticktinglist" className="no-underline">
+              <Card
+                title="Ticketing Module"
+                value={ticketCount}
+                color="#FFC107"
+                icon={
+                  <IoTicket
+                    style={{
+                      color: "#30C790",
+                      backgroundColor: "white",
+                      padding: "10px",
+                      borderRadius: "50%",
+                    }}
+                  />
+                }
+              />
+            </Link>
+          )}
+
+          {/* <Link to="/approveLeavelist" className="no-underline">
             <Card
               title="Approve Leave"
               value={ticketCount}
@@ -276,7 +323,7 @@ const DashboardContent = () => {
               icon={
                 <RiPassValidFill
                   style={{
-                    color: "#C03098",
+                    color: "#C03078",
                     backgroundColor: "white",
                     padding: "10px",
                     borderRadius: "50%",
@@ -284,7 +331,7 @@ const DashboardContent = () => {
                 />
               }
             />
-          </Link>
+          </Link> */}
           {roleId === null ? (
             // Skeleton card
             <div className="flex justify-between animate-pulse bg-white rounded shadow-md p-4 w-full h-[114px] border border-gray-200">
