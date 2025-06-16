@@ -552,7 +552,7 @@ const TeacherAttendanceDailyReport = () => {
                             ) : (
                               <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                                 <div className=" text-center text-xl text-red-700">
-                                  Oops! No data found for Prsent Staff..
+                                  Oops! No data found for Present Staff..
                                 </div>
                               </div>
                             )}

@@ -100,19 +100,6 @@ function NonTeachingStaff() {
 
   // Apply filtering logic
   const searchLower = searchTerm.trim().toLowerCase();
-  //   const filteredClasses = classes.filter((student) => {
-  //     const fullName = `${student.first_name} ${student.mid_name || ""} ${
-  //       student.last_name
-  //     }`.toLowerCase();
-  //     const className = student.classname?.toString().toLowerCase() || "";
-  //     const sectionName = student.sectionname?.toString().toLowerCase() || "";
-
-  //     return (
-  //       fullName.includes(searchLower) ||
-  //       className.includes(searchLower) ||
-  //       sectionName.includes(searchLower)
-  //     );
-  //   });
 
   const filteredClasses = classes.filter((staff) => {
     const name = staff.name?.toLowerCase() || "";
@@ -188,9 +175,7 @@ function NonTeachingStaff() {
                       <th className="px-2 text-center   lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Designation{" "}
                       </th>
-                      <th className="px-2  text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Class
-                      </th>
+
                       <th className="px-2 text-center   lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Phone No.
                       </th>
@@ -229,13 +214,7 @@ function NonTeachingStaff() {
                               {classItem.designation}
                             </p>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {classItem.sectionname}
-                              {"-"}
-                              {classItem.sectionname}
-                            </p>
-                          </td>
+
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {classItem.phone}
