@@ -12,11 +12,8 @@ import * as XLSX from "xlsx";
 
 const TeacherAttendanceDailyReport = () => {
   const API_URL = import.meta.env.VITE_API_URL;
-  const [selectedStudent, setSelectedStudent] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
-  const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
   // const [selectedMonth, setSelectedMonth] = useState(null);
   const navigate = useNavigate();
@@ -34,7 +31,6 @@ const TeacherAttendanceDailyReport = () => {
 
   useEffect(() => {
     fetchExams();
-    // handleSearch();
   }, []);
 
   const fetchExams = async () => {
@@ -54,63 +50,6 @@ const TeacherAttendanceDailyReport = () => {
       setLoadingExams(false);
     }
   };
-
-  // Handle search and fetch parent information
-
-  // const handleSearch = async () => {
-  //   setLoadingForSearch(false);
-  //   if (!toDate) {
-  //     setStudentError("Please select Date.");
-  //     setLoadingForSearch(false);
-  //     return;
-  //   }
-  //   setSearchTerm("");
-  //   try {
-  //     setLoadingForSearch(true); // Start loading
-  //     setTimetable([]);
-  //     const token = localStorage.getItem("authToken");
-  //     const params = {};
-  //     if (toDate) params.date = toDate;
-  //     // if (selectedStudentId) params.month = selectedStudentId;
-
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_staffdailyattendancereport`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params,
-  //       }
-  //     );
-
-  //     if (
-  //       !response?.data?.data ||
-  //       (!response.data.data.absent_staff?.length &&
-  //         !response.data.data.late_staff?.length &&
-  //         !response.data.data.present_staff?.length)
-  //     ) {
-  //       toast.error("Teacher Attendance Daily Report data not found.");
-  //       setTimetable([]);
-  //     } else {
-  //       const {
-  //         absent_staff = [],
-  //         late_staff = [],
-  //         present_staff = [],
-  //       } = response.data.data;
-
-  //       const mergedData = [...absent_staff, ...late_staff, ...present_staff];
-
-  //       setTimetable(mergedData);
-  //       setPageCount(Math.ceil(mergedData.length / pageSize));
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching Teacher  Attendance Daily Report:", error);
-  //     toast.error(
-  //       "Error fetching Teacher Attendance Daily Report. Please try again."
-  //     );
-  //   } finally {
-  //     setIsSubmitting(false); // Re-enable the button after the operation
-  //     setLoadingForSearch(false);
-  //   }
-  // };
 
   const handleSearch = async () => {
     setLoadingForSearch(false);
@@ -192,125 +131,6 @@ const TeacherAttendanceDailyReport = () => {
       setLoadingForSearch(false);
     }
   };
-
-  // const handlePrint = () => {
-  //   const printTitle = `Teacher Attendance Daily Report ${
-  //     toDate ? `List of  ${toDate}` : ": For All Satff "
-  //   }`;
-  //   const printContent = `
-  //   <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
-  //        <h5 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
-  //   <div id="tableHeading" class="text-center w-3/4">
-  //     <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-2">
-  //       <thead>
-  //         <tr class="bg-gray-100">
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Name</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Employee Id</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Punch Date</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">In Time</th>
-  //           <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Out Time</th>
-  //         </tr>
-  //       </thead>
-  //       <tbody>
-  //         ${displayedPresent
-  //           .map(
-  //             (student, index) => `
-  //       <tr class="text-sm">
-  //         <td class="px-2 text-center py-2 border border-black">
-  //           ${index + 1}
-  //         </td>
-  //         <td class="px-2 text-center py-2 border border-black">
-  //           ${student?.name || " "}
-  //         </td>
-  //          <td class="px-2 text-center py-2 border border-black">
-  //           ${student?.employee_id || " "}
-  //         </td>
-  //         <td class="px-2 text-center py-2 border border-black">
-  //           ${student?.date_part || " "}
-  //         </td>
-  //         <td class="px-2 text-center py-2 border border-black">
-  //           ${student?.punch_in_time || " "}
-  //         </td>
-  //         <td class="px-2 text-center py-2 border border-black">
-  //         ${student?.punch_out_time || " "}
-  //         </td>
-  //       </tr>`
-  //           )
-  //           .join("")}
-  //       </tbody>
-  //     </table>
-  //   </div>
-  // </div>`;
-
-  //   const printWindow = window.open("", "_blank", "width=1000,height=800");
-
-  //   printWindow.document.write(`
-  //   <html>
-  //     <head>
-  //       <title>${printTitle}</title>
-  //       <style>
-  //               @page { margin: 0; }
-  //       body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-
-  //       /* Increase width */
-  //       #tableMain {
-  //         width: 100%;
-  //         display: flex;
-  //         flex-direction: column;
-  //         align-items: center;
-  //       }
-
-  //       h5 {
-  //         width: 100%;
-  //         text-align: center;
-  //         font-size: 1.5em;
-  //         font-weight: bold;
-  //         margin-bottom: 10px;
-  //       }
-
-  //       #tableContainer {
-  //         width: 100%;
-  //         display: flex;
-  //         justify-content: center;
-  //       }
-
-  //       table {
-  //         width: 80%; /* Increase table width */
-  //         border-spacing: 0;
-  //          margin: auto;
-  //       }
-
-  //       th, td {
-  //         border: 1px solid gray;
-  //         padding: 12px;
-  //         text-align: center;
-  //         font-size: 16px; /* Increase font size */
-  //       }
-
-  //       th {
-  //         background-color: #f9f9f9;
-  //         font-size: 1.1em;
-  //       }
-  //       </style>
-  //     </head>
-  //        <body>
-  //       <div id="printContainer">
-  //           ${printContent}
-  //       </div>
-  //   </body>
-  //   </html>
-  // `);
-
-  //   printWindow.document.close();
-
-  //   // Ensure content is fully loaded before printing
-  //   printWindow.onload = function () {
-  //     printWindow.focus();
-  //     printWindow.print();
-  //     printWindow.close(); // Optional: close after printing
-  //   };
-  // };
 
   const handlePrint = () => {
     const printTitle = `Teacher Attendance Daily Report ${
@@ -439,111 +259,74 @@ const TeacherAttendanceDailyReport = () => {
     };
   };
 
-  const handleDownloadEXL = () => {
-    if (!displayedPresent || displayedPresent.length === 0) {
-      toast.error("No data available to download the Excel sheet.");
-      return;
-    }
+  // const filterStaffByStatus = (status) =>
+  //   Array.isArray(timetable)
+  //     ? timetable.filter((staff) => {
+  //         if (staff.status !== status) return false;
 
-    // Define headers matching the print table
-    const headers = [
-      "Sr No.",
-      "Name",
-      "Employee Id",
-      "Punch Date",
-      "In Time",
-      "Out Time",
-    ];
+  //         const searchLower = searchTerm.toString().trim().toLowerCase();
+  //         const staffName = staff?.name?.toString().toLowerCase() || "";
+  //         const date = staff?.date_part?.toString().toLowerCase() || "";
+  //         const inTime = staff?.punch_in_time?.toString().toLowerCase() || "";
+  //         const outTime = staff?.punch_out_time?.toString().toLowerCase() || "";
+  //         const lateTime = staff?.lateTime?.toString().toLowerCase() || "";
+  //         const employeeId = staff?.employee_id?.toString().toLowerCase() || "";
 
-    // Convert displayedPresent data to array format for Excel
-    const data = displayedPresent.map((student, index) => [
-      index + 1,
-      student?.period || " ",
-      student?.date || " ",
-      student?.teachername || " ",
-      `${student?.classname || " "} ${student?.sectionname || " "} (${
-        student?.name || " "
-      })`,
-      student?.substitutename || " ",
-    ]);
+  //         return (
+  //           staffName.includes(searchLower) ||
+  //           date.includes(searchLower) ||
+  //           inTime.includes(searchLower) ||
+  //           outTime.includes(searchLower) ||
+  //           lateTime.includes(searchLower) ||
+  //           employeeId.includes(searchLower)
+  //         );
+  //       })
+  //     : [];
 
-    // Create a worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
-    const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
-    worksheet["!cols"] = columnWidths;
+  // const filteredAbsent = filterStaffByStatus("Absent");
+  // const filteredLate = filterStaffByStatus("Late");
+  // const filteredPresent = filterStaffByStatus("Present");
 
-    // Create a workbook and append the worksheet
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(
-      workbook,
-      worksheet,
-      "Teacher Monthly Attendance Details Report"
-    );
+  // const displayedPresent = filteredPresent.slice(currentPage * pageSize);
+  // const displayedAbsent = filteredAbsent.slice(currentPage * pageSize);
+  // const displayedLate = filteredLate.slice(currentPage * pageSize);
+  const filteredStaff = Array.isArray(timetable)
+    ? timetable.filter((staff) => {
+        const searchLower = searchTerm.toString().trim().toLowerCase();
 
-    // Generate and download the Excel file
+        const staffName = staff?.name?.toString().toLowerCase() || "";
+        const date = staff?.date_part?.toString().toLowerCase() || "";
+        const inTime = staff?.punch_in_time?.toString().toLowerCase() || "";
+        const outTime = staff?.punch_out_time?.toString().toLowerCase() || "";
+        const lateTime = staff?.late_time?.toString().toLowerCase() || "";
+        const employeeId = staff?.employee_id?.toString().toLowerCase() || "";
 
-    const fileName = `Teacher_Attendance_Monthly_Detailed_Report ${
-      selectedStudent?.label
-        ? `List of Month ${selectedStudent.label}`
-        : ": For All Teacher "
-    }.xlsx`;
-    XLSX.writeFile(workbook, fileName);
-  };
+        return (
+          staffName.includes(searchLower) ||
+          date.includes(searchLower) ||
+          inTime.includes(searchLower) ||
+          outTime.includes(searchLower) ||
+          lateTime.includes(searchLower) ||
+          employeeId.includes(searchLower)
+        );
+      })
+    : [];
+  const filteredPresent = filteredStaff.filter((s) => s.status === "Present");
+  const filteredLate = filteredStaff.filter((s) => s.status === "Late");
+  const filteredAbsent = filteredStaff.filter((s) => s.status === "Absent");
 
-  console.log("row", timetable);
-
-  // const filteredSections = timetable.filter((student) => {
-  //   const searchLower = searchTerm.toLowerCase();
-
-  //   // Convert period to string before calling `.toLowerCase()`
-  //   const period = student?.period?.toString().toLowerCase() || "";
-  //   const date = student?.date?.toLowerCase() || "";
-  //   const teacherName = student?.teachername?.toLowerCase() || "";
-  //   const classInfo = `${student?.classname || ""} ${
-  //     student?.sectionname || ""
-  //   } (${student?.name || ""})`.toLowerCase();
-  //   const substituteName = student?.substitutename?.toLowerCase() || "";
-
-  //   return (
-  //     period.includes(searchLower) ||
-  //     date.includes(searchLower) ||
-  //     teacherName.includes(searchLower) ||
-  //     classInfo.includes(searchLower) ||
-  //     substituteName.includes(searchLower)
-  //   );
-  // });
-
-  const filterStaffByStatus = (status) =>
-    Array.isArray(timetable)
-      ? timetable.filter((staff) => {
-          if (staff.status !== status) return false;
-
-          const searchLower = searchTerm.toString().trim().toLowerCase();
-          const staffName = staff?.name?.toString().toLowerCase() || "";
-          const date = staff?.date_part?.toString().toLowerCase() || "";
-          const inTime = staff?.punch_in_time?.toString().toLowerCase() || "";
-          const outTime = staff?.punch_out_time?.toString().toLowerCase() || "";
-          const lateTime = staff?.lateTime?.toString().toLowerCase() || "";
-          const employeeId = staff?.employee_id?.toString().toLowerCase() || "";
-
-          return (
-            staffName.includes(searchLower) ||
-            date.includes(searchLower) ||
-            inTime.includes(searchLower) ||
-            outTime.includes(searchLower) ||
-            lateTime.includes(searchLower) ||
-            employeeId.includes(searchLower)
-          );
-        })
-      : [];
-
-  const filteredAbsent = filterStaffByStatus("Absent");
-  const filteredLate = filterStaffByStatus("Late");
-  const filteredPresent = filterStaffByStatus("Present");
-
-  const displayedPresent = filteredPresent.slice(currentPage * pageSize);
-  const displayedAbsent = filteredAbsent.slice(currentPage * pageSize);
-  const displayedLate = filteredLate.slice(currentPage * pageSize);
+  const displayedPresent = filteredPresent.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize
+  );
+  const displayedLate = filteredLate.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize
+  );
+  const displayedAbsent = filteredAbsent.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize
+  );
 
   return (
     <>
@@ -573,7 +356,7 @@ const TeacherAttendanceDailyReport = () => {
               <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                 <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-y-3 md:gap-y-0 mb-4">
                   {/* Date Picker */}
-                  <div className="flex items-center w-full md:w-1/3">
+                  <div className="flex  mt-2 items-center w-full md:w-1/3">
                     <label
                       htmlFor="dateSelect"
                       className="w-1/3 text-md pl-0 md:pl-5"
@@ -585,10 +368,16 @@ const TeacherAttendanceDailyReport = () => {
                         type="date"
                         id="toDate"
                         value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
+                        onChange={(e) => {
+                          setToDate(e.target.value);
+                          setStudentError(""); // 👈 Clear error when user changes the date
+                        }}
                         className="w-full px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         disabled={loadingExams}
                       />
+                      <div className=" absolute text-red-500 text-xs mt-1">
+                        {studentError && <span>{studentError}</span>}
+                      </div>
                     </div>
                   </div>
 
