@@ -697,6 +697,7 @@ function HolidayList() {
     setFormData({ title: "", holiday_date: "", to_date: "" }); // Clear the form data when closing
     setFieldErrors({ message: "" }); // Reset any errors
     setShowAddModal(false);
+
     setShowEditModal(false);
     setShowDeleteModal(false);
     setShowDActiveModal(false);
@@ -735,12 +736,25 @@ function HolidayList() {
   };
 
   // Handle file selection
+  // const handleFileChange = (event) => {
+  //   const file = event.target.files[0];
+  //   setSelectedFile(file); // Set the selected file to state
+  //   setErrorMessage(""); // Clear any previous error
+  //   setUploadStatus(""); // Clear any previous success
+  //   setErrorMessageUrl("");
+  // };
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    setSelectedFile(file); // Set the selected file to state
-    setErrorMessage(""); // Clear any previous error
-    setUploadStatus(""); // Clear any previous success
-    setErrorMessageUrl("");
+
+    if (file) {
+      setSelectedFile(file);
+      setErrorMessage("");
+      setUploadStatus("");
+      setErrorMessageUrl("");
+
+      // Reset input value so same file can be selected again
+      event.target.value = null;
+    }
   };
 
   const downloadCsv = async (fileUrl) => {
