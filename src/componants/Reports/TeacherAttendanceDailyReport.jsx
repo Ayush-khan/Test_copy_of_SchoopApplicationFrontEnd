@@ -23,7 +23,11 @@ const TeacherAttendanceDailyReport = () => {
   const [attendanceCount, setAttendanceCount] = useState("0/0");
 
   const [timetable, setTimetable] = useState([]);
-  const [toDate, setToDate] = useState(null);
+  // const [toDate, setToDate] = useState(null);
+  const [toDate, setToDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // returns 'YYYY-MM-DD'
+  });
 
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
@@ -290,6 +294,7 @@ const TeacherAttendanceDailyReport = () => {
   // const displayedPresent = filteredPresent.slice(currentPage * pageSize);
   // const displayedAbsent = filteredAbsent.slice(currentPage * pageSize);
   // const displayedLate = filteredLate.slice(currentPage * pageSize);
+
   const filteredStaff = Array.isArray(timetable)
     ? timetable.filter((staff) => {
         const searchLower = searchTerm.toString().trim().toLowerCase();
