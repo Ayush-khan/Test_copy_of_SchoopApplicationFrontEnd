@@ -236,6 +236,9 @@ import EditLeaveApplicationForPrinciple from "../componants/LeaveApplications/Pr
 import CreateLeaveApplicationForPrinciple from "../componants/LeaveApplications/PrincipleLeaveApplication/CreateLeaveApplicationForPrinciple.jsx";
 import StudentIdCardDetailedReport from "../componants/Reports/StudentReportPrinciple/StudentIdCardDetailedReport.jsx";
 import TeacherAttendanceDailyReport from "../componants/Reports/TeacherAttendanceDailyReport.jsx";
+import TeacherRemarkandObservation from "../componants/RemarkAndObserVationForPrinciple/RemarkandObservationforTeachers.jsx";
+import EditTeacherRemarkandObservation from "../componants/RemarkAndObserVationForPrinciple/EditRemarkandObservationforTeachers.jsx";
+import CreateRemarkandObservationTeacher from "../componants/RemarkAndObserVationForPrinciple/CreateRemarkandObservationforTeachers.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -906,6 +909,24 @@ function Index() {
         <Route
           path="/TeacherADReport"
           element={<PrivateRoute element={<TeacherAttendanceDailyReport />} />}
+        />
+
+        {/* Remark and observation modules for principle */}
+        <Route
+          path="/remObsTeacher"
+          element={<PrivateRoute element={<TeacherRemarkandObservation />} />}
+        />
+        {/* <Route
+          path="/createRemObsTeacher"
+          element={
+            <PrivateRoute element={<CreateRemarkandObservationTeacher />} />
+          }
+        /> */}
+        <Route
+          path="/remObsTeacher/edit/:id"
+          element={
+            <PrivateRoute element={<EditTeacherRemarkandObservation />} />
+          }
         />
       </Route>
 
