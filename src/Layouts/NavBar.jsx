@@ -822,7 +822,9 @@ function NavBar() {
 
     if (!token) {
       console.error("No authentication token found");
-      return;
+      toast.error("Authentication token not found Please login again");
+      navigate("/"); // 👈 Redirect to login
+      return; // 👈
     }
 
     try {
@@ -853,7 +855,10 @@ function NavBar() {
     const fetcUSerProfilehData = async () => {
       const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error("No authentication token is found");
+        // throw new Error("No authentication token is found");
+        toast.error("Authentication token not found Please login again");
+        navigate("/"); // 👈 Redirect to login
+        return; // 👈
       }
       // console.log("jfdshfoisafhaios");
       try {
@@ -877,6 +882,21 @@ function NavBar() {
           error
         );
       }
+      // working well code
+      //   const errorMsg = error.response?.data?.message;
+
+      //   // Handle expired token
+      //   if (errorMsg === "Token has expired") {
+      //     toast.error("Session expired. Please login again.");
+      //     localStorage.removeItem("authToken"); // Optional: clear old token
+      //     navigate("/"); // Redirect to login
+      //     return;
+      //   }
+
+      //   // Other error handling
+      //   toast.error(errorMsg || "Something went wrong.");
+      //   console.error("Error fetching profile:", error);
+      // }
     };
 
     fetcUSerProfilehData();
@@ -950,7 +970,9 @@ function NavBar() {
 
       if (!token) {
         console.error("No authentication token found");
-        return;
+        toast.error("Authentication token not found Please login again");
+        navigate("/"); // 👈 Redirect to login
+        return; // 👈
       }
 
       try {

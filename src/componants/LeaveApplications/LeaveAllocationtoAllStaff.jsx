@@ -35,7 +35,11 @@ function LeaveAllocationtoAllStaff() {
 
   const handleAllocatedLeaveChange = (e) => {
     setFieldErrors((prev) => ({ ...prev, leave_allocated: "" }));
-    setNewLeaveAllocated(e.target.value);
+    const value = e.target.value;
+    if (/^\d*\.?\d*$/.test(value)) {
+      setNewLeaveAllocated(value);
+    }
+    // setNewLeaveAllocated(e.target.value);
   };
 
   // fetch leave type
@@ -164,10 +168,13 @@ function LeaveAllocationtoAllStaff() {
                   Leave Allocated <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="text"
+                  // type="text"
+                  type="number"
+                  min="0" // or min="0" if zero is allowed
+                  maxLength={5} // e.g. "999.9"
                   value={newLeaveAllocated}
                   onChange={handleAllocatedLeaveChange}
-                  className="h-10 text-gray-600 p-1 border-1 border-gray-300 outline-blue-400 rounded-md w-[60%] md:w-[55%] "
+                  className="h-10 text-gray-600 p-1 pl-4 border-1 border-gray-300 outline-blue-400 rounded-md w-[60%] md:w-[55%] "
                   placeholder=""
                 />
 

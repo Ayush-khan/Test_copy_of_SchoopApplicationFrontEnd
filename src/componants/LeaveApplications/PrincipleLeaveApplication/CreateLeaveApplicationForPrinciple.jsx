@@ -1119,6 +1119,7 @@ const CreateLeaveApplicationForPrinciple = () => {
                   type="number"
                   id="no_of_days"
                   name="no_of_days"
+                  maxLength={5}
                   value={formData.no_of_days}
                   step="0.5"
                   min="0.5"
@@ -1144,7 +1145,7 @@ const CreateLeaveApplicationForPrinciple = () => {
                   Reason
                 </label>
                 <textarea
-                  maxLength={200}
+                  maxLength={500}
                   id="reason"
                   name="reason"
                   value={formData.reason}
@@ -1163,7 +1164,7 @@ const CreateLeaveApplicationForPrinciple = () => {
                   Approver's Comments
                 </label>
                 <textarea
-                  maxLength={200}
+                  maxLength={500}
                   id="approverscomment"
                   name="approverscomment"
                   value={formData.approverscomment}

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Styles from "./EventCard.module.css"; // Import CSS module
 import Loader from "../common/LoaderFinal/DashboardLoadder/Loader";
+import { useNavigate } from "react-router-dom";
 
 const EventCard = () => {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -11,6 +12,7 @@ const EventCard = () => {
   const currentYear = new Date().getFullYear();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const months = [
     { value: 0, label: "January" },
@@ -35,7 +37,10 @@ const EventCard = () => {
       console.log("token is", token);
 
       if (!token) {
-        throw new Error("No authentication token found");
+        // toast.error("Authentication token not found Please login again");
+        navigate("/"); // 👈 Redirect to login
+        return; // 👈
+        // throw new Error("No authentication token found");
       }
 
       const response = await axios.get(

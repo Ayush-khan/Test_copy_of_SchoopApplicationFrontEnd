@@ -504,6 +504,7 @@ const CreateLeaveApplication = () => {
                 value={formData.no_of_days}
                 step="0.5"
                 min="0.5"
+                maxLength={5}
                 onChange={handleChange}
                 onFocus={() => {
                   manuallyEditedNoOfDaysRef.current = true; // 👈 This is crucial
@@ -526,7 +527,7 @@ const CreateLeaveApplication = () => {
               </label>
               <textarea
                 type="text"
-                maxLength={200}
+                maxLength={500}
                 id="reason"
                 name="reason"
                 value={formData.reason}

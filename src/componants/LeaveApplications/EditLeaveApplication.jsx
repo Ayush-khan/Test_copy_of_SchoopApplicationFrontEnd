@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -513,6 +513,7 @@ const EditLeaveApplication = () => {
                 type="number" // Change to "number" to support decimals
                 id="no_of_days"
                 name="no_of_days"
+                maxLength={5}
                 value={formData.no_of_days}
                 step="0.5" // Allows decimals (e.g., 0.5, 1.75)
                 min="0.5" // Ensures that 0.01 or more is entered
@@ -554,7 +555,7 @@ const EditLeaveApplication = () => {
               </label>
               <textarea
                 type="text"
-                maxLength={200}
+                maxLength={500}
                 id="reason"
                 name="reason"
                 value={formData.reason}
@@ -569,7 +570,7 @@ const EditLeaveApplication = () => {
               </label>
               <textarea
                 type="text"
-                maxLength={200}
+                maxLength={500}
                 id="approval"
                 name="approval"
                 value={formData.reason_for_rejection}

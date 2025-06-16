@@ -492,6 +492,7 @@ const EditLeaveApplicationForPrinciple = () => {
                 type="number"
                 id="no_of_days"
                 name="no_of_days"
+                maxLength={5}
                 value={formData.no_of_days}
                 step="0.5"
                 min="0.5"
@@ -553,6 +554,7 @@ const EditLeaveApplicationForPrinciple = () => {
                 <textarea
                   id="reason"
                   name="reason"
+                  maxLength={500}
                   value={formData.reason}
                   onChange={handleChange}
                   readOnly
@@ -568,6 +570,7 @@ const EditLeaveApplicationForPrinciple = () => {
                 <textarea
                   id="reason_for_rejection"
                   name="reason_for_rejection"
+                  maxLength={500}
                   value={formData.reason_for_rejection}
                   onChange={handleChange}
                   rows="2"
