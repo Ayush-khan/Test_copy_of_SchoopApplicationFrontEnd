@@ -19,6 +19,8 @@ const LeavingCertificate = () => {
   const [nameError, setNameError] = useState("");
   const [nameErrorForClass, setNameErrorForClass] = useState("");
   const [selectedClass, setSelectedClass] = useState(null);
+  const [selectedClassForSubject, setSelectedClassForSubject] = useState("");
+
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
@@ -280,8 +282,22 @@ const LeavingCertificate = () => {
     }
   };
 
+  // const handleClassSelect = (selectedOption) => {
+  //   setSelectedClass(selectedOption);
+  //   setSelectedClassForSubject(selectedOption?.label);
+  //   setSelectedStudent(null);
+  //   setSelectedStudentId(null);
+  //   setClassIdForSearch(selectedOption?.value);
+  //   fetchStudentNameWithClassId(selectedOption?.value);
+  // };
+
   const handleClassSelect = (selectedOption) => {
     setSelectedClass(selectedOption);
+
+    // Extract only class name from label, e.g., "10 A (170)" → "10"
+    const classNameOnly = selectedOption?.label?.split(" ")[0] || "";
+
+    setSelectedClassForSubject(classNameOnly);
     setSelectedStudent(null);
     setSelectedStudentId(null);
     setClassIdForSearch(selectedOption?.value);
@@ -963,6 +979,7 @@ const LeavingCertificate = () => {
           part_of: "",
         });
         setSelectedClass(null);
+        setSelectedClassForSubject("");
         setSelectedStudent(null);
 
         setTimeout(() => setParentInformation(null), 3000);
@@ -1526,7 +1543,7 @@ const LeavingCertificate = () => {
                         className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                     </div>{" "}
-                    {/* <div className="grid   col-span-2 row-span-2 ">
+                    <div className="grid   col-span-2 row-span-2 ">
                       <label
                         htmlFor="subjects"
                         className="block font-bold text-xs  col-span-3"
@@ -1534,7 +1551,6 @@ const LeavingCertificate = () => {
                         Subjects Studied <span className="text-red-500">*</span>
                       </label>
 
-                     
                       {formData.subjectsFor &&
                       formData.subjectsFor.length > 0 ? (
                         formData.subjectsFor.map((subject, index) => (
@@ -1564,36 +1580,34 @@ const LeavingCertificate = () => {
                         </p>
                       )}
 
-                    
-                      {formData.class_id_for_subj &&
-                        formData.class_id_for_subj === 109 && (
-                          <div className="col-span-1 relative  ">
-                            <label className="inline-flex items-center">
-                              <input
-                                type="checkbox"
-                                name="subjects"
-                                value="Basic Mathematics"
-                                checked={formData.selectedSubjects.includes(
-                                  "Basic Mathematics"
-                                )}
-                                onChange={(e) =>
-                                  handleSubjectSelection(e, "Basic Mathematics")
-                                }
-                                className="form-checkbox h-4 w-4 text-blue-600"
-                              />
-                              <span className="ml-1 text-sm">
-                                Basic Mathematics
-                              </span>
-                            </label>
-                          </div>
-                        )}
+                      {selectedClassForSubject == "10" && (
+                        <div className="col-span-1 relative  ">
+                          <label className="inline-flex items-center">
+                            <input
+                              type="checkbox"
+                              name="subjects"
+                              value="Basic Mathematics"
+                              checked={formData.selectedSubjects.includes(
+                                "Basic Mathematics"
+                              )}
+                              onChange={(e) =>
+                                handleSubjectSelection(e, "Basic Mathematics")
+                              }
+                              className="form-checkbox h-4 w-4 text-blue-600"
+                            />
+                            <span className="ml-1 text-sm">
+                              Basic Mathematics
+                            </span>
+                          </label>
+                        </div>
+                      )}
                       {errors.selectedSubjects && (
                         <span className="text-red-500 text-xs ml-1 h-1 col-span-3">
                           {errors.selectedSubjects}
                         </span>
                       )}
-                    </div> */}
-                    <div className="grid col-span-2 row-span-2">
+                    </div>
+                    {/* <div className="grid col-span-2 row-span-2">
                       <label
                         htmlFor="subjects"
                         className="block font-bold text-xs col-span-3"
@@ -1601,7 +1615,6 @@ const LeavingCertificate = () => {
                         Subjects Studied <span className="text-red-500">*</span>
                       </label>
 
-                      {/* Render fetched subjects */}
                       {formData.subjectsFor &&
                       formData.subjectsFor.length > 0 ? (
                         formData.subjectsFor.map((subject, index) => (
@@ -1631,7 +1644,6 @@ const LeavingCertificate = () => {
                         </p>
                       )}
 
-                      {/* ✅ Add Basic Mathematics if class label is exactly "10" */}
                       {selectedClass?.label?.trim().startsWith("10") && (
                         <div className="col-span-1 relative">
                           <label className="inline-flex items-center">
@@ -1659,7 +1671,7 @@ const LeavingCertificate = () => {
                           {errors.selectedSubjects}
                         </span>
                       )}
-                    </div>
+                    </div> */}
                     <div>
                       <label
                         htmlFor="subcaste"

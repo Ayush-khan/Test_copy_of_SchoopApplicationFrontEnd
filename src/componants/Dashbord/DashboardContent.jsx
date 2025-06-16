@@ -15,6 +15,7 @@ import TableFeeCollect from "./TableFeeCollect.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import LoadingSpinner from "../common/LoadingSpinner.jsx";
 import { ToastContainer, toast } from "react-toastify";
+import { RiPassValidFill } from "react-icons/ri";
 
 const DashboardContent = () => {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -249,7 +250,8 @@ const DashboardContent = () => {
               }
             />
           </Link>
-          <Link to="/ticktinglist" className="no-underline">
+          {/* Hide as of now after prepare it then we will show it */}
+          {/* <Link to="/ticktinglist" className="no-underline">
             <Card
               title="Ticketing Module"
               value={ticketCount}
@@ -265,8 +267,24 @@ const DashboardContent = () => {
                 />
               }
             />
+          </Link> */}
+          <Link to="/approveLeavelist" className="no-underline">
+            <Card
+              title="Approve Leave"
+              value={ticketCount}
+              color="#FFC107"
+              icon={
+                <RiPassValidFill
+                  style={{
+                    color: "#C03098",
+                    backgroundColor: "white",
+                    padding: "10px",
+                    borderRadius: "50%",
+                  }}
+                />
+              }
+            />
           </Link>
-
           {roleId === null ? (
             // Skeleton card
             <div className="flex justify-between animate-pulse bg-white rounded shadow-md p-4 w-full h-[114px] border border-gray-200">

@@ -239,6 +239,8 @@ import TeacherAttendanceDailyReport from "../componants/Reports/TeacherAttendanc
 import TeacherRemarkandObservation from "../componants/RemarkAndObserVationForPrinciple/RemarkandObservationforTeachers.jsx";
 import EditTeacherRemarkandObservation from "../componants/RemarkAndObserVationForPrinciple/EditRemarkandObservationforTeachers.jsx";
 import CreateRemarkandObservationTeacher from "../componants/RemarkAndObserVationForPrinciple/CreateRemarkandObservationforTeachers.jsx";
+import ApproveLeave from "../componants/AllTableList/ApproveLeaveList.jsx";
+import ApproveLeaveList from "../componants/AllTableList/ApproveLeaveList.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -832,6 +834,11 @@ function Index() {
           path="/ticktinglist"
           element={<PrivateRoute element={<TickitingCountList />} />}
         />
+        {/* Approve leave module card of dashboard */}
+        <Route
+          path="/approveLeavelist"
+          element={<PrivateRoute element={<ApproveLeaveList />} />}
+        />
         <Route
           path="/feependinglist"
           element={<PrivateRoute element={<FeePendingList />} />}
@@ -916,12 +923,7 @@ function Index() {
           path="/remObsTeacher"
           element={<PrivateRoute element={<TeacherRemarkandObservation />} />}
         />
-        {/* <Route
-          path="/createRemObsTeacher"
-          element={
-            <PrivateRoute element={<CreateRemarkandObservationTeacher />} />
-          }
-        /> */}
+
         <Route
           path="/remObsTeacher/edit/:id"
           element={

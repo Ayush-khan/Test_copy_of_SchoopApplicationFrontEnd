@@ -59,7 +59,6 @@ const EditLeavingCertificate = () => {
     attendance: "",
     subjectsFor: [],
     subjects: [],
-
     reason_leaving: "",
     application_date: "",
     leaving_date: "",
@@ -108,6 +107,7 @@ const EditLeavingCertificate = () => {
             sr_no: fetchedData.sr_no || "",
             stud_id: fetchedData.stud_id || "",
             grn_no: fetchedData.grn_no || "",
+            class_id_for_subj: response?.data?.data?.studentinformation || " ",
             academicStudent: DataStudentAc.academicStudent || [],
             issue_date: fetchedData.issue_date || "",
             student_id_no: fetchedData.stud_id_no || "",
@@ -301,145 +301,10 @@ const EditLeavingCertificate = () => {
   const [errors, setErrors] = useState({});
   const [backendErrors, setBackendErrors] = useState({});
 
-  // Maximum date for date_of_birth
   const MAX_DATE = "2030-12-31";
   const MIN_DATE = "1996-01-01";
-  // Get today's date in YYYY-MM-DD format
-  // Calculate today's date
+
   const today = new Date().toISOString().split("T")[0];
-
-  // for student and class dropdown
-
-  //   const handleSearch = async () => {
-  //     setNameError("");
-  //     setNameErrorForClass("");
-  //     setErrors({}); // Clears all field-specific errors
-
-  //     if (!selectedClass && !selectedStudent) {
-  //       setNameError("Please select at least one of them.");
-  //       toast.error("Please select at least one of them!");
-  //       return;
-  //     }
-
-  //     setFormData({
-  //       grn_no: "",
-  //       class_id: "",
-  //       issue_date: "",
-  //       student_id_no: "",
-  //       aadhar_no: "",
-  //       first_name: "",
-  //       mid_name: "",
-  //       last_name: "",
-  //       father_name: "",
-  //       mother_name: "",
-  //       nationality: "",
-  //       mother_tongue: "",
-  //       religion: "",
-  //       caste: "",
-  //       subcaste: "",
-  //       birth_place: "",
-  //       dob: "",
-  //       dob_words: "",
-  //       dob_proof: "",
-  //       prev_school_class: "",
-  //       // previous_school_attended: "",
-  //       date_of_admission: "",
-  //       admission_class: "",
-  //       leaving_date: "",
-  //       standard_studying: "",
-  //       last_exam: "",
-  //       subjects: [], // Empty array for selected subjects
-  //       promoted_to: "",
-  //       attendance: "",
-  //       fee_month: "",
-  //       part_of: "",
-  //       selectedActivities: [], // Empty array for selected activities
-  //       application_date: "",
-  //       conduct: "",
-  //       reason_leaving: "",
-  //       remark: "",
-  //       academic_yr: "",
-  //       stud_id: "",
-  //       udise_pen_no: "",
-  //     });
-
-  //     try {
-  //       setLoadingForSearch(true); // Start loading
-  //       const token = localStorage.getItem("authToken");
-  //       const response = await axios.get(
-  //         `${API_URL}/api/get_srnoleavingcertificatedata/${selectedStudentId}`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-
-  //       // Check if data was received and update the form state
-  //       if (response?.data?.data) {
-  //         const fetchedData = response.data.data; // Extract the data
-
-  //         setParentInformation(fetchedData); // Assuming response data contains parent information
-  //         // Extract all subject names for initial selected state
-  //         const allSubjectNames = (fetchedData.classsubject || []).map(
-  //           (subject) => subject.name
-  //         );
-
-  //         console.log("allSubjectNames", allSubjectNames);
-  //         // Populate formData with the fetched data
-  //         setFormData({
-  //           sr_no: fetchedData.sr_no || "",
-  //           class_id: fetchedData.class_id || " ",
-  //           class_id_for_subj: fetchedData.studentinformation.class_id || "",
-  //           grn_no: fetchedData.studentinformation.grn_no || "",
-  //           date: today || "", // Directly from the fetched data
-  //           subjectsFor: fetchedData.classsubject || [],
-  //           academicStudent: fetchedData.academicStudent || [],
-  //           academic_yr: fetchedData.studentinformation?.academic_yr || "", // Preselect first academic year if available
-  //           subjects: allSubjectNames,
-
-  //           selectedSubjects: allSubjectNames, // Initialize with all subjects checked
-  //           // first_name: `${fetchedData.studentinformation?.first_name || ""} ${
-  //           //   fetchedData.studentinformation?.mid_name || ""
-  //           // } ${fetchedData.studentinformation?.last_name || ""}`,
-  //           student_id_no: fetchedData.studentinformation.student_id_no || "",
-  //           first_name: fetchedData.studentinformation.first_name || "",
-  //           mid_name: fetchedData.studentinformation.mid_name || "",
-  //           last_name: fetchedData.studentinformation.last_name || "",
-  //           udise_pen_no: fetchedData.studentinformation.udise_pen_no || "",
-  //           promoted_to: fetchedData.studentinformation.promoted_to || "",
-  //           last_exam: fetchedData.studentinformation.last_exam || "",
-
-  //           stud_id: fetchedData.studentinformation.stud_id || " ",
-  //           father_name: fetchedData.studentinformation.father_name || "",
-  //           mother_name: fetchedData.studentinformation.mother_name || "",
-
-  //           date_of_admission:
-  //             fetchedData.studentinformation.date_of_admission || "",
-  //           religion: fetchedData.studentinformation.religion || "",
-  //           caste: fetchedData.studentinformation.caste || "",
-  //           subcaste: fetchedData.studentinformation.subcaste || "",
-  //           birth_place: fetchedData.studentinformation.birth_place || "", // Adjusted according to the fetched data
-  //           state: fetchedData.studentinformation.state || "",
-  //           mother_tongue: fetchedData.studentinformation.mother_tongue || "",
-  //           dob: fetchedData.studentinformation.dob || "",
-  //           // dob_words: fetchedData.dobinwords || "", // Directly from fetched data
-  //           dob_words: convertDateToWords(fetchedData.studentinformation.dob),
-  //           attendance: fetchedData.total_attendance || "",
-  //           nationality: fetchedData.studentinformation.nationality || "",
-  //           aadhar_no: fetchedData.studentinformation.aadhar_no || "",
-  //           teacher_image_name:
-  //             fetchedData.studentinformation.father_image_name || null, // Assuming this is for a teacher image
-  //           purpose: fetchedData.purpose || " ",
-  //         });
-  //       } else {
-  //         toast.error("No data found for the selected student.");
-  //       }
-  //     } catch (error) {
-  //       console.log("error is", error);
-  //       toast.error("Error fetching data for the selected student.");
-  //     } finally {
-  //       setLoadingForSearch(false);
-  //     }
-  //   };
 
   const validate = () => {
     const newErrors = {};
@@ -649,7 +514,7 @@ const EditLeavingCertificate = () => {
           ...prevData, // Retain the existing formData values
           academic_yr: selectedAcademicYear, // Make sure to retain the selected academic year
           sr_no: fetchedData.sr_no || "",
-          class_id_for_subj: fetchedData.studentinformation.class_id || "",
+          class_id_for_subj: fetchedData.studentinformation || "",
           grn_no: fetchedData.studentinformation.grn_no || "",
           issue_date: today || "",
           subjectsFor: fetchedData.classsubject || [],
@@ -1275,8 +1140,6 @@ const EditLeavingCertificate = () => {
                 >
                   Subjects Studied <span className="text-red-500">*</span>
                 </label>
-                {/* Render checkboxes for each subject */}
-                {/* Render checkboxes for each subject */}
 
                 {formData.subjectsFor && formData.subjectsFor.length > 0 ? (
                   formData.subjectsFor.map((subject, index) => (
@@ -1304,26 +1167,25 @@ const EditLeavingCertificate = () => {
                   </p>
                 )}
                 {/* Conditional extra subject for class 100 */}
-                {formData.class_id_for_subj &&
-                  formData.class_id_for_subj === 109 && (
-                    <div className="col-span-1 relative  ">
-                      <label className="inline-flex items-center">
-                        <input
-                          type="checkbox"
-                          name="subjects"
-                          value="Basic Mathematics"
-                          checked={formData.selectedSubjects.includes(
-                            "Basic Mathematics"
-                          )}
-                          onChange={(e) =>
-                            handleSubjectSelection(e, "Basic Mathematics")
-                          }
-                          className="form-checkbox h-4 w-4 text-blue-600"
-                        />
-                        <span className="ml-1 text-sm">Basic Mathematics</span>
-                      </label>
-                    </div>
-                  )}
+                {formData.class_id_for_subj == "10" && (
+                  <div className="col-span-1 relative  ">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="checkbox"
+                        name="subjects"
+                        value="Basic Mathematics"
+                        checked={formData.selectedSubjects.includes(
+                          "Basic Mathematics"
+                        )}
+                        onChange={(e) =>
+                          handleSubjectSelection(e, "Basic Mathematics")
+                        }
+                        className="form-checkbox h-4 w-4 text-blue-600"
+                      />
+                      <span className="ml-1 text-sm">Basic Mathematics</span>
+                    </label>
+                  </div>
+                )}
                 {errors.selectedSubjects && (
                   <span className="text-red-500 text-xs ml-1 h-1 col-span-3">
                     {errors.selectedSubjects}
