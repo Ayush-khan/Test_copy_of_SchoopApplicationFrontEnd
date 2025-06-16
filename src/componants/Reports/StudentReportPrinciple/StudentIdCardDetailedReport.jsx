@@ -8,6 +8,9 @@ import { RxCross1 } from "react-icons/rx";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleUser } from "@fortawesome/free-solid-svg-icons";
+import { FaUserLarge } from "react-icons/fa6";
 
 const StudentIdCardDetailedReport = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -126,6 +129,7 @@ const StudentIdCardDetailedReport = () => {
       "Blood Group",
       "Grn No.",
       "House",
+      "Image Name",
     ];
 
     // Convert displayedSections data to array format for Excel
@@ -147,6 +151,7 @@ const StudentIdCardDetailedReport = () => {
       student?.blood_group || " ",
       student?.reg_no || " ",
       `${student?.house === "Unknown House" ? "" : student?.house}`,
+      student?.image_name || " ",
     ]);
 
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
@@ -193,6 +198,7 @@ const StudentIdCardDetailedReport = () => {
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Blood Group</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Grn No.</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">House</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Image Name</th>
           </tr>
         </thead>
         <tbody>
@@ -247,6 +253,9 @@ const StudentIdCardDetailedReport = () => {
                      ? ""
                      : subject.house
                  }
+                </td>
+                <td class="px-2 text-center py-2 border border-black">
+                ${subject?.image_name || " "}
                 </td>
               </tr>`
             )
@@ -339,6 +348,18 @@ const StudentIdCardDetailedReport = () => {
   };
 
   console.log("row", timetable);
+
+  const handleSubjectClick = (student) => {
+    if (student) {
+      navigate(
+        `/iDCardDetails/${student?.student_id}`,
+
+        {
+          state: { staff: student },
+        }
+      );
+    }
+  };
 
   const filteredSections = timetable.filter((section) => {
     const searchLower = searchTerm.toString().trim().toLowerCase();
@@ -609,6 +630,12 @@ const StudentIdCardDetailedReport = () => {
                               >
                                 House
                               </th>
+                              <th
+                                style={{ width: "100px" }}
+                                className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900"
+                              >
+                                Image Name
+                              </th>
                             </tr>
                           </thead>
 
@@ -672,6 +699,21 @@ const StudentIdCardDetailedReport = () => {
                                     {student.house === "Unknown House"
                                       ? student.house === ""
                                       : student.house}
+                                  </td>
+
+                                  <td
+                                    className="px-2 text-center align-middle  lg:px-3 py-2 hover:font-semibold border border-gray-950 text-sm cursor-pointer text-blue-600 hover:text-blue-700"
+                                    onClick={() => handleSubjectClick(student)}
+                                  >
+                                    <div className="flex justify-center items-center h-full">
+                                      {student?.image_name === "" ? (
+                                        <FaUserLarge className="text-xl text-gray-500" />
+                                      ) : (
+                                        <p className=" mt-2">
+                                          {student?.image_name}
+                                        </p>
+                                      )}
+                                    </div>
                                   </td>
                                 </tr>
                               ))

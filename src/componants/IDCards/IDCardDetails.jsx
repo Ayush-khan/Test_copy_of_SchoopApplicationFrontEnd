@@ -5,7 +5,8 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ImageCropper from "../common/ImageUploadAndCrop";
-import Loader from "../common/LoaderFinal/LoaderStyle";
+// import Loader from "../common/LoaderFinal/LoaderStyle";
+import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 
 const IDCardDetails = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -194,9 +195,10 @@ const IDCardDetails = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-[70vh]">
-        <div className="loader">Loading...</div>{" "}
-        {/* Replace with your spinner */}
+      <div className="flex w-[70%] mx-auto mt-4 justify-center items-center h-64 bg-white">
+        {/* <div className="spinner-border text-primary" role="status"> */}
+        <LoaderStyle />
+        {/* </div> */}
       </div>
     );
   }

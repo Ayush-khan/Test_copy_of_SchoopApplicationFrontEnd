@@ -288,141 +288,140 @@ const DuplicatePaymentReport = () => {
         <div className="card rounded-md ">
           {loadingForSearch ? (
             <div className="flex justify-center items-center h-64">
-              {/* <div className="spinner-border text-primary" role="status"> */}
               <LoaderStyle />
-              {/* </div> */}
             </div>
-          ) : (
-            timetable.length > 0 && (
-              <>
-                <div className="w-full">
-                  <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                      <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
-                        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          List of Duplicate Payment Report
-                        </h3>
-                        <div className="w-1/2 md:w-[18%] mr-1 ">
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search "
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
-                        <button
-                          type="button"
-                          onClick={handleDownloadEXL}
-                          className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
-                        >
-                          <FaFileExcel />
-
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                            Exports to excel
-                          </div>
-                        </button>
-
-                        <button
-                          onClick={handlePrint}
-                          className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
-                        >
-                          <FiPrinter />
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                            Print{" "}
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-                    <div
-                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                      style={{
-                        backgroundColor: "#C03078",
-                      }}
-                    ></div>
-
-                    <div className="card-body w-full">
-                      <div
-                        className="h-[550px] lg:h-[550px] overflow-y-scroll overflow-x-scroll"
-                        style={{
-                          scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
-                          scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
-                        }}
-                      >
-                        <table className="min-w-full w-[1500px] leading-normal table-auto">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              <th className="w-12 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Sr No.
-                              </th>
-                              <th className="w-44 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Student Name
-                              </th>
-                              <th className="w-28 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Payment Date
-                              </th>
-                              <th className="w-28 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Class
-                              </th>
-                              <th className="w-20 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Installment
-                              </th>
-                              <th className="w-24 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Installment Amount
-                              </th>
-                              <th className="w-36 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Receipt No.
-                              </th>
-                            </tr>
-                          </thead>
-
-                          <tbody>
-                            {displayedSections.length ? (
-                              displayedSections?.map((student, index) => (
-                                <tr
-                                  key={student.adm_form_pk}
-                                  className="border border-gray-300"
-                                >
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {index + 1}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.student_name || " "}
-                                  </td>
-
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.payment_date}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.class}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.installment}
-                                  </td>
-                                  <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
-                                    {student?.amount || " "}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.receipt_no || " "}
-                                  </td>
-                                </tr>
-                              ))
-                            ) : (
-                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                <div className=" text-center text-xl text-red-700">
-                                  Oops! No data found..
-                                </div>
-                              </div>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
+          ) : timetable.length > 0 ? (
+            <div className="w-full">
+              <div className="card mx-auto lg:w-full shadow-lg">
+                <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                  <div className="w-full flex flex-row justify-between mr-0 md:mr-4">
+                    <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                      List of Duplicate Payment Report
+                    </h3>
+                    <div className="w-1/2 md:w-[18%] mr-1">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search "
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
                     </div>
                   </div>
+                  <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                    <button
+                      type="button"
+                      onClick={handleDownloadEXL}
+                      className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
+                    >
+                      <FaFileExcel />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600 text-white text-[.7em] rounded-md py-1 px-2">
+                        Exports to excel
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handlePrint}
+                      className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
+                    >
+                      <FiPrinter />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600 text-white text-[.7em] rounded-md py-1 px-2">
+                        Print
+                      </div>
+                    </button>
+                  </div>
                 </div>
-              </>
-            )
+
+                <div
+                  className="relative w-[97%] mb-3 h-1 mx-auto bg-red-700"
+                  style={{ backgroundColor: "#C03078" }}
+                ></div>
+
+                <div className="card-body w-full">
+                  <div
+                    className="h-[550px] lg:h-[550px] overflow-y-scroll overflow-x-scroll"
+                    style={{
+                      scrollbarWidth: "thin",
+                      scrollbarColor: "#C03178 transparent",
+                    }}
+                  >
+                    <table className="min-w-full w-[1500px] leading-normal table-auto">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="w-12 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Sr No.
+                          </th>
+                          <th className="w-44 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Student Name
+                          </th>
+                          <th className="w-28 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Payment Date
+                          </th>
+                          <th className="w-28 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Class
+                          </th>
+                          <th className="w-20 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Installment
+                          </th>
+                          <th className="w-24 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Installment Amount
+                          </th>
+                          <th className="w-36 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Receipt No.
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {displayedSections.length > 0 ? (
+                          displayedSections.map((student, index) => (
+                            <tr
+                              key={student.adm_form_pk}
+                              className="border border-gray-300"
+                            >
+                              <td className="px-2 py-2 text-center border border-gray-300">
+                                {index + 1}
+                              </td>
+                              <td className="px-2 py-2 text-center border border-gray-300">
+                                {student?.student_name || " "}
+                              </td>
+                              <td className="px-2 py-2 text-center border border-gray-300">
+                                {student?.payment_date}
+                              </td>
+                              <td className="px-2 py-2 text-center border border-gray-300">
+                                {student?.class}
+                              </td>
+                              <td className="px-2 py-2 text-center border border-gray-300">
+                                {student?.installment}
+                              </td>
+                              <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
+                                {student?.amount || " "}
+                              </td>
+                              <td className="px-2 py-2 text-center border border-gray-300">
+                                {student?.receipt_no || " "}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td
+                              colSpan="7"
+                              className="text-center text-red-700 py-6 text-lg"
+                            >
+                              Oops! No data found..
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-center items-center h-48">
+              <div className="text-red-700 text-2xl font-semibold">
+                Oops! No data found..
+              </div>
+            </div>
           )}
         </div>
       </div>
