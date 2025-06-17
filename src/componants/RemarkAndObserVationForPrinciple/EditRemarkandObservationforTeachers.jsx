@@ -4,10 +4,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
-// import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
-import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 
 const EditTeacherRemarkandObservation = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -49,30 +48,12 @@ const EditTeacherRemarkandObservation = () => {
     }
   }, [location.state]);
 
-  // const resetForm = () => {
-  //   if (formData) {
-  //     setSubject(formData.remark_subject || "");
-  //     setRemarkDesc(formData.remark || "");
-  //     setIsObservation(formData.remark_type === "Observation");
-  //   }
-  // };
-
   const resetForm = () => {
-    setFormData({
-      t_remark_id: formData.t_remark_id, // keep the ID to avoid issues during update
-      name: formData.name, // keep teacher name (read-only field)
-      remark_subject: "",
-      remark_desc: "",
-      remark_type: "Remark",
-    });
-
-    setErrors({
-      subjectError: "",
-      remarkDescError: "",
-      classError: "",
-    });
-
-    setIsObservation(false);
+    if (formData) {
+      setSubject(formData.remark_subject || "");
+      setRemarkDesc(formData.remark || "");
+      setIsObservation(formData.remark_type === "Observation");
+    }
   };
 
   const validateForm = () => {
@@ -91,18 +72,12 @@ const EditTeacherRemarkandObservation = () => {
   };
 
   const handleSubmitEdit = async () => {
-    console.log("handleSubmitEdit is runing", formData);
     console.log(formData.remark_subject);
     console.log(formData.remark_desc);
-    console.log("validation start runing");
     if (!validateForm()) return;
-    console.log("validation not run");
     try {
-      console.log("validation  run");
-
       setLoading(true);
       const token = localStorage.getItem("authToken");
-
       // Prepare only the fields that need to be updated
       const payload = {
         remarksubject: formData.remark_subject,
@@ -122,14 +97,14 @@ const EditTeacherRemarkandObservation = () => {
       );
 
       if (response.status === 200) {
-        toast.success(response.data.message || "Remark updated successfully!");
+        toast.success("Remark updated successfully!");
         navigate("/remObsTeacher");
       } else {
-        toast.error(response.data.message || "Failed to update remark.");
+        toast.error("Failed to update remark.");
       }
     } catch (error) {
       console.error("Error updating remark:", error);
-      toast.error(error || "Something went wrong.");
+      toast.error("Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -160,16 +135,14 @@ const EditTeacherRemarkandObservation = () => {
               <div className="card-body w-full ml-2">
                 {loading ? (
                   <div className="flex justify-center items-center h-64">
-                    {/* <div className="spinner-border text-primary" role="status"> */}
                     <LoaderStyle />
-                    {/* </div> */}
                   </div>
                 ) : (
                   <div className="card-body w-full ml-2">
                     <div className="space-y-5 mr-14">
                       {/* Teacher Selection */}
                       <div className="flex flex-col md:flex-row items-start md:items-center">
-                        <label className="w-[40%] text-[1em] text-gray-700">
+                        <label className="w-[35%] text-[1em] text-gray-700">
                           Teacher Name
                         </label>
                         <div className="flex-1">
@@ -185,7 +158,7 @@ const EditTeacherRemarkandObservation = () => {
 
                       {/* Subject of Remark */}
                       <div className="flex flex-col md:flex-row items-start md:items-center">
-                        <label className="w-[40%] text-[1em] text-gray-700">
+                        <label className="w-[35%] text-[1em] text-gray-700">
                           Subject of Remark{" "}
                           <span className="text-red-500">*</span>
                         </label>
@@ -200,6 +173,7 @@ const EditTeacherRemarkandObservation = () => {
                                 remark_subject: e.target.value,
                               })
                             }
+                            maxLength={100}
                           />
 
                           {errors.subjectError && (
@@ -212,7 +186,7 @@ const EditTeacherRemarkandObservation = () => {
 
                       {/* Remark */}
                       <div className="flex flex-col md:flex-row items-start md:items-center">
-                        <label className="w-[40%] text-[1em] text-gray-700">
+                        <label className="w-[35%] text-[1em] text-gray-700">
                           Remark <span className="text-red-500">*</span>
                         </label>
                         <div className="flex-1">
@@ -226,6 +200,7 @@ const EditTeacherRemarkandObservation = () => {
                                 remark_desc: e.target.value,
                               })
                             }
+                            maxLength={300}
                           />
                           {errors.remarkDescError && (
                             <p className="text-red-500 mt-1">
@@ -245,12 +220,6 @@ const EditTeacherRemarkandObservation = () => {
                     className="btn btn-primary"
                   >
                     Update
-                  </button>
-                  <button
-                    onClick={resetForm}
-                    className="btn btn-danger bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                  >
-                    Reset
                   </button>
                 </div>
               )}

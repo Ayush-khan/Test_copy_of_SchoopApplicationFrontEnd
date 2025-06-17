@@ -26,7 +26,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 function TeacherRemarkandObservation() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState("Manage");
   const [classes, setClasses] = useState([]);
@@ -111,9 +111,9 @@ function TeacherRemarkandObservation() {
     if (isSubmitting) return;
     setIsSubmitting(true);
     setSearchTerm("");
+    setLoading(true);
 
     try {
-      setLoading(true);
       const token = localStorage.getItem("authToken");
       const params = {};
 
@@ -139,7 +139,7 @@ function TeacherRemarkandObservation() {
         setPageCount(Math.ceil(updatedNotices.length / pageSize));
       } else {
         setNotices([]);
-        toast.error("No remarks found for the selected criteria.");
+        toast.error("No remarks found.");
       }
     } catch (error) {
       console.error("Error fetching remarks:", error);
@@ -232,7 +232,6 @@ function TeacherRemarkandObservation() {
   };
 
   const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
-
   const handleEdit = (section) => {
     navigate(`/remObsTeacher/edit/${section.t_remark_id}`, {
       state: section,
@@ -269,6 +268,7 @@ function TeacherRemarkandObservation() {
       const formData = new FormData();
       formData.append("subject", subject);
       formData.append("notice_desc", noticeDesc);
+
       uploadedFiles.forEach((file) => formData.append("userfile[]", file));
       console.log("filenottobedeleted[]", preselectedFiles);
       preselectedFiles.forEach((fileUrl) => {
@@ -434,33 +434,20 @@ function TeacherRemarkandObservation() {
 
   const searchLower = searchTerm.trim().toLowerCase();
 
-  // const filteredSections = notices.filter((section) => {
-  //   // Convert the fields to lowercase for case-insensitive comparison
-  //   const teacherName = section?.classnames?.toLowerCase() || "";
-  //   const subjectName = section?.subject?.toLowerCase() || "";
-  //   const noticeDesc = section?.notice_type?.toLowerCase() || ""; // New field to filter
-  //   const teacher = section?.name?.toLowerCase() || ""; // Example for teacher's name, update as needed
-
-  //   // Check if the search term is present in any of the specified fields
-  //   return (
-  //     teacherName.toLowerCase().includes(searchLower) ||
-  //     subjectName.toLowerCase().includes(searchLower) ||
-  //     noticeDesc.toLowerCase().includes(searchLower) || // Check notice description
-  //     teacher.toLowerCase().includes(searchLower) // Check teacher name
-  //   );
-  // });
-
   const filteredSections = notices.filter((section) => {
-    const teacherName = section?.name?.toLowerCase() || "";
-    const remarkType = section?.remark_type?.toLowerCase() || "";
-    const publishDate = section?.publish_date?.toLowerCase() || "";
-    const subject = section?.remark_subject?.toLowerCase() || "";
+    const teacherName = section?.teachername?.toLowerCase() || "";
+    const subjectName = section?.remark_type?.toLowerCase() || "";
+    const noticeDesc = section?.remark_subject?.toLowerCase() || "";
+    const teacher = section?.name?.toLowerCase() || "";
+    const publishDate =
+      section?.publish_date?.toString().toLowerCase().trim() || "";
 
     return (
-      teacherName.includes(searchLower) ||
-      remarkType.includes(searchLower) ||
-      publishDate.includes(searchLower) ||
-      subject.includes(searchLower)
+      teacherName.toLowerCase().includes(searchLower) ||
+      subjectName.toLowerCase().includes(searchLower) ||
+      noticeDesc.toLowerCase().includes(searchLower) ||
+      teacher.toLowerCase().includes(searchLower) ||
+      publishDate.toLowerCase().includes(searchLower)
     );
   });
 
@@ -468,7 +455,6 @@ function TeacherRemarkandObservation() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
-
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
   const handleFileUpload = (e) => {
@@ -499,7 +485,7 @@ function TeacherRemarkandObservation() {
       <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
         <div className=" card-header  flex justify-between items-center  ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-            Remark & Observation
+            Remark for Teachers
           </h3>
           <RxCross1
             className="float-end relative -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -544,7 +530,7 @@ function TeacherRemarkandObservation() {
                 <div className="card mx-auto lg:w-full shadow-lg">
                   <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                     <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                      Manage Remark & Observation{" "}
+                      Manage Remark & Observation
                     </h3>
                     <div className="w-1/2 md:w-fit mr-1 ">
                       <input
@@ -599,6 +585,7 @@ function TeacherRemarkandObservation() {
                             </th>
                           </tr>
                         </thead>
+
                         <tbody>
                           {loading ? (
                             <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
@@ -652,7 +639,7 @@ function TeacherRemarkandObservation() {
                                       onClick={() =>
                                         handleDelete(subject?.t_remark_id)
                                       }
-                                      className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                      className="text-red-600 hover:text-red-800 hover:bg-transparent"
                                     >
                                       <FontAwesomeIcon icon={faTrash} />
                                     </button>
@@ -661,7 +648,8 @@ function TeacherRemarkandObservation() {
                                   )}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.publish === "N" ? (
+                                  {subject.publish === "N" &&
+                                  subject.remark_type !== "Observation" ? (
                                     <button
                                       onClick={() => handlePublish(subject)}
                                       className="text-green-500 hover:text-green-700 hover:bg-transparent"
@@ -672,7 +660,6 @@ function TeacherRemarkandObservation() {
                                     ""
                                   )}
                                 </td>
-
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.acknowledge === "Y" && (
                                     <FontAwesomeIcon
@@ -682,7 +669,7 @@ function TeacherRemarkandObservation() {
                                   )}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.acknowledge === "Y" && (
+                                  {subject.read_status === 1 && (
                                     <FontAwesomeIcon
                                       icon={faBookReader}
                                       style={{ color: "#C03078" }}
@@ -693,11 +680,14 @@ function TeacherRemarkandObservation() {
                               </tr>
                             ))
                           ) : (
-                            <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                              <div className=" text-center text-xl text-red-700">
+                            <tr>
+                              <td
+                                colSpan="11"
+                                className="text-center py-6 text-red-700 text-lg"
+                              >
                                 Oops! No data found..
-                              </div>
-                            </div>
+                              </td>
+                            </tr>
                           )}
                         </tbody>
                       </table>
@@ -912,113 +902,6 @@ function TeacherRemarkandObservation() {
         </div>
       )}
 
-      {showViewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="modal show" style={{ display: "block" }}>
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="flex justify-between p-3">
-                  <h5 className="modal-title">View Notice/SMS</h5>
-                  <RxCross1
-                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                    type="button"
-                    onClick={handleCloseModal}
-                  />
-                </div>
-                <div
-                  className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                  style={{ backgroundColor: "#C03078" }}
-                ></div>
-                <div className="modal-body">
-                  {/* Class */}
-                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Class:{" "}
-                    </label>
-
-                    <div
-                      className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner break-words"
-                      style={{
-                        maxWidth: "262px", // Set maximum width for text wrapping
-                        height: "auto", // Allow height to grow dynamically
-                        wordWrap: "break-word", // Ensure text wraps within the box
-                      }}
-                    >
-                      {newclassnames}
-                    </div>
-                  </div>
-                  {/* Notice Date */}
-                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Notice Date:{" "}
-                    </label>
-                    <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
-                      {newSection}
-                    </span>
-                  </div>
-                  {/* Subject */}
-                  <div className="mb-3 relative flex justify-start mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Subject:{" "}
-                    </label>
-                    <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
-                      {newSubject}
-                    </span>
-                  </div>
-                  {/* Description */}
-                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
-                    <label htmlFor="noticeDesc" className="w-1/2 mt-2">
-                      Description:
-                    </label>
-                    <textarea
-                      id="noticeDesc"
-                      rows="2"
-                      maxLength={1000}
-                      readOnly
-                      className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      value={teacherNameIs}
-                    ></textarea>
-                  </div>
-
-                  {/* Download Links */}
-                  {/* Download Links */}
-
-                  {imageUrls && imageUrls.length > 0 && (
-                    <div className=" flex flex-row">
-                      <label className=" px-4 mb-2 ">Attachments:</label>
-
-                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
-                        {imageUrls.map((url, index) => {
-                          // Extracting file name from the URL
-                          const fileName = url.substring(
-                            url.lastIndexOf("/") + 1
-                          );
-                          return (
-                            <div
-                              key={index}
-                              className=" font-semibold flex flex-row text-[.58em]  items-center gap-x-2"
-                            >
-                              {/* Display file name */}
-                              <span className=" ">{fileName}</span>
-                              <button
-                                className=" text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                onClick={() => downloadFile(url, fileName)}
-                              >
-                                <ImDownload className="font-2xl w-3 h-3" />
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Delete Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
@@ -1044,10 +927,7 @@ function TeacherRemarkandObservation() {
                     backgroundColor: "#C03078",
                   }}
                 ></div>
-                {/* <div className="modal-body">
-                  Are you sure you want to delete this{" "}
-                  {` ${currentSection?.teacher_name} `} ?
-                </div> */}
+
                 <div className="modal-body">
                   Are you sure you want to delete this{" "}
                   {currestSubjectNameForDelete}?
