@@ -31,6 +31,8 @@ const DashboardContent = () => {
   });
   const [staffBirthday, setStaffBirthday] = useState("");
   const [ticketCount, setTicketCount] = useState("");
+  const [approveLeaveCount, setApproveLeaveCount] = useState("");
+
   const [pendingFee, setPendingFee] = useState("");
   const [collectedFee, setCollectedFee] = useState("");
   const [approvedLessonPlaneCount, setApprovedLessonPlaneCount] = useState("");
@@ -129,6 +131,17 @@ const DashboardContent = () => {
         responseTickingCount.data.count
       );
       setTicketCount(responseTickingCount.data.count);
+      // Fetch the data of approveLeave count
+      const responseApproveLeaveCount = await axios.get(
+        `${API_URL}/api/get_count_of_approveleave`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setApproveLeaveCount(responseApproveLeaveCount?.data?.data);
+
       // Fetch Pending Fee Records counts
       const pendingFeeCount = await axios.get(`${API_URL}/api/feecollection`, {
         headers: {
@@ -196,23 +209,25 @@ const DashboardContent = () => {
               }
             />
           </Link>
-          <CardStuStaf
-            title="Teachers"
-            TotalValue={staffData.teachingStaff}
-            // presentValue={staffData.teachingStaff}
-            presentValue={staffData?.attendanceteachingstaff}
-            color="#2196F3"
-            icon={
-              <FaUserGroup
-                style={{
-                  color: "#00FFFF",
-                  backgroundColor: "white",
-                  padding: "10px",
-                  borderRadius: "50%",
-                }}
-              />
-            }
-          />
+          <Link to="/teacherList" className="no-underline">
+            <CardStuStaf
+              title="Teachers"
+              TotalValue={staffData.teachingStaff}
+              // presentValue={staffData.teachingStaff}
+              presentValue={staffData?.attendanceteachingstaff}
+              color="#2196F3"
+              icon={
+                <FaUserGroup
+                  style={{
+                    color: "#00FFFF",
+                    backgroundColor: "white",
+                    padding: "10px",
+                    borderRadius: "50%",
+                  }}
+                />
+              }
+            />
+          </Link>
           <Link to="/nonTeachingStaff" className="no-underline">
             <CardStuStaf
               title="Non-Teaching Staff"
@@ -280,7 +295,7 @@ const DashboardContent = () => {
             <Link to="/approveLeavelist" className="no-underline">
               <Card
                 title="Approve Leave"
-                value={ticketCount}
+                value={approveLeaveCount}
                 color="#FFC107"
                 icon={
                   <RiPassValidFill

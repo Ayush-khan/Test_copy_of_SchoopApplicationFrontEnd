@@ -241,6 +241,9 @@ import EditTeacherRemarkandObservation from "../componants/RemarkAndObserVationF
 import CreateRemarkandObservationTeacher from "../componants/RemarkAndObserVationForPrinciple/CreateRemarkandObservationforTeachers.jsx";
 import ApproveLeave from "../componants/AllTableList/ApproveLeaveList.jsx";
 import ApproveLeaveList from "../componants/AllTableList/ApproveLeaveList.jsx";
+import LeaveApprove from "../componants/AllTableList/LeaveApproveForPrinciple/LeaveApprove (1).jsx";
+import TeacherList from "../componants/AllTableList/TeacherList.jsx";
+import EditLeaveApprove from "../componants/AllTableList/LeaveApproveForPrinciple/EditLeaveApprove (1).jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -837,7 +840,11 @@ function Index() {
         {/* Approve leave module card of dashboard */}
         <Route
           path="/approveLeavelist"
-          element={<PrivateRoute element={<ApproveLeaveList />} />}
+          element={<PrivateRoute element={<LeaveApprove />} />}
+        />
+        <Route
+          path="/leaveApprove/edit/:id"
+          element={<PrivateRoute element={<EditLeaveApprove />} />}
         />
         <Route
           path="/feependinglist"
@@ -859,13 +866,17 @@ function Index() {
           path="/staffbirthlist"
           element={<PrivateRoute element={<StaffBirthdayTabList />} />}
         />
-
+        <Route
+          path="/teacherList"
+          element={<PrivateRoute element={<TeacherList />} />}
+        />
         {/* For Principle or management login routes RoleId is M */}
 
         <Route
           path="/manageSubjectP"
           element={<PrivateRoute element={<ManageSubjectPrinciple />} />}
         />
+
         {/* For notice and sms for staff */}
         <Route
           path="/staffNoticeAndSms"

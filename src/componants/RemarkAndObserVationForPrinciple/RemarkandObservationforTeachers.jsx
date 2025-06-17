@@ -485,7 +485,7 @@ function TeacherRemarkandObservation() {
       <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
         <div className=" card-header  flex justify-between items-center  ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-            Remark for Teachers
+            Remark & Observation for Teacher
           </h3>
           <RxCross1
             className="float-end relative -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
