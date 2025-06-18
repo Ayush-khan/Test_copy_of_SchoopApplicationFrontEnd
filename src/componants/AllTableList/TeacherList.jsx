@@ -271,7 +271,6 @@ function TeacherList() {
               ) : activeTab === "Teacher Attendance" ? (
                 <div
                   className="h-96 lg:h-96 overflow-y-scroll"
-                  //   className="h-auto lg:h-96 overflow-y-scroll"
                   style={{
                     scrollbarWidth: "thin", // Firefox
                     scrollbarColor: "#C03178 transparent", // Firefox
@@ -465,8 +464,11 @@ function TeacherList() {
                         <th className=" px-0.5 w-full md:w-[30%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                           Class
                         </th>
-                        <th className=" px-0.5 md:w-[33%] text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                        <th className=" px-0.5 md:w-[10%] text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                           Mobile No.
+                        </th>
+                        <th className=" px-0.5 w-full md:w-[%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                          Leave Status
                         </th>
                       </tr>
                     </thead>
@@ -491,9 +493,15 @@ function TeacherList() {
                               {staff?.class_section || " - "}
                             </p>
                           </td>
+
                           <td className="text-center border border-gray-950 text-sm">
                             <p className="text-gray-900">
                               {staff?.phone || " "}
+                            </p>
+                          </td>
+                          <td className="text-center border border-gray-950 text-sm">
+                            <p className="text-gray-900">
+                              {staff?.leave_status || " - "}
                             </p>
                           </td>
                         </tr>
