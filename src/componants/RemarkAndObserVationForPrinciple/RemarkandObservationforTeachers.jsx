@@ -162,6 +162,23 @@ function TeacherRemarkandObservation() {
     // Handle page change logic
   };
 
+  // const handleView = (section) => {
+  //   console.log("view data", section);
+  //   setCurrentSection(section);
+  //   setnewclassnames(section?.classnames);
+  //   setnewSectionName(section?.notice_date);
+  //   setnewSubjectnName(section?.subject);
+  //   setTeacherNameIs(section?.notice_desc);
+  //   setteacherIdIs(section?.get_teacher?.teacher_id);
+  //   setShowViewModal(true);
+
+  //   if (section.notice_type === "Notice") {
+  //     fetchNoticeData(section); // Pass the current section directly
+  //   } else {
+  //     setImageUrls([]); // Clear image URLs if not a notice
+  //   }
+  // };
+
   const handleView = (subject) => {
     setRemarkData({
       teacherName: subject.name || "",
@@ -232,6 +249,48 @@ function TeacherRemarkandObservation() {
   };
 
   const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
+
+  // const handleEdit = async (section) => {
+  //   setCurrentSection(section);
+  //   setSubject(section?.subject || "");
+  //   setNoticeDesc(section?.notice_desc || "");
+  //   setnewclassnames(section?.classnames || "");
+  //   console.log("enter notice", section);
+  //   if (section?.notice_type === "Notice") {
+  //     console.log("enter notice-->start");
+
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+  //       if (!token) {
+  //         throw new Error("No authentication token found");
+  //       }
+  //       const response = await axios.get(
+  //         `${API_URL}/api/get_smsnoticedata/${section.unq_id}`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+  //       console.log("responsedata of notice edit", response);
+  //       if (response.data.success) {
+  //         const noticedata = response.data.data.noticedata[0];
+  //         const imageUrls = response.data.data.imageurl || [];
+
+  //         setSubject(noticedata.subject || "");
+  //         setNoticeDesc(noticedata.notice_desc || "");
+  //         setnewclassnames(noticedata.classnames || "");
+  //         setPreselectedFiles(imageUrls); // Set preselected files
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching notice data:", error);
+  //       toast.error("Failed to fetch notice data.");
+  //     }
+  //   } else {
+  //     setPreselectedFiles([]); // Clear preselected files for non-NOTICE types
+  //   }
+
+  //   setShowEditModal(true);
+  // };
+
   const handleEdit = (section) => {
     navigate(`/remObsTeacher/edit/${section.t_remark_id}`, {
       state: section,
@@ -268,9 +327,21 @@ function TeacherRemarkandObservation() {
       const formData = new FormData();
       formData.append("subject", subject);
       formData.append("notice_desc", noticeDesc);
-
+      // if (uploadedFiles) {
+      //   uploadedFiles.forEach((file) => formData.append("userfile[]", file));
+      // } else {
+      //   preselectedFiles.forEach((fileUrl) =>
+      //     formData.append("userfile[]", fileUrl)
+      //   );
+      // }
+      // Append newly uploaded files
       uploadedFiles.forEach((file) => formData.append("userfile[]", file));
       console.log("filenottobedeleted[]", preselectedFiles);
+      // Append preselected files (assuming preselectedFiles contains their URLs or identifiers)
+      // preselectedFiles.forEach((fileUrl) =>
+      //   formData.append("filenottobedeleted[]", fileUrl)
+      // );
+      // Append preselected files (extracting only the filename)
       preselectedFiles.forEach((fileUrl) => {
         const fileName = fileUrl.split("/").pop(); // Extracts only the file name
         formData.append("filenottobedeleted[]", fileName);
@@ -455,6 +526,14 @@ function TeacherRemarkandObservation() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
+
+  // handle allot subject close model
+  //   useEffect(() => {
+  //     if (activeTab === "Manage") {
+  //       handleSearch();
+  //     }
+  //   }, [activeTab]); // Dependency array ensures it runs when activeTab changes
+
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
   const handleFileUpload = (e) => {
@@ -485,7 +564,7 @@ function TeacherRemarkandObservation() {
       <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
         <div className=" card-header  flex justify-between items-center  ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-            Remark & Observation for Teacher
+            Remark for Teachers
           </h3>
           <RxCross1
             className="float-end relative -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -585,7 +664,101 @@ function TeacherRemarkandObservation() {
                             </th>
                           </tr>
                         </thead>
+                        {/* <tbody>
+                          {displayedSections.length ? (
+                            displayedSections.map((subject, index) => (
+                              <tr key={subject.notice_id} className="text-sm ">
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {currentPage * pageSize + index + 1}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.name}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.remark_type}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.publish_date &&
+                                  subject.publish_date !== "0000-00-00"
+                                    ? new Date(
+                                        subject.publish_date
+                                      ).toLocaleDateString("en-GB")
+                                    : ""}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.remark_subject}
+                                </td>
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                  {subject.publish === "Y" ? (
+                                    <button
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                      onClick={() => handleView(subject)}
+                                    >
+                                      <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                                    </button>
+                                  ) : (
+                                    <button
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                      onClick={() => handleEdit(subject)}
+                                    >
+                                      <FontAwesomeIcon icon={faEdit} />
+                                    </button>
+                                  )}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.publish === "N" ? (
+                                    <button
+                                      onClick={() =>
+                                        handleDelete(subject?.t_remark_id)
+                                      }
+                                      className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                    >
+                                      <FontAwesomeIcon icon={faTrash} />
+                                    </button>
+                                  ) : (
+                                    " "
+                                  )}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.publish === "N" ? (
+                                    <button
+                                      onClick={() => handlePublish(subject)}
+                                      className="text-green-500 hover:text-green-700 hover:bg-transparent"
+                                    >
+                                      <FaCheck />
+                                    </button>
+                                  ) : (
+                                    ""
+                                  )}
+                                </td>
 
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.acknowledge === "Y" && (
+                                    <FontAwesomeIcon
+                                      icon={faThumbsUp}
+                                      className="text-black text-base"
+                                    />
+                                  )}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.acknowledge === "Y" && (
+                                    <FontAwesomeIcon
+                                      icon={faBookReader}
+                                      style={{ color: "#C03078" }}
+                                      className="text-base"
+                                    />
+                                  )}
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                              <div className=" text-center text-xl text-red-700">
+                                Oops! No data found..
+                              </div>
+                            </div>
+                          )}
+                        </tbody> */}
                         <tbody>
                           {loading ? (
                             <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
@@ -927,9 +1100,8 @@ function TeacherRemarkandObservation() {
                     backgroundColor: "#C03078",
                   }}
                 ></div>
-
                 <div className="modal-body">
-                  Are you sure you want to delete this{" "}
+                  Are you sure you want to delete remark for{" "}
                   {currestSubjectNameForDelete}?
                 </div>
 

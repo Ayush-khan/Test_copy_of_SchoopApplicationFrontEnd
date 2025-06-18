@@ -4,12 +4,12 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
+// import Loader from "../components/Loader"; // Add a Loader component or use an existing one.
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import Select from "react-select";
 
 const CreateRemarkandObservationTeacher = () => {
   const API_URL = import.meta.env.VITE_API_URL;
-
   const [allClasses, setAllClasses] = useState([]);
   const [subject, setSubject] = useState("");
   const [noticeDesc, setNoticeDesc] = useState("");
@@ -22,8 +22,6 @@ const CreateRemarkandObservationTeacher = () => {
     noticeDescError: "",
     classError: "",
   });
-
-  const [activeTab, setActiveTab] = useState("Manage");
 
   const [isObservation, setIsObservation] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
@@ -169,7 +167,6 @@ const CreateRemarkandObservationTeacher = () => {
       if (response.status === 200) {
         toast.success("Remark Saved successfully!");
         resetForm?.();
-        setActiveTab("Manage");
       } else {
         toast.error("Unexpected server response.");
       }
@@ -417,24 +414,24 @@ const CreateRemarkandObservationTeacher = () => {
                             value={remarkText}
                             maxLength={300}
                             onChange={(e) => setRemarkText(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                                const cursorPos = e.target.selectionStart;
-                                const textBeforeCursor = remarkText.slice(
-                                  0,
-                                  cursorPos
-                                );
-                                const textAfterCursor =
-                                  remarkText.slice(cursorPos);
-                                const updatedText = `${textBeforeCursor}\n• ${textAfterCursor}`;
-                                setRemarkText(updatedText);
-                                setTimeout(() => {
-                                  e.target.selectionStart =
-                                    e.target.selectionEnd = cursorPos + 3;
-                                }, 0);
-                              }
-                            }}
+                            // onKeyDown={(e) => {
+                            //   if (e.key === "Enter") {
+                            //     e.preventDefault();
+                            //     const cursorPos = e.target.selectionStart;
+                            //     const textBeforeCursor = remarkText.slice(
+                            //       0,
+                            //       cursorPos
+                            //     );
+                            //     const textAfterCursor =
+                            //       remarkText.slice(cursorPos);
+                            //     const updatedText = `${textBeforeCursor}\n• ${textAfterCursor}`;
+                            //     setRemarkText(updatedText);
+                            //     setTimeout(() => {
+                            //       e.target.selectionStart =
+                            //         e.target.selectionEnd = cursorPos + 3;
+                            //     }, 0);
+                            //   }
+                            // }}
                           />
                           {errors.remarkError && (
                             <p className="text-red-500 text-sm">
