@@ -175,7 +175,7 @@ const EditLeaveApprove = () => {
       if (response.status === 200) {
         toast.success("Leave updated successfully!");
         fetchLeaves();
-        navigate("/leaveApprove");
+        navigate("/approveLeavelist");
       } else {
         toast.error("Failed to update leave.");
       }
@@ -200,7 +200,7 @@ const EditLeaveApprove = () => {
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               setErrors({});
-              navigate("/leaveApprove");
+              navigate("/approveLeavelist");
             }}
           />
         </div>
