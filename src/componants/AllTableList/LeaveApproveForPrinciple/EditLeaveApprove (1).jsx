@@ -14,7 +14,7 @@ const EditLeaveApprove = () => {
   console.log("staff leave for editing", staffleave);
 
   const statusOptions = [
-    { value: "A", label: "Approve" },
+    { value: "P", label: "Approve" },
     { value: "H", label: "Hold" },
     { value: "R", label: "Rejected" },
   ];
@@ -32,9 +32,8 @@ const EditLeaveApprove = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const [leaveType, setLeaveType] = useState([]);
-  const [newLeaveType, setNewLeaveType] = useState("");
   const [error, setError] = useState(null);
+  const [staffs, setStaffs] = useState([]);
 
   const navigate = useNavigate();
   const MAX_DATE = "2006-12-31";
@@ -48,12 +47,35 @@ const EditLeaveApprove = () => {
     return null;
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  useEffect(() => {
+    fetchLeaves();
+  }, []);
+
+  const fetchLeaves = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/get_listforleaveapprove`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+      console.log("approve leave data", response.data.data);
+      setStaffs(response.data.data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleStatusChange = (selectedOption) => {
@@ -113,7 +135,7 @@ const EditLeaveApprove = () => {
 
   //     if (response.status === 200) {
   //       toast.success("Leave updated successfully!");
-  //       navigate("/approveLeavelist");
+  //       navigate("/leaveApprove");
   //     } else {
   //       toast.error("Failed to update leave.");
   //     }
@@ -124,46 +146,41 @@ const EditLeaveApprove = () => {
   //     setLoading(false);
   //   }
   // };
+
   const handleSubmit = async () => {
-    console.log(formData.status);
-    console.log(formData.reason_for_rejection);
+    if (!staffleave?.leave_app_id) {
+      toast.error("Invalid leave application ID.");
+      return;
+    }
 
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
 
-      // 🛠️ Create FormData instead of JSON
-      const formDataToSend = new FormData();
-      formDataToSend.append("status", formData.status?.value || "P");
-      formDataToSend.append(
-        "approverscomment",
-        formData.reason_for_rejection || ""
-      );
-
-      console.log("Submitting FormData:");
-      for (let pair of formDataToSend.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
+      const form = new FormData();
+      form.append("status", formData.status?.value || "A");
+      form.append("approverscomment", formData.reason_for_rejection || "");
 
       const response = await axios.post(
         `${API_URL}/api/update_leaveapprovestatus/${staffleave.leave_app_id}`,
-        formDataToSend,
+        form,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            // ✅ Don't set 'Content-Type', axios will do it correctly for FormData
+            "Content-Type": "multipart/form-data", // crucial for FormData
           },
         }
       );
 
       if (response.status === 200) {
         toast.success("Leave updated successfully!");
-        navigate("/approveLeavelist");
+        fetchLeaves();
+        navigate("/leaveApprove");
       } else {
         toast.error("Failed to update leave.");
       }
     } catch (error) {
-      console.error("Error updating leave:", error.response?.data || error);
+      console.error("Error updating leave:", error);
       toast.error("Something went wrong.");
     } finally {
       setLoading(false);
@@ -183,7 +200,7 @@ const EditLeaveApprove = () => {
             className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               setErrors({});
-              navigate("/approveLeavelist");
+              navigate("/leaveApprove");
             }}
           />
         </div>
@@ -351,10 +368,15 @@ const EditLeaveApprove = () => {
               <textarea
                 type="text"
                 maxLength={200}
-                id="approval"
-                name="approval"
-                value={formData.approverscomment}
-                onChange={handleChange}
+                id="reason_for_rejection"
+                name="reason_for_rejection"
+                value={formData.reason_for_rejection}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    reason_for_rejection: e.target.value,
+                  })
+                }
                 className="input-field resize block w-full border border-gray-300 rounded-md py-1 px-3 shadow-inner"
                 rows="2"
               />{" "}
