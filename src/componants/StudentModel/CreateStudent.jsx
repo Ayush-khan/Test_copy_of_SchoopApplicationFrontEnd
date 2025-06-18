@@ -1128,181 +1128,82 @@ function Form() {
     }));
   };
   // resolve all errors and working code i will do this later
-  // const getUserIdDetails = (formData, selectedUsername) => {
-  //   switch (selectedUsername) {
-  //     case "FatherMob":
-  //       return { value: formData.f_mobile, key: "fatherMobile" };
-  //     case "MotherMob":
-  //       return { value: formData.m_mobile, key: "motherMobile" };
-  //     case "Father":
-  //       return { value: formData.f_email, key: "fatherEmail" };
-  //     case "Mother":
-  //       return { value: formData.m_emailid, key: "motherEmail" };
-  //     default:
-  //       return { value: "", key: "general" };
-  //   }
-  // };
-
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   setErrors({});
-  //   setUsernameErrors({}); // Clear previous username errors
-
-  //   const validationErrors = validate();
-  //   if (Object.keys(validationErrors).length > 0) {
-  //     setErrors(validationErrors);
-  //     console.log("Validation Errors:", validationErrors);
-  //     return;
-  //   }
-
-  //   // Get user ID and its corresponding error key
-  //   const { value: userIdForCheck, key: errorKey } = getUserIdDetails(
-  //     formData,
-  //     selectedUsername
-  //   );
-
-  //   // Prevent if user ID is empty
-  //   if (!userIdForCheck) {
-  //     setUsernameErrors((prev) => ({
-  //       ...prev,
-  //       [errorKey]: "Username is empty or invalid.",
-  //     }));
-  //     toast.error("Please fill a valid username.");
-  //     return;
-  //   }
-
-  //   // Check username uniqueness
-  //   const usernameExists = await checkUserId(
-  //     student.student_id,
-  //     userIdForCheck
-  //   );
-  //   if (usernameExists) {
-  //     setUsernameErrors((prevErrors) => ({
-  //       ...prevErrors,
-  //       [errorKey]: "Username is already taken.",
-  //     }));
-  //     toast.error("Username is already taken. Please choose another.");
-  //     return;
-  //   }
-
-  //   // ✅ Proceed to submit if username is unique
-  //   try {
-  //     setLoading(true);
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       throw new Error("No authentication token found");
-  //     }
-
-  //     const updatedFormData = {
-  //       ...formData,
-  //       image_name: isImageCropped ? formData.image_name : "",
-  //       SetEmailIDAsUsername: selectedUsername || "",
-  //     };
-
-  //     const response = await axios.put(
-  //       `${API_URL}/api/students/${student.student_id}`,
-  //       updatedFormData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success("Student updated successfully!");
-  //       setTimeout(() => {
-  //         navigate("/manageStudent");
-  //       }, 500);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error.response?.data || error.message);
-  //     if (error.response?.data?.errors) {
-  //       setBackendErrors(error.response.data.errors || {});
-  //       toast.error(
-  //         "Some fields contain duplicate data. Please ensure all values are unique."
-  //       );
-  //     } else {
-  //       toast.error(
-  //         error.message || "Backend error occurred while updating data."
-  //       );
-  //     }
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // above code is 100% workin code
+  const getUserIdDetails = (formData, selectedUsername) => {
+    switch (selectedUsername) {
+      case "FatherMob":
+        return { value: formData.f_mobile, key: "fatherMobile" };
+      case "MotherMob":
+        return { value: formData.m_mobile, key: "motherMobile" };
+      case "Father":
+        return { value: formData.f_email, key: "fatherEmail" };
+      case "Mother":
+        return { value: formData.m_emailid, key: "motherEmail" };
+      default:
+        return { value: "", key: "general" };
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setErrors({});
-    const validationErrors = validate();
+    setUsernameErrors({}); // Clear previous username errors
 
+    const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       console.log("Validation Errors:", validationErrors);
       return;
     }
-    // const validationErrors = validate();
 
-    // if (Object.keys(validationErrors).length > 0) {
-    //   setErrors(validationErrors);
-    //   Object.values(validationErrors).forEach((error) => {
-    //     console.log(error);
-    //   });
-    //   console.log("error in feilds name");
-
-    //   return;
-    // }
-    // Check for username-specific errors
-
-    const hasUsernameErrors = Object.values(usernameErrors).some(
-      (error) => error !== ""
+    // Get user ID and its corresponding error key
+    const { value: userIdForCheck, key: errorKey } = getUserIdDetails(
+      formData,
+      selectedUsername
     );
-    if (hasUsernameErrors) {
-      // Set backend errors if any
-      if (hasUsernameErrors) {
-        Object.keys(usernameErrors).forEach((key) => {
-          if (usernameErrors[key]) {
-            console.log(usernameErrors[key]);
-          }
-        });
-      }
-      console.log("error in the uniquye name");
-      // Exit function if there are validation errors or username errors
+
+    // Prevent if user ID is empty
+    if (!userIdForCheck) {
+      setUsernameErrors((prev) => ({
+        ...prev,
+        [errorKey]: "Username is empty or invalid.",
+      }));
+      toast.error("Please fill a valid username.");
       return;
     }
-    // // Create FormData object
-    // const formattedFormData = new FormData();
-    // Object.keys(formData).forEach((key) => {
-    //   formattedFormData.append(key, formData[key]);
-    // });
-    setBackendErrors({});
-    try {
-      setLoading(true); // Start loading state
 
+    // Check username uniqueness
+    const usernameExists = await checkUserId(
+      student.student_id,
+      userIdForCheck
+    );
+    if (usernameExists) {
+      setUsernameErrors((prevErrors) => ({
+        ...prevErrors,
+        [errorKey]: "Username is already taken.",
+      }));
+      toast.error("Username is already taken. Please choose another.");
+      return;
+    }
+
+    // ✅ Proceed to submit if username is unique
+    try {
+      setLoading(true);
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("No authentication token found");
       }
-      // console.log("formattedFormData", formattedFormData);
-      console.log("selectedUsername------>", selectedUsername);
-      // Create a local copy of formData with the updated field
 
       const updatedFormData = {
         ...formData,
         image_name: isImageCropped ? formData.image_name : "",
         SetEmailIDAsUsername: selectedUsername || "",
       };
-      console.log("formData Before submitting", updatedFormData);
 
       const response = await axios.put(
         `${API_URL}/api/students/${student.student_id}`,
-        updatedFormData, // Send the FormData object
+        updatedFormData,
         {
           headers: {
-            // "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         }
@@ -1316,21 +1217,121 @@ function Form() {
       }
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
-      if (error.response && error.response.data && error.response.data.errors) {
+      if (error.response?.data?.errors) {
         setBackendErrors(error.response.data.errors || {});
         toast.error(
           "Some fields contain duplicate data. Please ensure all values are unique."
         );
-        console.log("setBackendErrors", backendErrors);
       } else {
         toast.error(
-          error.message || "Backdend error occur while updating data"
+          error.message || "Backend error occurred while updating data."
         );
       }
     } finally {
-      setLoading(false); // End loading state
+      setLoading(false);
     }
   };
+
+  // above code is 100% workin code
+
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   setErrors({});
+  //   setUsernameErrors({});
+  //   const validationErrors = validate();
+
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setErrors(validationErrors);
+  //     console.log("Validation Errors:", validationErrors);
+  //     return;
+  //   }
+
+  //   // const validationErrors = validate();
+  //   // if (Object.keys(validationErrors).length > 0) {
+  //   //   setErrors(validationErrors);
+  //   //   Object.values(validationErrors).forEach((error) => {
+  //   //     console.log(error);
+  //   //   });
+  //   //   console.log("error in feilds name");
+
+  //   //   return;
+  //   // }
+  //   // Check for username-specific errors
+
+  //   const hasUsernameErrors = Object.values(usernameErrors).some(
+  //     (error) => error !== ""
+  //   );
+  //   if (hasUsernameErrors) {
+  //     // Set backend errors if any
+  //     if (hasUsernameErrors) {
+  //       Object.keys(usernameErrors).forEach((key) => {
+  //         if (usernameErrors[key]) {
+  //           console.log(usernameErrors[key]);
+  //         }
+  //       });
+  //     }
+  //     console.log("error in the uniquye name");
+  //     // Exit function if there are validation errors or username errors
+  //     return;
+  //   }
+  //   // // Create FormData object
+  //   // const formattedFormData = new FormData();
+  //   // Object.keys(formData).forEach((key) => {
+  //   //   formattedFormData.append(key, formData[key]);
+  //   // });
+  //   setBackendErrors({});
+  //   try {
+  //     setLoading(true); // Start loading state
+
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token found");
+  //     }
+  //     // console.log("formattedFormData", formattedFormData);
+  //     console.log("selectedUsername------>", selectedUsername);
+  //     // Create a local copy of formData with the updated field
+
+  //     const updatedFormData = {
+  //       ...formData,
+  //       image_name: isImageCropped ? formData.image_name : "",
+  //       SetEmailIDAsUsername: selectedUsername || "",
+  //     };
+  //     console.log("formData Before submitting", updatedFormData);
+
+  //     const response = await axios.put(
+  //       `${API_URL}/api/students/${student.student_id}`,
+  //       updatedFormData, // Send the FormData object
+  //       {
+  //         headers: {
+  //           // "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       toast.success("Student updated successfully!");
+  //       setTimeout(() => {
+  //         navigate("/manageStudent");
+  //       }, 500);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error.response?.data || error.message);
+  //     if (error.response && error.response.data && error.response.data.errors) {
+  //       setBackendErrors(error.response.data.errors || {});
+  //       toast.error(
+  //         "Some fields contain duplicate data. Please ensure all values are unique."
+  //       );
+  //       console.log("setBackendErrors", backendErrors);
+  //     } else {
+  //       toast.error(
+  //         error.message || "Backdend error occur while updating data"
+  //       );
+  //     }
+  //   } finally {
+  //     setLoading(false); // End loading state
+  //   }
+  // };
 
   // Fetch class names when component loads
 
