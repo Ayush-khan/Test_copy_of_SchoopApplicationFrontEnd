@@ -13,6 +13,8 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const toggleShowPassword = () => setShowPassword(!showPassword);
+  const [rememberMe, setRememberMe] = useState(false); // ✅ NEW
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -24,6 +26,7 @@ const LoginForm = () => {
       const response = await axios.post(`${API_URL}/api/login`, {
         user_id: email,
         password: password,
+        rememberme: rememberMe,
       });
       console.log(
         "responseerror",
@@ -56,21 +59,6 @@ const LoginForm = () => {
         return;
       }
     } catch (error) {
-      // catch (error) {
-      //   const newErrors = {};
-      //   if (error.response) {
-      //     if (error.response.status === 404) {
-      //       newErrors.email = "Invalid username";
-      //     } else if (error.response.status === 401) {
-      //       newErrors.password = "Invalid password";
-      //     } else {
-      //       newErrors.api = "An unexpected error. Please try again later.";
-      //     }
-      //   } else {
-      //     newErrors.api = "An unexpected error. Please try again later.";
-      //   }
-      //   setErrors(newErrors);
-      // }
       const newErrors = {};
 
       if (error.response) {
@@ -159,7 +147,21 @@ const LoginForm = () => {
             {errors.api}
           </span>
         )}
-
+        <div className="flex items-center ml-3 mb-0.5 ">
+          <input
+            type="checkbox"
+            id="rememberMe"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="mr-1"
+          />
+          <label
+            htmlFor="rememberMe"
+            className="text-sm font-medium text-gray-700"
+          >
+            Remember me
+          </label>
+        </div>
         <button
           type="submit"
           className={`${styles.loginButton} flex place-items-center justify-center`}
