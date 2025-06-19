@@ -122,7 +122,7 @@ const TeacherAttendanceDailyReport = () => {
 
         setTimetable(mergedData);
         setAttendanceCount(total_attendance); //  set string like "24/119"
-        setPageCount(Math.ceil(mergedData.length / pageSize));
+        // setPageCount(Math.ceil(mergedData.length / pageSize));
       }
       console.log("total attendance", setAttendanceCount);
     } catch (error) {
@@ -319,19 +319,22 @@ const TeacherAttendanceDailyReport = () => {
   const filteredPresent = filteredStaff.filter((s) => s.status === "Present");
   const filteredLate = filteredStaff.filter((s) => s.status === "Late");
   const filteredAbsent = filteredStaff.filter((s) => s.status === "Absent");
+  const displayedPresent = filteredPresent;
+  const displayedLate = filteredLate;
+  const displayedAbsent = filteredAbsent;
 
-  const displayedPresent = filteredPresent.slice(
-    currentPage * pageSize,
-    (currentPage + 1) * pageSize
-  );
-  const displayedLate = filteredLate.slice(
-    currentPage * pageSize,
-    (currentPage + 1) * pageSize
-  );
-  const displayedAbsent = filteredAbsent.slice(
-    currentPage * pageSize,
-    (currentPage + 1) * pageSize
-  );
+  // const displayedPresent = filteredPresent.slice(
+  //   currentPage * pageSize,
+  //   (currentPage + 1) * pageSize
+  // );
+  // const displayedLate = filteredLate.slice(
+  //   currentPage * pageSize,
+  //   (currentPage + 1) * pageSize
+  // );
+  // const displayedAbsent = filteredAbsent.slice(
+  //   currentPage * pageSize,
+  //   (currentPage + 1) * pageSize
+  // );
 
   return (
     <>

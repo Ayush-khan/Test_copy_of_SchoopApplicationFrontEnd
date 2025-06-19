@@ -13,7 +13,7 @@ function TeacherList() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Teacher Attendance");
-  const [loadingForSearch, setLoadingForSearch] = useState(false);
+  const [loadingForSend, setLoadingForSend] = useState(false);
   const [fromDate, setFromDate] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
@@ -170,6 +170,7 @@ function TeacherList() {
     formData.append("message", message);
 
     try {
+      setLoadingForSend(true);
       const response = await axios.post(
         `${API_URL}/api/send_whatsapplatecoming`,
         formData,
@@ -193,6 +194,8 @@ function TeacherList() {
     } catch (error) {
       console.error("Sending Error:", error);
       toast.error("An error occurred while sending messages.");
+    } finally {
+      setLoadingForSend(false);
     }
   };
 
@@ -553,16 +556,22 @@ function TeacherList() {
 
                       {/* Character count inside the textarea box */}
                       <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none">
-                        {description.length} / {maxCharacters}
+                        {/* {description.length} / {maxCharacters} */}
+                        {message.length} / {maxCharacters}
                       </div>
                     </div>
 
                     <button
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition duration-200"
+                      //   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition duration-200"
+                      className={`bg-blue-600 text-white font-semibold py-2 px-6 rounded-md transition duration-200 ${
+                        loadingForSend
+                          ? "opacity-50 cursor-not-allowed bg-blue-500"
+                          : "hover:bg-blue-700"
+                      }`}
                       onClick={handleSend}
-                      disabled={loading}
+                      disabled={loadingForSend}
                     >
-                      {loading ? "Sending" : "Send"}
+                      {loadingForSend ? "Sending" : "Send"}
                     </button>
                   </div>
                 </div>

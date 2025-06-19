@@ -505,7 +505,7 @@ function NonTeachingStaff() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Staff Attendance");
-  const [loadingForSearch, setLoadingForSearch] = useState(false);
+  const [loadingForSend, setLoadingForSend] = useState(false);
   const [fromDate, setFromDate] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
@@ -643,6 +643,7 @@ function NonTeachingStaff() {
     formData.append("message", message);
 
     try {
+      setLoadingForSend(true);
       const response = await axios.post(
         `${API_URL}/api/send_whatsapplatecoming`,
         formData,
@@ -666,6 +667,8 @@ function NonTeachingStaff() {
     } catch (error) {
       console.error("Sending Error:", error);
       toast.error("An error occurred while sending messages.");
+    } finally {
+      setLoadingForSend(false);
     }
   };
 
@@ -1006,16 +1009,21 @@ function NonTeachingStaff() {
 
                     {/* Character count inside the textarea box */}
                     <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none">
-                      {description.length} / {maxCharacters}
+                      {/* {description.length} / {maxCharacters} */}
+                      {message.length} / {maxCharacters}
                     </div>
                   </div>
 
                   <button
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition duration-200"
+                    className={`text-white font-semibold py-2 px-6 rounded-md transition duration-200 ${
+                      loadingForSend
+                        ? "bg-blue-500 opacity-50 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700"
+                    }`}
                     onClick={handleSend}
-                    disabled={loading}
+                    disabled={loadingForSend}
                   >
-                    {loading ? "Sending" : "Send"}
+                    {loadingForSend ? "Sending" : "Send"}
                   </button>
                 </div>
               </div>

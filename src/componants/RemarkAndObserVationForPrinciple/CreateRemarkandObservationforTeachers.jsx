@@ -4,16 +4,11 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
-// import Loader from "../components/Loader"; // Add a Loader component or use an existing one.
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import Select from "react-select";
 
 const CreateRemarkandObservationTeacher = () => {
   const API_URL = import.meta.env.VITE_API_URL;
-  const [allClasses, setAllClasses] = useState([]);
-  const [subject, setSubject] = useState("");
-  const [noticeDesc, setNoticeDesc] = useState("");
-  const [selectedClasses, setSelectedClasses] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [loading, setLoading] = useState(false); // Loader state
   // const [fetchingClasses, setFetchingClasses] = useState(false); // Loader for fetching classes
@@ -28,14 +23,8 @@ const CreateRemarkandObservationTeacher = () => {
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
-
-  const [nameError, setNameError] = useState(null);
-  const [loadingClasses, setLoadingClasses] = useState(false);
-  const [studentError, setStudentError] = useState(null);
-
   const [remarkSubject, setRemarkSubject] = useState("");
   const [remarkText, setRemarkText] = useState("");
-
   const handleObservationToggle = (e) => {
     setIsObservation(e.target.checked);
   };
@@ -49,11 +38,11 @@ const CreateRemarkandObservationTeacher = () => {
       setLoadingStudents(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/staff_list`, {
+      const response = await axios.get(`${API_URL}/api/get_allstaff`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("Staff", response);
-      setStudentNameWithClassId(response?.data || []);
+      setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching Teacher");
       console.error("Error fetching Teachers:", error);
@@ -61,12 +50,6 @@ const CreateRemarkandObservationTeacher = () => {
       setLoadingStudents(false);
     }
   };
-
-  //   const handleStudentSelect = (selectedOption) => {
-  //     setStudentError(""); // Reset error if student is select.
-  //     setSelectedStudent(selectedOption);
-  //     setSelectedStudentId(selectedOption?.value);
-  //   };
 
   const handleStudentSelect = (selectedOption) => {
     setSelectedStudent(selectedOption);
@@ -79,15 +62,6 @@ const CreateRemarkandObservationTeacher = () => {
     }
   };
 
-  //   const studentOptions = useMemo(
-  //     () =>
-  //       studentNameWithClassId.map((cls) => ({
-  //         value: cls?.teacher_id,
-  //         label: `${cls.name}`,
-  //       })),
-  //     [studentNameWithClassId]
-  //   );
-
   const studentOptions = useMemo(
     () =>
       studentNameWithClassId.map((cls) => ({
@@ -96,15 +70,6 @@ const CreateRemarkandObservationTeacher = () => {
       })),
     [studentNameWithClassId]
   );
-
-  const handleFileUpload = (event) => {
-    const files = Array.from(event.target.files);
-    setUploadedFiles((prevFiles) => [...prevFiles, ...files]);
-  };
-
-  const removeFile = (index) => {
-    setUploadedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-  };
 
   const validateForm = () => {
     const errors = {};
@@ -253,109 +218,6 @@ const CreateRemarkandObservationTeacher = () => {
                     {/* </div> */}
                   </div>
                 ) : (
-                  // <div className="card-body w-full ml-2">
-                  //   <div className="space-y-6 mr-10">
-                  //     {/* Teacher Selection */}
-                  //     <div className="flex flex-col md:flex-row items-start md:items-center mb-2">
-                  //       <label className="w-[40%] text-[1em] text-gray-700">
-                  //         Select Teacher <span className="text-red-500">*</span>
-                  //       </label>
-                  //       <div className="flex-1">
-                  //         <Select
-                  //           options={studentOptions}
-                  //           value={selectedStudent}
-                  //           onChange={handleStudentSelect}
-                  //           className="w-full"
-                  //           placeholder="Select"
-                  //           isClearable
-                  //         />
-                  //         {errors.classError && (
-                  //           <p className="text-red-500 text-sm">
-                  //             {errors.classError}
-                  //           </p>
-                  //         )}
-                  //       </div>
-                  //     </div>
-
-                  //     {/* Subject of Remark */}
-                  //     <div className="flex flex-col md:flex-row items-start md:items-center">
-                  //       <label className="w-[40%] text-[1em] text-gray-700">
-                  //         Subject of Remark{" "}
-                  //         <span className="text-red-500">*</span>
-                  //       </label>
-                  //       <div className="flex-1">
-                  //         <input
-                  //           type="text"
-                  //           className="w-full px-2 py-2 border border-gray-700 rounded-md shadow-md"
-                  //           value={remarkSubject}
-                  //           onChange={(e) => setRemarkSubject(e.target.value)}
-                  //         />
-                  //         {errors.subjectError && (
-                  //           <p className="text-red-500 text-sm">
-                  //             {errors.subjectError}
-                  //           </p>
-                  //         )}
-                  //       </div>
-                  //     </div>
-
-                  //     {/* Remark */}
-                  //     <div className="flex flex-col md:flex-row items-start md:items-center">
-                  //       <label className="w-[40%] text-[1em] text-gray-700">
-                  //         Remark <span className="text-red-500">*</span>
-                  //       </label>
-                  //       <div className="flex-1">
-                  //         <textarea
-                  //           rows="3"
-                  //           className="w-full px-2 py-1 border border-gray-700 rounded-md shadow-md"
-                  //           value={remarkText}
-                  //           onChange={(e) => setRemarkText(e.target.value)}
-                  //           onKeyDown={(e) => {
-                  //             if (e.key === "Enter") {
-                  //               e.preventDefault();
-                  //               const cursorPos = e.target.selectionStart;
-                  //               const textBeforeCursor = remarkText.slice(
-                  //                 0,
-                  //                 cursorPos
-                  //               );
-                  //               const textAfterCursor =
-                  //                 remarkText.slice(cursorPos);
-                  //               const updatedText = `${textBeforeCursor}\n• ${textAfterCursor}`;
-                  //               setRemarkText(updatedText);
-                  //               setTimeout(() => {
-                  //                 e.target.selectionStart =
-                  //                   e.target.selectionEnd = cursorPos + 3;
-                  //               }, 0);
-                  //             }
-                  //           }}
-                  //         />
-                  //         {errors.remarkError && (
-                  //           <p className="text-red-500 text-sm">
-                  //             {errors.remarkError}
-                  //           </p>
-                  //         )}
-
-                  //         {/* Observation just below input field */}
-                  //         <div className="mt-2">
-                  //           <label className="inline-flex flex-col text-sm text-gray-700">
-                  //             <span className="flex items-center">
-                  //               <input
-                  //                 type="checkbox"
-                  //                 className="mr-2"
-                  //                 checked={isObservation}
-                  //                 onChange={handleObservationToggle}
-                  //               />
-                  //               Observation
-                  //             </span>
-                  //             <span className="text-xs text-gray-500 ml-6">
-                  //               (Observation will not be shown to teachers!)
-                  //             </span>
-                  //           </label>
-                  //         </div>
-                  //       </div>
-                  //     </div>
-                  //   </div>
-                  // </div>
-
                   <div className="card-body w-full ml-2">
                     <div className="space-y-4 mr-10">
                       {/* Teacher Selection */}
@@ -414,24 +276,6 @@ const CreateRemarkandObservationTeacher = () => {
                             value={remarkText}
                             maxLength={300}
                             onChange={(e) => setRemarkText(e.target.value)}
-                            // onKeyDown={(e) => {
-                            //   if (e.key === "Enter") {
-                            //     e.preventDefault();
-                            //     const cursorPos = e.target.selectionStart;
-                            //     const textBeforeCursor = remarkText.slice(
-                            //       0,
-                            //       cursorPos
-                            //     );
-                            //     const textAfterCursor =
-                            //       remarkText.slice(cursorPos);
-                            //     const updatedText = `${textBeforeCursor}\n• ${textAfterCursor}`;
-                            //     setRemarkText(updatedText);
-                            //     setTimeout(() => {
-                            //       e.target.selectionStart =
-                            //         e.target.selectionEnd = cursorPos + 3;
-                            //     }, 0);
-                            //   }
-                            // }}
                           />
                           {errors.remarkError && (
                             <p className="text-red-500 text-sm">

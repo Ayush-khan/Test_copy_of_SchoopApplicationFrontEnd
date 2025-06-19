@@ -162,23 +162,6 @@ function TeacherRemarkandObservation() {
     // Handle page change logic
   };
 
-  // const handleView = (section) => {
-  //   console.log("view data", section);
-  //   setCurrentSection(section);
-  //   setnewclassnames(section?.classnames);
-  //   setnewSectionName(section?.notice_date);
-  //   setnewSubjectnName(section?.subject);
-  //   setTeacherNameIs(section?.notice_desc);
-  //   setteacherIdIs(section?.get_teacher?.teacher_id);
-  //   setShowViewModal(true);
-
-  //   if (section.notice_type === "Notice") {
-  //     fetchNoticeData(section); // Pass the current section directly
-  //   } else {
-  //     setImageUrls([]); // Clear image URLs if not a notice
-  //   }
-  // };
-
   const handleView = (subject) => {
     setRemarkData({
       teacherName: subject.name || "",
@@ -249,47 +232,6 @@ function TeacherRemarkandObservation() {
   };
 
   const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
-
-  // const handleEdit = async (section) => {
-  //   setCurrentSection(section);
-  //   setSubject(section?.subject || "");
-  //   setNoticeDesc(section?.notice_desc || "");
-  //   setnewclassnames(section?.classnames || "");
-  //   console.log("enter notice", section);
-  //   if (section?.notice_type === "Notice") {
-  //     console.log("enter notice-->start");
-
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-  //       if (!token) {
-  //         throw new Error("No authentication token found");
-  //       }
-  //       const response = await axios.get(
-  //         `${API_URL}/api/get_smsnoticedata/${section.unq_id}`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-  //       console.log("responsedata of notice edit", response);
-  //       if (response.data.success) {
-  //         const noticedata = response.data.data.noticedata[0];
-  //         const imageUrls = response.data.data.imageurl || [];
-
-  //         setSubject(noticedata.subject || "");
-  //         setNoticeDesc(noticedata.notice_desc || "");
-  //         setnewclassnames(noticedata.classnames || "");
-  //         setPreselectedFiles(imageUrls); // Set preselected files
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching notice data:", error);
-  //       toast.error("Failed to fetch notice data.");
-  //     }
-  //   } else {
-  //     setPreselectedFiles([]); // Clear preselected files for non-NOTICE types
-  //   }
-
-  //   setShowEditModal(true);
-  // };
 
   const handleEdit = (section) => {
     navigate(`/remObsTeacher/edit/${section.t_remark_id}`, {
@@ -834,7 +776,7 @@ function TeacherRemarkandObservation() {
                                   )}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.acknowledge === "Y" && (
+                                  {subject.acknowledge == "Y" && (
                                     <FontAwesomeIcon
                                       icon={faThumbsUp}
                                       className="text-black text-base"
@@ -842,7 +784,7 @@ function TeacherRemarkandObservation() {
                                   )}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.read_status === 1 && (
+                                  {subject.read_status == 1 && (
                                     <FontAwesomeIcon
                                       icon={faBookReader}
                                       style={{ color: "#C03078" }}
@@ -1147,7 +1089,7 @@ function TeacherRemarkandObservation() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to Publish this{" "}
+                  Are you sure you want to publish remark for{" "}
                   {` ${currentSection?.name} `} ?
                 </div>
                 <div className=" flex justify-end p-3">

@@ -675,11 +675,11 @@ const CreateLeaveApplicationForPrinciple = () => {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/staff_list`, {
+      const response = await axios.get(`${API_URL}/api/get_allstaff`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("Class", response);
-      setStudentNameWithClassId(response?.data || []);
+      setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching Staff");
       console.error("Error fetching Staff:", error);
