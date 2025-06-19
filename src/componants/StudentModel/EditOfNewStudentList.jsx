@@ -457,6 +457,7 @@ function EditOfNewStudentList() {
   // Fetch classes with student count
 
   //  newLogic
+
   useEffect(() => {
     if (parentInformation) {
       setFormData((prevFormData) => ({
@@ -1349,6 +1350,100 @@ function EditOfNewStudentList() {
     }
   };
 
+  // const handleSubmit = async (event) => {
+  //   console.log("Submit triggered");
+  //   event.preventDefault();
+
+  //   setErrors({});
+  //   setUsernameErrors({});
+  //   const validationErrors = validate();
+
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setErrors(validationErrors);
+  //     console.log("Validation Errors:", validationErrors);
+  //     return;
+  //   }
+
+  //   // ✅ Derive user ID and related error key
+  //   const { value: userIdForCheck, key: errorKey } = getUserIdDetails(
+  //     formData,
+  //     selectedUsername
+  //   );
+
+  //   // ✅ Check for username presence
+  //   if (!userIdForCheck) {
+  //     setUsernameErrors((prev) => ({
+  //       ...prev,
+  //       [errorKey]: "Username is empty or invalid.",
+  //     }));
+  //     toast.error("Please provide a valid username.");
+  //     return;
+  //   }
+
+  //   // ✅ Check uniqueness
+  //   const usernameExists = await checkUserId(
+  //     student.student_id,
+  //     userIdForCheck
+  //   );
+  //   if (usernameExists) {
+  //     setUsernameErrors((prevErrors) => ({
+  //       ...prevErrors,
+  //       [errorKey]: "Username is already taken.",
+  //     }));
+  //     toast.error("Username is already taken. Please choose another.");
+  //     return;
+  //   }
+
+  //   // ✅ Continue if no errors
+  //   if (parentExist === "no") {
+  //     formData.parent_id = 0;
+  //     console.log("No existing parent, parent_id set to 0");
+  //   } else {
+  //     console.log("Parent exists, parent_id is:", formData.parent_id);
+  //   }
+
+  //   try {
+  //     setBackendErrors({});
+  //     setLoading(true);
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) throw new Error("No authentication token found");
+
+  //     const updatedFormData = {
+  //       ...formData,
+  //       SetEmailIDAsUsername: selectedUsername || "",
+  //     };
+
+  //     const response = await axios.put(
+  //       `${API_URL}/api/updateNewStudent/${student.student_id}/${formData?.parent_id}`,
+  //       updatedFormData,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       toast.success("Student updated successfully!");
+  //       setTimeout(() => {
+  //         navigate("/newStudentList");
+  //       }, 3000);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error.response?.data || error.message);
+  //     if (error.response?.data?.errors) {
+  //       setBackendErrors(error.response.data.errors);
+  //       toast.error(
+  //         "Some fields contain duplicate data. Please ensure all values are unique."
+  //       );
+  //     } else {
+  //       toast.error(
+  //         error.message || "Backend error occurred while updating data."
+  //       );
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  // above code working well but one condtions for sibling user id miss because api for unique name is run
   const handleSubmit = async (event) => {
     console.log("Submit triggered");
     event.preventDefault();
@@ -1363,44 +1458,46 @@ function EditOfNewStudentList() {
       return;
     }
 
-    // ✅ Derive user ID and related error key
-    const { value: userIdForCheck, key: errorKey } = getUserIdDetails(
-      formData,
-      selectedUsername
-    );
-
-    // ✅ Check for username presence
-    if (!userIdForCheck) {
-      setUsernameErrors((prev) => ({
-        ...prev,
-        [errorKey]: "Username is empty or invalid.",
-      }));
-      toast.error("Please provide a valid username.");
-      return;
-    }
-
-    // ✅ Check uniqueness
-    const usernameExists = await checkUserId(
-      student.student_id,
-      userIdForCheck
-    );
-    if (usernameExists) {
-      setUsernameErrors((prevErrors) => ({
-        ...prevErrors,
-        [errorKey]: "Username is already taken.",
-      }));
-      toast.error("Username is already taken. Please choose another.");
-      return;
-    }
-
-    // ✅ Continue if no errors
+    // ✅ Skip username check if parent already exists
     if (parentExist === "no") {
+      // ✅ Derive user ID and related error key
+      const { value: userIdForCheck, key: errorKey } = getUserIdDetails(
+        formData,
+        selectedUsername
+      );
+
+      // ✅ Check for username presence
+      if (!userIdForCheck) {
+        setUsernameErrors((prev) => ({
+          ...prev,
+          [errorKey]: "Username is empty or invalid.",
+        }));
+        toast.error("Please provide a valid username.");
+        return;
+      }
+
+      // ✅ Check uniqueness
+      const usernameExists = await checkUserId(
+        student.student_id,
+        userIdForCheck
+      );
+      if (usernameExists) {
+        setUsernameErrors((prevErrors) => ({
+          ...prevErrors,
+          [errorKey]: "Username is already taken.",
+        }));
+        toast.error("Username is already taken. Please choose another.");
+        return;
+      }
+
+      // Set parent_id to 0 for new parent
       formData.parent_id = 0;
       console.log("No existing parent, parent_id set to 0");
     } else {
-      console.log("Parent exists, parent_id is:", formData.parent_id);
+      console.log("Parent exists, skipping username check.");
     }
 
+    // ✅ Continue to submit form
     try {
       setBackendErrors({});
       setLoading(true);
@@ -1442,106 +1539,6 @@ function EditOfNewStudentList() {
       setLoading(false);
     }
   };
-  // above code is working well i will c it
-  // const handleSubmit = async (event) => {
-  //   console.log("hudsfh");
-  //   event.preventDefault();
-  //   // const validationErrors = validate();
-
-  //   // if (Object.keys(validationErrors).length > 0) {
-  //   //   setErrors(validationErrors);
-  //   //   Object.values(validationErrors).forEach((error) => {
-  //   //     console.log(error);
-  //   //   });
-  //   //   console.log("error in feilds name");
-
-  //   //   return;
-  //   // }
-  //   setErrors({});
-  //   const validationErrors = validate();
-
-  //   if (Object.keys(validationErrors).length > 0) {
-  //     setErrors(validationErrors);
-  //     console.log("Validation Errors:", validationErrors);
-  //     return;
-  //   }
-  //   // Check for username-specific errors
-  //   const hasUsernameErrors = Object.values(usernameErrors).some(
-  //     (error) => error !== ""
-  //   );
-  //   if (hasUsernameErrors) {
-  //     // Set backend errors if any
-  //     if (hasUsernameErrors) {
-  //       Object.keys(usernameErrors).forEach((key) => {
-  //         if (usernameErrors[key]) {
-  //           console.log(usernameErrors[key]);
-  //         }
-  //       });
-  //     }
-  //     console.log("error in the uniquye name");
-  //     // Exit function if there are validation errors or username errors
-  //     return;
-  //   }
-  //   // // Create FormData object
-  //   // const formattedFormData = new FormData();
-  //   // Object.keys(formData).forEach((key) => {
-  //   //   formattedFormData.append(key, formData[key]);
-  //   // });
-  //   if (parentExist === "no") {
-  //     formData.parent_id = 0;
-  //     console.log("formadata parent_id not exit", formData.parent_id);
-  //   } else {
-  //     console.log("formadata parent_id is exit", formData.parent_id);
-  //   }
-  //   try {
-  //     setBackendErrors({});
-  //     setLoading(true); // Start loading
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       throw new Error("No authentication token found");
-  //     }
-  //     // console.log("formattedFormData", formattedFormData);
-  //     console.log("formData", formData);
-  //     const updatedFormData = {
-  //       ...formData,
-  //       SetEmailIDAsUsername: selectedUsername || "",
-  //     };
-  //     console.log("formData Before submitting", updatedFormData);
-  //     // const ParentIdIs=formData.parent_id;
-  //     const response = await axios.put(
-  //       `${API_URL}/api/updateNewStudent/${student.student_id}/${formData?.parent_id}`,
-  //       updatedFormData, // Send the FormData object
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success("Student updated successfully!");
-  //       setTimeout(() => {
-  //         navigate("/newStudentList");
-  //       }, 3000);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error.response?.data || error.message);
-  //     if (error.response && error.response.data && error.response.data.errors) {
-  //       setBackendErrors(error.response.data.errors || {});
-  //       toast.error(
-  //         "Some fields contain duplicate data. Please ensure all values are unique."
-  //       );
-  //     } else {
-  //       toast.error(
-  //         error.message || "Backdend error occur while updating data"
-  //       );
-  //     }
-  //   } finally {
-  //     setLoading(false); // End loading state
-  //   }
-  // };
-
-  // Fetch the class names when component loads
 
   return (
     <div className=" w-[95%] mx-auto p-4">
@@ -2569,7 +2566,6 @@ function EditOfNewStudentList() {
                   <label className="block md:text-nowrap font-semibold text-[.9em] mb-0.5">
                     <input
                       type="radio"
-                      //   id="siblingmap"
                       value="yes"
                       name="parentExist"
                       checked={parentExist === "yes"} //   className="md:text-nowrap"

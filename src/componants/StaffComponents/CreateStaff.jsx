@@ -223,7 +223,18 @@ function CreateStaff() {
           },
         }
       );
-
+      console.log(
+        "response is --->",
+        response,
+        response.data.status,
+        response.data.success
+      );
+      if (response.data.status === 400 && response.data.success === false) {
+        toast.error(
+          "❌ Userid is created using staff name, please use a different name to create user id"
+        );
+        return;
+      }
       if (response.status === 201) {
         toast.success(response.data.message || "Teacher created successfully!");
         setTimeout(() => {
