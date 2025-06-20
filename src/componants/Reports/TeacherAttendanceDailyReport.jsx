@@ -1250,11 +1250,6 @@ const TeacherAttendanceDailyReport = () => {
                                     Oops! No data found for Present Staff..
                                   </td>
                                 </tr>
-                                // <div className=" relative left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                //   <div className=" text-center text-xl text-red-700">
-                                //     Oops! No data found for Present Staff..
-                                //   </div>
-                                // </div>
                               )}
                             </tbody>
                           </table>
@@ -1344,11 +1339,6 @@ const TeacherAttendanceDailyReport = () => {
                                     Oops! No data found for Late Staff..
                                   </td>
                                 </tr>
-                                // <div className=" relative left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                //   <div className=" text-center text-xl text-red-700">
-                                //     Oops! No data found for Late Staff..
-                                //   </div>
-                                // </div>
                               )}
                             </tbody>
                           </table>
@@ -1417,11 +1407,6 @@ const TeacherAttendanceDailyReport = () => {
                                     Oops! No data found for Absent Staff..
                                   </td>
                                 </tr>
-                                // <div className=" relative left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                //   <div className=" text-center text-xl text-red-700">
-                                //     Oops! No data found for Absent Staff..
-                                //   </div>
-                                // </div>
                               )}
                             </tbody>
                           </table>
