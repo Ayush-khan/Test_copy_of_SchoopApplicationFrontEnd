@@ -157,7 +157,8 @@ const LoginForm = () => {
           />
           <label
             htmlFor="rememberMe"
-            className="text-sm font-medium text-gray-700"
+            // className="text-sm font-medium text-gray-700"
+            className={`text-sm font-medium text-gray-900  `}
           >
             Remember me
           </label>
