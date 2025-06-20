@@ -884,7 +884,6 @@ function NavBar() {
       }
       // working well code
       //   const errorMsg = error.response?.data?.message;
-
       //   // Handle expired token
       //   if (errorMsg === "Token has expired") {
       //     toast.error("Session expired. Please login again.");
@@ -1461,6 +1460,7 @@ function NavBar() {
                     type="text"
                     id="search"
                     name="search"
+                    disabled
                     placeholder="GR NO"
                     value={inputValueGR}
                     onChange={(e) => {
@@ -1475,7 +1475,7 @@ function NavBar() {
                       paddingRight: "4px",
                     }}
                     className={`w-12 lg:w-20 mr-4 outline-none border-1 border-gray-400 rounded-md py-0.5 text-xs lg:text-sm`}
-                    disabled={loading}
+                    // disabled={loading}
                   />
                 </div>
               </div>{" "}
