@@ -344,6 +344,7 @@
 // }
 
 // Test for pop up override or not
+// This code working well but when user delect subject then pass subject_id and name null
 import { useState, useEffect } from "react";
 import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
 import { toast, ToastContainer } from "react-toastify";
@@ -362,7 +363,6 @@ export default function CommonTable({
   usedPeriods,
   setUsedPeriods,
   classSectionNames,
-  overrideSelections,
   onOverrideChange,
 }) {
   const [localSelectedSubjects, setLocalSelectedSubjects] = useState({});
@@ -379,7 +379,8 @@ export default function CommonTable({
           <button
             onClick={() => {
               toast.dismiss();
-              handleSubjectChange(day, period_no, selectedSub);
+              onOverrideChange?.(day, period_no, "Y");
+              applySubjectChange(day, period_no, selectedSub);
             }}
             style={{
               marginRight: 10,
@@ -394,7 +395,11 @@ export default function CommonTable({
             Override
           </button>
           <button
-            onClick={() => toast.dismiss()}
+            onClick={() => {
+              toast.dismiss();
+              onOverrideChange?.(day, period_no, "N");
+              applySubjectChange(day, period_no, selectedSub); // ✅ Select even on Cancel
+            }}
             style={{
               backgroundColor: "red",
               color: "white",
@@ -419,258 +424,154 @@ export default function CommonTable({
     );
   };
 
-  console.log("ClassSectionNames is---->", classSectionNames);
-  console.log("globalSubjectSelection", globalSubjectSelection);
   const activeTabData = tabs.find((tab) => tab.id === activeTab);
   const classId = activeTabData?.class_id;
   const sectionId = activeTabData?.section_id;
-  console.log("activeTabData", activeTabData);
   const key = `${classId}-${sectionId}`;
 
-  // Sync local selected subjects with global selected subjects when the active tab or selected subjects change
+  // Sync local & global selections
   useEffect(() => {
-    if (selectedSubjects[key]) {
-      setLocalSelectedSubjects(selectedSubjects[key]);
-    } else {
-      setLocalSelectedSubjects({});
-    }
+    setLocalSelectedSubjects(selectedSubjects[key] || {});
   }, [selectedSubjects, key]);
 
-  // Update global subject selection when local selections change
   useEffect(() => {
     if (Object.keys(localSelectedSubjects).length) {
-      setGlobalSubjectSelection((prevState) => ({
-        ...prevState,
+      setGlobalSubjectSelection((prev) => ({
+        ...prev,
         [key]: localSelectedSubjects,
       }));
     }
   }, [localSelectedSubjects, key]);
 
-  // Check if a subject is already selected in another section for the same period and day
-  // Check if a subject is already selected in another section for the same period and day
-  const isAnySubjectAlreadySelectedInOtherSection = (day, period_no) => {
-    for (const sectionKey in globalSubjectSelection) {
-      if (sectionKey === key) continue; // Skip current section
-      const sectionData = globalSubjectSelection[sectionKey];
-      const selectedSubject = sectionData[day]?.[period_no];
-      // Allow changes only if the ID is not empty in the other section
-      if (selectedSubject?.id && selectedSubject.id !== "") {
-        return true; // Subject already selected in another section
-      }
-    }
-    return false;
-  };
-
   const applySubjectChange = (day, period_no, selectedSubject) => {
-    const currentSelectedSubject = localSelectedSubjects?.[day]?.[period_no];
+    const cur = localSelectedSubjects?.[day]?.[period_no];
 
-    const updatedSubjects = {
+    const updated = {
       ...localSelectedSubjects,
       [day]: {
-        ...(localSelectedSubjects[day] || {}),
-        [period_no]: selectedSubject.id
+        ...localSelectedSubjects[day],
+        [period_no]: selectedSubject
           ? { id: selectedSubject.id, name: selectedSubject.name }
           : null,
       },
     };
 
-    if (selectedSubject.id) {
-      if (!currentSelectedSubject || currentSelectedSubject.id === "") {
-        setUsedPeriods((prev) => (prev < allocatedPeriods ? prev + 1 : prev));
-      }
-    } else {
-      if (currentSelectedSubject) {
-        setUsedPeriods((prev) => (prev > 0 ? prev - 1 : 0));
-      }
-    }
+    // ✅ Used periods logic
+    setUsedPeriods((prev) =>
+      selectedSubject ? (cur ? prev : prev + 1) : cur ? prev - 1 : prev
+    );
 
-    setLocalSelectedSubjects(updatedSubjects);
-    setGlobalSubjectSelection((prevState) => ({
-      ...prevState,
-      [key]: updatedSubjects[day],
-    }));
-
+    setLocalSelectedSubjects(updated);
+    setGlobalSubjectSelection((prev) => ({ ...prev, [key]: updated[day] }));
     handleTableData(classId, sectionId, day, period_no, selectedSubject);
   };
 
-  const handleSubjectChange = (
-    day,
-    period_no,
-    selectedSubject,
-    shouldRunOverride
-  ) => {
+  const handleSubjectChange = (day, period_no, selectedSubject) => {
     if (!classId || !sectionId) return;
 
-    const currentSelectedSubject = localSelectedSubjects?.[day]?.[period_no];
+    const current = localSelectedSubjects?.[day]?.[period_no];
 
-    // 1. Strict error toast (no override) if subject selected in another section
-    if (
-      selectedSubject.id &&
-      isAnySubjectAlreadySelectedInOtherSection(day, period_no)
-    ) {
-      let conflictingClassSection = "";
-      for (const sectionKey in globalSubjectSelection) {
-        if (sectionKey === key) continue;
-        const sectionData = globalSubjectSelection[sectionKey];
-        const selectedSubjectInOtherSection = sectionData[day]?.[period_no];
-        if (selectedSubjectInOtherSection?.id) {
-          const [conflictingClassId, conflictingSectionId] =
-            sectionKey.split("-");
-          const classSectionName = classSectionNames[conflictingSectionId];
-          conflictingClassSection = `${classSectionName}`;
-          break;
-        }
-      }
+    // ✅ Step 1: Deselect handling
+    if (!selectedSubject.id) {
+      onOverrideChange?.(day, period_no, "N");
+      applySubjectChange(day, period_no, null); // Clean removal
+      return;
+    }
+
+    // ✅ Step 2: Check other sections
+    const inOther = Object.entries(globalSubjectSelection).some(
+      ([sec, data]) => sec !== key && data?.[day]?.[period_no]?.id
+    );
+    if (selectedSubject.id && inOther) {
+      const conflictKey = Object.keys(globalSubjectSelection).find(
+        (sec) =>
+          sec !== key && globalSubjectSelection[sec]?.[day]?.[period_no]?.id
+      );
+      const confSecName = conflictKey
+        ? classSectionNames[conflictKey.split("-")[1]]
+        : "another section";
 
       toast.error(
         <div>
-          <span>
-            <strong style={{ color: "#e74c3c" }}>
-              Subject already selected in another section (
-              {conflictingClassSection})
-            </strong>
-          </span>
+          <strong style={{ color: "#e74c3c" }}>
+            Subject already selected in another section ({confSecName})
+          </strong>
           <br />
           <span style={{ color: "#2980b9" }}>
             for {day}, Period {period_no}.
           </span>
         </div>,
-        {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        }
+        { position: "top-right", autoClose: 5000 }
       );
-
-      return; // Prevent selection
+      return;
     }
 
-    // 2. Override confirmation toast logic (new addition)
-    if (
-      shouldRunOverride &&
-      selectedSubject.id &&
-      currentSelectedSubject?.id &&
-      currentSelectedSubject.id !== selectedSubject.id
-    ) {
-      showOverrideConfirmToast(
-        `Subject already assigned for ${day}, Period ${period_no}. Do you want to override?`,
-        () => {
-          if (onOverrideChange) {
-            onOverrideChange(day, period_no, "Y");
-          }
-          applySubjectChange(day, period_no, selectedSubject);
-        },
-        () => {
-          if (onOverrideChange) {
-            onOverrideChange(day, period_no, "N");
-          }
-          // Cancelled override - do nothing
-        }
-      );
+    // ✅ Step 3: Same-section override check
+    const assignedName =
+      periods.find((p) => p.day === day && p.period_no === period_no)
+        ?.subject_id || "";
+    const assignedTeacher =
+      periods.find((p) => p.day === day && p.period_no === period_no)
+        ?.teachers || "";
 
-      return; // Wait for user action
+    if (assignedName.trim() && assignedTeacher.trim() && selectedSubject.id) {
+      showOverrideConfirmToast(day, period_no, selectedSubject);
+      return;
     }
 
-    // 3. Normal apply change if no conflicts or override needed
-    if (onOverrideChange) {
-      onOverrideChange(day, period_no, selectedSubject.id ? "Y" : "N");
-    }
+    // ✅ Step 4: Normal apply
+    onOverrideChange?.(day, period_no, selectedSubject.id ? "Y" : "N");
     applySubjectChange(day, period_no, selectedSubject);
   };
 
   const renderRows = (days) => {
     const rows = [];
     const maxRows = Math.max(rowCounts.mon_fri, rowCounts.sat);
-
-    for (let rowIndex = 0; rowIndex < maxRows; rowIndex++) {
+    for (let r = 0; r < maxRows; r++) {
       rows.push(
-        <tr key={`row-${rowIndex}`}>
-          {/* Periods Column */}
-          <td className="border p-2 text-center bg-gray-100 w-16">
-            {rowIndex + 1}
-          </td>
-
+        <tr key={r}>
+          <td className="border p-2 bg-gray-100 text-center w-16">{r + 1}</td>
           {days.map((day) => {
-            if (day === "Saturday" && rowIndex >= rowCounts.sat) {
-              return <td key={day} className="border p-2"></td>;
-            }
+            const sel = localSelectedSubjects[day]?.[r + 1];
+            const periodData =
+              periods.find((p) => p.day === day && p.period_no === r + 1) || {};
+            const subjectName = periodData.subject_id || "";
+            const teacherName = periodData.teachers || "";
 
-            const selectedPeriod = localSelectedSubjects?.[day]?.[rowIndex + 1];
-            const periodData = periods.find(
-              (period) =>
-                period.day === day && period.period_no === rowIndex + 1
-            );
-
-            const subjectName = periodData ? periodData.subject_id : " ";
-            const teacherName = periodData ? periodData.teachers : " ";
-
-            // Handle subject selection
-            const handleSubjectSelection = (e) => {
-              const selectedValue = e.target.value;
-              const selectedSub = {
-                id: selectedValue,
-                name:
-                  subjects.find((s) => s.sm_id === selectedValue)
-                    ?.subjectname || "",
+            const onChange = (e) => {
+              const val = e.target.value;
+              const sub = {
+                id: val,
+                name: subjects.find((s) => s.sm_id === val)?.subjectname || "",
               };
-
-              const isRowAlreadyAssigned =
-                subjectName.trim() !== "" && teacherName.trim() !== "";
-
-              if (isRowAlreadyAssigned) {
-                showOverrideConfirmToast(day, rowIndex + 1, selectedSub);
-              } else {
-                handleSubjectChange(day, rowIndex + 1, selectedSub);
-              }
+              handleSubjectChange(day, r + 1, sub);
             };
 
-            // Determine if the background should be highlighted (for selected subjects in other class-sections)
-            const isSelectedInOtherSection =
-              isAnySubjectAlreadySelectedInOtherSection(day, rowIndex + 1);
-            const highlightClass =
-              selectedPeriod?.id === ""
-                ? "" // No highlight if the ID is empty
-                : isSelectedInOtherSection
-                ? "bg-pink-100"
-                : "";
+            const highlight = (isAny) => (isAny ? "bg-pink-100" : "");
+            const inOther = Object.entries(globalSubjectSelection).some(
+              ([sec, data]) => sec !== key && data?.[day]?.[r + 1]?.id
+            );
 
             return (
               <td key={day} className="border p-2">
-                <div className="flex text-center flex-col w-full text-sm text-gray-600">
-                  {subjectName && teacherName ? (
+                <div className="text-center text-xs text-gray-600">
+                  {subjectName && teacherName && (
                     <>
-                      <div className="mb-1">
-                        <span className="break-words text-xs font-medium">
-                          {subjectName}
-                        </span>
-                      </div>
-
-                      <div>
-                        <span className="break-words text-pink-600 font-medium text-xs">
-                          {teacherName}
-                        </span>
-                      </div>
+                      <div className="font-medium">{subjectName}</div>
+                      <div className="text-pink-600">{teacherName}</div>
                     </>
-                  ) : null}
+                  )}
                 </div>
-
-                {/* Subject Dropdown */}
                 <select
-                  className={`border p-1 w-full mt-2 ${highlightClass}`}
-                  value={selectedPeriod?.id || ""}
-                  onChange={handleSubjectSelection}
-                  disabled={
-                    usedPeriods >= allocatedPeriods && !selectedPeriod?.id
-                  } // Disable if used periods match allocated periods and subject is not already selected
+                  value={sel?.id || ""}
+                  onChange={onChange}
+                  className={`border p-1 w-full mt-2 ${highlight(inOther)}`}
+                  disabled={usedPeriods >= allocatedPeriods && !sel?.id}
                 >
                   <option value="">Select</option>
-                  {subjects.map((subject) => (
-                    <option key={subject.subject_id} value={subject.sm_id}>
-                      {subject.subjectname}
+                  {subjects.map((s) => (
+                    <option key={s.subject_id} value={s.sm_id}>
+                      {s.subjectname}
                     </option>
                   ))}
                 </select>
@@ -689,47 +590,348 @@ export default function CommonTable({
     "Wednesday",
     "Thursday",
     "Friday",
-    ...(rowCounts.sat > 0 ? ["Saturday"] : []),
+    ...(rowCounts.sat ? ["Saturday"] : []),
   ];
-
-  const renderTable = () => {
-    if (!periods?.length || !subjects.length || !rowCounts?.mon_fri) {
-      return (
-        <div className="flex w-[100%]  text-center  justify-center mt-14 flex-col items-center space-y-2">
-          <span className="text-4xl animate-bounce">⚠️</span>
-          <p className="text-xl font-medium text-red-700 tracking-wide drop-shadow-md">
-            Oops! No data found..
-          </p>
-        </div>
-      );
-    }
-    return (
-      <table className="table-auto w-full border-collapse border border-gray-300">
-        <thead>
-          <tr className="bg-gray-200 text-gray-600">
-            <th className="border p-2 text-center">Periods</th>
-            {daysForTable.map((day, daykey) => (
-              <th key={daykey} className="border p-2 text-center">
-                {day}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>{renderRows(daysForTable)}</tbody>
-      </table>
-    );
-  };
 
   return (
     <div className="overflow-x-auto">
       {loading ? (
-        <div className="mt-24 border-1 border-white flex justify-center items-center p-5 ">
+        <div className="flex justify-center items-center p-5">
           <LoaderStyle />
         </div>
       ) : (
-        renderTable()
+        <table className="w-full table-auto border-collapse border border-gray-300">
+          <thead>
+            <tr className="bg-gray-200 text-gray-600">
+              <th className="border p-2">Periods</th>
+              {daysForTable.map((d, i) => (
+                <th key={i} className="border p-2">
+                  {d}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>{renderRows(daysForTable)}</tbody>
+        </table>
       )}
       <ToastContainer />
     </div>
   );
 }
+
+// This code working well but when user delect subject then pass subject_id and name empty
+// import { useState, useEffect } from "react";
+// import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
+// import { toast, ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+
+// export default function CommonTable({
+//   periods,
+//   subjects,
+//   loading,
+//   selectedSubjects,
+//   handleTableData,
+//   activeTab,
+//   tabs,
+//   rowCounts,
+//   allocatedPeriods,
+//   usedPeriods,
+//   setUsedPeriods,
+//   classSectionNames,
+//   onOverrideChange,
+// }) {
+//   const [localSelectedSubjects, setLocalSelectedSubjects] = useState({});
+//   const [globalSubjectSelection, setGlobalSubjectSelection] = useState({});
+
+//   // const showOverrideConfirmToast = (day, period_no, selectedSub) => {
+//   //   toast.info(
+//   //     <div>
+//   //       <p>
+//   //         Subject already assigned for <b>{day}</b>, Period <b>{period_no}</b>.
+//   //         Do you want to override?
+//   //       </p>
+//   //       <div style={{ marginTop: 10 }}>
+//   //         <button
+//   //           onClick={() => {
+//   //             toast.dismiss();
+//   //             onOverrideChange?.(day, period_no, "Y");
+//   //             applySubjectChange(day, period_no, selectedSub);
+//   //           }}
+//   //           style={{
+//   //             marginRight: 10,
+//   //             backgroundColor: "green",
+//   //             color: "white",
+//   //             padding: "5px 10px",
+//   //           }}
+//   //         >
+//   //           Override
+//   //         </button>
+//   //         <button
+//   //           onClick={() => {
+//   //             toast.dismiss();
+//   //             onOverrideChange?.(day, period_no, "N");
+//   //             // Cancel: do not apply change
+//   //           }}
+//   //           style={{
+//   //             backgroundColor: "red",
+//   //             color: "white",
+//   //             padding: "5px 10px",
+//   //           }}
+//   //         >
+//   //           Cancel
+//   //         </button>
+//   //       </div>
+//   //     </div>,
+//   //     {
+//   //       position: "top-center",
+//   //       autoClose: false,
+//   //       closeOnClick: false,
+//   //       closeButton: false,
+//   //       draggable: false,
+//   //       pauseOnHover: true,
+//   //     }
+//   //   );
+//   // };
+//   const showOverrideConfirmToast = (day, period_no, selectedSub) => {
+//     toast.info(
+//       <div>
+//         <p>
+//           Subject already assigned for <b>{day}</b>, Period <b>{period_no}</b>.
+//           Do you want to override?
+//         </p>
+//         <div style={{ marginTop: 10 }}>
+//           <button
+//             onClick={() => {
+//               toast.dismiss();
+//               onOverrideChange?.(day, period_no, "Y");
+//               applySubjectChange(day, period_no, selectedSub);
+//             }}
+//             style={{
+//               marginRight: 10,
+//               backgroundColor: "green",
+//               color: "white",
+//               padding: "5px 10px",
+//               border: "none",
+//               borderRadius: 3,
+//               cursor: "pointer",
+//             }}
+//           >
+//             Override
+//           </button>
+//           <button
+//             onClick={() => {
+//               toast.dismiss();
+//               onOverrideChange?.(day, period_no, "N");
+//               applySubjectChange(day, period_no, selectedSub); // ✅ Select even on Cancel
+//             }}
+//             style={{
+//               backgroundColor: "red",
+//               color: "white",
+//               padding: "5px 10px",
+//               border: "none",
+//               borderRadius: 3,
+//               cursor: "pointer",
+//             }}
+//           >
+//             Cancel
+//           </button>
+//         </div>
+//       </div>,
+//       {
+//         position: "top-center",
+//         autoClose: false,
+//         closeOnClick: false,
+//         closeButton: false,
+//         draggable: false,
+//         pauseOnHover: true,
+//       }
+//     );
+//   };
+
+//   const activeTabData = tabs.find((tab) => tab.id === activeTab);
+//   const classId = activeTabData?.class_id;
+//   const sectionId = activeTabData?.section_id;
+//   const key = `${classId}-${sectionId}`;
+
+//   // Sync local & global selections
+//   useEffect(() => {
+//     setLocalSelectedSubjects(selectedSubjects[key] || {});
+//   }, [selectedSubjects, key]);
+
+//   useEffect(() => {
+//     if (Object.keys(localSelectedSubjects).length) {
+//       setGlobalSubjectSelection((prev) => ({
+//         ...prev,
+//         [key]: localSelectedSubjects,
+//       }));
+//     }
+//   }, [localSelectedSubjects, key]);
+
+//   const applySubjectChange = (day, period_no, selectedSubject) => {
+//     const cur = localSelectedSubjects?.[day]?.[period_no];
+//     const updated = {
+//       ...localSelectedSubjects,
+//       [day]: {
+//         ...localSelectedSubjects[day],
+//         [period_no]: selectedSubject.id
+//           ? { id: selectedSubject.id, name: selectedSubject.name }
+//           : null,
+//       },
+//     };
+
+//     setUsedPeriods((prev) =>
+//       selectedSubject.id ? (cur ? prev : prev + 1) : cur ? prev - 1 : prev
+//     );
+
+//     setLocalSelectedSubjects(updated);
+//     setGlobalSubjectSelection((prev) => ({ ...prev, [key]: updated[day] }));
+//     handleTableData(classId, sectionId, day, period_no, selectedSubject);
+//   };
+
+//   const handleSubjectChange = (day, period_no, selectedSubject) => {
+//     if (!classId || !sectionId) return;
+
+//     const current = localSelectedSubjects?.[day]?.[period_no];
+
+//     // STEP 1: Check another section
+//     const inOther = Object.entries(globalSubjectSelection).some(
+//       ([sec, data]) => {
+//         return sec !== key && data?.[day]?.[period_no]?.id;
+//       }
+//     );
+//     if (selectedSubject.id && inOther) {
+//       const conflictKey = Object.keys(globalSubjectSelection).find(
+//         (sec) =>
+//           sec !== key && globalSubjectSelection[sec]?.[day]?.[period_no]?.id
+//       );
+//       const confSecName = conflictKey
+//         ? classSectionNames[conflictKey.split("-")[1]]
+//         : "another section";
+//       toast.error(
+//         <div>
+//           <strong style={{ color: "#e74c3c" }}>
+//             Subject already selected in another section ({confSecName})
+//           </strong>
+//           <br />
+//           <span style={{ color: "#2980b9" }}>
+//             for {day}, Period {period_no}.
+//           </span>
+//         </div>,
+//         { position: "top-right", autoClose: 5000 }
+//       );
+//       return; // Block here
+//     }
+
+//     // STEP 2: Same-section override logic
+//     const assignedName =
+//       periods.find((p) => p.day === day && p.period_no === period_no)
+//         ?.subject_id || "";
+//     const assignedTeacher =
+//       periods.find((p) => p.day === day && p.period_no === period_no)
+//         ?.teachers || "";
+//     const rowHasAssignment = assignedName.trim() && assignedTeacher.trim();
+
+//     if (rowHasAssignment && selectedSubject.id) {
+//       showOverrideConfirmToast(day, period_no, selectedSubject);
+//       return; // Wait for user decision
+//     }
+
+//     // STEP 3: Normal apply
+//     onOverrideChange?.(day, period_no, selectedSubject.id ? "Y" : "N");
+//     applySubjectChange(day, period_no, selectedSubject);
+//   };
+
+//   const renderRows = (days) => {
+//     const rows = [];
+//     const maxRows = Math.max(rowCounts.mon_fri, rowCounts.sat);
+//     for (let r = 0; r < maxRows; r++) {
+//       rows.push(
+//         <tr key={r}>
+//           <td className="border p-2 bg-gray-100 text-center w-16">{r + 1}</td>
+//           {days.map((day) => {
+//             const sel = localSelectedSubjects[day]?.[r + 1];
+//             const periodData =
+//               periods.find((p) => p.day === day && p.period_no === r + 1) || {};
+//             const subjectName = periodData.subject_id || "";
+//             const teacherName = periodData.teachers || "";
+
+//             const onChange = (e) => {
+//               const val = e.target.value;
+//               const sub = {
+//                 id: val,
+//                 name: subjects.find((s) => s.sm_id === val)?.subjectname || "",
+//               };
+//               handleSubjectChange(day, r + 1, sub);
+//             };
+
+//             const highlight = (isAny) => (isAny ? "bg-pink-100" : "");
+//             const inOther = Object.entries(globalSubjectSelection).some(
+//               ([sec, data]) => sec !== key && data?.[day]?.[r + 1]?.id
+//             );
+
+//             return (
+//               <td key={day} className="border p-2">
+//                 <div className="text-center text-xs text-gray-600">
+//                   {subjectName && teacherName && (
+//                     <>
+//                       <div className="font-medium">{subjectName}</div>
+//                       <div className="text-pink-600">{teacherName}</div>
+//                     </>
+//                   )}
+//                 </div>
+//                 <select
+//                   value={sel?.id || ""}
+//                   onChange={onChange}
+//                   className={`border p-1 w-full mt-2 ${highlight(inOther)}`}
+//                   disabled={usedPeriods >= allocatedPeriods && !sel?.id}
+//                 >
+//                   <option value="">Select</option>
+//                   {subjects.map((s) => (
+//                     <option key={s.subject_id} value={s.sm_id}>
+//                       {s.subjectname}
+//                     </option>
+//                   ))}
+//                 </select>
+//               </td>
+//             );
+//           })}
+//         </tr>
+//       );
+//     }
+//     return rows;
+//   };
+
+//   const daysForTable = [
+//     "Monday",
+//     "Tuesday",
+//     "Wednesday",
+//     "Thursday",
+//     "Friday",
+//     ...(rowCounts.sat ? ["Saturday"] : []),
+//   ];
+
+//   return (
+//     <div className="overflow-x-auto">
+//       {loading ? (
+//         <div className="flex justify-center items-center p-5">
+//           <LoaderStyle />
+//         </div>
+//       ) : (
+//         <table className="w-full table-auto border-collapse border border-gray-300">
+//           <thead>
+//             <tr className="bg-gray-200 text-gray-600">
+//               <th className="border p-2">Periods</th>
+//               {daysForTable.map((d, i) => (
+//                 <th key={i} className="border p-2">
+//                   {d}
+//                 </th>
+//               ))}
+//             </tr>
+//           </thead>
+//           <tbody>{renderRows(daysForTable)}</tbody>
+//         </table>
+//       )}
+//       <ToastContainer />
+//     </div>
+//   );
+// }
