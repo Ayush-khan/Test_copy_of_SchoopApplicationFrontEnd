@@ -1315,6 +1315,98 @@ export default function CommonTable({
     onOverrideChange?.(day, period_no, selectedSubject.id ? "Y" : "N");
     applySubjectChange(day, period_no, selectedSubject);
   };
+  // const handleSubjectChange = (day, period_no, selectedSubject) => {
+  //   if (!classId || !sectionId) return;
+
+  //   const current = localSelectedSubjects?.[day]?.[period_no];
+
+  //   // STEP 0: Get period data for the current cell
+  //   const periodData = periods.find(
+  //     (p) => p.day === day && p.period_no === period_no
+  //   );
+
+  //   const assignedSubjects = (periodData?.subject_id || "")
+  //     .split(",")
+  //     .map((s) => s.trim().toLowerCase());
+
+  //   const assignedTeachers = (periodData?.teachers || "")
+  //     .split(",")
+  //     .map((t) => t.trim().toLowerCase());
+
+  //   // STEP 1: Get selected subject and teacher details
+  //   const selectedSubData = subjects.find(
+  //     (s) => s.sm_id === selectedSubject.id
+  //   );
+
+  //   const selectedTeacher = selectedSubData?.teacher_name?.toLowerCase() || "";
+  //   const selectedSubName = selectedSubData?.subjectname?.toLowerCase() || "";
+
+  //   // STEP 2: Check if same subject-teacher already assigned
+  //   const duplicate = assignedSubjects.some((sub, idx) => {
+  //     return (
+  //       sub === selectedSubName && assignedTeachers[idx] === selectedTeacher
+  //     );
+  //   });
+
+  //   if (duplicate) {
+  //     toast.warn(
+  //       <div>
+  //         <strong style={{ color: "#eab308" }}>
+  //           यह subject और teacher पहले से assign हैं।
+  //         </strong>
+  //         <br />
+  //         <span>
+  //           {selectedSubName} - {selectedTeacher}
+  //           <br />
+  //           (Day: <b>{day}</b>, Period: <b>{period_no}</b>)
+  //         </span>
+  //       </div>,
+  //       { position: "top-right", autoClose: 4000 }
+  //     );
+  //     return; // block the selection
+  //   }
+
+  //   // STEP 1: Check another section
+  //   const inOther = Object.entries(globalSubjectSelection).some(
+  //     ([sec, data]) => {
+  //       return sec !== key && data?.[day]?.[period_no]?.id;
+  //     }
+  //   );
+  //   if (selectedSubject.id && inOther) {
+  //     const conflictKey = Object.keys(globalSubjectSelection).find(
+  //       (sec) =>
+  //         sec !== key && globalSubjectSelection[sec]?.[day]?.[period_no]?.id
+  //     );
+  //     const confSecName = conflictKey
+  //       ? classSectionNames[conflictKey.split("-")[1]]
+  //       : "another section";
+  //     toast.error(
+  //       <div>
+  //         <strong style={{ color: "#e74c3c" }}>
+  //           Subject already selected in another section ({confSecName})
+  //         </strong>
+  //         <br />
+  //         <span style={{ color: "#2980b9" }}>
+  //           for {day}, Period {period_no}.
+  //         </span>
+  //       </div>,
+  //       { position: "top-right", autoClose: 5000 }
+  //     );
+  //     return; // Block here
+  //   }
+
+  //   // STEP 2: Same-section override logic
+  //   const rowHasAssignment = assignedName.trim() && assignedTeacher.trim();
+
+  //   if (rowHasAssignment && selectedSubject.id) {
+  //     showOverrideConfirmToast(day, period_no, selectedSubject);
+  //     return; // Wait for user decision
+  //   }
+
+  //   // STEP 3: Normal apply
+  //   onOverrideChange?.(day, period_no, selectedSubject.id ? "Y" : "N");
+  //   applySubjectChange(day, period_no, selectedSubject);
+  // };
 
   const renderRows = (days) => {
     const rows = [];
@@ -1358,32 +1450,6 @@ export default function CommonTable({
             return (
               <td key={day} className="border p-2 text-center  relative">
                 {subjectName && (
-                  // <div
-                  //   className="text-pink-600 cursor-pointer text-[.75em]"
-                  //   onMouseEnter={(e) => {
-                  //     const subjectList = subjectName
-                  //       .split(",")
-                  //       .map((s) => s.trim());
-                  //     const teacherList = teacherName
-                  //       .split(",")
-                  //       .map((t) => t.trim());
-                  //     const items = subjectList.map((sub, idx) => ({
-                  //       subject: sub,
-                  //       teacher: teacherList[idx] || "",
-                  //     }));
-                  //     setHoverInfo({
-                  //       show: true,
-                  //       x: e.clientX,
-                  //       y: e.clientY,
-                  //       items,
-                  //     });
-                  //   }}
-                  //   onMouseLeave={() =>
-                  //     setHoverInfo((prev) => ({ ...prev, show: false }))
-                  //   }
-                  // >
-                  //   {subjectName.split(",")[0] || subjectName}
-                  // </div>
                   <div
                     className="text-pink-600 cursor-pointer text-[.75em]"
                     onMouseEnter={(e) => {
