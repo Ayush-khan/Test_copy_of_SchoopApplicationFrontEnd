@@ -883,19 +883,18 @@ function NavBar() {
         );
       }
       // working well code
-      //   const errorMsg = error.response?.data?.message;
-      //   // Handle expired token
-      //   if (errorMsg === "Token has expired") {
-      //     toast.error("Session expired. Please login again.");
-      //     localStorage.removeItem("authToken"); // Optional: clear old token
-      //     navigate("/"); // Redirect to login
-      //     return;
-      //   }
+      const errorMsg = error.response?.data?.message;
+      // Handle expired token
+      if (errorMsg === "Token has expired") {
+        toast.error("Session expired. Please login again.");
+        localStorage.removeItem("authToken"); // Optional: clear old token
+        navigate("/"); // Redirect to login
+        return;
+      }
 
-      //   // Other error handling
-      //   toast.error(errorMsg || "Something went wrong.");
-      //   console.error("Error fetching profile:", error);
-      // }
+      // Other error handling
+      toast.error(errorMsg || "Something went wrong.");
+      console.error("Error fetching profile:", error);
     };
 
     fetcUSerProfilehData();
