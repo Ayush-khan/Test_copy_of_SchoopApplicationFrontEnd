@@ -561,7 +561,7 @@ export default function EditCommonTimeTable({
               return <td key={day} className="border p-2 bg-gray-50"></td>;
             }
 
-            // 👉 Skip rendering for Mon–Fri if period exceeds allowed
+            // 👉 Skipp rendering for Mon–Fri if period exceeds allowed
             if (day !== "Saturday" && r >= rowCounts.mon_fri) {
               return <td key={day} className="border p-2 bg-gray-50"></td>;
             }

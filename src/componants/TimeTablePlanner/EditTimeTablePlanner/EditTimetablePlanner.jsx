@@ -800,7 +800,7 @@ const EditTimetablePlanner = () => {
         setTimetable(response?.data?.data);
         setPageCount(Math.ceil(response?.data?.data?.length / pageSize));
       }
-      console.log("response idddddd--->", response.data.data);
+      console.log("response iddddd--->", response.data.data);
       const formattedTabs = response.data.data.map((item) => ({
         id: `${item.classname}-${item.sectionname}`,
         classname: item.classname,
