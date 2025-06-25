@@ -2448,7 +2448,7 @@ const CreateTimetablePlanner = () => {
                 .map((sub) => sub.subject_name || "")
                 .filter(Boolean)
                 .join(", ")
-            : "N/A"; // Fallback (shouldn't happen now)
+            : " "; // Fallback (shouldn't happen now)
 
           // ✅ Extract teacher names from array
           const teacherNames = Array.isArray(period.teacher)
@@ -2456,7 +2456,7 @@ const CreateTimetablePlanner = () => {
                 .map((t) => t.t_name || "")
                 .filter(Boolean)
                 .join(", ")
-            : "N/A"; // Fallback
+            : " "; // Fallback
 
           // Add to periods array
           periods.push({

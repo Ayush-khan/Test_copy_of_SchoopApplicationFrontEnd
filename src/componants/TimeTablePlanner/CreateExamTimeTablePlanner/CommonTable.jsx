@@ -1181,7 +1181,7 @@ export default function CommonTable({
             onMouseOver={(e) => (e.target.style.backgroundColor = "#15803d")}
             onMouseOut={(e) => (e.target.style.backgroundColor = "#16a34a")}
           >
-            ➕ Add more subjects
+            ➕ Add subject
           </button>
 
           <button
@@ -1204,7 +1204,7 @@ export default function CommonTable({
             onMouseOver={(e) => (e.target.style.backgroundColor = "#b91c1c")}
             onMouseOut={(e) => (e.target.style.backgroundColor = "#dc2626")}
           >
-            🗑 Overwrite existing subject
+            🗑 Overwrite subject(s)
           </button>
         </div>
       </div>,
