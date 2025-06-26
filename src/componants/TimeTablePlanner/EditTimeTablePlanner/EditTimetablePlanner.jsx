@@ -1152,8 +1152,15 @@ const EditTimetablePlanner = () => {
         {/* <ToastContainer /> */}
         <div className="card p-4 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
-            <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+            {/* <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Edit Time Table Planner
+            </h5> */}
+            <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+              {/* View Time Table Planner for{" "} */}
+              Edit Time Table Planner for{" "}
+              <span className="text-lg text-pink-600 mt-1 font-semibold">
+                <span className="uppercase">{staff?.teachername}</span>
+              </span>
             </h5>
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"

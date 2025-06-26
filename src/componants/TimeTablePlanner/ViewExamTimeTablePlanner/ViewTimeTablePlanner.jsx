@@ -130,15 +130,15 @@ const ViewTimeTablePlanner = () => {
       setTimeTableDataError("");
       if (!staff?.teacher_id) {
         console.log(
-          "Teacher ID is missing. Please select a teacher.",
-          staff.teacher_id
+          "Teacher ID is missing. Please select a teacher.--->",
+          staff
         );
         toast.error("Teacher ID is missing. Please select a teacher.");
         return;
       }
       console.log(
-        "Outside Teacher ID is missing. Please select a teacher.",
-        staff.teacher_id
+        "Outside Teacher ID is missing. Please select a teacher---->>>.",
+        staff
       );
       const token = localStorage.getItem("authToken");
       const periodResponse = await axios.get(
@@ -400,7 +400,11 @@ const ViewTimeTablePlanner = () => {
         <div className="card p-4 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              View Time Table Planner
+              {/* View Time Table Planner for{" "} */}
+              View the Time Table for{" "}
+              <span className="text-lg text-pink-600 mt-1 font-semibold">
+                <span className="uppercase">{staff?.teachername}</span>
+              </span>
             </h5>
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
