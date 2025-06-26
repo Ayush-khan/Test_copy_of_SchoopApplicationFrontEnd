@@ -88,6 +88,16 @@ function TimetablePlanner() {
       }
     );
   };
+  const handleView = async (staffItem) => {
+    console.log("handleview is running on");
+    navigate(
+      `/viewTimeTable/view/${staffItem.teacher_id}`,
+
+      {
+        state: { staff: staffItem },
+      }
+    );
+  };
 
   const handleDelete = (staffCurrent) => {
     console.log("insise detelt");
@@ -232,6 +242,9 @@ function TimetablePlanner() {
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Delete
                       </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        View
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -289,6 +302,15 @@ function TimetablePlanner() {
                               onClick={() => handleDelete(staffItem)}
                             >
                               <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleView(staffItem)}
+                            >
+                              <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                              {/* <FontAwesomeIcon icon={faEdit} /> */}
                             </button>
                           </td>
                         </tr>

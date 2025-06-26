@@ -244,6 +244,7 @@ import ApproveLeaveList from "../componants/AllTableList/ApproveLeaveList.jsx";
 import LeaveApprove from "../componants/AllTableList/LeaveApproveForPrinciple/LeaveApprove (1).jsx";
 import TeacherList from "../componants/AllTableList/TeacherList.jsx";
 import EditLeaveApprove from "../componants/AllTableList/LeaveApproveForPrinciple/EditLeaveApprove (1).jsx";
+import ViewTimeTablePlanner from "../componants/TimeTablePlanner/ViewExamTimeTablePlanner/ViewTimeTablePlanner.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -662,6 +663,10 @@ function Index() {
         <Route
           path="/creaExamTimeTable"
           element={<PrivateRoute element={<CreateExamTimeTable />} />}
+        />
+        <Route
+          path="/viewTimeTable/view/:id"
+          element={<PrivateRoute element={<ViewTimeTablePlanner />} />}
         />
         <Route
           path="/examTimeTable/edit/:id"
