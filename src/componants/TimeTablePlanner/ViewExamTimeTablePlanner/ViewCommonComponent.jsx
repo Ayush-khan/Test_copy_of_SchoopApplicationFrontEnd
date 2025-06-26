@@ -325,7 +325,9 @@ export default function ViewCommonComponent({
               day !== "Saturday" && r >= rowCounts.mon_fri;
 
             if (isSaturdayExcess || isMonToFriExcess) {
-              return <td key={day} className="border p-2 bg-gray-300"></td>;
+              return (
+                <td key={day} className="border-none p-2 bg-gray-100"></td>
+              );
             }
 
             return (

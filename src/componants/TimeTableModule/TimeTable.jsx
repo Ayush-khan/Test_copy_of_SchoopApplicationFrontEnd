@@ -118,7 +118,7 @@ const TimeTable = () => {
       toast.error("Invalid class data.");
       return;
     }
-    setCurrentTimetable({ class_id, section_id }); // ✅ Correctly updating state
+    setCurrentTimetable({ class_id, section_id }); // Correctly updating state
     setShowDeleteModal(true);
   };
 
@@ -219,31 +219,89 @@ const TimeTable = () => {
                         "Friday",
                         "Saturday",
                       ]
+                        // .map((day) => {
+                        //   const lecture = entry[day] || {};
+                        //   const subjectArray = Array.isArray(lecture.subject)
+                        //     ? lecture.subject
+                        //         .map((s) => s.subject_name || "")
+                        //         .filter(Boolean)
+                        //     : lecture.subject && lecture.subject.subject_name
+                        //     ? [lecture.subject.subject_name]
+                        //     : lecture.subject &&
+                        //       typeof lecture.subject === "string"
+                        //     ? [lecture.subject]
+                        //     : [];
+
+                        //   const subject = subjectArray.join(", ");
+
+                        //   // const timeIn = lecture.time_in || " ";
+                        //   // const timeOut = lecture.time_out || " ";
+                        //   const teacherArray = Array.isArray(lecture.teacher)
+                        //     ? lecture.teacher
+                        //         .map((t) =>
+                        //           t.t_name
+                        //             .toLowerCase()
+                        //             .replace(/\b\w/g, (char) =>
+                        //               char.toUpperCase()
+                        //             )
+                        //         )
+                        //         .join(", ")
+                        //     : "";
+
+                        //   return `<td class="px-3 py-2 border border-black">
+                        //             <b>${subject}</b><br>
+
+                        //             ${teacherArray}
+                        //           </td>`;
+                        // })
+                        // .join("")}
+
                         .map((day) => {
                           const lecture = entry[day] || {};
-                          const subject = lecture.subject || " ";
-                          // const timeIn = lecture.time_in || " ";
-                          // const timeOut = lecture.time_out || " ";
-                          const teacherArray = Array.isArray(lecture.teacher)
-                            ? lecture.teacher
-                                .map((t) =>
-                                  t.t_name
-                                    .toLowerCase()
-                                    .replace(/\b\w/g, (char) =>
-                                      char.toUpperCase()
-                                    )
-                                )
-                                .join(", ")
-                            : "";
+
+                          const subjectArray = Array.isArray(lecture.subject)
+                            ? lecture.subject
+                                .map((s) => s.subject_name || "")
+                                .filter(Boolean)
+                            : lecture.subject && lecture.subject.subject_name
+                            ? [lecture.subject.subject_name]
+                            : lecture.subject &&
+                              typeof lecture.subject === "string"
+                            ? [lecture.subject]
+                            : [];
+
+                          const teachers = Array.isArray(lecture.teacher)
+                            ? lecture.teacher.map((t) =>
+                                t.t_name
+                                  .toLowerCase()
+                                  .replace(/\b\w/g, (char) =>
+                                    char.toUpperCase()
+                                  )
+                              )
+                            : [];
+
+                          const maxLength = Math.max(
+                            subjectArray.length,
+                            teachers.length
+                          );
+
+                          const subject = Array.from(
+                            { length: maxLength },
+                            (_, i) => {
+                              const subj = subjectArray[i] || "-";
+                              const teacher = teachers[i] || "-";
+                              return `${subj}<br>${teacher}`;
+                            }
+                          ).join("<br><br>");
 
                           return `<td class="px-3 py-2 border border-black">
-                                    <b>${subject}</b><br>
-                                    
-                                    ${teacherArray}
+                                    <b>${subject}</b>
                                   </td>`;
                         })
                         .join("")}
+                        
                     </tr>`;
+
                   // ${timeIn} - ${timeOut}<br>
 
                   const shortBreakRow =
@@ -552,14 +610,6 @@ const TimeTable = () => {
                   timetable[selectedDay].length > 0 ? (
                     <div className="p-4 text-center mx-auto">
                       <div className="space-y-2">
-                        {/* Assembly Block */}
-                        {/* <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
-                          <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
-                            <span className="w-[35%] font-bold"></span>
-                            <span className="font-bold">Assembly</span>
-                            <span className="font-bold">8.00 - 8.30</span>
-                          </div>
-                        </div> */}
                         <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
                           <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
                             <span className="w-[35%] font-bold"></span>
@@ -572,50 +622,30 @@ const TimeTable = () => {
                           </div>
                         </div>
 
-                        {timetable[selectedDay].map((lecture, index) => (
+                        {/* {timetable[selectedDay].map((lecture, index) => (
                           <React.Fragment key={index}>
-                            {/* Lecture Block */}
+                            
                             <div className="border rounded-lg px-4 py-2 shadow-sm bg-gray-100 text-left min-h-[60px] flex items-center">
                               <div className="flex flex-row justify-between items-center text-md font-medium w-full">
                                 <span className="w-[25%] text-left pl-3">
                                   {lecture.period_no}
                                 </span>
                                 <span className="w-[25%] text-center">
-                                  {lecture.subject == null
-                                    ? "-"
-                                    : lecture.subject}
+                                  {lecture.subject && lecture.subject.length > 0
+                                    ? lecture.subject
+                                        .map((subj) => subj.subject_name)
+                                        .join(", ")
+                                    : "-"}
                                 </span>
                                 <span className="w-[35%] text-right">
-                                  {lecture.teacher?.[0]?.t_name == null
-                                    ? "-"
-                                    : lecture.teacher?.[0]?.t_name}
+                                  {lecture.teacher && lecture.teacher.length > 0
+                                    ? lecture.teacher
+                                        .map((t) => t.t_name)
+                                        .join(", ")
+                                    : "-"}
                                 </span>
                               </div>
                             </div>
-
-                            {/* Breaks */}
-                            {/* {index === 1 && (
-                              <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
-                                <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
-                                  <span className="w-[32%] font-bold"></span>
-                                  <span className="font-bold">Short Break</span>
-                                  <span className="font-bold">
-                                    9.45 - 10.00
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                            {index === 4 && (
-                              <div className="border rounded-lg px-6 py-2 shadow-sm bg-gray-300 text-left">
-                                <div className="flex flex-col sm:flex-row items-center text-md font-medium gap-2">
-                                  <span className="w-[32%] font-bold"></span>
-                                  <span className="font-bold">Long Break</span>
-                                  <span className="font-bold">
-                                    11.45 - 12.15
-                                  </span>
-                                </div>
-                              </div>
-                            )} */}
 
                             {selectedDay?.toLowerCase() === "saturday" ? (
                               index === 3 && (
@@ -660,7 +690,106 @@ const TimeTable = () => {
                               </>
                             )}
                           </React.Fragment>
-                        ))}
+                        ))} */}
+
+                        {timetable[selectedDay].map((lecture, index) => {
+                          const subjects = Array.isArray(lecture.subject)
+                            ? lecture.subject
+                            : lecture.subject
+                            ? [lecture.subject]
+                            : [];
+
+                          const teachers = Array.isArray(lecture.teacher)
+                            ? lecture.teacher
+                            : lecture.teacher
+                            ? [lecture.teacher]
+                            : [];
+
+                          const rowCount =
+                            Math.max(subjects.length, teachers.length) || 1;
+
+                          return (
+                            <div
+                              key={index}
+                              className="border rounded-lg px-4 py-2 shadow-md bg-white mb-4"
+                            >
+                              <table className="w-full text-md font-medium border border-gray-300">
+                                <tbody>
+                                  {Array.from({ length: rowCount }).map(
+                                    (_, i) => (
+                                      <tr
+                                        key={i}
+                                        className="border-b border-gray-300"
+                                      >
+                                        {/* Period Number */}
+                                        {i === 0 && (
+                                          <td
+                                            rowSpan={rowCount}
+                                            className="text-center align-middle px-2 py-1 border-r border-gray-300 font-bold w-[10%]"
+                                          >
+                                            {lecture.period_no}
+                                          </td>
+                                        )}
+
+                                        {/* Subject */}
+                                        <td className="px-3 py-2 w-[45%] border-r border-gray-200">
+                                          {subjects[i]
+                                            ? typeof subjects[i] === "object"
+                                              ? subjects[i]?.subject_name || "-"
+                                              : subjects[i]
+                                            : "-"}
+                                        </td>
+
+                                        {/* Teacher */}
+                                        <td className="px-3 py-2 w-[45%] text-center">
+                                          {teachers[i]
+                                            ? typeof teachers[i] === "object"
+                                              ? teachers[i]?.t_name || "-"
+                                              : teachers[i]
+                                            : "-"}
+                                        </td>
+                                      </tr>
+                                    )
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          );
+                        })}
+
+                        {/* {timetable[selectedDay].map((lecture, index) => (
+                          <div
+                            key={index}
+                            className="border rounded-lg px-4 py-2 shadow-sm bg-gray-100 text-left text-md font-medium flex"
+                          >
+                            
+                            <div className="w-[50%] text-left pl-3 flex items-start">
+                              {lecture.period_no}
+                            </div>
+
+                          
+                            <div className="w-[35%] text-left break-words whitespace-normal flex flex-col gap-1">
+                              {lecture.subject && lecture.subject.length > 0 ? (
+                                lecture.subject.map((s, i) => (
+                                  <div key={i}>{s.subject_name || "-"}</div>
+                                ))
+                              ) : (
+                                <div>-</div>
+                              )}
+                            </div>
+
+                           
+                            <div className="w-[40%] text-right pr-3 break-words whitespace-normal flex flex-col gap-1">
+                              {lecture.teacher && lecture.teacher.length > 0 ? (
+                                lecture.teacher.map((t, i) => (
+                                  <div key={i}>{t.t_name || "-"}</div>
+                                ))
+                              ) : (
+                                <div>-</div>
+                              )}
+                            </div>
+                          </div>
+                        ))} */}
                       </div>
                     </div>
                   ) : (
