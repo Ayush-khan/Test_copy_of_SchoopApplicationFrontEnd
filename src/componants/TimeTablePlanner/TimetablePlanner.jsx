@@ -310,7 +310,6 @@ function TimetablePlanner() {
                               onClick={() => handleView(staffItem)}
                             >
                               <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                              {/* <FontAwesomeIcon icon={faEdit} /> */}
                             </button>
                           </td>
                         </tr>
