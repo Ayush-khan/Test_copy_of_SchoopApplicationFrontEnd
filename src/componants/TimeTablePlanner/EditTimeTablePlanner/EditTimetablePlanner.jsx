@@ -688,6 +688,7 @@ const EditTimetablePlanner = () => {
   const location = useLocation();
   const [showNoDataMessage, setShowNoDataMessage] = useState(false);
   const [overrideSelections, setOverrideSelections] = useState({});
+  const [removedSubjects, setRemovedSubjects] = useState({});
 
   const { staff } = location.state || {};
   console.log("TeacherData is: ", staff);
@@ -931,6 +932,25 @@ const EditTimetablePlanner = () => {
 
   // Ensure to check before rendering the `CommonTable`
 
+  // const handleTableData = (
+  //   classId,
+  //   sectionId,
+  //   day,
+  //   period_no,
+  //   selectedSubject
+  // ) => {
+  //   const key = `${classId}-${sectionId}`;
+  //   setSelectedSubjects((prevSubjects) => ({
+  //     ...prevSubjects,
+  //     [key]: {
+  //       ...(prevSubjects[key] || {}),
+  //       [day]: {
+  //         ...(prevSubjects[key]?.[day] || {}),
+  //         [period_no]: selectedSubject,
+  //       },
+  //     },
+  //   }));
+  // };
   const handleTableData = (
     classId,
     sectionId,
@@ -1052,11 +1072,25 @@ const EditTimetablePlanner = () => {
 
             return {
               day,
-              periods: Object.keys(periodsForDay).map((period_no) => ({
-                period_no,
-                subject: periodsForDay[period_no],
-                override: overrideSelections[`${day}-${period_no}`] || "N",
-              })),
+              // periods: Object.keys(periodsForDay).map((period_no) => ({
+              //   period_no,
+              //   subject: periodsForDay[period_no],
+              //   override: overrideSelections[`${day}-${period_no}`] || "N",
+              // })),
+              periods: Object.keys(periodsForDay).map((period_no) => {
+                const subData = periodsForDay[period_no] || {};
+                return {
+                  period_no,
+                  subject: {
+                    id: subData.id || "",
+                    name: subData.name || "",
+                  },
+                  ...(subData.subjectRemove
+                    ? { subjectRemove: subData.subjectRemove }
+                    : {}),
+                  override: overrideSelections[`${day}-${period_no}`] || "N",
+                };
+              }),
             };
           }
         );

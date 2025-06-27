@@ -502,13 +502,9 @@ export default function EditCommonTimeTable({
 
       dayPeriods.forEach((period) => {
         const override = selectedSubjects?.[key]?.[day]?.[period.period_no];
-        // updated[day][period.period_no] = override || {
-        //   id: period.subject_id ? String(period.subject_id) : "",
-        //   name: period.subject || "",
-        // };
-        updated[day][period.period_no] = override ?? {
-          id: "",
-          name: "",
+        updated[day][period.period_no] = override || {
+          id: period.subject_id ? String(period.subject_id) : "",
+          name: period.subject || "",
         };
       });
     });
@@ -517,15 +513,44 @@ export default function EditCommonTimeTable({
     setGlobalSubjectSelection((prev) => ({ ...prev, [key]: updated }));
   }, [periods, selectedSubjects]);
 
+  // const applySubjectChange = (day, period_no, selectedSubject) => {
+  //   const cur = localSelectedSubjects?.[day]?.[period_no];
+  //   const updated = {
+  //     ...localSelectedSubjects,
+  //     [day]: {
+  //       ...localSelectedSubjects[day],
+  //       [period_no]: selectedSubject.id
+  //         ? { id: selectedSubject.id, name: selectedSubject.name }
+  //         : null,
+  //     },
+  //   };
+
+  //   setUsedPeriods((prev) => {
+  //     const wasEmpty = !cur?.id;
+  //     const nowEmpty = !selectedSubject.id;
+
+  //     if (wasEmpty && !nowEmpty) return prev + 1;
+  //     if (!wasEmpty && nowEmpty) return prev - 1;
+  //     return prev;
+  //   });
+
+  //   setLocalSelectedSubjects(updated);
+  //   setGlobalSubjectSelection((prev) => ({ ...prev, [key]: updated[day] }));
+  //   handleTableData(classId, sectionId, day, period_no, selectedSubject);
+  // };
   const applySubjectChange = (day, period_no, selectedSubject) => {
     const cur = localSelectedSubjects?.[day]?.[period_no];
+
+    // 🆕 Track if a subject was removed
+    const subjectRemove = !selectedSubject.id && cur?.id ? cur.id : undefined;
+
     const updated = {
       ...localSelectedSubjects,
       [day]: {
         ...localSelectedSubjects[day],
         [period_no]: selectedSubject.id
           ? { id: selectedSubject.id, name: selectedSubject.name }
-          : null,
+          : { id: "", name: "", ...(subjectRemove ? { subjectRemove } : {}) },
       },
     };
 
@@ -540,7 +565,12 @@ export default function EditCommonTimeTable({
 
     setLocalSelectedSubjects(updated);
     setGlobalSubjectSelection((prev) => ({ ...prev, [key]: updated[day] }));
-    handleTableData(classId, sectionId, day, period_no, selectedSubject);
+
+    // 🆕 Include subjectRemove in selectedSubject if needed
+    handleTableData(classId, sectionId, day, period_no, {
+      ...selectedSubject,
+      ...(subjectRemove ? { subjectRemove } : {}),
+    });
   };
 
   const handleSubjectChange = (day, period_no, selectedSubject) => {
@@ -708,10 +738,17 @@ export default function EditCommonTimeTable({
                   className={`border p-1 w-full mt-2 ${
                     inOther ? "bg-pink-100" : ""
                   }`}
+                  // disabled={
+                  //   usedPeriods >= allocatedPeriods &&
+                  //   !sel?.id &&
+                  //   !periodData?.subject_id
+                  // }
+
                   disabled={
                     usedPeriods >= allocatedPeriods &&
                     !sel?.id &&
-                    !periodData?.subject_id
+                    !periodData?.subject &&
+                    !periodData?.teachers
                   }
                 >
                   <option value="">Select</option>
