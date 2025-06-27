@@ -401,7 +401,7 @@ const ViewTimeTablePlanner = () => {
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               {/* View Time Table Planner for{" "} */}
-              View the Time Table for{" "}
+              View Time Table for{" "}
               <span className="text-lg text-pink-600 mt-1 font-semibold">
                 <span className="uppercase">{staff?.teachername}</span>
               </span>

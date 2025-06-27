@@ -502,9 +502,13 @@ export default function EditCommonTimeTable({
 
       dayPeriods.forEach((period) => {
         const override = selectedSubjects?.[key]?.[day]?.[period.period_no];
-        updated[day][period.period_no] = override || {
-          id: period.subject_id ? String(period.subject_id) : "",
-          name: period.subject || "",
+        // updated[day][period.period_no] = override || {
+        //   id: period.subject_id ? String(period.subject_id) : "",
+        //   name: period.subject || "",
+        // };
+        updated[day][period.period_no] = override ?? {
+          id: "",
+          name: "",
         };
       });
     });
@@ -583,6 +587,7 @@ export default function EditCommonTimeTable({
       selectedSubject.id !== currentValue
     ) {
       const toastKey = `${day}-${period_no}-${selectedSubject.id}`;
+      toastShownRef.current[toastKey] = false;
       if (!toastShownRef.current[toastKey]) {
         toastShownRef.current[toastKey] = true;
         toast.info(
@@ -626,7 +631,9 @@ export default function EditCommonTimeTable({
       }
     } else {
       onOverrideChange?.(day, period_no, selectedSubject.id ? "Y" : "N");
-      applySubjectChange(day, period_no, selectedSubject);
+      setTimeout(() => {
+        applySubjectChange(day, period_no, selectedSubject);
+      }, 0); // force re-rendering fix if React batches updates
     }
   };
 
@@ -701,7 +708,11 @@ export default function EditCommonTimeTable({
                   className={`border p-1 w-full mt-2 ${
                     inOther ? "bg-pink-100" : ""
                   }`}
-                  disabled={usedPeriods >= allocatedPeriods && !sel?.id}
+                  disabled={
+                    usedPeriods >= allocatedPeriods &&
+                    !sel?.id &&
+                    !periodData?.subject_id
+                  }
                 >
                   <option value="">Select</option>
                   {subjects.map((s) => (

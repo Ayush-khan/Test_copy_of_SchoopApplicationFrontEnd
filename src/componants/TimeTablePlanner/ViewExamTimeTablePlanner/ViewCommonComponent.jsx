@@ -326,7 +326,7 @@ export default function ViewCommonComponent({
 
             if (isSaturdayExcess || isMonToFriExcess) {
               return (
-                <td key={day} className="border-none p-2 bg-gray-100"></td>
+                <td key={day} className="border-none p-2 bg-gray-200"></td>
               );
             }
 
@@ -334,17 +334,13 @@ export default function ViewCommonComponent({
               <td key={day} className="border p-2 text-center relative">
                 {subjectName !== "-" ? (
                   <div
-                    className="text-pink-600 cursor-pointer text-[.9em]"
+                    className="text-pink-600 cursor-pointer text-[1em]"
                     onMouseEnter={(e) => {
                       const subjectList = subjectName
                         .split(",")
                         .map((s) => s.trim());
-                      const teacherList = teacherName
-                        .split(",")
-                        .map((t) => t.trim());
-                      const items = subjectList.map((sub, idx) => ({
+                      const items = subjectList.map((sub) => ({
                         subject: sub,
-                        teacher: teacherList[idx] || "",
                       }));
                       setHoverInfo({
                         show: true,
@@ -357,20 +353,9 @@ export default function ViewCommonComponent({
                       setHoverInfo((prev) => ({ ...prev, show: false }))
                     }
                   >
-                    {/* {subjectName.split(",").map((s, idx) => (
+                    {subjectName.split(",").map((s, idx) => (
                       <div key={idx}>{s.trim()}</div>
-                    ))} */}
-                    {subjectName.split(",").map((sub, idx) => {
-                      const teacher = teacherName.split(",")[idx]?.trim() || "";
-                      return (
-                        <div key={idx}>
-                          {sub.trim()}{" "}
-                          {teacher && (
-                            <span className="text-gray-500">({teacher})</span>
-                          )}
-                        </div>
-                      );
-                    })}
+                    ))}
                   </div>
                 ) : (
                   <span className="text-gray-400 text-sm">-</span>
@@ -439,7 +424,7 @@ export default function ViewCommonComponent({
       <ToastContainer />
       {hoverInfo.show && (
         <div
-          className="fixed z-50 bg-white text-gray-700 shadow-lg rounded-lg p-2 border border-gray-300 text-[1em]"
+          className="fixed z-50 bg-white text-gray-700 shadow-lg rounded-lg p-2 border border-gray-300 text-[1.1em]"
           style={{
             top: hoverInfo.y + 10,
             left: hoverInfo.x + 10,
@@ -450,7 +435,7 @@ export default function ViewCommonComponent({
           {hoverInfo.items.map((item, i) => (
             <div key={i} className="font-medium">
               <span className="text-pink-600">{item.subject}</span>{" "}
-              <span className="text-black">({item.teacher})</span>
+              {/* <span className="text-black">({item.teacher})</span> */}
             </div>
           ))}
         </div>
