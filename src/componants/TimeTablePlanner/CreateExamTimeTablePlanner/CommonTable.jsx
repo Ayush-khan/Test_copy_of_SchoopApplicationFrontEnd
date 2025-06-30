@@ -1253,10 +1253,17 @@ export default function CommonTable({
           : null,
       },
     };
+    setUsedPeriods((prev) => {
+      const wasEmpty = !cur?.id;
+      const nowEmpty = !selectedSubject.id;
 
-    setUsedPeriods((prev) =>
-      selectedSubject.id ? (cur ? prev : prev + 1) : cur ? prev - 1 : prev
-    );
+      if (wasEmpty && !nowEmpty) return prev + 1;
+      if (!wasEmpty && nowEmpty) return Math.max(prev - 1, 0); // ✅ Prevent negative
+      return prev;
+    });
+    // setUsedPeriods((prev) =>
+    //   selectedSubject.id ? (cur ? prev : prev + 1) : cur ? prev - 1 : prev
+    // );
 
     setLocalSelectedSubjects(updated);
     setGlobalSubjectSelection((prev) => ({ ...prev, [key]: updated[day] }));
