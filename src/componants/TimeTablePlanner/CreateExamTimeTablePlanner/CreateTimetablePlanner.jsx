@@ -2345,7 +2345,7 @@ const CreateTimetablePlanner = () => {
       }
 
       const response = await axios.get(
-        `${API_URL}/api/get_timetablebyclasssection/${class_id}/${section_id}`,
+        `${API_URL}/api/get_timetablebyclasssection/${class_id}/${section_id}/${selectedStudentId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -2405,6 +2405,28 @@ const CreateTimetablePlanner = () => {
 
   // Ensure to check before rendering the `CommonTable`
 
+  // const handleTableData = (
+  //   classId,
+  //   sectionId,
+  //   day,
+  //   period_no,
+  //   selectedSubject
+  // ) => {
+  //   const key = `${classId}-${sectionId}`;
+
+  //   setSelectedSubjects((prevSubjects) => ({
+  //     ...prevSubjects,
+  //     [key]: {
+  //       ...prevSubjects[key], // Preserve previous data for the same class-section
+  //       [day]: {
+  //         ...(prevSubjects[key]?.[day] || {}), // Preserve previous day's data
+  //         [period_no]: selectedSubject, // Update selected subject for this period
+  //       },
+  //     },
+  //   }));
+  //   console.log("setSelectedSubjects[]----->", selectedSubjects);
+  // };
+  // console.log("")
   const handleTableData = (
     classId,
     sectionId,
@@ -2413,36 +2435,92 @@ const CreateTimetablePlanner = () => {
     selectedSubject
   ) => {
     const key = `${classId}-${sectionId}`;
-
     setSelectedSubjects((prevSubjects) => ({
       ...prevSubjects,
       [key]: {
-        ...prevSubjects[key], // Preserve previous data for the same class-section
+        ...(prevSubjects[key] || {}),
         [day]: {
-          ...(prevSubjects[key]?.[day] || {}), // Preserve previous day's data
-          [period_no]: selectedSubject, // Update selected subject for this period
+          ...(prevSubjects[key]?.[day] || {}),
+          [period_no]: selectedSubject,
         },
       },
     }));
-    console.log("setSelectedSubjects[]----->", selectedSubjects);
   };
-  // console.log("")
 
+  // const transformTimetableData = (data) => {
+  //   const periods = [];
+  //   const subjects = [];
+
+  //   const rowCounts = {
+  //     mon_fri: data.mon_fri,
+  //     sat: data.sat,
+  //   };
+
+  //   Object.keys(data).forEach((day) => {
+  //     if (day !== "mon_fri" && day !== "sat") {
+  //       const dayData = data[day];
+
+  //       dayData.forEach((period) => {
+  //         // ✅ Extract subject names from array
+  //         const subjectName = Array.isArray(period.subject)
+  //           ? period.subject
+  //               .map((sub) => sub.subject_name || "")
+  //               .filter(Boolean)
+  //               .join(", ")
+  //           : " "; // Fallback (shouldn't happen now)
+
+  //         // ✅ Extract teacher names from array
+  //         const teacherNames = Array.isArray(period.teacher)
+  //           ? period.teacher
+  //               .map((t) => t.t_name || "")
+  //               .filter(Boolean)
+  //               .join(", ")
+  //           : " "; // Fallback
+
+  //         // Add to periods array
+  //         periods.push({
+  //           period_no: period.period_no,
+  //           time_in: period.time_in,
+  //           time_out: period.time_out,
+  //           subject_id: subjectName,
+  //           teachers: teacherNames,
+  //           day: day,
+  //         });
+
+  //         // Add to subjects array
+  //         subjects.push({
+  //           day,
+  //           period_no: period.period_no,
+  //           subject_id: subjectName,
+  //           teachers: teacherNames,
+  //         });
+  //       });
+  //     }
+  //   });
+
+  //   return { periods, subjects, rowCounts };
+  // };
   const transformTimetableData = (data) => {
     const periods = [];
     const subjects = [];
 
     const rowCounts = {
-      mon_fri: data.mon_fri,
-      sat: data.sat,
+      mon_fri: data.mon_fri, // Number of periods for Monday to Friday
+      sat: data.sat, // Number of periods for Saturday
     };
 
+    // Iterate through each day and extract the periods
     Object.keys(data).forEach((day) => {
       if (day !== "mon_fri" && day !== "sat") {
         const dayData = data[day];
-
         dayData.forEach((period) => {
-          // ✅ Extract subject names from array
+          // Extract teacher names, handling empty teacher arrays
+          const teachers =
+            period.teacher &&
+            Array.isArray(period.teacher) &&
+            period.teacher.length > 0
+              ? period.teacher.map((t) => t.t_name).join(", ")
+              : " "; // If no teachers, return "N/A"
           const subjectName = Array.isArray(period.subject)
             ? period.subject
                 .map((sub) => sub.subject_name || "")
@@ -2457,23 +2535,23 @@ const CreateTimetablePlanner = () => {
                 .filter(Boolean)
                 .join(", ")
             : " "; // Fallback
-
-          // Add to periods array
+          // Add the period to the periods array, with subject and teacher names
           periods.push({
             period_no: period.period_no,
             time_in: period.time_in,
             time_out: period.time_out,
-            subject_id: subjectName,
-            teachers: teacherNames,
-            day: day,
+            subject_id: period.subject_id, // Subject ID
+            subject: subjectName,
+            teachers: teacherNames, // Teacher(s) name(s)
+            day: day, // Add the day to link periods to days
           });
 
-          // Add to subjects array
+          // Add the subject and teacher details for the subject table
           subjects.push({
             day,
             period_no: period.period_no,
-            subject_id: subjectName,
-            teachers: teacherNames,
+            subject_id: subjectName, // Subject ID
+            teachers: teacherNames, // Teacher(s) name(s)
           });
         });
       }
@@ -2481,7 +2559,6 @@ const CreateTimetablePlanner = () => {
 
     return { periods, subjects, rowCounts };
   };
-
   const handleOverrideChange = (day, period_no, value) => {
     setOverrideSelections((prev) => ({
       ...prev,
@@ -2523,11 +2600,25 @@ const CreateTimetablePlanner = () => {
 
             return {
               day,
-              periods: Object.keys(periodsForDay).map((period_no) => ({
-                period_no,
-                subject: periodsForDay[period_no],
-                override: overrideSelections[`${day}-${period_no}`] || "N",
-              })),
+              // periods: Object.keys(periodsForDay).map((period_no) => ({
+              //   period_no,
+              //   subject: periodsForDay[period_no],
+              //   override: overrideSelections[`${day}-${period_no}`] || "N",
+              // })),
+              periods: Object.keys(periodsForDay).map((period_no) => {
+                const subData = periodsForDay[period_no] || {};
+                return {
+                  period_no,
+                  subject: {
+                    id: subData.id || "",
+                    name: subData.name || "",
+                  },
+                  ...(subData.subjectRemove
+                    ? { subjectRemove: subData.subjectRemove }
+                    : {}),
+                  override: overrideSelections[`${day}-${period_no}`] || "N",
+                };
+              }),
             };
           }
         );
@@ -2549,7 +2640,7 @@ const CreateTimetablePlanner = () => {
 
       const token = localStorage.getItem("authToken");
       const response = await axios.post(
-        `${API_URL}/api/save_timetableallotment`,
+        `${API_URL}/api/update_timetableforclass`,
         dataToSubmit,
         {
           headers: {
@@ -2559,7 +2650,7 @@ const CreateTimetablePlanner = () => {
       );
 
       if (response?.data?.success) {
-        toast.success("Timetable successfully submitted!");
+        toast.success("Timetable created successfully!");
         setTimeout(() => {
           setActiveTab("");
           setTimetableData({

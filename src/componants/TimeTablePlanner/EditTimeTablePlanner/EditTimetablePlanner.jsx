@@ -1124,7 +1124,7 @@ const EditTimetablePlanner = () => {
       );
 
       if (response?.data?.success) {
-        toast.success("Timetable successfully submitted!");
+        toast.success("Timetable updated successfully!");
         setTimeout(() => {
           setActiveTab(""); // Reset active tab
           setTimetableData({
