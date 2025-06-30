@@ -1142,8 +1142,27 @@ export default function CommonTable({
           backgroundColor: "#fff",
           textAlign: "center",
           margin: "0 auto",
+          position: "relative",
         }}
       >
+        {/* ❌ Close Button */}
+        <button
+          onClick={() => toast.dismiss()}
+          style={{
+            position: "absolute",
+            top: "1px",
+            right: "5px",
+            background: "transparent",
+            border: "none",
+            fontSize: "18px",
+            // fontWeight: "medium",
+            color: "red",
+            cursor: "pointer",
+          }}
+          aria-label="Close"
+        >
+          ✖
+        </button>
         <p
           style={{ fontSize: "0.95em", marginBottom: "16px", color: "#1f2937" }}
         >
@@ -1160,6 +1179,7 @@ export default function CommonTable({
 
             flexWrap: "wrap",
           }}
+          className="flex justify-center gap-2"
         >
           <button
             onClick={() => {
@@ -1167,17 +1187,7 @@ export default function CommonTable({
               onOverrideChange?.(day, period_no, "N");
               applySubjectChange(day, period_no, selectedSub);
             }}
-            style={{
-              backgroundColor: "#16a34a",
-              color: "#fff",
-              padding: "10px 16px",
-              fontSize: "0.8em",
-              fontWeight: 500,
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              transition: "background 0.2s",
-            }}
+            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
             onMouseOver={(e) => (e.target.style.backgroundColor = "#15803d")}
             onMouseOut={(e) => (e.target.style.backgroundColor = "#16a34a")}
           >
@@ -1190,17 +1200,7 @@ export default function CommonTable({
               onOverrideChange?.(day, period_no, "Y");
               applySubjectChange(day, period_no, selectedSub);
             }}
-            style={{
-              backgroundColor: "#dc2626",
-              color: "#fff",
-              padding: "10px 16px",
-              fontSize: "0.8em",
-              fontWeight: 500,
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              transition: "background 0.2s",
-            }}
+            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
             onMouseOver={(e) => (e.target.style.backgroundColor = "#b91c1c")}
             onMouseOut={(e) => (e.target.style.backgroundColor = "#dc2626")}
           >
@@ -1315,98 +1315,6 @@ export default function CommonTable({
     onOverrideChange?.(day, period_no, selectedSubject.id ? "Y" : "N");
     applySubjectChange(day, period_no, selectedSubject);
   };
-  // const handleSubjectChange = (day, period_no, selectedSubject) => {
-  //   if (!classId || !sectionId) return;
-
-  //   const current = localSelectedSubjects?.[day]?.[period_no];
-
-  //   // STEP 0: Get period data for the current cell
-  //   const periodData = periods.find(
-  //     (p) => p.day === day && p.period_no === period_no
-  //   );
-
-  //   const assignedSubjects = (periodData?.subject_id || "")
-  //     .split(",")
-  //     .map((s) => s.trim().toLowerCase());
-
-  //   const assignedTeachers = (periodData?.teachers || "")
-  //     .split(",")
-  //     .map((t) => t.trim().toLowerCase());
-
-  //   // STEP 1: Get selected subject and teacher details
-  //   const selectedSubData = subjects.find(
-  //     (s) => s.sm_id === selectedSubject.id
-  //   );
-
-  //   const selectedTeacher = selectedSubData?.teacher_name?.toLowerCase() || "";
-  //   const selectedSubName = selectedSubData?.subjectname?.toLowerCase() || "";
-
-  //   // STEP 2: Check if same subject-teacher already assigned
-  //   const duplicate = assignedSubjects.some((sub, idx) => {
-  //     return (
-  //       sub === selectedSubName && assignedTeachers[idx] === selectedTeacher
-  //     );
-  //   });
-
-  //   if (duplicate) {
-  //     toast.warn(
-  //       <div>
-  //         <strong style={{ color: "#eab308" }}>
-  //           यह subject और teacher पहले से assign हैं।
-  //         </strong>
-  //         <br />
-  //         <span>
-  //           {selectedSubName} - {selectedTeacher}
-  //           <br />
-  //           (Day: <b>{day}</b>, Period: <b>{period_no}</b>)
-  //         </span>
-  //       </div>,
-  //       { position: "top-right", autoClose: 4000 }
-  //     );
-  //     return; // block the selection
-  //   }
-
-  //   // STEP 1: Check another section
-  //   const inOther = Object.entries(globalSubjectSelection).some(
-  //     ([sec, data]) => {
-  //       return sec !== key && data?.[day]?.[period_no]?.id;
-  //     }
-  //   );
-  //   if (selectedSubject.id && inOther) {
-  //     const conflictKey = Object.keys(globalSubjectSelection).find(
-  //       (sec) =>
-  //         sec !== key && globalSubjectSelection[sec]?.[day]?.[period_no]?.id
-  //     );
-  //     const confSecName = conflictKey
-  //       ? classSectionNames[conflictKey.split("-")[1]]
-  //       : "another section";
-  //     toast.error(
-  //       <div>
-  //         <strong style={{ color: "#e74c3c" }}>
-  //           Subject already selected in another section ({confSecName})
-  //         </strong>
-  //         <br />
-  //         <span style={{ color: "#2980b9" }}>
-  //           for {day}, Period {period_no}.
-  //         </span>
-  //       </div>,
-  //       { position: "top-right", autoClose: 5000 }
-  //     );
-  //     return; // Block here
-  //   }
-
-  //   // STEP 2: Same-section override logic
-  //   const rowHasAssignment = assignedName.trim() && assignedTeacher.trim();
-
-  //   if (rowHasAssignment && selectedSubject.id) {
-  //     showOverrideConfirmToast(day, period_no, selectedSubject);
-  //     return; // Wait for user decision
-  //   }
-
-  //   // STEP 3: Normal apply
-  //   onOverrideChange?.(day, period_no, selectedSubject.id ? "Y" : "N");
-  //   applySubjectChange(day, period_no, selectedSubject);
-  // };
 
   const renderRows = (days) => {
     const rows = [];

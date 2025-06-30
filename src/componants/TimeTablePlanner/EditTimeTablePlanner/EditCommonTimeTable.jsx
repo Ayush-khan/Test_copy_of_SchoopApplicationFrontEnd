@@ -462,11 +462,21 @@ export default function EditCommonTimeTable({
       },
     };
 
+    // setUsedPeriods((prev) => {
+    //   const wasEmpty = !cur?.id;
+    //   const nowEmpty = !selectedSubject.id;
+    //   if (wasEmpty && !nowEmpty) return prev + 1;
+    //   if (!wasEmpty && nowEmpty) return prev - 1;
+    //   return prev;
+    // });
+
+    // correct working code not show negative values in the used periods
     setUsedPeriods((prev) => {
       const wasEmpty = !cur?.id;
       const nowEmpty = !selectedSubject.id;
+
       if (wasEmpty && !nowEmpty) return prev + 1;
-      if (!wasEmpty && nowEmpty) return prev - 1;
+      if (!wasEmpty && nowEmpty) return Math.max(prev - 1, 0); // ✅ Prevent negative
       return prev;
     });
 
@@ -537,9 +547,34 @@ export default function EditCommonTimeTable({
               backgroundColor: "#fff",
               textAlign: "center",
               margin: "0 auto",
+              position: "relative",
             }}
           >
-            <p>
+            {/* ❌ Close Button */}
+            <button
+              onClick={() => toast.dismiss()}
+              style={{
+                position: "absolute",
+                top: "1px",
+                right: "5px",
+                background: "transparent",
+                border: "none",
+                fontSize: "18px",
+                // fontWeight: "medium",
+                color: "red",
+                cursor: "pointer",
+              }}
+              aria-label="Close"
+            >
+              ✖
+            </button>
+            <p
+              style={{
+                fontSize: "0.95em",
+                marginBottom: "16px",
+                color: "#1f2937",
+              }}
+            >
               <strong>Subject is already allotted for this period.</strong>
               <br />
               What would you like to do?

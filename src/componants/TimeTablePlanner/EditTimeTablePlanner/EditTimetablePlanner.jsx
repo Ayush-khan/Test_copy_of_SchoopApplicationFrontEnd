@@ -1114,7 +1114,7 @@ const EditTimetablePlanner = () => {
       // Send the data to the server
       const token = localStorage.getItem("authToken");
       const response = await axios.post(
-        `${API_URL}/api/save_timetableallotment`,
+        `${API_URL}/api/update_timetableforclass`,
         dataToSubmit,
         {
           headers: {
