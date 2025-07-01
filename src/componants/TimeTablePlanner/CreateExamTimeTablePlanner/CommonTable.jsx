@@ -527,14 +527,6 @@ export default function CommonTable({
       },
     };
 
-    // setUsedPeriods((prev) => {
-    //   const wasEmpty = !cur?.id;
-    //   const nowEmpty = !selectedSubject.id;
-    //   if (wasEmpty && !nowEmpty) return prev + 1;
-    //   if (!wasEmpty && nowEmpty) return prev - 1;
-    //   return prev;
-    // });
-
     // correct working code not show negative values in the used periods
     setUsedPeriods((prev) => {
       const wasEmpty = !cur?.id;
@@ -772,10 +764,9 @@ export default function CommonTable({
                     inOther ? "bg-pink-100" : ""
                   }`}
                   disabled={
-                    usedPeriods >= allocatedPeriods &&
-                    !sel?.id &&
-                    !periodData?.subject &&
-                    !periodData?.teachers
+                    usedPeriods >= allocatedPeriods && !sel?.id
+                    // !periodData?.subject &&
+                    // !periodData?.teachers
                   }
                 >
                   <option value="">Select</option>
