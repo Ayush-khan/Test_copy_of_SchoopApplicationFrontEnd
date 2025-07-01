@@ -707,10 +707,9 @@ export default function EditCommonTimeTable({
                     inOther ? "bg-pink-100" : ""
                   }`}
                   disabled={
-                    usedPeriods >= allocatedPeriods &&
-                    !sel?.id &&
-                    !periodData?.subject &&
-                    !periodData?.teachers
+                    usedPeriods >= allocatedPeriods && !sel?.id
+                    // !periodData?.subject &&
+                    // !periodData?.teachers
                   }
                 >
                   <option value="">Select</option>
