@@ -245,6 +245,9 @@ import LeaveApprove from "../componants/AllTableList/LeaveApproveForPrinciple/Le
 import TeacherList from "../componants/AllTableList/TeacherList.jsx";
 import EditLeaveApprove from "../componants/AllTableList/LeaveApproveForPrinciple/EditLeaveApprove (1).jsx";
 import ViewTimeTablePlanner from "../componants/TimeTablePlanner/ViewExamTimeTablePlanner/ViewTimeTablePlanner.jsx";
+import Stationery from "../componants/Stationery/Stationery.jsx";
+import SiblingUnmapping from "../componants/SiblingUnmapping/SiblingUnmapping.jsx";
+import UnmapDetails from "../componants/SiblingUnmapping/UnmapDetails.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -927,7 +930,21 @@ function Index() {
           path="/studentIdcDReport"
           element={<PrivateRoute element={<StudentIdCardDetailedReport />} />}
         />
-
+        {/* Stationary module*/}
+        <Route
+          path="/stationery"
+          element={<PrivateRoute element={<Stationery />} />}
+        />
+        {/* Siblings unMapping module*/}
+        <Route
+          path="/siblingUnmapping"
+          element={<PrivateRoute element={<SiblingUnmapping />} />}
+        />
+        {/* Stationary module*/}
+        <Route
+          path="/unmapDetails/edit/:id"
+          element={<PrivateRoute element={<UnmapDetails />} />}
+        />
         {/* TeacherAttendance Daily Report  report */}
         <Route
           path="/TeacherADReport"

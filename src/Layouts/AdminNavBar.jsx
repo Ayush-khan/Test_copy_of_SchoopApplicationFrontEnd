@@ -118,6 +118,9 @@ const AdminNavBar = () => {
             <NavDropdown.Item as={Link} to="/SiblingMapping">
               Sibling Mapping
             </NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/siblingUnmapping">
+              Sibling Unmapping
+            </NavDropdown.Item>
             <NavDropdown.Item as={Link} to="/myprofile">
               User Profile
             </NavDropdown.Item>
@@ -622,6 +625,15 @@ const AdminNavBar = () => {
             className="text-sm font-bold hover:text-black"
           >
             Exam Timetable{" "}
+          </NavDropdown.Item>
+          {/* Stationery module */}
+          <NavDropdown.Item
+            as={Link}
+            to="/stationery"
+            // to="/allotMarksHeading"
+            className="text-sm font-bold hover:text-black"
+          >
+            Stationery{" "}
           </NavDropdown.Item>
         </NavDropdown>
 
