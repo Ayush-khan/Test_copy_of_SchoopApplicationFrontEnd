@@ -875,26 +875,36 @@ function NavBar() {
           "the userupdate profile inside the navbar compoenent",
           staff
         );
+        const errorMsg = response?.data?.message;
+        // Handle expired token
+        console.log("tokeneeee error--->", errorMsg, response?.data?.message);
+        if (errorMsg === "Token has expired") {
+          toast.error("Session expired. Please login again.");
+          localStorage.removeItem("authToken"); // Optional: clear old token
+          navigate("/"); // Redirect to login
+          return;
+        }
       } catch (error) {
         toast.error(error.response.data.message);
         console.error(
           "Error fetching profile data inside navbar component:",
           error
         );
-      }
-      // working well code
-      const errorMsg = error.response?.data?.message;
-      // Handle expired token
-      if (errorMsg === "Token has expired") {
-        toast.error("Session expired. Please login again.");
-        localStorage.removeItem("authToken"); // Optional: clear old token
-        navigate("/"); // Redirect to login
-        return;
-      }
 
-      // Other error handling
-      toast.error(errorMsg || "Something went wrong.");
-      console.error("Error fetching profile:", error);
+        // working well code
+        const errorMsg = error.response?.data?.message;
+        // Handle expired token
+        if (errorMsg === "Token has expired") {
+          toast.error("Session expired. Please login again.");
+          localStorage.removeItem("authToken"); // Optional: clear old token
+          navigate("/"); // Redirect to login
+          return;
+        }
+
+        // Other error handling
+        toast.error(errorMsg || "Something went wrong.");
+        console.error("Error fetching profile:", error);
+      }
     };
 
     fetcUSerProfilehData();
@@ -988,7 +998,15 @@ function NavBar() {
         setSessionData(sessionResponse.data);
         setSelectedYear(sessionResponse?.data?.custom_claims?.academic_year);
         setRoleId(sessionResponse.data.user.role_id); // Store role_id
-        // setRoleId("A"); // Store role_id
+
+        const errorMsg = sessionResponse?.data?.message;
+        // Handle expired token
+        if (errorMsg === "Token has expired") {
+          toast.error("Session expired. Please login again.");
+          localStorage.removeItem("authToken"); // Optional: clear old token
+          navigate("/"); // Redirect to login
+          return;
+        } // setRoleId("A"); // Store role_id
         // Fetch academic year data
         const academicYearResponse = await axios.get(
           `${API_URL}/api/getAcademicYear`,
@@ -1010,6 +1028,14 @@ function NavBar() {
         console.log("this is the nablis", navResponse.data);
         console.log("this is the array", navResponse.data.sub_menus);
       } catch (error) {
+        const errorMsg = error.response?.data?.message;
+        // Handle expired token
+        if (errorMsg === "Token has expired") {
+          toast.error("Session expired. Please login again.");
+          localStorage.removeItem("authToken"); // Optional: clear old token
+          navigate("/"); // Redirect to login
+          return;
+        }
         console.error("Error fetching data:", error);
       }
     };
@@ -1459,7 +1485,7 @@ function NavBar() {
                     type="text"
                     id="search"
                     name="search"
-                    disabled
+                    // disabled
                     placeholder="GR NO"
                     value={inputValueGR}
                     onChange={(e) => {
@@ -1474,7 +1500,7 @@ function NavBar() {
                       paddingRight: "4px",
                     }}
                     className={`w-12 lg:w-20 mr-4 outline-none border-1 border-gray-400 rounded-md py-0.5 text-xs lg:text-sm`}
-                    // disabled={loading}
+                    disabled={loading}
                   />
                 </div>
               </div>{" "}

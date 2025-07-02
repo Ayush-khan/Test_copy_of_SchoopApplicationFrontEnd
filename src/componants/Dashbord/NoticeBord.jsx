@@ -220,7 +220,6 @@ function NoticeBord() {
     const fetchNotices = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        const academicYr = localStorage.getItem("academicYear");
         if (!token) {
           navigate("/"); // 👈 Redirect to login
           return; // 👈 Prevent further execution
@@ -232,7 +231,6 @@ function NoticeBord() {
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              "X-Academic-Year": academicYr,
             },
           }
         );
@@ -242,12 +240,18 @@ function NoticeBord() {
         const staffResponse = await axios.get(`${API_URL}/api/staff-notices`, {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Academic-Year": "2023-2024",
           },
         });
         setStaffNotices(staffResponse.data.notices);
       } catch (error) {
         setError(error.message);
+        const errorMsg = error.response?.data?.message;
+        // Handle expired token
+        if (errorMsg === "Token has expired") {
+          localStorage.removeItem("authToken"); // Optional: clear old token
+          navigate("/"); // Redirect to login
+          return;
+        }
         console.error("Error fetching notices:", error);
       } finally {
         setLoading(false); // ✅ Always set loading to false after fetch

@@ -43,24 +43,31 @@ const EventCard = () => {
         // throw new Error("No authentication token found");
       }
 
-      const response = await axios.get(
-        // `http://127.0.0.1:8000/api/events`,
-        `${API_URL}/api/events`,
-        {
-          params: {
-            month: selectedMonth + 1, // API expects 1-based month index
-            year: currentYear,
-          },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/events`, {
+        params: {
+          month: selectedMonth + 1, // API expects 1-based month index
+          year: currentYear,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setEvents(response?.data);
       console.log("responseData of Events", response?.data);
     } catch (error) {
       setError(error.message);
+      // working well code
+      const errorMsg = error.response?.data?.message;
+      // Handle expired token
+      if (errorMsg === "Token has expired") {
+        localStorage.removeItem("authToken"); // Optional: clear old token
+        navigate("/"); // Redirect to login
+        return;
+      }
+
+      // Other error handling
+
       console.error("Error fetching events:", error);
     } finally {
       setLoading(false);
