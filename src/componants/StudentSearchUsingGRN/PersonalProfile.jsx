@@ -336,7 +336,17 @@ const PersonalProfile = () => {
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-md">
               {[
-                { label: "Full Name", value: student.student_name },
+                {
+                  label: "Student's Full Name",
+                  value: [
+                    student.first_name,
+                    student.mid_name,
+                    student.last_name,
+                  ]
+                    .filter(Boolean) // removes null, undefined, ""
+                    .join(" "),
+                },
+                { label: "Student Name", value: student.student_name },
                 {
                   label: "Gender",
                   value:
