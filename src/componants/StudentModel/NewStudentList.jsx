@@ -1306,38 +1306,6 @@ function NewStudentList() {
     setUploadStatus(""); // Clear any previous success
     setErrorMessageUrl("");
   };
-  // const downloadCsv = async (relativeUrl) => {
-  //   console.log("relativeUrl", relativeUrl);
-  //   try {
-  //     // Use the provided relativeUrl directly
-  //     const response = await fetch(relativeUrl);
-
-  //     // Handle HTTP errors
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP Error! Status: ${response.status}`);
-  //     }
-
-  //     // Convert response to Blob
-  //     const blob = await response.blob();
-  //     const filename = "rejected_rows.csv"; // Desired file name
-
-  //     // Create a temporary link and trigger download
-  //     const link = document.createElement("a");
-  //     link.href = window.URL.createObjectURL(blob);
-  //     link.setAttribute("download", filename);
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     document.body.removeChild(link);
-
-  //     // Clean up the URL object
-  //     window.URL.revokeObjectURL(link.href);
-  //   } catch (error) {
-  //     console.error("Error downloading the file:", error.message);
-  //     alert(
-  //       "Failed to download the file. Please check the URL or your network connection."
-  //     );
-  //   }
-  // };
 
   const downloadCsv = async (fileUrl) => {
     try {
@@ -1369,37 +1337,6 @@ function NewStudentList() {
       console.error("Error downloading template:", error);
     }
   };
-
-  //  const downloadCsv = (fileUrl, fileName = "download.csv") => {
-  //    console.log("fileUrl", fileUrl);
-
-  //    // Base URL for the file
-  //    const baseUrl = "https://sms.evolvu.in/storage/app/public/csv_rejected/";
-  //    const fullUrl = `${baseUrl}${fileUrl}`; // Construct the full file URL
-
-  //    // Fetch the file contents using fetch API
-  //    fetch(fullUrl)
-  //      .then((response) => {
-  //        if (!response.ok) {
-  //          throw new Error(`HTTP error! Status: ${response.status}`);
-  //        }
-  //        return response.blob(); // Get the file content as a blob
-  //      })
-  //      .then((blob) => {
-  //        // Create a temporary download link
-  //        const link = document.createElement("a");
-  //        link.href = URL.createObjectURL(blob); // Create a blob URL for the file
-  //        link.download = fileName; // Set the file name for download
-  //        document.body.appendChild(link); // Add the link to the DOM
-  //        link.click(); // Programmatically click the link
-  //        document.body.removeChild(link); // Clean up by removing the link
-  //      })
-  //      .catch((error) => {
-  //        console.error("Error downloading the file:", error);
-  //      });
-  //  };
-
-  // Function to upload the selected CSV file
 
   const handleUpload = async () => {
     if (!selectedFile) {

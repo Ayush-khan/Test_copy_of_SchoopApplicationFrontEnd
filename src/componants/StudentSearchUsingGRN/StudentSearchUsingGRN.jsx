@@ -425,7 +425,7 @@ export default function StudentSearchUsingGRN() {
   const navigate = useNavigate();
   const location = useLocation();
   const student = location.state?.studentData || {};
-
+  console.log("response of the students is------>>>", student);
   const tabs = [
     {
       id: "profile",
@@ -488,15 +488,19 @@ export default function StudentSearchUsingGRN() {
           <div className="flex  bg-gray-100 ">
             {/* Left Side - Tabs */}
             <div className="w-[15%] bg-white shadow-lg border-r p-6  rounded-lg">
-              <div className="flex flex-col items-center  gap-4">
+              <div className="flex flex-col items-center  gap-2">
                 <div className="text-center item-center ">
                   <img
-                    src="/path/to/default-profile.png"
-                    alt="Profile"
+                    src={`${student?.student_image_url}`}
+                    alt={`${student?.image_name}`}
                     className="w-24 h-24 mx-auto rounded-full border-4 border-pink-500"
                   />
-                  <h2 className="text-sm font-semibold mt-3">
-                    ASHWATI - 11(D - Commerce & Arts) fdgdf
+                  <h2 className="text-sm font-semibold mt-2">
+                    {student?.student_name}- {student?.get_class?.name}
+                    {"("}
+                    {student?.get_division?.name}
+                    {")"}
+                    {/* ASHWATI - 11(D - Commerce & Arts) */}
                   </h2>
                 </div>
 

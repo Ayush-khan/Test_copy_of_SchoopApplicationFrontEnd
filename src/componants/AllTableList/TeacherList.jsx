@@ -562,11 +562,10 @@ function TeacherList() {
                     </div>
 
                     <button
-                      //   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition duration-200"
-                      className={`bg-blue-600 text-white font-semibold py-2 px-6 rounded-md transition duration-200 ${
+                      className={`text-white font-semibold py-2 px-6 rounded-md transition duration-200 ${
                         loadingForSend
-                          ? "opacity-50 cursor-not-allowed bg-blue-500"
-                          : "hover:bg-blue-700"
+                          ? "bg-blue-500 opacity-50 cursor-not-allowed"
+                          : "bg-blue-600 hover:bg-blue-700"
                       }`}
                       onClick={handleSend}
                       disabled={loadingForSend}

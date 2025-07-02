@@ -514,7 +514,7 @@ const EditLeavingCertificate = () => {
           ...prevData, // Retain the existing formData values
           academic_yr: selectedAcademicYear, // Make sure to retain the selected academic year
           sr_no: fetchedData.sr_no || "",
-          class_id_for_subj: fetchedData.studentinformation || "",
+          class_id_for_subj: response?.data?.data?.studentinformation || "",
           grn_no: fetchedData.studentinformation.grn_no || "",
           issue_date: today || "",
           subjectsFor: fetchedData.classsubject || [],

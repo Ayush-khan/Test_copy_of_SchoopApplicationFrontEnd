@@ -139,53 +139,6 @@ const EditLeaveApplicationForPrinciple = () => {
     }
   };
 
-  // const handleChange = (event) => {
-  //   const { name, value } = event.target;
-
-  //   setFormData((prevData) => {
-  //     let updatedData = {
-  //       ...prevData,
-  //       [name]: value,
-  //     };
-
-  //     // Recalculate no_of_days only if the dates are changed, and no manual editing is done
-  //     if (
-  //       updatedData.leave_start_date &&
-  //       updatedData.leave_end_date &&
-  //       name !== "no_of_days"
-  //     ) {
-  //       const startDate = new Date(updatedData.leave_start_date);
-  //       const endDate = new Date(updatedData.leave_end_date);
-
-  //       // Calculate day difference as a decimal (including fractional days)
-  //       const timeDiff = endDate - startDate;
-  //       const dayDiff = timeDiff / (1000 * 60 * 60 * 24) + 1; // Including fractional days
-
-  //       // Set the calculated value
-  //       updatedData.no_of_days = dayDiff > 0 ? dayDiff.toFixed(0) : "";
-  //     }
-
-  //     return updatedData;
-  //   });
-
-  //   // When manually editing no_of_days field, accept decimals and validate
-  //   if (name === "no_of_days") {
-  //     // Allow decimal values (positive only)
-  //     const decimalPattern = /^\d+(\.\d+)?$/;
-  //     if (decimalPattern.test(value)) {
-  //       setErrors((prevErrors) => ({
-  //         ...prevErrors,
-  //         no_of_days: "", // Clear any existing errors
-  //       }));
-  //     } else {
-  //       setErrors((prevErrors) => ({
-  //         ...prevErrors,
-  //         no_of_days: "Please enter a valid positive number (e.g., 0.5).",
-  //       }));
-  //     }
-  //   }
-  // };
-
   const manuallyEditedNoOfDaysRef = useRef(false);
 
   const handleChange = (event) => {

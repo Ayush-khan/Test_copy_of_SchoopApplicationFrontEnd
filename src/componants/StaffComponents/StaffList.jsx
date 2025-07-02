@@ -175,33 +175,6 @@ function StaffList() {
     }
   };
 
-  //   const handleSubmitEdit = async () => {
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-
-  //       if (!token || !currentStaff || !currentStaff.user_id) {
-  //         throw new Error("Staff ID is missing");
-  //       }
-
-  //       await axios.put(
-  //         `${API_URL}/api/teachers/${currentStaff.user_id}`,
-  //         { name: newStaffName, designation: newDesignation },
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //           withCredentials: true,
-  //         }
-  //       );
-
-  //       fetchStaffs();
-  //       handleCloseModal();
-  //       toast.success("Staff updated successfully!");
-  //     } catch (error) {
-  //       console.error("Error editing staff:", error);
-  //     }
-  //   };
-
   const handleSubmitEdit = (staffItem) => {
     console.log("this is the )))))))))", staffItem.get_teacher);
     // navigate(`/editStaff/${staffItem.user_id}`
@@ -213,43 +186,6 @@ function StaffList() {
       }
     );
   };
-
-  //  Code for show the model but i don't want to show the model
-  // const handleSubmitEdit = async () => {
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     if (!token || !currentStaff || !currentStaff.get_teacher.employee_id) {
-  //       throw new Error("Employee ID is missing");
-  //     }
-
-  //     const response = await axios.put(
-  //       `${API_URL}/api/teachers/${currentStaff.get_teacher.employee_id}`,
-  //       {
-  //         name: newStaffName,
-  //         designation: newDesignation,
-  //         // Add other required fields according to your backend validation
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         withCredentials: true,
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       fetchStaffs(); // Refresh staff list after successful update
-  //       handleCloseModal();
-  //       toast.success("Staff updated successfully!");
-  //     } else {
-  //       toast.error("Failed to update staff");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error editing staff:", error);
-  //     toast.error("Failed to update staff");
-  //   }
-  // };
 
   const handleDelete = (staffCurrent) => {
     console.log("insise detelt");
