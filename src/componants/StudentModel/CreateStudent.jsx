@@ -159,7 +159,7 @@ function Form() {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [backendErrors, setBackendErrors] = useState({});
 
-  console.log("employeeID", student.employeeId);
+  // console.log("employeeID", student.employeeId);
 
   // State for father's mobile selection
   const [fatherMobileSelected, setFatherMobileSelected] = useState({
