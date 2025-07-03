@@ -940,7 +940,7 @@ function NavBar() {
       console.log("Student List:", studentList); // Debugging
 
       if (studentList.length === 0) {
-        alert("Not students found with tis gr no");
+        // alert("Not students found with tis gr no");
         toast.error("No student found with this GR number.");
         console.log("Error: No student found"); // Debugging
       } else {
