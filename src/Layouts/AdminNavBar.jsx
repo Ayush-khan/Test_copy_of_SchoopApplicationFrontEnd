@@ -211,6 +211,9 @@ const AdminNavBar = () => {
             <NavDropdown.Item as={Link} to="/LeaveApplication">
               Leave Application
             </NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/LeaveApplicationP">
+              Leave Application For Staff
+            </NavDropdown.Item>
           </NavDropdown>
           {/* Time Table Planner */}
           {/* Leave Sub-dropdown */}

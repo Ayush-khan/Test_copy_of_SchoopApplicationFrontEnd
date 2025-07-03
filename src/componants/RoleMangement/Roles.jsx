@@ -614,7 +614,7 @@ function Roles() {
                       type="text"
                       className="form-control shadow-md mb-3"
                       id="role_id"
-                      maxLength={1}
+                      maxLength={2}
                       value={newRoleID}
                       onChange={handleChangeRoleID}
                     />
@@ -689,7 +689,7 @@ function Roles() {
                     </label>
                     <input
                       type="text"
-                      maxLength={1}
+                      maxLength={2}
                       className="form-control shadow-md mb-3"
                       id="role_id"
                       value={newRoleID}

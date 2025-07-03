@@ -301,12 +301,12 @@ const EditLeaveApplicationForPrinciple = () => {
   };
 
   return (
-    <div className="container mx-auto min-h-screen flex items-center justify-center  ">
+    <div className="container mx-auto mt-4 flex items-center justify-center  ">
       <ToastContainer />
       <div className="card p-4 rounded-md w-[80%]">
         <div className=" card-header mb-4 flex justify-between items-center">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-            Edit Leave Application
+            Edit Leave Application For Staff
           </h5>
 
           <RxCross1
@@ -462,20 +462,6 @@ const EditLeaveApplicationForPrinciple = () => {
               )}
             </div>
 
-            {/* Status */}
-            {/* <div className="flex flex-col">
-              <label htmlFor="status" className="mb-1">
-                Status <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="status"
-                name="status"
-                value={statusMap[formData.status] || ""}
-                readOnly
-                className="form-control bg-gray-200 shadow-inner"
-              />
-            </div> */}
             <div className="flex flex-col">
               <label htmlFor="status" className="mb-1">
                 Status <span className="text-red-500">*</span>
