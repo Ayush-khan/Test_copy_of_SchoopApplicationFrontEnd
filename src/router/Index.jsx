@@ -744,7 +744,7 @@ function Index() {
           element={<PrivateRoute element={<CreateAppointmentWindow />} />}
         />
         <Route
-          path="/EditAppWindow"
+          path="/EditAppWindow/edit/:id"
           element={<PrivateRoute element={<EditAppointmentWindow />} />}
         />
 

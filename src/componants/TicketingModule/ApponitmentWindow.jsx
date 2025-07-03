@@ -248,7 +248,7 @@ function AppointmentWindow() {
 
   const handleEdit = (section) => {
     console.log("apponiment id", section.aw_id);
-    navigate(`/appointmentWindow/edit/${section.aw_id}`, {
+    navigate(`/EditAppWindow/edit/${section.aw_id}`, {
       state: {
         aw_id: section.aw_id,
         role_id: section.role_id,
@@ -264,7 +264,7 @@ function AppointmentWindow() {
   };
 
   const handleAdd = () => {
-    navigate("/createAppointmentWindow");
+    navigate("/CreateAppWindow");
     // setShowAddModal(true);
   };
 

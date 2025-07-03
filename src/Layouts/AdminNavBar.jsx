@@ -61,7 +61,7 @@ const AdminNavBar = () => {
     <>
       <Nav ref={menuRef}>
         {/* Role Dropdown now we have hide this*/}
-        {/* <NavDropdown
+        <NavDropdown
           title={<span className="nav-dropdown-title">Role</span>}
           className="custom-nav-dropdown"
         >
@@ -74,7 +74,7 @@ const AdminNavBar = () => {
           <NavDropdown.Item as={Link} to="/manageRoleAccess">
             Manage Access
           </NavDropdown.Item>
-        </NavDropdown> */}
+        </NavDropdown>
 
         {/* My Actions Dropdown */}
         <NavDropdown
@@ -513,11 +513,30 @@ const AdminNavBar = () => {
         {/* Ticket Dropdown */}
         <NavDropdown
           title={<span className="nav-dropdown-title">Ticket</span>}
-          className="relative cursor-pointer"
-          style={{ color: "black", fontWeight: "800" }}
-          onClick={handleTicketClick} // Trigger navigation when clicked
+          className="custom-nav-dropdown"
+          style={{ color: "black", fontWeight: "700" }}
         >
-          {/* You can leave the dropdown empty or add other items if needed */}
+          <NavDropdown.Item
+            as={Link}
+            to="/serviceType"
+            className="text-sm font-bold hover:text-black"
+          >
+            Service Type
+          </NavDropdown.Item>{" "}
+          <NavDropdown.Item
+            as={Link}
+            to="/subServiceType"
+            className="text-sm font-bold hover:text-black"
+          >
+            Sub Service Type
+          </NavDropdown.Item>{" "}
+          <NavDropdown.Item
+            as={Link}
+            to="/appointmentWindow"
+            className="text-sm font-bold hover:text-black"
+          >
+            Appointment Window
+          </NavDropdown.Item>{" "}
         </NavDropdown>
 
         {/* Masters Dropdown */}
