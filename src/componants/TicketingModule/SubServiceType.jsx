@@ -171,44 +171,6 @@ function SubServiceType() {
     return errors;
   };
 
-  // APi calling for check unique name
-  const handleBlur = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      console.log("the response of the namechack api____");
-
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      const response = await axios.post(
-        `${API_URL}/api/check_class_name`,
-        { name: newClassName },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
-      console.log("the response of the namechack api", response.data);
-      if (response.data?.exists === true) {
-        console.log("the EXI NAME IS  ");
-
-        setNameError("Name is already taken.");
-        setNameAvailable(false);
-        return;
-      } else {
-        console.log("the EXI NAME IS NO  ");
-
-        setNameError("");
-        setNameAvailable(true);
-      }
-    } catch (error) {
-      console.error("Error checking class name:", error);
-    }
-  };
-
   const handleEdit = (classItem) => {
     setCurrentClass(classItem);
     console.log("the edit ", classItem);
@@ -323,69 +285,6 @@ function SubServiceType() {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
-
-  // const handleSubmitEdit = async () => {
-  //   const validationErrors = validateSectionName(newClassName, newDepartmentId);
-  //   if (Object.keys(validationErrors).length > 0) {
-  //     setFieldErrors(validationErrors);
-  //     return;
-  //   }
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     if (!token || !currentClass || !currentClass.class_id) {
-  //       throw new Error("Class ID is missing");
-  //     }
-  //     console.log("the EXI NAME IS  ", currentClass);
-  //     console.log("The name is  ", newClassName);
-
-  //     // Step 1: Check if the class name is available using the same logic from handleBlur
-  //     // const checkNameResponse = await axios.post(
-  //     //   `${API_URL}/api/check_class_name`,
-  //     //   { name: newClassName },
-  //     //   {
-  //     //     headers: {
-  //     //       Authorization: `Bearer ${token}`,
-  //     //     },
-  //     //     withCredentials: true,
-  //     //   }
-  //     // );
-
-  //     // Step 2: If the name already exists, stop the submission
-  //     // if (checkNameResponse.data?.exists) {
-  //     //   setNameError("Name is already taken.");
-  //     //   setNameAvailable(false);
-  //     //   return;
-  //     // } else {
-  //     //   setNameError("");
-  //     //   setNameAvailable(true);
-  //     // }
-
-  //     console.log("className:", newClassName, "deparment_id", newDepartmentId);
-  //     const response = await axios.put(
-  //       `${API_URL}/api/classes/${currentClass.class_id}`,
-  //       { name: newClassName, department_id: newDepartmentId },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         withCredentials: true,
-  //       }
-  //     );
-
-  //     fetchClasses();
-  //     handleCloseModal();
-  //     toast.success("Class updated successfully!");
-  //   } catch (error) {
-  //     if (error.response && error.response.data) {
-  //       toast.error(`Error updating class: ${error.response.data.message}`);
-  //     } else {
-  //       toast.error(`Error updating class: ${error.message}`);
-  //     }
-  //     console.error("Error editing class:", error);
-  //   }
-  // };
 
   const handleSubmitEdit = async () => {
     if (isSubmitting) return; // Prevent re-submitting
@@ -757,7 +656,6 @@ function SubServiceType() {
                       id="newClassName"
                       value={newClassName}
                       onChange={handleChangeSectionName}
-                      onBlur={handleBlur}
                     />
                     <div className="absolute  top-9 left-1/3">
                       {!nameAvailable && (
@@ -849,7 +747,6 @@ function SubServiceType() {
                       className="form-control shadow-md mb-2"
                       id="newClassName"
                       value={newClassName}
-                      onBlur={handleBlur}
                       onChange={handleChangeSectionName}
                     />
                     <div className="absolute top-9 left-1/3 ">
