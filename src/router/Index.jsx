@@ -248,6 +248,11 @@ import ViewTimeTablePlanner from "../componants/TimeTablePlanner/ViewExamTimeTab
 import Stationery from "../componants/Stationery/Stationery.jsx";
 import SiblingUnmapping from "../componants/SiblingUnmapping/SiblingUnmapping.jsx";
 import UnmapDetails from "../componants/SiblingUnmapping/UnmapDetails.jsx";
+import SubServiceType from "../componants/TicketingModule/SubServiceType.jsx";
+import AppointmentWindow from "../componants/TicketingModule/ApponitmentWindow.jsx";
+import CreateAppointmentWindow from "../componants/TicketingModule/CreateApponimentWindow.jsx";
+import EditAppointmentWindow from "../componants/TicketingModule/EditApponitmentWindow.jsx";
+import ServiceType from "../componants/TicketingModule/ServiceType.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -721,6 +726,29 @@ function Index() {
           path="/iDCardDetails/:id"
           element={<PrivateRoute element={<IDCardDetails />} />}
         />
+        {/* Ticketing module start */}
+        <Route
+          path="/serviceType"
+          element={<PrivateRoute element={<ServiceType />} />}
+        />
+        <Route
+          path="/subServiceType"
+          element={<PrivateRoute element={<SubServiceType />} />}
+        />
+        <Route
+          path="/appointmentWindow"
+          element={<PrivateRoute element={<AppointmentWindow />} />}
+        />
+        <Route
+          path="/CreateAppWindow"
+          element={<PrivateRoute element={<CreateAppointmentWindow />} />}
+        />
+        <Route
+          path="/EditAppWindow"
+          element={<PrivateRoute element={<EditAppointmentWindow />} />}
+        />
+
+        {/* Report start */}
         {/* List Of Admission Form Reports */}
         <Route
           path="/listAdmFrmRep"
