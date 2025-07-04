@@ -597,6 +597,13 @@ const AdminNavBar = () => {
           </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
+            to="/allotSpecialRole"
+            className="text-sm font-bold hover:text-black"
+          >
+            Allot Special Role
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
             to="/SubjectAllotmentHSC"
             className="text-sm font-bold hover:text-black"
           >

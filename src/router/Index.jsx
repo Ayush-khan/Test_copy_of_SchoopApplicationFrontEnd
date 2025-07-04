@@ -256,6 +256,7 @@ import ServiceType from "../componants/TicketingModule/ServiceType.jsx";
 import TicketList from "../componants/TicketingModule/TicketList.jsx";
 import TicketReport from "../componants/TicketingModule/TicketReport.jsx";
 import ViewTicket from "../componants/TicketingModule/ViewTicket.jsx";
+import AllotSpecialRole from "../componants/MastersModule/AllotSpecialRole/AllotSpecialRole.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -542,6 +543,11 @@ function Index() {
         <Route
           path="/myprofile"
           element={<PrivateRoute element={<UserProfile />} />}
+        />
+        {/* Allot special Role */}
+        <Route
+          path="/allotSpecialRole"
+          element={<PrivateRoute element={<AllotSpecialRole />} />}
         />
         <Route
           path="/classes"
