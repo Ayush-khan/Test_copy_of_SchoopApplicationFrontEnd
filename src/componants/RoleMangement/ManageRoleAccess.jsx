@@ -97,7 +97,9 @@ function ManageRoleAccess() {
       await axios.post(
         `${API_URL}/api/update_access/${roleId}`,
         {
-          role_id: role.id,
+          // role_id: role.id || roleId,
+          role_id: role?.id ?? roleId,
+
           menu_ids: Array.from(selectedMenus),
         },
         {
