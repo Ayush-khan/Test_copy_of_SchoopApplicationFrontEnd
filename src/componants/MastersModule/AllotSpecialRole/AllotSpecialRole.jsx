@@ -8,6 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
+import { Navigate } from "react-router-dom";
 
 function AllotSpecialRole() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -37,8 +38,8 @@ function AllotSpecialRole() {
   const [sectionNameis, newSectionNameis] = useState({});
   const [backendErrors, setBackendErrors] = useState({});
   const [roleOptions, setRoleOptions] = useState([]);
-  const [selectedStaff, setSelectedStaff] = useState(null);
-  const [selectedRole, setSelectedRole] = useState(null);
+  const [selectedStaff, setSelectedStaff] = useState("");
+  const [selectedRole, setSelectedRole] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
@@ -82,7 +83,7 @@ function AllotSpecialRole() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const opts = Array.isArray(res.data.data)
-        ? res.data.data.map((r) => ({ value: r.id, label: r.name }))
+        ? res.data.data.map((r) => ({ value: r.sp_role_id, label: r.name }))
         : [];
       setRoleOptions(opts);
     } catch (err) {
@@ -92,9 +93,12 @@ function AllotSpecialRole() {
   const fetchStaffNames = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_allstaff`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_allstaff_without_caretaker`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       console.log(" all staff names", response.data);
 
       if (Array.isArray(response.data.data)) {
@@ -137,7 +141,7 @@ function AllotSpecialRole() {
     const errors = {};
 
     if (!departmentId) {
-      errors.department = "Please select a department";
+      errors.department_id = "Please select a department"; // ✅ updated key
     }
 
     if (!staff) {
@@ -157,11 +161,11 @@ function AllotSpecialRole() {
     setNewDepartmentId(classItem.department_id);
     setSelectedStaff({
       value: classItem.teacher_id,
-      label: classItem.staff_name,
+      label: classItem.teachername,
     });
     setSelectedRole({
-      value: classItem.specialrole_id,
-      label: classItem.role_name,
+      value: classItem.role,
+      label: classItem.role,
     });
     setShowEditModal(true);
   };
@@ -181,14 +185,17 @@ function AllotSpecialRole() {
     setNameError("");
     setFieldErrors({});
     setBackendErrors("");
-
+    setNewDepartmentId("");
+    setSelectedRole("");
+    setSelectedStaff("");
     setValidationErrors({});
+    setSelectedRole("");
   };
 
   const handleSubmitAdd = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
-    // Perform validation first
+
     const validation = validateFormFields({
       departmentId: newDepartmentId,
       staff: selectedStaff,
@@ -207,37 +214,41 @@ function AllotSpecialRole() {
         throw new Error("No authentication token found");
       }
 
-      // Step 3: Continue with form submission if name is available
-      await axios.post(
-        `${API_URL}/api/classes`,
-        { name: newClassName, department_id: newDepartmentId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
+      // ✅ Prepare payload
+      const formData = {
+        teacher_id: selectedStaff?.value, // assuming selectedStaff is an object like { value, label }
+        department_id: newDepartmentId,
+        role: selectedRole?.label, // assuming selectedRole is also an object
+      };
 
-      // Step 4: Post-submission actions
+      await axios.post(`${API_URL}/api/save_allotspecialrole`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+
       fetchAllotSpecialRoleList();
       handleCloseModal();
-      toast.success("Class added successfully!");
+      toast.success("Special Role Alloted successfully!");
     } catch (error) {
-      // Handle errors
       if (error.response && error.response.data) {
-        toast.error(`Error adding class: ${error.response.data.message}`);
+        toast.error(
+          `Error Alloting Special Role: ${error.response.data.message}`
+        );
       } else {
-        toast.error(`Error adding class: ${error.message}`);
+        toast.error(`ErrorAlloting Special Role: ${error.message}`);
       }
-      console.error("Error adding class:", error);
+      console.error("Error aAlloting Special Role:", error);
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
     }
   };
+
   const handleSubmitEdit = async () => {
-    if (isSubmitting) return; // Prevent re-submitting
+    if (isSubmitting) return;
     setIsSubmitting(true);
+
     const validation = validateFormFields({
       departmentId: newDepartmentId,
       staff: selectedStaff,
@@ -253,19 +264,24 @@ function AllotSpecialRole() {
     try {
       const token = localStorage.getItem("authToken");
 
-      if (!token || !currentClass || !currentClass.class_id) {
-        throw new Error("Class ID is missing");
+      if (!token || !currentClass?.special_role_id) {
+        throw new Error("Special Role ID is missing");
       }
 
-      console.log("Existing Class:", currentClass);
-      console.log("New Class Name:", newClassName);
-
-      const response = await axios.put(
-        `${API_URL}/api/classes/${currentClass.class_id}`,
-        { name: newClassName, department_id: newDepartmentId },
+      // ✅ Raw JSON payload (no FormData)
+      const payload = {
+        teacher_id: selectedStaff?.value,
+        role: selectedRole?.label,
+        // remove `department_id` if your API doesn't expect it for update
+      };
+      console.log("payload data is for edit--->", payload);
+      await axios.put(
+        `${API_URL}/api/update_allotspecialrole/${currentClass.special_role_id}`,
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
           withCredentials: true,
         }
@@ -273,49 +289,49 @@ function AllotSpecialRole() {
 
       fetchAllotSpecialRoleList();
       handleCloseModal();
-      toast.success("Class updated successfully!");
-
-      // Reset backend errors on successful submission
+      toast.success("Allot Special Role updated successfully!");
       setBackendErrors({});
     } catch (error) {
       if (error.response && error.response.data) {
         const backendErrors = error.response.data.errors;
         if (backendErrors) {
-          // Store backend validation errors in the state
           setBackendErrors(backendErrors);
-
-          // Optionally show a toast with error messages
           toast.error(`Error: ${backendErrors.name?.join(", ")}`);
         } else {
-          toast.error(`Error updating class: ${error.response.data.message}`);
+          toast.error(
+            `Error updating Allot Special Role: ${error.response.data.message}`
+          );
         }
       } else {
-        toast.error(`Error updating class: ${error.message}`);
+        toast.error(`Error updating Allot Special Role: ${error.message}`);
       }
-      console.error("Error editing class:", error);
+      console.error("Error editing Allot Special Role:", error);
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = (id) => {
-    const classToDelete = classes.find((cls) => cls.class_id === id);
-    console.log("the classto didlete", classToDelete);
-    setCurrentClass(classToDelete);
-    setShowDeleteModal(true);
+    const classToDelete = classes.find((cls) => cls.special_role_id === id);
+    if (classToDelete) {
+      setCurrentClass(classToDelete);
+      setShowDeleteModal(true);
+    } else {
+      toast.error("Special Role not found for deletion.");
+    }
   };
+
   const handleSubmitDelete = async () => {
-    if (isSubmitting) return; // Prevent re-submitting
+    if (isSubmitting || !currentClass?.special_role_id) return;
+
     setIsSubmitting(true);
+
     try {
       const token = localStorage.getItem("authToken");
-
-      if (!token) {
-        throw new Error("No authentication token found.");
-      }
+      if (!token) throw new Error("No authentication token found.");
 
       const response = await axios.delete(
-        `${API_URL}/api/classes/${currentClass.class_id}`,
+        `${API_URL}/api/delete_allotspecialrole/${currentClass.special_role_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -324,29 +340,22 @@ function AllotSpecialRole() {
         }
       );
 
-      // Handle successful deletion
-      if (response.data && response.data.status === 400) {
-        const errorMessage = response.data.message || "Delete failed.";
-        toast.error(errorMessage);
+      if (response?.data?.status === 400) {
+        toast.error(response.data.message || "Failed to delete.");
       } else {
-        toast.success("Class deleted successfully!");
-        fetchAllotSpecialRoleList(); // Refresh the classes list
+        toast.success("Special Role allotment deleted successfully!");
+        fetchAllotSpecialRoleList();
       }
 
-      setShowDeleteModal(false); // Close the modal
-    } catch (error) {
-      console.error("Error deleting class:", error);
-
-      // Handle error responses
-      if (error.response && error.response.status === 400) {
-        const errorMessage = error.response.data.message || "Delete failed.";
-        toast.error(errorMessage);
-      } else {
-        toast.error("Server error. Please try again later.");
-      }
-    } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false);
+      setCurrentClass(null);
+    } catch (error) {
+      console.error("Error deleting Special Role:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to delete. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -508,7 +517,9 @@ function AllotSpecialRole() {
                             <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                               <button
                                 className="text-red-600 hover:text-red-800 hover:bg-transparent"
-                                onClick={() => handleDelete(classItem.class_id)}
+                                onClick={() =>
+                                  handleDelete(classItem.special_role_id)
+                                }
                               >
                                 <FontAwesomeIcon icon={faTrash} />
                               </button>
@@ -576,80 +587,95 @@ function AllotSpecialRole() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  <div className=" relative -top-1 mb-3 flex justify-center  mx-4">
+                  {/* Department Field */}
+                  <div className="relative  flex justify-center items-start mx-4">
                     <label htmlFor="newDepartmentId" className="w-1/2 mt-2">
                       Department <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      className="form-control"
-                      id="newDepartmentId shadow-md"
-                      value={newDepartmentId}
-                      onChange={handleChangeDepartmentId}
-                    >
-                      <option value="">Select</option>
-                      {departments.map((department) => (
-                        <option
-                          key={department.department_id}
-                          value={department.department_id}
-                        >
-                          {department.name}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute top-9 left-1/3">
-                      {fieldErrors.department_id && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.department_id}
-                        </span>
-                      )}
+                    <div className="w-full">
+                      <select
+                        className="form-control shadow-md"
+                        id="newDepartmentId"
+                        value={newDepartmentId}
+                        onChange={handleChangeDepartmentId}
+                      >
+                        <option value="">Select</option>
+                        {departments.map((department) => (
+                          <option
+                            key={department.department_id}
+                            value={department.department_id}
+                          >
+                            {department.name}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="min-h-[2rem]">
+                        {fieldErrors.department_id && (
+                          <p className="text-red-500 text-xs">
+                            {fieldErrors.department_id}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  {/* Staff Name */}
-                  <div className="mb-3">
-                    <label className="block mb-1">
-                      Staff <span className="text-red-500">*</span>
+
+                  {/* Staff Field */}
+                  <div className="relative  flex justify-center items-start mx-4">
+                    <label className="w-1/2 mt-2">
+                      Staff Name <span className="text-red-500">*</span>
                     </label>
-                    <Select
-                      options={staffNames}
-                      value={selectedStaff}
-                      onChange={(opt) => {
-                        setSelectedStaff(opt);
-                        setFieldErrors((prev) => ({ ...prev, staff: "" }));
-                      }}
-                      placeholder="Select Staff"
-                      className="w-full"
-                      isSearchable
-                      isClearable
-                    />
-                    {fieldErrors.staff && (
-                      <p className="text-red-500 text-xs">
-                        {fieldErrors.staff}
-                      </p>
-                    )}
+                    <div className="w-full">
+                      <Select
+                        options={staffNames}
+                        value={selectedStaff}
+                        onChange={(opt) => {
+                          setSelectedStaff(opt);
+                          setFieldErrors((prev) => ({ ...prev, staff: "" }));
+                        }}
+                        placeholder="Select Staff"
+                        className="shadow-md"
+                        isSearchable
+                        isClearable
+                      />
+                      <div className="min-h-[2rem]">
+                        {fieldErrors.staff && (
+                          <p className="text-red-500 text-xs">
+                            {fieldErrors.staff}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Role */}
-                  <div className="mb-3">
-                    <label className="block mb-1">
-                      Role <span className="text-red-500">*</span>
+                  {/* Role Field */}
+                  <div className="relative mb-3 flex justify-center items-start mx-4">
+                    <label className="w-1/2 mt-2">
+                      Role Name <span className="text-red-500">*</span>
                     </label>
-                    <Select
-                      options={roleOptions}
-                      value={selectedRole}
-                      onChange={(opt) => {
-                        setSelectedRole(opt);
-                        setFieldErrors((prev) => ({ ...prev, role: "" }));
-                      }}
-                      placeholder="Select Role"
-                      className="w-full"
-                      isSearchable
-                      isClearable
-                    />
-                    {fieldErrors.role && (
-                      <p className="text-red-500 text-xs">{fieldErrors.role}</p>
-                    )}
+                    <div className="w-full">
+                      <Select
+                        options={roleOptions}
+                        value={selectedRole}
+                        onChange={(opt) => {
+                          setSelectedRole(opt);
+                          setFieldErrors((prev) => ({ ...prev, role: "" }));
+                        }}
+                        placeholder="Select Role"
+                        className="shadow-md"
+                        isSearchable
+                        isClearable
+                      />
+                      <div className="min-h-[2rem]">
+                        {fieldErrors.role && (
+                          <p className="text-red-500 text-xs">
+                            {fieldErrors.role}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
+
                 <div className=" flex justify-end p-3">
                   <button
                     type="button"
@@ -673,7 +699,7 @@ function AllotSpecialRole() {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Edit Class</h5>
+                  <h5 className="modal-title">Edit Special Role allotment</h5>
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -688,81 +714,92 @@ function AllotSpecialRole() {
 
                 <div className="modal-body">
                   {/* Department Dropdown */}
-                  <div className="relative mb-3 flex justify-center mx-4">
+                  <div className="relative mb-3 flex justify-center items-start mx-4">
                     <label htmlFor="newDepartmentId" className="w-1/2 mt-2">
                       Department <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      className="form-control shadow-md w-full"
-                      id="newDepartmentId"
-                      value={newDepartmentId}
-                      onChange={handleChangeDepartmentId}
-                    >
-                      <option value="">Select</option>
-                      {departments.map((department) => (
-                        <option
-                          key={department.department_id}
-                          value={department.department_id}
-                        >
-                          {department.name}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute top-9 left-1/3 w-2/3">
-                      {fieldErrors.department && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.department}
-                        </span>
-                      )}
+                    <div className="w-full">
+                      <select
+                        className="form-control shadow-md"
+                        id="newDepartmentId"
+                        value={newDepartmentId}
+                        onChange={handleChangeDepartmentId}
+                        disabled
+                      >
+                        <option value="">Select</option>
+                        {departments.map((department) => (
+                          <option
+                            key={department.department_id}
+                            value={department.department_id}
+                          >
+                            {department.name}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="min-h-[1rem]">
+                        {fieldErrors.department_id && (
+                          <p className="text-red-500 text-xs">
+                            {fieldErrors.department_id}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
 
                   {/* Staff Dropdown */}
-                  <div className="mb-3 px-4">
-                    <label className="block mb-1">
+                  <div className="relative  flex justify-center items-start mx-4">
+                    <label className="w-1/2 mt-2">
                       Staff Name <span className="text-red-500">*</span>
                     </label>
-                    <Select
-                      options={staffNames}
-                      value={selectedStaff}
-                      onChange={(opt) => {
-                        setSelectedStaff(opt);
-                        setFieldErrors((prev) => ({ ...prev, staff: "" }));
-                      }}
-                      placeholder="Select Staff"
-                      className="w-full"
-                      isSearchable
-                      isClearable
-                    />
-                    {fieldErrors.staff && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {fieldErrors.staff}
-                      </p>
-                    )}
+                    <div className="w-full">
+                      <Select
+                        options={staffNames}
+                        value={selectedStaff}
+                        onChange={(opt) => {
+                          setSelectedStaff(opt);
+                          setFieldErrors((prev) => ({ ...prev, staff: "" }));
+                        }}
+                        placeholder="Select Staff"
+                        className="shadow-md"
+                        isSearchable
+                        isClearable
+                      />
+                      <div className="min-h-[1rem]">
+                        {fieldErrors.staff && (
+                          <p className="text-red-500 text-xs">
+                            {fieldErrors.staff}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Role Dropdown */}
-                  <div className="mb-3 px-4">
-                    <label className="block mb-1">
-                      Role <span className="text-red-500">*</span>
+                  <div className="relative  flex justify-center items-start mx-4">
+                    <label className="w-1/2 mt-2">
+                      Role Name <span className="text-red-500">*</span>
                     </label>
-                    <Select
-                      options={roleOptions}
-                      value={selectedRole}
-                      onChange={(opt) => {
-                        setSelectedRole(opt);
-                        setFieldErrors((prev) => ({ ...prev, role: "" }));
-                      }}
-                      placeholder="Select Role"
-                      className="w-full"
-                      isSearchable
-                      isClearable
-                    />
-                    {fieldErrors.role && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {fieldErrors.role}
-                      </p>
-                    )}
+                    <div className="w-full">
+                      <Select
+                        options={roleOptions}
+                        value={selectedRole}
+                        onChange={(opt) => {
+                          setSelectedRole(opt);
+                          setFieldErrors((prev) => ({ ...prev, role: "" }));
+                        }}
+                        placeholder="Select Role"
+                        className="shadow-md"
+                        isSearchable
+                        isClearable
+                      />
+                      <div className="min-h-[1rem]">
+                        {fieldErrors.role && (
+                          <p className="text-red-500 text-xs">
+                            {fieldErrors.role}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -790,7 +827,7 @@ function AllotSpecialRole() {
             <div className="modal-dialog  modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Delete Class</h5>
+                  <h5 className="modal-title">Delete Special Role allotment</h5>
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -806,8 +843,8 @@ function AllotSpecialRole() {
                 ></div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to delete this class{" "}
-                    {currentClass?.name}?
+                    Are you sure you want to delete this special role allotment
+                    for {currentClass?.teachername}?
                   </p>
                 </div>
                 <div className=" flex justify-end p-3">
