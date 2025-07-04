@@ -537,6 +537,20 @@ const AdminNavBar = () => {
           >
             Appointment Window
           </NavDropdown.Item>{" "}
+          <NavDropdown.Item
+            as={Link}
+            to="/ticketList"
+            className="text-sm font-bold hover:text-black"
+          >
+            Ticket List
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            as={Link}
+            to="/ticketReport"
+            className="text-sm font-bold hover:text-black"
+          >
+            Ticket Report
+          </NavDropdown.Item>
         </NavDropdown>
 
         {/* Masters Dropdown */}

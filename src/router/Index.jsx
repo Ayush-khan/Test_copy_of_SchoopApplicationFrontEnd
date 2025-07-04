@@ -253,6 +253,9 @@ import AppointmentWindow from "../componants/TicketingModule/ApponitmentWindow.j
 import CreateAppointmentWindow from "../componants/TicketingModule/CreateApponimentWindow.jsx";
 import EditAppointmentWindow from "../componants/TicketingModule/EditApponitmentWindow.jsx";
 import ServiceType from "../componants/TicketingModule/ServiceType.jsx";
+import TicketList from "../componants/TicketingModule/TicketList.jsx";
+import TicketReport from "../componants/TicketingModule/TicketReport.jsx";
+import ViewTicket from "../componants/TicketingModule/ViewTicket.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -748,6 +751,18 @@ function Index() {
           element={<PrivateRoute element={<EditAppointmentWindow />} />}
         />
 
+        <Route
+          path="/ticketList"
+          element={<PrivateRoute element={<TicketList />} />}
+        />
+        <Route
+          path="/ticketReport"
+          element={<PrivateRoute element={<TicketReport />} />}
+        />
+        <Route
+          path="/ticketList/view/:id"
+          element={<PrivateRoute element={<ViewTicket />} />}
+        />
         {/* Report start */}
         {/* List Of Admission Form Reports */}
         <Route
