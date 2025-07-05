@@ -46,7 +46,6 @@ function ServiceType() {
   const fetchSections = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      // const academicYr = localStorage.getItem("academicYear");
 
       if (!token) {
         throw new Error("No authentication token found");
@@ -344,8 +343,13 @@ function ServiceType() {
   };
 
   const handleChangeSectionName = (e) => {
-    const { value } = e.target;
+    let { value } = e.target;
+
+    // Allow only alphabets and optional spaces
+    value = value.replace(/[^a-zA-Z ]/g, "");
+
     setNewSectionName(value);
+
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
       name: validateSectionName(value, newDepartmentId).name,

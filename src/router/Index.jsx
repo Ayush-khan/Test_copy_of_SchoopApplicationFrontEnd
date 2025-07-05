@@ -257,6 +257,10 @@ import TicketList from "../componants/TicketingModule/TicketList.jsx";
 import TicketReport from "../componants/TicketingModule/TicketReport.jsx";
 import ViewTicket from "../componants/TicketingModule/ViewTicket.jsx";
 import AllotSpecialRole from "../componants/MastersModule/AllotSpecialRole/AllotSpecialRole.jsx";
+import RemarkObservationStudent from "../componants/RemarkAndObservationforStudent/RemarkObservationStudent.jsx";
+import EditRemarkandObservation from "../componants/RemarkAndObservationforStudent/EditRemarkObservation.jsx";
+import CreateRemarkObservationStudent from "../componants/RemarkAndObservationforStudent/CreateRemarkObservationStudent.jsx";
+import CreateRemarkObservation from "../componants/RemarkAndObservationforStudent/CreateRemarkObservation.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -734,6 +738,25 @@ function Index() {
         <Route
           path="/iDCardDetails/:id"
           element={<PrivateRoute element={<IDCardDetails />} />}
+        />
+        {/* Remark and Observation for Student  */}
+        <Route
+          path="/remObsStudent"
+          element={<PrivateRoute element={<RemarkObservationStudent />} />}
+        />
+        <Route
+          path="/remObsStudent/edit/:id"
+          element={<PrivateRoute element={<EditRemarkandObservation />} />}
+        />
+        <Route
+          path="/createremObsStudent"
+          element={
+            <PrivateRoute element={<CreateRemarkObservationStudent />} />
+          }
+        />
+        <Route
+          path="createremObs"
+          element={<PrivateRoute element={<CreateRemarkObservation />} />}
         />
         {/* Ticketing module start */}
         <Route

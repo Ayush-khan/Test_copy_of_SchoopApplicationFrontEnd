@@ -39,6 +39,7 @@ function SubServiceType() {
   const [sectionNameis, newSectionNameis] = useState({});
   const [backendErrors, setBackendErrors] = useState({});
   const [roleId, setRoleId] = useState("");
+
   const fetchClasses = async () => {
     setLoading(true);
 
@@ -127,39 +128,11 @@ function SubServiceType() {
     setCurrentPage(data.selected);
   };
 
-  // const validateClassData = (name, departmentId) => {
-  //   const errors = {};
-  //   if (!name || name.trim() === "") {
-  //     errors.name = "Please enter class name.";
-  //   } else if (!/^[A-Za-z0-9]+$/.test(name)) {
-  //     errors.name = "The name field only contain alphabets and numbers.";
-  //   } else if (name.length > 30) {
-  //     errors.name = "The name field must not exceed 30 characters.";
-  //   }
-  //   if (!departmentId || isNaN(departmentId)) {
-  //     errors.department_id = "Please select section.";
-  //   }
-  //   return errors;
-  // };
-
-  // const handleInputChange = (setter, validator) => (e) => {
-  //   const { value } = e.target;
-  //   setter(value);
-  //   // Perform validation based on the field that triggered the change
-  //   const errors = validateClassData(newClassName, newDepartmentId);
-  //   setValidationErrors(errors);
-  // };
-
   const validateSectionName = (name, departmentId) => {
     const errors = {};
 
-    // Regular expression to match only alphabets
-    // const alphabetRegex = /^[A-Za-z]+$/;
-
     if (!name || name.trim() === "") {
       errors.name = "Please enter sub service name.";
-    } else if (!/^[A-Za-z0-9]+$/.test(name)) {
-      errors.name = "The name field only contain alphabets and numbers.";
     } else if (name.length > 30) {
       errors.name = "The name field must not exceed 30 character.";
     }
@@ -196,49 +169,6 @@ function SubServiceType() {
     setFieldErrors({});
     setBackendErrors("");
   };
-
-  // const handleSubmitAdd = async () => {
-  //   const validationErrors = validateSectionName(newClassName, newDepartmentId);
-  //   if (Object.keys(validationErrors).length > 0) {
-  //     setFieldErrors(validationErrors);
-  //     return;
-  //   }
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     // const academicYr = localStorage.getItem("academicYear");
-
-  //     if (!token) {
-  //       throw new Error("No authentication token found");
-  //     }
-
-  //     if (!nameAvailable) {
-  //       return;
-  //     }
-
-  //     await axios.post(
-  //       `${API_URL}/api/classes`,
-  //       { name: newClassName, department_id: newDepartmentId },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         withCredentials: true,
-  //       }
-  //     );
-
-  //     fetchClasses();
-  //     handleCloseModal();
-  //     toast.success("Class added successfully!");
-  //   } catch (error) {
-  //     if (error.response && error.response.data) {
-  //       toast.error(`Error adding class: ${error.response.data.message}`);
-  //     } else {
-  //       toast.error(`Error adding class: ${error.message}`);
-  //     }
-  //     console.error("Error adding class:", error);
-  //   }
-  // };
 
   const handleSubmitAdd = async () => {
     if (isSubmitting) return; // Prevent re-submitting
@@ -479,7 +409,6 @@ function SubServiceType() {
               <button
                 className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
                 onClick={handleAdd}
-                // onClick={() => navigate("/CreateStaff")}
               >
                 <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
                 Add
@@ -546,45 +475,24 @@ function SubServiceType() {
                               {classItem.service_name}
                             </p>
                           </td>
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-pink-600 hover:text-pink-800 hover:bg-transparent "
-                                // onClick={() => handleEdit(classItem)}
-                              >
-                                {/* <FontAwesomeIcon icon={faEdit} /> */}
-                              </button>
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                onClick={() => handleEdit(classItem)}
-                              >
-                                <FontAwesomeIcon icon={faEdit} />
-                              </button>
-                            </td>
-                          )}
 
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-green-600 hover:text-green-800 hover:bg-transparent "
-                                // onClick={() => handleDelete(classItem.class_id)}
-                              >
-                                {/* <FontAwesomeIcon icon={faTrash} /> */}
-                              </button>
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                onClick={() => handleDelete(classItem.class_id)}
-                              >
-                                <FontAwesomeIcon icon={faTrash} />
-                              </button>
-                            </td>
-                          )}
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleEdit(classItem)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </td>
+
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                              onClick={() => handleDelete(classItem.class_id)}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </td>
                         </tr>
                       ))
                     ) : (
