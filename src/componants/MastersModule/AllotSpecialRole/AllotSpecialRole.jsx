@@ -218,7 +218,7 @@ function AllotSpecialRole() {
       const formData = {
         teacher_id: selectedStaff?.value, // assuming selectedStaff is an object like { value, label }
         department_id: newDepartmentId,
-        role: selectedRole?.label, // assuming selectedRole is also an object
+        role: selectedRole?.value, // assuming selectedRole is also an object
       };
 
       await axios.post(`${API_URL}/api/save_allotspecialrole`, formData, {
@@ -271,7 +271,7 @@ function AllotSpecialRole() {
       // ✅ Raw JSON payload (no FormData)
       const payload = {
         teacher_id: selectedStaff?.value,
-        role: selectedRole?.label,
+        role: selectedRole?.value,
         // remove `department_id` if your API doesn't expect it for update
       };
       console.log("payload data is for edit--->", payload);

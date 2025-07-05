@@ -1019,7 +1019,8 @@ function NavBar() {
         setAcademicYear(academicYearResponse.data.academic_years);
 
         // Fetch navigation items
-        const navResponse = await axios.get(`${API_URL}/api/navmenulist`, {
+        // const navResponse = await axios.get(`${API_URL}/api/navmenulist`,
+        const navResponse = await axios.get(`${API_URL}/api/navmenulisttest`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
