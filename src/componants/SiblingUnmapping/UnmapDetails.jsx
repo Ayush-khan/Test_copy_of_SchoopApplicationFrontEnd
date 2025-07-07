@@ -66,9 +66,22 @@ const UnmapDetails = () => {
     user_id: "", // User ID set as Parent (Father Phone here)
   });
 
+  // const handleNewParentChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setNewParent((prev) => ({ ...prev, [name]: value }));
+  // };
+
   const handleNewParentChange = (e) => {
     const { name, value } = e.target;
-    setNewParent((prev) => ({ ...prev, [name]: value }));
+
+    let updatedValue = value;
+
+    // Only allow alphabets and spaces for specific name fields
+    if (["father_name", "mother_name"].includes(name)) {
+      updatedValue = value.replace(/[^a-zA-Z\s]/g, "");
+    }
+
+    setNewParent((prev) => ({ ...prev, [name]: updatedValue }));
   };
 
   // for form
@@ -241,7 +254,7 @@ const UnmapDetails = () => {
       mother_email: "",
       mother_phone: "",
       user_id: "",
-      siblings: [], // ✅ Reset siblings as well
+      siblings: [], // Reset siblings as well
     });
 
     try {
@@ -367,7 +380,8 @@ const UnmapDetails = () => {
 
       //Show response feedback
       if (response?.data?.status === "success") {
-        toast.success("Sibling mapping updated successfully!");
+        // toast.success("Sibling mapping updated successfully!");
+        toast.success("Students unmapped successfully.");
         handleResetNewParentForm();
       } else {
         toast.error(response?.data?.message || "Update failed.");
@@ -390,6 +404,11 @@ const UnmapDetails = () => {
       m_email: "",
       userIdOption: "",
     });
+  };
+
+  const reset = () => {
+    setSelectedClass(null);
+    setSelectedStudent(null);
   };
 
   useEffect(() => {
@@ -601,7 +620,7 @@ const UnmapDetails = () => {
 
                     <button
                       type="button"
-                      onClick={handleResetNewParentForm}
+                      onClick={reset}
                       className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded"
                     >
                       Reset
@@ -619,7 +638,7 @@ const UnmapDetails = () => {
                   }}
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Father Fields */}
+                    {/* Father Name */}
                     <div>
                       <label className="block font-semibold text-black">
                         Father Name{" "}
@@ -636,13 +655,31 @@ const UnmapDetails = () => {
                       />
                     </div>
 
+                    {/* Mother Name */}
+                    <div>
+                      <label className="block font-semibold text-black">
+                        Mother Name{" "}
+                        <span className="text-sm text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="mother_name"
+                        value={newParent.mother_name}
+                        onChange={handleNewParentChange}
+                        className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+                        placeholder="Mother Name"
+                        required
+                      />
+                    </div>
+
+                    {/* Father Phone */}
                     <div>
                       <label className="block font-semibold text-black">
                         Father Phone{" "}
                         <span className="text-sm text-red-500">*</span>
                       </label>
                       <input
-                        type="tel"
+                        type="phone"
                         name="f_mobile"
                         maxLength={10}
                         value={newParent.f_mobile}
@@ -660,6 +697,25 @@ const UnmapDetails = () => {
                       />
                     </div>
 
+                    {/* Mother Phone */}
+                    <div>
+                      <label className="block font-semibold text-black">
+                        Mother Phone{" "}
+                        <span className="text-sm text-red-500">*</span>
+                      </label>
+                      <input
+                        type="phone"
+                        name="m_mobile"
+                        maxLength={10}
+                        value={newParent.m_mobile}
+                        onChange={handleNewParentChange}
+                        className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+                        placeholder="Mother Phone"
+                        required
+                      />
+                    </div>
+
+                    {/* Father Email */}
                     <div>
                       <label className="block font-semibold text-black">
                         Father Email{" "}
@@ -676,40 +732,7 @@ const UnmapDetails = () => {
                       />
                     </div>
 
-                    {/* Mother Fields */}
-                    <div>
-                      <label className="block font-semibold text-black">
-                        Mother Name{" "}
-                        <span className="text-sm text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="mother_name"
-                        value={newParent.mother_name}
-                        onChange={handleNewParentChange}
-                        className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
-                        placeholder="Mother Name"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-semibold text-black">
-                        Mother Phone{" "}
-                        <span className="text-sm text-red-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        name="m_mobile"
-                        maxLength={10}
-                        value={newParent.m_mobile}
-                        onChange={handleNewParentChange}
-                        className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
-                        placeholder="Mother Phone"
-                        required
-                      />
-                    </div>
-
+                    {/* Mother Email */}
                     <div>
                       <label className="block font-semibold text-black">
                         Mother Email{" "}

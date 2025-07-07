@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -28,7 +28,10 @@ function Stationery() {
   const [nameError, setNameError] = useState("");
   const [nameAvailable, setNameAvailable] = useState(true);
   const [roleId, setRoleId] = useState("");
+  const [classes, setClasses] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newSetLateTime, setNewSetLateTime] = useState("");
+  const [newTeacherId, setNewTeacherId] = useState("");
   const [newLeaveType, setNewLeaveType] = useState("");
 
   const previousPageRef = useRef(0);
@@ -117,11 +120,14 @@ function Stationery() {
 
   const validateSectionName = (name) => {
     const errors = {};
-    // console.log("xcfgvbhnj")
 
     if (!name || name.trim() === "") {
-      errors.name = "Please Select Stationery Name.";
+      errors.name = "Please select Stationery Name.";
     }
+    // else if (!/^[A-Za-z\s]+$/.test(name)) {
+    //   errors.name =
+    //     "Only alphabets and spaces are allowed. No numbers or special characters.";
+    // }
 
     return errors;
   };
@@ -304,6 +310,7 @@ function Stationery() {
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
+      const academicYr = localStorage.getItem("academicYear");
 
       if (!token || !currentSection || !currentSection.stationery_id) {
         throw new Error("Statonery is missing");
@@ -339,15 +346,29 @@ function Stationery() {
     }
   };
 
+  // const handleChangeSectionName = (e) => {
+  //   console.log(setNewLeaveType);
+  //   const { value } = e.target;
+
+  //   setNewLeaveType(value); //
+  //   setFieldErrors((prevErrors) => ({
+  //     ...prevErrors,
+  //     name: validateSectionName(value).name,
+  //   }));
+  // };
+
   const handleChangeSectionName = (e) => {
-    console.log(setNewLeaveType);
     const { value } = e.target;
 
-    setNewLeaveType(value); //
-    setFieldErrors((prevErrors) => ({
-      ...prevErrors,
-      name: validateSectionName(value).name,
-    }));
+    // Allow only alphabets and spaces
+    if (/^[A-Za-z\s]*$/.test(value)) {
+      setNewLeaveType(value);
+
+      setFieldErrors((prevErrors) => ({
+        ...prevErrors,
+        name: validateSectionName(value).name,
+      }));
+    }
   };
 
   return (
@@ -434,38 +455,24 @@ function Stationery() {
                               {leave.name}
                             </p>
                           </td>
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button className="text-pink-600 hover:text-pink-800 hover:bg-transparent ">
-                                {/* <FontAwesomeIcon icon={faEdit} /> */}
-                              </button>{" "}
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                onClick={() => handleEdit(leave)}
-                              >
-                                <FontAwesomeIcon icon={faEdit} />
-                              </button>{" "}
-                            </td>
-                          )}
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button className="text-green-600 hover:text-green-800 hover:bg-transparent "></button>
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                onClick={() =>
-                                  handleDelete(leave.stationery_id)
-                                }
-                              >
-                                <FontAwesomeIcon icon={faTrash} />
-                              </button>
-                            </td>
-                          )}
+
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleEdit(leave)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>{" "}
+                          </td>
+
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                              onClick={() => handleDelete(leave.stationery_id)}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </td>
                         </tr>
                       ))
                     ) : (
@@ -529,10 +536,9 @@ function Stationery() {
                       backgroundColor: "#C03078",
                     }}
                   ></div>
-                  {/* <hr className="font-bold"></hr> */}
+
                   <div className="modal-body">
                     {" "}
-                    {/* <div className="form-group"> */}
                     <div className=" relative mb-3 flex justify-center  mx-4">
                       <label htmlFor="sectionName" className="w-3/4 mt-2">
                         Stationery Name<span className="text-red-500">*</span>
@@ -554,8 +560,10 @@ function Stationery() {
                       </div>
                     </div>
                   </div>
-
+                  {/* <div className="modal-footer d-flex justify-content-end"> */}
+                  {/* modified code by divyani mam guidance */}
                   <div className=" flex justify-end p-3">
+                    {/* <button type="button" className="btn btn-secondary me-2" onClick={handleCloseModal}>Cancel</button> */}
                     <button
                       type="button"
                       className="btn btn-primary px-3 mb-2 mr-2 "
@@ -565,6 +573,16 @@ function Stationery() {
                     >
                       {isSubmitting ? "Saving..." : "Add"}
                     </button>
+
+                    {/* <button
+                      type="button"
+                      className="btn btn-danger px-3 mb-2 "
+                      style={{}}
+                    //   onClick={handleSubmitAdd}
+                    //   disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Saving..." : "Reset"}
+                    </button> */}
                   </div>
                 </div>
               </div>

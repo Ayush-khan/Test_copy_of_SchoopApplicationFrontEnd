@@ -238,7 +238,7 @@ const SiblingUnmapping = () => {
       mother_email: "",
       mother_phone: "",
       user_id: "",
-      siblings: [], // ✅ Reset siblings as well
+      siblings: [], //  Reset siblings as well
     });
 
     try {
@@ -593,7 +593,12 @@ const SiblingUnmapping = () => {
                             </div>
                           ))
                         ) : (
-                          <p className="text-gray-600">No siblings linked.</p>
+                          <div>
+                            {/* <h3>Siblings</h3> */}
+                            <p className="text-gray-600">
+                              No siblings available.
+                            </p>
+                          </div>
                         )}
                       </div>
                     </div>

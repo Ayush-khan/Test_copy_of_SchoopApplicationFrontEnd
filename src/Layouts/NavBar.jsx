@@ -1471,6 +1471,8 @@ function NavBar() {
 
                     {console.log("the Role id", roleId)}
                     {roleId === "A" ? renderStaticMenu() : renderDynamicMenu()}
+                    {/* {renderDynamicMenu()} */}
+
                     {/* {renderDropdownItemsis(navItems)} */}
                     {/* Resysuib function  */}
                     {/* <RecursiveDropdown items={navItems} /> */}

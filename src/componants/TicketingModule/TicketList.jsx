@@ -4,7 +4,6 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
-// import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
 import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 
@@ -100,6 +99,7 @@ const TicketList = () => {
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
+
   return (
     <>
       <div className="w-full md:w-[90%] mx-auto p-4 ">
