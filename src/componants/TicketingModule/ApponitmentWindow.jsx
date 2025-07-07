@@ -582,7 +582,6 @@ function AppointmentWindow() {
                         >
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {/* {index + 1} */}
                               {currentPage * pageSize + index + 1}
                             </p>
                           </td>
@@ -603,34 +602,24 @@ function AppointmentWindow() {
                               {section.week} {section.weekday}
                             </p>
                           </td>
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button className="text-pink-600 hover:text-pink-800 hover:bg-transparent "></button>{" "}
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                onClick={() => handleEdit(section)}
-                              >
-                                <FontAwesomeIcon icon={faEdit} />
-                              </button>{" "}
-                            </td>
-                          )}
-                          {roleId === "M" ? (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button className="text-green-600 hover:text-green-800 hover:bg-transparent "></button>
-                            </td>
-                          ) : (
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                onClick={() => handleDelete(section.aw_id)}
-                              >
-                                <FontAwesomeIcon icon={faTrash} />
-                              </button>
-                            </td>
-                          )}
+
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              onClick={() => handleEdit(section)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>{" "}
+                          </td>
+
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <button
+                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                              onClick={() => handleDelete(section.aw_id)}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </td>
                         </tr>
                       ))
                     ) : (
@@ -701,18 +690,6 @@ function AppointmentWindow() {
                       <label htmlFor="staffName" className="w-1/2 mt-2">
                         Name<span className="text-red-500">*</span>
                       </label>
-                      {/* <Select
-                        id="staffName"
-                        options={staffNames}
-                        value={staffNames.find(
-                          (staff) => staff.value === newStaffName
-                        )}
-                        onChange={handleChangeStaffName}
-                        placeholder="Select"
-                        className=" shadow-md w-full"
-                        isSearchable
-                        isClearable
-                      /> */}
                       <input
                         id="staffName"
                         className="w-full border rounded shadow-md p-2"

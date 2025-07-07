@@ -650,7 +650,7 @@ const TicketReport = () => {
                                     {student?.createdby || ""}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.First_name} {student?.mid_name}{" "}
+                                    {student?.first_name} {student?.mid_name}{" "}
                                     {student?.last_name}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">

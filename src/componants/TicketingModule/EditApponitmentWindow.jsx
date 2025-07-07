@@ -62,7 +62,9 @@ const EditAppointmentWindow = () => {
         role_id: appointmentData.role_id || "",
         class_id: appointmentData.class_id || "",
         week: appointmentData.week || "",
-        weekday: appointmentData.weekday || [],
+        weekday: appointmentData.weekday
+          ? appointmentData.weekday.split(",")
+          : [],
         time_from: appointmentData.time_from || "",
         time_to: appointmentData.time_to || "",
       });
@@ -132,13 +134,65 @@ const EditAppointmentWindow = () => {
       [name]: value,
     }));
 
-    // Clear error when user starts correcting the field
-    if (errors[name]) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        [name]: "",
-      }));
+    const updatedFormData = {
+      ...formData,
+      [name]: value,
+    };
+
+    const minTime = new Date("1970-01-01T09:00");
+    const maxTime = new Date("1970-01-01T18:00");
+
+    const from = updatedFormData.time_from
+      ? new Date(`1970-01-01T${updatedFormData.time_from}`)
+      : null;
+    const to = updatedFormData.time_to
+      ? new Date(`1970-01-01T${updatedFormData.time_to}`)
+      : null;
+
+    const newErrors = { ...errors };
+
+    if (name === "time_from") {
+      if (!value) {
+        newErrors.time_from = "Start time is required";
+      } else if (from < minTime) {
+        newErrors.time_from =
+          "Please enter a value greater than or equal to 09:00 am";
+      } else if (from > maxTime) {
+        newErrors.time_from =
+          "Please enter a value less than or equal to 18:00.";
+      } else {
+        delete newErrors.time_from;
+      }
+
+      // Also check relation with end time
+      if (to && to <= from) {
+        newErrors.time_to = "End time must be after start time";
+      } else if (to) {
+        delete newErrors.time_to;
+      }
     }
+
+    if (name === "time_to") {
+      if (!value) {
+        newErrors.time_to = "End time is required";
+      } else if (to < minTime) {
+        newErrors.time_to =
+          "Please enter a value greater than or equal to 09:00 am";
+      } else if (to > maxTime) {
+        newErrors.time_to = "Please enter a value less than or equal to 18:00.";
+      } else if (from && to <= from) {
+        newErrors.time_to = "End time must be after start time";
+      } else {
+        delete newErrors.time_to;
+      }
+    }
+
+    // Clear other non-time errors as usual
+    if (name !== "time_from" && name !== "time_to" && errors[name]) {
+      delete newErrors[name];
+    }
+
+    setErrors(newErrors);
   };
 
   const appointmentOptions = [
@@ -155,7 +209,6 @@ const EditAppointmentWindow = () => {
     { value: "Thursday", label: "Thursday" },
     { value: "Friday", label: "Friday" },
     { value: "Saturday", label: "Saturday" },
-    { value: "Sunday", label: "Sunday" },
   ];
 
   const handleSubmit = async (e) => {
@@ -206,7 +259,7 @@ const EditAppointmentWindow = () => {
       const data = response.data;
 
       if (data.success) {
-        toast.success("Appointment window saved successfully!");
+        toast.success("Appointment window updated successfully!");
         setTimeout(() => {
           navigate("/appointmentWindow");
         }, 500);
@@ -244,8 +297,9 @@ const EditAppointmentWindow = () => {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <p className="  md:absolute md:right-10  md:top-[19%]  text-gray-500  ">
-          <span className="text-red-500">*</span>indicates mandatory information
+        <p className="absolute right-10 top-10 md:top-20 text-gray-500">
+          <span className="text-red-500">*</span> indicates mandatory
+          information
         </p>
 
         <form
@@ -309,16 +363,16 @@ const EditAppointmentWindow = () => {
               </div>
             </div>
 
-            <div className="mt-4 mb-4 flex items-center justify-start mx-4 gap-5">
+            <div className="mt-4 mb-4 flex items-start justify-start mx-4 gap-5">
               {/* Label */}
-              <label htmlFor="week" className="w-[26%]">
+              <label htmlFor="week" className="w-[26%] pt-1.5">
                 Appointment Every <span className="text-red-500">*</span>
               </label>
 
               {/* Combined Selects */}
               <div className="flex gap-4 w-[67%]">
                 {/* Appointment Every Select */}
-                <div className="w-[50%]">
+                <div className="w-[50%] space-y-1">
                   <Select
                     id="week"
                     name="week"
@@ -356,7 +410,8 @@ const EditAppointmentWindow = () => {
                   )}
                 </div>
 
-                <div className="w-[50%]">
+                {/* Weekday Multi-Select */}
+                <div className="w-[50%] space-y-1">
                   <Select
                     id="weekday"
                     name="weekday"
@@ -393,7 +448,7 @@ const EditAppointmentWindow = () => {
                     }}
                     menuPortalTarget={document.body}
                   />
-                  {<errors className="weekday"></errors> && (
+                  {errors.weekday && (
                     <span className="text-danger text-xs">
                       {errors.weekday}
                     </span>

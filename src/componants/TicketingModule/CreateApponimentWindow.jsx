@@ -51,7 +51,7 @@ const CreateAppointmentWindow = () => {
 
     // Week
     if (!formData.week) {
-      newErrors.week = "Week is required";
+      newErrors.week = "Please select a appointment";
     }
 
     // Weekday (multi-select array)
@@ -116,12 +116,70 @@ const CreateAppointmentWindow = () => {
       [name]: value,
     }));
 
-    // Clear error when user starts correcting the field
+    // Clear error on typing
     if (errors[name]) {
       setErrors((prevErrors) => ({
         ...prevErrors,
         [name]: "",
       }));
+    }
+
+    // Validate time fields immediately
+    if (name === "time_from" || name === "time_to") {
+      const minTime = new Date("1970-01-01T09:00");
+      const maxTime = new Date("1970-01-01T18:00");
+
+      // Prepare latest time values for accurate validation
+      const updatedFormData = {
+        ...formData,
+        [name]: value,
+      };
+
+      const from = updatedFormData.time_from
+        ? new Date(`1970-01-01T${updatedFormData.time_from}`)
+        : null;
+      const to = updatedFormData.time_to
+        ? new Date(`1970-01-01T${updatedFormData.time_to}`)
+        : null;
+
+      const newErrors = { ...errors };
+
+      // Validate time_from
+      if (name === "time_from" && from) {
+        if (from < minTime) {
+          newErrors.time_from =
+            "Please enter a value greater than or equal to 09:00 am";
+        } else if (from > maxTime) {
+          newErrors.time_from =
+            "Please enter a value less than or equal to 18:00.";
+        } else {
+          delete newErrors.time_from;
+        }
+
+        // Validate time_to if exists
+        if (to && to <= from) {
+          newErrors.time_to = "End time must be after start time";
+        } else if (to && to > from) {
+          delete newErrors.time_to;
+        }
+      }
+
+      // Validate time_to
+      if (name === "time_to" && to) {
+        if (to < minTime) {
+          newErrors.time_to =
+            "Please enter a value greater than or equal to 09:00 am";
+        } else if (to > maxTime) {
+          newErrors.time_to =
+            "Please enter a value less than or equal to 18:00.";
+        } else if (from && to <= from) {
+          newErrors.time_to = "End time must be after start time";
+        } else {
+          delete newErrors.time_to;
+        }
+      }
+
+      setErrors(newErrors);
     }
   };
 
@@ -139,33 +197,28 @@ const CreateAppointmentWindow = () => {
     { value: "Thursday", label: "Thursday" },
     { value: "Friday", label: "Friday" },
     { value: "Saturday", label: "Saturday" },
-    { value: "Sunday", label: "Sunday" },
   ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (isSubmitting) return;
-    setIsSubmitting(true);
 
     const validationErrors = validate();
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      Object.values(validationErrors).forEach((error) => {
-        console.log("errors: ", error);
-        if (isSubmitting) return;
-        setIsSubmitting(true);
-      });
       return;
     }
+
+    setIsSubmitting(true);
 
     const formattedFormData = {
       ...formData,
       role: formData.role_id,
       class: formData.class_id,
       week: formData.week,
-      weekday: formData.weekday, // array like ['Monday', 'Wednesday']
+      weekday: formData.weekday,
       time_from: formData.time_from,
       time_to: formData.time_to,
     };
@@ -173,16 +226,14 @@ const CreateAppointmentWindow = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
+      if (!token) throw new Error("No authentication token found");
 
       const response = await axios.post(
         `${API_URL}/api/save_appointmentwindow`,
         formattedFormData,
         {
           headers: {
-            Authorization: ` Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -203,11 +254,12 @@ const CreateAppointmentWindow = () => {
       toast.error("An error occurred while saving. Please try again.");
     } finally {
       setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto flex items-center justify-center mt-4 ">
+    <div className="container mx-auto flex items-center justify-center mt-5 ">
       <ToastContainer />
       <div className="card p-4 rounded-md w-[60%] ">
         <div className=" card-header mb-4 flex justify-between items-center">
@@ -229,10 +281,10 @@ const CreateAppointmentWindow = () => {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <p className="  md:absolute md:right-10  md:top-[19%]  text-gray-500  ">
-          <span className="text-red-500">*</span>indicates mandatory information
+        <p className="absolute right-10 top-10 md:top-20 text-gray-500">
+          <span className="text-red-500">*</span> indicates mandatory
+          information
         </p>
-
         <form
           onSubmit={handleSubmit}
           className="flex items-center justify-center overflow-x-hidden shadow-md p-3 bg-gray-50 space-y-2" //min-h-screen flex items-center justify-center overflow-x-hidden shadow-md p-4 bg-gray-50
@@ -292,9 +344,9 @@ const CreateAppointmentWindow = () => {
               </div>
             </div>
 
-            <div className="mt-4 mb-4 flex items-center justify-start mx-4 gap-5">
+            <div className="mt-4 mb-4 flex items-start justify-start mx-4 gap-5">
               {/* Label */}
-              <label htmlFor="week" className="w-[26%]">
+              <label htmlFor="week" className="w-[26%] pt-1.5">
                 Appointment Every <span className="text-red-500">*</span>
               </label>
 
@@ -339,6 +391,7 @@ const CreateAppointmentWindow = () => {
                   )}
                 </div>
 
+                {/* Weekday Multi-Select */}
                 <div className="w-[50%]">
                   <Select
                     id="weekday"
@@ -376,7 +429,7 @@ const CreateAppointmentWindow = () => {
                     }}
                     menuPortalTarget={document.body}
                   />
-                  {<errors className="weekday"></errors> && (
+                  {errors.weekday && (
                     <span className="text-danger text-xs">
                       {errors.weekday}
                     </span>

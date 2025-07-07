@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RxCross1 } from "react-icons/rx";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -20,6 +20,7 @@ const ViewTicket = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [initialData, setInitialData] = useState({});
 
   const navigate = useNavigate();
 
@@ -28,6 +29,22 @@ const ViewTicket = () => {
   useEffect(() => {
     fetchTicketDetails();
   }, [id]);
+
+  useEffect(() => {
+    if (ticket) {
+      setInitialData({
+        status: ticket.status,
+        comment: ticket.comment,
+        appointment_date_time: ticket.appointment_date_time,
+        files: [], // assuming no default files
+      });
+
+      // Also set them in the form state if not already done
+      setStatus(ticket.status);
+      setComments(ticket.comment);
+      setSelectedAppointment(ticket.appointment_date_time);
+    }
+  }, [ticket]);
 
   const fetchTicketDetails = async () => {
     try {
@@ -160,7 +177,41 @@ const ViewTicket = () => {
     console.log("Status changed to:", e.target.value);
   };
 
-  const handleSubmit = async () => {
+  const handleRadioChange = (value) => {
+    if (status === "Approved") {
+      setSelectedAppointment(value);
+    } else {
+      toast.error("Please select status as Approved first!!");
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+
+    // Check for changes
+    const isUnchanged =
+      status === initialData.status &&
+      comments === initialData.comment &&
+      (selectedAppointment || "") ===
+        (initialData.appointment_date_time || "") &&
+      selectedFiles.length === 0;
+
+    if (isUnchanged) {
+      toast.error(
+        "No changes detected. Please modify a field before submitting."
+      );
+      setIsSaving(false);
+      return;
+    }
+
+    //  If status is Approved, ensure Date and Time are selected
+    if (status === "Approved" && !selectedAppointment) {
+      toast.error("Please select Date and Time for Approved status.");
+      setIsSaving(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
@@ -173,7 +224,6 @@ const ViewTicket = () => {
         selectedAppointment || ticket?.appointment_date_time || ""
       );
 
-      // Append all selected files
       selectedFiles.forEach((file) => {
         formData.append("fileupload", file);
       });
@@ -182,9 +232,14 @@ const ViewTicket = () => {
         `${API_URL}/api/save_ticketinformation/${id}`,
         formData,
         {
-          headers: { Authorization: ` Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
         }
       );
+
+      console.log("save api response", response);
 
       if (response.data.status === 200) {
         toast.success("Data Saved successfully!");
@@ -199,6 +254,7 @@ const ViewTicket = () => {
       toast.error("Something went wrong!");
     } finally {
       setLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -430,8 +486,11 @@ const ViewTicket = () => {
                                 name={`appointment-time-${ticket.ticket_id}`} // to make it unique per ticket
                                 value={timeSlot.value}
                                 checked={selectedAppointment === timeSlot.value}
+                                // onChange={() =>
+                                //   setSelectedAppointment(timeSlot.value)
+                                // }
                                 onChange={() =>
-                                  setSelectedAppointment(timeSlot.value)
+                                  handleRadioChange(timeSlot.value)
                                 }
                                 className="text-blue-800 focus:ring-blue-800"
                               />
@@ -511,6 +570,7 @@ const ViewTicket = () => {
         {/* Action Buttons */}
         <div className="mt-8 flex justify-end space-x-2">
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={isSaving}
             className={`bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl ${
@@ -548,112 +608,6 @@ const ViewTicket = () => {
               {/* Modal Content */}
               <div className="p-6 max-h-96 overflow-y-auto">
                 <div className="overflow-x-auto">
-                  {/* <table className="min-w-full">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="p-2 text-center text-sm font-semibold text-gray-600 border-b">
-                          <i className="fas fa-calendar mr-2"></i>
-                          Date
-                        </th>
-                        <th className="p-2 text-center text-sm font-semibold text-gray-600 border-b">
-                          <i className="fas fa-flag mr-2"></i>
-                          Status
-                        </th>
-                        <th className="p-2 text-center text-sm font-semibold text-gray-600 border-b">
-                          <i className="fas fa-comment mr-2"></i>
-                          Comments
-                        </th>
-                        <th className="p-2 text-center text-sm font-semibold text-gray-600 border-b">
-                          <i className="fas fa-clock mr-2"></i>
-                          Appointment Date & Time
-                        </th>
-                        <th className="p-2 text-center text-sm font-semibold text-gray-600 border-b">
-                          <i className="fas fa-user mr-2"></i>
-                          User
-                        </th>
-                        <th className="p-2 text-center text-sm font-semibold text-gray-600 border-b">
-                          <i className="fas fa-paperclip mr-2"></i>
-                          Attachment
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {loadingComments ? (
-                        <tr>
-                          <td
-                            colSpan="6"
-                            className="text-center py-6 text-blue-600 font-semibold"
-                          >
-                            Loading comments...
-                          </td>
-                        </tr>
-                      ) : commentList.length === 0 ? (
-                        <tr>
-                          <td
-                            colSpan="6"
-                            className="text-center text-gray-500 py-6"
-                          >
-                            <div className="flex flex-col items-center space-y-2">
-                              <i className="fas fa-inbox text-4xl text-gray-300"></i>
-                              <p className="text-lg">No comments available</p>
-                              <p className="text-sm">
-                                Comments will appear here when added
-                              </p>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : (
-                        commentList.map((comment, index) => (
-                          <tr
-                            key={index}
-                            className="hover:bg-gray-50 text-center"
-                          >
-                            <td className="p-2 text-sm text-gray-700 border-b">
-                              {comment.date ? formatDate(comment.date) : " "}
-                            </td>
-                            <td className="p-2 text-sm text-gray-700 border-b">
-                              {comment.status || ""}
-                            </td>
-                            <td className="p-2 text-sm text-gray-700 border-b">
-                              {comment.comment || ""}
-                            </td>
-                            <td className="p-2 text-sm text-gray-700 border-b">
-                              {comment.appointment_date_time || ""}
-                            </td>
-                            <td className="p-2 text-sm text-gray-700 border-b">
-                              {comment.login_type || ""} {comment.name || ""}
-                            </td>
-                            <td className="p-2 text-sm text-gray-700 border-b">
-                              {comment.image_url ? (
-                                <div className="flex items-center space-x-2">
-                                  <a
-                                    href={comment.image_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-500 underline"
-                                  >
-                                    {comment.image_url.split("/").pop()}{" "}
-                                  </a>
-                                  <button
-                                    onClick={() =>
-                                      handleDownload(comment.image_url)
-                                    }
-                                    className="text-green-600 hover:text-green-800"
-                                    title="Download File"
-                                  >
-                                    <i className="fas fa-download"></i>
-                                  </button>
-                                </div>
-                              ) : (
-                                ""
-                              )}
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table> */}
-
                   <table className="min-w-full border border-gray-300 border-collapse">
                     <thead>
                       <tr className="bg-gray-50">
