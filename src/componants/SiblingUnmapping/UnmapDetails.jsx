@@ -56,20 +56,15 @@ const UnmapDetails = () => {
   const [selectedParent, setSelectedParent] = useState("");
 
   const [formData, setFormData] = useState({
-    stud_name: "", // Combined name with class and division
+    stud_name: "",
     father_name: "",
-    mother_name: "", // Added mother's name
+    mother_name: "",
     father_email: "",
     father_phone: "",
     mother_email: "",
     mother_phone: "",
-    user_id: "", // User ID set as Parent (Father Phone here)
+    user_id: "",
   });
-
-  // const handleNewParentChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setNewParent((prev) => ({ ...prev, [name]: value }));
-  // };
 
   const handleNewParentChange = (e) => {
     const { name, value } = e.target;
@@ -289,7 +284,7 @@ const UnmapDetails = () => {
             father_email: student?.parents?.f_email || "",
             father_phone: student?.parents?.f_mobile || "",
             parent_id: student?.parents?.parent_id || "",
-            mother_email: student?.parents?.m_email || "",
+            mother_email: student?.parents?.m_emailid || "",
             mother_phone: student?.parents?.m_mobile || "",
             user_id: student?.user_master?.user_id || "",
             siblings: student?.siblings || [], //Add siblings to formData
@@ -326,7 +321,7 @@ const UnmapDetails = () => {
     }
 
     try {
-      setIsSaving(true); // Show loading state
+      setIsSaving(true);
 
       const config = {
         headers: {
@@ -340,13 +335,13 @@ const UnmapDetails = () => {
         const parentId = formData?.parent_id;
 
         if (!parentId) {
-          toast.error("Missing parent ID.");
+          toast.error("Please select Class and Student");
           return;
         }
 
         response = await axios.post(
           `${API_URL}/api/update_studentwithsibling/${id}`,
-          {}, // Empty body
+          {},
           {
             ...config,
             params: {
@@ -378,11 +373,12 @@ const UnmapDetails = () => {
         return;
       }
 
-      //Show response feedback
       if (response?.data?.status === "success") {
-        // toast.success("Sibling mapping updated successfully!");
         toast.success("Students unmapped successfully.");
         handleResetNewParentForm();
+        setTimeout(() => {
+          navigate("/siblingUnmapping");
+        }, 2000);
       } else {
         toast.error(response?.data?.message || "Update failed.");
       }

@@ -261,6 +261,7 @@ import RemarkObservationStudent from "../componants/RemarkAndObservationforStude
 import EditRemarkandObservation from "../componants/RemarkAndObservationforStudent/EditRemarkObservation.jsx";
 import CreateRemarkObservationStudent from "../componants/RemarkAndObservationforStudent/CreateRemarkObservationStudent.jsx";
 import CreateRemarkObservation from "../componants/RemarkAndObservationforStudent/CreateRemarkObservation.jsx";
+import StaffMonthlyAttendanceRepo from "../componants/Reports/StaffMonthlyAttendanceRepo.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -862,6 +863,11 @@ function Index() {
         <Route
           path="/staffReport"
           element={<PrivateRoute element={<StaffReport />} />}
+        />
+        {/* Staff Monthly Attendance Report */}
+        <Route
+          path="/staffMonthlyAttendanceRepo"
+          element={<PrivateRoute element={<StaffMonthlyAttendanceRepo />} />}
         />
         {/* monthlyAttendenceReport module */}
         <Route

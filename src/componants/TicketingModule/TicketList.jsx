@@ -17,6 +17,7 @@ const TicketList = () => {
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     handleSearch();
@@ -45,6 +46,7 @@ const TicketList = () => {
       console.error("Error fetching Staff Report Report:", error);
       toast.error("Error fetching Staff Report. Please try again.");
     } finally {
+      setLoading(false);
       setIsSubmitting(false); // Re-enable the button after the operation
       setLoadingForSearch(false);
     }
@@ -99,6 +101,7 @@ const TicketList = () => {
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
+  console.log("displayedSection", displayedSections);
 
   return (
     <>
@@ -110,128 +113,132 @@ const TicketList = () => {
               <LoaderStyle />
             </div>
           ) : (
-            timetable.length > 0 && (
-              <>
-                <div className="w-full">
-                  <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                      <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
-                        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          List of Tickets
-                        </h3>
-                        <div className="w-1/2 md:w-[18%] mr-1 ">
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search "
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                      style={{
-                        backgroundColor: "#C03078",
-                      }}
-                    ></div>
-
-                    <div className="card-body w-full">
-                      <div
-                        className="h-[550px] lg:h-[550px] overflow-y-scroll overflow-x-scroll"
-                        style={{
-                          scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
-                          scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
-                        }}
-                      >
-                        <table className="min-w-full w-[1000px] leading-normal table-auto">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              <th className="w-12 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Sr No.
-                              </th>
-                              <th className="w-12 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Ticket ID
-                              </th>
-                              <th className="w-40 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Student Name
-                              </th>
-                              <th className="w-20 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Service Name
-                              </th>
-                              <th className="w-20 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Title
-                              </th>
-                              <th className="w-28 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Raised On
-                              </th>
-                              <th className="w-20 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Status
-                              </th>
-                              <th className="w-12 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                View
-                              </th>
-                            </tr>
-                          </thead>
-
-                          <tbody>
-                            {displayedSections.length ? (
-                              displayedSections?.map((student, index) => (
-                                <tr
-                                  key={student.adm_form_pk}
-                                  className="border border-gray-300"
-                                >
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {index + 1}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.ticket_id || " "}
-                                  </td>
-
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.first_name} {student?.mid_name}{" "}
-                                    {student?.last_name}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.service_name}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.title}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.raised_on
-                                      ? formatDate(student.raised_on)
-                                      : " "}
-                                  </td>
-
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.status || " "}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    <button
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                      onClick={() => handleView(student)}
-                                    >
-                                      <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))
-                            ) : (
-                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                <div className=" text-center text-xl text-red-700">
-                                  Oops! No data found..
-                                </div>
-                              </div>
-                            )}
-                          </tbody>
-                        </table>
+            // timetable.length > 0 && (
+            <>
+              <div className="w-full">
+                <div className="card mx-auto lg:w-full shadow-lg">
+                  <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                    <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
+                      <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                        List of Tickets
+                      </h3>
+                      <div className="w-1/2 md:w-[18%] mr-1 ">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Search "
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                       </div>
                     </div>
                   </div>
+                  <div
+                    className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+                    style={{
+                      backgroundColor: "#C03078",
+                    }}
+                  ></div>
+
+                  <div className="card-body w-full">
+                    <div
+                      className="h-[550px] lg:h-[550px] overflow-y-scroll overflow-x-scroll"
+                      style={{
+                        scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
+                        scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
+                      }}
+                    >
+                      <table className="min-w-full w-[1000px] leading-normal table-auto">
+                        <thead>
+                          <tr className="bg-gray-100">
+                            <th className="w-12 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Sr No.
+                            </th>
+                            <th className="w-12 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Ticket ID
+                            </th>
+                            <th className="w-40 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Student Name
+                            </th>
+                            <th className="w-20 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Service Name
+                            </th>
+                            <th className="w-20 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Title
+                            </th>
+                            <th className="w-28 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Raised On
+                            </th>
+                            <th className="w-20 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Status
+                            </th>
+                            <th className="w-12 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              View
+                            </th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {loading ? (
+                            <div className="absolute left-[1%] w-[100%] text-center flex justify-center items-center mt-14">
+                              <div className="text-center text-xl text-blue-600">
+                                Please wait while data is loading...
+                              </div>
+                            </div>
+                          ) : displayedSections.length ? (
+                            displayedSections.map((student, index) => (
+                              <tr
+                                key={student.adm_form_pk}
+                                className="border border-gray-300"
+                              >
+                                <td className="px-2 py-2 text-center border border-gray-300">
+                                  {index + 1}
+                                </td>
+                                <td className="px-2 py-2 text-center border border-gray-300">
+                                  {student?.ticket_id || " "}
+                                </td>
+                                <td className="px-2 py-2 text-center border border-gray-300">
+                                  {student?.first_name} {student?.mid_name}{" "}
+                                  {student?.last_name}
+                                </td>
+                                <td className="px-2 py-2 text-center border border-gray-300">
+                                  {student?.service_name}
+                                </td>
+                                <td className="px-2 py-2 text-center border border-gray-300">
+                                  {student?.title}
+                                </td>
+                                <td className="px-2 py-2 text-center border border-gray-300">
+                                  {student?.raised_on
+                                    ? formatDate(student.raised_on)
+                                    : " "}
+                                </td>
+                                <td className="px-2 py-2 text-center border border-gray-300">
+                                  {student?.status || " "}
+                                </td>
+                                <td className="px-2 py-2 text-center border border-gray-300">
+                                  <button
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                    onClick={() => handleView(student)}
+                                  >
+                                    <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <div className="absolute left-[1%] w-[100%] text-center flex justify-center items-center mt-14">
+                              <div className="text-center text-xl text-red-700">
+                                Oops! No data found..
+                              </div>
+                            </div>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
-              </>
-            )
+              </div>
+            </>
+            // )
           )}
         </div>
       </div>

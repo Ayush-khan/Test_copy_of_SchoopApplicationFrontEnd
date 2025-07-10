@@ -21,10 +21,13 @@ const ViewTicket = () => {
   const [loading, setLoading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [initialData, setInitialData] = useState({});
+  const [requiresAppointment, setRequiresAppointment] = useState("");
 
   const navigate = useNavigate();
 
   const { id } = useParams();
+
+  console.log("id", id);
 
   useEffect(() => {
     fetchTicketDetails();
@@ -59,6 +62,8 @@ const ViewTicket = () => {
       if (response.data?.data) {
         const ticketData = response.data.data || [];
         setTicket(ticketData);
+        console.log("require", ticketData[0]?.RequiresAppointment);
+        setRequiresAppointment(ticketData[0]?.RequiresAppointment);
 
         // Get class_id from the first ticket item (adjust if needed)
         const classId = ticketData[0]?.class_id;
@@ -141,33 +146,6 @@ const ViewTicket = () => {
     }
   };
 
-  const handleDownload = async (fileUrl) => {
-    try {
-      const token = localStorage.getItem("authToken");
-
-      const response = await axios.get(fileUrl, {
-        responseType: "blob",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const blob = new Blob([response.data]);
-      const downloadUrl = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = fileUrl.split("/").pop(); // extract filename
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
-    } catch (error) {
-      console.error("Download failed:", error);
-      toast.error("File download failed");
-    }
-  };
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
@@ -205,8 +183,19 @@ const ViewTicket = () => {
       return;
     }
 
-    //  If status is Approved, ensure Date and Time are selected
-    if (status === "Approved" && !selectedAppointment) {
+    if (
+      status === "Approved" &&
+      requiresAppointment === "Y" &&
+      appointmentTimes.length === 0
+    ) {
+      toast.error("Please Create Appointment window first for date & time.");
+      setIsSaving(false);
+      return;
+    } else if (
+      status === "Approved" &&
+      requiresAppointment === "Y" &&
+      !selectedAppointment
+    ) {
       toast.error("Please select Date and Time for Approved status.");
       setIsSaving(false);
       return;
@@ -242,7 +231,7 @@ const ViewTicket = () => {
       console.log("save api response", response);
 
       if (response.data.status === 200) {
-        toast.success("Data Saved successfully!");
+        toast.success("Ticked Status Update Successfully!");
         setTimeout(() => {
           navigate("/ticketList");
         }, 2000);
@@ -255,6 +244,58 @@ const ViewTicket = () => {
     } finally {
       setLoading(false);
       setIsSaving(false);
+    }
+  };
+
+  const handleDownload = async (ticketId, commentId, fileName) => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token || !ticketId || !commentId || !fileName) {
+        throw new Error("Missing required information for download.");
+      }
+
+      console.log(token);
+      console.log(ticketId);
+      console.log(commentId);
+      console.log(fileName);
+
+      const response = await axios.get(
+        `${API_URL}/api/downloadticketfiles/${ticketId}/${commentId}/${fileName}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "blob",
+        }
+      );
+
+      if (response.status === 200) {
+        const contentDisposition = response.headers["content-disposition"];
+        let filename = fileName;
+
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="?(.+?)"?$/);
+          if (match && match[1]) {
+            filename = match[1];
+          }
+        }
+
+        const blob = new Blob([response.data]);
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        toast.success("File downloaded successfully!");
+      } else {
+        throw new Error("Failed to download file");
+      }
+    } catch (error) {
+      console.error("Download Error:", error);
+      toast.error("An error occurred during file download");
     }
   };
 
@@ -440,6 +481,20 @@ const ViewTicket = () => {
                     {ticket.service_name}
                   </span>
                 </div>
+                {ticket.document && ticket.document.trim() !== "" && (
+                  <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                    <div className="flex items-center space-x-3">
+                      <i className="fas fa-cogs text-blue-500"></i>
+                      <span className="text-gray-600 font-medium">
+                        Sub service Name
+                      </span>
+                    </div>
+                    <span className="text-gray-800 font-semibold">
+                      {ticket.document}
+                    </span>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <i className="fas fa-heading text-blue-500"></i>
@@ -486,9 +541,6 @@ const ViewTicket = () => {
                                 name={`appointment-time-${ticket.ticket_id}`} // to make it unique per ticket
                                 value={timeSlot.value}
                                 checked={selectedAppointment === timeSlot.value}
-                                // onChange={() =>
-                                //   setSelectedAppointment(timeSlot.value)
-                                // }
                                 onChange={() =>
                                   handleRadioChange(timeSlot.value)
                                 }
@@ -521,24 +573,38 @@ const ViewTicket = () => {
               <i className="fas fa-paperclip text-2xl text-green-500"></i>
               <h3 className="text-xl font-bold text-gray-800">Attachments</h3>
             </div>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 ">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400">
               <i className="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
               <p className="text-gray-600 mb-2">Upload supporting documents</p>
+
               <input
                 type="file"
                 id="file-upload"
                 multiple
                 className="hidden"
-                onChange={(e) => setSelectedFiles([...e.target.files])}
+                onChange={(e) => setSelectedFiles(Array.from(e.target.files))}
               />
 
               <label
                 htmlFor="file-upload"
                 className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg cursor-pointer transition-colors duration-300 inline-flex items-center space-x-2"
               >
-                {/* <i className="fas fa-plus"></i> */}
                 <span>Choose Files</span>
               </label>
+
+              {/* Display selected file names */}
+              {selectedFiles?.length > 0 && (
+                <div className="mt-4 text-left">
+                  <p className="text-sm font-medium text-gray-700 mb-1">
+                    Selected Files:
+                  </p>
+                  <ul className="list-disc list-inside text-sm text-gray-600">
+                    {selectedFiles.map((file, index) => (
+                      <li key={index}>{file.name}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 
@@ -621,9 +687,6 @@ const ViewTicket = () => {
                           Comments
                         </th>
                         <th className="p-2 text-center text-sm font-semibold text-gray-600 border border-gray-300">
-                          Appointment Date & Time
-                        </th>
-                        <th className="p-2 text-center text-sm font-semibold text-gray-600 border border-gray-300">
                           User
                         </th>
                         <th className="p-2 text-center text-sm font-semibold text-gray-600 border border-gray-300">
@@ -663,16 +726,20 @@ const ViewTicket = () => {
                             className="hover:bg-gray-50 text-center"
                           >
                             <td className="p-2 text-sm text-gray-700 border border-gray-300">
-                              {comment.date ? formatDate(comment.date) : " "}
+                              {comment.date
+                                ? comment.date
+                                    .split(" ")[0]
+                                    .split("-")
+                                    .reverse()
+                                    .join("/")
+                                : ""}
                             </td>
+
                             <td className="p-2 text-sm text-gray-700 border border-gray-300">
                               {comment.status || ""}
                             </td>
                             <td className="p-2 text-sm text-gray-700 border border-gray-300">
                               {comment.comment || ""}
-                            </td>
-                            <td className="p-2 text-sm text-gray-700 border border-gray-300">
-                              {comment.appointment_date_time || ""}
                             </td>
                             <td className="p-2 text-sm text-gray-700 border border-gray-300">
                               {comment.login_type || ""} {comment.name || ""}
@@ -681,16 +748,36 @@ const ViewTicket = () => {
                               {comment.image_url ? (
                                 <div className="flex items-center space-x-2">
                                   <a
-                                    href={comment.image_url}
-                                    target="_blank"
+                                    // href={comment.image_url}
+                                    // target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-blue-500 underline"
                                   >
                                     {comment.image_url.split("/").pop()}
                                   </a>
+                                  {/* <a
+                                    href={comment.image_url}
+                                    download
+                                    className="text-green-600 hover:text-green-800"
+                                    title="Download File"
+                                  >
+                                    <i className="fas fa-download"></i>
+                                  </a> */}
+
+                                  {console.log(
+                                    "Ticket comment",
+                                    comment.ticket_comment_id
+                                  )}
+                                  {console.log("Ticket id", comment.ticket_id)}
+                                  {console.log("name", comment.image_name)}
+
                                   <button
                                     onClick={() =>
-                                      handleDownload(comment.image_url)
+                                      handleDownload(
+                                        comment.ticket_id,
+                                        comment.ticket_comment_id,
+                                        comment.image_name
+                                      )
                                     }
                                     className="text-green-600 hover:text-green-800"
                                     title="Download File"
