@@ -147,9 +147,9 @@ const TicketList = () => {
                         scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
                       }}
                     >
-                      <table className="min-w-full w-[1000px] leading-normal table-auto">
+                      <table className="min-w-full w-[900px] leading-normal table-auto">
                         <thead>
-                          <tr className="bg-gray-100">
+                          {/* <tr className="bg-gray-100">
                             <th className="w-12 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Sr No.
                             </th>
@@ -172,6 +172,33 @@ const TicketList = () => {
                               Status
                             </th>
                             <th className="w-12 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              View
+                            </th>
+                          </tr> */}
+
+                          <tr className="bg-gray-100">
+                            <th className="w-16 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Sr No.
+                            </th>
+                            <th className="w-24 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Ticket ID
+                            </th>
+                            <th className="w-44 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Student Name
+                            </th>
+                            <th className="w-40 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Service Name
+                            </th>
+                            <th className="w-48 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Title
+                            </th>
+                            <th className="w-40 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Raised On
+                            </th>
+                            <th className="w-28 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Status
+                            </th>
+                            <th className="w-16 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               View
                             </th>
                           </tr>

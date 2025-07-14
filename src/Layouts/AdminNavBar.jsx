@@ -515,7 +515,7 @@ const AdminNavBar = () => {
           title={<span className="nav-dropdown-title">Ticket</span>}
           className="custom-nav-dropdown"
           style={{ color: "black", fontWeight: "700" }}
-          onClick={handleTicketClick} // Trigger navigation when clicked
+          // onClick={handleTicketClick} // Trigger navigation when clicked
         >
           <NavDropdown.Item
             as={Link}
@@ -596,13 +596,13 @@ const AdminNavBar = () => {
           >
             Subjects Allotment
           </NavDropdown.Item>
-          {/* <NavDropdown.Item
+          <NavDropdown.Item
             as={Link}
             to="/allotSpecialRole"
             className="text-sm font-bold hover:text-black"
           >
             Allot Special Role
-          </NavDropdown.Item> */}
+          </NavDropdown.Item>
           <NavDropdown.Item
             as={Link}
             to="/SubjectAllotmentHSC"

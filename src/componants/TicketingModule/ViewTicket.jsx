@@ -207,7 +207,7 @@ const ViewTicket = () => {
       const formData = new FormData();
 
       formData.append("status", status);
-      formData.append("comment", comments);
+      formData.append("comment", comments || "");
       formData.append(
         "appointment_date_time",
         selectedAppointment || ticket?.appointment_date_time || ""
@@ -596,7 +596,7 @@ const ViewTicket = () => {
               {selectedFiles?.length > 0 && (
                 <div className="mt-4 text-left">
                   <p className="text-sm font-medium text-gray-700 mb-1">
-                    Selected Files:
+                    Selected File:
                   </p>
                   <ul className="list-disc list-inside text-sm text-gray-600">
                     {selectedFiles.map((file, index) => (

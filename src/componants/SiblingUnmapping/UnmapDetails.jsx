@@ -5,9 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-// import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
-
 import { useParams } from "react-router-dom";
 
 const UnmapDetails = () => {
@@ -29,6 +27,7 @@ const UnmapDetails = () => {
   const [selectedOption, setSelectedOption] = useState("");
   const [confirmedOption, setConfirmedOption] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [userIdOptionError, setUserIdOptionError] = useState("");
 
   const { id } = useParams();
   console.log("selected student is", id);
@@ -66,20 +65,39 @@ const UnmapDetails = () => {
     user_id: "",
   });
 
+  // const handleNewParentChange = (e) => {
+  //   const { name, value } = e.target;
+
+  //   let updatedValue = value;
+
+  //   // Only allow alphabets and spaces for specific name fields
+  //   if (["father_name", "mother_name"].includes(name)) {
+  //     updatedValue = value.replace(/[^a-zA-Z\s]/g, "");
+  //   }
+
+  //   setNewParent((prev) => ({ ...prev, [name]: updatedValue }));
+  // };
+
+  // for form
+
   const handleNewParentChange = (e) => {
     const { name, value } = e.target;
 
     let updatedValue = value;
 
-    // Only allow alphabets and spaces for specific name fields
+    // Only allow alphabets and spaces for name fields
     if (["father_name", "mother_name"].includes(name)) {
       updatedValue = value.replace(/[^a-zA-Z\s]/g, "");
+    }
+
+    // Clear error when user selects userIdOption
+    if (name === "userIdOption") {
+      setUserIdOptionError("");
     }
 
     setNewParent((prev) => ({ ...prev, [name]: updatedValue }));
   };
 
-  // for form
   const [errors, setErrors] = useState({});
   const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
@@ -349,7 +367,34 @@ const UnmapDetails = () => {
             },
           }
         );
+        // } else if (selectedOption === "newParent") {
+        //   const parentData = {
+        //     father_name: newParent.father_name,
+        //     f_email: newParent.f_email,
+        //     f_mobile: newParent.f_mobile,
+        //     mother_name: newParent.mother_name,
+        //     m_email: newParent.m_email,
+        //     m_mobile: newParent.m_mobile,
+        //     user_id:
+        //       newParent.userIdOption === "mother"
+        //         ? newParent.m_email
+        //         : newParent.f_email,
+        //   };
+
+        //   response = await axios.post(
+        //     `${API_URL}/api/update_studentwithsibling/${id}`,
+        //     parentData,
+        //     config
+        //   );
       } else if (selectedOption === "newParent") {
+        // Validate radio selection
+        if (!newParent.userIdOption) {
+          setUserIdOptionError("Please select any one User ID.");
+          return;
+        } else {
+          setUserIdOptionError(""); // Clear error if selected
+        }
+
         const parentData = {
           father_name: newParent.father_name,
           f_email: newParent.f_email,
@@ -773,6 +818,11 @@ const UnmapDetails = () => {
                       />
                       Mother Email Id
                     </label>
+                    {userIdOptionError && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {userIdOptionError}
+                      </p>
+                    )}
                   </div>
 
                   {/* Action Buttons */}
