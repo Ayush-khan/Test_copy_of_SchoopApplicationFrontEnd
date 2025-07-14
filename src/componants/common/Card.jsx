@@ -58,6 +58,53 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
           )}
           {isLoading ? (
             <div>{renderLoader()}</div>
+          ) : title === "Fee Pending" ? (
+            <div className="mx-2 -space-y-2 text-[.8em]">
+              <div className="flex justify-between items-center gap-x-2">
+                <span className="text-red-600 font-semibold">
+                  {new Intl.NumberFormat("en-IN", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(valuePendingFee)}
+                </span>
+              </div>
+            </div>
+          ) : title === "Fee" ? (
+            <div className="mx-2 -space-y-2 text-[.7em]">
+              <div className="flex justify-between items-center gap-x-2">
+                <span className="text-green-700 font-semibold">Collected:</span>
+                <span className="text-green-600 font-semibold">
+                  {new Intl.NumberFormat("en-IN", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(value)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center gap-x-2">
+                <span className="text-red-700 font-semibold">Pending:</span>
+                <span className="text-red-600 font-semibold">
+                  {new Intl.NumberFormat("en-IN", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(valuePendingFee)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div
+                className={
+                  title === "Approve Lesson Plans" ? "text-red-600" : ""
+                }
+              >
+                {value}
+              </div>
+              <div>{valuePendingFee}</div>
+            </div>
+          )}
+
+          {/* {isLoading ? (
+            <div>{renderLoader()}</div>
           ) : title === "Fee" ? (
             <div className="mx-2   -space-y-2 text-[.7em]  ">
               <div className="flex justify-between item-center gap-x-2">
@@ -81,7 +128,7 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
             </div>
           ) : (
             <div>
-              {/* <div>{value}</div> */}
+              
               <div
                 className={
                   title === "Approve Lesson Plans" ? "text-red-600" : ""
@@ -92,7 +139,7 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
 
               <div>{valuePendingFee}</div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

@@ -9,15 +9,12 @@ import { RxCross1 } from "react-icons/rx";
 const FeesOutStandingSendSms = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [searchTerm, setSearchTerm] = useState("");
-
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedStudentForStudent, setSelectedStudentForStudent] =
     useState(null);
   const [classesforForm, setClassesforForm] = useState([]);
-
   const [classIdForSearch, setClassIdForSearch] = useState(null);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
-
   const [nameError, setNameError] = useState("");
   const [nameErrorForClass, setNameErrorForClass] = useState("");
   const [nameErrorForStudent, setNameErrorForStudent] = useState("");
@@ -30,7 +27,7 @@ const FeesOutStandingSendSms = () => {
   const [loadingForSearch, setLoadingForSearch] = useState(false);
   const [selectedTab, setSelectedTab] = useState("installment");
   const [message, setMessage] = useState("");
-  
+
   const maxCharacters = 900;
 
   const navigate = useNavigate();
@@ -38,11 +35,6 @@ const FeesOutStandingSendSms = () => {
   // for form
   const [errors, setErrors] = useState({});
   const [backendErrors, setBackendErrors] = useState({});
-
-  // Get today's date in YYYY-MM-DD format
-  // Calculate today's date
-  //   const today = new Date().toISOString().split("T")[0];
-  // State for loading indicators
   const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
 
@@ -64,12 +56,12 @@ const FeesOutStandingSendSms = () => {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
-      console.log('data of names of class',classResponse.data)
+      console.log("data of names of class", classResponse.data);
 
       // Set the fetched data
-    //   setClassesforForm(classResponse.data || []);
-         setClassesforForm(classResponse.data || []);
-        // setStudentNameWithClassId(studentResponse?.data?.data || []);
+      //   setClassesforForm(classResponse.data || []);
+      setClassesforForm(classResponse.data || []);
+      // setStudentNameWithClassId(studentResponse?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching Class data.");
     } finally {
@@ -80,7 +72,7 @@ const FeesOutStandingSendSms = () => {
   };
 
   const handleClassSelect = (selectedOption) => {
-    console.log('selectedoption',selectedOption?.key)
+    console.log("selectedoption", selectedOption?.key);
     setNameErrorForClass("");
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
@@ -105,13 +97,12 @@ const FeesOutStandingSendSms = () => {
   const [selectedInstallment, setSelectedInstallment] = useState(null);
   console.log("seletedStudents[]", selectedStudents);
   useEffect(() => {
-  if (selectedTab === "select") {
-    setSelectedInstallment({ value: "%", label: "%" });
-  } else {
-    setSelectedInstallment(null); // clear on switching to installment tab
-  }
-}, [selectedTab]);
-  
+    if (selectedTab === "select") {
+      setSelectedInstallment({ value: "%", label: "%" });
+    } else {
+      setSelectedInstallment(null); // clear on switching to installment tab
+    }
+  }, [selectedTab]);
 
   const handleSelectAll = () => {
     setSelectAll(!selectAll);
@@ -119,9 +110,7 @@ const FeesOutStandingSendSms = () => {
     if (!selectAll) {
       // Select only students with at least one parent email
       const validStudentIds = parentInformation
-        .filter(
-          (student) => student?.student_installment 
-        )
+        .filter((student) => student?.student_installment)
         .map((student) => student.student_installment);
 
       setSelectedStudents(validStudentIds);
@@ -141,14 +130,14 @@ const FeesOutStandingSendSms = () => {
 
   const handleSearch = async () => {
     // Reset error messages
-    console.log('classId For Search',classIdForSearch)
-    console.log('installment ',selectedInstallment?.value || "%")
+    console.log("classId For Search", classIdForSearch);
+    console.log("installment ", selectedInstallment?.value || "%");
     setNameError("");
     setSearchTerm("");
     setNameErrorForClass("");
     setNameErrorForClassForStudent("");
     setNameErrorForStudent("");
-    setErrors({}); 
+    setErrors({});
 
     let hasError = false;
     if (!selectedClass) {
@@ -170,10 +159,15 @@ const FeesOutStandingSendSms = () => {
       setLoadingForSearch(true); // Start loading
       const token = localStorage.getItem("authToken");
       // console.log(`${API_URL}/api/get_sendsmsforfeespendingdata/${classIdForSearch}/${selectedInstallment?.value || "%"}`)
-      const response = await axios.get(`${API_URL}/api/get_sendsmsforfeespendingdata/${classIdForSearch}/${selectedInstallment?.value || "%"}`, {
-        headers: { Authorization: `Bearer ${token}` }, // Pass query parameters here
-      });
-      console.log('response of the fees pending data',response.data)
+      const response = await axios.get(
+        `${API_URL}/api/get_sendsmsforfeespendingdata/${classIdForSearch}/${
+          selectedInstallment?.value || "%"
+        }`,
+        {
+          headers: { Authorization: `Bearer ${token}` }, // Pass query parameters here
+        }
+      );
+      console.log("response of the fees pending data", response.data);
 
       // Check if data was received and update the form state
       if (response?.data) {
@@ -215,10 +209,9 @@ const FeesOutStandingSendSms = () => {
         throw new Error("No authentication token is found");
       }
 
-      
       const postData = {
         studentid_installment: selectedStudents,
-        message: message
+        message: message,
         // tclass_id: selectedClassForStudent.value, // Replace with actual target class ID
         // tsection_id: selectedStudentForStudent.value, // Replace with actual target section ID
       };
@@ -233,7 +226,6 @@ const FeesOutStandingSendSms = () => {
           },
         }
       );
-      
 
       // Handle successful response
       if (response.status === 200) {
@@ -286,34 +278,33 @@ const FeesOutStandingSendSms = () => {
   //         );
   //       })
   //     : [];
-    const getInstallmentOptions = () => {
+  const getInstallmentOptions = () => {
     if (selectedTab === "select") {
-        return [{ value: "%", label: "%" }];
+      return [{ value: "%", label: "%" }];
     }
 
     let options = [
-        { value: "1", label: "Installment 1" },
-        { value: "2", label: "Installment 2" },
-        { value: "3", label: "Installment 3" },
+      { value: "1", label: "Installment 1" },
+      { value: "2", label: "Installment 2" },
+      { value: "3", label: "Installment 3" },
     ];
 
     // Add Installment 4 if class name is "10"
     if (selectedClass?.label === "10") {
-        options.push({ value: "4", label: "CBSE Exam Fee" });
+      options.push({ value: "4", label: "CBSE Exam Fee" });
     }
 
     return options;
-    };
+  };
   const filteredParents = parentInformation
     ? parentInformation.filter((student) => {
         const searchLower = searchTerm.toLowerCase();
-        console.log(student)
+        console.log(student);
 
         return (
           // Filter by roll number
           (student.roll_no !== null &&
             student.roll_no.toString().toLowerCase().includes(searchLower)) ||
-          
           // Filter by full name
           `${student.first_name || ""} ${student.mid_name || ""} ${
             student.last_name || ""
@@ -393,7 +384,7 @@ const FeesOutStandingSendSms = () => {
                     className="text-md mt-1.5 mr-1 md:mr-0"
                     htmlFor="installmentSelect"
                   >
-                    Installment 
+                    Installment
                   </label>
                   <div className="w-full md:w-[57%]">
                     <Select
@@ -415,7 +406,6 @@ const FeesOutStandingSendSms = () => {
                       }}
                       isDisabled={loadingClasses}
                     />
-                    
                   </div>
                 </div>
 
@@ -532,7 +522,6 @@ const FeesOutStandingSendSms = () => {
                             <th className="px-2 w-full md:w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               SMS Sent on
                             </th>
-
                           </tr>
                         </thead>
                         <tbody>
@@ -565,19 +554,18 @@ const FeesOutStandingSendSms = () => {
                                 </td> */}
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                    
-                                      <input
-                                        type="checkbox"
-                                        checked={selectedStudents.includes(
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedStudents.includes(
+                                        student.student_installment
+                                      )}
+                                      onChange={() =>
+                                        handleCheckboxChange(
                                           student.student_installment
-                                        )}
-                                        onChange={() =>
-                                          handleCheckboxChange(
-                                            student.student_installment
-                                          )
-                                        }
-                                        className="cursor-pointer"
-                                      />
+                                        )
+                                      }
+                                      className="cursor-pointer"
+                                    />
                                   </p>
                                 </td>
 
@@ -636,7 +624,6 @@ const FeesOutStandingSendSms = () => {
                                   </p>
                                 </td>
                               </tr>
-                              
                             ))
                           ) : (
                             <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
@@ -647,26 +634,26 @@ const FeesOutStandingSendSms = () => {
                           )}
                         </tbody>
                       </table>
-                     {filteredParents.length > 0 && (
+                      {filteredParents.length > 0 && (
                         <div className="flex justify-center mt-2">
-                        <div className="w-full md:w-[50%] relative">
+                          <div className="w-full md:w-[50%] relative">
                             <textarea
-                            value={message}
-                            onChange={(e) => {
+                              value={message}
+                              onChange={(e) => {
                                 if (e.target.value.length <= maxCharacters) {
-                                setMessage(e.target.value);
+                                  setMessage(e.target.value);
                                 }
-                            }}
-                            className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none"
-                            placeholder="Enter message"
+                              }}
+                              className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none"
+                              placeholder="Enter message"
                             ></textarea>
 
                             <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none">
-                            {message.length} / {maxCharacters}
+                              {message.length} / {maxCharacters}
                             </div>
+                          </div>
                         </div>
-                        </div>
-                        )}
+                      )}
                     </div>
                   </div>{" "}
                   <div className="text-center">
@@ -677,7 +664,6 @@ const FeesOutStandingSendSms = () => {
                       </h6>
                     </p>
                   </div>
-                  
                   <div className="col-span-3 mb-2  text-right">
                     <button
                       type="submit"
