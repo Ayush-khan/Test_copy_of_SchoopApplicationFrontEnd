@@ -262,6 +262,10 @@ import EditRemarkandObservation from "../componants/RemarkAndObservationforStude
 import CreateRemarkObservationStudent from "../componants/RemarkAndObservationforStudent/CreateRemarkObservationStudent.jsx";
 import CreateRemarkObservation from "../componants/RemarkAndObservationforStudent/CreateRemarkObservation.jsx";
 import StaffMonthlyAttendanceRepo from "../componants/Reports/StaffMonthlyAttendanceRepo.jsx";
+import FeesStructure from "../componants/Finance/FeesStructure.jsx";
+import FeesCategoryStudentAllotment from "../componants/Finance/FeesCategoryStudentAllotment.jsx";
+import FeesCategoryView from "../componants/Finance/FeesCategoryView.jsx";
+import FeesOutStandingSendSms from "../componants/Finance/FeesOutStandingSendSms.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -1040,6 +1044,24 @@ function Index() {
           element={
             <PrivateRoute element={<EditTeacherRemarkandObservation />} />
           }
+        />
+
+        {/* Finance */}
+        <Route
+          path="/feesStructure"
+          element={<PrivateRoute element={<FeesStructure />} />}
+        />
+        <Route
+          path="/feesCatStudAllot"
+          element={<PrivateRoute element={<FeesCategoryStudentAllotment />} />}
+        />
+        <Route
+          path="/feesCategoryView"
+          element={<PrivateRoute element={<FeesCategoryView />} />}
+        />
+        <Route
+          path="/feesOutStandingSendSms"
+          element={<PrivateRoute element={<FeesOutStandingSendSms />} />}
         />
       </Route>
 

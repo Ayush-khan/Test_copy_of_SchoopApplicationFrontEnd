@@ -1,5 +1,4 @@
 import { FaUserGroup, FaUsersLine } from "react-icons/fa6";
-import Style from "../../CSS/DashbordCss/Card.module.css";
 import Card from "../common/Card.jsx";
 import EventCard from "./EventCard.jsx";
 import CardStuStaf from "../common/CardStuStaf.jsx";
@@ -32,12 +31,10 @@ const DashboardContent = () => {
   const [staffBirthday, setStaffBirthday] = useState("");
   const [ticketCount, setTicketCount] = useState("");
   const [approveLeaveCount, setApproveLeaveCount] = useState("");
-
   const [pendingFee, setPendingFee] = useState("");
   const [collectedFee, setCollectedFee] = useState("");
   const [approvedLessonPlaneCount, setApprovedLessonPlaneCount] = useState("");
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [roleId, setRoleId] = useState(null);
 
   useEffect(() => {
@@ -97,15 +94,11 @@ const DashboardContent = () => {
       });
 
       // Fetch staff data
-      const staffResponse = await axios.get(
-        // "http://127.0.0.1:8000/api/staff",
-        `${API_URL}/api/staff`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const staffResponse = await axios.get(`${API_URL}/api/staff`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log("reponse of the staffAPI", staffResponse);
       setStaffData({
         teachingStaff: staffResponse?.data?.teachingStaff,
@@ -265,24 +258,6 @@ const DashboardContent = () => {
               }
             />
           </Link>
-          {/* Hide as of now after prepare it then we will show it */}
-          {/* <Link to="/ticktinglist" className="no-underline">
-            <Card
-              title="Ticketing Module"
-              value={ticketCount}
-              color="#FFC107"
-              icon={
-                <IoTicket
-                  style={{
-                    color: "#30C790",
-                    backgroundColor: "white",
-                    padding: "10px",
-                    borderRadius: "50%",
-                  }}
-                />
-              }
-            />
-          </Link> */}
 
           {roleId === null ? (
             // Skeleton card
@@ -354,7 +329,6 @@ const DashboardContent = () => {
               <div className=" relative top-3 h-10 bg-gray-300 rounded w-1/3"></div>
             </div>
           ) : roleId === "M" ? (
-            // <Link to="/approveLessonP" className="no-underline">
             <Card
               title="Approve Lesson Plans"
               value={approvedLessonPlaneCount}
@@ -372,7 +346,6 @@ const DashboardContent = () => {
               }
             />
           ) : (
-            // </Link>
             <Link to="/staffbirthlist" className="no-underline">
               <Card
                 title="Today's Birthdays"
