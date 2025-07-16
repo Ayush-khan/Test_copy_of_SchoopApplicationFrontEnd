@@ -1470,8 +1470,8 @@ function NavBar() {
                     </div>
 
                     {console.log("the Role id", roleId)}
-                    {roleId === "A" ? renderStaticMenu() : renderDynamicMenu()}
-                    {/* {renderDynamicMenu()} */}
+                    {/* {roleId === "A" ? renderStaticMenu() : renderDynamicMenu()} */}
+                    {renderDynamicMenu()}
 
                     {/* {renderDropdownItemsis(navItems)} */}
                     {/* Resysuib function  */}
