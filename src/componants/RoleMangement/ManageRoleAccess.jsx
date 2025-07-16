@@ -165,7 +165,7 @@ function ManageRoleAccess() {
     <>
       <ToastContainer />
       <div className="container md:mt-4">
-        <div className="card mx-auto lg:w-3/4 shadow-lg">
+        <div className="card mx-auto lg:w-[95%] shadow-lg">
           <div className="card-header flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Role-Based Access For{" "}
@@ -186,7 +186,7 @@ function ManageRoleAccess() {
             style={{ backgroundColor: "#C03078" }}
           ></div>
 
-          <div className="card-body w-full md:w-[85%] mx-auto">
+          <div className="card-body w-full md:w-[90%] mx-auto">
             <div className="flex flex-row w-full justify-end items-center gap-2 relative top-2">
               <h5 className=" w-[50%] text-center text-blue-500 ">
                 {/* List of Menus URLs */}
@@ -212,14 +212,17 @@ function ManageRoleAccess() {
                   <table className="min-w-full leading-normal table-auto">
                     <thead>
                       <tr className="bg-gray-200 ">
-                        <th className="pb-4 w-full md:w-[15%] text-center px-3 border border-gray-950 text-sm font-bold ">
+                        <th className="pb-4 w-full md:w-[10%] text-center px-3 border border-gray-950 text-sm font-bold ">
                           Menu ID
                         </th>
                         <th className=" pb-4 text-center px-3  border border-gray-950 text-sm font-bold">
                           Menu Name
                         </th>
+                        <th className=" pb-4 text-center px-3  border border-gray-950 text-sm font-bold">
+                          Parent Name
+                        </th>
 
-                        <th className=" w-full md:w-[20%] text-center px-3 border border-gray-950 text-sm font-bold ">
+                        <th className=" w-full md:w-[15%] text-center px-3 border border-gray-950 text-sm font-bold ">
                           <div className="form-check flex space-y-2 relative   ">
                             <label
                               htmlFor="select_all"
@@ -271,7 +274,9 @@ function ManageRoleAccess() {
                           >
                             {menu.name}
                           </td>
-
+                          <td className="text-center px-3 py-2 border border-gray-950 text-sm text-wrap">
+                            {menu?.full_path}
+                          </td>
                           <td className="text-center px-3 py-2 border border-gray-950 text-sm">
                             <label className="relative inline-flex items-center cursor-pointer">
                               <input

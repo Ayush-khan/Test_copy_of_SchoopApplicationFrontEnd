@@ -222,7 +222,7 @@ const DashboardContent = () => {
             // Approve Leave card for roleId "M"
             <Link to="#" className="no-underline">
               <Card
-                title="Lesson Plane"
+                title="Lesson Plan"
                 value={0}
                 color="#2196F3"
                 icon={
