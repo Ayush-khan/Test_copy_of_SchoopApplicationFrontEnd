@@ -448,7 +448,7 @@ const TeacherRemarkReport = () => {
                           }),
                           menu: (provided) => ({
                             ...provided,
-                            fontSize: "1em", // Adjust font size for dropdown options
+                            fontSize: ".9em", // Adjust font size for dropdown options
                           }),
                           option: (provided) => ({
                             ...provided,
