@@ -197,6 +197,7 @@ const DashboardContent = () => {
           <Link to="/studentAbsent" className="no-underline">
             <CardStuStaf
               title="Student"
+              roleId={roleId} // Pass the roleId here
               TotalValue={studentData.total}
               presentValue={studentData.present}
               color="#4CAF50"
@@ -223,7 +224,8 @@ const DashboardContent = () => {
             <Link to="#" className="no-underline">
               <Card
                 title="Lesson Plan"
-                value={0}
+                roleId={roleId} // Pass the roleId here
+                value={" "}
                 color="#2196F3"
                 icon={
                   <GiTeacher
@@ -270,7 +272,7 @@ const DashboardContent = () => {
             <Link to="#" className="no-underline">
               <Card
                 title="Homework"
-                value={0}
+                value={" "}
                 color="#FF9800"
                 icon={
                   <TfiWrite
@@ -383,7 +385,7 @@ const DashboardContent = () => {
             <Link to="#" className="no-underline">
               <Card
                 title="Assessment"
-                value={0}
+                value={" "}
                 color="#4CAF50"
                 icon={
                   <MdAssessment
@@ -446,7 +448,7 @@ const DashboardContent = () => {
             <Link to="#" className="no-underline">
               <Card
                 title="Leave"
-                value={0}
+                value={" "}
                 color="#FFC107"
                 icon={
                   <FaCalendarAlt

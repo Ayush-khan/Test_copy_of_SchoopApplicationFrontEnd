@@ -3,7 +3,15 @@
 import styles from "../../CSS/DashbordCss/Card.module.css";
 import { FaSpinner } from "react-icons/fa"; // Import the spinner icon
 
-const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
+const Card = ({
+  title,
+  value,
+  valuePendingFee,
+  spanLabel,
+  color,
+  icon,
+  roleId,
+}) => {
   // Check if value is empty string, undefined, null, or empty array
   const isLoading =
     value === "" ||
@@ -61,12 +69,12 @@ const Card = ({ title, value, valuePendingFee, spanLabel, color, icon }) => {
           ) : title === "Fee Pending" ? (
             <div className="mx-2 -space-y-2 text-[.8em]">
               <div className="flex justify-between items-center gap-x-2">
-                <span className="text-red-600 font-semibold">
+                {/* <span className="text-red-600 font-semibold">
                   {new Intl.NumberFormat("en-IN", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   }).format(valuePendingFee)}
-                </span>
+                </span> */}
               </div>
             </div>
           ) : title === "Fee" ? (
