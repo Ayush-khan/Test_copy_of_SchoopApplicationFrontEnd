@@ -266,6 +266,7 @@ import FeesStructure from "../componants/Finance/FeesStructure.jsx";
 import FeesCategoryStudentAllotment from "../componants/Finance/FeesCategoryStudentAllotment.jsx";
 import FeesCategoryView from "../componants/Finance/FeesCategoryView.jsx";
 import FeesOutStandingSendSms from "../componants/Finance/FeesOutStandingSendSms.jsx";
+import SubstituteClassTeacher from "../componants/SubstituteClassTeacher/SubstituteClassTeacher.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -482,6 +483,11 @@ function Index() {
         <Route
           path="/leaveAllocationtoAllStaff"
           element={<PrivateRoute element={<LeaveAllocationtoAllStaff />} />}
+        />
+        {/* Substitute class teacher module */}
+        <Route
+          path="/substituteClassTeacher"
+          element={<PrivateRoute element={<SubstituteClassTeacher />} />}
         />
         {/* Substitute Teacher */}
         <Route
