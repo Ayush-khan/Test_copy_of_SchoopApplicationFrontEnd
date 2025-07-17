@@ -267,6 +267,7 @@ import FeesCategoryStudentAllotment from "../componants/Finance/FeesCategoryStud
 import FeesCategoryView from "../componants/Finance/FeesCategoryView.jsx";
 import FeesOutStandingSendSms from "../componants/Finance/FeesOutStandingSendSms.jsx";
 import SubstituteClassTeacher from "../componants/SubstituteClassTeacher/SubstituteClassTeacher.jsx";
+import AttendanceMarkingStatusReport from "../componants/Reports/AttendanceReport/AttendanceMarkingStatusReport.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -878,6 +879,11 @@ function Index() {
         <Route
           path="/staffMonthlyAttendanceRepo"
           element={<PrivateRoute element={<StaffMonthlyAttendanceRepo />} />}
+        />
+        {/* Attendance Marking Status Report */}
+        <Route
+          path="/attendanceMarkingStatusRepo"
+          element={<PrivateRoute element={<AttendanceMarkingStatusReport />} />}
         />
         {/* monthlyAttendenceReport module */}
         <Route

@@ -194,7 +194,10 @@ const DashboardContent = () => {
       <div className="flex flex-col lg:flex-row items-start justify-between w-full gap-4 p-6 ">
         <div className="w-full lg:w-2/3  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* {console.log("totalstudent", studentData.total)} */}
-          <Link to="/studentAbsent" className="no-underline">
+          <Link
+            to={roleId === "T" ? "#" : "/studentAbsent"}
+            className="no-underline"
+          >
             <CardStuStaf
               title="Student"
               roleId={roleId} // Pass the roleId here
