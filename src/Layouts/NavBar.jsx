@@ -998,7 +998,14 @@ function NavBar() {
         setSessionData(sessionResponse.data);
         setSelectedYear(sessionResponse?.data?.custom_claims?.academic_year);
         setRoleId(sessionResponse.data.user.role_id); // Store role_id
-
+        localStorage.setItem(
+          "academic_yr_from",
+          sessionResponse?.data?.custom_claims?.settings?.academic_yr_from
+        );
+        localStorage.setItem(
+          "academic_yr_to",
+          sessionResponse?.data?.custom_claims?.settings?.academic_yr_to
+        );
         const errorMsg = sessionResponse?.data?.message;
         // Handle expired token
         if (errorMsg === "Token has expired") {

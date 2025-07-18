@@ -33,7 +33,8 @@ const AttendanceMarkingStatusReport = () => {
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const academicYrFrom = localStorage.getItem("academic_yr_from");
+  const academicYrTo = localStorage.getItem("academic_yr_to");
   const handleStudentSelect = (selectedOption) => {
     setStudentError(""); // Reset error if student is select.
     setSelectedStudent(selectedOption);
@@ -383,19 +384,11 @@ const AttendanceMarkingStatusReport = () => {
                       Select Date <span className="text-red-500">*</span>
                     </label>
                     <div className="w-full md:w-[85%]">
-                      {/* <input
-                        type="date"
-                        id="fromDate"
-                        value={fromDate}
-                        onChange={(e) => {
-                          setDateError("");
-                          setFromDate(e.target.value);
-                        }}
-                        className="text-sm w-full border border-gray-300 rounded px-2 py-2"
-                      /> */}
                       <input
                         type="date"
                         id="fromDate"
+                        min={academicYrFrom}
+                        max={academicYrTo}
                         value={fromDate}
                         onChange={(e) => {
                           setDateError("");

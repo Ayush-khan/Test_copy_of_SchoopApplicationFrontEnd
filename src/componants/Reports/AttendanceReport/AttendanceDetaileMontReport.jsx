@@ -72,8 +72,8 @@ const AttendanceDetaileMontReport = () => {
   const studentOptions = useMemo(
     () =>
       studentNameWithClassId.map((cls) => ({
-        value: cls?.class_id,
-        valueSection: cls?.section_id,
+        value: cls?.section_id,
+        valueclass: cls?.class_id,
         label: `${cls?.get_class?.name} ${cls.name}`,
       })),
     [studentNameWithClassId]
@@ -499,118 +499,99 @@ const AttendanceDetaileMontReport = () => {
 
             {timetable.length > 0 && (
               <>
-                <div className="w-full  mt-4">
-                  <div className="card mx-auto lg:w-full shadow-lg">
+                <div className="w-full mt-4">
+                  <div className="card mx-auto shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                      <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
+                      <div className="w-full flex flex-row justify-between mr-0 md:mr-4">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          List of Attendance Marking Status Report
+                          Student Attendance Report
                         </h3>
-                        <div className="w-1/2 md:w-[18%] mr-1 ">
+                        <div className="w-1/2 md:w-[18%] mr-1">
                           <input
                             type="text"
-                            className="form-control"
-                            placeholder="Search "
+                            className="form-control border px-2 py-1 rounded"
+                            placeholder="Search"
                             onChange={(e) => setSearchTerm(e.target.value)}
                           />
                         </div>
                       </div>
+
                       <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
                         <button
                           type="button"
                           onClick={handleDownloadEXL}
-                          className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
+                          className="relative bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded group"
                         >
                           <FaFileExcel />
-
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                            Exports to excel
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                            Export to Excel
                           </div>
                         </button>
 
                         <button
                           onClick={handlePrint}
-                          className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
+                          className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
                         >
                           <FiPrinter />
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                            Print{" "}
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                            Print
                           </div>
                         </button>
                       </div>
                     </div>
+
                     <div
-                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                      style={{
-                        backgroundColor: "#C03078",
-                      }}
+                      className="relative w-[97%] mb-3 h-1 mx-auto"
+                      style={{ backgroundColor: "#C03078" }}
                     ></div>
 
                     <div className="card-body w-full">
-                      <div
-                        className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
-                        style={{
-                          scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
-                          scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
-                        }}
-                      >
-                        <table className="min-w-full leading-normal table-auto">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              {[
-                                "Sr No.",
-                                "Class",
-                                "Class Teacher",
-                                "Substitute Teacher",
-                                "Attendance Marked By",
-                                "Marked Attendance",
-                              ].map((header, index) => (
-                                <th
-                                  key={index}
-                                  className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
-                                >
-                                  {header}
+                      <div className="h-[600px] overflow-x-auto overflow-y-scroll border">
+                        <table className="min-w-[1600px] table-auto text-sm text-center border border-gray-300">
+                          <thead className="bg-gray-100 sticky top-0 z-10">
+                            <tr>
+                              <th className="border p-1">Roll No</th>
+                              <th className="border p-1">Student Name</th>
+                              {/* Example dates loop (replace with dynamic generation) */}
+                              {[...Array(30)].map((_, i) => (
+                                <th key={i} className="border p-1">
+                                  {`Day ${i + 1}`}
                                 </th>
                               ))}
+                              <th className="border p-1">Present Days</th>
+                              <th className="border p-1">Prev. Attendance</th>
+                              <th className="border p-1">Total Attendance</th>
+                              <th className="border p-1">Absent Days</th>
                             </tr>
                           </thead>
-
                           <tbody>
-                            {displayedSections.length ? (
-                              displayedSections?.map((student, index) => (
-                                <tr
-                                  key={student.adm_form_pk}
-                                  className="border border-gray-300"
-                                >
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {index + 1}
+                            {/* Replace with actual mapped student data */}
+                            {students.map((student, i) => (
+                              <tr key={i} className="hover:bg-gray-50">
+                                <td className="border p-1">{i + 1}</td>
+                                <td className="border p-1">{student.name}</td>
+                                {student.attendance.map((val, idx) => (
+                                  <td
+                                    key={idx}
+                                    className={`border p-1 ${
+                                      val === "A" ? "text-red-600" : ""
+                                    }`}
+                                  >
+                                    {val}
                                   </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.class_section || " "}
-                                  </td>
-
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.class_teacher || " "}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.substitute_teacher || " "}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.attendance_marked_by || " "}
-                                  </td>
-
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.marked || " "}
-                                  </td>
-                                </tr>
-                              ))
-                            ) : (
-                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                <div className=" text-center text-xl text-red-700">
-                                  Oops! No data found..
-                                </div>
-                              </div>
-                            )}
+                                ))}
+                                <td className="border p-1">
+                                  {student.present}
+                                </td>
+                                <td className="border p-1">
+                                  {student.prevAttendance}
+                                </td>
+                                <td className="border p-1">
+                                  {student.totalAttendance}
+                                </td>
+                                <td className="border p-1">{student.absent}</td>
+                              </tr>
+                            ))}
                           </tbody>
                         </table>
                       </div>
