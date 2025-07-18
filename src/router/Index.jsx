@@ -270,6 +270,7 @@ import SubstituteClassTeacher from "../componants/SubstituteClassTeacher/Substit
 import AttendanceMarkingStatusReport from "../componants/Reports/AttendanceReport/AttendanceMarkingStatusReport.jsx";
 import StaffLeaveReport from "../componants/Reports/StaffReport/StaffLeaveReport.jsx";
 import TeacherRemarkReport from "../componants/Reports/StaffReport/TeacherRemarkReport.jsx";
+import AttendanceDetaileMontReport from "../componants/Reports/AttendanceReport/AttendanceDetaileMontReport.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -887,6 +888,10 @@ function Index() {
         <Route
           path="/teacherRemarkReport"
           element={<PrivateRoute element={<TeacherRemarkReport />} />}
+        />
+        <Route
+          path="/AttendanceDetaileMontReport"
+          element={<PrivateRoute element={<AttendanceDetaileMontReport />} />}
         />
         {/* Staff Monthly Attendance Report */}
         <Route

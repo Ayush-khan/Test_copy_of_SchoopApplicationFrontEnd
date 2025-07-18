@@ -48,7 +48,14 @@ const LoginForm = () => {
 
       if (response.status === 200) {
         localStorage.setItem("authToken", response.data.token);
-
+        localStorage.setItem(
+          "academic_yr_from",
+          response?.data?.userdetails?.settings?.academic_yr_from
+        );
+        localStorage.setItem(
+          "academic_yr_to",
+          response?.data?.userdetails?.settings?.academic_yr_to
+        );
         const sessionData = {
           user: response.data.data,
           settings: response.data.settings,
