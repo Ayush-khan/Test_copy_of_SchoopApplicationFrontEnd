@@ -175,19 +175,48 @@ const AttendanceDetaileMontReport = () => {
   };
   useEffect(() => {
     if (timetable?.students?.length > 0 && timetable?.date_range?.length > 0) {
+      //   const formattedStudents = timetable.students.map((student) => {
+      //     const attendanceMap = {};
+      //     student.daily_attendance.forEach((entry) => {
+      //       attendanceMap[entry.date] = entry.status || "";
+      //     });
+
+      //     const attendance = timetable.date_range.map((dateObj) => {
+      //       return attendanceMap[dateObj.date] || "";
+      //     });
+
+      //     return {
+      //       name: student.name,
+      //       rollNo: student.roll_no || "", // ✅ Use the real roll number
+      //       attendance,
+      //       present_days: student.present_days,
+      //       absent_days: student.absent_days,
+      //       working_days: student.working_days,
+      //       prev_attendance: student.prev_attendance,
+      //       total_attendance: student.total_attendance,
+      //       total_working_days_till_month: student.total_working_days_till_month,
+      //       cumulative_absent_days: student.cumulative_absent_days,
+      //     };
+      //   });
       const formattedStudents = timetable.students.map((student) => {
         const attendanceMap = {};
         student.daily_attendance.forEach((entry) => {
-          attendanceMap[entry.date] = entry.status || "";
+          attendanceMap[entry.date] = {
+            status: entry.status || "",
+            duplicate: entry.duplicate || false,
+          };
         });
 
         const attendance = timetable.date_range.map((dateObj) => {
-          return attendanceMap[dateObj.date] || "";
+          const entry = attendanceMap[dateObj.date];
+          return entry
+            ? { status: entry.status, duplicate: entry.duplicate }
+            : { status: "", duplicate: false };
         });
 
         return {
           name: student.name,
-          rollNo: student.roll_no || "", // ✅ Use the real roll number
+          rollNo: student.roll_no || "",
           attendance,
           present_days: student.present_days,
           absent_days: student.absent_days,
@@ -327,7 +356,7 @@ const AttendanceDetaileMontReport = () => {
     const tableHTML = generateAttendanceTableHTML();
 
     const headerTable = `
-      <table style="width: 100%; margin-bottom: 10px; border-collapse: collapse; font-size: 14px;">
+      <table style="width: 100%; margin-bottom: 10px;  font-size: 14px;">
         <tr>
           <td style="border: 1px solid #ccc; padding: 6px; text-align: center;"><strong>Class:</strong> ${
             selectedStudent?.class || ""
@@ -350,13 +379,12 @@ const AttendanceDetaileMontReport = () => {
           <title>${printTitle}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
-            table { width: 100%; font-size: 12px; border-collapse: collapse; }
+            table { width: 100%; font-size: 12px;  }
             th, td { border: 1px solid #333; padding: 4px; text-align: center; }
             th { background: #eee; }
           </style>
         </head>
         <body>
-          <h3 style="text-align:center; margin-bottom: 10px;">${printTitle}</h3>
           ${headerTable}
           ${tableHTML}
         </body>
@@ -460,27 +488,22 @@ const AttendanceDetaileMontReport = () => {
     XLSX.writeFile(workbook, fileName);
   };
 
-  const filteredSections = students.filter((record) => {
-    const searchLower = searchTerm.toLowerCase();
-
-    const classSection = record?.class_section?.toLowerCase() || "";
-    const classTeacher = record?.class_teacher?.toLowerCase() || "";
-    const substituteTeacher = record?.substitute_teacher?.toLowerCase() || "";
-    const attendanceMarkedBy =
-      record?.attendance_marked_by?.toLowerCase() || "";
-    const markedStatus =
-      record?.marked?.toLowerCase() === "y" ? "marked" : "not marked";
+  const filteredStudents = students.filter((student) => {
+    const search = searchTerm.toLowerCase();
 
     return (
-      classSection.includes(searchLower) ||
-      classTeacher.includes(searchLower) ||
-      substituteTeacher.includes(searchLower) ||
-      attendanceMarkedBy.includes(searchLower) ||
-      markedStatus.includes(searchLower)
+      student.rollNo?.toString().toLowerCase().includes(search) ||
+      student.name?.toLowerCase().includes(search) ||
+      student.present_days?.toString().includes(search) ||
+      student.absent_days?.toString().includes(search) ||
+      student.working_days?.toString().includes(search) ||
+      student.prev_attendance?.toString().includes(search) ||
+      student.total_attendance?.toString().includes(search) ||
+      student.total_working_days_till_month?.toString().includes(search) ||
+      student.cumulative_absent_days?.toString().includes(search)
     );
   });
 
-  const displayedSections = filteredSections.slice(currentPage * pageSize);
   return (
     <>
       <div
@@ -505,7 +528,9 @@ const AttendanceDetaileMontReport = () => {
                 />
               </div>
               <div
-                className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+                className={` relative    -top-6 h-1  mx-auto bg-red-700 ${
+                  showStudentReport ? "w-full " : "w-[98%] "
+                }`}
                 style={{
                   backgroundColor: "#C03078",
                 }}
@@ -652,8 +677,33 @@ const AttendanceDetaileMontReport = () => {
                         <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                           <div className="w-full flex flex-row justify-between mr-0 md:mr-4">
                             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                              Student Attendance Report
+                              View Students Attendance
                             </h3>
+                            <div className="bg-blue-50 border-l-2 border-r-2 px-4 text-[1em] border-pink-500 rounded-md shadow-md w-full md:w-auto">
+                              <div className="flex flex-col md:flex-row md:items-center md:gap-6  mt-1 text-blue-800 font-medium">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-blue-600">
+                                    🏫 Class:
+                                  </span>
+                                  <span>{selectedStudent?.class || "--"}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-blue-600">
+                                    🎓 Section:
+                                  </span>
+                                  <span>
+                                    {selectedStudent?.section || "--"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-blue-600">
+                                    📅 Month:
+                                  </span>
+                                  <span>{selectedMonth?.label || "--"}</span>
+                                </div>
+                              </div>
+                            </div>
+
                             <div className="w-1/2 md:w-[18%] mr-1">
                               <input
                                 type="text"
@@ -664,14 +714,14 @@ const AttendanceDetaileMontReport = () => {
                             </div>
                           </div>
 
-                          <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                          <div className="flex mb-1.5 flex-col md:flex-row gap-x-1 justify-center md:justify-end">
                             <button
                               type="button"
                               onClick={handleDownloadEXL}
-                              className="relative bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded group"
+                              className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
                             >
                               <FaFileExcel />
-                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                              <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
                                 Export to Excel
                               </div>
                             </button>
@@ -693,7 +743,7 @@ const AttendanceDetaileMontReport = () => {
                         </div>
 
                         <div
-                          className="relative w-[97%] mb-3 h-1 mx-auto"
+                          className=" w-[97%] h-1 mx-auto"
                           style={{ backgroundColor: "#C03078" }}
                         ></div>
 
@@ -732,7 +782,6 @@ const AttendanceDetaileMontReport = () => {
                                   </th>
                                 </tr>
                               </thead>
-
                               <tbody>
                                 {students
                                   .filter((student) =>
@@ -748,7 +797,7 @@ const AttendanceDetaileMontReport = () => {
                                       <td className="border p-1">
                                         {student.name}
                                       </td>
-                                      {student.attendance.map((val, idx) => (
+                                      {/* {student.attendance.map((val, idx) => (
                                         <td
                                           key={idx}
                                           className={`border p-1 ${
@@ -759,7 +808,22 @@ const AttendanceDetaileMontReport = () => {
                                         >
                                           {val}
                                         </td>
+                                      ))} */}
+                                      {/* for star in P when duplicate is true */}
+                                      {student.attendance.map((val, idx) => (
+                                        <td
+                                          key={idx}
+                                          className={`border p-1 ${
+                                            val.status === "A"
+                                              ? "text-red-600 font-bold"
+                                              : ""
+                                          }`}
+                                        >
+                                          {val.status}
+                                          {val.duplicate ? "*" : ""}
+                                        </td>
                                       ))}
+
                                       <td className="border p-1">
                                         {student.present_days}
                                       </td>
@@ -784,7 +848,6 @@ const AttendanceDetaileMontReport = () => {
                                     </tr>
                                   ))}
                               </tbody>
-
                               <tfoot className="bg-yellow-100 font-semibold">
                                 <tr>
                                   <td className="border p-1" colSpan={2}>
