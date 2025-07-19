@@ -170,7 +170,7 @@ const AttendanceDetaileMontReport = () => {
   };
   useEffect(() => {
     if (timetable?.students?.length > 0 && timetable?.date_range?.length > 0) {
-      const formattedStudents = timetable.students.map((student, idx) => {
+      const formattedStudents = timetable.students.map((student) => {
         const attendanceMap = {};
         student.daily_attendance.forEach((entry) => {
           attendanceMap[entry.date] = entry.status || "";
@@ -182,12 +182,15 @@ const AttendanceDetaileMontReport = () => {
 
         return {
           name: student.name,
-          rollNo: idx + 1,
+          rollNo: student.roll_no || "", // ✅ Use the real roll number
           attendance,
-          present: student.present_days,
-          prevAttendance: student.prev_attendance,
-          totalAttendance: student.total_attendance,
-          absent: student.absent_days,
+          present_days: student.present_days,
+          absent_days: student.absent_days,
+          working_days: student.working_days,
+          prev_attendance: student.prev_attendance,
+          total_attendance: student.total_attendance,
+          total_working_days_till_month: student.total_working_days_till_month,
+          cumulative_absent_days: student.cumulative_absent_days,
         };
       });
 
@@ -605,11 +608,19 @@ const AttendanceDetaileMontReport = () => {
                                 </th>
                               ))}
                               <th className="border p-1">Present Days</th>
+                              <th className="border p-1">Absent Days</th>
+                              <th className="border p-1">Working Days</th>
                               <th className="border p-1">Prev. Attendance</th>
                               <th className="border p-1">Total Attendance</th>
-                              <th className="border p-1">Absent Days</th>
+                              <th className="border p-1">
+                                Working Days Till Month
+                              </th>
+                              <th className="border p-1">
+                                Cumulative Absent Days
+                              </th>
                             </tr>
                           </thead>
+
                           <tbody>
                             {students
                               .filter((student) =>
@@ -636,39 +647,127 @@ const AttendanceDetaileMontReport = () => {
                                     </td>
                                   ))}
                                   <td className="border p-1">
-                                    {student.present}
-                                  </td>
-                                  <td className="border p-1">
-                                    {student.prevAttendance}
-                                  </td>
-                                  <td className="border p-1">
-                                    {student.totalAttendance}
+                                    {student.present_days}
                                   </td>
                                   <td className="border p-1 text-red-600">
-                                    {student.absent}
+                                    {student.absent_days}
+                                  </td>
+                                  <td className="border p-1">
+                                    {student.working_days}
+                                  </td>
+                                  <td className="border p-1">
+                                    {student.prev_attendance}
+                                  </td>
+                                  <td className="border p-1">
+                                    {student.total_attendance}
+                                  </td>
+                                  <td className="border p-1">
+                                    {student.total_working_days_till_month}
+                                  </td>
+                                  <td className="border p-1 text-red-600">
+                                    {student.cumulative_absent_days}
                                   </td>
                                 </tr>
                               ))}
+                          </tbody>
 
-                            {/* Optional Totals Row */}
-                            <tr className="bg-gray-200 font-semibold">
+                          <tfoot className="bg-yellow-100 font-semibold">
+                            <tr>
+                              <td className="border p-1" colSpan={2}>
+                                Present
+                              </td>
+                              {timetable?.totals?.daily_present.map(
+                                (val, i) => (
+                                  <td
+                                    key={`present-${i}`}
+                                    className="border p-1"
+                                  >
+                                    {val}
+                                  </td>
+                                )
+                              )}
+                              <td className="border p-1">
+                                {timetable.totals?.total_present_days}
+                              </td>
+                              <td className="border p-1 text-red-600">–</td>
+                              <td className="border p-1">
+                                {
+                                  timetable.totals
+                                    ?.total_working_days_for_this_month
+                                }
+                              </td>
+                              <td className="border p-1">
+                                {timetable.totals?.total_prev_attendance}
+                              </td>
+                              <td className="border p-1">
+                                {timetable.totals?.total_attendance}
+                              </td>
+                              <td className="border p-1">
+                                {
+                                  timetable.totals
+                                    ?.total_working_days_till_month
+                                }
+                              </td>
                               <td className="border p-1 text-red-600">
+                                {timetable.totals?.total_cumulative_absent_days}
+                              </td>
+                            </tr>
+
+                            <tr>
+                              <td className="border p-1" colSpan={2}>
                                 Absent
                               </td>
-                              <td className="border p-1"></td>
-                              {timetable.totals.daily_absent.map((val, i) => (
-                                <td key={i} className="border p-1 text-red-600">
+                              {timetable?.totals?.daily_absent.map((val, i) => (
+                                <td
+                                  key={`absent-${i}`}
+                                  className="border p-1 text-red-600"
+                                >
                                   {val}
                                 </td>
                               ))}
-                              <td className="border p-1">
-                                {timetable.totals.total_absent_days}
+                              <td className="border p-1 text-red-600">
+                                {timetable.totals?.total_absent_days}
                               </td>
-                              <td className="border p-1"></td>
-                              <td className="border p-1"></td>
-                              <td className="border p-1"></td>
+                              <td className="border p-1">–</td>
+                              <td className="border p-1">–</td>
+                              <td className="border p-1">–</td>
+                              <td className="border p-1">–</td>
+                              <td className="border p-1">–</td>
+                              <td className="border p-1">–</td>
                             </tr>
-                          </tbody>
+
+                            <tr>
+                              <td className="border p-1" colSpan={2}>
+                                Total
+                              </td>
+                              {timetable?.totals?.daily_total.map((val, i) => (
+                                <td
+                                  key={`total-${i}`}
+                                  className="border p-1 font-bold"
+                                >
+                                  {val}
+                                </td>
+                              ))}
+                              <td className="border p-1 font-bold">
+                                {timetable.totals?.total_present_absent_days}
+                              </td>
+                              <td className="border p-1">–</td>
+                              <td className="border p-1">–</td>
+                              <td className="border p-1 font-bold">
+                                {timetable.totals?.total_previous_attendance}
+                              </td>
+                              <td className="border p-1 font-bold">
+                                {timetable.totals?.grand_total_attendance}
+                              </td>
+                              <td className="border p-1">–</td>
+                              <td className="border p-1 font-bold text-red-600">
+                                {
+                                  timetable.totals
+                                    ?.grand_total_absent_attendance
+                                }
+                              </td>
+                            </tr>
+                          </tfoot>
                         </table>
                       </div>
                     </div>
