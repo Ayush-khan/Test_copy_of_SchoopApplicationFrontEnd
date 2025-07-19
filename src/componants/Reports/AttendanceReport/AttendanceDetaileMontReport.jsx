@@ -15,6 +15,7 @@ const AttendanceDetaileMontReport = () => {
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [selectedMonthId, setSelectedMonthId] = useState(null);
   const [students, setStudents] = useState([]);
+  const [showStudentReport, setShowStudentReport] = useState(false);
 
   const [fromDate, setFromDate] = useState(null);
   const [formattedFromDate, setFormattedFromDate] = useState("");
@@ -75,6 +76,8 @@ const AttendanceDetaileMontReport = () => {
       studentNameWithClassId.map((cls) => ({
         value: cls?.section_id,
         valueclass: cls?.class_id,
+        class: cls?.get_class?.name,
+        section: cls.name,
         label: `${cls?.get_class?.name} ${cls.name}`,
       })),
     [studentNameWithClassId]
@@ -155,10 +158,12 @@ const AttendanceDetaileMontReport = () => {
       if (reportData.length === 0) {
         toast.error("No detailed monthly attendance report data found.");
         setTimetable([]);
+        setShowStudentReport(false); // Don't show report view if empty
       } else {
         setTimetable(reportData);
 
         setPageCount(Math.ceil(reportData.length / pageSize));
+        setShowStudentReport(true); // ✅ Show report view
       }
     } catch (error) {
       console.error("API Error:", error?.response?.data || error.message);
@@ -198,55 +203,144 @@ const AttendanceDetaileMontReport = () => {
     }
   }, [timetable]);
 
-  const handlePrint = () => {
-    const printTitle = `Attendance Marking Status Report for ${selectedStudent?.label} on ${formattedFromDate}`;
-    const printContent = `
-    <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
-         <h5 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
-    <div id="tableHeading" class="text-center w-3/4">
-      <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-2">
-        <thead>
-          <tr class="bg-gray-100">
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class Teacher</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Substitute Teacher</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Attendance Marked By</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Marked Attendance</th>
-            
-          </tr>
-        </thead>
-        <tbody>
-          ${displayedSections
+  const generateAttendanceTableHTML = () => {
+    const thead = `
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="border p-1">Roll No</th>
+          <th class="border p-1">Student Name</th>
+          ${timetable.date_range
             .map(
-              (subject, index) => `
-              <tr class="text-sm">
-                <td class="px-2 text-center py-2 border border-black">${
-                  index + 1
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.class_section || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.class_teacher || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.substitute_teacher || " "
-                }</td>
-               <td class="px-2 text-center py-2 border border-black">${
-                 subject?.attendance_marked_by || " "
-               }</td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.marked || " "
-                  }</td>
-                   
-              </tr>`
+              (date) =>
+                `<th class="border p-1">${date.formatted_date}<br/>${date.day}</th>`
             )
             .join("")}
-        </tbody>
+          <th class="border p-1">Present Days</th>
+          <th class="border p-1">Absent Days</th>
+          <th class="border p-1">Working Days</th>
+          <th class="border p-1">Prev. Attendance</th>
+          <th class="border p-1">Total Attendance</th>
+          <th class="border p-1">Working Days Till Month</th>
+          <th class="border p-1">Cumulative Absent Days</th>
+        </tr>
+      </thead>`;
+
+    const tbody = `
+      <tbody>
+        ${students
+          .filter((s) =>
+            s.name.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+          .map(
+            (student) => `
+            <tr>
+              <td class="border p-1">${student.rollNo}</td>
+              <td class="border p-1">${student.name}</td>
+              ${student.attendance
+                .map(
+                  (val) =>
+                    `<td class="border p-1 ${
+                      val === "A" ? "text-red-600 font-bold" : ""
+                    }">${val}</td>`
+                )
+                .join("")}
+              <td class="border p-1">${student.present_days}</td>
+              <td class="border p-1 text-red-600">${student.absent_days}</td>
+              <td class="border p-1">${student.working_days}</td>
+              <td class="border p-1">${student.prev_attendance}</td>
+              <td class="border p-1">${student.total_attendance}</td>
+              <td class="border p-1">${
+                student.total_working_days_till_month
+              }</td>
+              <td class="border p-1 text-red-600">${
+                student.cumulative_absent_days
+              }</td>
+            </tr>`
+          )
+          .join("")}
+      </tbody>`;
+
+    const tfoot = `
+      <tfoot class="bg-yellow-100 font-semibold">
+        <tr>
+          <td class="border p-1" colspan="2">Present</td>
+          ${timetable?.totals?.daily_present
+            .map((val) => `<td class="border p-1">${val}</td>`)
+            .join("")}
+          <td class="border p-1">${timetable.totals?.total_present_days}</td>
+          <td class="border p-1 text-red-600">–</td>
+          <td class="border p-1">${
+            timetable.totals?.total_working_days_for_this_month
+          }</td>
+          <td class="border p-1">${timetable.totals?.total_prev_attendance}</td>
+          <td class="border p-1">${timetable.totals?.total_attendance}</td>
+          <td class="border p-1">${
+            timetable.totals?.total_working_days_till_month
+          }</td>
+          <td class="border p-1 text-red-600">${
+            timetable.totals?.total_cumulative_absent_days
+          }</td>
+        </tr>
+        <tr>
+          <td class="border p-1" colspan="2">Absent</td>
+          ${timetable?.totals?.daily_absent
+            .map((val) => `<td class="border p-1 text-red-600">${val}</td>`)
+            .join("")}
+          <td class="border p-1 text-red-600">${
+            timetable.totals?.total_absent_days
+          }</td>
+          <td class="border p-1">–</td>
+          <td class="border p-1">–</td>
+          <td class="border p-1">–</td>
+          <td class="border p-1">–</td>
+          <td class="border p-1">–</td>
+          <td class="border p-1">–</td>
+        </tr>
+        <tr>
+          <td class="border p-1" colspan="2">Total</td>
+          ${timetable?.totals?.daily_total
+            .map((val) => `<td class="border p-1 font-bold">${val}</td>`)
+            .join("")}
+          <td class="border p-1 font-bold">${
+            timetable.totals?.total_present_absent_days
+          }</td>
+          <td class="border p-1">–</td>
+          <td class="border p-1">–</td>
+          <td class="border p-1 font-bold">${
+            timetable.totals?.total_previous_attendance
+          }</td>
+          <td class="border p-1 font-bold">${
+            timetable.totals?.grand_total_attendance
+          }</td>
+          <td class="border p-1">–</td>
+          <td class="border p-1 font-bold text-red-600">${
+            timetable.totals?.grand_total_absent_attendance
+          }</td>
+        </tr>
+      </tfoot>`;
+
+    return `<table class="table-auto border border-black text-xs text-center w-full">${thead}${tbody}${tfoot}</table>`;
+  };
+
+  const handlePrint = () => {
+    const printTitle = `Detailed monthly attendance report of ${selectedStudent?.label} (${selectedMonth?.label})`;
+    const tableHTML = generateAttendanceTableHTML();
+
+    const headerTable = `
+      <table style="width: 100%; margin-bottom: 10px; border-collapse: collapse; font-size: 14px;">
+        <tr>
+          <td style="border: 1px solid #ccc; padding: 6px; text-align: center;"><strong>Class:</strong> ${
+            selectedStudent?.class || ""
+          }</td>
+          <td style="border: 1px solid #ccc; padding: 6px; text-align: center;"><strong>Division:</strong> ${
+            selectedStudent?.section || ""
+          }</td>
+          <td style="border: 1px solid #ccc; padding: 6px; text-align: center;"><strong>Month:</strong> ${
+            selectedMonth?.label
+          }</td>
+        </tr>
       </table>
-    </div>
-  </div>`;
+    `;
 
     const printWindow = window.open("", "_blank", "width=1000,height=800");
 
@@ -255,119 +349,114 @@ const AttendanceDetaileMontReport = () => {
         <head>
           <title>${printTitle}</title>
           <style>
-          @page { margin: 0; padding:0; box-sizing:border-box;   ;
-    }
-          body { margin: 0; padding: 0; box-sizing:border-box; font-family: Arial, sans-serif; }
-          #tableHeading {
-      width: 100%;
-      margin: auto; /* Centers the div horizontally */
-      display: flex;
-      justify-content: center;
-    }
-
-    #tableHeading table {
-      width: 100%; /* Ensures the table fills its container */
-      margin:auto;
-      padding:0 10em 0 10em;
-    }
-
-    #tableContainer {
-      display: flex;
-      justify-content: center; /* Centers the table horizontally */
-      width: 80%;
-
-    }
-
-    h5 {
-      width: 100%;
-      text-align: center;
-      margin: 0;  /* Remove any default margins */
-      padding: 5px 0;  /* Adjust padding if needed */
-    }
-
-    #tableMain {
-    width:100%;
-    margin:auto;
-    box-sizing:border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start; /* Prevent unnecessary space */
-    padding:0 10em 0 10em;
-    }
-
-    h5 + * { /* Targets the element after h5 */
-      margin-top: 0; /* Ensures no extra space after h5 */
-    }
-
-          table { border-spacing: 0; width: 70%; margin: auto;   }
-          th { font-size: 0.8em; background-color: #f9f9f9; }
-          td { font-size: 12px; }
-          th, td { border: 1px solid gray; padding: 8px; text-align: center; }
-          .student-photo {
-            width: 30px !important;
-            height: 30px !important;
-            object-fit: cover;
-            border-radius: 50%;
-          }
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            table { width: 100%; font-size: 12px; border-collapse: collapse; }
+            th, td { border: 1px solid #333; padding: 4px; text-align: center; }
+            th { background: #eee; }
           </style>
         </head>
-           <body>
-          <div id="printContainer">
-              ${printContent}
-          </div>
-      </body>
+        <body>
+          <h3 style="text-align:center; margin-bottom: 10px;">${printTitle}</h3>
+          ${headerTable}
+          ${tableHTML}
+        </body>
       </html>
     `);
 
     printWindow.document.close();
-
-    // ✅ Ensure content is fully loaded before printing
-    printWindow.onload = function () {
+    printWindow.onload = () => {
       printWindow.focus();
       printWindow.print();
-      printWindow.close(); // Optional: close after printing
+      printWindow.close();
     };
   };
 
+  const generateAttendanceExcelData = () => {
+    const headerRow = [
+      "Roll No",
+      "Student Name",
+      ...timetable.date_range.map((d) => `${d.formatted_date} (${d.day})`),
+      "Present Days",
+      "Absent Days",
+      "Working Days",
+      "Prev. Attendance",
+      "Total Attendance",
+      "Working Days Till Month",
+      "Cumulative Absent Days",
+    ];
+
+    const dataRows = students
+      .filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      .map((student) => [
+        student.rollNo,
+        student.name,
+        ...student.attendance,
+        student.present_days,
+        student.absent_days,
+        student.working_days,
+        student.prev_attendance,
+        student.total_attendance,
+        student.total_working_days_till_month,
+        student.cumulative_absent_days,
+      ]);
+
+    const footerRows = [
+      [
+        "Present",
+        "",
+        ...timetable.totals?.daily_present,
+        timetable.totals?.total_present_days,
+        "–",
+        timetable.totals?.total_working_days_for_this_month,
+        timetable.totals?.total_prev_attendance,
+        timetable.totals?.total_attendance,
+        timetable.totals?.total_working_days_till_month,
+        timetable.totals?.total_cumulative_absent_days,
+      ],
+      [
+        "Absent",
+        "",
+        ...timetable.totals?.daily_absent,
+        timetable.totals?.total_absent_days,
+        "–",
+        "–",
+        "–",
+        "–",
+        "–",
+        "–",
+      ],
+      [
+        "Total",
+        "",
+        ...timetable.totals?.daily_total,
+        timetable.totals?.total_present_absent_days,
+        "–",
+        "–",
+        timetable.totals?.total_previous_attendance,
+        timetable.totals?.grand_total_attendance,
+        "–",
+        timetable.totals?.grand_total_absent_attendance,
+      ],
+    ];
+
+    return [headerRow, ...dataRows, ...footerRows];
+  };
+
   const handleDownloadEXL = () => {
-    if (!displayedSections || displayedSections.length === 0) {
-      toast.error("No data available to download the Excel sheet.");
+    const data = generateAttendanceExcelData();
+
+    if (data.length <= 1) {
+      toast.error("No attendance data available.");
       return;
     }
 
-    // Define headers matching the print table
-    const headers = [
-      "Sr No.",
-      "Class",
-      "Class Teacher",
-      "Substitute Teacher",
-      "Attendance Marked By",
-      "Marked Attendance",
-    ];
-    // Convert displayedSections data to array format for Excel
-    const data = displayedSections.map((student, index) => [
-      index + 1,
-      student?.class_section || " ",
-      student?.class_teacher || " ",
-      student?.substitute_teacher || " ",
-      student?.attendance_marked_by || " ",
-      student?.marked || " ",
-    ]);
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    worksheet["!cols"] = data[0].map(() => ({ wch: 20 }));
 
-    // Create a worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
-
-    // Auto-adjust column width
-    const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
-    worksheet["!cols"] = columnWidths;
-
-    // Create a workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance Report");
 
-    // Generate and download the Excel file
-    const fileName = `Attendance Marking Status Report for ${selectedStudent?.label} on ${formattedFromDate}.xlsx`;
+    const fileName = `Detailed monthly attendance report of ${selectedStudent?.label}(${selectedMonth?.label}).xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -394,385 +483,433 @@ const AttendanceDetaileMontReport = () => {
   const displayedSections = filteredSections.slice(currentPage * pageSize);
   return (
     <>
-      <div className="w-full md:w-[85%]  mx-auto p-4 ">
+      <div
+        className={` transition-all duration-500 w-[85%]  mx-auto p-4 ${
+          showStudentReport ? "w-full " : "w-[85%] "
+        }`}
+        // className="w-full md:w-[85%]  mx-auto p-4 "
+      >
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
-          <div className=" card-header mb-4 flex justify-between items-center ">
-            <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              Detailed Monthly Attendance Report
-            </h5>
-            <RxCross1
-              className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-              onClick={() => {
-                navigate("/dashboard");
-              }}
-            />
-          </div>
-          <div
-            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
-            style={{
-              backgroundColor: "#C03078",
-            }}
-          ></div>
-
+        <div className="card pb-4  rounded-md ">
+          {!showStudentReport && (
+            <>
+              <div className=" card-header mb-4 flex justify-between items-center ">
+                <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+                  Detailed Monthly Attendance Report
+                </h5>
+                <RxCross1
+                  className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                  onClick={() => {
+                    navigate("/dashboard");
+                  }}
+                />
+              </div>
+              <div
+                className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+                style={{
+                  backgroundColor: "#C03078",
+                }}
+              ></div>
+            </>
+          )}
           <>
-            <div className=" w-full md:w-[85%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
-              <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full md:w-[98%]  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                  {/* Class Dropdown */}
-                  <div className="w-full  md:w-[40%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                    <label
-                      className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
-                      htmlFor="studentSelect"
-                    >
-                      Select Class <span className="text-red-500">*</span>
-                      {/* Staff */}
-                    </label>
-                    <div className="w-full md:w-[55%]">
-                      <Select
-                        menuPortalTarget={document.body}
-                        menuPosition="fixed"
-                        id="studentSelect"
-                        value={selectedStudent}
-                        onChange={handleStudentSelect}
-                        options={studentOptions}
-                        placeholder={loadingExams ? "Loading..." : "Select"}
-                        isSearchable
-                        isClearable
-                        className="text-sm"
-                        isDisabled={loadingExams}
-                        styles={{
-                          control: (provided) => ({
-                            ...provided,
-                            fontSize: "1em", // Adjust font size for selected value
-                            minHeight: "30px", // Reduce height
-                          }),
-                          menu: (provided) => ({
-                            ...provided,
-                            fontSize: "1em", // Adjust font size for dropdown options
-                          }),
-                          option: (provided) => ({
-                            ...provided,
-                            fontSize: ".9em", // Adjust font size for each option
-                          }),
-                        }}
-                      />
-                      {studentError && (
-                        <div className="h-8 relative ml-1 text-danger text-xs">
-                          {studentError}
+            {!showStudentReport && (
+              <>
+                <div className=" w-full md:w-[85%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+                  <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
+                    <div className="w-full md:w-[98%]  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                      {/* Class Dropdown */}
+                      <div className="w-full  md:w-[40%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                        <label
+                          className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
+                          htmlFor="studentSelect"
+                        >
+                          Select Class <span className="text-red-500">*</span>
+                          {/* Staff */}
+                        </label>
+                        <div className="w-full md:w-[55%]">
+                          <Select
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                            id="studentSelect"
+                            value={selectedStudent}
+                            onChange={handleStudentSelect}
+                            options={studentOptions}
+                            placeholder={loadingExams ? "Loading..." : "Select"}
+                            isSearchable
+                            isClearable
+                            className="text-sm"
+                            isDisabled={loadingExams}
+                            styles={{
+                              control: (provided) => ({
+                                ...provided,
+                                fontSize: "1em", // Adjust font size for selected value
+                                minHeight: "30px", // Reduce height
+                              }),
+                              menu: (provided) => ({
+                                ...provided,
+                                fontSize: "1em", // Adjust font size for dropdown options
+                              }),
+                              option: (provided) => ({
+                                ...provided,
+                                fontSize: ".9em", // Adjust font size for each option
+                              }),
+                            }}
+                          />
+                          {studentError && (
+                            <div className="h-8 relative ml-1 text-danger text-xs">
+                              {studentError}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
+                      </div>
 
-                  {/* From Date Dropdown */}
-                  <div className="w-full   md:w-[35%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
-                    <label
-                      className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
-                      htmlFor="fromDate"
-                    >
-                      Month <span className="text-red-500">*</span>
-                    </label>
-                    <div className="w-full md:w-[85%]">
-                      <Select
-                        menuPortalTarget={document.body}
-                        menuPosition="fixed"
-                        id="monthSelect"
-                        value={selectedMonth}
-                        onChange={handleMonthSelect}
-                        options={monthOptions}
-                        placeholder="Select"
-                        isSearchable
-                        isClearable
-                        className="text-sm"
-                        isDisabled={loadingExams}
-                      />
+                      {/* From Date Dropdown */}
+                      <div className="w-full   md:w-[35%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
+                        <label
+                          className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
+                          htmlFor="fromDate"
+                        >
+                          Month <span className="text-red-500">*</span>
+                        </label>
+                        <div className="w-full md:w-[85%]">
+                          <Select
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                            id="monthSelect"
+                            value={selectedMonth}
+                            onChange={handleMonthSelect}
+                            options={monthOptions}
+                            placeholder="Select"
+                            isSearchable
+                            isClearable
+                            className="text-sm"
+                            isDisabled={loadingExams}
+                          />
 
-                      {dateError && (
-                        <div className="h-8 relative ml-1 text-danger text-xs">
-                          {dateError}
+                          {dateError && (
+                            <div className="h-8 relative ml-1 text-danger text-xs">
+                              {dateError}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
+                      </div>
 
-                  {/* Browse Button */}
-                  <div className="mt-1">
-                    <button
-                      type="search"
-                      onClick={handleSearch}
-                      style={{ backgroundColor: "#2196F3" }}
-                      className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                        loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                      disabled={loadingForSearch}
-                    >
-                      {loadingForSearch ? (
-                        <span className="flex items-center">
-                          <svg
-                            className="animate-spin h-4 w-4 mr-2 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                            ></path>
-                          </svg>
-                          Browsing...
-                        </span>
-                      ) : (
-                        "Browse"
-                      )}
-                    </button>
+                      {/* Browse Button */}
+                      <div className="mt-1">
+                        <button
+                          type="search"
+                          onClick={handleSearch}
+                          style={{ backgroundColor: "#2196F3" }}
+                          className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                            loadingForSearch
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                          disabled={loadingForSearch}
+                        >
+                          {loadingForSearch ? (
+                            <span className="flex items-center">
+                              <svg
+                                className="animate-spin h-4 w-4 mr-2 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                ></path>
+                              </svg>
+                              Browsing...
+                            </span>
+                          ) : (
+                            "Browse"
+                          )}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {students.length > 0 && (
+              </>
+            )}
+            {showStudentReport && (
               <>
-                <div className="w-full mt-4">
-                  <div className="card mx-auto shadow-lg">
-                    {/* Header Section */}
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                      <div className="w-full flex flex-row justify-between mr-0 md:mr-4">
-                        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          Student Attendance Report
-                        </h3>
-                        <div className="w-1/2 md:w-[18%] mr-1">
-                          <input
-                            type="text"
-                            className="form-control border px-2 py-1 rounded"
-                            placeholder="Search"
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                          />
+                {students.length > 0 && (
+                  <>
+                    <div className="   w-full  mx-auto transition-all duration-300">
+                      <div className="card mx-auto shadow-lg">
+                        {/* Header Section */}
+                        <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                          <div className="w-full flex flex-row justify-between mr-0 md:mr-4">
+                            <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                              Student Attendance Report
+                            </h3>
+                            <div className="w-1/2 md:w-[18%] mr-1">
+                              <input
+                                type="text"
+                                className="form-control border px-2 py-1 rounded"
+                                placeholder="Search"
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                            <button
+                              type="button"
+                              onClick={handleDownloadEXL}
+                              className="relative bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded group"
+                            >
+                              <FaFileExcel />
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                                Export to Excel
+                              </div>
+                            </button>
+
+                            <button
+                              onClick={handlePrint}
+                              className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                            >
+                              <FiPrinter />
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                                Print
+                              </div>
+                            </button>
+                            <RxCross1
+                              className="text-xl text-red-600 cursor-pointer hover:bg-red-100 rounded "
+                              onClick={() => setShowStudentReport(false)} // ✅ Reset state
+                            />
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
-                        <button
-                          type="button"
-                          onClick={handleDownloadEXL}
-                          className="relative bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded group"
-                        >
-                          <FaFileExcel />
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
-                            Export to Excel
-                          </div>
-                        </button>
+                        <div
+                          className="relative w-[97%] mb-3 h-1 mx-auto"
+                          style={{ backgroundColor: "#C03078" }}
+                        ></div>
 
-                        <button
-                          onClick={handlePrint}
-                          className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
-                        >
-                          <FiPrinter />
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
-                            Print
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div
-                      className="relative w-[97%] mb-3 h-1 mx-auto"
-                      style={{ backgroundColor: "#C03078" }}
-                    ></div>
-
-                    {/* Table */}
-                    <div className="card-body w-full">
-                      <div className="h-[600px] overflow-x-auto overflow-y-scroll border">
-                        <table className="min-w-[1600px] table-auto text-sm text-center border border-gray-300">
-                          <thead className="bg-gray-100 sticky top-0 z-10">
-                            <tr>
-                              <th className="border p-1">Roll No</th>
-                              <th className="border p-1">Student Name</th>
-                              {timetable.date_range.map((date, i) => (
-                                <th
-                                  key={i}
-                                  className="border p-1 whitespace-nowrap"
-                                >
-                                  {date.formatted_date}
-                                  <br />
-                                  {date.day}
-                                </th>
-                              ))}
-                              <th className="border p-1">Present Days</th>
-                              <th className="border p-1">Absent Days</th>
-                              <th className="border p-1">Working Days</th>
-                              <th className="border p-1">Prev. Attendance</th>
-                              <th className="border p-1">Total Attendance</th>
-                              <th className="border p-1">
-                                Working Days Till Month
-                              </th>
-                              <th className="border p-1">
-                                Cumulative Absent Days
-                              </th>
-                            </tr>
-                          </thead>
-
-                          <tbody>
-                            {students
-                              .filter((student) =>
-                                student.name
-                                  .toLowerCase()
-                                  .includes(searchTerm.toLowerCase())
-                              )
-                              .map((student, i) => (
-                                <tr key={i} className="hover:bg-gray-50">
-                                  <td className="border p-1">
-                                    {student.rollNo}
-                                  </td>
-                                  <td className="border p-1">{student.name}</td>
-                                  {student.attendance.map((val, idx) => (
-                                    <td
-                                      key={idx}
-                                      className={`border p-1 ${
-                                        val === "A"
-                                          ? "text-red-600 font-bold"
-                                          : ""
-                                      }`}
+                        {/* Table */}
+                        <div className="card-body w-full">
+                          <div className="h-[600px] overflow-x-auto overflow-y-scroll border">
+                            <table className="min-w-[1600px] table-auto text-sm text-center border border-gray-300">
+                              <thead className="bg-gray-200 sticky top-0 z-5">
+                                <tr>
+                                  <th className="border p-1">Roll No</th>
+                                  <th className="border p-1">Student Name</th>
+                                  {timetable.date_range.map((date, i) => (
+                                    <th
+                                      key={i}
+                                      className="border p-1 whitespace-nowrap"
                                     >
-                                      {val}
-                                    </td>
+                                      {date.formatted_date}
+                                      <br />
+                                      {date.day}
+                                    </th>
                                   ))}
+                                  <th className="border p-1">Present Days</th>
+                                  <th className="border p-1">Absent Days</th>
+                                  <th className="border p-1">Working Days</th>
+                                  <th className="border p-1">
+                                    Prev. Attendance
+                                  </th>
+                                  <th className="border p-1">
+                                    Total Attendance
+                                  </th>
+                                  <th className="border p-1">
+                                    Working Days Till Month
+                                  </th>
+                                  <th className="border p-1">
+                                    Cumulative Absent Days
+                                  </th>
+                                </tr>
+                              </thead>
+
+                              <tbody>
+                                {students
+                                  .filter((student) =>
+                                    student.name
+                                      .toLowerCase()
+                                      .includes(searchTerm.toLowerCase())
+                                  )
+                                  .map((student, i) => (
+                                    <tr key={i} className="hover:bg-gray-50">
+                                      <td className="border p-1">
+                                        {student.rollNo}
+                                      </td>
+                                      <td className="border p-1">
+                                        {student.name}
+                                      </td>
+                                      {student.attendance.map((val, idx) => (
+                                        <td
+                                          key={idx}
+                                          className={`border p-1 ${
+                                            val === "A"
+                                              ? "text-red-600 font-bold"
+                                              : ""
+                                          }`}
+                                        >
+                                          {val}
+                                        </td>
+                                      ))}
+                                      <td className="border p-1">
+                                        {student.present_days}
+                                      </td>
+                                      <td className="border p-1 text-red-600">
+                                        {student.absent_days}
+                                      </td>
+                                      <td className="border p-1">
+                                        {student.working_days}
+                                      </td>
+                                      <td className="border p-1">
+                                        {student.prev_attendance}
+                                      </td>
+                                      <td className="border p-1">
+                                        {student.total_attendance}
+                                      </td>
+                                      <td className="border p-1">
+                                        {student.total_working_days_till_month}
+                                      </td>
+                                      <td className="border p-1 text-red-600">
+                                        {student.cumulative_absent_days}
+                                      </td>
+                                    </tr>
+                                  ))}
+                              </tbody>
+
+                              <tfoot className="bg-yellow-100 font-semibold">
+                                <tr>
+                                  <td className="border p-1" colSpan={2}>
+                                    Present
+                                  </td>
+                                  {timetable?.totals?.daily_present.map(
+                                    (val, i) => (
+                                      <td
+                                        key={`present-${i}`}
+                                        className="border p-1"
+                                      >
+                                        {val}
+                                      </td>
+                                    )
+                                  )}
                                   <td className="border p-1">
-                                    {student.present_days}
+                                    {timetable.totals?.total_present_days}
+                                  </td>
+                                  <td className="border p-1 text-red-600">–</td>
+                                  <td className="border p-1">
+                                    {
+                                      timetable.totals
+                                        ?.total_working_days_for_this_month
+                                    }
+                                  </td>
+                                  <td className="border p-1">
+                                    {timetable.totals?.total_prev_attendance}
+                                  </td>
+                                  <td className="border p-1">
+                                    {timetable.totals?.total_attendance}
+                                  </td>
+                                  <td className="border p-1">
+                                    {
+                                      timetable.totals
+                                        ?.total_working_days_till_month
+                                    }
                                   </td>
                                   <td className="border p-1 text-red-600">
-                                    {student.absent_days}
-                                  </td>
-                                  <td className="border p-1">
-                                    {student.working_days}
-                                  </td>
-                                  <td className="border p-1">
-                                    {student.prev_attendance}
-                                  </td>
-                                  <td className="border p-1">
-                                    {student.total_attendance}
-                                  </td>
-                                  <td className="border p-1">
-                                    {student.total_working_days_till_month}
-                                  </td>
-                                  <td className="border p-1 text-red-600">
-                                    {student.cumulative_absent_days}
+                                    {
+                                      timetable.totals
+                                        ?.total_cumulative_absent_days
+                                    }
                                   </td>
                                 </tr>
-                              ))}
-                          </tbody>
 
-                          <tfoot className="bg-yellow-100 font-semibold">
-                            <tr>
-                              <td className="border p-1" colSpan={2}>
-                                Present
-                              </td>
-                              {timetable?.totals?.daily_present.map(
-                                (val, i) => (
-                                  <td
-                                    key={`present-${i}`}
-                                    className="border p-1"
-                                  >
-                                    {val}
+                                <tr>
+                                  <td className="border p-1" colSpan={2}>
+                                    Absent
                                   </td>
-                                )
-                              )}
-                              <td className="border p-1">
-                                {timetable.totals?.total_present_days}
-                              </td>
-                              <td className="border p-1 text-red-600">–</td>
-                              <td className="border p-1">
-                                {
-                                  timetable.totals
-                                    ?.total_working_days_for_this_month
-                                }
-                              </td>
-                              <td className="border p-1">
-                                {timetable.totals?.total_prev_attendance}
-                              </td>
-                              <td className="border p-1">
-                                {timetable.totals?.total_attendance}
-                              </td>
-                              <td className="border p-1">
-                                {
-                                  timetable.totals
-                                    ?.total_working_days_till_month
-                                }
-                              </td>
-                              <td className="border p-1 text-red-600">
-                                {timetable.totals?.total_cumulative_absent_days}
-                              </td>
-                            </tr>
+                                  {timetable?.totals?.daily_absent.map(
+                                    (val, i) => (
+                                      <td
+                                        key={`absent-${i}`}
+                                        className="border p-1 text-red-600"
+                                      >
+                                        {val}
+                                      </td>
+                                    )
+                                  )}
+                                  <td className="border p-1 text-red-600">
+                                    {timetable.totals?.total_absent_days}
+                                  </td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1">–</td>
+                                </tr>
 
-                            <tr>
-                              <td className="border p-1" colSpan={2}>
-                                Absent
-                              </td>
-                              {timetable?.totals?.daily_absent.map((val, i) => (
-                                <td
-                                  key={`absent-${i}`}
-                                  className="border p-1 text-red-600"
-                                >
-                                  {val}
-                                </td>
-                              ))}
-                              <td className="border p-1 text-red-600">
-                                {timetable.totals?.total_absent_days}
-                              </td>
-                              <td className="border p-1">–</td>
-                              <td className="border p-1">–</td>
-                              <td className="border p-1">–</td>
-                              <td className="border p-1">–</td>
-                              <td className="border p-1">–</td>
-                              <td className="border p-1">–</td>
-                            </tr>
-
-                            <tr>
-                              <td className="border p-1" colSpan={2}>
-                                Total
-                              </td>
-                              {timetable?.totals?.daily_total.map((val, i) => (
-                                <td
-                                  key={`total-${i}`}
-                                  className="border p-1 font-bold"
-                                >
-                                  {val}
-                                </td>
-                              ))}
-                              <td className="border p-1 font-bold">
-                                {timetable.totals?.total_present_absent_days}
-                              </td>
-                              <td className="border p-1">–</td>
-                              <td className="border p-1">–</td>
-                              <td className="border p-1 font-bold">
-                                {timetable.totals?.total_previous_attendance}
-                              </td>
-                              <td className="border p-1 font-bold">
-                                {timetable.totals?.grand_total_attendance}
-                              </td>
-                              <td className="border p-1">–</td>
-                              <td className="border p-1 font-bold text-red-600">
-                                {
-                                  timetable.totals
-                                    ?.grand_total_absent_attendance
-                                }
-                              </td>
-                            </tr>
-                          </tfoot>
-                        </table>
+                                <tr>
+                                  <td className="border p-1" colSpan={2}>
+                                    Total
+                                  </td>
+                                  {timetable?.totals?.daily_total.map(
+                                    (val, i) => (
+                                      <td
+                                        key={`total-${i}`}
+                                        className="border p-1 font-bold"
+                                      >
+                                        {val}
+                                      </td>
+                                    )
+                                  )}
+                                  <td className="border p-1 font-bold">
+                                    {
+                                      timetable.totals
+                                        ?.total_present_absent_days
+                                    }
+                                  </td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1 font-bold">
+                                    {
+                                      timetable.totals
+                                        ?.total_previous_attendance
+                                    }
+                                  </td>
+                                  <td className="border p-1 font-bold">
+                                    {timetable.totals?.grand_total_attendance}
+                                  </td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1 font-bold text-red-600">
+                                    {
+                                      timetable.totals
+                                        ?.grand_total_absent_attendance
+                                    }
+                                  </td>
+                                </tr>
+                              </tfoot>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-[10%] mt-2 mx-auto">
+                        <button
+                          onClick={() => setShowStudentReport(false)} // ✅ Reset state
+                          className="relative  bg-yellow-400 hover:bg-yellow-600 text-white px-3 py-1 rounded group flex items-center font-bold"
+                        >
+                          Back
+                        </button>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </>
             )}
           </>
