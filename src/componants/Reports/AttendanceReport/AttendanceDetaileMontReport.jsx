@@ -14,6 +14,7 @@ const AttendanceDetaileMontReport = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [selectedMonthId, setSelectedMonthId] = useState(null);
+  const [students, setStudents] = useState([]);
 
   const [fromDate, setFromDate] = useState(null);
   const [formattedFromDate, setFormattedFromDate] = useState("");
@@ -79,6 +80,13 @@ const AttendanceDetaileMontReport = () => {
     [studentNameWithClassId]
   );
 
+  // Get the year from localStorage and extract just the year
+  const academicYrFrom = localStorage.getItem("academic_yr_from"); // e.g. "2025-03-31"
+  const academicYear = academicYrFrom
+    ? new Date(academicYrFrom).getFullYear()
+    : new Date().getFullYear();
+
+  // Create the dropdown options with format like "5-2025"
   const monthOptions = [
     { value: "4", label: "April" },
     { value: "5", label: "May" },
@@ -92,7 +100,11 @@ const AttendanceDetaileMontReport = () => {
     { value: "1", label: "January" },
     { value: "2", label: "February" },
     { value: "3", label: "March" },
-  ];
+  ].map((month) => ({
+    value: `${month.value}-${academicYear}`,
+    label: month.label,
+  }));
+
   // Handle search and fetch parent information
 
   const handleSearch = async () => {
@@ -114,7 +126,7 @@ const AttendanceDetaileMontReport = () => {
 
     console.log("Calling API with:", {
       section: selectedStudentId,
-      date: fromDate,
+      month_year: selectedMonthId,
     });
 
     setSearchTerm("");
@@ -125,25 +137,27 @@ const AttendanceDetaileMontReport = () => {
       const token = localStorage.getItem("authToken");
 
       const response = await axios.get(
-        `${API_URL}/api/get_attendancemarkingstatus`,
+        `${API_URL}/api/get_studentdailyattendancemonthwise`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            section: selectedStudentId, // 'PrePrimary' or 'all'
-            date: fromDate, // e.g. '2025-07-01'
+            class_id: selectedStudent.valueclass,
+            section_id: selectedStudentId, // 'PrePrimary' or 'all'
+            month_year: selectedMonthId, // e.g. '2025-07-01'
           },
         }
       );
 
-      const reportData = response?.data?.report ?? [];
+      const reportData = response?.data?.data ?? [];
 
       if (reportData.length === 0) {
-        toast.error("No attendance marking data found.");
+        toast.error("No detailed monthly attendance report data found.");
         setTimetable([]);
       } else {
         setTimetable(reportData);
+
         setPageCount(Math.ceil(reportData.length / pageSize));
       }
     } catch (error) {
@@ -154,6 +168,32 @@ const AttendanceDetaileMontReport = () => {
       setLoadingForSearch(false);
     }
   };
+  useEffect(() => {
+    if (timetable?.students?.length > 0 && timetable?.date_range?.length > 0) {
+      const formattedStudents = timetable.students.map((student, idx) => {
+        const attendanceMap = {};
+        student.daily_attendance.forEach((entry) => {
+          attendanceMap[entry.date] = entry.status || "";
+        });
+
+        const attendance = timetable.date_range.map((dateObj) => {
+          return attendanceMap[dateObj.date] || "";
+        });
+
+        return {
+          name: student.name,
+          rollNo: idx + 1,
+          attendance,
+          present: student.present_days,
+          prevAttendance: student.prev_attendance,
+          totalAttendance: student.total_attendance,
+          absent: student.absent_days,
+        };
+      });
+
+      setStudents(formattedStudents);
+    }
+  }, [timetable]);
 
   const handlePrint = () => {
     const printTitle = `Attendance Marking Status Report for ${selectedStudent?.label} on ${formattedFromDate}`;
@@ -328,7 +368,7 @@ const AttendanceDetaileMontReport = () => {
     XLSX.writeFile(workbook, fileName);
   };
 
-  const filteredSections = timetable.filter((record) => {
+  const filteredSections = students.filter((record) => {
     const searchLower = searchTerm.toLowerCase();
 
     const classSection = record?.class_section?.toLowerCase() || "";
@@ -497,10 +537,11 @@ const AttendanceDetaileMontReport = () => {
               </div>
             </div>
 
-            {timetable.length > 0 && (
+            {students.length > 0 && (
               <>
                 <div className="w-full mt-4">
                   <div className="card mx-auto shadow-lg">
+                    {/* Header Section */}
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full flex flex-row justify-between mr-0 md:mr-4">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
@@ -545,6 +586,7 @@ const AttendanceDetaileMontReport = () => {
                       style={{ backgroundColor: "#C03078" }}
                     ></div>
 
+                    {/* Table */}
                     <div className="card-body w-full">
                       <div className="h-[600px] overflow-x-auto overflow-y-scroll border">
                         <table className="min-w-[1600px] table-auto text-sm text-center border border-gray-300">
@@ -552,10 +594,14 @@ const AttendanceDetaileMontReport = () => {
                             <tr>
                               <th className="border p-1">Roll No</th>
                               <th className="border p-1">Student Name</th>
-                              {/* Example dates loop (replace with dynamic generation) */}
-                              {[...Array(30)].map((_, i) => (
-                                <th key={i} className="border p-1">
-                                  {`Day ${i + 1}`}
+                              {timetable.date_range.map((date, i) => (
+                                <th
+                                  key={i}
+                                  className="border p-1 whitespace-nowrap"
+                                >
+                                  {date.formatted_date}
+                                  <br />
+                                  {date.day}
                                 </th>
                               ))}
                               <th className="border p-1">Present Days</th>
@@ -565,33 +611,63 @@ const AttendanceDetaileMontReport = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {/* Replace with actual mapped student data */}
-                            {students.map((student, i) => (
-                              <tr key={i} className="hover:bg-gray-50">
-                                <td className="border p-1">{i + 1}</td>
-                                <td className="border p-1">{student.name}</td>
-                                {student.attendance.map((val, idx) => (
-                                  <td
-                                    key={idx}
-                                    className={`border p-1 ${
-                                      val === "A" ? "text-red-600" : ""
-                                    }`}
-                                  >
-                                    {val}
+                            {students
+                              .filter((student) =>
+                                student.name
+                                  .toLowerCase()
+                                  .includes(searchTerm.toLowerCase())
+                              )
+                              .map((student, i) => (
+                                <tr key={i} className="hover:bg-gray-50">
+                                  <td className="border p-1">
+                                    {student.rollNo}
                                   </td>
-                                ))}
-                                <td className="border p-1">
-                                  {student.present}
+                                  <td className="border p-1">{student.name}</td>
+                                  {student.attendance.map((val, idx) => (
+                                    <td
+                                      key={idx}
+                                      className={`border p-1 ${
+                                        val === "A"
+                                          ? "text-red-600 font-bold"
+                                          : ""
+                                      }`}
+                                    >
+                                      {val}
+                                    </td>
+                                  ))}
+                                  <td className="border p-1">
+                                    {student.present}
+                                  </td>
+                                  <td className="border p-1">
+                                    {student.prevAttendance}
+                                  </td>
+                                  <td className="border p-1">
+                                    {student.totalAttendance}
+                                  </td>
+                                  <td className="border p-1 text-red-600">
+                                    {student.absent}
+                                  </td>
+                                </tr>
+                              ))}
+
+                            {/* Optional Totals Row */}
+                            <tr className="bg-gray-200 font-semibold">
+                              <td className="border p-1 text-red-600">
+                                Absent
+                              </td>
+                              <td className="border p-1"></td>
+                              {timetable.totals.daily_absent.map((val, i) => (
+                                <td key={i} className="border p-1 text-red-600">
+                                  {val}
                                 </td>
-                                <td className="border p-1">
-                                  {student.prevAttendance}
-                                </td>
-                                <td className="border p-1">
-                                  {student.totalAttendance}
-                                </td>
-                                <td className="border p-1">{student.absent}</td>
-                              </tr>
-                            ))}
+                              ))}
+                              <td className="border p-1">
+                                {timetable.totals.total_absent_days}
+                              </td>
+                              <td className="border p-1"></td>
+                              <td className="border p-1"></td>
+                              <td className="border p-1"></td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
