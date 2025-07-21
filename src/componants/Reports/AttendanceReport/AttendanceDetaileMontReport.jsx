@@ -834,7 +834,7 @@ date.</p>
                                   <th className="border p-2 sticky left-[0px] bg-gray-200  ">
                                     Roll No
                                   </th>
-                                  <th className="border p-2 sticky left-[0px] bg-gray-200  ">
+                                  <th className="border p-2 sticky left-[40px] bg-gray-200  ">
                                     Student Name
                                   </th>
 
@@ -887,10 +887,10 @@ date.</p>
                                       key={i}
                                       className="hover:bg-gray-50 even:bg-gray-50 odd:bg-white"
                                     >
-                                      <td className="border p-2 sticky left-0 bg-white ">
+                                      <td className="border p-2 sticky left-[0px] bg-white ">
                                         {student.rollNo}
                                       </td>
-                                      <td className="border p-2 sticky left-[0px] bg-white  text-left">
+                                      <td className="border p-2 sticky left-[40px] bg-white  text-left ">
                                         {student.name
                                           ?.toLowerCase()
                                           .split(" ")
@@ -948,7 +948,7 @@ date.</p>
                                   {/* Present Row */}
                                   <tr className="font-medium text-green-700">
                                     <td
-                                      className="border p-2 text-left"
+                                      className="border p-2 text-left sticky left-[0px] bg-gradient-to-t from-yellow-100 to-yellow-50"
                                       colSpan={2}
                                     >
                                       ✅ Present
@@ -986,7 +986,7 @@ date.</p>
                                   {/* Absent Row */}
                                   <tr className="font-medium text-red-600">
                                     <td
-                                      className="border p-2 text-left"
+                                      className="border p-2 text-left sticky left-[0px] bg-gradient-to-t from-yellow-100 to-yellow-50"
                                       colSpan={2}
                                     >
                                       ❌ Absent
@@ -1015,7 +1015,7 @@ date.</p>
                                   {/* Total Row */}
                                   <tr className="font-bold text-blue-900 border-t border-gray-400">
                                     <td
-                                      className="border p-2 text-left"
+                                      className="border p-2 text-left sticky left-[0px] bg-gradient-to-t from-yellow-100 to-yellow-50"
                                       colSpan={2}
                                     >
                                       📊 Total
