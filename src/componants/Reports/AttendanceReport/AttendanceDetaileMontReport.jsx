@@ -16,25 +16,18 @@ const AttendanceDetaileMontReport = () => {
   const [selectedMonthId, setSelectedMonthId] = useState(null);
   const [students, setStudents] = useState([]);
   const [showStudentReport, setShowStudentReport] = useState(false);
-
-  const [fromDate, setFromDate] = useState(null);
-  const [formattedFromDate, setFormattedFromDate] = useState("");
-
-  const [currentPage, setCurrentPage] = useState(0);
+  const [roleId, setRoleId] = useState(null);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
-
   const navigate = useNavigate();
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
   const [dateError, setDateError] = useState("");
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [timetable, setTimetable] = useState([]);
-
+  const [regId, setRegId] = useState(null);
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,19 +43,78 @@ const AttendanceDetaileMontReport = () => {
     setSelectedMonthId(selectedOption?.value);
   };
   useEffect(() => {
-    fetchClass();
+    const init = async () => {
+      const sessionData = await fetchRoleId();
+
+      if (sessionData) {
+        await fetchClass(sessionData.roleId, sessionData.regId);
+      }
+    };
+
+    init();
   }, []);
 
-  const fetchClass = async () => {
-    try {
-      setLoadingExams(true);
-      const token = localStorage.getItem("authToken");
+  const fetchRoleId = async () => {
+    const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/get_class_section`, {
-        headers: { Authorization: `Bearer ${token}` },
+    if (!token) {
+      toast.error("Authentication token not found. Please login again.");
+      navigate("/");
+      return null; // ⛔ Prevent execution if no token
+    }
+
+    try {
+      const response = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      console.log("Class", response);
-      setStudentNameWithClassId(response?.data || []);
+
+      const roleId = response?.data?.user?.role_id;
+      const regId = response?.data?.user?.reg_id;
+
+      if (roleId) {
+        setRoleId(roleId); // Optional: still store in state
+        setRegId(regId);
+        return { roleId, regId }; // ✅ return both
+      } else {
+        console.warn("role_id not found in sessionData response");
+        return null;
+      }
+    } catch (error) {
+      console.error("Failed to fetch session data:", error);
+      return null;
+    }
+  };
+
+  const fetchClass = async (roleId, regId) => {
+    const token = localStorage.getItem("authToken");
+    setLoadingExams(true);
+
+    try {
+      if (roleId === "T") {
+        const response = await axios.get(
+          `${API_URL}/api/get_teacherclasstimetable?teacher_id=${regId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const mappedData = response.data.data.map((item) => ({
+          section_id: item.section_id,
+          class_id: item.class_id,
+          get_class: { name: item.classname }, // mimic original structure
+          name: item.sectionname,
+        }));
+
+        setStudentNameWithClassId(mappedData || []);
+      } else {
+        const response = await axios.get(`${API_URL}/api/get_class_section`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setStudentNameWithClassId(response?.data || []);
+      }
     } catch (error) {
       toast.error("Error fetching Classes");
       console.error("Error fetching Classes:", error);
