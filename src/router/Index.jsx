@@ -271,6 +271,10 @@ import AttendanceMarkingStatusReport from "../componants/Reports/AttendanceRepor
 import StaffLeaveReport from "../componants/Reports/StaffReport/StaffLeaveReport.jsx";
 import TeacherRemarkReport from "../componants/Reports/StaffReport/TeacherRemarkReport.jsx";
 import AttendanceDetaileMontReport from "../componants/Reports/AttendanceReport/AttendanceDetaileMontReport.jsx";
+import LessonPlanStatusReport from "../componants/Reports/LessonPlanReport/LessonPlanStatusReport.jsx";
+import LessonPlanSummarisedReport from "../componants/Reports/LessonPlanReport/LessonPlanSummarisedReport.jsx";
+import HomeworkStatusReport from "../componants/Reports/LessonPlanReport/HomeworkStatusReport.jsx";
+import ClasswiseHomeworkDetailReport from "../componants/Reports/LessonPlanReport/ClasswiseHomeworkDetailReport.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -892,6 +896,23 @@ function Index() {
         <Route
           path="/AttendanceDetaileMontReport"
           element={<PrivateRoute element={<AttendanceDetaileMontReport />} />}
+        />
+        {/* Lesson plane report modules */}
+        <Route
+          path="/lessonPlanStatusReport"
+          element={<PrivateRoute element={<LessonPlanStatusReport />} />}
+        />
+        <Route
+          path="/lessonPlanSummarisedReport"
+          element={<PrivateRoute element={<LessonPlanSummarisedReport />} />}
+        />
+        <Route
+          path="/homeworkStatusReport"
+          element={<PrivateRoute element={<HomeworkStatusReport />} />}
+        />
+        <Route
+          path="/classwiseHomeworkDetailReport"
+          element={<PrivateRoute element={<ClasswiseHomeworkDetailReport />} />}
         />
         {/* Staff Monthly Attendance Report */}
         <Route
