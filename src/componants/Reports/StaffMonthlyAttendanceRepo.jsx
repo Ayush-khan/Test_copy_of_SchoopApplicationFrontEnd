@@ -32,9 +32,9 @@ const StaffMonthlyAttendanceRepo = () => {
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    // handleSearch();
-  }, []);
+  // useEffect(() => {
+  //   // handleSearch();
+  // }, []);
 
   const monthOptions = [
     { value: "4", label: "April" },
