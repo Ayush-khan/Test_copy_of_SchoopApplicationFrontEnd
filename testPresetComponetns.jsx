@@ -1,356 +1,801 @@
-/* Main navbar link styling
-.custom-nav-dropdown .nav-dropdown-title {
-  color: black;
-  font-weight: 400;
-  display: inline-block;
-  transition: background-color 0.2s ease;
-}
+import { useState, useEffect, useMemo } from "react";
+import axios from "axios";
+import Select from "react-select";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
+import { RxCross1 } from "react-icons/rx";
+import { FiPrinter } from "react-icons/fi";
+import { FaFileExcel } from "react-icons/fa";
+import * as XLSX from "xlsx";
 
+const AttendanceDetaileMontReport = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [selectedMonthId, setSelectedMonthId] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [showStudentReport, setShowStudentReport] = useState(false);
 
-.nav-dropdown-title:hover {
-  font-weight: 400;
-  background-color: #408cdd !important;
-  color: white !important;
-  border-right: 2px double rgb(207, 10, 102);
-  border-left: 2px double rgb(207, 10, 102);
-}
+  const [fromDate, setFromDate] = useState(null);
+  const [formattedFromDate, setFormattedFromDate] = useState("");
 
+  const [currentPage, setCurrentPage] = useState(0);
+  const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingForSearch, setLoadingForSearch] = useState(false);
 
-.custom-submenu .dropdown-menu {
-  background-color: #c1d1e0 !important;
-  display: none;
-  margin-top: 0;
-  border-radius: 4px;
-  transition: all 0.3s ease-in-out;
-}
+  const navigate = useNavigate();
+  const [loadingExams, setLoadingExams] = useState(false);
+  const [studentError, setStudentError] = useState("");
+  const [dateError, setDateError] = useState("");
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-.custom-submenu:hover > .dropdown-menu {
-  display: block !important;
-  opacity: 1;
-  visibility: visible;
-}
+  const [timetable, setTimetable] = useState([]);
 
+  const pageSize = 10;
+  const [pageCount, setPageCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
 
-.custom-nav-dropdown .dropdown-item {
-  color: black;
-  font-weight: 500;
-  background-color: white;
+  const handleStudentSelect = (selectedOption) => {
+    setStudentError(""); // Reset error if student is select.
+    setSelectedStudent(selectedOption);
+    setSelectedStudentId(selectedOption?.value);
+  };
+  const handleMonthSelect = (selectedOption) => {
+    setDateError(""); // Reset error if month is selected.
+    setSelectedMonth(selectedOption);
+    setSelectedMonthId(selectedOption?.value);
+  };
+  useEffect(() => {
+    fetchClass();
+  }, []);
 
-  transition: background-color 0.2s ease;
-}
+  const fetchClass = async () => {
+    try {
+      setLoadingExams(true);
+      const token = localStorage.getItem("authToken");
 
-.custom-nav-dropdown .dropdown-item:hover {
-  color: white !important;
-  background-color: #408cdd !important;
-  font-weight: 400 !important;
+      const response = await axios.get(`${API_URL}/api/get_class_section`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("Class", response);
+      setStudentNameWithClassId(response?.data || []);
+    } catch (error) {
+      toast.error("Error fetching Classes");
+      console.error("Error fetching Classes:", error);
+    } finally {
+      setLoadingExams(false);
+    }
+  };
 
-  font-size: 14px !important;
+  const studentOptions = useMemo(
+    () =>
+      studentNameWithClassId.map((cls) => ({
+        value: cls?.section_id,
+        valueclass: cls?.class_id,
+        class: cls?.get_class?.name,
+        section: cls.name,
+        label: `${cls?.get_class?.name} ${cls.name}`,
+      })),
+    [studentNameWithClassId]
+  );
 
-}
+  // Get the year from localStorage and extract just the year
+  const academicYrFrom = localStorage.getItem("academic_yr_from"); // e.g. "2025-03-31"
+  const academicYear = academicYrFrom
+    ? new Date(academicYrFrom).getFullYear()
+    : new Date().getFullYear();
 
+  // Create the dropdown options with format like "5-2025"
+  const monthOptions = [
+    { value: "4", label: "April" },
+    { value: "5", label: "May" },
+    { value: "6", label: "June" },
+    { value: "7", label: "July" },
+    { value: "8", label: "August" },
+    { value: "9", label: "September" },
+    { value: "10", label: "October" },
+    { value: "11", label: "November" },
+    { value: "12", label: "December" },
+    { value: "1", label: "January" },
+    { value: "2", label: "February" },
+    { value: "3", label: "March" },
+  ].map((month) => ({
+    value: `${month.value}-${academicYear}`,
+    label: month.label,
+  }));
 
-.nav-dropdown-titleSubUnder {
-  display: inline-block;
-  width: 100%;
+  // Handle search and fetch parent information
 
-  color: black;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
+  const handleSearch = async () => {
+    setLoadingForSearch(false);
 
+    let hasError = false;
 
-.nav-dropdown-titleSubUnder:hover {
-  background-color: #408cdd !important;
-  color: white !important;
-}
+    if (!selectedStudentId) {
+      setStudentError("Please select Class.");
+      hasError = true;
+    }
 
+    if (!selectedMonthId) {
+      setDateError("Please select month.");
+      hasError = true;
+    }
 
-.custom-submenu .dropdown-item {
-  color: black !important;
+    if (hasError) return;
 
-  font-weight: 500;
-  font-size: 14px !important;
-  background-color: white !important;
-}
+    console.log("Calling API with:", {
+      section: selectedStudentId,
+      month_year: selectedMonthId,
+    });
 
+    setSearchTerm("");
+    setLoadingForSearch(true);
+    setTimetable([]);
 
-.custom-submenu .dropdown-item:hover {
-  background-color: #408cdd !important;
-  color: white !important;
-}
+    try {
+      const token = localStorage.getItem("authToken");
 
+      const response = await axios.get(
+        `${API_URL}/api/get_studentdailyattendancemonthwise`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            class_id: selectedStudent.valueclass,
+            section_id: selectedStudentId, // 'PrePrimary' or 'all'
+            month_year: selectedMonthId, // e.g. '2025-07-01'
+          },
+        }
+      );
 
-.custom-submenu {
-  position: relative;
-}
+      const reportData = response?.data?.data ?? [];
 
-.custom-submenu .dropdown-menu {
-  top: 0;
-  left: 100%;
-  margin-top: -1px;
-}
+      if (reportData.length === 0) {
+        toast.error("No detailed monthly attendance report data found.");
+        setTimetable([]);
+        setShowStudentReport(false); // Don't show report view if empty
+      } else {
+        setTimetable(reportData);
 
-.nav-title-top {
-  color: black;
-  font-weight: 900;
-  padding: 0px 10px;
-  display: inline-block;
-}
+        setPageCount(Math.ceil(reportData.length / pageSize));
+        setShowStudentReport(true); // ✅ Show report view
+      }
+    } catch (error) {
+      console.error("API Error:", error?.response?.data || error.message);
+      toast.error("Failed to fetch attendance data. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+      setLoadingForSearch(false);
+    }
+  };
+  useEffect(() => {
+    if (timetable?.students?.length > 0 && timetable?.date_range?.length > 0) {
+      //   const formattedStudents = timetable.students.map((student) => {
+      //     const attendanceMap = {};
+      //     student.daily_attendance.forEach((entry) => {
+      //       attendanceMap[entry.date] = entry.status || "";
+      //     });
 
+      //     const attendance = timetable.date_range.map((dateObj) => {
+      //       return attendanceMap[dateObj.date] || "";
+      //     });
 
-.nav-title-sub {
-  display: inline-block;
-  width: 100%;
+      //     return {
+      //       name: student.name,
+      //       rollNo: student.roll_no || "", // ✅ Use the real roll number
+      //       attendance,
+      //       present_days: student.present_days,
+      //       absent_days: student.absent_days,
+      //       working_days: student.working_days,
+      //       prev_attendance: student.prev_attendance,
+      //       total_attendance: student.total_attendance,
+      //       total_working_days_till_month: student.total_working_days_till_month,
+      //       cumulative_absent_days: student.cumulative_absent_days,
+      //     };
+      //   });
+      const formattedStudents = timetable.students.map((student) => {
+        const attendanceMap = {};
+        student.daily_attendance.forEach((entry) => {
+          attendanceMap[entry.date] = {
+            status: entry.status || "",
+            duplicate: entry.duplicate || false,
+          };
+        });
 
-  color: black;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
+        const attendance = timetable.date_range.map((dateObj) => {
+          const entry = attendanceMap[dateObj.date];
+          return entry
+            ? { status: entry.status, duplicate: entry.duplicate }
+            : { status: "", duplicate: false };
+        });
 
+        return {
+          name: student.name,
+          rollNo: student.roll_no || "",
+          attendance,
+          present_days: student.present_days,
+          absent_days: student.absent_days,
+          working_days: student.working_dayss,
+          prev_attendance: student.prev_attendances,
+          total_attendance: student.total_attendance,
+          total_working_days_till_month: student.total_working_days_till_months,
+          cumulative_absent_days: student.cumulative_absent_dayss,
+        };
+      });
 
-.nav-title-sub:hover {
-  background-color: #408cdd !important;
-  color: white !important;
-} */
-/* above code is previous code working fine now the below code is the design for dymanic navbar */
+      setStudents(formattedStudents);
+    }
+  }, [timetable]);
 
-/* Main navbar link styling */
-.custom-nav-dropdown .nav-dropdown-title {
-  color: black;
-  font-weight: 400;
-  display: inline-block;
-  transition: background-color 0.2s ease;
-}
-.nav-dropdown-title {
-  font-weight: 900;
-}
+  const generateAttendanceTableHTML = () => {
+    console.log("For Print functionliyy");
+  };
+  const handlePrint = () => {
+    const printTitle = `Detailed monthly attendance report of ${selectedStudent?.label} (${selectedMonth?.label})`;
+    const tableHTML = generateAttendanceTableHTML();
 
-/*  Hover: only background color changes */
-/* .nav-dropdown-title:hover {
-  font-weight: 400;
-  background-color: #408cdd !important;
-  color: white !important;
-  border-right: 2px double rgb(207, 10, 102);
-  border-left: 2px double rgb(207, 10, 102);
-} */
+    const headerTable = `
+      <table style="width: 100%; margin-bottom: 10px;  font-size: 14px;">
+        <tr>
+          <td style="border: 1px solid #ccc; padding: 6px; text-align: center;"><strong>Class:</strong> ${
+            selectedStudent?.class || ""
+          }</td>
+          <td style="border: 1px solid #ccc; padding: 6px; text-align: center;"><strong>Division:</strong> ${
+            selectedStudent?.section || ""
+          }</td>
+          <td style="border: 1px solid #ccc; padding: 6px; text-align: center;"><strong>Month:</strong> ${
+            selectedMonth?.label
+          }</td>
+        </tr>
+      </table>
+    `;
 
-.nav-dropdown-sub {
-  width: 100px;
-  color: black;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
+    const printWindow = window.open("", "_blank", "width=1000,height=800");
 
-/* .nav-dropdown-sub:hover {
-  font-weight: 400;
-  background-color: #408cdd !important;
-  color: white;
-  border-right: 2px double rgb(207, 10, 102);
-  border-left: 2px double rgb(207, 10, 102);
-} */
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>${printTitle}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            table { width: 100%; font-size: 12px;  }
+            th, td { border: 1px solid #333; padding: 4px; text-align: center; }
+            th { background: #eee; }
+          </style>
+        </head>
+        <body>
+          ${headerTable}
+          ${tableHTML}
+        </body>
+      </html>
+    `);
 
-/* Dropdown menu default background */
-.custom-submenu .dropdown-menu {
-  background-color: #c1d1e0 !important;
-  display: none;
-  margin-top: 0;
-  border-radius: 4px;
-  transition: all 0.3s ease-in-out;
-}
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    };
+  };
 
-/* Show submenu on hover */
-.custom-submenu:hover > .dropdown-menu {
-  display: block !important;
-  opacity: 1;
-  visibility: visible;
-}
+  const generateAttendanceExcelData = () => {
+    console.log("This is for Download the excel file");
+  };
+  const handleDownloadEXL = () => {
+    const data = generateAttendanceExcelData();
 
-/* Top-level dropdown items */
-.custom-nav-dropdown .dropdown-item {
-  color: black;
-  font-weight: 500;
-  background-color: white;
-  transition: background-color 0.2s ease;
-}
+    if (data.length <= 1) {
+      toast.error("No attendance data available.");
+      return;
+    }
 
-.custom-nav-dropdown .dropdown-item:hover {
-  color: white !important;
-  background-color: #408cdd !important;
-  font-weight: 400 !important;
-  font-size: 14px !important;
-}
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    worksheet["!cols"] = data[0].map(() => ({ wch: 20 }));
 
-/* Nested dropdown title styling */
-.nav-dropdown-titleSubUnderIs {
-  display: inline-block;
-  width: 100%;
-  color: black;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance Report");
 
-/* Hover: only background color changes */
-.nav-dropdown-titleSubUnderIs:hover {
-  background-color: #408cdd !important;
-  color: white;
-}
-.custom-submenuIs {
-  /* color: black !important; */
-  font-weight: 500;
-  font-size: 14px !important;
-  background-color: white !important;
-}
-.custom-submenuIs:hover {
-  background-color: #408cdd !important;
-  color: white !important;
-}
+    const fileName = `Detailed monthly attendance report of ${selectedStudent?.label}(${selectedMonth?.label}).xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
 
-/* Submenu dropdown items */
-.custom-submenu .dropdown-item {
-  color: black !important;
-  font-weight: 500;
-  font-size: 14px !important;
-  background-color: white !important;
-}
+  const filteredStudents = students.filter((student) => {
+    const search = searchTerm.toLowerCase();
 
-/*  Hover: only background color changes */
-.custom-submenu .dropdown-item:hover {
-  background-color: #408cdd !important;
-  color: white !important;
-}
+    return (
+      student.rollNo?.toString().toLowerCase().includes(search) ||
+      student.name?.toLowerCase().includes(search) ||
+      student.present_days?.toString().includes(search) ||
+      student.absent_days?.toString().includes(search) ||
+      student.working_days?.toString().includes(search) ||
+      student.prev_attendance?.toString().includes(search) ||
+      student.total_attendance?.toString().includes(search) ||
+      student.total_working_days_till_month?.toString().includes(search) ||
+      student.cumulative_absent_days?.toString().includes(search)
+    );
+  });
 
-/* Nested submenu positioning */
-.custom-submenu {
-  position: relative;
-}
+  return (
+    <>
+      <div
+        className={` transition-all duration-500 w-[85%]  mx-auto p-4 ${
+          showStudentReport ? "w-full " : "w-[85%] "
+        }`}
+        // className="w-full md:w-[85%]  mx-auto p-4 "
+      >
+        <ToastContainer />
+        <div className="card pb-4  rounded-md ">
+          {!showStudentReport && (
+            <>
+              <div className=" card-header mb-4 flex justify-between items-center ">
+                <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+                  Detailed Monthly Attendance Report
+                </h5>
+                <RxCross1
+                  className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                  onClick={() => {
+                    navigate("/dashboard");
+                  }}
+                />
+              </div>
+              <div
+                className={` relative    -top-6 h-1  mx-auto bg-red-700 ${
+                  showStudentReport ? "w-full " : "w-[98%] "
+                }`}
+                style={{
+                  backgroundColor: "#C03078",
+                }}
+              ></div>
+            </>
+          )}
+          <>
+            {!showStudentReport && (
+              <>
+                <div className=" w-full md:w-[85%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+                  <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
+                    <div className="w-full md:w-[98%]  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                      {/* Class Dropdown */}
+                      <div className="w-full  md:w-[40%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                        <label
+                          className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
+                          htmlFor="studentSelect"
+                        >
+                          Select Class <span className="text-red-500">*</span>
+                          {/* Staff */}
+                        </label>
+                        <div className="w-full md:w-[55%]">
+                          <Select
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                            id="studentSelect"
+                            value={selectedStudent}
+                            onChange={handleStudentSelect}
+                            options={studentOptions}
+                            placeholder={loadingExams ? "Loading..." : "Select"}
+                            isSearchable
+                            isClearable
+                            className="text-sm"
+                            isDisabled={loadingExams}
+                            styles={{
+                              control: (provided) => ({
+                                ...provided,
+                                fontSize: "1em", // Adjust font size for selected value
+                                minHeight: "30px", // Reduce height
+                              }),
+                              menu: (provided) => ({
+                                ...provided,
+                                fontSize: "1em", // Adjust font size for dropdown options
+                              }),
+                              option: (provided) => ({
+                                ...provided,
+                                fontSize: ".9em", // Adjust font size for each option
+                              }),
+                            }}
+                          />
+                          {studentError && (
+                            <div className="h-8 relative ml-1 text-danger text-xs">
+                              {studentError}
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
-.custom-submenu .dropdown-menu {
-  top: 0;
-  left: 100%;
-  margin-top: -1px;
-}
+                      {/* From Date Dropdown */}
+                      <div className="w-full   md:w-[35%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
+                        <label
+                          className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
+                          htmlFor="fromDate"
+                        >
+                          Month <span className="text-red-500">*</span>
+                        </label>
+                        <div className="w-full md:w-[85%]">
+                          <Select
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                            id="monthSelect"
+                            value={selectedMonth}
+                            onChange={handleMonthSelect}
+                            options={monthOptions}
+                            placeholder="Select"
+                            isSearchable
+                            isClearable
+                            className="text-sm"
+                            isDisabled={loadingExams}
+                          />
 
-/* Top-level menu title */
-.nav-title-top {
-  color: black;
-  font-weight: 900;
-  padding: 0px 6px;
-  display: inline-block;
-}
-.nav-title-topIs {
-  color: black;
-  font-weight: 900;
-  padding: 0px 6px;
-  display: inline-block;
-}
+                          {dateError && (
+                            <div className="h-8 relative ml-1 text-danger text-xs">
+                              {dateError}
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
-/* Submenu title */
-.nav-title-sub {
-  display: inline-block;
-  width: 100%;
-  /* padding: 6px 10px; */
-  color: black;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
+                      {/* Browse Button */}
+                      <div className="mt-1">
+                        <button
+                          type="search"
+                          onClick={handleSearch}
+                          style={{ backgroundColor: "#2196F3" }}
+                          className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                            loadingForSearch
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                          disabled={loadingForSearch}
+                        >
+                          {loadingForSearch ? (
+                            <span className="flex items-center">
+                              <svg
+                                className="animate-spin h-4 w-4 mr-2 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                ></path>
+                              </svg>
+                              Browsing...
+                            </span>
+                          ) : (
+                            "Browse"
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+            {showStudentReport && (
+              <>
+                {students.length > 0 && (
+                  <>
+                    <div className="   w-full  mx-auto transition-all duration-300">
+                      <div className="card mx-auto shadow-lg">
+                        {/* Header Section */}
+                        <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                          <div className="w-full flex flex-row justify-between mr-0 md:mr-4">
+                            <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                              View Students Attendance
+                            </h3>
+                            <div className="bg-blue-50 border-l-2 border-r-2 px-4 text-[1em] border-pink-500 rounded-md shadow-md w-full md:w-auto">
+                              <div className="flex flex-col md:flex-row md:items-center md:gap-6  mt-1 text-blue-800 font-medium">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-blue-600">
+                                    🏫 Class:
+                                  </span>
+                                  <span>{selectedStudent?.class || "--"}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-blue-600">
+                                    🎓 Section:
+                                  </span>
+                                  <span>
+                                    {selectedStudent?.section || "--"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-blue-600">
+                                    📅 Month:
+                                  </span>
+                                  <span>{selectedMonth?.label || "--"}</span>
+                                </div>
+                              </div>
+                            </div>
 
-/*  Hover: only background color changes */
-.nav-title-sub:hover {
-  background-color: #408cdd !important;
-  color: white !important;
-  border-right: 2px double rgb(207, 10, 102);
-  border-left: 2px double rgb(207, 10, 102);
-}
+                            <div className="w-1/2 md:w-[18%] mr-1">
+                              <input
+                                type="text"
+                                className="form-control border px-2 py-1 rounded"
+                                placeholder="Search"
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                              />
+                            </div>
+                          </div>
 
-.nav-dropdown-sub-new > .dropdown-toggle {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  /* or a fixed width if needed */
-  color: black !important;
-  background-color: transparent !important;
-}
+                          <div className="flex mb-1.5 flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                            <button
+                              type="button"
+                              onClick={handleDownloadEXL}
+                              className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
+                            >
+                              <FaFileExcel />
+                              <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                                Export to Excel
+                              </div>
+                            </button>
 
-.nav-dropdown-sub-new > .dropdown-toggle::after {
-  margin-left: 0 !important;
-  /* remove Bootstrap's spacing */
-  position: static !important;
-}
-.nav-dropdown-sub-new {
-  color: black;
-}
+                            <button
+                              onClick={handlePrint}
+                              className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                            >
+                              <FiPrinter />
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                                Print
+                              </div>
+                            </button>
+                            <RxCross1
+                              className="text-xl text-red-600 cursor-pointer hover:bg-red-100 rounded "
+                              onClick={() => setShowStudentReport(false)} // ✅ Reset state
+                            />
+                          </div>
+                        </div>
 
-.nav-dropdown-sub-new:hover {
-  font-weight: 400;
-  background-color: #408cdd !important;
-  color: white !important;
-  border-right: 2px double rgb(207, 10, 102);
-  border-left: 2px double rgb(207, 10, 102);
-}
-.nav-dropdown-sub-new-Dynamic {
-  color: black;
-}
-.nav-dropdown-sub-new:hover .nav-dropdown-sub-new-Dynamic {
-  color: white !important;
-}
-.custom-hover-styleForchildLevel {
-  color: black;
-}
+                        <div
+                          className=" w-[97%] h-1 mx-auto"
+                          style={{ backgroundColor: "#C03078" }}
+                        ></div>
 
-.custom-hover-styleForchildLevel:hover {
-  color: white !important;
-}
-/* This one for the scoller in the navbar in dynamic for student in the report */
-.dropdown-scrollableForChild {
-  max-height: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-/* Apply max height and scrolling to dropdown items */
-.scrollable-parent .dropdown-menu {
-  max-height: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-/* Ensures submenus open to the left */
-/* Forces 3rd-level submenu to open to the right of its parent */
-.open-right-submenu .dropdown-menu {
-  top: 0;
-  left: 100% !important; /* Pushes submenu to the right of parent */
-  right: auto !important;
-  margin-left: 0.1rem;
-  margin-right: 0;
-  transform: none !important;
-  z-index: 1051; /* Make sure it's above parents */
-}
+                        {/* Table */}
+                        <div className="card-body w-full">
+                          <div className="h-[600px] overflow-x-auto overflow-y-scroll border">
+                            <table className="min-w-[1600px] table-auto text-sm text-center border border-gray-300">
+                              <thead className="bg-gray-200 sticky top-0 z-5">
+                                <tr>
+                                  <th className="border p-1">Roll No</th>
+                                  <th className="border p-1">Student Name</th>
+                                  {timetable.date_range.map((date, i) => (
+                                    <th
+                                      key={i}
+                                      className="border p-1 whitespace-nowrap"
+                                    >
+                                      {date.formatted_date}
+                                      <br />
+                                      {date.day}
+                                    </th>
+                                  ))}
+                                  <th className="border p-1">Present Days</th>
+                                  <th className="border p-1">Absent Days</th>
+                                  <th className="border p-1">Working Days</th>
+                                  <th className="border p-1">
+                                    Prev. Attendance
+                                  </th>
+                                  <th className="border p-1">
+                                    Total Attendance
+                                  </th>
+                                  <th className="border p-1">
+                                    Working Days Till Month
+                                  </th>
+                                  <th className="border p-1">
+                                    Cumulative Absent Days
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {students
+                                  .filter((student) =>
+                                    student.name
+                                      .toLowerCase()
+                                      .includes(searchTerm.toLowerCase())
+                                  )
+                                  .map((student, i) => (
+                                    <tr key={i} className="hover:bg-gray-50">
+                                      <td className="border p-1">
+                                        {student.rollNo}
+                                      </td>
+                                      <td className="border p-1">
+                                        {student.name}
+                                      </td>
+                                      {/* {student.attendance.map((val, idx) => (
+                                        <td
+                                          key={idx}
+                                          className={`border p-1 ${
+                                            val === "A"
+                                              ? "text-red-600 font-bold"
+                                              : ""
+                                          }`}
+                                        >
+                                          {val}
+                                        </td>
+                                      ))} */}
+                                      {/* for star in P when duplicate is true */}
+                                      {student.attendance.map((val, idx) => (
+                                        <td
+                                          key={idx}
+                                          className={`border p-1 ${
+                                            val.status === "A"
+                                              ? "text-red-600 font-bold"
+                                              : ""
+                                          }`}
+                                        >
+                                          {val.status}
+                                          {val.duplicate ? "*" : ""}
+                                        </td>
+                                      ))}
 
-/* Optional: Prevent hover glitches */
-.dropdown-menu {
-  pointer-events: auto;
-  border: 3px solid green;
-}
+                                      <td className="border p-1">
+                                        {student.present_days}
+                                      </td>
+                                      <td className="border p-1 text-red-600">
+                                        {student.absent_days}
+                                      </td>
+                                      <td className="border p-1">
+                                        {student.working_days}
+                                      </td>
+                                      <td className="border p-1">
+                                        {student.prev_attendance}
+                                      </td>
+                                      <td className="border p-1">
+                                        {student.total_attendance}
+                                      </td>
+                                      <td className="border p-1">
+                                        {student.total_working_days_till_month}
+                                      </td>
+                                      <td className="border p-1 text-red-600">
+                                        {student.cumulative_absent_days}
+                                      </td>
+                                    </tr>
+                                  ))}
+                              </tbody>
+                              <tfoot className="bg-yellow-100 font-semibold">
+                                <tr>
+                                  <td className="border p-1" colSpan={2}>
+                                    Present
+                                  </td>
+                                  {timetable?.totals?.daily_present.map(
+                                    (val, i) => (
+                                      <td
+                                        key={`present-${i}`}
+                                        className="border p-1"
+                                      >
+                                        {val}
+                                      </td>
+                                    )
+                                  )}
+                                  <td className="border p-1">
+                                    {timetable.totals?.total_present_days}
+                                  </td>
+                                  <td className="border p-1 text-red-600">–</td>
+                                  <td className="border p-1">
+                                    {
+                                      timetable.totals
+                                        ?.total_working_days_for_this_months
+                                    }
+                                  </td>
+                                  <td className="border p-1">
+                                    {timetable.totals?.total_prev_attendances}
+                                  </td>
+                                  <td className="border p-1">
+                                    {timetable.totals?.total_attendances}
+                                  </td>
+                                  <td className="border p-1">
+                                    {
+                                      timetable.totals
+                                        ?.total_working_days_till_months
+                                    }
+                                  </td>
+                                  <td className="border p-1 text-red-600">
+                                    {
+                                      timetable.totals
+                                        ?.total_cumulative_absent_dayss
+                                    }
+                                  </td>
+                                </tr>
 
-/* Make sure parent NavDropdown is relatively positioned */
-.nav-dropdown-sub-new {
-  position: relative;
+                                <tr>
+                                  <td className="border p-1" colSpan={2}>
+                                    Absent
+                                  </td>
+                                  {timetable?.totals?.daily_absent.map(
+                                    (val, i) => (
+                                      <td
+                                        key={`absent-${i}`}
+                                        className="border p-1 text-red-600"
+                                      >
+                                        {val}
+                                      </td>
+                                    )
+                                  )}
+                                  <td className="border p-1 text-red-600">
+                                    {timetable.totals?.total_absent_days}
+                                  </td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1">–</td>
+                                </tr>
 
-  /* max-height: 300px; */
-  /* overflow-y: auto; */
-}
+                                <tr>
+                                  <td className="border p-1" colSpan={2}>
+                                    Total
+                                  </td>
+                                  {timetable?.totals?.daily_total.map(
+                                    (val, i) => (
+                                      <td
+                                        key={`total-${i}`}
+                                        className="border p-1 font-bold"
+                                      >
+                                        {val}
+                                      </td>
+                                    )
+                                  )}
+                                  <td className="border p-1 font-bold">
+                                    {
+                                      timetable.totals
+                                        ?.total_present_absent_dayss
+                                    }
+                                  </td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1 font-bold">
+                                    {
+                                      timetable.totals
+                                        ?.total_previous_attendances
+                                    }
+                                  </td>
+                                  <td className="border p-1 font-bold">
+                                    {timetable.totals?.grand_total_attendances}
+                                  </td>
+                                  <td className="border p-1">–</td>
+                                  <td className="border p-1 font-bold text-red-600">
+                                    {
+                                      timetable.totals
+                                        ?.grand_total_absent_attendances
+                                    }
+                                  </td>
+                                </tr>
+                              </tfoot>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-[10%] mt-2 mx-auto">
+                        <button
+                          onClick={() => setShowStudentReport(false)} // ✅ Reset state
+                          className="relative  bg-yellow-400 hover:bg-yellow-600 text-white px-3 py-1 rounded group flex items-center font-bold"
+                        >
+                          Back
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </>
+        </div>
+      </div>
+    </>
+  );
+};
 
-/* Position 3rd-level submenu to the right */
-.dropdown-submenu-right > .dropdown-menu {
-  top: 0;
-  left: 100%;
-  margin-left: 0.1rem;
-  border: 3px solid red;
-  margin-top: -1px; /* optional tweak to align vertically */
-}
-.dropdown-submenu-right > .dropdown-menu {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-
+export default AttendanceDetaileMontReport;
