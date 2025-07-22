@@ -275,6 +275,7 @@ import LessonPlanStatusReport from "../componants/Reports/LessonPlanReport/Lesso
 import LessonPlanSummarisedReport from "../componants/Reports/LessonPlanReport/LessonPlanSummarisedReport.jsx";
 import HomeworkStatusReport from "../componants/Reports/LessonPlanReport/HomeworkStatusReport.jsx";
 import ClasswiseHomeworkDetailReport from "../componants/Reports/LessonPlanReport/ClasswiseHomeworkDetailReport.jsx";
+import TeacherAttendanceMonthlyReport from "../componants/Reports/TeacherAttendanceMonthlyReport.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -918,6 +919,13 @@ function Index() {
         <Route
           path="/staffMonthlyAttendanceRepo"
           element={<PrivateRoute element={<StaffMonthlyAttendanceRepo />} />}
+        />
+        {/* Staff Monthly Attendance Report */}
+        <Route
+          path="/teacherAttendanceMonthlyReport"
+          element={
+            <PrivateRoute element={<TeacherAttendanceMonthlyReport />} />
+          }
         />
         {/* Attendance Marking Status Report */}
         <Route

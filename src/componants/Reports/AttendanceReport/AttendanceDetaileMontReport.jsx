@@ -285,126 +285,156 @@ const AttendanceDetaileMontReport = () => {
   }, [timetable]);
 
   const generateAttendanceTableHTML = () => {
-    console.log("handlePrint");
-    // const thead = `
-    //   <thead class="bg-gray-200">
-    //     <tr>
-    //       <th class="border p-1">Roll No</th>
-    //       <th class="border p-1">Student Name</th>
-    //       ${timetable.date_range
-    //         .map(
-    //           (date) =>
-    //             `<th class="border p-1">${date.formatted_date}<br/>${date.day}</th>`
-    //         )
-    //         .join("")}
-    //       <th class="border p-1">Present Days</th>
-    //       <th class="border p-1">Absent Days</th>
-    //       <th class="border p-1">Working Days</th>
-    //       <th class="border p-1">Prev. Attendance</th>
-    //       <th class="border p-1">Total Attendance</th>
-    //       <th class="border p-1">Working Days Till Month</th>
-    //       <th class="border p-1">Cumulative Absent Days</th>
-    //     </tr>
-    //   </thead>`;
+    const zebraStyle = (index) =>
+      `background-color: ${index % 2 === 0 ? "#ffffff" : "#f9fafb"};`;
 
-    // const tbody = `
-    //   <tbody>
-    //     ${students
-    //       .filter((s) =>
-    //         s.name.toLowerCase().includes(searchTerm.toLowerCase())
-    //       )
-    //       .map(
-    //         (student) => `
-    //         <tr>
-    //           <td class="border p-1">${student.rollNo}</td>
-    //           <td class="border p-1">${student.name}</td>
-    //          ${student.attendance
-    //            .map(
-    //              (val) =>
-    //                `<td class="border p-1 ${
-    //                  val.status === "A" ? "text-red-600 font-bold" : ""
-    //                }">
-    //     ${val.status}${val.duplicate ? "<sup>*</sup>" : ""}
-    //   </td>`
-    //            )
-    //            .join("")}
+    const thead = `
+    <thead style="background-color: #e5e7eb; font-weight: bold;">
+      <tr>
+        <th style="border: 1px solid #ccc; padding: 6px;">Roll No</th>
+        <th style="border: 1px solid #ccc; padding: 6px;">Student Name</th>
+        ${timetable.date_range
+          .map(
+            (date) => `
+            <th style="border: 1px solid #ccc; padding: 6px;">
+              <span style="color: #db2777; font-weight: 600;">
+                ${date.formatted_date.split("-")[0]}
+              </span><br/>
+              <span style="color: #4b5563;">${date.day}</span>
+            </th>`
+          )
+          .join("")}
+        <th style="border: 1px solid #ccc; padding: 6px;">Present Days</th>
+        <th style="border: 1px solid #ccc; padding: 6px;">Absent Days</th>
+        <th style="border: 1px solid #ccc; padding: 6px;">Prev. Attendance</th>
+        <th style="border: 1px solid #ccc; padding: 6px;">Total Attendance</th>
+        <th style="border: 1px solid #ccc; padding: 6px;">Cumulative Absent Days</th>
+        <th style="border: 1px solid #ccc; padding: 6px;">Working Days</th>
+        <th style="border: 1px solid #ccc; padding: 6px;">Total Working Days</th>
+      </tr>
+    </thead>
+  `;
 
-    //           <td class="border p-1">${student.present_days}</td>
-    //           <td class="border p-1 text-red-600">${student.absent_days}</td>
-    //           <td class="border p-1">${student.working_days}</td>
-    //           <td class="border p-1">${student.prev_attendance}</td>
-    //           <td class="border p-1">${student.total_attendance}</td>
-    //           <td class="border p-1">${
-    //             student.total_working_days_till_month
-    //           }</td>
-    //           <td class="border p-1 text-red-600">${
-    //             student.cumulative_absent_days
-    //           }</td>
-    //         </tr>`
-    //       )
-    //       .join("")}
-    //   </tbody>`;
+    const tbody = `
+    <tbody>
+      ${students
+        .filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        .map(
+          (student, i) => `
+          <tr style="${zebraStyle(i)}">
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.rollNo
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px; text-align: left;">
+              ${student.name
+                ?.toLowerCase()
+                .split(" ")
+                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                .join(" ")}
+            </td>
+            ${student.attendance
+              .map(
+                (val) => `
+                <td style="border: 1px solid #ccc; padding: 6px; ${
+                  val.status === "A" ? "color: #dc2626; font-weight: bold;" : ""
+                }">
+                  ${val.status}${val.duplicate ? "<sup>*</sup>" : ""}
+                </td>
+              `
+              )
+              .join("")}
+            <td style="border: 1px solid #ccc; padding: 6px; color: #16a34a; font-weight: 600;">
+              ${student.present_days}
+            </td>
+            <td style="border: 1px solid #ccc; padding: 6px; color: #dc2626; font-weight: 600;">
+              ${student.absent_days}
+            </td>
+            <td style="border: 1px solid #ccc; padding: 6px;">
+              ${student.prev_attendance}
+            </td>
+            <td style="border: 1px solid #ccc; padding: 6px; color: #2563eb; font-weight: 600;">
+              ${student.total_attendance}
+            </td>
+            <td style="border: 1px solid #ccc; padding: 6px; color: #ef4444; font-weight: 600;">
+              ${student.cumulative_absent_days}
+            </td>
+            <td style="border: 1px solid #ccc; padding: 6px;">
+              ${student.working_days}
+            </td>
+            <td style="border: 1px solid #ccc; padding: 6px;">
+              ${student.total_working_days_till_month}
+            </td>
+          </tr>
+        `
+        )
+        .join("")}
+    </tbody>
+  `;
 
-    // const tfoot = `
-    //   <tfoot class="bg-yellow-100 font-semibold">
-    //     <tr>
-    //       <td class="border p-1" colspan="2">Present</td>
-    //       ${timetable?.totals?.daily_present
-    //         .map((val) => `<td class="border p-1">${val}</td>`)
-    //         .join("")}
-    //       <td class="border p-1">${timetable.totals?.total_present_days}</td>
-    //       <td class="border p-1 text-red-600">–</td>
-    //       <td class="border p-1">${
-    //         timetable.totals?.total_working_days_for_this_month
-    //       }</td>
-    //       <td class="border p-1">${timetable.totals?.total_prev_attendance}</td>
-    //       <td class="border p-1">${timetable.totals?.total_attendance}</td>
-    //       <td class="border p-1">${
-    //         timetable.totals?.total_working_days_till_month
-    //       }</td>
-    //       <td class="border p-1 text-red-600">${
-    //         timetable.totals?.total_cumulative_absent_days
-    //       }</td>
-    //     </tr>
-    //     <tr>
-    //       <td class="border p-1" colspan="2">Absent</td>
-    //       ${timetable?.totals?.daily_absent
-    //         .map((val) => `<td class="border p-1 text-red-600">${val}</td>`)
-    //         .join("")}
-    //       <td class="border p-1 text-red-600">${
-    //         timetable.totals?.total_absent_days
-    //       }</td>
-    //       <td class="border p-1">–</td>
-    //       <td class="border p-1">–</td>
-    //       <td class="border p-1">–</td>
-    //       <td class="border p-1">–</td>
-    //       <td class="border p-1">–</td>
-    //       <td class="border p-1">–</td>
-    //     </tr>
-    //     <tr>
-    //       <td class="border p-1" colspan="2">Total</td>
-    //       ${timetable?.totals?.daily_total
-    //         .map((val) => `<td class="border p-1 font-bold">${val}</td>`)
-    //         .join("")}
-    //       <td class="border p-1 font-bold">${
-    //         timetable.totals?.total_present_absent_days
-    //       }</td>
-    //       <td class="border p-1">–</td>
-    //       <td class="border p-1">–</td>
-    //       <td class="border p-1 font-bold">${
-    //         timetable.totals?.total_previous_attendance
-    //       }</td>
-    //       <td class="border p-1 font-bold">${
-    //         timetable.totals?.grand_total_attendance
-    //       }</td>
-    //       <td class="border p-1">–</td>
-    //       <td class="border p-1 font-bold text-red-600">${
-    //         timetable.totals?.grand_total_absent_attendance
-    //       }</td>
-    //     </tr>
-    //   </tfoot>`;
+    const tfoot = `
+    <tfoot style="background-color: #fefce8;">
+      <tr style="color: #16a34a; font-weight: 600;">
+        <td style="border: 1px solid #ccc; padding: 6px;" colspan="2">✅ Present</td>
+        ${timetable.totals.daily_present
+          .map(
+            (val) =>
+              `<td style="border: 1px solid #ccc; padding: 6px;">${val}</td>`
+          )
+          .join("")}
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.total_present_days
+        }</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">–</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.total_prev_attendance
+        }</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.total_attendance
+        }</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">–</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">–</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">–</td>
+      </tr>
+      <tr style="color: #dc2626; font-weight: 600;">
+        <td style="border: 1px solid #ccc; padding: 6px;" colspan="2">❌ Absent</td>
+        ${timetable.totals.daily_absent
+          .map(
+            (val) =>
+              `<td style="border: 1px solid #ccc; padding: 6px;">${val}</td>`
+          )
+          .join("")}
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.total_absent_days
+        }</td>
+        <td colspan="6" style="border: 1px solid #ccc; padding: 6px;">–</td>
+      </tr>
+      <tr style="color: #1e3a8a; font-weight: bold;">
+        <td style="border: 1px solid #ccc; padding: 6px;" colspan="2">📊 Total</td>
+        ${timetable.totals.daily_total
+          .map(
+            (val) =>
+              `<td style="border: 1px solid #ccc; padding: 6px;">${val}</td>`
+          )
+          .join("")}
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.total_present_absent_days
+        }</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">–</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.total_previous_attendance
+        }</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.grand_total_attendance
+        }</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">–</td>
+        <td colspan="2" style="border: 1px solid #ccc; padding: 6px; color: #dc2626;">${
+          timetable.totals.grand_total_absent_attendance
+        }</td>
+      </tr>
+    </tfoot>
+  `;
 
-    // return `<table class="table-auto border border-black text-xs text-center w-full">${thead}${tbody}${tfoot}</table>`;
+    return `<table style=" width: 100%; font-size: 12px;">${thead}${tbody}${tfoot}</table>`;
   };
 
   const handlePrint = () => {
@@ -459,81 +489,90 @@ date.</p>
   };
 
   const generateAttendanceExcelData = () => {
-    console.log("handle download run");
-    // const headerRow = [
-    //   "Roll No",
-    //   "Student Name",
-    //   ...timetable.date_range.map((d) => `${d.formatted_date} (${d.day})`),
-    //   "Present Days",
-    //   "Absent Days",
-    //   "Working Days",
-    //   "Prev. Attendance",
-    //   "Total Attendance",
-    //   "Working Days Till Month",
-    //   "Cumulative Absent Days",
-    // ];
+    if (!timetable || !timetable.date_range || students.length === 0) {
+      return [];
+    }
 
-    // const dataRows = students
-    //   .filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    //   .map((student) => [
-    //     student.rollNo,
-    //     student.name,
-    //     ...student.attendance.map((a) => a.status + (a.duplicate ? "*" : "")),
-    //     student.present_days,
-    //     student.absent_days,
-    //     student.working_days,
-    //     student.prev_attendance,
-    //     student.total_attendance,
-    //     student.total_working_days_till_month,
-    //     student.cumulative_absent_days,
-    //   ]);
+    const headerRow = [
+      "Roll No",
+      "Student Name",
+      ...timetable.date_range.map(
+        (d) => `${d.formatted_date.split("-")[0]} (${d.day})`
+      ),
+      "Present Days",
+      "Absent Days",
+      "Prev. Attendance",
+      "Total Attendance",
+      "Cumulative Absent Days",
+      "Working Days",
+      "Total Working Days",
+    ];
 
-    // const footerRows = [
-    //   [
-    //     "Present",
-    //     "",
-    //     ...timetable.totals?.daily_present,
-    //     timetable.totals?.total_present_days,
-    //     "–",
-    //     timetable.totals?.total_working_days_for_this_month,
-    //     timetable.totals?.total_prev_attendance,
-    //     timetable.totals?.total_attendance,
-    //     timetable.totals?.total_working_days_till_month,
-    //     timetable.totals?.total_cumulative_absent_days,
-    //   ],
-    //   [
-    //     "Absent",
-    //     "",
-    //     ...timetable.totals?.daily_absent,
-    //     timetable.totals?.total_absent_days,
-    //     "–",
-    //     "–",
-    //     "–",
-    //     "–",
-    //     "–",
-    //     "–",
-    //   ],
-    //   [
-    //     "Total",
-    //     "",
-    //     ...timetable.totals?.daily_total,
-    //     timetable.totals?.total_present_absent_days,
-    //     "–",
-    //     "–",
-    //     timetable.totals?.total_previous_attendance,
-    //     timetable.totals?.grand_total_attendance,
-    //     "–",
-    //     timetable.totals?.grand_total_absent_attendance,
-    //   ],
-    // ];
+    const dataRows = students
+      .filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      .map((student) => [
+        student.rollNo,
+        student.name
+          ?.toLowerCase()
+          .split(" ")
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" "),
+        ...student.attendance.map((a) => a.status + (a.duplicate ? "*" : "")),
+        student.present_days,
+        student.absent_days,
+        student.prev_attendance,
+        student.total_attendance,
+        student.cumulative_absent_days,
+        student.working_days,
+        student.total_working_days_till_month,
+      ]);
 
-    // return [headerRow, ...dataRows, ...footerRows];
+    const footerRows = [
+      [
+        "✅ Present",
+        "",
+        ...(timetable.totals?.daily_present ?? []),
+        timetable.totals?.total_present_days ?? "",
+        "–",
+        timetable.totals?.total_prev_attendance ?? "",
+        timetable.totals?.total_attendance ?? "",
+        "–",
+        "–",
+        "–",
+      ],
+      [
+        "❌ Absent",
+        "",
+        ...(timetable.totals?.daily_absent ?? []),
+        timetable.totals?.total_absent_days ?? "",
+        "–",
+        "–",
+        "–",
+        "–",
+        "–",
+        "–",
+      ],
+      [
+        "📊 Total",
+        "",
+        ...(timetable.totals?.daily_total ?? []),
+        timetable.totals?.total_present_absent_days ?? "",
+        "–",
+        timetable.totals?.total_previous_attendance ?? "",
+        timetable.totals?.grand_total_attendance ?? "",
+        "–",
+        "–",
+        timetable.totals?.grand_total_absent_attendance ?? "",
+      ],
+    ];
+
+    return [headerRow, ...dataRows, ...footerRows];
   };
 
   const handleDownloadEXL = () => {
     const data = generateAttendanceExcelData();
 
-    if (data.length <= 1) {
+    if (!data || data.length <= 1) {
       toast.error("No attendance data available.");
       return;
     }
@@ -544,7 +583,7 @@ date.</p>
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance Report");
 
-    const fileName = `Detailed monthly attendance report of ${selectedStudent?.label}(${selectedMonth?.label}).xlsx`;
+    const fileName = `Detailed monthly attendance report of ${selectedStudent?.label} (${selectedMonth?.label}).xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
