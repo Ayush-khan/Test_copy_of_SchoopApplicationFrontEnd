@@ -835,7 +835,7 @@ date.</p>
                               </div>
                             </button>
                             <RxCross1
-                              assName="text-xl text-red-600 cursor-pointer hover:bg-red-100 rounded "
+                              className=" mt-0.5 text-xl bg-gray-50 text-red-600 hover:cursor-pointer hover:bg-red-100"
                               onClick={() => setShowStudentReport(false)} // ✅ Reset state
                             />
                           </div>
@@ -865,8 +865,9 @@ date.</p>
                                 className="bg-gray-200 sticky top-0  text-gray-700 text-sm"
                                 style={{
                                   zIndex: "5",
-                                  scrollbarWidth: "thin", // Firefox
-                                  WebkitOverflowScrolling: "touch",
+
+                                  scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
+                                  scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
                                 }}
                               >
                                 <tr>
@@ -929,7 +930,7 @@ date.</p>
                                       <td className="border p-2 sticky left-[0px] bg-white ">
                                         {student.rollNo}
                                       </td>
-                                      <td className="border p-2 sticky left-[40px] bg-white  text-left ">
+                                      <td className="border p-2 sticky left-[40px] bg-white  text-center ">
                                         {student.name
                                           ?.toLowerCase()
                                           .split(" ")
@@ -951,7 +952,13 @@ date.</p>
                                           }`}
                                         >
                                           {val.status}
-                                          {val.duplicate ? "*" : ""}
+                                          {val.duplicate ? (
+                                            <span className="text-red-600 font-bold">
+                                              *
+                                            </span>
+                                          ) : (
+                                            ""
+                                          )}
                                         </td>
                                       ))}
 

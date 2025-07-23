@@ -9,6 +9,7 @@ import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
+import zIndex from "@mui/material/styles/zIndex";
 
 const StudentReport = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -34,6 +35,10 @@ const StudentReport = () => {
     fetchExams();
     // handleSearch();
   }, []);
+  //  Helper Function: for capitalizeFirst
+  const capitalizeFirst = (str) =>
+    str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+  const toLowerCaseAll = (str) => (str ? str.toLowerCase() : "");
 
   const fetchExams = async () => {
     try {
@@ -153,15 +158,26 @@ const StudentReport = () => {
       student?.roll_no || " ",
       student?.reg_no || " ",
       student?.admission_class || " ",
-      `${student?.first_name || ""} ${student?.mid_name?.trim() || ""} ${
-        student?.last_name || ""
-      }`,
-      student?.dob || " ",
-      `${
-        student?.admission_date
-          ? new Date(student?.admission_date).toLocaleDateString("en-GB")
-          : ""
-      }`,
+
+      `${capitalizeFirst(student.first_name)} ${
+        student.mid_name?.trim() ? toLowerCaseAll(student.mid_name) : ""
+      } ${toLowerCaseAll(student.last_name)}`,
+      student?.dob
+        ? new Date(student.dob).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+          })
+        : " ",
+
+      student?.admission_date
+        ? new Date(student.admission_date).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+          })
+        : "",
+
       student?.permant_add || " ",
       student?.city || " ",
       student?.state || " ",
@@ -288,31 +304,49 @@ const StudentReport = () => {
   const displayedSections = filteredSections.slice(currentPage * pageSize);
   return (
     <>
-      <div className="w-full md:w-[100%] mx-auto p-4 ">
+      <div
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
+          timetable.length > 0
+            ? "w-full md:w-[100%] scale-100"
+            : "w-full md:w-[80%] scale-[0.98]"
+        }`}
+      >
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
+        <div className="card  rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Student Report
             </h5>
             <RxCross1
-              className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+              className="  relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
               onClick={() => {
                 navigate("/dashboard");
               }}
             />
           </div>
           <div
-            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
           ></div>
 
           <>
-            <div className=" w-full md:w-[70%]  flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
-              <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full md:w-[75%] gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+            <div
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
+                timetable.length > 0
+                  ? "pb-0 w-full md:w-[99%]"
+                  : "pb-4 w-full md:w-[80%]"
+              }`}
+            >
+              <div className="w-full md:w-[70%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
+                <div
+                  className={`  w-full gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
+                    timetable.length > 0
+                      ? "w-full md:w-[75%]  wrelative left-0"
+                      : " w-full md:w-[95%] relative left-10"
+                  }`}
+                >
                   <div className="w-full md:w-[50%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                     <label
                       className="md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
@@ -382,57 +416,39 @@ const StudentReport = () => {
                   </div>
                 </div>{" "}
               </div>
+              {timetable.length > 0 && (
+                <div className="p-2 px-3  bg-gray-100 border-none flex justify-between items-center">
+                  <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
+                    <div className="w-1/2 md:w-[85%] mr-1 ">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search "
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                    <button
+                      type="button"
+                      onClick={handleDownloadEXL}
+                      className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
+                    >
+                      <FaFileExcel />
+
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
+                        Exports to excel
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {timetable.length > 0 && (
               <>
-                <div className="w-full  mt-4">
+                <div className="w-full px-4 mt-4 mb-4 ">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                      <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
-                        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          List Of Student Report
-                        </h3>
-                        <div className="w-1/2 md:w-[18%] mr-1 ">
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search "
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
-                        <button
-                          type="button"
-                          onClick={handleDownloadEXL}
-                          className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
-                        >
-                          <FaFileExcel />
-
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                            Exports to excel
-                          </div>
-                        </button>
-
-                        {/* <button
-                          onClick={handlePrint}
-                          className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
-                        >
-                          <FiPrinter />
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                            Print{" "}
-                          </div>
-                        </button> */}
-                      </div>
-                    </div>
-                    <div
-                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                      style={{
-                        backgroundColor: "#C03078",
-                      }}
-                    ></div>
-
                     <div className="card-body w-full">
                       <div
                         className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
@@ -441,9 +457,12 @@ const StudentReport = () => {
                           scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
                         }}
                       >
-                        <table className="min-w-full leading-normal table-auto">
-                          <thead>
-                            <tr className="bg-gray-100">
+                        <table className="min-w-full leading-normal table-auto ">
+                          <thead
+                            className="sticky top-0  bg-gray-200"
+                            style={{ zIndex: "1px" }}
+                          >
+                            <tr className="bg-gray-200">
                               {[
                                 "Sr No.",
                                 "Roll No.",
@@ -503,30 +522,40 @@ const StudentReport = () => {
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.reg_no || " "}
                                   </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                  <td className="px-2 py-2 text-center text-nowrap border border-gray-300">
                                     {student.classname || " "}{" "}
                                     {student.sectionname}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.first_name}{" "}
-                                    {student.mid_name?.trim() || ""}{" "}
-                                    {student.last_name}
+                                    {`${capitalizeFirst(student.first_name)} ${
+                                      student.mid_name?.trim()
+                                        ? toLowerCaseAll(student.mid_name)
+                                        : ""
+                                    } ${toLowerCaseAll(student.last_name)}`}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.dob
+                                    {student?.dob
                                       ? new Date(
                                           student.dob
-                                        ).toLocaleDateString("en-GB")
+                                        ).toLocaleDateString("en-GB", {
+                                          day: "2-digit",
+                                          month: "2-digit",
+                                          year: "2-digit",
+                                        })
                                       : ""}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.admission_date
+                                    {student?.admission_date
                                       ? new Date(
                                           student.admission_date
-                                        ).toLocaleDateString("en-GB")
+                                        ).toLocaleDateString("en-GB", {
+                                          day: "2-digit",
+                                          month: "2-digit",
+                                          year: "2-digit",
+                                        })
                                       : ""}
                                   </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                  <td className="px-2  py-2 text-center border border-gray-300">
                                     {student.permant_add || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
@@ -577,7 +606,8 @@ const StudentReport = () => {
                                     {student.stu_aadhaar_no || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.father_name || " "}
+                                    {capitalizeFirst(student.father_name)}
+                                    {/* {student. || " "} */}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.f_mobile || " "}
@@ -586,7 +616,7 @@ const StudentReport = () => {
                                     {student.f_email || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.mother_name || " "}
+                                    {capitalizeFirst(student.mother_name)}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.m_mobile || " "}
