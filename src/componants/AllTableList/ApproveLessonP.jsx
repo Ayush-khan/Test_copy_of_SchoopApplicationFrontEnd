@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
@@ -11,21 +12,40 @@ import * as XLSX from "xlsx";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import dayjs from "dayjs";
-const ApproveLessonP = () => {
+
+const ApproveLessonPlan = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [currentPage, setCurrentPage] = useState(0);
+  const academicYrFrom = localStorage.getItem("academic_yr_from");
+  const academicYrTo = localStorage.getItem("academic_yr_to");
+
+  const minDate = academicYrFrom ? dayjs(academicYrFrom).toDate() : null;
+  const maxDate = academicYrTo ? dayjs(academicYrTo).toDate() : null;
+
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
+
   const [loadingForSearch, setLoadingForSearch] = useState(false);
+  const [loading, setLoading] = useState(null);
+
   const navigate = useNavigate();
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [weekError, setWeekError] = useState(false);
+  const [currentPage, setCurrentPage] = useState();
+
   const [timetable, setTimetable] = useState([]);
+
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [teacher, setTeacher] = useState([]);
+
+  const [selectedApprovals, setSelectedApprovals] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [studentRemarks, setStudentRemarks] = useState({});
+
   const [weekRange, setWeekRange] = useState("");
   const [fromDate, setFromDate] = useState(null);
   const datePickerRef = useRef(null);
@@ -47,8 +67,8 @@ const ApproveLessonP = () => {
       console.log("Staff", response);
       setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
-      toast.error("Error fetching Teachers");
-      console.error("Error fetching Teachers:", error);
+      toast.error("Error fetching Classes");
+      console.error("Error fetching Classes:", error);
     } finally {
       setLoadingExams(false);
     }
@@ -56,11 +76,12 @@ const ApproveLessonP = () => {
 
   const handleDateChange = (date) => {
     setFromDate(date);
+    setWeekError("");
 
     if (date) {
-      const startOfWeek = dayjs(date).startOf("week").format("DD-MM-YYYY");
-      const endOfWeek = dayjs(date).endOf("week").format("DD-MM-YYYY");
-      setWeekRange(`${startOfWeek} / ${endOfWeek}`);
+      const startDate = dayjs(date).format("DD-MM-YYYY");
+      const endDate = dayjs(date).add(6, "day").format("DD-MM-YYYY");
+      setWeekRange(`${startDate} / ${endDate}`);
     } else {
       setWeekRange("");
     }
@@ -72,36 +93,67 @@ const ApproveLessonP = () => {
     }
   };
 
-  const statusMap = {
-    P: "Pending",
-    A: "Approved",
-    R: "Rejected",
-    H: "Hold",
-    S: "Scheduled",
-    V: "Verified",
+  const fetchClass = async (teacherId) => {
+    try {
+      setLoadingExams(true);
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(
+        `${API_URL}/api/get_teacherallsubjects?teacher_id=${teacherId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Teacher Timetable:", response?.data);
+
+      const teacherClasses = Array.isArray(response?.data?.data)
+        ? response.data.data
+        : [];
+
+      setTeacher(teacherClasses);
+    } catch (error) {
+      toast.error("Error fetching teacher timetable");
+      console.error("Error fetching teacher timetable:", error);
+    } finally {
+      setLoadingExams(false);
+    }
   };
+
   const handleStudentSelect = (selectedOption) => {
-    setStudentError(""); // Reset error if student is select.
+    setStudentError("");
     setSelectedStudent(selectedOption);
     setSelectedStudentId(selectedOption?.value);
+
+    if (selectedOption?.value) {
+      fetchClass(selectedOption.value);
+    }
   };
 
   const studentOptions = useMemo(
     () =>
-      studentNameWithClassId.map((cls) => ({
-        value: cls?.teacher_id,
-        label: `${cls.name}`,
-      })),
+      Array.isArray(studentNameWithClassId)
+        ? studentNameWithClassId.map((cls) => ({
+            value: cls?.teacher_id,
+            label: `${cls.name}`,
+          }))
+        : [],
     [studentNameWithClassId]
   );
 
-  // Handle search and fetch parent information
+  const statusMap = {
+    I: "Incomplete",
+    C: "Complete",
+    Y: "Approve",
+  };
 
   const handleSearch = async () => {
     setLoadingForSearch(false);
 
     if (!selectedStudentId) {
-      setStudentError("Please select teacher Name.");
+      setStudentError("Please select staff Name.");
       setLoadingForSearch(false);
       return;
     }
@@ -109,23 +161,23 @@ const ApproveLessonP = () => {
     setSearchTerm("");
 
     try {
-      const formattedWeek = weekRange.replace(/\s/g, "").replace(/%20/g, ""); // Ensure no extra spaces or encoded symbols
+      const formattedWeek = weekRange;
+
       console.log("Formatted Week is: --->", formattedWeek);
 
-      setLoadingForSearch(true); // Start loading
+      setLoadingForSearch(true);
       setTimetable([]);
 
       const token = localStorage.getItem("authToken");
 
       const params = {
-        teacher_id: selectedStudentId,
-        week: formattedWeek,
+        staff_id: selectedStudentId,
+        week: weekRange,
       };
 
+      console.log(params);
       const response = await axios.get(
-        // `${API_URL}/api/getsubstituteteacherweeklyreport`,
-        `${API_URL}/api/`,
-
+        `${API_URL}/api/get_approvelessonplandata`,
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
@@ -141,123 +193,326 @@ const ApproveLessonP = () => {
       }
     } catch (error) {
       console.error("Error fetching Approve Lesson Plan:", error);
-      //   toast.error("Error fetching Approve Lesson Plan. Please try again.");
-      toast.error("Comming Soon Approve Lesson Plan.");
+      toast.error("Error fetching Approve Lesson Plan. Please try again.");
     } finally {
       setIsSubmitting(false);
       setLoadingForSearch(false);
     }
   };
 
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedApprovals([]);
+    } else {
+      const allSelected = displayedSections.map((student) => ({
+        lesson_plan_id: student.lesson_plan_id,
+        unq_id: student.unq_id,
+        remark: studentRemarks[student.lesson_plan_id] || "",
+      }));
+      setSelectedApprovals(allSelected);
+    }
+    setSelectAll(!selectAll);
+  };
+
+  const handleApprovalChange = (student) => {
+    const exists = selectedApprovals.find(
+      (item) => item.lesson_plan_id === student.lesson_plan_id
+    );
+
+    let updated;
+
+    if (exists) {
+      updated = selectedApprovals.filter(
+        (item) => item.lesson_plan_id !== student.lesson_plan_id
+      );
+    } else {
+      updated = [
+        ...selectedApprovals,
+        {
+          lesson_plan_id: student.lesson_plan_id,
+          unq_id: student.unq_id,
+          remark: studentRemarks[student.lesson_plan_id] || "",
+        },
+      ];
+    }
+
+    setSelectedApprovals(updated);
+    setSelectAll(updated.length === displayedSections.length);
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    const token = localStorage.getItem("authToken");
+    const plansToSubmit = displayedSections
+      .filter((student) =>
+        selectedApprovals.some(
+          (approval) => approval.lesson_plan_id === student.lesson_plan_id
+        )
+      )
+
+      .map((student) => ({
+        lesson_plan_id: student.lesson_plan_id,
+        unq_id: student.unq_id,
+        remark: studentRemarks[student.lesson_plan_id] || "",
+      }));
+
+    if (plansToSubmit.length === 0) {
+      toast.error("Please select at least one lesson plan to approve.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/update_approvelessonplanstatus`,
+        {
+          teacher_id: selectedStudentId,
+          plans: plansToSubmit,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data.status === 200) {
+        toast.success("Lesson plans updated successfully.");
+      } else {
+        toast.error("Failed to update lesson plans.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while submitting the data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePrint = () => {
-    const printTitle = `Substitution Weekly Hours Report  ${
+    const printTitle = `Approve Lesson Plan  ${
       selectedStudent?.label
         ? `List of ${selectedStudent.label}`
         : ": Complete List of All Staff "
     }`;
     const printContent = `
-  <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
-         <h5 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
- <div id="tableHeading" class="text-center w-3/4">
-      <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-2">
-        <thead>
-          <tr class="bg-gray-100">
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Name</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Week</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Total Hours</th>
+  <div style="font-family: sans-serif; font-size: 12px; padding: 20px;">
+    <h2 style="text-align: center; font-weight: bold; font-size: 18px; margin-bottom: 20px;">${printTitle}</h2>
 
-           
-          </tr>
-        </thead>
-        <tbody>
-          ${displayedSections
-            .map(
-              (subject, index) => `
-              <tr class="text-sm">
-                <td class="px-2 text-center py-2 border border-black">${
-                  index + 1
+    ${displayedSections
+      .map(
+        (student, index) => `
+        <div style="border: 1px solid #ccc; margin-bottom: 40px; padding: 16px; page-break-inside: avoid;">
+          <div style="position: relative; margin-bottom: 10px;">
+            <span style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); background: #E0E7FF; color: #3730A3; font-weight: bold; padding: 4px 12px; border-radius: 999px;">${
+              index + 1
+            }</span>
+            <h3 style="text-align: center; color: #C03078; font-size: 16px; font-weight: bold;">Lesson For Class ${
+              student.classname
+            } ${student.secname}</h3>
+          </div>
+
+          <table style="width: 100%;  margin-bottom: 10px;">
+            <thead>
+              <tr style="background-color: #f3f4f6;">
+                ${[
+                  "Week",
+                  "Class",
+                  "Subject",
+                  "Sub-Subject",
+                  "Period No.",
+                  "Lesson",
+                  "Name of the Lesson",
+                ]
+                  .map(
+                    (header) =>
+                      `<th style="border: 1px solid #ccc; padding: 6px; text-align: center;">${header}</th>`
+                  )
+                  .join("")}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                  student.week_date || ""
                 }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.teachername || " "
+                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                  student.classname
+                } ${student.secname}</td>
+                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                  student.subname
                 }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.week || " "
+                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                  student.sub_subject || "-"
                 }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.time_difference_decimal || " "
+                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                  student.no_of_periods
                 }</td>
-               
-              </tr>`
-            )
-            .join("")}
-        </tbody>
-      </table>
-    </div>
-  </div>`;
+                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                  student.chapter_no
+                }</td>
+                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                  student.chaptername
+                }</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+            ${
+              student.non_daily?.length > 0
+                ? student.non_daily
+                    .map(
+                      (item) => `
+                <div style="flex: 0 0 200px; min-width: 200px; border: 1px solid #ccc; padding: 8px;">
+                  <p style="font-weight: bold; color: #2563EB;">${
+                    item.heading
+                  }</p>
+                  <ul style="padding-left: 16px; margin-top: 4px;">
+                    ${item.description
+                      .map((desc) => `<li>${desc.trim()}</li>`)
+                      .join("")}
+                  </ul>
+                </div>`
+                    )
+                    .join("")
+                : ""
+            }
+          </div>
+
+          ${
+            student.daily_changes?.length > 0
+              ? `
+            <div style="display: flex; gap: 16px; margin-bottom: 10px;">
+              <div style="flex: 2; border: 1px solid #ccc; padding: 10px;">
+                <table style="width: 100%; ">
+                  <thead>
+                    <tr style="background-color: #f3f4f6;">
+                      <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">Start Date</th>
+                      <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">${
+                        student.daily_changes[0]?.heading || "Teaching Points"
+                      }</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${student.daily_changes[0].entries
+                      .map(
+                        (entry) => `
+                        <tr>
+                          <td style="border: 1px solid #ccc; padding: 6px;">${entry.start_date}</td>
+                          <td style="border: 1px solid #ccc; padding: 6px;">${entry.description[0]}</td>
+                        </tr>`
+                      )
+                      .join("")}
+                  </tbody>
+                </table>
+              </div>
+              <div style="flex: 1; border: 1px solid #ccc; padding: 10px;">
+                <table style="width: 100%; ">
+                  <thead>
+                    <tr style="background-color: #f3f4f6;">
+                      <th style="border: 1px solid #ccc; padding: 6px; text-align: center;">Status</th>
+                      <th style="border: 1px solid #ccc; padding: 6px; text-align: center;">Principal's Approval</th>
+                      <th style="border: 1px solid #ccc; padding: 6px; text-align: center;">Remark</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                        statusMap[student.status] || "-"
+                      }</td>
+                      <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                        statusMap[student.approve] || "-"
+                      }</td>
+                      <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                        student.remark || "-"
+                      }</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>`
+              : ""
+          }
+        </div>
+      `
+      )
+      .join("")}
+  </div>
+`;
 
     const printWindow = window.open("", "_blank", "width=1000,height=800");
 
     printWindow.document.write(`
-    <html>
-      <head>
-        <title>${printTitle}</title>
-        <style>
-                @page { margin: 0; }
-        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-  
-        /* Increase width */
-        #tableMain {
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-  
-        h5 {
-          width: 100%;
-          text-align: center;
-          font-size: 1.5em;
-          font-weight: bold;
-          margin-bottom: 10px;
-        }
-  
-        #tableContainer {
-          width: 100%;
-          display: flex;
-          justify-content: center;
-        }
-  
-        table {
-          width: 80%; /* Increase table width */
-          border-spacing: 0;
-           margin: auto;
-        }
-  
-        th, td {
-          border: 1px solid gray;
-          padding: 12px;
-          text-align: center;
-          font-size: 16px; /* Increase font size */
-        }
-  
-        th {
-          background-color: #f9f9f9;
-          font-size: 1.1em;
-        }
-        </style>
-      </head>
-         <body>
-        <div id="printContainer">
-            ${printContent}
-        </div>
-    </body>
-    </html>
-  `);
+      <html>
+        <head>
+          <title>${printTitle}</title>
+          <style>
+          @page { margin: 0; padding:0; box-sizing:border-box;   ;
+    }
+          body { margin: 0; padding: 0; box-sizing:border-box; font-family: Arial, sans-serif; }
+          #tableHeading {
+      width: 100%;
+      margin: auto; /* Centers the div horizontally */
+      display: flex;
+      justify-content: center;
+    }
+
+    #tableHeading table {
+      width: 100%; /* Ensures the table fills its container */
+      margin:auto;
+      padding:0 10em 0 10em;
+    }
+
+    #tableContainer {
+      display: flex;
+      justify-content: center; /* Centers the table horizontally */
+      width: 80%;
+
+    }
+
+    h5 {
+      width: 100%;
+      text-align: center;
+      margin: 0;  /* Remove any default margins */
+      padding: 5px 0;  /* Adjust padding if needed */
+    }
+
+    #tableMain {
+    width:100%;
+    margin:auto;
+    box-sizing:border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start; /* Prevent unnecessary space */
+    padding:0 10em 0 10em;
+    }
+
+    h5 + * { /* Targets the element after h5 */
+      margin-top: 0; /* Ensures no extra space after h5 */
+    }
+
+          table { border-spacing: 0; width: 70%; margin: auto;   }
+          th { font-size: 0.8em; background-color: #f9f9f9; }
+          td { font-size: 12px; }
+          th, td { border: 1px solid gray; padding: 8px; text-align: center; }
+          .student-photo {
+            width: 30px !important;
+            height: 30px !important;
+            object-fit: cover;
+            border-radius: 50%;
+          }
+          </style>
+        </head>
+           <body>
+          <div id="printContainer">
+              ${printContent}
+          </div>
+      </body>
+      </html>
+    `);
 
     printWindow.document.close();
 
-    // ✅ Ensure content is fully loaded before printing
+    // Ensure content is fully loaded before printing
     printWindow.onload = function () {
       printWindow.focus();
       printWindow.print();
@@ -271,58 +526,178 @@ const ApproveLessonP = () => {
       return;
     }
 
-    // Define headers matching the print table
-    const headers = ["Sr No.", "Name", "Week", "Total Hours"];
-    // Convert displayedSections data to array format for Excel
-    const data = displayedSections.map((student, index) => [
-      index + 1,
-      student?.teachername || " ",
-      student?.week || " ",
-      student?.time_difference_decimal || " ",
-    ]);
-
-    // Create a worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
-
-    // Auto-adjust column width
-    const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
-    worksheet["!cols"] = columnWidths;
-
-    // Create a workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
 
-    // Generate and download the Excel file
-    const fileName = ` Substitution_Weekly_Hours_Report
-${selectedStudent?.label || "For All Staff"}.xlsx`;
+    displayedSections.forEach((student, index) => {
+      const classSection = `${student?.classname || ""} ${
+        student?.secname || ""
+      }`;
+      const subject = student?.subname || "-";
+      const subSubject = student?.sub_subject || "-";
+      const period = student?.no_of_periods || "-";
+      const lessonNo = student?.chapter_no || "-";
+      const lessonName = student?.chaptername || "-";
+      const week = student?.week_date || "-";
+      const status = statusMap[student?.status] || "-";
+      const approval = statusMap[student?.approve] || "-";
+      const remark = student?.remark || "-";
+
+      let sheetData = [];
+
+      // === Table 1: General Info ===
+      sheetData.push([
+        "Week",
+        "Class",
+        "Subject",
+        "Sub-Subject",
+        "Period No.",
+        "Lesson",
+        "Name of the Lesson",
+      ]);
+      sheetData.push([
+        week,
+        classSection,
+        subject,
+        subSubject,
+        period,
+        lessonNo,
+        lessonName,
+      ]);
+
+      // Spacer row
+      sheetData.push([]);
+
+      // === Table 2: Non-Daily Points ===
+      sheetData.push(["Non-Daily Heading", "Description"]);
+      if (student.non_daily?.length > 0) {
+        student.non_daily.forEach((item) => {
+          const desc = item.description?.join("; ") || "-";
+          sheetData.push([item.heading, desc]);
+        });
+      } else {
+        sheetData.push(["-", "-"]);
+      }
+
+      sheetData.push([]);
+
+      // === Table 3: Daily Teaching Points ===
+      const dailyHeading =
+        student.daily_changes?.[0]?.heading || "Teaching Points";
+      sheetData.push(["Start Date", dailyHeading]);
+      if (student.daily_changes?.[0]?.entries?.length > 0) {
+        student.daily_changes[0].entries.forEach((entry) => {
+          sheetData.push([
+            entry.start_date || "-",
+            entry.description?.[0] || "-",
+          ]);
+        });
+      } else {
+        sheetData.push(["-", "-"]);
+      }
+
+      sheetData.push([]);
+
+      // === Table 4: Status Info ===
+      sheetData.push(["Status", "Principal's Approval", "Remark"]);
+      sheetData.push([status, approval, remark]);
+
+      const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+      // Set column widths
+      const maxCols = Math.max(...sheetData.map((row) => row.length));
+      const columnWidths = new Array(maxCols).fill({ wch: 30 });
+      worksheet["!cols"] = columnWidths;
+
+      // Add to workbook
+      const sheetName = `Lesson_${index + 1}_${classSection.trim()}`.slice(
+        0,
+        31
+      ); // Excel max sheet name = 31 chars
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    });
+
+    const fileName = `Lesson_Plan_Detailed_Report_${
+      selectedStudent?.label || "All_Teacher"
+    }.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
   console.log("row", timetable);
 
   const filteredSections = timetable.filter((student) => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = searchTerm.replace(/\s+/g, "").toLowerCase();
 
-    // Extract relevant fields and convert them to lowercase for case-insensitive search
-    const teacherName = student?.teachername?.toLowerCase() || "";
-    const week = student?.week?.toLowerCase() || "";
-    const totalHours =
-      student?.time_difference_decimal?.toString().toLowerCase() || "";
+    const classAndSection = (
+      (student?.classname || "") + (student?.secname || "")
+    )
+      .replace(/\s+/g, "")
+      .toLowerCase();
 
-    // Check if the search term is present in any of the specified fields
-    return (
-      teacherName.includes(searchLower) ||
-      week.includes(searchLower) ||
-      totalHours.includes(searchLower)
-    );
+    // Flattened values
+    const flatValues = [
+      student?.teachername,
+      student?.week,
+      student?.subname,
+      student?.sub_subject,
+      student?.no_of_periods?.toString(),
+      student?.chapter_no?.toString(),
+      student?.chaptername,
+      student?.status,
+      student?.approve,
+      student?.remark,
+      classAndSection,
+    ]
+      .filter(Boolean)
+      .map((val) => val.toString().toLowerCase());
+
+    // Add values from non_daily (heading + description)
+    if (Array.isArray(student.non_daily)) {
+      student.non_daily.forEach((item) => {
+        if (item.heading) flatValues.push(item.heading.toLowerCase());
+        if (Array.isArray(item.description)) {
+          item.description.forEach((desc) =>
+            flatValues.push(desc.toLowerCase())
+          );
+        }
+      });
+    }
+
+    // Add values from daily_changes (heading + description)
+    if (Array.isArray(student.daily_changes)) {
+      student.daily_changes.forEach((change) => {
+        if (change.heading) flatValues.push(change.heading.toLowerCase());
+        if (Array.isArray(change.entries)) {
+          change.entries.forEach((entry) => {
+            if (Array.isArray(entry.description)) {
+              entry.description.forEach((desc) =>
+                flatValues.push(desc.toLowerCase())
+              );
+            }
+            if (entry.start_date)
+              flatValues.push(entry.start_date.toLowerCase());
+          });
+        }
+      });
+    }
+
+    // Return if any value contains the search term
+    return flatValues.some((val) => val.includes(searchLower));
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
+
   return (
     <>
-      <div className="w-full md:w-[85%] mx-auto p-4 ">
+      {/* <div className="w-full md:w-[80%] mx-auto p-4 "> */}
+      <div
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
+          timetable.length > 0
+            ? "w-full md:w-[100%] scale-100"
+            : "w-full md:w-[80%] scale-[0.98]"
+        }`}
+      >
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
+        <div className="card rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Approve Lesson Plan
@@ -335,23 +710,30 @@ ${selectedStudent?.label || "For All Staff"}.xlsx`;
             />
           </div>
           <div
-            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
           ></div>
 
           <>
-            <div className=" w-full md:w-[90%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
-              <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="  w-full md:w-[100%] gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                  {/* Class Dropdown */}
-                  <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+            <div
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
+                timetable.length > 0
+                  ? "pb-0 w-full md:w-[99%]"
+                  : "pb-4 w-full md:w-[80%]"
+              }`}
+            >
+              {/* <div className=" w-full md:w-[95%] flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2"> */}
+              <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
+                <div className="w-full md:w-[85%] gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                  {/* Staff Dropdown */}
+                  <div className="w-full  md:w-[50%] gap-x-3 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
-                      className="w-full md:w-[45%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      Select Teacher <span className="text-red-500">*</span>
+                      Teacher <span className="text-red-500">*</span>
                     </label>
                     <div className="w-full md:w-[65%]">
                       <Select
@@ -378,7 +760,7 @@ ${selectedStudent?.label || "For All Staff"}.xlsx`;
                           }),
                           option: (provided) => ({
                             ...provided,
-                            fontSize: ".8em", // Adjust font size for each option
+                            fontSize: ".9em", // Adjust font size for each option
                           }),
                         }}
                       />
@@ -392,10 +774,11 @@ ${selectedStudent?.label || "For All Staff"}.xlsx`;
 
                   <div className="w-full md:w-[50%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
                     <label
-                      className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
+                      className="ml-0 md:ml-4 w-full md:w-[80%] text-md mt-1.5"
                       htmlFor="fromDate"
                     >
-                      Select Week
+                      Select Week{" "}
+                      {/* <span className="text-sm text-red-500">*</span> */}
                     </label>
                     <div className="w-full">
                       <div
@@ -403,16 +786,24 @@ ${selectedStudent?.label || "For All Staff"}.xlsx`;
                         onClick={openDatePicker}
                       >
                         {weekRange || (
-                          <FaRegCalendarAlt className="text-pink-500  " />
+                          <FaRegCalendarAlt className="text-pink-500" />
                         )}
                       </div>
+
+                      {weekError && (
+                        <div className="relative ml-1 text-danger text-xs">
+                          {weekError}
+                        </div>
+                      )}
 
                       <DatePicker
                         ref={datePickerRef}
                         selected={fromDate}
                         onChange={handleDateChange}
                         dateFormat="dd-MM-yyyy"
-                        className=" outline-none relative -top-10 text-sm w-[1px] h-[1px]  bg-white"
+                        minDate={minDate}
+                        maxDate={maxDate}
+                        className="outline-none relative -top-10 text-sm w-[1px] h-[1px] bg-white"
                       />
                     </div>
                   </div>
@@ -458,113 +849,298 @@ ${selectedStudent?.label || "For All Staff"}.xlsx`;
                   </div>
                 </div>
               </div>
+
+              {timetable.length > 0 && (
+                <div className="p-2 px-3  bg-gray-100 border-none flex justify-between items-center">
+                  <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
+                    <div className="w-1/2 md:w-[95%] mr-1 ">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search "
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                    <button
+                      type="button"
+                      onClick={handleDownloadEXL}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
+                    >
+                      <FaFileExcel />
+                      <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                        Export to Excel
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handlePrint}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                    >
+                      <FiPrinter />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                        Print
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {timetable.length > 0 && (
               <>
-                <div className="w-full  mt-4">
+                <div className="w-full  mt-4 px-4 mb-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                      <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
-                        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          List Of Approve Lesson Plan
-                        </h3>
-                        <div className="w-1/2 md:w-[18%] mr-1 ">
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search "
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
-                        <button
-                          type="button"
-                          onClick={handleDownloadEXL}
-                          className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
-                        >
-                          <FaFileExcel />
-
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                            Exports to excel
-                          </div>
-                        </button>
-
-                        <button
-                          onClick={handlePrint}
-                          className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
-                        >
-                          <FiPrinter />
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                            Print{" "}
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-                    <div
-                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                      style={{
-                        backgroundColor: "#C03078",
-                      }}
-                    ></div>
-
                     <div className="card-body w-full">
                       <div
                         className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
                         style={{
-                          scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
-                          scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
+                          scrollbarWidth: "thin",
+                          scrollbarColor: "#C03178 transparent",
                         }}
                       >
-                        <table className="w-full md:w-[80%] mx-auto leading-normal table-auto">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              {["Sr No.", "Name", "Week", "Total Hours"].map(
-                                (header, index) => (
-                                  <th
-                                    key={index}
-                                    className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
-                                  >
-                                    {header}
-                                  </th>
-                                )
-                              )}
-                            </tr>
-                          </thead>
+                        <div className="flex justify-between items-center px-2">
+                          <label className="flex items-center gap-2 text-sm font-semibold text-indigo-600">
+                            <input
+                              type="checkbox"
+                              checked={selectAll}
+                              onChange={handleSelectAll}
+                            />
+                            Select All lesson plan for approve
+                          </label>
 
-                          <tbody>
-                            {displayedSections.length ? (
-                              displayedSections?.map((student, index) => (
-                                <tr
-                                  key={student.adm_form_pk}
-                                  className="border border-gray-300"
-                                >
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {index + 1}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.teachername || " "}
-                                  </td>
+                          {/* <p className="text-sm font-semibold text-indigo-600">
+                            Total Lesson Plans: {displayedSections.length || 0}
+                          </p> */}
+                        </div>
 
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.week || " "}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.time_difference_decimal || " "}
-                                  </td>
-                                </tr>
-                              ))
-                            ) : (
-                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                <div className=" text-center text-xl text-red-700">
-                                  Oops! No data found..
-                                </div>
+                        {Array.isArray(displayedSections) &&
+                        displayedSections.length > 0 ? (
+                          displayedSections.map((student, index) => (
+                            <div
+                              key={index}
+                              className="mb-10 border rounded-lg shadow-md p-1"
+                            >
+                              {/* Heading: Lesson For [Classname Section] */}
+                              <div className="relative">
+                                <span className="absolute left-0 top-3 -translate-y-1/2 bg-indigo-100 text-indigo-700 text-sm px-3 py-1 rounded-full shadow">
+                                  {index + 1}
+                                </span>
+                                <h2 className="text-lg font-semibold text-center text-[#C03078]">
+                                  Lesson For Class {student.classname}{" "}
+                                  {student.secname}
+                                </h2>
                               </div>
-                            )}
-                          </tbody>
-                        </table>
+
+                              {/* Table 1: General Info */}
+                              <table className="w-full table-auto border border-gray-500 mb-4">
+                                <thead className="bg-gray-200">
+                                  <tr>
+                                    {[
+                                      "Week",
+                                      "Subject",
+                                      "Sub-Subject",
+                                      "Period No.",
+                                      "Lesson",
+                                      "Name of the Lesson",
+                                    ].map((header, i) => (
+                                      <th
+                                        key={i}
+                                        className="px-4 py-2 border text-sm font-semibold text-center text-gray-800"
+                                      >
+                                        {header}
+                                      </th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr className="text-center text-sm text-gray-700">
+                                    <td className="border px-4 py-2">
+                                      {student.week_date}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                      {student.subname}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                      {student.sub_subject || "-"}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                      {student.no_of_periods}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                      {student.chapter_no}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                      {student.chaptername}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+
+                              {/* Table 2: Non Daily Sections */}
+                              <div className="flex flex-row gap-4 overflow-x-auto mb-4">
+                                {student.non_daily?.map((item, i) => (
+                                  <div
+                                    key={i}
+                                    className="w-[200px] min-w-[200px] border p-3 rounded shadow-sm bg-white flex-shrink-0"
+                                  >
+                                    <p className="font-semibold text-blue-700">
+                                      {item.heading}
+                                    </p>
+                                    <ul className="text-sm mt-1 text-gray-800 space-y-1">
+                                      {item.description?.map((desc, j) => (
+                                        <li key={j}>{desc.trim()}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Table 3: Daily Teaching Points */}
+                              {student.daily_changes?.length > 0 && (
+                                <div className="flex flex-row gap-4 mb-4">
+                                  <div className="w-2/3 border p-3 rounded bg-gray-50">
+                                    <table className="w-full table-auto  text-sm">
+                                      <thead>
+                                        <tr className="bg-gray-200">
+                                          <th className="border px-4 py-2 text-left w-1/3 text-sm font-semibold text-gray-800">
+                                            Start Date
+                                          </th>
+                                          <th className="border px-4 py-2 text-left text-sm font-semibold text-gray-800">
+                                            {student.daily_changes[0]
+                                              ?.heading || "Teaching Points"}
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {student.daily_changes[0]?.entries.map(
+                                          (entry, idx) => (
+                                            <tr
+                                              key={idx}
+                                              className="even:bg-white odd:bg-gray-50"
+                                            >
+                                              <td className="border px-4 py-2">
+                                                {entry.start_date}
+                                              </td>
+                                              <td className="border px-4 py-2">
+                                                {entry.description[0]}
+                                              </td>
+                                            </tr>
+                                          )
+                                        )}
+                                      </tbody>
+                                    </table>
+                                  </div>
+
+                                  {/* Table 4: Status Section */}
+                                  {displayedSections.length > 0 && (
+                                    <div className="w-1/3 border p-3 rounded bg-gray-50">
+                                      <table className="w-full table-auto  text-sm">
+                                        <thead>
+                                          <tr className="bg-gray-200">
+                                            <th className="px-4 py-2 border text-sm font-semibold text-center text-gray-800">
+                                              Status
+                                            </th>
+                                            <th className="px-4 py-2 border text-sm font-semibold text-center text-gray-800">
+                                              Principal's Approval
+                                            </th>
+                                            <th className="px-4 py-2 border text-sm font-semibold text-center text-gray-800">
+                                              Remark
+                                            </th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          <tr className="even:bg-white odd:bg-gray-50 text-center">
+                                            <td className="border px-2 py-2">
+                                              {
+                                                statusMap[
+                                                  displayedSections[0].status
+                                                ]
+                                              }
+                                            </td>
+                                            <td className="border px-2 py-2">
+                                              <div className="flex justify-center items-center gap-2">
+                                                <input
+                                                  type="checkbox"
+                                                  checked={selectedApprovals.some(
+                                                    (item) =>
+                                                      item.lesson_plan_id ===
+                                                      student.lesson_plan_id
+                                                  )}
+                                                  onChange={() =>
+                                                    handleApprovalChange(
+                                                      student
+                                                    )
+                                                  }
+                                                />
+                                                <span>Approve</span>
+                                              </div>
+                                            </td>
+
+                                            <td className="border px-2 py-2">
+                                              <textarea
+                                                rows={4}
+                                                className="border rounded px-2 py-1 w-full text-sm resize-y"
+                                                value={
+                                                  studentRemarks[
+                                                    student.lesson_plan_id
+                                                  ] || ""
+                                                }
+                                                onChange={(e) => {
+                                                  const remark = e.target.value;
+                                                  setStudentRemarks((prev) => ({
+                                                    ...prev,
+                                                    [student.lesson_plan_id]:
+                                                      remark,
+                                                  }));
+
+                                                  // Update remark in selectedApprovals if already selected
+                                                  setSelectedApprovals((prev) =>
+                                                    prev.map((item) =>
+                                                      item.lesson_plan_id ===
+                                                      student.lesson_plan_id
+                                                        ? { ...item, remark }
+                                                        : item
+                                                    )
+                                                  );
+                                                }}
+                                                placeholder="Enter remark"
+                                                maxLength={1000}
+                                              />
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="absolute left-[1%] w-[100%] text-center flex justify-center items-center mt-14">
+                            <div className="text-center text-xl text-red-700">
+                              Oops! No data found..
+                            </div>
+                          </div>
+                        )}
                       </div>
+                    </div>
+
+                    <div className="flex justify-end gap-y-4 gap-2 pr-3 mb-4 mr-10">
+                      <button
+                        onClick={() => navigate("/dashboard")}
+                        className="bg-yellow-300 hover:bg-yellow-400 text-white font-semibold px-4 py-2 rounded"
+                      >
+                        Back
+                      </button>
+                      <button
+                        onClick={handleSubmit}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded"
+                      >
+                        {loading ? "Saving" : "Save"}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -577,4 +1153,4 @@ ${selectedStudent?.label || "For All Staff"}.xlsx`;
   );
 };
 
-export default ApproveLessonP;
+export default ApproveLessonPlan;
