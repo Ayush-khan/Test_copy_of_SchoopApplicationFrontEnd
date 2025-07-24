@@ -280,8 +280,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { RxCross1 } from "react-icons/rx";
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

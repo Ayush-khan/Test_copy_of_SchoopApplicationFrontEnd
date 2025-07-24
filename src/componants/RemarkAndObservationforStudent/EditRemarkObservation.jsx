@@ -7,7 +7,6 @@ import { RxCross1 } from "react-icons/rx";
 // import Loader from "../components/Loader"; // Add a Loader component or use an existing one.
 // import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
-
 // import Select from "react-select";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 

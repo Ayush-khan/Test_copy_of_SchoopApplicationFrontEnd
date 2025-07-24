@@ -32,7 +32,7 @@ const StudentReport = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchExams();
+    fetchClasses();
     // handleSearch();
   }, []);
   //  Helper Function: for capitalizeFirst
@@ -40,7 +40,7 @@ const StudentReport = () => {
     str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
   const toLowerCaseAll = (str) => (str ? str.toLowerCase() : "");
 
-  const fetchExams = async () => {
+  const fetchClasses = async () => {
     try {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
@@ -111,6 +111,211 @@ const StudentReport = () => {
       setLoadingForSearch(false);
     }
   };
+
+  const generateStudentDetailsTableHTML = (students = []) => {
+    const capitalize = (str) =>
+      str?.charAt(0).toUpperCase() + str?.slice(1).toLowerCase();
+
+    const formatDate = (dateStr) =>
+      dateStr
+        ? new Date(dateStr).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+          })
+        : "";
+
+    const headers = [
+      "Sr No.",
+      "Roll No.",
+      "GRN No.",
+      "Class",
+      "Student Full Name",
+      "DOB",
+      "DOA",
+      "Address",
+      "City",
+      "State",
+      "Pincode",
+      "Nationality",
+      "Mother Tongue",
+      "Gender",
+      "Blood Group",
+      "Religion",
+      "Caste",
+      "Category",
+      "Emergency name",
+      "Emergency Address",
+      "Emergency Contact",
+      "Student Aadhaar No.",
+      "Father Name",
+      "Father Mobile No.",
+      "Father Email-Id",
+      "Mother Name",
+      "Mother Mobile No.",
+      "Mother Email-Id",
+      "Parent's Aadhaar No.",
+      "Last year %",
+      "Last year attendance",
+    ];
+
+    const thead = `
+    <thead style="background-color: #e5e7eb; font-weight: bold;">
+      <tr>
+        ${headers
+          .map(
+            (h) => `<th style="border: 1px solid #ccc; padding: 6px;">${h}</th>`
+          )
+          .join("")}
+      </tr>
+    </thead>
+  `;
+
+    const tbody = `
+    <tbody>
+      ${timetable
+        .map((student, index) => {
+          const fullName = `${capitalize(student.first_name)} ${
+            student.mid_name ? capitalize(student.mid_name) : ""
+          } ${capitalize(student.last_name)}`;
+          const gender =
+            student.gender === "M"
+              ? "Male"
+              : student.gender === "F"
+              ? "Female"
+              : student.gender;
+
+          return `
+          <tr style="background-color: ${
+            index % 2 === 0 ? "#fff" : "#f9fafb"
+          };">
+            <td style="border: 1px solid #ccc; padding: 6px;">${index + 1}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.roll_no || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.reg_no || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.classname || ""
+            } ${student.sectionname || ""}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${fullName}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
+              student.dob
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
+              student.admission_date
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.permant_add
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.city
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.state
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.pincode || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.nationality
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.mother_tongue
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${gender}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.blood_group || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.religion
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.caste
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.category || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.emergency_name
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.emergency_add
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.emergency_contact || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.stu_aadhaar_no || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.father_name
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.f_mobile || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.f_email || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.mother_name
+            )}</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.m_mobile || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.m_emailid || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.parent_adhar_no || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.total_percent || ""
+            }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.total_attendance || ""
+            }</td>
+          </tr>
+        `;
+        })
+        .join("")}
+    </tbody>
+  `;
+
+    return `<table style="width: 100%;  font-size: 12px;">${thead}${tbody}</table>`;
+  };
+  const handleStudentPrint = (studentsList) => {
+    const title = `Student Report of class ${selectedStudent.label}`;
+    const tableHTML = generateStudentDetailsTableHTML(studentsList);
+
+    const printWindow = window.open("", "_blank", "width=1000,height=800");
+
+    printWindow.document.write(`
+    <html>
+      <head>
+      <title>${title}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          table { width: 100%;  font-size: 12px; }
+          th, td { border: 1px solid #333; padding: 6px; text-align: center; }
+          th { background: #f3f4f6; }
+        </style>
+      </head>
+      <body>
+        ${tableHTML}
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    };
+  };
+
   const handleDownloadEXL = () => {
     if (!displayedSections || displayedSections.length === 0) {
       toast.error("No data available to download the Excel sheet.");
@@ -178,29 +383,29 @@ const StudentReport = () => {
           })
         : "",
 
-      student?.permant_add || " ",
-      student?.city || " ",
-      student?.state || " ",
+      capitalizeFirst(student?.permant_add) || " ",
+      capitalizeFirst(student?.city) || " ",
+      capitalizeFirst(student?.state) || " ",
       student?.pincode || " ",
-      student?.nationality || " ",
-      student?.mother_tongue || " ",
+      capitalizeFirst(student?.nationality) || " ",
+      capitalizeFirst(student?.mother_tongue) || " ",
       student?.gender === "M"
         ? "Male"
         : student?.gender === "F"
         ? "Female"
         : student?.gender || " ",
       student?.blood_group || " ",
-      student?.religion || " ",
-      student?.caste || " ",
+      capitalizeFirst(student?.religion) || " ",
+      capitalizeFirst(student?.caste) || " ",
       student?.category || " ",
-      student?.emergency_name || " ",
-      student?.emergency_add || " ",
+      capitalizeFirst(student?.emergency_name) || " ",
+      capitalizeFirst(student?.emergency_add) || " ",
       student?.emergency_contact || " ",
       student?.stu_aadhaar_no || " ",
-      student?.father_name || " ",
+      capitalizeFirst(student?.father_name) || " ",
       student?.f_mobile || " ",
       student?.f_email || " ",
-      student?.mother_name || " ",
+      capitalizeFirst(student?.mother_name) || " ",
       student?.m_mobile || " ",
       student?.m_emailid || " ",
       student?.parent_adhar_no || " ",
@@ -419,7 +624,7 @@ const StudentReport = () => {
               {timetable.length > 0 && (
                 <div className="p-2 px-3  bg-gray-100 border-none flex justify-between items-center">
                   <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
-                    <div className="w-1/2 md:w-[85%] mr-1 ">
+                    <div className="w-1/2 md:w-[95%] mr-1 ">
                       <input
                         type="text"
                         className="form-control"
@@ -432,12 +637,21 @@ const StudentReport = () => {
                     <button
                       type="button"
                       onClick={handleDownloadEXL}
-                      className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
                     >
                       <FaFileExcel />
+                      <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                        Export to Excel
+                      </div>
+                    </button>
 
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                        Exports to excel
+                    <button
+                      onClick={handleStudentPrint}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                    >
+                      <FiPrinter />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                        Print
                       </div>
                     </button>
                   </div>
@@ -555,23 +769,26 @@ const StudentReport = () => {
                                         })
                                       : ""}
                                   </td>
-                                  <td className="px-2  py-2 text-center border border-gray-300">
-                                    {student.permant_add || " "}
+                                  <td className="px-2 w-[20%] py-2 text-center border border-gray-300">
+                                    {capitalizeFirst(student.permant_add) ||
+                                      " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.city || " "}
+                                    {capitalizeFirst(student.city) || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.state || " "}
+                                    {capitalizeFirst(student.state) || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.pincode || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.nationality || " "}
+                                    {capitalizeFirst(student.nationality) ||
+                                      " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.mother_tongue || " "}
+                                    {capitalizeFirst(student.mother_tongue) ||
+                                      " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.gender === "M"
@@ -584,20 +801,22 @@ const StudentReport = () => {
                                     {student.blood_group || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.religion || " "}
+                                    {capitalizeFirst(student.religion) || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.caste || " "}
+                                    {capitalizeFirst(student.caste) || " "}
                                   </td>
 
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.category || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.emergency_name || " "}
+                                    {capitalizeFirst(student.emergency_name) ||
+                                      " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.emergency_add || " "}
+                                    {capitalizeFirst(student.emergency_add) ||
+                                      " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.emergency_contact || " "}

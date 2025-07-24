@@ -1,6 +1,5 @@
 import axios from "axios";
 import ReactPaginate from "react-paginate";
-import NavBar from "../../../Layouts/NavBar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

@@ -345,19 +345,6 @@ const SubstituteTeacherMonthlyReport = () => {
                       Month <span className="text-sm text-red-500">*</span>
                     </label>
                     <div className=" w-full md:w-[65%]">
-                      {/* <Select
-                        menuPortalTarget={document.body}
-                        menuPosition="fixed"
-                        id="studentSelect"
-                        value={selectedStudent}
-                        onChange={handleStudentSelect}
-                        options={studentOptions}
-                        placeholder={loadingExams ? "Loading..." : "Select"}
-                        isSearchable
-                        isClearable
-                        className="text-sm"
-                        isDisabled={loadingExams}
-                      /> */}
                       <Select
                         menuPortalTarget={document.body}
                         menuPosition="fixed"
