@@ -277,6 +277,7 @@ import HomeworkStatusReport from "../componants/Reports/LessonPlanReport/Homewor
 import ClasswiseHomeworkDetailReport from "../componants/Reports/LessonPlanReport/ClasswiseHomeworkDetailReport.jsx";
 import TeacherAttendanceMonthlyReport from "../componants/Reports/TeacherAttendanceMonthlyReport.jsx";
 import FullTermMarksClass from "../componants/Reports/AssessmentrReportModule/FullTermMarksClass.jsx";
+import LessonPlanDetailedView from "../componants/View/LessonPlanDetailedView.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -733,7 +734,6 @@ function Index() {
           path="/teacherIdCard"
           element={<PrivateRoute element={<TeacherIdCard />} />}
         />
-
         <Route
           path="/updateStudentIdCard"
           element={<PrivateRoute element={<UpdateStudentIdCards />} />}
@@ -743,19 +743,16 @@ function Index() {
           path="/uploadStudentPhoto/:id"
           element={<PrivateRoute element={<UploadStudentPhoto />} />}
         />
-
         <Route
           path="/uploadParentPhoto/:id"
           element={<PrivateRoute element={<UploadParentPhoto />} />}
         />
-
         {/* Pending StudentID Card Module */}
         <Route
           path="/pendingStudentId"
           element={<PrivateRoute element={<PendingStudentId />} />}
         />
         {/* Id Card Details */}
-
         <Route
           path="/iDCardDetails/:id"
           element={<PrivateRoute element={<IDCardDetails />} />}
@@ -800,7 +797,6 @@ function Index() {
           path="/EditAppWindow/edit/:id"
           element={<PrivateRoute element={<EditAppointmentWindow />} />}
         />
-
         <Route
           path="/ticketList"
           element={<PrivateRoute element={<TicketList />} />}
@@ -927,6 +923,11 @@ function Index() {
           element={
             <PrivateRoute element={<TeacherAttendanceMonthlyReport />} />
           }
+        />{" "}
+        {/* Lesson plan Detailed Report */}
+        <Route
+          path="/lessonPlanDetailedView"
+          element={<PrivateRoute element={<LessonPlanDetailedView />} />}
         />
         {/* Attendance Marking Status Report */}
         <Route
@@ -939,7 +940,6 @@ function Index() {
           element={<PrivateRoute element={<MonthlyAttendenceReport />} />}
         />
         {/* Full Term Marks Of A Class repor */}
-
         <Route
           path="/fullTermMarksClass"
           element={<PrivateRoute element={<FullTermMarksClass />} />}
@@ -949,7 +949,6 @@ function Index() {
           path="/hSCStudSubjectsRepo"
           element={<PrivateRoute element={<HSCStudentsSubjectsReport />} />}
         />
-
         {/* Fee payment report module */}
         <Route
           path="/feePaymentRepo"
@@ -1027,12 +1026,10 @@ function Index() {
           element={<PrivateRoute element={<TeacherList />} />}
         />
         {/* For Principle or management login routes RoleId is M */}
-
         <Route
           path="/manageSubjectP"
           element={<PrivateRoute element={<ManageSubjectPrinciple />} />}
         />
-
         {/* For notice and sms for staff */}
         <Route
           path="/staffNoticeAndSms"
@@ -1098,20 +1095,17 @@ function Index() {
           path="/TeacherADReport"
           element={<PrivateRoute element={<TeacherAttendanceDailyReport />} />}
         />
-
         {/* Remark and observation modules for principle */}
         <Route
           path="/remObsTeacher"
           element={<PrivateRoute element={<TeacherRemarkandObservation />} />}
         />
-
         <Route
           path="/remObsTeacher/edit/:id"
           element={
             <PrivateRoute element={<EditTeacherRemarkandObservation />} />
           }
         />
-
         {/* Finance */}
         <Route
           path="/feesStructure"
