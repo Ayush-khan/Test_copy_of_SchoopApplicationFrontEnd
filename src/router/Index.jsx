@@ -276,6 +276,7 @@ import LessonPlanSummarisedReport from "../componants/Reports/LessonPlanReport/L
 import HomeworkStatusReport from "../componants/Reports/LessonPlanReport/HomeworkStatusReport.jsx";
 import ClasswiseHomeworkDetailReport from "../componants/Reports/LessonPlanReport/ClasswiseHomeworkDetailReport.jsx";
 import TeacherAttendanceMonthlyReport from "../componants/Reports/TeacherAttendanceMonthlyReport.jsx";
+import FullTermMarksClass from "../componants/Reports/AssessmentrReportModule/FullTermMarksClass.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -936,6 +937,12 @@ function Index() {
         <Route
           path="/monthlyAttendenceRepo"
           element={<PrivateRoute element={<MonthlyAttendenceReport />} />}
+        />
+        {/* Full Term Marks Of A Class repor */}
+
+        <Route
+          path="/fullTermMarksClass"
+          element={<PrivateRoute element={<FullTermMarksClass />} />}
         />
         {/* Student Gender Wise  Report Module */}
         <Route
