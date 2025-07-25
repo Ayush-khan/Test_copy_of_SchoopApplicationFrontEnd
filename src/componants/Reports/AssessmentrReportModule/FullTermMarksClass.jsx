@@ -8,7 +8,6 @@ import { RxCross1 } from "react-icons/rx";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
-import ClasswiseReport from "./ClasswiseMarksReport";
 
 const FullTermMarksClass = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -511,180 +510,193 @@ const FullTermMarksClass = () => {
                 </div>
               </>
             )}
-            {/* {showStudentReport && ( */}
-            <>
-              {/* {students.length > 0 && ( */}
+            {showStudentReport && (
               <>
-                <div className="   w-full  mx-auto transition-all duration-300">
-                  <div className="card mx-auto shadow-lg">
-                    {/* Header Section */}
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                      <div className="w-full flex flex-row justify-between mr-0 md:mr-4">
-                        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          View Students Attendance
-                        </h3>
-                        <div className="bg-blue-50 border-l-2 border-r-2 px-4 text-[1em] border-pink-500 rounded-md shadow-md w-full md:w-auto">
-                          <div className="flex flex-col md:flex-row md:items-center md:gap-6  mt-1 text-blue-800 font-medium">
-                            <div className="flex items-center gap-1">
-                              <span className="text-blue-600">🏫 Class:</span>
-                              <span>{selectedStudent?.class || "--"}</span>
+                {(timetable?.headings?.length > 0 ||
+                  timetable?.data?.length > 0) && (
+                  <>
+                    <div className="   w-full  mx-auto transition-all duration-300">
+                      <div className="card mx-auto shadow-lg">
+                        {/* Header Section */}
+                        <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                          <div className="w-full flex flex-row justify-between mr-0 md:mr-4">
+                            <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                              View Full Term Marks Of A Class
+                            </h3>
+                            <div className="bg-blue-50 border-l-2 border-r-2 px-4 text-[1em] border-pink-500 rounded-md shadow-md w-full md:w-auto">
+                              <div className="flex flex-col md:flex-row md:items-center md:gap-6  mt-1 text-blue-800 font-medium">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-blue-600">
+                                    🏫 Class:
+                                  </span>
+                                  <span>
+                                    {selectedStudent?.class || "--"}{" "}
+                                    {selectedStudent?.section || "--"}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-1">
+                                  <span className="text-blue-600">
+                                    📅 Exam:
+                                  </span>
+                                  <span>{selectedExam?.label || "--"}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-blue-600">
+                                    📅 Subject:
+                                  </span>
+                                  <span>{selectedSubject?.label || "--"}</span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <span className="text-blue-600">🎓 Section:</span>
-                              <span>{selectedStudent?.section || "--"}</span>
+
+                            <div className="w-1/2 md:w-[18%] mr-1">
+                              <input
+                                type="text"
+                                className="form-control border px-2 py-1 rounded"
+                                placeholder="Search"
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                              />
                             </div>
-                            <div className="flex items-center gap-1">
-                              <span className="text-blue-600">📅 Month:</span>
-                              <span>{selectedMonth?.label || "--"}</span>
-                            </div>
+                          </div>
+
+                          <div className="flex mb-1.5 flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                            <button
+                              type="button"
+                              //   onClick={handleDownloadEXL}
+                              className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
+                            >
+                              <FaFileExcel />
+                              <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                                Export to Excel
+                              </div>
+                            </button>
+
+                            <button
+                              //   onClick={handlePrint}
+                              className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                            >
+                              <FiPrinter />
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                                Print
+                              </div>
+                            </button>
+                            <RxCross1
+                              className=" mt-0.5 text-xl bg-gray-50 text-red-600 hover:cursor-pointer hover:bg-red-100"
+                              onClick={() => setShowStudentReport(false)} // ✅ Reset state
+                            />
                           </div>
                         </div>
 
-                        <div className="w-1/2 md:w-[18%] mr-1">
-                          <input
-                            type="text"
-                            className="form-control border px-2 py-1 rounded"
-                            placeholder="Search"
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                          />
+                        <div
+                          className=" w-[97%] h-1 mx-auto"
+                          style={{ backgroundColor: "#C03078" }}
+                        ></div>
+
+                        {/* Table */}
+                        <div className="card-body w-full">
+                          <div
+                            className="h-[600px] mt-1 overflow-x-auto overflow-y-auto border scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+                            style={{
+                              zIndex: "5",
+                              scrollbarWidth: "thin", // Firefox
+                              WebkitOverflowScrolling: "touch",
+                            }}
+                          >
+                            <table className="min-w-full border-collapse border text-center text-sm">
+                              <thead className="bg-gray-200">
+                                <tr>
+                                  {row1.map((col, i) => (
+                                    <th
+                                      key={i}
+                                      colSpan={col.colspan}
+                                      rowSpan={col.rowspan}
+                                      className="border px-2 py-1"
+                                    >
+                                      {col.label}
+                                    </th>
+                                  ))}
+                                </tr>
+                                <tr>
+                                  {row2.map((col, i) => (
+                                    <th
+                                      key={i}
+                                      colSpan={col.colspan}
+                                      className="border px-2 py-1"
+                                    >
+                                      {col.label}
+                                    </th>
+                                  ))}
+                                </tr>
+                                <tr>
+                                  {row3.map((col, i) => (
+                                    <th key={i} className="border px-2 py-1">
+                                      {col.label}
+                                    </th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {timetable.data?.map((student, index) => (
+                                  <tr key={index}>
+                                    <td className="border px-2 py-1">
+                                      {index + 1}
+                                    </td>
+                                    <td className="border px-2 py-1">
+                                      {student.roll_no}
+                                    </td>
+                                    <td className="border px-2 py-1">
+                                      {student.name}
+                                    </td>
+
+                                    {timetable.headings.map((subject) =>
+                                      subject.exams.map((exam) =>
+                                        exam.mark_headings.map(
+                                          (markHeading, idx) => {
+                                            const subjectMarks =
+                                              student.marks?.[
+                                                subject.subject_id
+                                              ] || {};
+                                            const examMarks =
+                                              subjectMarks?.[exam.exam_id] ||
+                                              {};
+                                            const mark =
+                                              examMarks?.[
+                                                markHeading.marks_headings_id
+                                              ] ?? "-";
+
+                                            return (
+                                              <td
+                                                key={`${student.roll_no}-${subject.subject_id}-${exam.exam_id}-${markHeading.marks_headings_id}-${idx}`}
+                                                className="border px-2 py-1"
+                                              >
+                                                {mark}
+                                              </td>
+                                            );
+                                          }
+                                        )
+                                      )
+                                    )}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                        <div className="w-[10%] mt-2 mx-auto">
+                          <button
+                            onClick={() => setShowStudentReport(false)} // ✅ Reset state
+                            className="relative  bg-yellow-400 hover:bg-yellow-600 text-white px-3 py-1 rounded group flex items-center font-bold"
+                          >
+                            Back
+                          </button>
                         </div>
                       </div>
-
-                      <div className="flex mb-1.5 flex-col md:flex-row gap-x-1 justify-center md:justify-end">
-                        <button
-                          type="button"
-                          //   onClick={handleDownloadEXL}
-                          className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
-                        >
-                          <FaFileExcel />
-                          <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
-                            Export to Excel
-                          </div>
-                        </button>
-
-                        <button
-                          //   onClick={handlePrint}
-                          className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
-                        >
-                          <FiPrinter />
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
-                            Print
-                          </div>
-                        </button>
-                        <RxCross1
-                          className=" mt-0.5 text-xl bg-gray-50 text-red-600 hover:cursor-pointer hover:bg-red-100"
-                          onClick={() => setShowStudentReport(false)} // ✅ Reset state
-                        />
-                      </div>
                     </div>
-
-                    <div
-                      className=" w-[97%] h-1 mx-auto"
-                      style={{ backgroundColor: "#C03078" }}
-                    ></div>
-
-                    {/* Table */}
-                    <div className="card-body w-full">
-                      <div
-                        className="h-[600px] mt-1 overflow-x-auto overflow-y-auto border scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
-                        style={{
-                          zIndex: "5",
-                          scrollbarWidth: "thin", // Firefox
-                          WebkitOverflowScrolling: "touch",
-                        }}
-                      >
-                        <table className="min-w-full border-collapse border text-center text-sm">
-                          <thead className="bg-gray-200">
-                            <tr>
-                              {row1.map((col, i) => (
-                                <th
-                                  key={i}
-                                  colSpan={col.colspan}
-                                  rowSpan={col.rowspan}
-                                  className="border px-2 py-1"
-                                >
-                                  {col.label}
-                                </th>
-                              ))}
-                            </tr>
-                            <tr>
-                              {row2.map((col, i) => (
-                                <th
-                                  key={i}
-                                  colSpan={col.colspan}
-                                  className="border px-2 py-1"
-                                >
-                                  {col.label}
-                                </th>
-                              ))}
-                            </tr>
-                            <tr>
-                              {row3.map((col, i) => (
-                                <th key={i} className="border px-2 py-1">
-                                  {col.label}
-                                </th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {timetable.data?.map((student, index) => (
-                              <tr key={index}>
-                                <td className="border px-2 py-1">
-                                  {index + 1}
-                                </td>
-                                <td className="border px-2 py-1">
-                                  {student.roll_no}
-                                </td>
-                                <td className="border px-2 py-1">
-                                  {student.name}
-                                </td>
-
-                                {timetable.headings.map((subject) =>
-                                  subject.exams.map((exam) =>
-                                    exam.mark_headings.map(
-                                      (markHeading, idx) => {
-                                        const subjectMarks =
-                                          student.marks?.[subject.subject_id] ||
-                                          {};
-                                        const examMarks =
-                                          subjectMarks?.[exam.exam_id] || {};
-                                        const mark =
-                                          examMarks?.[
-                                            markHeading.marks_headings_id
-                                          ] ?? "-";
-
-                                        return (
-                                          <td
-                                            key={`${student.roll_no}-${subject.subject_id}-${exam.exam_id}-${markHeading.marks_headings_id}-${idx}`}
-                                            className="border px-2 py-1"
-                                          >
-                                            {mark}
-                                          </td>
-                                        );
-                                      }
-                                    )
-                                  )
-                                )}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                    <div className="w-[10%] mt-2 mx-auto">
-                      <button
-                        onClick={() => setShowStudentReport(false)} // ✅ Reset state
-                        className="relative  bg-yellow-400 hover:bg-yellow-600 text-white px-3 py-1 rounded group flex items-center font-bold"
-                      >
-                        Back
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </>
-              {/* )} */}
-            </>
-            {/* )} */}
+            )}
           </>
         </div>
       </div>
