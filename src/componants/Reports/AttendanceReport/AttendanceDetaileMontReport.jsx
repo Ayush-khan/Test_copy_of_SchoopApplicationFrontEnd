@@ -227,29 +227,6 @@ const AttendanceDetaileMontReport = () => {
   };
   useEffect(() => {
     if (timetable?.students?.length > 0 && timetable?.date_range?.length > 0) {
-      //   const formattedStudents = timetable.students.map((student) => {
-      //     const attendanceMap = {};
-      //     student.daily_attendance.forEach((entry) => {
-      //       attendanceMap[entry.date] = entry.status || "";
-      //     });
-
-      //     const attendance = timetable.date_range.map((dateObj) => {
-      //       return attendanceMap[dateObj.date] || "";
-      //     });
-
-      //     return {
-      //       name: student.name,
-      //       rollNo: student.roll_no || "", // ✅ Use the real roll number
-      //       attendance,
-      //       present_days: student.present_days,
-      //       absent_days: student.absent_days,
-      //       working_days: student.working_days,
-      //       prev_attendance: student.prev_attendance,
-      //       total_attendance: student.total_attendance,
-      //       total_working_days_till_month: student.total_working_days_till_month,
-      //       cumulative_absent_days: student.cumulative_absent_days,
-      //     };
-      //   });
       const formattedStudents = timetable.students.map((student) => {
         const attendanceMap = {};
         student.daily_attendance.forEach((entry) => {

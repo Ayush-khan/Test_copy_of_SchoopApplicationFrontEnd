@@ -315,6 +315,183 @@ const FullTermMarksClass = () => {
     return { row1, row2, row3 };
   }, [timetable]);
 
+  const generateMarksTableHTML = () => {
+    const theadHTML = `
+    <thead style="background: #e5e7eb; font-weight:bold;">
+      <tr>
+        <th style="border:1px solid #333; padding:6px;">Sr No</th>
+        <th style="border:1px solid #333; padding:6px;">Roll No</th>
+        <th style="border:1px solid #333; padding:6px;">Reg No</th>
+        <th style="border:1px solid #333; padding:6px;">Student Name</th>
+        ${marksData.headings
+          .map((subject) =>
+            subject.exams
+              .map((exam) =>
+                exam.mark_headings
+                  .map(
+                    (mh) =>
+                      `<th style="border:1px solid #333; padding:6px;">
+                          ${subject.subject_name} - ${exam.exam_name} (${mh.heading_name}‑${mh.highest_marks})
+                        </th>`
+                  )
+                  .join("")
+              )
+              .join("")
+          )
+          .join("")}
+      </tr>
+    </thead>
+  `;
+
+    const tbodyHTML = `
+    <tbody>
+      ${marksData.data
+        .map((student, idx) => {
+          const cells = [];
+          cells.push(
+            `<td style="border:1px solid #333;padding:4px;">${idx + 1}</td>`
+          );
+          cells.push(
+            `<td style="border:1px solid #333;padding:4px;">${student.roll_no}</td>`
+          );
+          cells.push(
+            `<td style="border:1px solid #333;padding:4px;">${student.reg_no}</td>`
+          );
+          cells.push(`<td style="border:1px solid #333;padding:4px; text-align:left;">
+                      ${student.name}</td>`);
+
+          marksData.headings.forEach((subject) => {
+            subject.exams.forEach((exam) => {
+              exam.mark_headings.forEach((mh) => {
+                const mark =
+                  student.marks?.[subject.subject_id]?.[exam.exam_id]?.[
+                    mh.marks_headings_id
+                  ] ?? "-";
+                cells.push(
+                  `<td style="border:1px solid #333;padding:4px; text-align:center;">${mark}</td>`
+                );
+              });
+            });
+          });
+
+          return `<tr>${cells.join("")}</tr>`;
+        })
+        .join("")}
+    </tbody>
+  `;
+
+    return `<table style="width:100%;  font-size:12px;">${theadHTML}${tbodyHTML}</table>`;
+  };
+
+  const handlePrint = () => {
+    const printTitle =
+      `Full Term Marks Report for ${
+        selectedStudent?.label || "the selected class"
+      }` +
+      (selectedExam?.label
+        ? `, conducted during the ${selectedExam.label}`
+        : "") +
+      (selectedSubject?.label
+        ? `, for the subject ${selectedSubject.label}`
+        : "") +
+      ".";
+
+    const tableHTML = generateMarksTableHTML();
+    const win = window.open("", "_blank", "width=1200,height=800");
+    win.document.write(`
+    <html><head>
+              <title>${printTitle}</title>
+
+    <style>
+      table, th, td { border:1px solid #333;  }
+      th, td { padding:6px; font-size:12px; }
+      th { background:#e5e7eb; font-weight:bold; }
+    </style>
+    </head><body>
+      ${tableHTML}
+    </body></html>
+  `);
+    win.document.close();
+    win.onload = () => {
+      win.focus();
+      win.print();
+      win.close();
+    };
+  };
+
+  const generateMarksExcelData = () => {
+    const headerRow = [
+      "Sr No",
+      "Roll No",
+      "Reg No",
+      "Student Name",
+      ...marksData.headings.flatMap((subject) =>
+        subject.exams.flatMap((exam) =>
+          exam.mark_headings.map(
+            (mh) =>
+              `${subject.subject_name} ‑ ${exam.exam_name} (${mh.heading_name}, max ${mh.highest_marks})`
+          )
+        )
+      ),
+    ];
+
+    const dataRows = marksData.data.map((student, idx) => {
+      const row = [idx + 1, student.roll_no, student.reg_no, student.name];
+      marksData.headings.forEach((subject) => {
+        subject.exams.forEach((exam) => {
+          exam.mark_headings.forEach((mh) => {
+            const mark =
+              student.marks?.[subject.subject_id]?.[exam.exam_id]?.[
+                mh.marks_headings_id
+              ] ?? "-";
+            row.push(mark);
+          });
+        });
+      });
+      return row;
+    });
+
+    return [headerRow, ...dataRows];
+  };
+
+  const handleDownloadEXL = () => {
+    const aoa = generateMarksExcelData();
+    if (!aoa || aoa.length <= 1) {
+      toast.error("No marks data to export.");
+      return;
+    }
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"] = aoa[0].map(() => ({ wch: 25 }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Marks Report");
+
+    const headerHTML =
+      `Full Term Marks Report for ${
+        selectedStudent?.label || "the selected class"
+      }` +
+      (selectedExam?.label
+        ? `, conducted during the ${selectedExam.label}`
+        : "") +
+      (selectedSubject?.label
+        ? `, for the subject ${selectedSubject.label}`
+        : "") +
+      ".";
+
+    const fname =
+      `Full Term Marks Report for ${
+        selectedStudent?.label || "the selected class"
+      }` +
+      (selectedExam?.label
+        ? `, conducted during the ${selectedExam.label}`
+        : "") +
+      (selectedSubject?.label
+        ? `, for the subject ${selectedSubject.label}`
+        : "") +
+      `.xlsx`;
+
+    XLSX.writeFile(wb, fname);
+  };
+
   return (
     <>
       <div
@@ -571,7 +748,7 @@ const FullTermMarksClass = () => {
                           <div className="flex mb-1.5 flex-col md:flex-row gap-x-1 justify-center md:justify-end">
                             <button
                               type="button"
-                              //   onClick={handleDownloadEXL}
+                              onClick={handleDownloadEXL}
                               className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
                             >
                               <FaFileExcel />
@@ -581,7 +758,7 @@ const FullTermMarksClass = () => {
                             </button>
 
                             <button
-                              //   onClick={handlePrint}
+                              onClick={handlePrint}
                               className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
                             >
                               <FiPrinter />
@@ -611,15 +788,15 @@ const FullTermMarksClass = () => {
                               WebkitOverflowScrolling: "touch",
                             }}
                           >
-                            <table className="min-w-full border-collapse border text-center text-sm">
-                              <thead className="bg-gray-200">
+                            <table className="min-w-full  border text-center text-sm">
+                              {/* <thead className="bg-gray-200">
                                 <tr>
                                   {row1.map((col, i) => (
                                     <th
                                       key={i}
                                       colSpan={col.colspan}
                                       rowSpan={col.rowspan}
-                                      className="border px-2 py-1"
+                                      className="border px-2 py-1 "
                                     >
                                       {col.label}
                                     </th>
@@ -643,20 +820,180 @@ const FullTermMarksClass = () => {
                                     </th>
                                   ))}
                                 </tr>
+                              </thead> */}
+                              <thead
+                                style={{
+                                  zIndex: 5,
+                                  scrollbarWidth: "thin",
+                                  scrollbarColor: "#C03178 transparent",
+                                }}
+                                className="sticky top-0 text-sm font-semibold text-blue-900 shadow "
+                              >
+                                {/* 🔷 Row 1: SUBJECT HEADINGS */}
+                                <tr className="bg-gradient-to-r from-gray-300 to-gray-200 border border-gray-800">
+                                  {row1.map((col, i) => {
+                                    const isSticky = i < 4;
+                                    const leftOffsets = [0, 48, 112, 176]; // Adjust as per your column widths
+                                    return (
+                                      <th
+                                        key={i}
+                                        colSpan={col.colspan}
+                                        rowSpan={col.rowspan}
+                                        className={`px-3 py-2 text-center whitespace-nowrap border border-gray-800 ${
+                                          isSticky ? "sticky bg-gray-300" : ""
+                                        }`}
+                                        style={
+                                          isSticky
+                                            ? {
+                                                left: `${leftOffsets[i]}px`,
+                                                zIndex: 5,
+                                                background: "#e5e7eb", // gray-300 fallback for non-Tailwind CSS
+                                              }
+                                            : {}
+                                        }
+                                      >
+                                        {col.label}
+                                      </th>
+                                    );
+                                  })}
+                                </tr>
+
+                                {/* 🟣 Row 2: EXAMS */}
+                                <tr className="bg-gradient-to-r from-gray-300 to-gray-200 text-blue-900 border border-gray-800">
+                                  {row2.map((col, i) => (
+                                    <th
+                                      key={i}
+                                      colSpan={col.colspan}
+                                      className="px-3 py-2 text-center whitespace-nowrap border border-gray-800"
+                                    >
+                                      {col.label}
+                                    </th>
+                                  ))}
+                                </tr>
+
+                                {/* 🔵 Row 3: MARK HEADINGS */}
+                                <tr className="bg-gradient-to-r from-blue-100 to-blue-50 text-blue-900 border border-gray-800">
+                                  {row3.map((col, i) => (
+                                    <th
+                                      key={i}
+                                      className="px-3 py-2 text-center whitespace-nowrap border border-gray-800"
+                                    >
+                                      {col.label}
+                                    </th>
+                                  ))}
+                                </tr>
                               </thead>
+
+                              {/* <thead
+                                style={{
+                                  zIndex: "5",
+                                  scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
+                                  scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
+                                }}
+                                className="sticky top-0  text-sm font-semibold text-blue-900 shadow bg-white"
+                              >
+                                <tr className="bg-gradient-to-r from-gray-300 to-gray-200">
+                                  {row1.map((col, i) => {
+                                    const isSticky = i < 4;
+                                    const leftOffsets = [0, 48, 112, 176]; // Adjust if needed
+                                    return (
+                                      <th
+                                        key={i}
+                                        colSpan={col.colspan}
+                                        rowSpan={col.rowspan}
+                                        className={`px-1 py-2 text-center whitespace-nowrap border border-gray-900 ${
+                                          isSticky ? "sticky bg-gray-300" : ""
+                                        }`}
+                                        style={
+                                          isSticky
+                                            ? {
+                                                left: `${leftOffsets[i]}px`, // 👈 make sure leftOffsets is defined for each sticky column
+                                                zIndex: 5,
+                                                scrollbarWidth: "thin", // Firefox
+                                                scrollbarColor:
+                                                  "#C03178 transparent", // Firefox
+                                              }
+                                            : {}
+                                        }
+                                      >
+                                        {col.label}
+                                      </th>
+                                    );
+                                  })}
+                                </tr>
+
+                                <tr className="bg-gradient-to-r from-indigo-100 to-indigo-50 text-blue-900">
+                                  {row2.map((col, i) => (
+                                    <th
+                                      key={i}
+                                      colSpan={col.colspan}
+                                      className={`px-2 py-2 text-center  border border-gray-900`}
+                                    >
+                                      {col.label}
+                                    </th>
+                                  ))}
+                                </tr>
+
+                                <tr className="bg-gradient-to-r from-blue-100 to-blue-50 text-blue-900">
+                                  {row3.map((col, i) => (
+                                    <th
+                                      key={i}
+                                      className={`px-3 py-2 text-center whitespace-nowrap border border-gray-300`}
+                                    >
+                                      {col.label}
+                                    </th>
+                                  ))}
+                                </tr>
+                              </thead> */}
+
                               <tbody>
-                                {/* {timetable.data?.map((student, index) => (
+                                {timetable.data?.map((student, index) => (
                                   <tr key={index}>
-                                    <td className="border px-2 py-1">
+                                    {/* Sticky: Sr No */}
+                                    <td
+                                      className="sticky left-0 bg-white  border px-3 py-1 "
+                                      style={{
+                                        zIndex: 3,
+                                        minWidth: "48px",
+                                      }}
+                                    >
                                       {index + 1}
                                     </td>
-                                    <td className="border px-2 py-1">
-                                      {student.roll_no}
-                                    </td>
-                                    <td className="border px-2 py-1">
-                                      {student.name}
+
+                                    {/* Sticky: Roll No */}
+                                    <td
+                                      className="sticky left-[48px] bg-white  border px-3 py-1 "
+                                      style={{
+                                        zIndex: 3,
+                                        minWidth: "64px",
+                                      }}
+                                    >
+                                      {student?.roll_no}
                                     </td>
 
+                                    {/* Sticky: Reg No */}
+                                    <td
+                                      className="sticky left-[112px] bg-white border px-3 py-1 "
+                                      style={{
+                                        zIndex: 3,
+                                        minWidth: "64px",
+                                      }}
+                                    >
+                                      {student?.reg_no}
+                                    </td>
+
+                                    {/* Sticky: Student Name */}
+                                    <td
+                                      className="sticky left-[176px] bg-white  border   px-1 py-1 "
+                                      style={{
+                                        zIndex: 3,
+                                        // minWidth: "154px",
+                                      }}
+                                    >
+                                      {capitalizeFirst(student.name)}
+                                    </td>
+
+                                    {/* Marks Data */}
                                     {timetable.headings.map((subject) =>
                                       subject.exams.map((exam) =>
                                         exam.mark_headings.map(
@@ -671,12 +1008,17 @@ const FullTermMarksClass = () => {
                                             const mark =
                                               examMarks?.[
                                                 markHeading.marks_headings_id
-                                              ] ?? "-";
+                                              ] !== undefined
+                                                ? examMarks[
+                                                    markHeading
+                                                      .marks_headings_id
+                                                  ]
+                                                : "-";
 
                                             return (
                                               <td
                                                 key={`${student.roll_no}-${subject.subject_id}-${exam.exam_id}-${markHeading.marks_headings_id}-${idx}`}
-                                                className="border px-2 py-1"
+                                                className="border px-3 py-1 text-center "
                                               >
                                                 {mark}
                                               </td>
@@ -686,96 +1028,7 @@ const FullTermMarksClass = () => {
                                       )
                                     )}
                                   </tr>
-                                ))} */}
-                                {timetable.data
-                                  ?.filter((student) => {
-                                    const term = searchTerm.toLowerCase();
-                                    const name =
-                                      student.name?.toLowerCase() || "";
-                                    const rollNo =
-                                      student.roll_no
-                                        ?.toString()
-                                        .toLowerCase() || "";
-                                    const regNo =
-                                      student.reg_no
-                                        ?.toString()
-                                        .toLowerCase() || "";
-
-                                    const className =
-                                      student.class?.toLowerCase?.() || "";
-                                    const sectionName =
-                                      student.section?.toLowerCase?.() || "";
-
-                                    // Match against marks too
-                                    const marksMatch = Object.values(
-                                      student.marks || {}
-                                    ).some((subjectMarks) =>
-                                      Object.values(subjectMarks || {}).some(
-                                        (examMarks) =>
-                                          Object.values(examMarks || {}).some(
-                                            (mark) =>
-                                              mark
-                                                ?.toString()
-                                                .toLowerCase()
-                                                .includes(term)
-                                          )
-                                      )
-                                    );
-
-                                    return (
-                                      name.includes(term) ||
-                                      regNo.includes(term) ||
-                                      rollNo.includes(term) ||
-                                      className.includes(term) ||
-                                      sectionName.includes(term) ||
-                                      marksMatch
-                                    );
-                                  })
-                                  .map((student, index) => (
-                                    <tr key={index}>
-                                      <td className="border px-2 py-1">
-                                        {index + 1}
-                                      </td>
-                                      <td className="border px-2 py-1">
-                                        {student?.roll_no}
-                                      </td>
-                                      <td className="border px-2 py-1">
-                                        {student?.reg_no}
-                                      </td>
-                                      <td className="border px-2 py-1">
-                                        {capitalizeFirst(student.name)}
-                                      </td>
-
-                                      {timetable.headings.map((subject) =>
-                                        subject.exams.map((exam) =>
-                                          exam.mark_headings.map(
-                                            (markHeading, idx) => {
-                                              const subjectMarks =
-                                                student.marks?.[
-                                                  subject.subject_id
-                                                ] || {};
-                                              const examMarks =
-                                                subjectMarks?.[exam.exam_id] ||
-                                                {};
-                                              const mark =
-                                                examMarks?.[
-                                                  markHeading.marks_headings_id
-                                                ] ?? "-";
-
-                                              return (
-                                                <td
-                                                  key={`${student.roll_no}-${subject.subject_id}-${exam.exam_id}-${markHeading.marks_headings_id}-${idx}`}
-                                                  className="border px-2 py-1"
-                                                >
-                                                  {mark}
-                                                </td>
-                                              );
-                                            }
-                                          )
-                                        )
-                                      )}
-                                    </tr>
-                                  ))}
+                                ))}
                               </tbody>
                             </table>
                           </div>
