@@ -278,6 +278,7 @@ import ClasswiseHomeworkDetailReport from "../componants/Reports/LessonPlanRepor
 import TeacherAttendanceMonthlyReport from "../componants/Reports/TeacherAttendanceMonthlyReport.jsx";
 import FullTermMarksClass from "../componants/Reports/AssessmentrReportModule/FullTermMarksClass.jsx";
 import LessonPlanDetailedView from "../componants/View/LessonPlanDetailedView.jsx";
+import IciciFeePaymentReport from "../componants/Reports/IciciFeePaymentReport.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -958,6 +959,11 @@ function Index() {
         <Route
           path="/worldlinfeePayRepo"
           element={<PrivateRoute element={<WorldlineFeePaymentReport />} />}
+        />
+        {/* IciciFeePaymentReport Fee Payment Report  module */}
+        <Route
+          path="/IciciFeePaymentReport"
+          element={<PrivateRoute element={<IciciFeePaymentReport />} />}
         />
         {/* Razorpay Fee Payment Reportmodule */}
         <Route
