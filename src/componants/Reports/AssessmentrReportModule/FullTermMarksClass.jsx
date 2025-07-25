@@ -38,6 +38,9 @@ const FullTermMarksClass = () => {
   const [marksData, setMarksData] = useState({ headings: [], data: [] });
   const [selectedExam, setSelectedExam] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
+  const capitalizeFirst = (str) =>
+    str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+  const toLowerCaseAll = (str) => (str ? str.toLowerCase() : "");
 
   useEffect(() => {
     const init = async () => {
@@ -251,10 +254,14 @@ const FullTermMarksClass = () => {
           data: response.data.data,
         });
       }
-      if (reportData.length === 0) {
-        toast.error("No marks report data found.");
+      if (
+        response?.data?.headings?.length === 0 &&
+        response?.data?.data?.length === 0
+      ) {
+        toast.error("No Classwise full term marks report data found.");
         setShowStudentReport(false);
         setTimetable([]);
+        return; // ✅ Stop further execution
       } else {
         setTimetable(reportData);
         setPageCount(Math.ceil(reportData.length / pageSize));
@@ -277,6 +284,7 @@ const FullTermMarksClass = () => {
     const row1 = [
       { label: "Sr No", colspan: 1, rowspan: 3 },
       { label: "Roll No", colspan: 1, rowspan: 3 },
+      { label: "Reg No", colspan: 1, rowspan: 3 },
       { label: "Student Name", colspan: 1, rowspan: 3 },
     ];
     const row2 = [];
@@ -637,7 +645,7 @@ const FullTermMarksClass = () => {
                                 </tr>
                               </thead>
                               <tbody>
-                                {timetable.data?.map((student, index) => (
+                                {/* {timetable.data?.map((student, index) => (
                                   <tr key={index}>
                                     <td className="border px-2 py-1">
                                       {index + 1}
@@ -678,7 +686,96 @@ const FullTermMarksClass = () => {
                                       )
                                     )}
                                   </tr>
-                                ))}
+                                ))} */}
+                                {timetable.data
+                                  ?.filter((student) => {
+                                    const term = searchTerm.toLowerCase();
+                                    const name =
+                                      student.name?.toLowerCase() || "";
+                                    const rollNo =
+                                      student.roll_no
+                                        ?.toString()
+                                        .toLowerCase() || "";
+                                    const regNo =
+                                      student.reg_no
+                                        ?.toString()
+                                        .toLowerCase() || "";
+
+                                    const className =
+                                      student.class?.toLowerCase?.() || "";
+                                    const sectionName =
+                                      student.section?.toLowerCase?.() || "";
+
+                                    // Match against marks too
+                                    const marksMatch = Object.values(
+                                      student.marks || {}
+                                    ).some((subjectMarks) =>
+                                      Object.values(subjectMarks || {}).some(
+                                        (examMarks) =>
+                                          Object.values(examMarks || {}).some(
+                                            (mark) =>
+                                              mark
+                                                ?.toString()
+                                                .toLowerCase()
+                                                .includes(term)
+                                          )
+                                      )
+                                    );
+
+                                    return (
+                                      name.includes(term) ||
+                                      regNo.includes(term) ||
+                                      rollNo.includes(term) ||
+                                      className.includes(term) ||
+                                      sectionName.includes(term) ||
+                                      marksMatch
+                                    );
+                                  })
+                                  .map((student, index) => (
+                                    <tr key={index}>
+                                      <td className="border px-2 py-1">
+                                        {index + 1}
+                                      </td>
+                                      <td className="border px-2 py-1">
+                                        {student?.roll_no}
+                                      </td>
+                                      <td className="border px-2 py-1">
+                                        {student?.reg_no}
+                                      </td>
+                                      <td className="border px-2 py-1">
+                                        {capitalizeFirst(student.name)}
+                                      </td>
+
+                                      {timetable.headings.map((subject) =>
+                                        subject.exams.map((exam) =>
+                                          exam.mark_headings.map(
+                                            (markHeading, idx) => {
+                                              const subjectMarks =
+                                                student.marks?.[
+                                                  subject.subject_id
+                                                ] || {};
+                                              const examMarks =
+                                                subjectMarks?.[exam.exam_id] ||
+                                                {};
+                                              const mark =
+                                                examMarks?.[
+                                                  markHeading.marks_headings_id
+                                                ] ?? "-";
+
+                                              return (
+                                                <td
+                                                  key={`${student.roll_no}-${subject.subject_id}-${exam.exam_id}-${markHeading.marks_headings_id}-${idx}`}
+                                                  className="border px-2 py-1"
+                                                >
+                                                  {mark}
+                                                </td>
+                                              );
+                                            }
+                                          )
+                                        )
+                                      )}
+                                    </tr>
+                                  ))}
                               </tbody>
                             </table>
                           </div>
