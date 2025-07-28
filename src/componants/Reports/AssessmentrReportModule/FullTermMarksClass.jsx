@@ -358,7 +358,7 @@ const FullTermMarksClass = () => {
             `<td style="border:1px solid #333;padding:4px;">${student.reg_no}</td>`
           );
           cells.push(`<td style="border:1px solid #333;padding:4px; text-align:left;">
-                      ${student.name}</td>`);
+                      ${capitalizeFirst(student.name)}</td>`);
 
           marksData.headings.forEach((subject) => {
             subject.exams.forEach((exam) => {
@@ -464,18 +464,6 @@ const FullTermMarksClass = () => {
     ws["!cols"] = aoa[0].map(() => ({ wch: 25 }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Marks Report");
-
-    const headerHTML =
-      `Full Term Marks Report for ${
-        selectedStudent?.label || "the selected class"
-      }` +
-      (selectedExam?.label
-        ? `, conducted during the ${selectedExam.label}`
-        : "") +
-      (selectedSubject?.label
-        ? `, for the subject ${selectedSubject.label}`
-        : "") +
-      ".";
 
     const fname =
       `Full Term Marks Report for ${
@@ -789,38 +777,6 @@ const FullTermMarksClass = () => {
                             }}
                           >
                             <table className="min-w-full  border text-center text-sm">
-                              {/* <thead className="bg-gray-200">
-                                <tr>
-                                  {row1.map((col, i) => (
-                                    <th
-                                      key={i}
-                                      colSpan={col.colspan}
-                                      rowSpan={col.rowspan}
-                                      className="border px-2 py-1 "
-                                    >
-                                      {col.label}
-                                    </th>
-                                  ))}
-                                </tr>
-                                <tr>
-                                  {row2.map((col, i) => (
-                                    <th
-                                      key={i}
-                                      colSpan={col.colspan}
-                                      className="border px-2 py-1"
-                                    >
-                                      {col.label}
-                                    </th>
-                                  ))}
-                                </tr>
-                                <tr>
-                                  {row3.map((col, i) => (
-                                    <th key={i} className="border px-2 py-1">
-                                      {col.label}
-                                    </th>
-                                  ))}
-                                </tr>
-                              </thead> */}
                               <thead
                                 style={{
                                   zIndex: 5,
@@ -883,69 +839,6 @@ const FullTermMarksClass = () => {
                                   ))}
                                 </tr>
                               </thead>
-
-                              {/* <thead
-                                style={{
-                                  zIndex: "5",
-                                  scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
-                                  scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
-                                }}
-                                className="sticky top-0  text-sm font-semibold text-blue-900 shadow bg-white"
-                              >
-                                <tr className="bg-gradient-to-r from-gray-300 to-gray-200">
-                                  {row1.map((col, i) => {
-                                    const isSticky = i < 4;
-                                    const leftOffsets = [0, 48, 112, 176]; // Adjust if needed
-                                    return (
-                                      <th
-                                        key={i}
-                                        colSpan={col.colspan}
-                                        rowSpan={col.rowspan}
-                                        className={`px-1 py-2 text-center whitespace-nowrap border border-gray-900 ${
-                                          isSticky ? "sticky bg-gray-300" : ""
-                                        }`}
-                                        style={
-                                          isSticky
-                                            ? {
-                                                left: `${leftOffsets[i]}px`, // 👈 make sure leftOffsets is defined for each sticky column
-                                                zIndex: 5,
-                                                scrollbarWidth: "thin", // Firefox
-                                                scrollbarColor:
-                                                  "#C03178 transparent", // Firefox
-                                              }
-                                            : {}
-                                        }
-                                      >
-                                        {col.label}
-                                      </th>
-                                    );
-                                  })}
-                                </tr>
-
-                                <tr className="bg-gradient-to-r from-indigo-100 to-indigo-50 text-blue-900">
-                                  {row2.map((col, i) => (
-                                    <th
-                                      key={i}
-                                      colSpan={col.colspan}
-                                      className={`px-2 py-2 text-center  border border-gray-900`}
-                                    >
-                                      {col.label}
-                                    </th>
-                                  ))}
-                                </tr>
-
-                                <tr className="bg-gradient-to-r from-blue-100 to-blue-50 text-blue-900">
-                                  {row3.map((col, i) => (
-                                    <th
-                                      key={i}
-                                      className={`px-3 py-2 text-center whitespace-nowrap border border-gray-300`}
-                                    >
-                                      {col.label}
-                                    </th>
-                                  ))}
-                                </tr>
-                              </thead> */}
-
                               <tbody>
                                 {timetable.data?.map((student, index) => (
                                   <tr key={index}>

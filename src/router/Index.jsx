@@ -279,6 +279,7 @@ import TeacherAttendanceMonthlyReport from "../componants/Reports/TeacherAttenda
 import FullTermMarksClass from "../componants/Reports/AssessmentrReportModule/FullTermMarksClass.jsx";
 import LessonPlanDetailedView from "../componants/View/LessonPlanDetailedView.jsx";
 import IciciFeePaymentReport from "../componants/Reports/IciciFeePaymentReport.jsx";
+import ReportCardMarksClass from "../componants/Reports/AssessmentrReportModule/ReportCardMarksClass.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -916,7 +917,9 @@ function Index() {
         {/* Staff Monthly Attendance Report */}
         <Route
           path="/staffMonthlyAttendanceRepo"
-          element={<PrivateRoute element={<StaffMonthlyAttendanceRepo />} />}
+          element={
+            <PrivateRoute element={<TeacherAttendanceMonthlyReport />} />
+          }
         />
         {/* Staff Monthly Attendance Report */}
         <Route
@@ -944,6 +947,11 @@ function Index() {
         <Route
           path="/fullTermMarksClass"
           element={<PrivateRoute element={<FullTermMarksClass />} />}
+        />
+        {/* Report Card Marks Of A Class repor */}
+        <Route
+          path="/reportCardMarksClass"
+          element={<PrivateRoute element={<ReportCardMarksClass />} />}
         />
         {/* Student Gender Wise  Report Module */}
         <Route

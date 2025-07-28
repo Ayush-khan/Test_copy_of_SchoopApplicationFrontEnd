@@ -125,8 +125,11 @@ const HomeworkStatusReport = () => {
     }
   };
 
+  const capitalizeWords = (str) =>
+    str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+
   const handlePrint = () => {
-    const printTitle = `Classwise Homework Details Report
+    const printTitle = `Homework Status Report
      ${
        selectedClass?.label
          ? `List of Class ${selectedClass.label}`
@@ -135,7 +138,7 @@ const HomeworkStatusReport = () => {
     `;
 
     const printContent = `
-  <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
+    <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
     <h5 id="tableHeading5" class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
     <div id="tableHeading" class="text-center w-max overflow-x-auto">
       <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-2">
@@ -177,7 +180,7 @@ const HomeworkStatusReport = () => {
                             <span>${subjectData.status}</span>
                             <div class="text-xs mt-1">
                               <span style="color: ${subjectData.status_color};">
-                                ${subjectData.teacher_name}
+                                ${capitalizeWords(subjectData.teacher_name)}
                               </span>
                             </div>
                           </div>
@@ -314,7 +317,7 @@ const HomeworkStatusReport = () => {
           const sub = section.subjects?.find(
             (s) => s.subject_name === subject.name
           );
-          return sub ? `(${sub.teacher_name})` : "";
+          return sub ? `(${capitalizeWords(sub.teacher_name)})` : "";
         }),
       ];
 
@@ -369,9 +372,16 @@ const HomeworkStatusReport = () => {
 
   return (
     <>
-      <div className="w-full md:w-[100%] mx-auto p-4 ">
+      {/* <div className="w-full md:w-[100%] mx-auto p-4 "> */}
+      <div
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
+          studentRemarkList.length > 0
+            ? "w-full md:w-[100%] scale-100"
+            : "w-full md:w-[80%] scale-[0.98]"
+        }`}
+      >
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
+        <div className="card rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Homework Status Report
@@ -391,12 +401,26 @@ const HomeworkStatusReport = () => {
           ></div>
 
           <>
-            <div className=" w-full md:w-[95%]  flex justify-center flex-col md:flex-row gap-x-1 ml-0    p-2">
+            {/* <div className=" w-full md:w-[95%]  flex justify-center flex-col md:flex-row gap-x-1 ml-0    p-2"> */}
+            <div
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
+                studentRemarkList.length > 0
+                  ? "pb-0 w-full md:w-[99%]"
+                  : "pb-4 w-full md:w-[80%]"
+              }`}
+            >
               <div className="w-full md:w-[80%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full md:w-[90%] gap-x-0 md:gap-x-8  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                {/* <div className="w-full md:w-[90%] gap-x-0 md:gap-x-8  flex flex-col gap-y-2 md:gap-y-0 md:flex-row"> */}
+                <div
+                  className={`  w-full gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
+                    studentRemarkList.length > 0
+                      ? "w-full md:w-[75%]  wrelative left-0"
+                      : " w-full md:w-[95%] relative left-10"
+                  }`}
+                >
                   <div className="w-full md:w-[40%] gap-x-1 justify-around  my-1 md:my-4 flex md:flex-row ">
                     <label
-                      className="md:w-[20%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
                       Class <span className="text-red-500">*</span>
@@ -463,13 +487,49 @@ const HomeworkStatusReport = () => {
                   </div>
                 </div>{" "}
               </div>
+              {studentRemarkList.length > 0 && (
+                <div className="p-2 px-3  bg-gray-100 border-none flex justify-between items-center">
+                  <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
+                    <div className="w-1/2 md:w-[95%] mr-1 ">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search "
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                    <button
+                      type="button"
+                      onClick={handleDownloadEXL}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
+                    >
+                      <FaFileExcel />
+                      <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                        Export to Excel
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handlePrint}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                    >
+                      <FiPrinter />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                        Print
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {studentRemarkList.length > 0 && (
               <>
-                <div className="w-full  mt-4">
+                <div className="w-full px-4 mb-4 mt-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                    {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                           List of Homework Status Report
@@ -512,104 +572,7 @@ const HomeworkStatusReport = () => {
                       style={{
                         backgroundColor: "#C03078",
                       }}
-                    ></div>
-
-                    {/* <div className="card-body w-[full] ">
-                      <div
-                        className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
-                        style={{
-                          scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
-                          scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
-                        }}
-                      >
-                        <table className="min-w-full leading-normal table-auto">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              {["Sr No.", "Class"].map((header, index) => (
-                                <th
-                                  key={index}
-                                  className="text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
-                                  style={{
-                                    width: index === 0 ? "40px" : "70px",
-                                  }}
-                                >
-                                  {header}
-                                </th>
-                              ))}
-
-                              {subjectsList?.map((subject) => (
-                                <th
-                                  key={subject.sm_id}
-                                  className="text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
-                                  style={{ width: "120px" }}
-                                >
-                                  {subject.name}
-                                </th>
-                              ))}
-                            </tr>
-                          </thead>
-
-                          <tbody>
-                            {displayedSections.length ? (
-                              displayedSections.map((student, index) => (
-                                <tr
-                                  key={index}
-                                  className="border border-gray-300"
-                                >
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {index + 1}
-                                  </td>
-
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.class_name || " "}
-                                  </td>
-
-                                  {subjectsList.map((subject) => {
-                                    const subjectData = student.subjects?.find(
-                                      (s) => s.subject_name === subject.name
-                                    );
-
-                                    return (
-                                      <td
-                                        key={subject.sm_id}
-                                        className="px-2 py-2 text-center border border-gray-300"
-                                      >
-                                        {subjectData ? (
-                                          <div>
-                                            <span>{subjectData.status}</span>
-                                            <div className="text-xs text-gray-600 mt-1">
-                                              <span
-                                                className={`font-medium`}
-                                                style={{
-                                                  color:
-                                                    subjectData.status_color,
-                                                }}
-                                              >
-                                                {subjectData.teacher_name}
-                                              </span>
-                                            </div>
-                                          </div>
-                                        ) : (
-                                          "-"
-                                        )}
-                                      </td>
-                                    );
-                                  })}
-                                </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td colSpan={subjectsList.length + 2}>
-                                  <div className="text-center text-xl text-red-700 py-4">
-                                    Oops! No data found..
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div> */}
+                    ></div> */}
 
                     <div className="card-body w-full">
                       <div
@@ -712,7 +675,9 @@ const HomeworkStatusReport = () => {
                                                     subjectData.status_color,
                                                 }}
                                               >
-                                                {subjectData.teacher_name}
+                                                {capitalizeWords(
+                                                  subjectData.teacher_name
+                                                )}
                                               </span>
                                             </div>
                                           </div>

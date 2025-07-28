@@ -344,9 +344,16 @@ const ClasswiseHomeworkDetailReport = () => {
 
   return (
     <>
-      <div className="w-full md:w-[80%] mx-auto p-4 ">
+      {/* <div className="w-full md:w-[80%] mx-auto p-4 "> */}
+      <div
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
+          studentRemarkList.length > 0
+            ? "w-full md:w-[90%] scale-100"
+            : "w-full md:w-[80%] scale-[0.98]"
+        }`}
+      >
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
+        <div className="card rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Classwise Homework Details Report
@@ -366,16 +373,29 @@ const ClasswiseHomeworkDetailReport = () => {
           ></div>
 
           <>
-            <div className=" w-full md:w-[95%]  flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
-              <div className="w-full md:w-[80%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full md:w-[90%] gap-x-0 md:gap-x-8  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                  <div className="w-full md:w-[40%] gap-x-1 justify-around  my-1 md:my-4 flex md:flex-row ">
+            {/* <div className=" w-full md:w-[95%]  flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2"> */}
+            <div
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
+                studentRemarkList.length > 0
+                  ? "pb-0 w-full md:w-[99%]"
+                  : "pb-4 w-full md:w-[80%]"
+              }`}
+            >
+              <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
+                <div
+                  className={`  w-full gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
+                    studentRemarkList.length > 0
+                      ? "w-full md:w-[75%]  wrelative left-0"
+                      : " w-full md:w-[95%] relative left-10"
+                  }`}
+                >
+                  {/* <div className="w-full md:w-[90%] gap-x-0 md:gap-x-8  flex flex-col gap-y-2 md:gap-y-0 md:flex-row"> */}
+                  <div className="w-full md:w-[50%] gap-x-1 justify-around  my-1 md:my-4 flex md:flex-row ">
                     <label
                       className="md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      Class
-                      <span className="text-red-500">*</span>
+                      Class <span className="text-red-500">*</span>
                     </label>
                     <div className="w-full md:w-[60%]">
                       <Select
@@ -458,13 +478,49 @@ const ClasswiseHomeworkDetailReport = () => {
                   </div>
                 </div>{" "}
               </div>
+              {studentRemarkList.length > 0 && (
+                <div className="p-2 px-3 w-[400px] bg-gray-100 border-none flex justify-between items-center">
+                  <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
+                    <div className="w-1/2 md:w-[95%] mr-1 ">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search "
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                    <button
+                      type="button"
+                      onClick={handleDownloadEXL}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
+                    >
+                      <FaFileExcel />
+                      <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                        Export to Excel
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handlePrint}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                    >
+                      <FiPrinter />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                        Print
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {studentRemarkList.length > 0 && (
               <>
-                <div className="w-full  mt-4">
+                <div className="w-full px-4 mb-4 mt-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                    {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                           List of Classwise Homework Details Report
@@ -507,9 +563,9 @@ const ClasswiseHomeworkDetailReport = () => {
                       style={{
                         backgroundColor: "#C03078",
                       }}
-                    ></div>
+                    ></div> */}
 
-                    <div className="card-body w-[80%] md:ml-24">
+                    <div className="card-body w-full">
                       <div
                         className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
                         style={{
@@ -517,63 +573,63 @@ const ClasswiseHomeworkDetailReport = () => {
                           scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
                         }}
                       >
-                        <table className="min-w-full leading-normal table-auto">
+                        <table className="table-fixed w-full leading-normal">
                           <thead>
                             <tr className="bg-gray-100">
-                              {[
-                                "Sr No.",
-                                "Subject",
-                                "Description",
-                                "Date",
-                                "Teacher Name",
-                              ].map((header, index) => {
-                                return (
-                                  <th
-                                    key={index}
-                                    className={`px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider`}
-                                  >
-                                    {header}
-                                  </th>
-                                );
-                              })}
+                              <th className="w-[7%] px-2 py-2 border text-center text-sm font-semibold text-gray-900">
+                                Sr No.
+                              </th>
+                              <th className="w-[20%] px-2 py-2 border text-center text-sm font-semibold text-gray-900">
+                                Subject
+                              </th>
+                              <th className="w-[40%] px-2 py-2 border text-center text-sm font-semibold text-gray-900">
+                                Description
+                              </th>
+                              <th className="w-[25%] px-2 py-2 border text-center text-sm font-semibold text-gray-900">
+                                Date
+                              </th>
+                              <th className="w-[20%] px-2 py-2 border text-center text-sm font-semibold text-gray-900">
+                                Teacher Name
+                              </th>
                             </tr>
                           </thead>
 
                           <tbody>
                             {displayedSections.length ? (
-                              displayedSections?.map((student, index) => (
+                              displayedSections.map((student, index) => (
                                 <tr
                                   key={student.adm_form_pk}
                                   className="border border-gray-300"
                                 >
-                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                  <td className="w-[20%] px-2 py-2 text-center border border-gray-300">
                                     {index + 1}
                                   </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                  <td className="w-[30%] px-2 py-2 text-center border border-gray-300">
                                     {student.sub_name || " "}
                                   </td>
-                                  <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
+                                  <td className="w-[35%] px-2 py-2 text-center border border-gray-300 whitespace-pre-wrap break-words">
                                     {student.description || " "}
                                   </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                  <td className="w-[25%] px-2 py-2 text-center border border-gray-300">
                                     {student.publish_date
                                       ? new Date(
                                           student.publish_date
-                                        ).toLocaleDateString("en-GB") // Format: dd/mm/yyyy
+                                        ).toLocaleDateString("en-GB")
                                       : " "}
                                   </td>
-
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.tec_name || " "}{" "}
+                                  <td className="w-[40%] px-2 py-2 text-center border border-gray-300">
+                                    {student.tec_name || " "}
                                   </td>
                                 </tr>
                               ))
                             ) : (
-                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                <div className=" text-center text-xl text-red-700">
-                                  Oops! No data found..
-                                </div>
-                              </div>
+                              <tr>
+                                <td colSpan="5">
+                                  <div className="text-center text-xl text-red-700 mt-4">
+                                    Oops! No data found..
+                                  </div>
+                                </td>
+                              </tr>
                             )}
                           </tbody>
                         </table>

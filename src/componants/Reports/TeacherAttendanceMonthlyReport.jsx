@@ -1,20 +1,22 @@
 import { useState, useEffect, useMemo } from "react";
+import React from "react";
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
 
+const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
 const TeacherAttendanceMonthlyReport = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
   // const [selectedMonth, setSelectedMonth] = useState(null);
   const navigate = useNavigate();
@@ -29,7 +31,6 @@ const TeacherAttendanceMonthlyReport = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchExams();
     // handleSearch();
   }, []);
 
@@ -47,24 +48,6 @@ const TeacherAttendanceMonthlyReport = () => {
     { value: "2", label: "February" },
     { value: "3", label: "March" },
   ];
-
-  const fetchExams = async () => {
-    try {
-      setLoadingExams(true);
-      const token = localStorage.getItem("authToken");
-
-      const response = await axios.get(`${API_URL}/api/classes`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Class", response);
-      setStudentNameWithClassId(response?.data || []);
-    } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
-    } finally {
-      setLoadingExams(false);
-    }
-  };
 
   const handleMonthSelect = (selectedOption) => {
     setStudentError(""); // Reset error if month is selected.
@@ -90,29 +73,28 @@ const TeacherAttendanceMonthlyReport = () => {
       if (selectedStudentId) params.month = selectedStudentId;
 
       const response = await axios.get(
-        `${API_URL}/api/getsubstituteteachermonthlyreport`,
+        `${API_URL}/api/get_teachermonthlyattendancereport/${selectedStudentId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params,
         }
       );
 
-      if (!response?.data?.data || response?.data?.data?.length === 0) {
-        toast.error(
-          "Teacher Attendance Monthly Detailed Report data not found."
-        );
+      console.log("Response", response);
+
+      if (!response?.data?.report || response?.data?.report?.length === 0) {
+        toast.error("Staff Monthly Attendace Detailed Report data not found.");
         setTimetable([]);
       } else {
-        setTimetable(response?.data?.data);
+        setTimetable(response?.data?.report);
         setPageCount(Math.ceil(response?.data?.data?.length / pageSize)); // Set page count based on response size
       }
     } catch (error) {
       console.error(
-        "Error fetching Teacher Attendance Monthly Detailed Report:",
+        "Error fetching Staff Attendance Monthly Detailed Report:",
         error
       );
       toast.error(
-        "Error fetching Teacher Attendance Monthly Detailed Report. Please try again."
+        "Error fetching Staff Attendance Monthly Detailed Report. Please try again."
       );
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
@@ -120,69 +102,98 @@ const TeacherAttendanceMonthlyReport = () => {
     }
   };
 
+  const capitalizeWords = (str) =>
+    str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+
   const handlePrint = () => {
-    const printTitle = `Teacher Attendance Monthly Detailed Report ${
+    const printTitle = `Staff Attendance Monthly Report ${
       selectedStudent?.label
         ? `List of Month ${selectedStudent.label}`
-        : ": For All Teacher "
+        : ": For All Staff "
     }`;
     const printContent = `
-    <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
-         <h5 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
-    <div id="tableHeading" class="text-center w-3/4">
-      <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-2">
-        <thead>
-          <tr class="bg-gray-100">
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Name</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Employee Id</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Punch Date</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">In Time</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Out Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${displayedSections
-            .map(
-              (student, index) => `
-        <tr class="text-sm">
-          <td class="px-2 text-center py-2 border border-black">
-            ${index + 1}
-          </td>
-          <td class="px-2 text-center py-2 border border-black">
-            ${student?.period || " "}
-          </td>
-          <td class="px-2 text-center py-2 border border-black">
-            ${student?.date || " "}
-          </td>
-          <td class="px-2 text-center py-2 border border-black">
-            ${student?.teachername || " "}
-          </td>
-          <td class="px-2 text-center py-2 border border-black">
-            ${student?.classname || " "} ${student?.sectionname || " "}
-            (${student?.name || " "})
-          </td>
-          <td class="px-2 text-center py-2 border border-black">
-            ${student?.substitutename || " "}
-          </td>
-        </tr>`
-            )
-            .join("")}
-        </tbody>
-      </table>
-    </div>
+  <div class="p-4 bg-white text-sm">
+    <h5 class="text-lg font-semibold mb-4 text-center border-b border-black pb-2">${printTitle}</h5>
+    <table class="min-w-full border border-black table-fixed border-collapse">
+      <colgroup>
+        <col style="width: 200px;" /> <!-- Teacher Name -->
+        <col style="width: 80px;" /> <!-- Days/In/Out -->
+        ${days.map(() => `<col style="width: 80px;" />`).join("")}
+      </colgroup>
+      <tbody>
+        ${displayedSections
+          .map((teacher, index) => {
+            const attendanceMap = {};
+
+            teacher.days.forEach((day) => {
+              const dayNum = new Date(day.date).getDate(); // 1 to 31
+              attendanceMap[dayNum] = {
+                in: day.in,
+                out: day.out,
+              };
+            });
+
+            const dayHeaders = days
+              .map(
+                (d) =>
+                  `<td class="border border-black px-1 py-1 text-center">
+                  ${d}
+                </td>`
+              )
+              .join("");
+
+            const inRow = days
+              .map(
+                (d) =>
+                  `<td class="border border-black px-1 py-1 text-center">${
+                    attendanceMap[d]?.in || ""
+                  }</td>`
+              )
+              .join("");
+
+            const outRow = days
+              .map(
+                (d) =>
+                  `<td class="border border-black px-1 py-1 text-center">${
+                    attendanceMap[d]?.out || ""
+                  }</td>`
+              )
+              .join("");
+
+            return `
+              <tr>
+                <td rowspan="3" class="border border-black font-semibold px-2 py-2 align-top text-left">
+                 ${capitalizeWords(teacher.name)}
+                </td>
+                <td class="border border-black font-semibold px-1 py-1 text-center">Days</td>
+                ${dayHeaders}
+              </tr>
+              <tr>
+                <td class="border border-black font-semibold px-1 py-1 text-center">In</td>
+                ${inRow}
+              </tr>
+              <tr>
+                <td class="border border-black font-semibold px-1 py-1 text-center">Out</td>
+                ${outRow}
+              </tr>
+              <tr><td colspan="${days.length + 2}" class="h-2"></td></tr>
+            `;
+          })
+          .join("")}
+      </tbody>
+    </table>
   </div>`;
 
-    const printWindow = window.open("", "_blank", "width=1000,height=800");
-
+    const printWindow = window.open("", "_blank", "width=2000,height=1000");
     printWindow.document.write(`
     <html>
       <head>
-        <title>${printTitle}</title>
+       <title>${printTitle}</title>
         <style>
-                @page { margin: 0; }
-        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-  
+            @page {
+                 size: A3 landscape; /* 420mm × 297mm */
+                 margin: 10mm;
+            }
         /* Increase width */
         #tableMain {
           width: 100%;
@@ -194,7 +205,7 @@ const TeacherAttendanceMonthlyReport = () => {
         h5 {
           width: 100%;
           text-align: center;
-          font-size: 1.5em;
+          font-size: 1em;
           font-weight: bold;
           margin-bottom: 10px;
         }
@@ -206,7 +217,7 @@ const TeacherAttendanceMonthlyReport = () => {
         }
   
         table {
-          width: 80%; /* Increase table width */
+          width: 100%; /* Increase table width */
           border-spacing: 0;
            margin: auto;
         }
@@ -215,7 +226,7 @@ const TeacherAttendanceMonthlyReport = () => {
           border: 1px solid gray;
           padding: 12px;
           text-align: center;
-          font-size: 16px; /* Increase font size */
+          font-size: 7px; /* Increase font size */
         }
   
         th {
@@ -248,83 +259,109 @@ const TeacherAttendanceMonthlyReport = () => {
       return;
     }
 
-    // Define headers matching the print table
-    const headers = [
-      "Sr No.",
-      "Name",
-      "Employee Id",
-      "Punch Date",
-      "In Time",
-      "Out Time",
-    ];
+    // Create static days: 1 to 31
+    const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
-    // Convert displayedSections data to array format for Excel
-    const data = displayedSections.map((student, index) => [
-      index + 1,
-      student?.period || " ",
-      student?.date || " ",
-      student?.teachername || " ",
-      `${student?.classname || " "} ${student?.sectionname || " "} (${
-        student?.name || " "
-      })`,
-      student?.substitutename || " ",
-    ]);
+    // Headers: Name + Days columns (In and Out for each day)
+    const headers = [`Month : ${selectedStudent.label}`];
 
-    // Create a worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
-    const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
-    worksheet["!cols"] = columnWidths;
+    // Construct rows for each teacher
+    const rows = [];
 
-    // Create a workbook and append the worksheet
+    displayedSections.forEach((teacher) => {
+      const attendanceMap = {};
+      teacher.days.forEach((day) => {
+        const dateObj = new Date(day.date);
+        const dayNumber = dateObj.getDate();
+        attendanceMap[dayNumber] = {
+          in: day.in || "",
+          out: day.out || "",
+        };
+      });
+
+      // Row 1: Days (just day numbers)
+      const daysRow = ["", "Days", ...days.map((d) => d)];
+
+      // Row 2: In times
+      const inRow = [
+        capitalizeWords(teacher.name),
+        "In",
+        ...days.map((d) => attendanceMap[d]?.in || ""),
+      ];
+
+      // Row 3: Out times
+      const outRow = [
+        "",
+        "Out",
+        ...days.map((d) => attendanceMap[d]?.out || ""),
+      ];
+
+      // Add to rows
+      rows.push(daysRow, inRow, outRow, []); // Empty row as spacer
+    });
+
+    // Create worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    worksheet["!cols"] = headers.map(() => ({ wch: 15 }));
+
+    // Create workbook
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(
       workbook,
       worksheet,
-      "Teacher Monthly Attendance Details Report"
+      "Staff Monthly Attendance Detailed Report"
     );
 
-    // Generate and download the Excel file
-
-    const fileName = `Teacher_Attendance_Monthly_Detailed_Report ${
-      selectedStudent?.label
-        ? `List of Month ${selectedStudent.label}`
-        : ": For All Teacher "
+    const fileName = `Staff_Monthly_Attendance_Detailed_Report_${
+      selectedStudent?.label || "All"
     }.xlsx`;
+
     XLSX.writeFile(workbook, fileName);
   };
 
   console.log("row", timetable);
 
-  const filteredSections = timetable.filter((student) => {
-    const searchLower = searchTerm.toLowerCase();
+  const filteredSections = timetable
+    .map((teacher) => {
+      const matchingDays = teacher.days.filter((day) => {
+        const searchLower = searchTerm.toLowerCase();
+        const date = day?.date?.toLowerCase() || "";
+        const teacherName = teacher?.name?.toLowerCase() || "";
 
-    // Convert period to string before calling `.toLowerCase()`
-    const period = student?.period?.toString().toLowerCase() || "";
-    const date = student?.date?.toLowerCase() || "";
-    const teacherName = student?.teachername?.toLowerCase() || "";
-    const classInfo = `${student?.classname || ""} ${
-      student?.sectionname || ""
-    } (${student?.name || ""})`.toLowerCase();
-    const substituteName = student?.substitutename?.toLowerCase() || "";
+        return date.includes(searchLower) || teacherName.includes(searchLower);
+      });
 
-    return (
-      period.includes(searchLower) ||
-      date.includes(searchLower) ||
-      teacherName.includes(searchLower) ||
-      classInfo.includes(searchLower) ||
-      substituteName.includes(searchLower)
-    );
-  });
+      if (matchingDays.length > 0) {
+        return {
+          ...teacher,
+          days: matchingDays,
+        };
+      }
+      return null;
+    })
+    .filter(Boolean);
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
+
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+  console.log("filtered section", displayedSections);
+
   return (
     <>
-      <div className="w-full md:w-[80%] mx-auto p-4 ">
+      {/* <div className="w-full md:w-[95%] mx-auto p-4 "> */}
+      <div
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
+          timetable.length > 0
+            ? "w-full md:w-[100%] scale-100"
+            : "w-full md:w-[80%] scale-[0.98]"
+        }`}
+      >
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
+        <div className="card  rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              Teacher Monthly Attendance Report
+              Staff Monthly Attendance Detailed Report
             </h5>
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -334,16 +371,30 @@ const TeacherAttendanceMonthlyReport = () => {
             />
           </div>
           <div
-            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
           ></div>
 
           <>
-            <div className=" w-full md:w-[80%]  flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+            {/* <div className=" w-full md:w-[80%]  flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2"> */}
+            <div
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
+                timetable.length > 0
+                  ? "pb-0 w-full md:w-[99%]"
+                  : "pb-4 w-full md:w-[80%]"
+              }`}
+            >
               <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full md:w-[75%] gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                {/* <div className="w-full md:w-[75%] gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row"> */}
+                <div
+                  className={`  w-full gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
+                    timetable.length > 0
+                      ? "w-full md:w-[70%]  wrelative left-0"
+                      : " w-full md:w-[95%] relative left-10"
+                  }`}
+                >
                   <div className="w-full md:w-[50%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                     <label
                       className="md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
@@ -351,7 +402,7 @@ const TeacherAttendanceMonthlyReport = () => {
                     >
                       Month <span className="text-sm text-red-500">*</span>
                     </label>
-                    <div className=" w-full md:w-[65%]">
+                    <div className=" w-full md:w-[60%]">
                       <Select
                         menuPortalTarget={document.body}
                         menuPosition="fixed"
@@ -413,16 +464,52 @@ const TeacherAttendanceMonthlyReport = () => {
                   </div>
                 </div>{" "}
               </div>
+              {timetable.length > 0 && (
+                <div className="p-2 px-3 w-[500px]  bg-gray-100 border-none flex justify-between items-center">
+                  <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
+                    <div className="w-1/2 md:w-[95%] mr-1 ">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search "
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                    <button
+                      type="button"
+                      onClick={handleDownloadEXL}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
+                    >
+                      <FaFileExcel />
+                      <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                        Export to Excel
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handlePrint}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                    >
+                      <FiPrinter />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                        Print
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {timetable.length > 0 && (
               <>
-                <div className="w-full  mt-4">
+                <div className="w-full px-4 mb-4 mt-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                    {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          List Of Teacher Attendance Monthly Report
+                          List of Staff Attendance Monthly Report
                         </h3>
                         <div className="w-1/2 md:w-[18%] mr-1 ">
                           <input
@@ -462,81 +549,219 @@ const TeacherAttendanceMonthlyReport = () => {
                       style={{
                         backgroundColor: "#C03078",
                       }}
-                    ></div>
+                    ></div> */}
 
-                    <div className="card-body w-full md:w-[90%] mx-auto">
-                      <div
-                        className="h-96 lg:h-96  overflow-y-scroll overflow-x-scroll"
-                        style={{
-                          scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
-                          scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
-                        }}
-                      >
-                        <table className="min-w-full leading-normal table-auto">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              {[
-                                "Sr No.",
-                                "Name",
-                                "Employee Id",
-                                "Punch Date",
-                                "In Time",
-                                "Out Time",
-                              ].map((header, index) => (
-                                <th
-                                  key={index}
-                                  className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
-                                >
-                                  {header}
-                                </th>
-                              ))}
-                            </tr>
-                          </thead>
-
-                          <tbody>
+                    <div className="w-full bg-white">
+                      {/* Table Container */}
+                      <div className="border border-gray-300 rounded-b-lg overflow-hidden">
+                        <div className="flex">
+                          {/* Fixed Teacher Names + Labels Column */}
+                          <div className="flex-shrink-0 bg-gray-50 border-r border-gray-300">
+                            {/* Staff Rows */}
                             {displayedSections.length ? (
-                              displayedSections?.map((student, index) => (
-                                <tr
-                                  key={student.adm_form_pk}
-                                  className="border border-gray-300"
+                              displayedSections.map((staff, index) => (
+                                <div
+                                  key={index}
+                                  className="border-b border-gray-300"
                                 >
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {index + 1}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.period || " "}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.date
-                                      ? new Date(
-                                          student.date
-                                        ).toLocaleDateString("en-GB")
-                                      : " "}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.teachername || " "}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.classname || " "}{" "}
-                                    {student.sectionname || " "}
-                                    {"("}
-                                    {student.name || " "}
-                                    {")"}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student.substitutename || " "}
-                                  </td>
-                                </tr>
+                                  {/* Days Row */}
+                                  <div className="flex">
+                                    <div
+                                      className="w-64 p-3 bg-white border-r border-gray-300 flex items-center"
+                                      style={{ height: "40px" }}
+                                    >
+                                      {index === 0 && (
+                                        <div className="font-semibold text-gray-800 text-s">
+                                          {staff.name
+                                            .toLowerCase()
+                                            .replace(/\b\w/g, (char) =>
+                                              char.toUpperCase()
+                                            )}
+                                        </div>
+                                      )}
+                                      {index !== 0 && (
+                                        <div className="font-semibold text-gray-800 text-s">
+                                          {staff.name
+                                            .toLowerCase()
+                                            .replace(/\b\w/g, (char) =>
+                                              char.toUpperCase()
+                                            )}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div
+                                      className="w-16 p-3 bg-gray-50 border-l border-gray-300 flex items-center justify-center"
+                                      style={{ height: "40px" }}
+                                    >
+                                      <span className="text-xs font-medium text-gray-700">
+                                        Days
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* In Row */}
+                                  <div className="flex">
+                                    <div
+                                      className="w-64 p-3 bg-white border-r border-gray-300"
+                                      style={{ height: "40px" }}
+                                    >
+                                      {/* Empty space for teacher name continuation */}
+                                    </div>
+                                    <div
+                                      className="w-16 p-3 bg-green-50 border-l border-gray-300 flex items-center justify-center"
+                                      style={{ height: "40px" }}
+                                    >
+                                      <span className="text-xs font-medium text-green-700">
+                                        In
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Out Row */}
+                                  <div className="flex">
+                                    <div
+                                      className="w-64 p-3 bg-white border-r border-gray-300"
+                                      style={{ height: "40px" }}
+                                    >
+                                      {/* Empty space for teacher name continuation */}
+                                    </div>
+                                    <div
+                                      className="w-16 p-3 bg-red-50 border-l border-gray-300 flex items-center justify-center"
+                                      style={{ height: "40px" }}
+                                    >
+                                      <span className="text-xs font-medium text-red-700">
+                                        Out
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
                               ))
                             ) : (
-                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                <div className=" text-center text-xl text-red-700">
-                                  Oops! No data found..
-                                </div>
+                              <div className="w-80 p-8 text-center text-gray-500">
+                                No staff data
                               </div>
                             )}
-                          </tbody>
-                        </table>
+                          </div>
+
+                          {/* Scrollable Days/Time Columns */}
+                          <div className="flex-1 overflow-hidden">
+                            <div
+                              className="overflow-x-auto"
+                              style={{
+                                scrollbarWidth: "thin",
+                                scrollbarColor: "#C03178 #f1f5f9",
+                              }}
+                            >
+                              <div className="min-w-max">
+                                {/* Days Header */}
+                                {/* <div
+                                  className="flex bg-gray-100 border-b border-gray-300 sticky top-0 z-10"
+                                  style={{ height: "52px" }}
+                                >
+                                  {days.map((day) => (
+                                    <div
+                                      key={day}
+                                      className="w-20 p-3 text-center border-r border-gray-300 font-semibold text-gray-800 text-sm flex items-center justify-center"
+                                    >
+                                      {day}
+                                    </div>
+                                  ))}
+                                </div> */}
+
+                                {/* Staff Data Rows */}
+                                {displayedSections.length ? (
+                                  displayedSections.map((staff, staffIndex) => {
+                                    const attendanceMap = {};
+                                    staff.days.forEach((day) => {
+                                      const dayNum = new Date(
+                                        day.date
+                                      ).getDate();
+                                      attendanceMap[dayNum] = {
+                                        in: day.in,
+                                        out: day.out,
+                                      };
+                                    });
+
+                                    return (
+                                      <div
+                                        key={staffIndex}
+                                        className="border-b border-gray-300"
+                                      >
+                                        <div
+                                          className="flex bg-gray-100 border-b border-gray-300 sticky top-0 z-10"
+                                          style={{ height: "40px" }}
+                                        >
+                                          {days.map((day) => (
+                                            <div
+                                              key={day}
+                                              className="w-20 p-2 text-center border-r border-gray-300 font-semibold text-gray-800 text-sm flex items-center justify-center"
+                                            >
+                                              {day}
+                                            </div>
+                                          ))}
+                                        </div>
+
+                                        {/* In Times Row */}
+                                        <div
+                                          className="flex bg-white hover:bg-green-50 transition-colors"
+                                          style={{ height: "40px" }}
+                                        >
+                                          {days.map((day) => (
+                                            <div
+                                              key={`in-${staffIndex}-${day}`}
+                                              className="w-20 p-2 text-center border-r border-gray-300 text-xs flex items-center justify-center"
+                                            >
+                                              {attendanceMap[day]?.in && (
+                                                <span className="bg-green-100 text-green-800 px-1 py-1 rounded text-xs">
+                                                  {attendanceMap[day].in}
+                                                </span>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+
+                                        {/* Out Times Row */}
+                                        <div
+                                          className="flex bg-white hover:bg-red-50 transition-colors"
+                                          style={{ height: "40px" }}
+                                        >
+                                          {days.map((day) => (
+                                            <div
+                                              key={`out-${staffIndex}-${day}`}
+                                              className="w-20 p-2 text-center border-r border-gray-300 text-xs flex items-center justify-center"
+                                            >
+                                              {attendanceMap[day]?.out && (
+                                                <span className="bg-red-100 text-red-800 px-1 py-1 rounded text-xs">
+                                                  {attendanceMap[day].out}
+                                                </span>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  <div className="flex items-center justify-center h-32">
+                                    <div className="text-red-600 text-lg font-medium">
+                                      Oops! No data found...
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="bg-gray-100 p-3 border-t border-gray-200 rounded-b-lg">
+                        <div className="flex justify-between items-center text-sm text-gray-600">
+                          <span>Total Staff: {displayedSections.length}</span>
+                          <span>
+                            Report Generated: {new Date().toLocaleDateString()}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>

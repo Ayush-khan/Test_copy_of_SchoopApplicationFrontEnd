@@ -11,6 +11,12 @@ import * as XLSX from "xlsx";
 
 const TeacherRemarkReport = () => {
   const API_URL = import.meta.env.VITE_API_URL;
+  const academicYrFrom = localStorage.getItem("academic_yr_from");
+  const academicYrTo = localStorage.getItem("academic_yr_to");
+
+  console.log("from year", academicYrFrom);
+  console.log("to yaer", academicYrTo);
+
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [fromDate, setFromDate] = useState(null);
@@ -92,11 +98,18 @@ const TeacherRemarkReport = () => {
       })),
     [studentNameWithClassId]
   );
+  const formatDateToDDMMYYYY = (date) => {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
   const handleSearch = async () => {
     // Clear any previous error messages and search inputs
     setSearchTerm("");
-    setStudentError(""); // if using any field-level error
+    setStudentError("");
     setTimetable([]);
     setLeaveTypes([]);
     setPageCount(0);
@@ -115,10 +128,9 @@ const TeacherRemarkReport = () => {
       // Prepare query params
       const params = {};
       if (selectedStudentId) params.staff_id = selectedStudentId;
-      if (fromDate) params.from_date = fromDate;
-      if (toDate) params.to_date = toDate;
+      if (fromDate) params.date = formatDateToDDMMYYYY(fromDate);
+      if (toDate) params.to_date = formatDateToDDMMYYYY(toDate);
 
-      // Fetch Teacher Remark report
       const response = await axios.get(
         `${API_URL}/api/getteacherremarkreport`,
         {
@@ -129,7 +141,6 @@ const TeacherRemarkReport = () => {
         }
       );
 
-      // Log for debugging
       console.log("response", response);
 
       const resultData = response?.data?.data || [];
@@ -153,6 +164,9 @@ const TeacherRemarkReport = () => {
       setLoadingForSearch(false);
     }
   };
+
+  const capitalizeWords = (str) =>
+    str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 
   const handlePrint = () => {
     const printTitle = `Staff Remark Report  ${
@@ -192,9 +206,8 @@ const TeacherRemarkReport = () => {
                     ? new Date(subject?.remark_date).toLocaleDateString("en-GB")
                     : ""
                 }</td>
-                 <td class="px-2 text-center py-2 border border-black">${
-                   subject?.name || ""
-                 }</td>
+                 <td class="px-2 text-center py-2 border border-black">
+                 ${capitalizeWords(subject?.name || "")}</td>
                   <td class="px-2 text-center py-2 border border-black">${
                     subject?.remark_type || ""
                   }</td>
@@ -331,7 +344,7 @@ const TeacherRemarkReport = () => {
           ? new Date(student?.remark_date).toLocaleDateString("en-GB")
           : ""
       }`,
-      student?.name || "",
+      `${capitalizeWords(student?.name || "")}`,
       student?.remark_type || "",
       student?.remark_subject || "",
       student?.remark_desc || "",
@@ -394,9 +407,16 @@ const TeacherRemarkReport = () => {
 
   return (
     <>
-      <div className="w-full md:w-[90%] mx-auto p-4 ">
+      {/* <div className="w-full md:w-[90%] mx-auto p-4 "> */}
+      <div
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
+          timetable.length > 0
+            ? "w-full md:w-[90%] scale-100"
+            : "w-full md:w-[80%] scale-[0.98]"
+        }`}
+      >
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
+        <div className="card rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Staff Remark Report
@@ -416,9 +436,23 @@ const TeacherRemarkReport = () => {
           ></div>
 
           <>
-            <div className=" w-full md:w-[80%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+            {/* <div className=" w-full md:w-[80%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2" */}
+            <div
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
+                timetable.length > 0
+                  ? "pb-0 w-full md:w-[99%]"
+                  : "pb-4 w-full md:w-[80%]"
+              }`}
+            >
               <div className="w-full md:w-[80%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                {/* <div className="w-full  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row"> */}
+                <div
+                  className={`  w-full gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
+                    timetable.length > 0
+                      ? "w-full md:w-[75%]  wrelative left-0"
+                      : " w-full md:w-[95%] relative left-10"
+                  }`}
+                >
                   {/* Class Dropdown */}
                   <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
@@ -477,6 +511,8 @@ const TeacherRemarkReport = () => {
                         type="date"
                         id="fromDate"
                         value={fromDate}
+                        min={localStorage.getItem("academic_yr_from") || ""}
+                        max={localStorage.getItem("academic_yr_to") || ""}
                         onChange={(e) => setFromDate(e.target.value)}
                         className="text-sm w-full border border-gray-300 rounded px-2 py-2"
                       />
@@ -525,13 +561,49 @@ const TeacherRemarkReport = () => {
                   </div>
                 </div>
               </div>
+              {timetable.length > 0 && (
+                <div className="p-2 px-3  bg-gray-100 border-none flex justify-between items-center">
+                  <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
+                    <div className="w-1/2 md:w-[95%] mr-1 ">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search "
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                    <button
+                      type="button"
+                      onClick={handleDownloadEXL}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
+                    >
+                      <FaFileExcel />
+                      <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                        Export to Excel
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handlePrint}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                    >
+                      <FiPrinter />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                        Print
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {timetable.length > 0 && (
               <>
-                <div className="w-full  mt-4">
+                <div className="w-full px-4 mb-4 mt-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                    {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                           List of Staff Remark Report
@@ -574,7 +646,7 @@ const TeacherRemarkReport = () => {
                       style={{
                         backgroundColor: "#C03078",
                       }}
-                    ></div>
+                    ></div> */}
 
                     <div className="card-body w-full">
                       <div
@@ -635,7 +707,22 @@ const TeacherRemarkReport = () => {
                                       : ""}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.name || ""}
+                                    {student?.name
+                                      ? student.name
+                                          .toLowerCase()
+                                          .split(" ")
+                                          .map((word) =>
+                                            word
+                                              .split("'")
+                                              .map(
+                                                (part) =>
+                                                  part.charAt(0).toUpperCase() +
+                                                  part.slice(1)
+                                              )
+                                              .join("'")
+                                          )
+                                          .join(" ")
+                                      : " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.remark_type || ""}
@@ -646,16 +733,27 @@ const TeacherRemarkReport = () => {
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.remark_desc || ""}
                                   </td>
-
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.published || ""}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.acknowledged || ""}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.viewed || ""}
-                                  </td>
+                                  {student?.published === "No" &&
+                                  student?.acknowledged === "No" &&
+                                  student?.viewed === "No" ? (
+                                    <>
+                                      <td className="px-2 py-2 text-center border border-gray-300"></td>
+                                      <td className="px-2 py-2 text-center border border-gray-300"></td>
+                                      <td className="px-2 py-2 text-center border border-gray-300"></td>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {student?.published || ""}
+                                      </td>
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {student?.acknowledged || ""}
+                                      </td>
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {student?.viewed || ""}
+                                      </td>
+                                    </>
+                                  )}
                                 </tr>
                               ))
                             ) : (

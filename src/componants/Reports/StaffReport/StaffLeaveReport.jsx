@@ -151,6 +151,9 @@ const StaffLeaveReport = () => {
     }
   };
 
+  const capitalizeWords = (str) =>
+    str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+
   const handlePrint = () => {
     const printTitle = `Staff Leave Report  ${
       selectedStudent?.label
@@ -184,9 +187,9 @@ const StaffLeaveReport = () => {
                 <td class="px-2 text-center py-2 border border-black">${
                   index + 1
                 }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.staff_name || " "
-                }</td>
+                <td class="px-2 text-center py-2 border border-black">
+                 ${capitalizeWords(subject.name)}
+              </td>
                 ${leaveTypes
                   .map(
                     (type) =>
@@ -305,7 +308,7 @@ const StaffLeaveReport = () => {
     // Convert displayedSections to array-of-arrays format
     const data = displayedSections.map((student, index) => [
       index + 1,
-      student?.staff_name || " ",
+      `${capitalizeWords(student.name)}`,
       ...leaveTypes.map((type) => student.leaves?.[type] ?? 0), // <-- spread leave values
       student?.total || "0",
     ]);
@@ -343,9 +346,16 @@ const StaffLeaveReport = () => {
 
   return (
     <>
-      <div className="w-full md:w-[90%] mx-auto p-4 ">
+      {/* <div className="w-full md:w-[90%] mx-auto p-4 "> */}
+      <div
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
+          timetable.length > 0
+            ? "w-full md:w-[90%] scale-100"
+            : "w-full md:w-[80%] scale-[0.98]"
+        }`}
+      >
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
+        <div className="card rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Staff Leave Report
@@ -365,13 +375,25 @@ const StaffLeaveReport = () => {
           ></div>
 
           <>
-            <div className=" w-full md:w-[95%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+            {/* <div className=" w-full md:w-[95%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2"> */}
+            <div
+              className={`w-full flex flex-col md:flex-row md:items-end gap-4 p-2 ${
+                timetable.length > 0 ? "md:w-[100%]" : "md:w-[90%]"
+              }`}
+            >
               <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                {/* <div className="w-full  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row"> */}
+                <div
+                  className={`  w-full gap-x-0 md:gap-x-8  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
+                    timetable.length > 0
+                      ? "w-full md:w-[100%]  wrelative left-0"
+                      : " w-full md:w-[95%] relative left-10"
+                  }`}
+                >
                   {/* Class Dropdown */}
                   <div className="w-full  md:w-[70%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
-                      className="w-full md:w-[20%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="w-full md:w-[27%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
                       Staff
@@ -414,9 +436,9 @@ const StaffLeaveReport = () => {
                   </div>
 
                   {/* From Date Dropdown */}
-                  <div className="w-full   md:w-[70%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
+                  <div className="w-full   md:w-[70%] gap-x-2 justify-between my-1 md:my-4 flex md:flex-row">
                     <label
-                      className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
+                      className="ml-0 md:ml-4 w-full md:w-[70%] text-md mt-1.5"
                       htmlFor="fromDate"
                     >
                       From Date
@@ -433,7 +455,7 @@ const StaffLeaveReport = () => {
                   </div>
 
                   {/* To Date Dropdown */}
-                  <div className="w-full  md:w-[70%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
+                  <div className="w-full  md:w-[70%] gap-x-2 justify-between my-1 md:my-4 flex md:flex-row">
                     <label
                       className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
                       htmlFor="toDate"
@@ -493,13 +515,36 @@ const StaffLeaveReport = () => {
                   </div>
                 </div>
               </div>
+              {timetable.length > 0 && (
+                <div className="flex gap-2 items-end  bg-gray-100 p-2">
+                  <input
+                    type="text"
+                    className="form-control border border-gray-300 rounded px-2 py-1 text-sm"
+                    placeholder="Search"
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleDownloadEXL}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                  >
+                    <FaFileExcel />
+                  </button>
+                  <button
+                    onClick={handlePrint}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                  >
+                    <FiPrinter />
+                  </button>
+                </div>
+              )}
             </div>
 
             {timetable.length > 0 && (
               <>
-                <div className="w-full  mt-4">
+                <div className="w-full px-4 mt-4 mb-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                    {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                           List of Staff Leave Report
@@ -542,7 +587,7 @@ const StaffLeaveReport = () => {
                       style={{
                         backgroundColor: "#C03078",
                       }}
-                    ></div>
+                    ></div> */}
 
                     <div className="card-body w-full">
                       <div
@@ -554,25 +599,6 @@ const StaffLeaveReport = () => {
                       >
                         <table className="min-w-full leading-normal table-auto">
                           <thead>
-                            {/* <tr className="bg-gray-100">
-                              {[
-                                "Sr No.",
-                                "Staff Name",
-                                "Casual Leave",
-                                "Maternity Leave",
-                                "Medical Leave",
-                                "Test",
-                                "Total",
-                              ].map((header, index) => (
-                                <th
-                                  key={index}
-                                  className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
-                                >
-                                  {header}
-                                </th>
-                              ))}
-                            </tr> */}
-
                             <tr className="bg-gray-100">
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Sr No.
@@ -607,7 +633,22 @@ const StaffLeaveReport = () => {
                                     {index + 1}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.staff_name || " "}
+                                    {student?.staff_name
+                                      ? student.staff_name
+                                          .toLowerCase()
+                                          .split(" ")
+                                          .map((word) =>
+                                            word
+                                              .split("'")
+                                              .map(
+                                                (part) =>
+                                                  part.charAt(0).toUpperCase() +
+                                                  part.slice(1)
+                                              )
+                                              .join("'")
+                                          )
+                                          .join(" ")
+                                      : " "}
                                   </td>
 
                                   {leaveTypes.map((type) => (
