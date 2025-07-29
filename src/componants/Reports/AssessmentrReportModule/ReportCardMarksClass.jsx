@@ -321,7 +321,7 @@ const ReportCardMarksClass = () => {
 
           exam.headings.forEach((heading) => {
             row3.push({
-              label: `${heading.heading_name} (${heading.highest_marks})`,
+              label: `${heading.heading_name}\n${heading.highest_marks}`,
             });
 
             subjectExamHeadingMap.push({
@@ -337,8 +337,8 @@ const ReportCardMarksClass = () => {
         });
 
         // Add "Total" column for the subject
-        row2.push({ label: "Total", colspan: 1 });
-        row3.push({ label: `Total (${subject.total_max_all})` });
+        row2.push({ label: "", colspan: 1 });
+        row3.push({ label: `Total\n${subject.total_max_all}` });
 
         // Find the exam which includes "Total"
         const examWithTotal = subject.exams.find((exam) =>
@@ -354,7 +354,7 @@ const ReportCardMarksClass = () => {
         });
 
         row1.push({
-          label: `Term ${termId}\n${subject.subject_name}`,
+          label: `${subject.subject_name}\n (Term ${termId})`,
           colspan: totalColSpan + 1,
         });
       });
@@ -363,112 +363,6 @@ const ReportCardMarksClass = () => {
     return { row1, row2, row3, subjectExamHeadingMap };
   }, [marksData.headings]);
 
-  //   const generateMarksTableHTML = () => {
-  //     const theadHTML = `
-  //     <thead style="background: #e5e7eb; font-weight:bold;">
-  //       <tr>
-  //         <th style="border:1px solid #333; padding:6px;">Sr No</th>
-  //         <th style="border:1px solid #333; padding:6px;">Roll No</th>
-  //         <th style="border:1px solid #333; padding:6px;">Reg No</th>
-  //         <th style="border:1px solid #333; padding:6px;">Student Name</th>
-  //         ${Object.entries(marksData.headings)
-  //           .map(([termId, subjects]) =>
-  //             Object.entries(subjects)
-  //               .map(([subjectId, subject]) =>
-  //                 subject.exams
-  //                   .map((exam) =>
-  //                     exam.headings
-  //                       .map(
-  //                         (mh) =>
-  //                           `<th style="border:1px solid #333; padding:6px;">
-  //                             ${subject.subject_name} - ${exam.exam_name} (${mh.heading_name}-${mh.highest_marks})
-  //                           </th>`
-  //                       )
-  //                       .join("")
-  //                   )
-  //                   .join("")
-  //               )
-  //               .join("")
-  //           )
-  //           .join("")}
-  //       </tr>
-  //     </thead>
-  //   `;
-
-  //     const tbodyHTML = `
-  //     <tbody>
-  //       ${marksData.data
-  //         .map((student, idx) => {
-  //           const fullName = `${capitalizeFirst(student.first_name) || ""} ${
-  //             toLowerCaseAll(student.mid_name) || ""
-  //           } ${toLowerCaseAll(student.last_name) || ""}`.trim();
-  //           const cells = [
-  //             `<td style="border:1px solid #333;padding:4px;">${idx + 1}</td>`,
-  //             `<td style="border:1px solid #333;padding:4px;">${student.roll_no}</td>`,
-  //             `<td style="border:1px solid #333;padding:4px;">${student.reg_no}</td>`,
-  //             `<td style="border:1px solid #333;padding:4px; text-align:left;">${fullName}</td>`,
-  //           ];
-
-  //           Object.entries(marksData.headings).forEach(([termId, subjects]) => {
-  //             Object.entries(subjects).forEach(([subjectId, subject]) => {
-  //               subject.exams.forEach((exam) => {
-  //                 exam.headings.forEach((mh) => {
-  //                   const mark =
-  //                     student.marks?.[termId]?.[subjectId]?.[exam.exam_id]?.[
-  //                       mh.heading_name
-  //                     ] ?? "-";
-  //                   cells.push(
-  //                     `<td style="border:1px solid #333;padding:4px; text-align:center;">${mark}</td>`
-  //                   );
-  //                 });
-  //               });
-  //             });
-  //           });
-
-  //           return `<tr>${cells.join("")}</tr>`;
-  //         })
-  //         .join("")}
-  //     </tbody>
-  //   `;
-
-  //     return `<table style="width:100%; font-size:12px;">${theadHTML}${tbodyHTML}</table>`;
-  //   };
-
-  //   const handlePrint = () => {
-  //     const printTitle =
-  //       `Report Card Marks for ${
-  //         selectedStudent?.label || "the selected class"
-  //       }` +
-  //       (selectedExam?.label
-  //         ? `, conducted during the ${selectedExam.label}`
-  //         : "") +
-  //       (selectedSubject?.label
-  //         ? `, for the subject ${selectedSubject.label}`
-  //         : "") +
-  //       ".";
-
-  //     const tableHTML = generateMarksTableHTML();
-  //     const win = window.open("", "_blank", "width=1200,height=800");
-  //     win.document.write(`
-  //     <html><head>
-  //               <title>${printTitle}</title>
-
-  //     <style>
-  //       table, th, td { border:1px solid #333;  }
-  //       th, td { padding:6px; font-size:12px; }
-  //       th { background:#e5e7eb; font-weight:bold; }
-  //     </style>
-  //     </head><body>
-  //       ${tableHTML}
-  //     </body></html>
-  //   `);
-  //     win.document.close();
-  //     win.onload = () => {
-  //       win.focus();
-  //       win.print();
-  //       win.close();
-  //     };
-  //   };
   const generateMarksTableHTML = () => {
     const row1 = ["Sr No", "Roll No", "Reg No", "Student Name"];
     const row2 = [];
@@ -477,19 +371,20 @@ const ReportCardMarksClass = () => {
 
     Object.entries(marksData.headings).forEach(([termId, subjects]) => {
       Object.entries(subjects).forEach(([subjectId, subject]) => {
-        const examSpan = subject.exams.reduce(
+        const totalExamHeadings = subject.exams.reduce(
           (acc, exam) => acc + exam.headings.length,
           0
         );
 
-        row1.push({ label: subject.subject_name, colspan: examSpan });
+        const totalColSpan = totalExamHeadings + 1; // +1 for "Total" column
+        row1.push({ label: subject.subject_name, colspan: totalColSpan });
 
         subject.exams.forEach((exam) => {
           row2.push({ label: exam.exam_name, colspan: exam.headings.length });
 
           exam.headings.forEach((heading) => {
             row3.push({
-              label: `${heading.heading_name} (${heading.highest_marks})`,
+              label: `${heading.heading_name}\n${heading.highest_marks}`,
             });
 
             columnKeys.push({
@@ -497,69 +392,115 @@ const ReportCardMarksClass = () => {
               subjectId,
               examId: exam.exam_id,
               headingName: heading.heading_name,
+              maxMarks: heading.highest_marks,
+              isTotal: false,
             });
           });
+        });
+
+        // Compute total max marks for subject
+        const totalMarks = subject.exams.reduce((total, exam) => {
+          return (
+            total +
+            exam.headings.reduce(
+              (acc, heading) => acc + Number(heading.highest_marks || 0),
+              0
+            )
+          );
+        }, 0);
+
+        // Add total column for this subject
+        row2.push({ label: "", colspan: 1 });
+        row3.push({ label: `Total\n${totalMarks}` }); // 💡 This is the key change
+
+        columnKeys.push({
+          termId,
+          subjectId,
+          isSubjectTotal: true,
+          maxMarks: totalMarks,
         });
       });
     });
 
     const theadHTML = `
-    <thead>
-      <tr style="background:#d1d5db; font-weight:bold;">
-        ${row1
-          .map((cell) =>
-            typeof cell === "string"
-              ? `<th rowspan="3" style="border:1px solid #333;padding:6px;">${cell}</th>`
-              : `<th colspan="${cell.colspan}" style="border:1px solid #333;padding:6px;">${cell.label}</th>`
-          )
-          .join("")}
-      </tr>
-      <tr style="background:#d1d5db; font-weight:bold;">
-        ${row2
-          .map(
-            (cell) =>
-              `<th colspan="${cell.colspan}" style="border:1px solid #333;padding:6px;">${cell.label}</th>`
-          )
-          .join("")}
-      </tr>
-      <tr style="background:#e0f2fe; font-weight:bold;">
-        ${row3
-          .map(
-            (cell) =>
-              `<th style="border:1px solid #333;padding:6px;">${cell.label}</th>`
-          )
-          .join("")}
-      </tr>
-    </thead>`;
+      <thead>
+        <tr style="background:#d1d5db; font-weight:bold;">
+          ${row1
+            .map((cell) =>
+              typeof cell === "string"
+                ? `<th rowspan="3" style="border:1px solid #333;padding:6px;">${cell}</th>`
+                : `<th colspan="${cell.colspan}" style="border:1px solid #333;padding:6px;">${cell.label}</th>`
+            )
+            .join("")}
+        </tr>
+        <tr style="background:#d1d5db; font-weight:bold;">
+          ${row2
+            .map(
+              (cell) =>
+                `<th colspan="${cell.colspan}" style="border:1px solid #333;padding:6px;">${cell.label}</th>`
+            )
+            .join("")}
+        </tr>
+        <tr style="background:#e0f2fe; font-weight:bold;">
+          ${row3
+            .map(
+              (cell) =>
+                `<th style="border:1px solid #333;padding:6px; white-space:pre-line;">${cell.label.replace(
+                  /\n/g,
+                  "<br/>"
+                )}</th>`
+            )
+            .join("")}
+        </tr>
+      </thead>`;
 
     const tbodyHTML = `
-    <tbody>
-      ${marksData.data
-        .map((student, idx) => {
-          const fullName = `${capitalizeFirst(student.first_name) || ""} ${
-            toLowerCaseAll(student.mid_name) || ""
-          } ${toLowerCaseAll(student.last_name) || ""}`.trim();
+      <tbody>
+        ${marksData.data
+          .map((student, idx) => {
+            const fullName = `${capitalizeFirst(student.first_name) || ""} ${
+              toLowerCaseAll(student.mid_name) || ""
+            } ${toLowerCaseAll(student.last_name) || ""}`.trim();
 
-          const cells = [
-            `<td style="border:1px solid #333;padding:4px;">${idx + 1}</td>`,
-            `<td style="border:1px solid #333;padding:4px;">${student.roll_no}</td>`,
-            `<td style="border:1px solid #333;padding:4px;">${student.reg_no}</td>`,
-            `<td style="border:1px solid #333;padding:4px; text-align:left;">${fullName}</td>`,
-          ];
+            const cells = [
+              `<td style="border:1px solid #333;padding:4px;">${idx + 1}</td>`,
+              `<td style="border:1px solid #333;padding:4px;">${student.roll_no}</td>`,
+              `<td style="border:1px solid #333;padding:4px;">${student.reg_no}</td>`,
+              `<td style="border:1px solid #333;padding:4px; text-align:left;">${fullName}</td>`,
+            ];
 
-          columnKeys.forEach(({ termId, subjectId, examId, headingName }) => {
-            const mark =
-              student.marks?.[termId]?.[subjectId]?.[examId]?.[headingName] ??
-              "-";
-            cells.push(
-              `<td style="border:1px solid #333;padding:4px; text-align:center;">${mark}</td>`
+            let subjectTotal = 0;
+
+            columnKeys.forEach(
+              ({ termId, subjectId, examId, headingName, isSubjectTotal }) => {
+                if (isSubjectTotal) {
+                  // Show total of previously accumulated subject
+                  cells.push(
+                    `<td style="border:1px solid #333;padding:4px; text-align:center; font-weight:bold;">${subjectTotal}</td>`
+                  );
+                  subjectTotal = 0; // Reset for next subject
+                  return;
+                }
+
+                const mark =
+                  student.marks?.[termId]?.[subjectId]?.[examId]?.[headingName];
+                const value =
+                  mark !== undefined && mark !== null ? Number(mark) : "-";
+
+                if (value !== "-" && !isNaN(value)) {
+                  subjectTotal += Number(value);
+                }
+
+                cells.push(
+                  `<td style="border:1px solid #333;padding:4px; text-align:center;">${value}</td>`
+                );
+              }
             );
-          });
 
-          return `<tr>${cells.join("")}</tr>`;
-        })
-        .join("")}
-    </tbody>`;
+            return `<tr>${cells.join("")}</tr>`;
+          })
+          .join("")}
+      </tbody>`;
 
     return `<table style="width:100%; font-size:12px;text-align:center;">${theadHTML}${tbodyHTML}</table>`;
   };
@@ -581,17 +522,17 @@ const ReportCardMarksClass = () => {
     const tableHTML = generateMarksTableHTML();
     const win = window.open("", "_blank", "width=1200,height=800");
     win.document.write(`
-    <html><head>
-    <title>${printTitle}</title>
-    <style>
-      table, th, td { border:1px solid #333;  }
-      th, td { padding:6px; font-size:12px; }
-      th { font-weight:bold; }
-    </style>
-    </head><body>
-      ${tableHTML}
-    </body></html>
-  `);
+      <html><head>
+      <title>${printTitle}</title>
+      <style>
+        table, th, td { border:1px solid #333;  }
+        th, td { padding:6px; font-size:12px; }
+        th { font-weight:bold; }
+      </style>
+      </head><body>
+        ${tableHTML}
+      </body></html>
+    `);
     win.document.close();
     win.onload = () => {
       win.focus();
@@ -600,91 +541,181 @@ const ReportCardMarksClass = () => {
     };
   };
   const generateMarksExcelData = () => {
-    const level1 = ["Sr No", "Roll No", "Reg No", "Student Name"];
-    const level2 = ["", "", "", ""];
-    const level3 = ["", "", "", ""];
+    const aoa = [];
+    const merges = [];
 
-    const columnKeys = [];
+    const level1 = [];
+    const level2 = [];
+    const level3 = [];
+    const level4 = []; // <-- NEW
 
-    // Loop to generate header rows and columnKeys
-    Object.entries(marksData.headings).forEach(([termId, subjects]) => {
-      Object.entries(subjects).forEach(([subjectId, subject]) => {
-        let subjectColSpan = 0;
-        const tempLevel2 = [];
-        const tempLevel3 = [];
+    const stickyHeaders = [
+      { label: "Roll No" },
+      { label: "Reg No" },
+      { label: "Student Name" },
+    ];
 
-        subject.exams.forEach((exam) => {
-          const headingCount = exam.headings.length;
-          subjectColSpan += headingCount;
-
-          // Row 2: Exam Name spanning number of headings
-          tempLevel2.push({
-            label: exam.exam_name,
-            span: headingCount,
-          });
-
-          // Row 3: Individual heading names
-          exam.headings.forEach((mh) => {
-            tempLevel3.push(`${mh.heading_name} (max ${mh.highest_marks})`);
-            columnKeys.push({
-              termId,
-              subjectId,
-              examId: exam.exam_id,
-              headingName: mh.heading_name,
-              subjectName: subject.subject_name,
-              examName: exam.exam_name,
-            });
-          });
-        });
-
-        // Row 1: Subject Name with total span
-        level1.push(subject.subject_name);
-        for (let i = 1; i < subjectColSpan; i++) level1.push("");
-
-        // Fill Row 2 (Exam Names)
-        tempLevel2.forEach((exam) => {
-          level2.push(exam.label);
-          for (let i = 1; i < exam.span; i++) level2.push("");
-        });
-
-        // Fill Row 3 (Heading names)
-        level3.push(...tempLevel3);
-      });
+    stickyHeaders.forEach((header, index) => {
+      level1.push({ v: header.label });
+      level2.push({ v: "" });
+      level3.push({ v: "" });
+      level4.push({ v: "" }); // <== Also empty for sticky headers
+      merges.push({ s: { r: 0, c: index }, e: { r: 3, c: index } }); // rowspan = 4
     });
 
-    // Now generate student rows
-    const dataRows = marksData.data.map((student, idx) => {
+    let colIndex = stickyHeaders.length;
+
+    // Row 1
+    row1.slice(3).forEach((cell) => {
+      const colspan = cell.colspan || 1;
+      level1.push({ v: cell.label });
+      for (let i = 1; i < colspan; i++) level1.push({ v: "" });
+
+      merges.push({
+        s: { r: 0, c: colIndex },
+        e: { r: 0, c: colIndex + colspan - 1 },
+      });
+
+      colIndex += colspan;
+    });
+
+    // Row 2
+    colIndex = stickyHeaders.length;
+    row2.forEach((cell) => {
+      const colspan = cell.colspan || 1;
+      level2.push({ v: cell.label });
+      for (let i = 1; i < colspan; i++) level2.push({ v: "" });
+
+      merges.push({
+        s: { r: 1, c: colIndex },
+        e: { r: 1, c: colIndex + colspan - 1 },
+      });
+
+      colIndex += colspan;
+    });
+
+    // Row 3 - Exam Headings
+    row3.forEach((cell) => {
+      const label = cell.label || "";
+
+      // Case 1: Match "Exam Name (40)" format
+      const match = label.match(/^(.*?)\s*\((\d+)\)$/);
+
+      if (match) {
+        const examName = match[1].trim(); // e.g. "Periodic Test"
+        const maxMark = match[2]; // e.g. "40"
+
+        level3.push({ v: examName });
+        level4.push({ v: maxMark });
+      }
+      // Case 2: Match "Term\n100" format
+      else if (label.includes("\n")) {
+        const [examName, maxMark] = label.split("\n");
+
+        level3.push({ v: examName.trim() });
+        level4.push({ v: maxMark.trim() });
+      }
+      // Fallback if format doesn't match
+      else {
+        level3.push({ v: label });
+        level4.push({ v: "" });
+      }
+    });
+
+    aoa.push(level1, level2, level3, level4); // Add level4 now
+
+    const dataRows = timetable.data.map((student) => {
       const fullName = `${capitalizeFirst(student.first_name) || ""} ${
         toLowerCaseAll(student.mid_name) || ""
       } ${toLowerCaseAll(student.last_name) || ""}`.trim();
 
-      const row = [idx + 1, student.roll_no, student.reg_no, fullName];
-
-      columnKeys.forEach(({ termId, subjectId, examId, headingName }) => {
-        const mark =
-          student.marks?.[termId]?.[subjectId]?.[examId]?.[headingName] ?? "-";
-        row.push(mark);
-      });
+      const row = [
+        student.roll_no,
+        student.reg_no,
+        fullName,
+        ...subjectExamHeadingMap.map(
+          ({ termId, subjectId, examId, headingName, isSubjectTotal }) => {
+            if (isSubjectTotal) {
+              const subjectExams = student.marks?.[termId]?.[subjectId] || {};
+              for (const examKey in subjectExams) {
+                if (subjectExams[examKey]?.Total !== undefined) {
+                  return subjectExams[examKey].Total;
+                }
+              }
+              return "-";
+            } else {
+              return (
+                student.marks?.[termId]?.[subjectId]?.[examId]?.[headingName] ??
+                "-"
+              );
+            }
+          }
+        ),
+      ];
 
       return row;
     });
 
-    return [level1, level2, level3, ...dataRows];
+    return { aoa: [...aoa, ...dataRows], merges };
   };
+
   const handleDownloadEXL = () => {
-    const aoa = generateMarksExcelData();
+    const { aoa, merges } = generateMarksExcelData();
+
     if (!aoa || aoa.length <= 3) {
       toast.error("No marks data to export.");
       return;
     }
 
     const ws = XLSX.utils.aoa_to_sheet(aoa);
-    ws["!cols"] = aoa[3].map(() => ({ wch: 25 })); // Set column width based on actual data row
+
+    const borderStyle = {
+      top: { style: "thin", color: { rgb: "000000" } },
+      bottom: { style: "thin", color: { rgb: "000000" } },
+      left: { style: "thin", color: { rgb: "000000" } },
+      right: { style: "thin", color: { rgb: "000000" } },
+    };
+
+    const headerFill = { patternType: "solid", fgColor: { rgb: "D9E1F2" } };
+
+    // Apply styles to each cell
+    for (let R = 0; R < aoa.length; ++R) {
+      for (let C = 0; C < aoa[R].length; ++C) {
+        const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+        const cell = ws[cellRef];
+        if (!cell) continue;
+
+        const isHeader = R <= 2;
+        const isTotal =
+          aoa[2]?.[C]?.toLowerCase?.()?.includes("total") && R > 2;
+
+        cell.s = {
+          font: { bold: isHeader || isTotal },
+          alignment: {
+            vertical: "center",
+            horizontal: "center",
+            wrapText: true,
+          },
+          border: borderStyle,
+          fill: isHeader ? headerFill : undefined,
+        };
+      }
+    }
+
+    ws["!merges"] = merges;
+
+    // Auto column widths
+    ws["!cols"] = aoa[0].map((col, i) => ({
+      wch: aoa.reduce((max, row) => {
+        const len = String(row[i] || "").length;
+        return Math.max(max, len + 2);
+      }, 10),
+    }));
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Marks Report");
 
-    const fname =
+    const fileName =
       `Report Card Marks for ${
         selectedStudent?.label || "the selected class"
       }` +
@@ -696,77 +727,8 @@ const ReportCardMarksClass = () => {
         ? `, for the subject ${selectedSubject.label}`
         : "") +
       `.xlsx`;
-
-    XLSX.writeFile(wb, fname);
+    XLSX.writeFile(wb, fileName);
   };
-
-  //   const generateMarksExcelData = () => {
-  //     const headerRow = ["Sr No", "Roll No", "Reg No", "Student Name"];
-
-  //     const columnKeys = [];
-
-  //     Object.entries(marksData.headings).forEach(([termId, subjects]) => {
-  //       Object.entries(subjects).forEach(([subjectId, subject]) => {
-  //         subject.exams.forEach((exam) => {
-  //           exam.headings.forEach((mh) => {
-  //             headerRow.push(
-  //               `${subject.subject_name} - ${exam.exam_name} (${mh.heading_name}, max ${mh.highest_marks})`
-  //             );
-  //             columnKeys.push({
-  //               termId,
-  //               subjectId,
-  //               examId: exam.exam_id,
-  //               headingName: mh.heading_name,
-  //             });
-  //           });
-  //         });
-  //       });
-  //     });
-
-  //     const dataRows = marksData.data.map((student, idx) => {
-  //       const fullName = `${capitalizeFirst(student.first_name) || ""} ${
-  //         toLowerCaseAll(student.mid_name) || ""
-  //       } ${toLowerCaseAll(student.last_name) || ""}`.trim();
-
-  //       const row = [idx + 1, student.roll_no, student.reg_no, fullName];
-
-  //       columnKeys.forEach(({ termId, subjectId, examId, headingName }) => {
-  //         const mark =
-  //           student.marks?.[termId]?.[subjectId]?.[examId]?.[headingName] ?? "-";
-  //         row.push(mark);
-  //       });
-
-  //       return row;
-  //     });
-
-  //     return [headerRow, ...dataRows];
-  //   };
-
-  //   const handleDownloadEXL = () => {
-  //     const aoa = generateMarksExcelData();
-  //     if (!aoa || aoa.length <= 1) {
-  //       toast.error("No marks data to export.");
-  //       return;
-  //     }
-  //     const ws = XLSX.utils.aoa_to_sheet(aoa);
-  //     ws["!cols"] = aoa[0].map(() => ({ wch: 25 }));
-  //     const wb = XLSX.utils.book_new();
-  //     XLSX.utils.book_append_sheet(wb, ws, "Marks Report");
-
-  //     const fname =
-  //       `Report Card Marks for ${
-  //         selectedStudent?.label || "the selected class"
-  //       }` +
-  //       (selectedExam?.label
-  //         ? `, conducted during the ${selectedExam.label}`
-  //         : "") +
-  //       (selectedSubject?.label
-  //         ? `, for the subject ${selectedSubject.label}`
-  //         : "") +
-  //       `.xlsx`;
-
-  //     XLSX.writeFile(wb, fname);
-  //   };
 
   return (
     <>
@@ -1253,7 +1215,9 @@ const ReportCardMarksClass = () => {
                                       key={`r3-${i}`}
                                       className="px-3 py-2 text-center whitespace-nowrap border border-gray-800"
                                     >
-                                      {cell.label}
+                                      {cell.label.split("\n").map((line, i) => (
+                                        <div key={i}>{line}</div>
+                                      ))}
                                     </th>
                                   ))}
                                 </tr>
