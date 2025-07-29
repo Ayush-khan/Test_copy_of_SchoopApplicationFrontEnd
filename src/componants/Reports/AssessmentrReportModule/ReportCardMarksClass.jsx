@@ -12,31 +12,28 @@ import * as XLSX from "xlsx";
 const ReportCardMarksClass = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [selectedMonthId, setSelectedMonthId] = useState(null);
-  const [students, setStudents] = useState([]);
   const [showStudentReport, setShowStudentReport] = useState(false);
   const [roleId, setRoleId] = useState(null);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
   const navigate = useNavigate();
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
-  const [dateError, setDateError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [timetable, setTimetable] = useState([]);
   const [regId, setRegId] = useState(null);
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [examOptions, setExamOptions] = useState([]);
+  const [termsOptions, setTermsOptions] = useState([]);
   const [subjectOptions, setSubjectOptions] = useState([]);
   const [loadingExamsData, setLoadingExamsData] = useState(false);
+  const [loadingTermsData, setLoadingTermsData] = useState(false);
   const [loadingSubjectsData, setLoadingSubjectsData] = useState(false);
   const [marksData, setMarksData] = useState({ headings: [], data: [] });
   const [selectedExam, setSelectedExam] = useState(null);
+  const [selectedTerms, setSelectedTerms] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const capitalizeFirst = (str) =>
     str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
@@ -52,6 +49,7 @@ const ReportCardMarksClass = () => {
     };
 
     init();
+    fetchtermsByClassId();
   }, []);
   const fetchRoleId = async () => {
     const token = localStorage.getItem("authToken");
@@ -159,7 +157,24 @@ const ReportCardMarksClass = () => {
     setLoadingExamsData(false);
     setLoadingSubjectsData(false);
   };
+  const fetchtermsByClassId = async () => {
+    const token = localStorage.getItem("authToken");
+    try {
+      const response = await axios.get(`${API_URL}/api/get_Term`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
+      const mappedExams =
+        response?.data?.map((exam) => ({
+          label: exam.name,
+          value: exam?.term_id,
+        })) || [];
+
+      setTermsOptions(mappedExams);
+    } catch (err) {
+      console.error("Error fetching exams:", err);
+    }
+  };
   const fetchExamsByClassId = async (classId) => {
     const token = localStorage.getItem("authToken");
     try {
@@ -236,7 +251,9 @@ const ReportCardMarksClass = () => {
       if (selectedSubject?.value) {
         params.subject_id = selectedSubject.value;
       }
-
+      if (selectedTerms?.value) {
+        params.term_id = selectedTerms.value;
+      }
       const response = await axios.get(
         `${API_URL}/api/get_classwisereportcardmarksreport`,
         {
@@ -552,6 +569,7 @@ const ReportCardMarksClass = () => {
       `Report Card Marks for ${
         selectedStudent?.label || "the selected class"
       }` +
+      (selectedTerms?.label ? `, of terms ${selectedTerms.label}` : "") +
       (selectedExam?.label
         ? `, conducted during the ${selectedExam.label}`
         : "") +
@@ -670,6 +688,7 @@ const ReportCardMarksClass = () => {
       `Report Card Marks for ${
         selectedStudent?.label || "the selected class"
       }` +
+      (selectedTerms?.label ? `, of terms ${selectedTerms.label}` : "") +
       (selectedExam?.label
         ? `, conducted during the ${selectedExam.label}`
         : "") +
@@ -752,8 +771,8 @@ const ReportCardMarksClass = () => {
   return (
     <>
       <div
-        className={` transition-all duration-500 w-[85%]  mx-auto p-4 ${
-          showStudentReport ? "w-full " : "w-[85%] "
+        className={` transition-all duration-500 w-[90%]  mx-auto p-4 ${
+          showStudentReport ? "w-full " : "w-[90%] "
         }`}
         // className="w-full md:w-[85%]  mx-auto p-4 "
       >
@@ -787,7 +806,7 @@ const ReportCardMarksClass = () => {
               <>
                 <div className=" w-full md:w-[98%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
                   <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                    <div className="w-full md:w-[98%]  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                    <div className="w-full md:w-[98%]  gap-x-0 md:gap-x-6 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                       {/* Class Dropdown */}
                       <div className="w-full  md:w-[45%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                         <label
@@ -831,6 +850,40 @@ const ReportCardMarksClass = () => {
                               {studentError}
                             </div>
                           )}
+                        </div>
+                      </div>
+                      <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                        <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
+                          Terms
+                        </label>
+                        <div className="w-full md:w-[85%]">
+                          <Select
+                            value={selectedTerms}
+                            onChange={(option) => setSelectedTerms(option)}
+                            options={termsOptions}
+                            placeholder={
+                              loadingTermsData ? "Loading..." : "Select..."
+                            }
+                            isSearchable
+                            isClearable
+                            isDisabled={loadingTermsData}
+                            className="text-sm"
+                            styles={{
+                              control: (provided) => ({
+                                ...provided,
+                                fontSize: "1em",
+                                minHeight: "30px",
+                              }),
+                              menu: (provided) => ({
+                                ...provided,
+                                fontSize: "1em",
+                              }),
+                              option: (provided) => ({
+                                ...provided,
+                                fontSize: ".9em",
+                              }),
+                            }}
+                          />
                         </div>
                       </div>
                       {/* Exam Dropdown */}
@@ -966,11 +1019,10 @@ const ReportCardMarksClass = () => {
                               View Report Card Marks
                             </h3>
                             <div className="bg-blue-50 border-l-2 border-r-2 px-4 text-[1em] border-pink-500 rounded-md shadow-md w-full md:w-auto">
-                              <div className="flex flex-col md:flex-row md:items-center md:gap-6  mt-1 text-blue-800 font-medium">
+                              <div className="flex flex-col md:flex-row md:items-center md:gap-3 mt-1 text-blue-800 font-medium space-y-1 md:space-y-0">
                                 <div className="flex items-center gap-1">
-                                  <span className="text-blue-600">
-                                    🏫 Class:
-                                  </span>
+                                  <span className="text-lg">🏫</span>
+                                  <span className="text-blue-600">Class:</span>
                                   <span>
                                     {selectedStudent?.class || "--"}{" "}
                                     {selectedStudent?.section || "--"}
@@ -978,14 +1030,21 @@ const ReportCardMarksClass = () => {
                                 </div>
 
                                 <div className="flex items-center gap-1">
-                                  <span className="text-blue-600">
-                                    📅 Exam:
-                                  </span>
+                                  <span className="text-lg">📚</span>
+                                  <span className="text-blue-600">Term:</span>
+                                  <span>{selectedTerms?.label || "--"}</span>
+                                </div>
+
+                                <div className="flex items-center gap-1">
+                                  <span className="text-lg">📝</span>
+                                  <span className="text-blue-600">Exam:</span>
                                   <span>{selectedExam?.label || "--"}</span>
                                 </div>
+
                                 <div className="flex items-center gap-1">
+                                  <span className="text-lg">📖</span>
                                   <span className="text-blue-600">
-                                    📅 Subject:
+                                    Subject:
                                   </span>
                                   <span>{selectedSubject?.label || "--"}</span>
                                 </div>
