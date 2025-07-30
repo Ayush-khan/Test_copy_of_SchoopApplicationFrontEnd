@@ -280,6 +280,10 @@ import FullTermMarksClass from "../componants/Reports/AssessmentrReportModule/Fu
 import LessonPlanDetailedView from "../componants/View/LessonPlanDetailedView.jsx";
 import IciciFeePaymentReport from "../componants/Reports/IciciFeePaymentReport.jsx";
 import ReportCardMarksClass from "../componants/Reports/AssessmentrReportModule/ReportCardMarksClass.jsx";
+import Event from "../componants/Events/Event.jsx";
+import CreateEvent from "../componants/Events/CreateEvent.jsx";
+import EditEvent from "../componants/Events/EditEvent.jsx";
+import MarkDropdownEditor from "../componants/Events/MarkDropdownEditor.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -724,6 +728,20 @@ function Index() {
         <Route
           path="/sections"
           element={<PrivateRoute element={<Sections />} />}
+        />
+        {/* Event modules Card Module */}
+        <Route path="/event" element={<PrivateRoute element={<Event />} />} />
+        <Route
+          path="/createEvent"
+          element={<PrivateRoute element={<CreateEvent />} />}
+        />
+        <Route
+          path="/editEvent/:id"
+          element={<PrivateRoute element={<EditEvent />} />}
+        />
+        <Route
+          path="/markDropdown"
+          element={<PrivateRoute element={<MarkDropdownEditor />} />}
         />
         {/* Id Cards Module */}
         {/* Student Id Card Module */}
