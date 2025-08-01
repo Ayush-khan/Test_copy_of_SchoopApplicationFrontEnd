@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import styles from "../CSS/Navbar.module.css";
 import "./styles.css";
 import { RxCross1 } from "react-icons/rx";
@@ -50,26 +50,43 @@ const UserVerification = () => {
 
   const handleResetPassword = async () => {
     setTouched({ userId: true });
-
     if (!isValid) return;
 
     setLoading(true);
     setNewPasswordLoading(true);
+
     try {
       const response = await axios.post(
-        `${API_URL}/api/update_forgotpassword`,
+        `https://api.aceventura.in/demo/evolvuUserService/validate_user`,
         {
           user_id: userId,
         }
       );
 
-      if (response.data.success) {
-        toast.success("Password reset instructions sent.");
+      if (response.data && response.data.length > 0) {
+        const shortName = response.data[0].short_name;
+
+        // Second API call using shortName
+        const secondResponse = await axios.post(
+          `https://api.aceventura.in/demo/evolvuUserService/check_user_access`,
+          {
+            short_name: shortName,
+          }
+        );
+
+        if (secondResponse.data.success) {
+          toast.success("Redirecting...");
+        } else {
+          toast.error(secondResponse.data.message || "Access denied.");
+        }
       } else {
-        toast.error(response.data.message || "Something went wrong.");
+        toast.error("Invalid user or no data returned.");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to reset password.");
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
     } finally {
       setLoading(false);
       setNewPasswordLoading(false);
@@ -88,8 +105,12 @@ const UserVerification = () => {
             className={`${styles.navbar} w-screen flex items-center justify-between px-2 h-12`}
             style={{ background: "#C03078" }}
           >
-            <div className="w-full flex justify-between items-center px-2">
-              <img src="/App ICON.png" alt="Logo" className="h-10" />
+            <div className="w-full flex justify-between items-center px-1">
+              <img
+                src="/logoSchoolimg.png"
+                alt="Logo"
+                className="h-24 relative bottom-2"
+              />
               <h1 className="flex-grow text-center text-white font-semibold text-lg lg:text-2xl">
                 EvolvU Smart School
               </h1>

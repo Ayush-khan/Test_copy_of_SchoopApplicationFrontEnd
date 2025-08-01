@@ -194,17 +194,12 @@ import Event from "../componants/Events/Event.jsx";
 import CreateEvent from "../componants/Events/CreateEvent.jsx";
 import EditEvent from "../componants/Events/EditEvent.jsx";
 import MarkDropdownEditor from "../componants/Events/MarkDropdownEditor.jsx";
-import UserVerification from "../Layouts/UserVerification.jsx";
 
 // import Menus from "../c";
 function Index() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/userVerification" element={<UserVerification />} />
-
-      <Route path="/login" element={<Login />} />
-      <Route path="/notification" element={<NotificationPage />} />
       <Route path="/forgotPassword" element={<ForgotPassword />} />
       <Route path="/" element={<MainLayout />}>
         {/* Role Management */}

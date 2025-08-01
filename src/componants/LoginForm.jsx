@@ -6,8 +6,8 @@ import { faUser, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import LoadingSpinner from "../componants/common/LoadingSpinner.jsx"; // Import the LoadingSpinner component
 import styles from "../CSS/LoginForm.module.css";
 
-const LoginForm = () => {
-  const [email, setEmail] = useState("");
+const LoginForm = ({ userId }) => {
+  const [email, setEmail] = useState(userId || "");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -104,11 +104,15 @@ const LoginForm = () => {
             <FontAwesomeIcon icon={faUser} className={styles.userIcon} />
             <input
               type="text"
+              readOnly={!!userId} // Make input read-only if userId is provided
               id="email"
               name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter User Id"
+              className={`
+    ${userId ? "bg-white-600  cursor-not-allowed" : "bg-gray-600 "}
+    focus:outline-none focus:ring-2 focus:ring-blue-400`}
               required
             />
           </div>
@@ -124,6 +128,9 @@ const LoginForm = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
+              className={`
+   
+    focus:outline-none focus:ring-2 focus:ring-blue-400`}
             />
             <FontAwesomeIcon
               icon={showPassword ? faEyeSlash : faEye}
