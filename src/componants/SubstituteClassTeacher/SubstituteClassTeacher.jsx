@@ -10,6 +10,7 @@ import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
 
 function SubstituteClassTeacher() {
+  const today = new Date().toISOString().split("T")[0];
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -32,8 +33,8 @@ function SubstituteClassTeacher() {
   const [roleId, setRoleId] = useState("");
   const [academicYear, setAcademicYear] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState(null);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -68,7 +69,6 @@ function SubstituteClassTeacher() {
       setRoleId(sessionResponse?.data?.user.role_id); // Store role_id
       // setRoleId("A"); // Store role_id
       setAcademicYear(sessionResponse?.data?.custom_claims?.academic_yr);
-      console.log("roleIDis:", sessionResponse.data);
       // Fetch academic year data
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -81,7 +81,6 @@ function SubstituteClassTeacher() {
       const response = await axios.get(`${API_URL}/api/get_classteachers`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("the classes are ", response.data.data);
       setClasses(
         response.data.data.map((classItem) => ({
           value: {
@@ -122,7 +121,7 @@ function SubstituteClassTeacher() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Fetched substitute teacher sections:", response.data.data);
+      // setPageCount(Math.ceil(response.data.data.length / pageSize));
       setSections(response.data.data);
     } catch (error) {
       setError(error.message);
@@ -166,21 +165,17 @@ function SubstituteClassTeacher() {
     if (sectionToDelete) {
       setCurrentSection(sectionToDelete); // Set the section to delete in state
       setShowDeleteModal(true); // Show the delete modal
-      console.log("Section to be deleted:", sectionToDelete);
     } else {
-      console.log("No section found for the given teacher_id");
     }
   };
 
   const handleEdit = (section) => {
-    console.log("Handle edit data", section);
     setCurrentSection(section);
     setNewSectionName(section?.section_id);
     setNewDepartmentId(section?.teacher_id);
     setTeacherId(section?.teacher_id);
     setStartDate(section.start_date);
     setEndDate(section.end_date);
-    console.log("the handleEdit ", section);
 
     if (section?.teacher_id && section?.substitute_teacher_name) {
       setSelectedTeacher({
@@ -213,8 +208,8 @@ function SubstituteClassTeacher() {
     setFieldErrors({});
     setTeacherId("");
     setNameError("");
-    setStartDate(null);
-    setEndDate(null);
+    setStartDate(today);
+    setEndDate(today);
     setIsUpdating(false);
     setIsSubmitting(false);
   };
@@ -246,10 +241,9 @@ function SubstituteClassTeacher() {
       handleCloseModal();
       toast.success("Substitute Class Teacher added successfully!");
       setIsSubmitting(false);
-      setStartDate(null);
-      setEndDate(null);
+      setStartDate(today);
+      setEndDate(today);
     } catch (error) {
-      console.log("error:", error?.response?.data?.message);
       toast.error(error?.response?.data?.message || error?.message);
     }
   };
@@ -261,7 +255,6 @@ function SubstituteClassTeacher() {
       return;
     }
     if (!teacherId) {
-      console.log("check teacherId is here");
       setFieldErrors({ teacher_id: "Please select a teacher." });
       return;
     }
@@ -271,7 +264,8 @@ function SubstituteClassTeacher() {
       const response = await axios.put(
         `${API_URL}/api/update_classteachersubstitute/${currentSection.class_substitute_id}`,
         {
-          class_teacher_id: className?.value?.teacher_id || "",
+          class_teacher_id:
+            className?.value?.teacher_id || className?.value || "",
           start_date: startDate, // Pass class ID
           sub_teacher_id: teacherId,
           end_date: endDate,
@@ -287,8 +281,8 @@ function SubstituteClassTeacher() {
       setTeacherId("");
       handleCloseModal();
       setIsUpdating(false);
-      setStartDate(null);
-      setEndDate(null);
+      setStartDate(today);
+      setEndDate(today);
     } catch (error) {
       toast.error("Error updating Class teacher. Please try again.");
     }
@@ -302,8 +296,6 @@ function SubstituteClassTeacher() {
       if (!token || !currentSection || !currentSection.section_id) {
         throw new Error("Class Teacher ID is missing");
       }
-
-      console.log("Handle submit delete ", currentSection);
 
       setIsDeleting(true);
       const response = await axios.delete(
@@ -357,13 +349,12 @@ function SubstituteClassTeacher() {
     prevSearchTermRef.current = trimmedSearch;
   }, [searchTerm]);
 
-  const searchLower = searchTerm.trim().toLowerCase();
-
   const filteredSections = sections.filter((section) => {
+    const searchLower = searchTerm.trim().toLowerCase();
     return (
-      section?.class_teacher_name?.toLowerCase().includes(searchLower) ||
-      section?.substitute_teacher_name?.toLowerCase().includes(searchLower) ||
-      section?.classname?.toLowerCase().includes(searchLower)
+      section.class_teacher_name.toLowerCase().includes(searchLower) ||
+      section.substitute_teacher_name.toLowerCase().includes(searchLower) ||
+      section.classname.toLowerCase().includes(searchLower)
     );
   });
 
@@ -410,6 +401,29 @@ function SubstituteClassTeacher() {
     const month = String(d.getMonth() + 1).padStart(2, "0");
     const year = d.getFullYear();
     return `${day}-${month}-${year}`;
+  };
+
+  const handleStartDateChange = (e) => {
+    const newStart = e.target.value;
+
+    setStartDate((prevStartDate) => {
+      if (!endDate || endDate === prevStartDate) {
+        setEndDate(newStart); // sync endDate if not manually changed
+      } else if (newStart > endDate) {
+        setEndDate(newStart);
+      }
+      return newStart;
+    });
+  };
+
+  const handleEndDateChange = (e) => {
+    const newEnd = e.target.value;
+
+    if (newEnd < startDate) {
+    } else {
+      setFieldErrors({ ...fieldErrors, end_date: null });
+      setEndDate(newEnd);
+    }
   };
 
   return (
@@ -491,7 +505,7 @@ function SubstituteClassTeacher() {
                     ) : displayedSections.length ? (
                       displayedSections.map((section, index) => (
                         <tr
-                          key={section.section_id}
+                          key={`${section.section_id}-${index}`}
                           className={`${
                             index % 2 === 0 ? "bg-white" : "bg-gray-100"
                           } hover:bg-gray-50`}
@@ -625,7 +639,7 @@ function SubstituteClassTeacher() {
                           id="startDate"
                           className="w-full text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded px-2 py-2"
                           value={startDate}
-                          onChange={(e) => setStartDate(e.target.value)}
+                          onChange={handleStartDateChange}
                         />
                         {fieldErrors.start_date && (
                           <div className="absolute top-8 left-1/3">
@@ -647,8 +661,13 @@ function SubstituteClassTeacher() {
                           id="endDate"
                           className="w-full h-[38px] text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded px-2 py-2"
                           value={endDate}
-                          onChange={(e) => setEndDate(e.target.value)}
+                          onChange={handleEndDateChange}
                         />
+                        {fieldErrors.end_date && (
+                          <div className="text-danger text-xs mt-1">
+                            {fieldErrors.end_date}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="relative mb-3 flex justify-center mx-4">
@@ -745,7 +764,7 @@ function SubstituteClassTeacher() {
                         id="startDate"
                         className="w-full h-[38px] text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
+                        onChange={handleStartDateChange}
                       />
                       {/* Error message */}
                       {fieldErrors.start_date && (
@@ -768,7 +787,7 @@ function SubstituteClassTeacher() {
                         id="endDate"
                         className="w-full h-[38px] text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
+                        onChange={handleEndDateChange}
                       />
                     </div>
                   </div>
@@ -795,7 +814,7 @@ function SubstituteClassTeacher() {
                     <label htmlFor="departmentId" className="w-1/2 mt-2">
                       Substitute Teacher <span className="text-red-500">*</span>
                     </label>
-                    {console.log("selectedTeachers", selectedTeacher)}
+
                     <Select
                       className="w-[80%] text-sm"
                       options={teachers}
