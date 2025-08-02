@@ -72,8 +72,9 @@ const LandingPage = () => {
   const [touched, setTouched] = useState({ userId: false });
   const [showLandingPage, setShowLandingPage] = useState(false);
   const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 768);
-
+  const [backendError, setBackendError] = useState("");
   const isValid = userId.trim();
+  const API_URL = import.meta.env.VITE_API_URL; // url for host
 
   useEffect(() => {
     const handleResize = () => {
@@ -108,50 +109,167 @@ const LandingPage = () => {
     const year = today.getFullYear();
     return `${day} ${monthName} ${year}`;
   }
-
   const handleResetPassword = async () => {
     setTouched({ userId: true });
     if (!isValid) return;
 
     setLoading(true);
     setNewPasswordLoading(true);
+    setBackendError(""); // clear any old error
 
     try {
-      const response = await axios.post(
-        `https://aceventura.in/demo/evolvuUserService/validate_teacher_user`,
-        { user_id: userId }
+      const formData = new FormData();
+      formData.append("user_id", userId);
+
+      let shortName = "0";
+      let schoolResponse;
+
+      // 🔹 Step 1: Try validate_staff_user API
+      const staffResponse = await axios.post(
+        "https://api.aceventura.in/demo/evolvuUserService/validate_staff_user",
+        formData
       );
 
-      if (response.data && response.data.length > 0) {
-        const shortName = response.data[0].short_name;
-
-        const secondResponse = await axios.post(
-          `https://api.aceventura.in/demo/evolvuUserService/check_user_access`,
-          { short_name: shortName }
+      if (
+        Array.isArray(staffResponse.data) &&
+        staffResponse.data.length > 0 &&
+        staffResponse.data[0].short_name !== "0"
+      ) {
+        shortName = staffResponse.data[0].short_name;
+        schoolResponse = staffResponse.data;
+      } else {
+        // 🔸 Step 2: Fallback to validate_user API
+        const userResponse = await axios.post(
+          "https://api.aceventura.in/demo/evolvuUserService/validate_user",
+          formData
         );
 
-        if (secondResponse.data.success) {
-          toast.success("Redirecting...");
-          setTimeout(() => {
-            setShowLandingPage(true); // ✅ Switch to LandingPage
-          }, 1000);
-        } else {
-          toast.error(secondResponse.data.message || "Access denied.");
+        if (typeof userResponse.data === "string") {
+          toast.error(userResponse.data);
+          setBackendError(userResponse.data);
+          return;
         }
+
+        if (Array.isArray(userResponse.data) && userResponse.data.length > 0) {
+          shortName = userResponse.data[0].short_name;
+          schoolResponse = userResponse.data;
+        } else {
+          toast.error("Invalid user.");
+          return;
+        }
+      }
+
+      // ✅ Use connectdatabase API to check access and connect
+      const accessFormData = new FormData();
+      accessFormData.append("short_name", shortName);
+
+      const connectResponse = await axios.post(
+        `${API_URL}/api/connectdatabase`,
+        accessFormData
+      );
+      // pass sort name in header
+      // const connectResponse = await axios.post(
+      //   `${API_URL}/api/connectdatabase`,
+      //   {
+      //     header: {
+      //       sort_name: shortName,
+      //       "content-Type": "application/json",
+      //     },
+      //   }
+      // );
+
+      if (
+        typeof connectResponse.data === "object" &&
+        connectResponse.data.message == "Connected to school DB using SACS"
+      ) {
+        toast.success("Redirecting...");
+        setTimeout(() => {
+          setShowLandingPage(true);
+        }, 1000);
       } else {
-        toast.error(response.data || "Invalid user.");
+        toast.error(
+          connectResponse.data.message || "Database connection failed."
+        );
       }
     } catch (error) {
-      toast.error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-      setShowLandingPage(true); // ✅ Switch to LandingPage
+      const errMsg =
+        error.response?.data === "Not a valid user"
+          ? "Not a valid user"
+          : error.response?.data?.message ||
+            "Something went wrong. Please try again.";
+      toast.error(errMsg);
+      setBackendError(errMsg);
     } finally {
       setLoading(false);
       setNewPasswordLoading(false);
     }
   };
+
+  // const handleResetPassword = async () => {
+  //   setTouched({ userId: true });
+  //   if (!isValid) return;
+
+  //   setLoading(true);
+  //   setNewPasswordLoading(true);
+  //   setBackendError(""); // Clear any old error
+
+  //   try {
+  //     console.log("API Starting now");
+
+  //     const formData = new FormData();
+  //     formData.append("user_id", userId);
+
+  //     const response = await axios.post(
+  //       "https://api.aceventura.in/demo/evolvuUserService/validate_user",
+  //       formData
+  //     );
+
+  //     console.log("validate_user response -->", response);
+
+  //     // 🟥 If response is "Not a valid user"
+  //     if (typeof response.data === "string") {
+  //       toast.error(response.data);
+  //       setBackendError(response.data);
+  //       return;
+  //     }
+
+  //     // 🟩 If valid array
+  //     if (Array.isArray(response.data) && response.data.length > 0) {
+  //       const shortName = response.data[0].short_name;
+
+  //       const accessFormData = new FormData();
+  //       accessFormData.append("short_name", shortName);
+
+  //       const secondResponse = await axios.post(
+  //         "https://api.aceventura.in/demo/evolvuUserService/check_user_access", // ✅ Correct API here
+  //         accessFormData
+  //       );
+
+  //       if (secondResponse.data.success) {
+  //         toast.success("Redirecting...");
+  //         setTimeout(() => {
+  //           setShowLandingPage(true);
+  //         }, 1000);
+  //       } else {
+  //         toast.error(secondResponse.data.message || "Access denied.");
+  //       }
+  //     } else {
+  //       toast.error("Invalid response.");
+  //     }
+  //   } catch (error) {
+  //     const errMsg =
+  //       error.response?.data === "Not a valid user"
+  //         ? "Not a valid user"
+  //         : error.response?.data?.message ||
+  //           "Something went wrong. Please try again.";
+
+  //     toast.error(errMsg);
+  //     setBackendError(errMsg);
+  //   } finally {
+  //     setLoading(false);
+  //     setNewPasswordLoading(false);
+  //   }
+  // };
 
   if (showLandingPage) {
     // ✅ Landing Page View
@@ -235,15 +353,20 @@ const LandingPage = () => {
                     type="text"
                     value={userId}
                     maxLength={50}
-                    onChange={(e) => setUserId(e.target.value)}
+                    onChange={(e) => {
+                      setUserId(e.target.value);
+                      setBackendError(""); // Clear backend error on typing
+                    }}
                     onBlur={() => handleBlur("userId")}
                     className="w-full px-4 py-1 border border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
-                  {touched.userId && !userId.trim() && (
-                    <p className="text-red-600 text-sm">
+                  {touched.userId && !userId.trim() ? (
+                    <p className="text-red-600 text-sm ml-1">
                       This field is required.
                     </p>
-                  )}
+                  ) : backendError ? (
+                    <p className="text-red-600 text-sm  ml-1">{backendError}</p>
+                  ) : null}
                 </div>
 
                 <div className="flex flex-col md:flex-row justify-center gap-4 mt-2">
