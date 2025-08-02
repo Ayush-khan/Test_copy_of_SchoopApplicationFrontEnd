@@ -58,7 +58,6 @@ const EditEvent = () => {
 
         setSubject(data.title || ""); // Event Title
         setSelectedClasses(data.classes || []);
-        // setSelectedRoles(data.login_type ? [data.login_type] : []);
         setSelectedRoles(() => {
           if (Array.isArray(data.login_type)) return data.login_type;
           if (typeof data.login_type === "string")
@@ -71,8 +70,10 @@ const EditEvent = () => {
         setStartTime(data.start_time || "");
         setEndTime(data.end_time || "");
         setDescription(data.event_desc || "");
-        setCompetition(data.competition === "true"); // checkbox expects boolean
-        setNotify(data.notify === "true");
+        // setCompetition(data.competition === "Y");
+        // setNotify(data.notify === "Y");
+        setCompetition(String(data.competition).toUpperCase() === "Y");
+        setNotify(String(data.notify).toUpperCase() === "Y");
       } catch (error) {
         console.error("Error fetching event:", error);
       }
@@ -81,16 +82,16 @@ const EditEvent = () => {
     fetchEvent();
   }, [id]);
 
-  const [formData, setFormData] = useState({
-    title: state?.title || "",
-    description: state?.event_desc || "",
-    startDate: state?.start_date || "",
-    endDate: state?.end_date || "",
-    startTime: state?.start_time || "",
-    endTime: state?.end_time || "",
-    competition: state?.competition === "Y",
-    notify: state?.notify === "Y",
-  });
+  // const [formData, setFormData] = useState({
+  //   title: state?.title || "",
+  //   description: state?.event_desc || "",
+  //   startDate: state?.start_date || "",
+  //   endDate: state?.end_date || "",
+  //   startTime: state?.start_time || "",
+  //   endTime: state?.end_time || "",
+  //   competition: state?.competition === "Y",
+  //   notify: state?.notify === "Y",
+  // });
 
   useEffect(() => {
     fetchClassNames();
@@ -149,8 +150,8 @@ const EditEvent = () => {
         end_date: endDate,
         start_time: startTime,
         end_time: endTime,
-        competition: competition ? "true" : "false",
-        notify: notify ? "true" : "false",
+        competition: competition ? "Y" : "N",
+        notify: notify ? "Y" : "N",
         classes: selectedClasses,
         login_type: selectedRoles.join(","),
       };
