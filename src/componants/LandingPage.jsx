@@ -118,7 +118,7 @@ const LandingPage = () => {
 
     try {
       const response = await axios.post(
-        `https://api.aceventura.in/demo/evolvuUserService/validate_user`,
+        `https://aceventura.in/demo/evolvuUserService/validate_teacher_user`,
         { user_id: userId }
       );
 
@@ -139,7 +139,7 @@ const LandingPage = () => {
           toast.error(secondResponse.data.message || "Access denied.");
         }
       } else {
-        toast.error("Invalid user or no data returned.");
+        toast.error(response.data || "Invalid user.");
       }
     } catch (error) {
       toast.error(
