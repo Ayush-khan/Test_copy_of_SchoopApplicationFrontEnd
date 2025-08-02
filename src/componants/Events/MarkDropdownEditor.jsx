@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import React, { useRef } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
@@ -15,7 +15,7 @@ function imageHandler() {
     formData.append("image", file);
 
     const res = await fetch(
-      "https://api.imgbb.com/1/upload?key=YOUR_IMGBB_API_KEY",
+      "https://api.imgbb.com/1/upload?key=8984397975a3738e6ebd1ecbece42617",
       {
         method: "POST",
         body: formData,

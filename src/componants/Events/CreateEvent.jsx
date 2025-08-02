@@ -152,12 +152,11 @@ const CreateEvent = () => {
     if (selectedRoles.length === roles.length) {
       updatedRoles = [];
     } else {
-      updatedRoles = roles.map((role) => role.id);
+      updatedRoles = roles.map((role) => role.role_id);
     }
 
     setSelectedRoles(updatedRoles);
 
-    // Clear roleError if user selects any role
     if (updatedRoles.length > 0) {
       setErrors((prevErrors) => ({ ...prevErrors, roleError: "" }));
     }
@@ -247,8 +246,8 @@ const CreateEvent = () => {
       formDataToSend.append("end_date", endDate || "");
       formDataToSend.append("start_time", startTime || "00:00:00");
       formDataToSend.append("end_time", endTime || "00:00:00");
-      formDataToSend.append("competition", competition ? "true" : "false");
-      formDataToSend.append("notify", notify ? "true" : "false");
+      formDataToSend.append("competition", competition ? "Y" : "N");
+      formDataToSend.append("notify", notify ? "Y" : "N");
       formDataToSend.append("publish", shouldPublish ? "true" : "false");
 
       classList.forEach((cls) => formDataToSend.append("checkbxclass[]", cls));
@@ -350,8 +349,8 @@ const CreateEvent = () => {
       formDataToSend.append("end_date", endDate || "");
       formDataToSend.append("start_time", startTime || "00:00:00");
       formDataToSend.append("end_time", endTime || "00:00:00");
-      formDataToSend.append("competition", competition ? "true" : "false");
-      formDataToSend.append("notify", notify ? "true" : "false");
+      formDataToSend.append("competition", competition ? "Y" : "N");
+      formDataToSend.append("notify", notify ? "Y" : "N");
       formDataToSend.append("publish", shouldPublish ? "true" : "false");
 
       classList.forEach((cls) => formDataToSend.append("checkbxclass[]", cls));

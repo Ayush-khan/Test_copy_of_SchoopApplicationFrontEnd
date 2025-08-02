@@ -27,6 +27,7 @@ function Event() {
   const [isSubmittingandPublishing, setIsSubmittingandPublishing] =
     useState(false);
 
+  const [filteredSections, setFilteredSections] = useState([]);
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
 
@@ -147,7 +148,6 @@ function Event() {
 
   // Handle Selection from Dropdown
   const handleClassSectionSelect = (selectedOption) => {
-    // setStudentError(""); // Clear any previous student selection error
     setSelectedClassSection(selectedOption);
     setSelectedSectionId(selectedOption?.value); // Store section_id
   };
@@ -237,10 +237,7 @@ function Event() {
 
   const handleMonthSelect = (selectedOption) => {
     setSelectedMonth(selectedOption);
-    setSelectedMonthId(selectedOption.value);
-    if (selectedOption) {
-      setMonthError("");
-    }
+    setSelectedMonthId(selectedOption ? selectedOption?.value : null);
   };
 
   const getDateLimits = (academicYear) => {
@@ -263,7 +260,7 @@ function Event() {
       const response = await axios.get(`${API_URL}/api/get_eventlist`, {
         params: {
           class_id: selectedSectionId,
-          month: selectedMonthId,
+          month_year: selectedMonthId,
         },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -275,6 +272,7 @@ function Event() {
         setDateLimits(getDateLimits(academicYear));
       }
 
+      console.log("holidays", response.data.data);
       setHolidays(response.data.data || []);
       setPageCount(Math.ceil((response.data.data?.length || 0) / pageSize));
     } catch (error) {
@@ -481,36 +479,6 @@ function Event() {
     setShowViewModal(false);
   };
 
-  // const handleDownloadTemplate = async () => {
-  //   const token = localStorage.getItem("authToken");
-
-  //   try {
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_template_csv_event`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         responseType: "blob",
-  //       }
-  //     );
-
-  //     let filename = "event_template.csv"; // Default fallback
-
-  //     if (selectedClasses.length === allClasses.length) {
-  //       filename = "all_event.csv";
-  //     } else if (selectedClasses.length > 0) {
-  //       const selectedClassNames = allClasses
-  //         .filter((cls) => selectedClasses.includes(cls.class_id))
-  //         .map((cls) => cls.name.replace(/\s+/g, "_"));
-
-  //       filename = `${selectedClassNames.join("_")}.csv`;
-  //     }
-
-  //     triggerFileDownload(response.data, filename);
-  //   } catch (error) {
-  //     console.error("Error downloading template:", error);
-  //   }
-  // };
-
   const handleDownloadTemplate = async () => {
     if (selectedClasses.length === 0) {
       // setErrors((prev) => ({
@@ -542,7 +510,7 @@ function Event() {
           .filter((cls) => selectedClasses.includes(cls.class_id))
           .map((cls) => cls.name.replace(/\s+/g, "_"));
 
-        filename = `${selectedClassNames.join("_")}.csv`;
+        filename = `${selectedClassNames.join("_")}_event.csv`;
       }
 
       triggerFileDownload(response.data, filename);
@@ -570,34 +538,6 @@ function Event() {
     setUploadStatus(""); // Clear any previous success
     setErrorMessageUrl("");
   };
-
-  // const downloadCsv = async (fileUrl) => {
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     console.log("the response of the namechack api____");
-
-  //     if (!token) {
-  //       throw new Error("No authentication token found");
-  //     }
-
-  //     const response = await axios.get(
-  //       `${API_URL}/api/download_csv_rejected/${fileUrl}`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       },
-  //       {
-  //         responseType: "blob", // Important for handling binary data
-  //       }
-  //     );
-
-  //     // Trigger download using a hidden link element
-  //     triggerFileDownload(response.data, `rejected_template.csv`);
-  //   } catch (error) {
-  //     console.error("Error downloading template:", error);
-  //   }
-  // };
 
   const downloadCsv = async (fileUrl) => {
     try {
@@ -632,24 +572,44 @@ function Event() {
     }
   };
 
+  // const downloadCsv = async (fileUrl) => {
+  //   if (!fileUrl || fileUrl === "undefined") {
+  //     toast.error("Rejected file is not available to download.");
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) throw new Error("No authentication token found");
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/download_csv_rejected/${fileUrl}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         responseType: "blob",
+  //       }
+  //     );
+
+  //     let filename = "rejected_template.csv";
+  //     if (selectedClasses.length > 0 && allClasses.length > 0) {
+  //       const selectedClassNames = allClasses
+  //         .filter((cls) => selectedClasses.includes(cls.class_id))
+  //         .map((cls) => cls.name.replace(/\s+/g, "_"));
+  //       filename = `${selectedClassNames.join("_")}.rejected.template.csv`;
+  //     }
+
+  //     triggerFileDownload(response.data, filename);
+  //   } catch (error) {
+  //     console.error("Error downloading template:", error);
+  //     toast.error("Failed to download the file.");
+  //   }
+  // };
+
   const handleUpload = async () => {
     if (!selectedFile) {
       setErrorMessage("Please select a file first.");
       return;
     }
-
-    // const fileNamePattern = /^holidaylist(\s?\(\d+\))?\.csv$/;
-    // const rejectedFileName = /^rejected_template(\s?\(\d+\))?\.csv$/;
-
-    // const fileName = selectedFile.name.trim();
-
-    // // Check if the file name matches the allowed pattern
-    // if (!fileNamePattern.test(fileName) && !rejectedFileName.test(fileName)) {
-    //   toast.warning(
-    //     "⚠️ Please check if correct file is selected for upload. The file name should be holidaylist or rejected_template."
-    //   );
-    //   return;
-    // }
 
     setLoading(true); // Show loader
     const formData = new FormData();
@@ -681,6 +641,9 @@ function Event() {
         setSelectedFile(null);
         fetchEvents();
       }
+      setTimeout(() => {
+        handleReset();
+      }, 2000);
     } catch (error) {
       setLoading(false); // Hide loader
 
@@ -717,10 +680,14 @@ function Event() {
     return `${day}-${month}-${year}`;
   };
 
-  const handleBack = () => {
+  const handleReset = () => {
     setShowUploadSection(false);
-
     setSelectedClasses([]);
+    setSelectedFile(null);
+    setErrorMessage("");
+    setErrorMessageUrl("");
+    setUploadStatus("");
+    setIsDataPosted(false);
   };
 
   useEffect(() => {
@@ -748,28 +715,27 @@ function Event() {
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
 
-  const filteredSections = (Array.isArray(holidays) ? holidays : [])
-    .sort((a, b) => new Date(a.start_date) - new Date(b.start_date)) // Sort by holiday_date
-    .filter((holiday) => {
-      if (!searchTerm) return true; // If no search term, return all holidays
+  useEffect(() => {
+    const filtered = (Array.isArray(holidays) ? holidays : [])
+      .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+      .filter((holiday) => {
+        if (!searchTerm) return true;
 
-      const searchLower = searchTerm.toLowerCase().trim();
-      const holidayName = holiday?.title
-        ? holiday.title.toLowerCase().trim()
-        : "";
-      const holidayStartDate = holiday?.start_date
-        ? holiday.start_date.toLowerCase().trim()
-        : "";
-      const createdBy = holiday?.created_by_name
-        ? holiday.created_by_name.toLowerCase().trim()
-        : "";
+        const searchLower = searchTerm.toLowerCase().trim();
+        const holidayName = holiday?.title?.toLowerCase().trim() || "";
+        const holidayStartDate =
+          holiday?.start_date?.toLowerCase().trim() || "";
+        const createdBy = holiday?.created_by_name?.toLowerCase().trim() || "";
 
-      return (
-        holidayName.includes(searchLower) ||
-        holidayStartDate.includes(searchLower) ||
-        createdBy.includes(searchLower)
-      );
-    });
+        return (
+          holidayName.includes(searchLower) ||
+          holidayStartDate.includes(searchLower) ||
+          createdBy.includes(searchLower)
+        );
+      });
+
+    setFilteredSections(filtered);
+  }, [holidays, searchTerm]);
 
   useEffect(() => {
     setPageCount(Math.ceil(filteredSections.length / pageSize));
@@ -779,7 +745,8 @@ function Event() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
-  // console.log("displayted sections", displayedSections);
+
+  console.log("displayted sections", displayedSections);
 
   return (
     <>
@@ -934,9 +901,10 @@ function Event() {
                 <div className="bg-white w-full max-w-6xl mx-4 rounded-lg shadow-lg p-6 overflow-y-auto max-h-[90vh] relative">
                   <RxCross1
                     className=" absolute top-3 right-4 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                    onClick={() => {
-                      setShowUploadSection(false);
-                    }}
+                    // onClick={() => {
+                    //   setShowUploadSection(false);
+                    // }}
+                    onClick={() => handleReset()}
                   />
 
                   <h2 className="text-center text-2xl font-semibold text-blue-600 mb-4">
@@ -1042,7 +1010,19 @@ function Event() {
                         {errorMessage && (
                           <p className="text-red-500">{errorMessage}</p>
                         )}
-                        {errorMessageUrl && (
+                        {/* {errorMessageUrl && (
+                          <a
+                            href="#"
+                            className="underline text-blue-500 hover:text-blue-800"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              downloadCsv(errorMessageUrl);
+                            }}
+                          >
+                            Download CSV to see errors.
+                          </a>
+                        )} */}
+                        {errorMessageUrl && errorMessageUrl !== "undefined" && (
                           <a
                             href="#"
                             className="underline text-blue-500 hover:text-blue-800"
@@ -1072,223 +1052,317 @@ function Event() {
               </div>
             )}
 
-            {holidays.length > 0 && (
-              <div className="w-full  mt-4">
-                <div className="card mx-auto lg:w-full shadow-lg">
-                  <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                    <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                      Event List
-                    </h3>
-                    <div className="box-border flex md:gap-x-2 justify-end md:h-10">
-                      <div className=" w-1/2 md:w-fit mr-1">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search"
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                      </div>
-                      <button
-                        className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                        onClick={handleAdd}
-                      >
-                        <FontAwesomeIcon
-                          icon={faPlus}
-                          style={{ marginRight: "5px" }}
-                        />
-                        Add
-                      </button>
-
-                      <button
-                        // type="submit"
-                        className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                        onClick={handlePublish}
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? "Publishing..." : "Publish"}
-                      </button>
+            {/* {holidays.length > 0 && ( */}
+            <div className="w-full  mt-4">
+              <div className="card mx-auto lg:w-full shadow-lg">
+                <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                  <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                    Event List
+                  </h3>
+                  <div className="box-border flex md:gap-x-2 justify-end md:h-10">
+                    <div className=" w-1/2 md:w-fit mr-1">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search"
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
                     </div>
+                    <button
+                      className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
+                      onClick={handleAdd}
+                    >
+                      <FontAwesomeIcon
+                        icon={faPlus}
+                        style={{ marginRight: "5px" }}
+                      />
+                      Add
+                    </button>
+
+                    <button
+                      // type="submit"
+                      className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
+                      onClick={handlePublish}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Publishing..." : "Publish"}
+                    </button>
                   </div>
-                  <div
-                    className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                    style={{
-                      backgroundColor: "#C03078",
-                    }}
-                  ></div>
+                </div>
+                <div
+                  className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
 
-                  <div className="card-body w-full">
-                    <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full  md:w-[100%] mx-auto">
-                      <table className="min-w-full leading-normal table-fixed">
-                        <thead>
-                          <tr className="bg-gray-200">
-                            <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Sr.No
-                            </th>
-                            <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              <input
-                                type="checkbox"
-                                checked={selectAll}
-                                onChange={handleSelectAll}
-                                className="cursor-pointer"
-                              />{" "}
-                              All
-                            </th>
-                            <th className="px-2 w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Event Title
-                            </th>
+                <div className="card-body w-full">
+                  <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full  md:w-[100%] mx-auto">
+                    <table className="min-w-full leading-normal table-fixed">
+                      <thead>
+                        <tr className="bg-gray-200">
+                          <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Sr.No
+                          </th>
+                          <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            <input
+                              type="checkbox"
+                              checked={selectAll}
+                              onChange={handleSelectAll}
+                              className="cursor-pointer"
+                            />{" "}
+                            All
+                          </th>
+                          <th className="px-2 w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Event Title
+                          </th>
 
-                            <th className="px-2 w-full md:w-[15%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Class
-                            </th>
-                            <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Start Date
-                            </th>
-                            <th className="px-2 w-full md:w-[15%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Created By
-                            </th>
-                            <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Edit
-                            </th>
-                            <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Delete
-                            </th>
-                            <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              View
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {displayedSections.length ? (
-                            displayedSections.map((holiday, index) => (
-                              <tr
-                                key={holiday.unq_id}
-                                className=" text-sm "
-                                // onClick={() => handlePublish(holiday.holiday_id)}
-                              >
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {currentPage * pageSize + index + 1}
-                                </td>
+                          <th className="px-2 w-full md:w-[15%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Class
+                          </th>
+                          <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Start Date
+                          </th>
+                          <th className="px-2 w-full md:w-[15%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Created By
+                          </th>
+                          <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Edit
+                          </th>
+                          <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Delete
+                          </th>
+                          <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            View
+                          </th>
+                        </tr>
+                      </thead>
+                      {/* <tbody>
+                        {displayedSections.length ? (
+                          displayedSections.map((holiday, index) => (
+                            <tr
+                              key={holiday.unq_id}
+                              className=" text-sm "
+                              
+                            >
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {currentPage * pageSize + index + 1}
+                              </td>
 
-                                <td className="px-2 text-center lg:px-3 border border-gray-950 text-sm">
-                                  {" "}
-                                  {/* py-2 */}
-                                  <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                    {holiday.publish === "N" && (
-                                      <input
-                                        type="checkbox"
-                                        checked={selectedHolidays.includes(
-                                          holiday.unq_id
-                                        )}
-                                        onChange={(e) => {
-                                          e.stopPropagation(); // Prevents row click from triggering publish
-                                          handleCheckboxChange(holiday.unq_id);
-                                        }}
-                                      />
-                                    )}
-                                  </p>
-                                </td>
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
-                                  {holiday.title}
-                                </td>
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {holiday.classes && holiday.classes.length > 0
-                                    ? holiday.classes
-                                        .map((cls) => cls.class_name)
-                                        .join(", ")
-                                    : "-"}
-                                </td>
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {holiday.start_date == "0000-00-00"
-                                    ? " "
-                                    : formatDate(holiday.start_date)}
-                                </td>
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {capitalizeWords(holiday.created_by_name)}
-                                </td>
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              <td className="px-2 text-center lg:px-3 border border-gray-950 text-sm">
+                                {" "}
+                                
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                   {holiday.publish === "N" && (
-                                    <button
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                      onClick={() => handleEdit(holiday)}
-                                    >
-                                      <FontAwesomeIcon icon={faEdit} />
-                                    </button>
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedHolidays.includes(
+                                        holiday.unq_id
+                                      )}
+                                      onChange={(e) => {
+                                        e.stopPropagation(); // Prevents row click from triggering publish
+                                        handleCheckboxChange(holiday.unq_id);
+                                      }}
+                                    />
                                   )}
-                                </td>
+                                </p>
+                              </td>
 
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {deletedHolidays.includes(holiday.unq_id) ? (
-                                    <span className="text-red-600 font-semibold">
-                                      Deleted
-                                    </span>
-                                  ) : (
-                                    <button
-                                      onClick={() => handleDelete(holiday)}
-                                      className="text-red-600 hover:text-red-800 hover:bg-transparent"
-                                    >
-                                      <FontAwesomeIcon icon={faTrash} />
-                                    </button>
-                                  )}
-                                </td>
-                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
+                                {holiday.title}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {holiday.classes && holiday.classes.length > 0
+                                  ? holiday.classes
+                                      .map((cls) => cls.class_name)
+                                      .join(", ")
+                                  : "-"}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {holiday.start_date == "0000-00-00"
+                                  ? " "
+                                  : formatDate(holiday.start_date)}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {capitalizeWords(holiday.created_by_name)}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {holiday.publish === "N" && (
+                                  <button
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                    onClick={() => handleEdit(holiday)}
+                                  >
+                                    <FontAwesomeIcon icon={faEdit} />
+                                  </button>
+                                )}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {deletedHolidays.includes(holiday.unq_id) ? (
+                                  <span className="text-red-600 font-semibold">
+                                    Deleted
+                                  </span>
+                                ) : (
                                   <button
                                     onClick={() => handleDelete(holiday)}
-                                    className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                    className="text-red-600 hover:text-red-800 hover:bg-transparent"
                                   >
                                     <FontAwesomeIcon icon={faTrash} />
                                   </button>
-                                </td> */}
-                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                  <button
-                                    type="button"
-                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                    onClick={() => handleView(holiday)}
-                                  >
-                                    <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <div className="absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                              <div className=" text-center text-xl text-red-700">
-                                Oops! No data found..
-                              </div>
+                                )}
+                              </td>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <button
+                                  type="button"
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                  onClick={() => handleView(holiday)}
+                                >
+                                  <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <div className="absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                            <div className=" text-center text-xl text-red-700">
+                              Oops! No data found..
                             </div>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div className=" flex justify-center pt-2 -mb-3">
-                      <ReactPaginate
-                        previousLabel={"Previous"}
-                        nextLabel={"Next"}
-                        breakLabel={"..."}
-                        breakClassName={"page-item"}
-                        breakLinkClassName={"page-link"}
-                        pageCount={pageCount}
-                        marginPagesDisplayed={1}
-                        pageRangeDisplayed={1}
-                        onPageChange={handlePageClick}
-                        containerClassName={"pagination"}
-                        pageClassName={"page-item"}
-                        pageLinkClassName={"page-link"}
-                        previousClassName={"page-item"}
-                        previousLinkClassName={"page-link"}
-                        nextClassName={"page-item"}
-                        nextLinkClassName={"page-link"}
-                        activeClassName={"active"}
-                      />
-                    </div>
+                          </div>
+                        )}
+                      </tbody> */}
+                      <tbody>
+                        {loading ? (
+                          <div className="absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                            <div className=" text-center text-xl text-blue-700">
+                              Please Wait While Data is Loading...
+                            </div>
+                          </div>
+                        ) : displayedSections.length ? (
+                          displayedSections.map((holiday, index) => (
+                            <tr
+                              key={holiday.unq_id}
+                              className="text-sm"
+                              // onClick={() => handlePublish(holiday.holiday_id)}
+                            >
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {currentPage * pageSize + index + 1}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                  {holiday.publish === "N" && (
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedHolidays.includes(
+                                        holiday.unq_id
+                                      )}
+                                      onChange={(e) => {
+                                        e.stopPropagation(); // Prevents row click from triggering publish
+                                        handleCheckboxChange(holiday.unq_id);
+                                      }}
+                                    />
+                                  )}
+                                </p>
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
+                                {holiday.title}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {holiday.classes && holiday.classes.length > 0
+                                  ? holiday.classes
+                                      .map((cls) => cls.class_name)
+                                      .join(", ")
+                                  : "-"}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {holiday.start_date === "0000-00-00"
+                                  ? " "
+                                  : formatDate(holiday.start_date)}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {capitalizeWords(holiday.created_by_name)}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {holiday.publish === "N" && (
+                                  <button
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                    onClick={() => handleEdit(holiday)}
+                                  >
+                                    <FontAwesomeIcon icon={faEdit} />
+                                  </button>
+                                )}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {deletedHolidays.includes(holiday.unq_id) ? (
+                                  <span className="text-red-600 font-semibold">
+                                    Deleted
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleDelete(holiday)}
+                                    className="text-red-600 hover:text-red-800 hover:bg-transparent"
+                                  >
+                                    <FontAwesomeIcon icon={faTrash} />
+                                  </button>
+                                )}
+                              </td>
+
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <button
+                                  type="button"
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                  onClick={() => handleView(holiday)}
+                                >
+                                  <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <div className="absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                            <div className=" text-center text-xl text-red-700">
+                              Oops! No data found..
+                            </div>
+                          </div>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className=" flex justify-center pt-2 -mb-3">
+                    <ReactPaginate
+                      previousLabel={"Previous"}
+                      nextLabel={"Next"}
+                      breakLabel={"..."}
+                      breakClassName={"page-item"}
+                      breakLinkClassName={"page-link"}
+                      pageCount={pageCount}
+                      marginPagesDisplayed={1}
+                      pageRangeDisplayed={1}
+                      onPageChange={handlePageClick}
+                      containerClassName={"pagination"}
+                      pageClassName={"page-item"}
+                      pageLinkClassName={"page-link"}
+                      previousClassName={"page-item"}
+                      previousLinkClassName={"page-link"}
+                      nextClassName={"page-item"}
+                      nextLinkClassName={"page-link"}
+                      activeClassName={"active"}
+                    />
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+            {/* )} */}
           </div>
         </div>
       </div>
@@ -1410,12 +1484,20 @@ function Event() {
                       <input
                         type="text"
                         className="form-control bg-gray-200"
-                        // value={selectedHoliday?.login_type || ""}
                         value={
-                          roles.find(
-                            (role) =>
-                              role.role_id === selectedHoliday?.login_type
-                          )?.name || "Unknown"
+                          selectedHoliday?.login_type
+                            ?.split(",")
+                            .map((id) => {
+                              const role = roles.find(
+                                (role) => role.role_id === id
+                              );
+                              if (!role) {
+                                console.warn("Missing role for ID:", id); // <- Debug missing role
+                              }
+                              return role?.name;
+                            })
+                            .filter(Boolean)
+                            .join(", ") || ""
                         }
                         readOnly
                       />
@@ -1425,13 +1507,38 @@ function Event() {
                     <div className="grid grid-cols-2 gap-x-5 gap-y-4">
                       <div className="flex items-center">
                         <label className="w-[110px] font-semibold">
+                          Competition
+                          {/* <span className="text-sm text-red-500">*</span> */}
+                        </label>
+                        <input
+                          type="text"
+                          className="w-[51%] max-w-md px-2 py-1 border border-gray-400 rounded"
+                          value={
+                            selectedHoliday?.competition === "Y" ? "Yes" : "No"
+                          }
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex items-center">
+                        <label className="w-[100px] font-semibold">
+                          Notify
+                        </label>
+                        <input
+                          type="text"
+                          className="w-[51%] max-w-md px-2 py-1 border border-gray-400 rounded"
+                          value={selectedHoliday?.notify === "Y" ? "Yes" : "No"}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex items-center">
+                        <label className="w-[110px] font-semibold">
                           Start Date
                           {/* <span className="text-sm text-red-500">*</span> */}
                         </label>
                         <input
                           type="text"
                           className="w-[51%] max-w-md px-2 py-1 border border-gray-400 rounded"
-                          value={selectedHoliday?.start_date || ""}
+                          value={formatDate(selectedHoliday?.start_date || "")}
                           readOnly
                         />
                       </div>
@@ -1442,7 +1549,7 @@ function Event() {
                         <input
                           type="text"
                           className="w-[51%] max-w-md px-2 py-1 border border-gray-400 rounded"
-                          value={selectedHoliday?.end_date || ""}
+                          value={formatDate(selectedHoliday?.end_date || "")}
                           readOnly
                         />
                       </div>
