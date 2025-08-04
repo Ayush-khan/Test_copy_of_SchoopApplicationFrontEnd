@@ -194,6 +194,9 @@ import Event from "../componants/Events/Event.jsx";
 import CreateEvent from "../componants/Events/CreateEvent.jsx";
 import EditEvent from "../componants/Events/EditEvent.jsx";
 import MarkDropdownEditor from "../componants/Events/MarkDropdownEditor.jsx";
+import SubjectMapping from "../componants/MastersModule/SubjectMapping/SubjectMapping.jsx";
+import ImportantLink from "../componants/ImportantLInks/ImportantLinks.jsx";
+import BookRequisition from "../componants/BookRequisition/BookRequisition.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -218,6 +221,21 @@ function Index() {
         <Route
           path="/manageRoleAccess/:roleId"
           element={<PrivateRoute element={<ManageRoleAccess />} />}
+        />
+        {/* Important links */}
+        <Route
+          path="/importantLinks"
+          element={<PrivateRoute element={<ImportantLink />} />}
+        />
+        {/* Subjectmapping */}
+        <Route
+          path="/subjetMappinig"
+          element={<PrivateRoute element={<SubjectMapping />} />}
+        />
+        {/* Book requisition */}
+        <Route
+          path="/bookRequisition"
+          element={<PrivateRoute element={<BookRequisition />} />}
         />
         {/* <Route
           path="/TestForAllfunctionlity"
