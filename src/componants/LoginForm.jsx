@@ -16,18 +16,32 @@ const LoginForm = ({ userId }) => {
   const [rememberMe, setRememberMe] = useState(false); // ✅ NEW
 
   const navigate = useNavigate();
+  const getCookie = (name) => {
+    const cookieValue = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="));
+    return cookieValue ? cookieValue.split("=")[1] : null;
+  };
 
   const handleSubmit = async (e) => {
     const API_URL = import.meta.env.VITE_API_URL; // url for host
+    const sortNameCookie = getCookie("short_name");
+    console.log("sortNameCookie", sortNameCookie);
     e.preventDefault();
     setErrors({});
     setLoading(true); // Set loading to true when form is submitted
     try {
-      const response = await axios.post(`${API_URL}/api/login`, {
-        user_id: email,
-        password: password,
-        rememberme: rememberMe,
-      });
+      const response = await axios.post(
+        `${API_URL}/api/login`,
+        {
+          user_id: email,
+          password: password,
+          rememberme: rememberMe,
+        },
+        {
+          withCredentials: true, // ✅ Send browser cookies
+        }
+      );
       console.log(
         "responseerror",
         response.data.success,
@@ -82,7 +96,9 @@ const LoginForm = ({ userId }) => {
           newErrors.password = "This password not using Bcrypt encryption.";
         } else {
           newErrors.api =
-            message || "An unexpected error occurred. Please try again later.";
+            error.response.data.error ||
+            message ||
+            "An unexpected error occurred. Please try again later.";
         }
       } else {
         newErrors.api = "Network error or server is unreachable.";
@@ -111,7 +127,7 @@ const LoginForm = ({ userId }) => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter User Id"
               className={`
-    ${userId ? "bg-white-600  cursor-not-allowed" : "bg-gray-600 "}
+    ${userId ? "bg-gray-600  cursor-not-allowed" : "bg-gray-600 "}
     focus:outline-none focus:ring-2 focus:ring-blue-400`}
               required
             />
