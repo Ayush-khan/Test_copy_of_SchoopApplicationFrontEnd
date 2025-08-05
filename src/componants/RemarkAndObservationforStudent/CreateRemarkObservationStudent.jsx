@@ -3,7 +3,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-// import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
+
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import Select from "react-select";
 

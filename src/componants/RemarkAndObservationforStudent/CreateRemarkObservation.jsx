@@ -3,7 +3,6 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-// import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 
 import Select from "react-select";
@@ -50,11 +49,17 @@ const CreateRemarkObservation = () => {
     fetchClasses();
   }, []);
 
+  // useEffect(() => {
+  //   if (classIdForSubjectAPI) {
+  //     fetchSubjects(classIdForSubjectAPI);
+  //   }
+  // }, [classIdForSubjectAPI]);
+
   useEffect(() => {
-    if (classIdForSubjectAPI) {
-      fetchSubjects(classIdForSubjectAPI);
+    if (classIdForSubjectAPI && sectionIdForStudentList) {
+      fetchSubjects(classIdForSubjectAPI, sectionIdForStudentList);
     }
-  }, [classIdForSubjectAPI]);
+  }, [classIdForSubjectAPI, sectionIdForStudentList]);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -329,8 +334,7 @@ const CreateRemarkObservation = () => {
             ? "Remark Saved & published successfully!"
             : "Remark saved successfully!"
         );
-        // Optionally reset
-        // resetForm();
+        resetForm();
       } else {
         toast.error("Failed to save remark.");
       }

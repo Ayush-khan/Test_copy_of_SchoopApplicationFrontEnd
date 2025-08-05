@@ -50,7 +50,6 @@ function RemarkObservationStudent() {
   const [noticeDesc, setNoticeDesc] = useState("");
   const [subjectError, setSubjectError] = useState("");
   const [noticeDescError, setNoticeDescError] = useState("");
-  const [imageUrls, setImageUrls] = useState([]);
   const [open, setOpen] = useState(false);
   const [remarkData, setRemarkData] = useState({
     teacherName: "",
@@ -136,52 +135,52 @@ function RemarkObservationStudent() {
   };
 
   // Function to download files
-  {
-    imageUrls && imageUrls.length > 0 && (
-      <div className="relative mb-3 flex flex-col mx-4 gap-y-2">
-        <label className="mb-2 font-bold">Attachments:</label>
-        {imageUrls.map((url, index) => {
-          // Extract file name from the URL
-          const fileName = url.substring(url.lastIndexOf("/") + 1);
-          return (
-            <div
-              key={index}
-              className="flex flex-row text-[.6em] items-center gap-x-2"
-            >
-              {/* Display file name */}
-              <span>{fileName}</span>
-              <button
-                className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                onClick={
-                  () => downloadFile(url, fileName) // Pass both URL and fileName
-                }
-              >
-                <ImDownload />
-              </button>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
+  // {
+  //   imageUrls && imageUrls.length > 0 && (
+  //     <div className="relative mb-3 flex flex-col mx-4 gap-y-2">
+  //       <label className="mb-2 font-bold">Attachments:</label>
+  //       {imageUrls.map((url, index) => {
+  //         // Extract file name from the URL
+  //         const fileName = url.substring(url.lastIndexOf("/") + 1);
+  //         return (
+  //           <div
+  //             key={index}
+  //             className="flex flex-row text-[.6em] items-center gap-x-2"
+  //           >
+  //             {/* Display file name */}
+  //             <span>{fileName}</span>
+  //             <button
+  //               className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+  //               onClick={
+  //                 () => downloadFile(url, fileName) // Pass both URL and fileName
+  //               }
+  //             >
+  //               <ImDownload />
+  //             </button>
+  //           </div>
+  //         );
+  //       })}
+  //     </div>
+  //   );
+  // }
 
-  const downloadFile = (fileUrl, fileName) => {
-    const baseUrl = "https://sms.evolvu.in/"; // Base URL
-    const fullUrl = `${fileUrl}`; // Construct the full file URL
+  // const downloadFile = (fileUrl, fileName) => {
+  //   const baseUrl = "https://sms.evolvu.in/"; // Base URL
+  //   const fullUrl = `${fileUrl}`; // Construct the full file URL
 
-    // Create an anchor element
-    const link = document.createElement("a");
-    link.href = fullUrl; // Set the file URL
-    link.target = "none"; // Open in a new tab (optional)
-    link.download = fileName || "downloaded_file.pdf"; // Use the provided file name or a default name
-    document.body.appendChild(link); // Append the link to the DOM
+  //   // Create an anchor element
+  //   const link = document.createElement("a");
+  //   link.href = fullUrl; // Set the file URL
+  //   link.target = "none"; // Open in a new tab (optional)
+  //   link.download = fileName || "downloaded_file.pdf"; // Use the provided file name or a default name
+  //   document.body.appendChild(link); // Append the link to the DOM
 
-    // Trigger the click to download the file
-    link.click();
+  //   // Trigger the click to download the file
+  //   link.click();
 
-    // Clean up the DOM
-    document.body.removeChild(link); // Remove the link after the click
-  };
+  //   // Clean up the DOM
+  //   document.body.removeChild(link); // Remove the link after the click
+  // };
 
   const handleDelete = (sectionId) => {
     const classToDelete = notices.find((cls) => cls.remark_id === sectionId);
@@ -1051,7 +1050,7 @@ function RemarkObservationStudent() {
                         remarkData.attachments.map((file, index) => (
                           <div key={index} className="flex items-center gap-2">
                             <a
-                              // href={file.file_url}
+                              href={file.file_url}
                               target="_blank"
                               rel="noopener noreferrer"
                               download

@@ -7,6 +7,7 @@ import { RxCross1 } from "react-icons/rx";
 // import Loader from "../components/Loader"; // Add a Loader component or use an existing one.
 // import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
+
 // import Select from "react-select";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
@@ -46,7 +47,7 @@ const EditRemarkandObservation = () => {
     name: "",
     remark_subject: "",
     remark_desc: "",
-    remark_type: "Remark",
+    remark_type: "",
     remark_id: "",
     filenotbedeleted: [], // existing uploaded files (to preview, not delete)
     userfile: [], // new files (if any, uploaded in edit)
@@ -204,10 +205,7 @@ const EditRemarkandObservation = () => {
     formDataToSend.append("remark_id", formData.remark_id);
     formDataToSend.append("remark_subject", formData.remark_subject);
     formDataToSend.append("remark_desc", formData.remark_desc);
-    formDataToSend.append(
-      "remark_type",
-      isObservation ? "Observation" : "Remark"
-    );
+    formDataToSend.append("remark_type", isObservation ? "yes" : " ");
 
     // 2. Append new files (userfile[])
     formData.userfile.forEach((file) => {

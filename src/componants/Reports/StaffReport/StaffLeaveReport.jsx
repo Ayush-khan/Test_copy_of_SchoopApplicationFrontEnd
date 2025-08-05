@@ -188,7 +188,7 @@ const StaffLeaveReport = () => {
                   index + 1
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">
-                 ${capitalizeWords(subject.name)}
+                 ${capitalizeWords(subject.staff_name)}
               </td>
                 ${leaveTypes
                   .map(
@@ -308,7 +308,7 @@ const StaffLeaveReport = () => {
     // Convert displayedSections to array-of-arrays format
     const data = displayedSections.map((student, index) => [
       index + 1,
-      `${capitalizeWords(student.name)}`,
+      `${student.staff_name}`,
       ...leaveTypes.map((type) => student.leaves?.[type] ?? 0), // <-- spread leave values
       student?.total || "0",
     ]);
