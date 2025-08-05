@@ -294,8 +294,11 @@ function TeacherList() {
                             onChange={toggleSelectAll}
                           />{" "}
                         </th>
-                        <th className="px-0.5 w-full md:w-[25%] mx-auto text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        <th className="px-0.5 w-full md:w-[20%] mx-auto text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Teachers name
+                        </th>
+                        <th className="px-0.5 w-full md:w-[15%] mx-auto text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Teachers Category
                         </th>
                         <th className="px-0.5 text-center md:w-[20%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Class
@@ -356,6 +359,17 @@ function TeacherList() {
                                 }`}
                               >
                                 {student.name}
+                              </p>
+                            </td>
+                            <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
+                              <p
+                                className={`whitespace-no-wrap relative top-2 ${
+                                  student.late === "Y"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
+                                }`}
+                              >
+                                {student.teachercategoryname}
                               </p>
                             </td>
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
@@ -464,6 +478,7 @@ function TeacherList() {
                         <th className=" px-0.5 w-full md:w-[30%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                           Teachers name
                         </th>
+
                         <th className=" px-0.5 w-full md:w-[30%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                           Class
                         </th>
@@ -491,6 +506,7 @@ function TeacherList() {
                               {staff?.name || " "}
                             </p>
                           </td>
+
                           <td className="text-center border border-gray-950 text-sm">
                             <p className="text-gray-900">
                               {staff?.class_section || " - "}
