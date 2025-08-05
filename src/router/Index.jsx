@@ -185,7 +185,7 @@ import LessonPlanStatusReport from "../componants/Reports/LessonPlanReport/Lesso
 import LessonPlanSummarisedReport from "../componants/Reports/LessonPlanReport/LessonPlanSummarisedReport.jsx";
 import HomeworkStatusReport from "../componants/Reports/LessonPlanReport/HomeworkStatusReport.jsx";
 import ClasswiseHomeworkDetailReport from "../componants/Reports/LessonPlanReport/ClasswiseHomeworkDetailReport.jsx";
-import TeacherAttendanceMonthlyReport from "../componants/Reports/TeacherAttendanceMonthlyReport.jsx";
+import TeacherAttendanceMonthlyReport from "../componants/Reports/TeacherMonthlyAttendanceDetailedReport.jsx";
 import FullTermMarksClass from "../componants/Reports/AssessmentrReportModule/FullTermMarksClass.jsx";
 import LessonPlanDetailedView from "../componants/View/LessonPlanDetailedView.jsx";
 import IciciFeePaymentReport from "../componants/Reports/IciciFeePaymentReport.jsx";
@@ -197,7 +197,7 @@ import MarkDropdownEditor from "../componants/Events/MarkDropdownEditor.jsx";
 import SubjectMapping from "../componants/MastersModule/SubjectMapping/SubjectMapping.jsx";
 import ImportantLink from "../componants/ImportantLInks/ImportantLinks.jsx";
 import BookRequisition from "../componants/BookRequisition/BookRequisition.jsx";
-import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherAttendanceMonthlyReport.jsx";
+import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherMonthlyAttendanceDetailedReport.jsx";
 
 // import Menus from "../c";
 function Index() {
