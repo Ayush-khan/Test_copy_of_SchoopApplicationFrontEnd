@@ -349,17 +349,17 @@ const StudentIdCardDetailedReport = () => {
 
   console.log("row", timetable);
 
-  const handleSubjectClick = (student) => {
-    if (student) {
-      navigate(
-        `/iDCardDetails/${student?.student_id}`,
+  // const handleSubjectClick = (student) => {
+  //   if (student) {
+  //     navigate(
+  //       `/iDCardDetails/${student?.student_id}`,
 
-        {
-          state: { staff: student },
-        }
-      );
-    }
-  };
+  //       {
+  //         state: { staff: student },
+  //       }
+  //     );
+  //   }
+  // };
 
   const filteredSections = timetable.filter((section) => {
     const searchLower = searchTerm.toString().trim().toLowerCase();
@@ -703,7 +703,7 @@ const StudentIdCardDetailedReport = () => {
 
                                   <td
                                     className="px-2 text-center align-middle  lg:px-3 py-2 hover:font-semibold border border-gray-950 text-sm cursor-pointer text-blue-600 hover:text-blue-700"
-                                    onClick={() => handleSubjectClick(student)}
+                                    // onClick={() => handleSubjectClick(student)}
                                   >
                                     <div className="flex justify-center items-center h-full">
                                       {student?.image_name === "" ? (
