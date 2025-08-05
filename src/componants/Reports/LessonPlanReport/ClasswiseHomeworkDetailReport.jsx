@@ -55,6 +55,9 @@ const ClasswiseHomeworkDetailReport = () => {
     }
   };
 
+  const capitalizeWords = (str) =>
+    str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+
   const handleClassSelect = (selectedOption) => {
     setStudentError(""); // Reset error if student is select.
     setSelectedClass(selectedOption);
@@ -172,7 +175,7 @@ const ClasswiseHomeworkDetailReport = () => {
                   }
                 </td>
                 <td class="px-2 text-center py-2 border border-black">
-                ${subject?.tec_name || " "} ${" "}
+                ${capitalizeWords(subject?.tec_name || " ")} ${" "}
               </tr>`
             )
             .join("")}
@@ -282,32 +285,35 @@ const ClasswiseHomeworkDetailReport = () => {
     // Convert displayedSections data to array format for Excel
     const data = displayedSections.map((student, index) => [
       index + 1,
-      `${student?.sub_name || " "} `,
+      `${student?.sub_name || " "}`,
       student?.description || " ",
-      `${
-        student?.publish_date
-          ? new Date(student?.publish_date).toLocaleDateString("en-GB")
-          : ""
-      }`,
-      `${student?.tec_name || ""}`,
+      student?.publish_date
+        ? new Date(student.publish_date).toLocaleDateString("en-GB")
+        : "",
+      `${capitalizeWords(student?.tec_name || "")}`,
     ]);
+
     // Create a worksheet
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
-    const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
+    const columnWidths = headers.map(() => ({ wch: 20 }));
     worksheet["!cols"] = columnWidths;
 
     // Create a workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(
-      workbook,
-      worksheet,
-      "Classwise Homework Detail Report"
-    );
+
+    // Sanitize and trim sheet name to 31 characters
+    const rawSheetName = "Classwise Homework Detail Report";
+    const sheetName = rawSheetName
+      .replace(/[:\\/?*\[\]]/g, "")
+      .substring(0, 31);
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
     // Generate and download the Excel file
     const fileName = `Classwise_Homework_Details_Report_${
-      selectedClass?.label || "For ALL Students"
+      selectedClass?.label || "For_ALL_Students"
     }.xlsx`;
+
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -573,7 +579,7 @@ const ClasswiseHomeworkDetailReport = () => {
                           scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
                         }}
                       >
-                        <table className="table-fixed w-full leading-normal">
+                        <table className="table-fixed w-full leading-normal border border-black">
                           <thead>
                             <tr className="bg-gray-100">
                               <th className="w-[7%] px-2 py-2 border text-center text-sm font-semibold text-gray-900">
@@ -618,7 +624,7 @@ const ClasswiseHomeworkDetailReport = () => {
                                       : " "}
                                   </td>
                                   <td className="w-[40%] px-2 py-2 text-center border border-gray-300">
-                                    {student.tec_name || " "}
+                                    {capitalizeWords(student.tec_name || " ")}
                                   </td>
                                 </tr>
                               ))

@@ -12,7 +12,7 @@ import * as XLSX from "xlsx";
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
-const TeacherAttendanceMonthlyReport = () => {
+const TeacherMonthlyAttendanceDetailedReport = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -253,6 +253,72 @@ const TeacherAttendanceMonthlyReport = () => {
     };
   };
 
+  // const handleDownloadEXL = () => {
+  //   if (!displayedSections || displayedSections.length === 0) {
+  //     toast.error("No data available to download the Excel sheet.");
+  //     return;
+  //   }
+
+  //   // Create static days: 1 to 31
+  //   const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+  //   // Headers: Name + Days columns (In and Out for each day)
+  //   const headers = [`Month : ${selectedStudent.label}`];
+
+  //   // Construct rows for each teacher
+  //   const rows = [];
+
+  //   displayedSections.forEach((teacher) => {
+  //     const attendanceMap = {};
+  //     teacher.days.forEach((day) => {
+  //       const dateObj = new Date(day.date);
+  //       const dayNumber = dateObj.getDate();
+  //       attendanceMap[dayNumber] = {
+  //         in: day.in || "",
+  //         out: day.out || "",
+  //       };
+  //     });
+
+  //     // Row 1: Days (just day numbers)
+  //     const daysRow = ["", "Days", ...days.map((d) => d)];
+
+  //     // Row 2: In times
+  //     const inRow = [
+  //       capitalizeWords(teacher.name),
+  //       "In",
+  //       ...days.map((d) => attendanceMap[d]?.in || ""),
+  //     ];
+
+  //     // Row 3: Out times
+  //     const outRow = [
+  //       "",
+  //       "Out",
+  //       ...days.map((d) => attendanceMap[d]?.out || ""),
+  //     ];
+
+  //     // Add to rows
+  //     rows.push(daysRow, inRow, outRow, []); // Empty row as spacer
+  //   });
+
+  //   // Create worksheet
+  //   const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  //   worksheet["!cols"] = headers.map(() => ({ wch: 15 }));
+
+  //   // Create workbook
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(
+  //     workbook,
+  //     worksheet,
+  //     "Staff Monthly Attendance Detailed Report"
+  //   );
+
+  //   const fileName = `Staff_Monthly_Attendance_Detailed_Report_${
+  //     selectedStudent?.label || "All"
+  //   }.xlsx`;
+
+  //   XLSX.writeFile(workbook, fileName);
+  // };
+
   const handleDownloadEXL = () => {
     if (!displayedSections || displayedSections.length === 0) {
       toast.error("No data available to download the Excel sheet.");
@@ -262,7 +328,7 @@ const TeacherAttendanceMonthlyReport = () => {
     // Create static days: 1 to 31
     const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
-    // Headers: Name + Days columns (In and Out for each day)
+    // Headers: Month label
     const headers = [`Month : ${selectedStudent.label}`];
 
     // Construct rows for each teacher
@@ -306,16 +372,24 @@ const TeacherAttendanceMonthlyReport = () => {
 
     // Create workbook
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(
-      workbook,
-      worksheet,
-      "Staff Monthly Attendance Detailed Report"
-    );
 
+    // Sanitize and limit sheet name
+    const sanitizeSheetName = (name) => {
+      const illegalChars = /[:\\/?*\[\]]/g;
+      return name.replace(illegalChars, "").substring(0, 31);
+    };
+
+    const rawSheetName = `Attendance_${selectedStudent?.label || "All"}`;
+    const sheetName = sanitizeSheetName(rawSheetName);
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+
+    // Create file name
     const fileName = `Staff_Monthly_Attendance_Detailed_Report_${
       selectedStudent?.label || "All"
     }.xlsx`;
 
+    // Trigger file download
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -371,7 +445,7 @@ const TeacherAttendanceMonthlyReport = () => {
             />
           </div>
           <div
-            className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
@@ -775,4 +849,4 @@ const TeacherAttendanceMonthlyReport = () => {
   );
 };
 
-export default TeacherAttendanceMonthlyReport;
+export default TeacherMonthlyAttendanceDetailedReport;
