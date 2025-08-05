@@ -32,7 +32,6 @@ const PendingStudentIdCardReport = () => {
 
   useEffect(() => {
     fetchExams();
-    // handleSearch();
   }, []);
 
   const fetchExams = async () => {
@@ -392,7 +391,7 @@ const PendingStudentIdCardReport = () => {
         <div className="card p-4 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              Pending Students ID Crad Report
+              Pending Students ID Card Report
             </h5>
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
