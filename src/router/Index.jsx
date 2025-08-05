@@ -197,6 +197,7 @@ import MarkDropdownEditor from "../componants/Events/MarkDropdownEditor.jsx";
 import SubjectMapping from "../componants/MastersModule/SubjectMapping/SubjectMapping.jsx";
 import ImportantLink from "../componants/ImportantLInks/ImportantLinks.jsx";
 import BookRequisition from "../componants/BookRequisition/BookRequisition.jsx";
+import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherAttendanceMonthlyReport.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -869,7 +870,9 @@ function Index() {
         <Route
           path="/teacherAttendanceMonthlyReport"
           element={
-            <PrivateRoute element={<TeacherAttendanceMonthlyReport />} />
+            <PrivateRoute
+              element={<TeacherMonthlyAttendanceDetailedReport />}
+            />
           }
         />{" "}
         {/* Lesson plan Detailed Report */}

@@ -328,9 +328,7 @@ const TeacherAttendanceDailyReport = () => {
       XLSX.utils.book_append_sheet(workbook, worksheet, title);
     });
 
-    const fileName = `Staff_Daily_Attendance_Report_${new Date()
-      .toISOString()
-      .slice(0, 10)}.xlsx`;
+    const fileName = `Staff_Daily_Attendance_Report_${toDate}.xlsx`;
 
     XLSX.writeFile(workbook, fileName);
   };
