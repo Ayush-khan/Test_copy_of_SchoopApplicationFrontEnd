@@ -8,6 +8,7 @@ import {
   faThumbsUp,
   faBookReader,
   faDownload,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ReactPaginate from "react-paginate";
@@ -31,6 +32,9 @@ function RemarkObservationStudent() {
   const [showPublish, setShowPublishModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [hiddenAttachments, setHiddenAttachments] = useState([]);
+  const [openedAttachments, setOpenedAttachments] = useState([]);
+
   const [currentSection, setCurrentSection] = useState(null);
   const [currestSubjectNameForDelete, setCurrestSubjectNameForDelete] =
     useState("");
@@ -44,13 +48,25 @@ function RemarkObservationStudent() {
   const prevSearchTermRef = useRef("");
   //   for allot subject checkboxes
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const openModal = (file) => {
+    setSelectedFile(file);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedFile(null);
+  };
 
   const [notices, setNotices] = useState([]); // To store fetched notices
   const [subject, setSubject] = useState("");
   const [noticeDesc, setNoticeDesc] = useState("");
   const [subjectError, setSubjectError] = useState("");
   const [noticeDescError, setNoticeDescError] = useState("");
-  const [open, setOpen] = useState(false);
+  // const [showViewModal, setShowViewModal] = useState(false);
   const [remarkData, setRemarkData] = useState({
     teacherName: "",
     remarkSubject: "",
@@ -127,11 +143,15 @@ function RemarkObservationStudent() {
       teacherName: subject.name || "",
       remarkSubject: subject.remark_subject || "",
       remarkDescription: subject.remark_desc || "",
-      studentName: subject.first_name || "",
-      classDivision: subject.classname || "",
+      studentName: `${subject.first_name || ""} ${subject.mid_name} ${
+        subject.last_name
+      }`,
+      classDivision: `${subject?.classname || ""} - ${
+        subject?.sectionname || ""
+      }`,
       attachments: subject.files || [],
     });
-    setOpen(true);
+    setShowViewModal(true);
   };
 
   // Function to download files
@@ -386,7 +406,7 @@ function RemarkObservationStudent() {
     setShowViewModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
-    setOpen(false);
+    setShowViewModal(false);
   };
 
   useEffect(() => {
@@ -451,6 +471,33 @@ function RemarkObservationStudent() {
     setUploadedFiles(updatedFiles);
   };
 
+  const handleDownload = async (fileUrl, fileName) => {
+    try {
+      const response = await fetch(fileUrl, {
+        mode: "cors",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch file");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName || "attachment";
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
+
   // This is tab
   const tabs = [
     { id: "Manage", label: "Manage" },
@@ -461,7 +508,7 @@ function RemarkObservationStudent() {
   return (
     <>
       {/* <ToastContainer /> */}
-      <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
+      <div className="md:mx-auto md:w-[85%] p-4 bg-white mt-4 ">
         <div className=" card-header  flex justify-between items-center  ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Remark & Observation
@@ -581,9 +628,21 @@ function RemarkObservationStudent() {
                                   {currentPage * pageSize + index + 1}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.first_name} {subject?.mid_name}{" "}
-                                  {subject?.last_name}
+                                  {`${subject?.first_name || ""} ${
+                                    subject?.mid_name || ""
+                                  } ${subject?.last_name || ""}`
+                                    .split(" ")
+                                    .map((word) =>
+                                      word
+                                        ? word.charAt(0).toUpperCase() +
+                                          word.slice(1).toLowerCase()
+                                        : ""
+                                    )
+                                    .join(" ")
+                                    .trim()}{" "}
+                                  {`(${subject?.classname} - ${subject?.sectionname})`}
                                 </td>
+
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.remark_type}
                                 </td>
@@ -629,7 +688,7 @@ function RemarkObservationStudent() {
                                       <FontAwesomeIcon icon={faTrash} />
                                     </button>
                                   ) : (
-                                    " "
+                                    ""
                                   )}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
@@ -982,7 +1041,7 @@ function RemarkObservationStudent() {
         </div>
       )}
 
-      {open && (
+      {showViewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="modal fade show" style={{ display: "block" }}>
             <div className="modal-dialog modal-dialog-centered">
@@ -991,7 +1050,7 @@ function RemarkObservationStudent() {
                   <h5 className="modal-title">View Remark</h5>
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                    onClick={() => setOpen(false)}
+                    onClick={() => setShowViewModal(false)}
                   />
                 </div>
 
@@ -1049,23 +1108,32 @@ function RemarkObservationStudent() {
                       remarkData.attachments.length > 0 ? (
                         remarkData.attachments.map((file, index) => (
                           <div key={index} className="flex items-center gap-2">
-                            <a
-                              href={file.file_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              download
-                              className="text-blue-600 underline text-sm break-all"
+                            <button
+                              onClick={() => openModal(file)}
+                              className="text-blue-600 underline text-sm break-all text-left"
                             >
                               {file.image_name}
-                            </a>
-                            <a
+                            </button>
+
+                            {/* <a
                               href={file.file_url}
+                              target="_blank"
                               download
                               className="text-green-700 hover:text-blue-600"
                               title="Download"
                             >
                               <FontAwesomeIcon icon={faDownload} size="sm" />
-                            </a>
+                            </a> */}
+                            <button
+                              onClick={() =>
+                                handleDownload(file.file_url, file.image_name)
+                              }
+                              className="text-green-700 hover:text-blue-600"
+                              title="Download"
+                              target="_blank"
+                            >
+                              <FontAwesomeIcon icon={faDownload} size="sm" />
+                            </button>
                           </div>
                         ))
                       ) : (
@@ -1075,13 +1143,45 @@ function RemarkObservationStudent() {
                       )}
                     </div>
                   </div>
+
+                  {/* Modal */}
+                  {showModal && selectedFile && (
+                    <>
+                      {/* Overlay */}
+                      <div
+                        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                        onClick={closeModal}
+                      ></div>
+
+                      {/* Modal box */}
+                      <div
+                        className="fixed z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                          bg-white p-4 rounded-lg shadow-lg w-[90%] max-w-md"
+                      >
+                        {/* Close button */}
+                        <button
+                          onClick={closeModal}
+                          className="absolute top-2 right-2 text-gray-600 text-xl hover:text-red-600"
+                        >
+                          &times;
+                        </button>
+
+                        {/* Attachment preview */}
+                        <img
+                          src={selectedFile.file_url}
+                          alt="Attachment"
+                          className="max-w-full max-h-[70vh] mx-auto mt-6 rounded-md"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="flex justify-end p-3">
                   <button
                     type="button"
                     className="btn btn-danger px-3 mb-2"
-                    onClick={() => setOpen(false)}
+                    onClick={() => setShowViewModal(false)}
                   >
                     Close
                   </button>

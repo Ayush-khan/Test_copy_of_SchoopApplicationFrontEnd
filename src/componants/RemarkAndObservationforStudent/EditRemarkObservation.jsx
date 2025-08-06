@@ -24,6 +24,7 @@ const EditRemarkandObservation = () => {
     classError: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { id } = useParams();
   console.log("id", id);
 
@@ -139,11 +140,6 @@ const EditRemarkandObservation = () => {
     }
   };
 
-  // const handleFileUpload = (event) => {
-  //   const files = Array.from(event.target.files);
-  //   setUploadedFiles((prevFiles) => [...prevFiles, ...files]);
-  // };
-
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
     setFormData((prev) => ({
@@ -198,6 +194,8 @@ const EditRemarkandObservation = () => {
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
 
+    setIsSubmitting(true);
+
     if (!validateForm()) return;
     const formDataToSend = new FormData();
 
@@ -248,6 +246,8 @@ const EditRemarkandObservation = () => {
     } catch (error) {
       console.error("Error updating remark:", error);
       toast.error("Error updating remark");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -486,8 +486,9 @@ const EditRemarkandObservation = () => {
                     type="button"
                     onClick={handleSubmitEdit}
                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                    disabled={isSubmitting}
                   >
-                    Update
+                    {isSubmitting ? "Updaing..." : "Update"}
                   </button>
 
                   <button

@@ -2717,6 +2717,21 @@ const FullTermMarksClass = () => {
     XLSX.writeFile(wb, fname);
   };
 
+  const filteredData = (timetable?.data || []).filter((student) => {
+    const fullName = `${student.first_name} ${student.mid_name || ""} ${
+      student.last_name || ""
+    }`.toLowerCase();
+    const regNo = student.reg_no?.toString().toLowerCase() || "";
+    const rollNo = student.roll_no?.toString().toLowerCase() || "";
+    const search = searchTerm.toLowerCase();
+
+    return (
+      fullName.includes(search) ||
+      regNo.includes(search) ||
+      rollNo.includes(search)
+    );
+  });
+
   return (
     <>
       <div
@@ -3065,7 +3080,7 @@ const FullTermMarksClass = () => {
                               >
                                 {" "}
                                 {/* Row 1 */}
-                                <tr className="bg-gradient-to-r from-gray-300 to-gray-200 border border-gray-800">
+                                <tr className="bg-gradient-to-r from-gray-300 to-gray-200 border-2 border-gray-400">
                                   {row1.map((cell, i) => {
                                     const isSticky = i < 3;
                                     const leftOffsets = [0, 80, 160]; // Customize widths here
@@ -3093,23 +3108,23 @@ const FullTermMarksClass = () => {
                                   })}
                                 </tr>
                                 {/* Row 2 */}
-                                <tr className="bg-gradient-to-r from-gray-300 to-gray-200 text-blue-900 border border-gray-800">
+                                <tr className="bg-gradient-to-r from-gray-300 to-gray-200 text-blue-900 border-2 border-gray-400">
                                   {row2.map((cell, i) => (
                                     <th
                                       key={`r2-${i}`}
                                       colSpan={cell.colspan}
-                                      className="px-3 py-2 text-center whitespace-nowrap border border-gray-800"
+                                      className="px-3 py-2 text-center whitespace-nowrap border-2 border-gray-400"
                                     >
                                       {cell.label}
                                     </th>
                                   ))}
                                 </tr>
                                 {/* Row 3 */}
-                                <tr className="bg-gradient-to-r from-blue-100 to-blue-50 text-blue-900 border border-gray-800">
+                                <tr className="bg-gradient-to-r from-blue-100 to-blue-50 text-blue-900 border-2 border-gray-400">
                                   {row3.map((cell, i) => (
                                     <th
                                       key={`r3-${i}`}
-                                      className="px-3 py-2 text-center whitespace-nowrap border border-gray-800"
+                                      className="px-3 py-2 text-center whitespace-nowrap border-2 border-gray-400"
                                     >
                                       {cell.label.split("\n").map((line, i) => (
                                         <div key={i}>{line}</div>
@@ -3120,93 +3135,111 @@ const FullTermMarksClass = () => {
                               </thead>
 
                               <tbody>
-                                {timetable.data.map((student, rowIndex) => (
-                                  <tr key={student.student_id}>
-                                    {/* Sticky: Roll No */}
-                                    <td
-                                      className="sticky left-0 bg-white border px-3 py-1 whitespace-nowrap"
-                                      style={{
-                                        zIndex: 3,
-                                        minWidth: "80px",
-                                      }}
-                                    >
-                                      {student.roll_no}
-                                    </td>
+                                {filteredData.length
+                                  ? filteredData.map((student, rowIndex) => (
+                                      <tr key={student.student_id}>
+                                        {/* Sticky: Roll No */}
+                                        <td
+                                          className="sticky left-0 bg-white border-2 border-gray-400 px-3 py-1 whitespace-nowrap"
+                                          style={{
+                                            zIndex: 3,
+                                            minWidth: "80px",
+                                          }}
+                                        >
+                                          {student.roll_no}
+                                        </td>
 
-                                    {/* Sticky: Reg No */}
-                                    <td
-                                      className="sticky left-[80px] bg-white border px-3 py-1 whitespace-nowrap"
-                                      style={{
-                                        zIndex: 3,
-                                        minWidth: "80px",
-                                      }}
-                                    >
-                                      {student.reg_no}
-                                    </td>
+                                        {/* Sticky: Reg No */}
+                                        <td
+                                          className="sticky left-[80px] bg-white border-2 border-gray-400 px-3 py-1 whitespace-nowrap"
+                                          style={{
+                                            zIndex: 3,
+                                            minWidth: "80px",
+                                          }}
+                                        >
+                                          {student.reg_no}
+                                        </td>
 
-                                    {/* Sticky: Student Name */}
-                                    <td
-                                      className="sticky left-[160px] bg-white  border px-3 py-1 "
-                                      style={{
-                                        zIndex: 3,
-                                        minWidth: "160px",
-                                      }}
-                                    >
-                                      {`${
-                                        capitalizeFirst(student.first_name) ||
-                                        ""
-                                      } ${
-                                        toLowerCaseAll(student.mid_name) || ""
-                                      } ${
-                                        toLowerCaseAll(student.last_name) || ""
-                                      }`.trim()}
-                                    </td>
+                                        {/* Sticky: Student Name */}
+                                        <td
+                                          className="sticky left-[160px] bg-white  border-2 border-gray-400 px-3 py-1 "
+                                          style={{
+                                            zIndex: 3,
+                                            minWidth: "160px",
+                                          }}
+                                        >
+                                          {`${
+                                            capitalizeFirst(
+                                              student.first_name
+                                            ) || ""
+                                          } ${
+                                            toLowerCaseAll(student.mid_name) ||
+                                            ""
+                                          } ${
+                                            toLowerCaseAll(student.last_name) ||
+                                            ""
+                                          }`.trim()}
+                                        </td>
 
-                                    {subjectExamHeadingMap.map(
-                                      (
-                                        {
-                                          termId,
-                                          subjectId,
-                                          examId,
-                                          marksHeadingId,
-                                          headingName,
-                                          isSubjectTotal,
-                                        },
-                                        index
-                                      ) => {
-                                        let value = "";
+                                        {subjectExamHeadingMap.map(
+                                          (
+                                            {
+                                              termId,
+                                              subjectId,
+                                              examId,
+                                              marksHeadingId,
+                                              headingName,
+                                              isSubjectTotal,
+                                            },
+                                            index
+                                          ) => {
+                                            let value = "";
 
-                                        if (isSubjectTotal) {
-                                          const subjectExams =
-                                            student.marks?.[termId]?.[
-                                              subjectId
-                                            ] || {};
-                                          for (const examKey in subjectExams) {
-                                            const exam = subjectExams[examKey];
-                                            if (exam?.Total !== undefined) {
-                                              value = exam.Total;
-                                              break;
+                                            if (isSubjectTotal) {
+                                              const subjectExams =
+                                                student.marks?.[termId]?.[
+                                                  subjectId
+                                                ] || {};
+                                              for (const examKey in subjectExams) {
+                                                const exam =
+                                                  subjectExams[examKey];
+                                                if (exam?.Total !== undefined) {
+                                                  value = exam.Total;
+                                                  break;
+                                                }
+                                              }
+                                            } else {
+                                              value =
+                                                student.marks?.[termId]?.[
+                                                  subjectId
+                                                ]?.[examId]?.[marksHeadingId] ??
+                                                "";
                                             }
-                                          }
-                                        } else {
-                                          value =
-                                            student.marks?.[termId]?.[
-                                              subjectId
-                                            ]?.[examId]?.[marksHeadingId] ?? "";
-                                        }
 
-                                        return (
-                                          <td
-                                            key={index}
-                                            className="border px-3 py-1 text-center whitespace-nowrap"
-                                          >
-                                            {value}
-                                          </td>
-                                        );
-                                      }
+                                            return (
+                                              <td
+                                                key={index}
+                                                className="border-2 border-gray-400 px-3 py-1 text-center whitespace-nowrap"
+                                              >
+                                                {value}
+                                              </td>
+                                            );
+                                          }
+                                        )}
+                                      </tr>
+                                    ))
+                                  : filteredData.length === 0 && (
+                                      <div
+                                        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                                        style={{
+                                          zIndex: 5,
+                                        }}
+                                      >
+                                        <p className="text-red-700 text-xl font-semibold">
+                                          Oops! No data found..
+                                        </p>
+                                      </div>
                                     )}
-                                  </tr>
-                                ))}
                               </tbody>
                             </table>
                           </div>
