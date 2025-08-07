@@ -120,6 +120,24 @@ const gradientColors = [
     name: "Muted Cosmos",
     value: "linear-gradient(to right, #1e2022, #3a3d40, #4b4e52)",
   },
+
+  // NEWLY ADDED GRADIENTS
+  {
+    name: "Silver Fade",
+    value: "linear-gradient(135deg, #e0e0e0, #cfcfcf, #bfbfbf)",
+  },
+  {
+    name: "Soft Steel",
+    value: "linear-gradient(145deg, #f0f0f0, #d6d6d6, #bbbbbb)",
+  },
+  {
+    name: "Grey Horizon",
+    value: "linear-gradient(to right, #d3d3d3, #a8a8a8)",
+  },
+  {
+    name: "Charcoal Drift",
+    value: "linear-gradient(120deg, #2e2e2e, #4a4a4a, #6e6e6e)",
+  },
 ];
 
 const AdminDashboard = () => {
