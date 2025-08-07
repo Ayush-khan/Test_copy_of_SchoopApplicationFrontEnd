@@ -81,7 +81,7 @@ const CreateRemarkObservationStudent = () => {
     return Array.isArray(allClasses)
       ? allClasses.map((cls) => ({
           value: cls.student_id,
-          label: `${cls?.first_name} ${cls.mid_name || ""} (${cls.last_name})`,
+          label: `${cls?.first_name} ${cls.last_name} (${cls.classname}-${cls.sectionname})`,
           class_id: cls.class_id,
           section_id: cls.section_id,
         }))
