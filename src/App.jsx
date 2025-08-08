@@ -6,7 +6,12 @@ function App() {
   // const API_URL = import.meta.env.API_URL;
   // console.log("this is API_URL", API_URL);
   return (
-    <div className="overflow-x-hidden">
+    <div
+      className=" w-screen overflow-x-hidden h-screen "
+      style={{
+        background: "#E61F64",
+      }}
+    >
       <Index />
     </div>
   );
