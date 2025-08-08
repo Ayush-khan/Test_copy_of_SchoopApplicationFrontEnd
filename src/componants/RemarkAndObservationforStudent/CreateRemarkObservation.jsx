@@ -511,6 +511,7 @@ const CreateRemarkObservation = () => {
                             className="w-[40%] px-2 py-2 border border-gray-700 rounded-md shadow-md"
                             value={remarkSubject}
                             onChange={handleRemarkSubjectChange}
+                            maxLength={100}
                           />
                           {errors.remarkSubjectError && (
                             <p className="text-red-500 text-sm mt-1">
@@ -531,6 +532,7 @@ const CreateRemarkObservation = () => {
                             className="w-[40%] px-2 py-1 border border-gray-700 rounded-md shadow-md"
                             value={remarkDescription}
                             onChange={handleRemarkDescriptionChange}
+                            maxLength={350}
                           />
                           {errors.remarkDescriptionError && (
                             <p className="text-red-500 text-sm mt-1">

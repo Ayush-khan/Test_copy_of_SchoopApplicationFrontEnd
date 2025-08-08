@@ -191,12 +191,8 @@ const EditRemarkandObservation = () => {
       remark_id: "",
       filenottobedeleted: [],
       userfile: [],
-      subjectname: "",
-      fullname: "",
-      classname: "",
     });
 
-    setSelectedClasses([]);
     setIsObservation(false);
   };
 
@@ -315,8 +311,12 @@ const EditRemarkandObservation = () => {
       );
 
       if (response.data.success) {
-        toast.success("Remark updated successfully!");
-        navigate("/remObsStudent");
+        toast.success("Remark Updated successfully!");
+
+        // Delay navigation by 32 seconds (32,000 milliseconds)
+        setTimeout(() => {
+          navigate("/remObsStudent");
+        }, 2000);
       } else {
         toast.error(response.data.message || "Something went wrong");
       }
@@ -391,6 +391,7 @@ const EditRemarkandObservation = () => {
                             readOnly
                             value={formData.fullname}
                             className="w-full bg-gray-200 text-gray-700 p-2 rounded"
+                            maxLength={100}
                           />
                           {errors.classError && (
                             <p className="text-red-500 mt-1">
@@ -411,6 +412,7 @@ const EditRemarkandObservation = () => {
                             value={formData.subjectname}
                             readOnly
                             className="w-full bg-gray-200 text-gray-700 p-2 rounded"
+                            maxLength={350}
                           />
                           {errors.classError && (
                             <p className="text-red-500 mt-1">
