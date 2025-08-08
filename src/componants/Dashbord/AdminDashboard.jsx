@@ -17,111 +17,62 @@ import { useState } from "react";
 import DashboardContent from "./DashboardContent.jsx";
 
 // FLAT COLORS
-const flatColors = [
-  { name: "Barely Green", value: "#acb7ae" },
-  { name: "Tan Blonde", value: "#e4decd" },
-  { name: "Blondey", value: "#c2b490" },
-  { name: "Goldi-lots", value: "#c7af6b" },
-  { name: "Blueberry", value: "#6B7A8F" },
-  { name: "Apple Core", value: "#DCC7AA" },
-  { name: "Sand Tan", value: "#e1b382" },
-  { name: "Sand Tan Shadow", value: "#c89666" },
-  { name: "Night Blue", value: "#2d545e" },
-  { name: "Night Blue Shadow", value: "#12343b" },
-  { name: "Brightly Orange #2", value: "#f43a09" },
-  { name: "Brightly Orange", value: "#ff1e00" },
-  { name: "Dimly Blue", value: "#e8f9fd" },
-  { name: "Alert Green", value: "#59ce8f" },
-  // DARK FLAT COLORS
-  { name: "Charcoal Black", value: "#1C1C1C" },
-  { name: "Midnight Gray", value: "#2C2C2C" },
-  { name: "Deep Ash", value: "#3A3A3A" },
-  { name: "Shadow Blue", value: "#2F3E46" },
-  { name: "Navy Night", value: "#1B263B" },
-  { name: "Raven", value: "#121212" },
-  { name: "Dim Coal", value: "#222222" },
+const flatGrayColors = [
+  { name: "Gainsboro", value: "#DCDCDC" }, // Light, soft gray – great for backgrounds
+  { name: "Silver", value: "#C0C0C0" }, // Classic silver-gray
+  { name: "Ash Gray", value: "#B2BEB5" }, // Slightly greenish tint – very modern
+  { name: "Spanish Gray", value: "#989898" }, // Neutral medium gray – perfect for cards or UI blocks
+  { name: "Slate Gray", value: "#708090" }, // Blue-ish undertone, looks great with whites and blues
+  { name: "Dim Gray", value: "#696969" }, // Smooth and subtle – ideal for text or borders
+  { name: "Sonic Silver", value: "#757575" }, // Balanced and readable on light backgrounds
+  { name: "Charcoal", value: "#36454F" }, // Rich dark gray-blue – great for dark mode
+  { name: "Graphite", value: "#383838" }, // Stylish dark gray – almost black, but softer
+  { name: "Jet Gray", value: "#2C2C2C" }, // Dark neutral gray – good for dark UI
 ];
 
 // GRADIENT COLORS
 const gradientColors = [
-  { name: "Yass Queen", value: "linear-gradient(to right, #ff1d58, #ff1d58)" },
   {
-    name: "Sister Sister",
-    value: "linear-gradient(to right, #f75990, #f75990)",
+    name: "Brutal Blue Glow",
+    value: "linear-gradient(135deg, #0049B7, #3A86FF, #00BBF9)",
   },
-  {
-    name: "Crown Yellow",
-    value: "linear-gradient(to right, #fff685, #fff685)",
-  },
-  { name: "Blue Light", value: "linear-gradient(to right, #00DDFF, #00DDFF)" },
-  { name: "Brutal Blue", value: "linear-gradient(to right, #0049B7, #0049B7)" },
   {
     name: "Ice Cold",
     value:
-      "linear-gradient(to right, #a0d2eb, #e5eaf5, #d0bdf4, #8458B3, #a28089)",
+      "linear-gradient(135deg, #a0d2eb, #e5eaf5, #d0bdf4, #8458B3, #a28089)",
   },
   {
     name: "Bright Blue Mix",
     value: "linear-gradient(to right, #51e2f5, #9df9ef, #edf756, #ffa8B6)",
   },
-
-  // DARK GRADIENT COLORS
   {
-    name: "Nightfall",
-    value: "linear-gradient(to right, #0f2027, #203a43, #2c5364)",
+    name: "Stormy Sea",
+    value: "linear-gradient(135deg, #373b44, #4a6588, #4286f4)",
   },
-  { name: "Deep Space", value: "linear-gradient(to right, #000428, #004e92)" },
+
+  // 🌌 Dark / Futuristic Themes
+
   {
     name: "Phantom Purple",
-    value: "linear-gradient(to right, #2b2e4a, #e84545)",
+    value: "linear-gradient(135deg, #2b2e4a, #e84545)",
   },
-  { name: "Dark Rose", value: "linear-gradient(to right, #2c3e50, #fd746c)" },
-  { name: "Moody Sky", value: "linear-gradient(to right, #434343, #000000)" },
-  { name: "Galaxy Mix", value: "linear-gradient(to right, #141E30, #243B55)" },
+  {
+    name: "Dark Rose",
+    value: "linear-gradient(135deg, #2c3e50, #fd746c)",
+  },
 
-  // NEW DARK GRADIENTS
-  {
-    name: "Twilight Shadows",
-    value: "linear-gradient(to right, #0f0c29, #302b63, #24243e)",
-  },
-  {
-    name: "Dark Steel",
-    value: "linear-gradient(to right, #434343, #000000)",
-  },
-  {
-    name: "Black Night",
-    value: "linear-gradient(to right, #000000, #434343)",
-  },
-  {
-    name: "Misty Noir",
-    value: "linear-gradient(to right, #1e130c, #9a8478)",
-  },
-  {
-    name: "Black Cherry",
-    value: "linear-gradient(to right, #2b0f1c, #4a0f23, #6a1b34)",
-  },
   {
     name: "Obsidian Flame",
     value: "linear-gradient(to right, #1a1a1a, #b31217)",
   },
-  {
-    name: "Ashen Violet",
-    value: "linear-gradient(to right, #41295a, #2F0743)",
-  },
+
   {
     name: "Emerald Night",
     value: "linear-gradient(to right, #004e92, #000428)",
   },
-  {
-    name: "Stormy Sea",
-    value: "linear-gradient(to right, #373b44, #4286f4)",
-  },
-  {
-    name: "Muted Cosmos",
-    value: "linear-gradient(to right, #1e2022, #3a3d40, #4b4e52)",
-  },
 
-  // NEWLY ADDED GRADIENTS
+  // 🌚 Grayscale & Charcoal
+
   {
     name: "Silver Fade",
     value: "linear-gradient(135deg, #e0e0e0, #cfcfcf, #bfbfbf)",
@@ -133,6 +84,19 @@ const gradientColors = [
   {
     name: "Grey Horizon",
     value: "linear-gradient(to right, #d3d3d3, #a8a8a8)",
+  },
+
+  {
+    name: "Moody Pastel",
+    value: "linear-gradient(135deg, #2f2f2f, #a39ba8, #c0b7c2)",
+  },
+  {
+    name: "Ash Moonlight",
+    value: "linear-gradient(135deg, #3e3e3e, #686868, #9e9e9e)",
+  },
+  {
+    name: "Dark Platinum",
+    value: "linear-gradient(135deg, #2b2b2b, #4d4d4d, #8e8e8e)",
   },
   {
     name: "Charcoal Drift",
@@ -174,35 +138,55 @@ const AdminDashboard = () => {
             <div>
               <h3 className="font-semibold text-lg mb-2">🎨 Flat Colors</h3>
               <div className="grid grid-cols-3 gap-4 mb-6">
-                {flatColors.map((color) => (
-                  <button
-                    key={color.name}
-                    onClick={() => setSelectedColor(color.value)}
-                    style={{ background: color.value }}
-                    className={`h-10 rounded border-2 ${
-                      selectedColor === color.value
-                        ? "border-black"
-                        : "border-transparent"
-                    }`}
-                    title={color.name}
-                  />
+                {flatGrayColors.map((color) => (
+                  <div className="relative">
+                    <button
+                      key={color.name}
+                      onClick={() => setSelectedColor(color.value)}
+                      style={{ background: color.value }}
+                      className={`h-12 w-full rounded-lg transition-all duration-300 transform 
+        ${
+          selectedColor === color.value
+            ? "scale-110 ring-4 ring-pink-500 border-2 border-white shadow-xl z-10"
+            : "hover:scale-105 hover:ring-2 hover:ring-gray-400"
+        }`}
+                      title={color.name}
+                    />
+                    {selectedColor === color.value && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="text-white text-xl font-bold drop-shadow-md">
+                          ✓
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
 
               <h3 className="font-semibold text-lg mb-2">🌈 Gradient Colors</h3>
               <div className="grid grid-cols-2 gap-4 mb-6">
                 {gradientColors.map((color) => (
-                  <button
-                    key={color.name}
-                    onClick={() => setSelectedColor(color.value)}
-                    style={{ background: color.value }}
-                    className={`h-12 rounded border-2 ${
-                      selectedColor === color.value
-                        ? "border-black"
-                        : "border-transparent"
-                    }`}
-                    title={color.name}
-                  />
+                  <div className="relative">
+                    <button
+                      key={color.name}
+                      onClick={() => setSelectedColor(color.value)}
+                      style={{ background: color.value }}
+                      className={`h-14 w-full rounded-lg transition-all duration-300 transform 
+        ${
+          selectedColor === color.value
+            ? "scale-110 ring-4 ring-blue-500 border-2 border-white shadow-xl z-10"
+            : "hover:scale-105 hover:ring-2 hover:ring-gray-400"
+        }`}
+                      title={color.name}
+                    />
+                    {selectedColor === color.value && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="text-white text-xl font-bold drop-shadow-md">
+                          ✓
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
 
