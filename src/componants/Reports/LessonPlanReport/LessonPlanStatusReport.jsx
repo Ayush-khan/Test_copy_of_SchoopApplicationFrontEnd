@@ -160,13 +160,6 @@ const LessonPlanStatusReport = () => {
     { value: "C", label: "Complete" },
   ];
 
-  const camelCase = (str) =>
-    str
-      ?.toLowerCase()
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-
   const handleSearch = async () => {
     setSearchTerm("");
     setStudentError("");
@@ -246,7 +239,7 @@ const LessonPlanStatusReport = () => {
   const handlePrint = () => {
     const printTitle = `Lesson Plan Status Report  ${
       selectedStudent?.label
-        ? `List of ${camelCase(selectedStudent.label)}`
+        ? `List of ${selectedStudent.label}`
         : ": Complete List of All Teacher "
     }`;
     const printContent = `
@@ -428,7 +421,7 @@ const LessonPlanStatusReport = () => {
 
     // Generate file name and trigger download
     const fileName = `Lesson_Plan_Status_Report_${
-      camelCase(selectedStudent?.label) || "All_Teacher"
+      selectedStudent?.label || "All_Teacher"
     }.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };

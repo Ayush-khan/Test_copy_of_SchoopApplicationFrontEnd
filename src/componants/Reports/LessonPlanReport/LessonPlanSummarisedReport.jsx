@@ -235,17 +235,10 @@ const LessonPlanSummarisedReport = () => {
     }
   };
 
-  const camelCase = (str) =>
-    str
-      ?.toLowerCase()
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-
   const handlePrint = () => {
     const printTitle = `Lesson Plan Summarised Report  ${
       selectedStudent?.label
-        ? `List of ${camelCase(selectedStudent.label)}`
+        ? `List of ${selectedStudent.label}`
         : ": Complete List of All Staff "
     }`;
     const printContent = `
@@ -443,7 +436,7 @@ const LessonPlanSummarisedReport = () => {
 
     // Generate and download the Excel file
     const fileName = `Lesson_Plan_Summarised_Report
-    ${camelCase(selectedStudent?.label) || "For All Staff"}.xlsx`;
+    ${selectedStudent?.label || "For All Staff"}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
