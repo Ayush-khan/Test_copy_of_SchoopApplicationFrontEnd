@@ -341,7 +341,7 @@ const LessonPlanDetailedView = () => {
             } ${student.secname}</h3>
           </div>
 
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+          <table style="width: 100%;  margin-bottom: 10px;">
             <thead>
               <tr style="background-color: #f3f4f6;">
                 ${[
@@ -414,7 +414,7 @@ const LessonPlanDetailedView = () => {
               ? `
             <div style="display: flex; gap: 16px; margin-bottom: 10px;">
               <div style="flex: 2; border: 1px solid #ccc; padding: 10px;">
-                <table style="width: 100%; border-collapse: collapse;">
+                <table style="width: 100%; ">
                   <thead>
                     <tr style="background-color: #f3f4f6;">
                       <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">Start Date</th>
@@ -437,7 +437,7 @@ const LessonPlanDetailedView = () => {
                 </table>
               </div>
               <div style="flex: 1; border: 1px solid #ccc; padding: 10px;">
-                <table style="width: 100%; border-collapse: collapse;">
+                <table style="width: 100%; ">
                   <thead>
                     <tr style="background-color: #f3f4f6;">
                       <th style="border: 1px solid #ccc; padding: 6px; text-align: center;">Status</th>
@@ -1332,7 +1332,7 @@ const LessonPlanDetailedView = () => {
                                     >
                                       <table
                                         className="table-fixed border border-gray-500"
-                                        style={{ borderCollapse: "collapse" }}
+                                        // style={{ }}
                                       >
                                         <thead className="bg-gray-200">
                                           <tr>
@@ -1406,7 +1406,7 @@ const LessonPlanDetailedView = () => {
                                   {student.daily_changes?.length > 0 && (
                                     <div className="flex flex-row gap-4 mb-4">
                                       <div className="w-2/3 border p-3 rounded bg-gray-50">
-                                        <table className="w-full table-auto border-collapse text-sm">
+                                        <table className="w-full table-auto  text-sm">
                                           <thead>
                                             <tr className="bg-gray-200">
                                               <th className="border px-4 py-2 text-left w-[19%] text-sm font-semibold text-gray-800">
@@ -1442,7 +1442,7 @@ const LessonPlanDetailedView = () => {
                                       {/* Table 4: Status Section */}
                                       {displayedSections.length > 0 && (
                                         <div className="w-1/3 border p-3 rounded bg-gray-50">
-                                          <table className="w-full table-auto border-collapse text-sm">
+                                          <table className="w-full table-auto  text-sm">
                                             <thead>
                                               <tr className="bg-gray-200">
                                                 <th className="px-4 py-2 border text-sm font-semibold text-center text-gray-800">
