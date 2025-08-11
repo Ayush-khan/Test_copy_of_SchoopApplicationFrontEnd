@@ -27,7 +27,7 @@ function App() {
   const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
 
-  const [background, setBackground] = useState(""); // ❌ No hardcoded background
+  const [background, setBackground] = useState(null); // ❌ No hardcoded background
   const [selectedColorId, setSelectedColorId] = useState(null);
   const [selectedColorCode, setSelectedColorCode] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -39,6 +39,13 @@ function App() {
     fetchActiveBackground();
     fetchBackgroundColors();
   }, []);
+  const cleanColorCode = (code) => {
+    if (!code) return "";
+    if (code.startsWith("linear-gradient") && !code.trim().endsWith(")")) {
+      return code + ")";
+    }
+    return code;
+  };
 
   // ✅ 1. Fetch active background color from updated API response format
   const fetchActiveBackground = async () => {
@@ -62,7 +69,7 @@ function App() {
       const active = response?.data?.data?.[0]; // ✅ Response is an array
       if (active) {
         setBackground(active.color_code);
-        console.log("Active background color:", active.color_code);
+        console.log("Active background color:", background);
         setSelectedColorId(active.background_color_id);
         setSelectedColorCode(active.color_code);
       }
@@ -95,7 +102,7 @@ function App() {
   const applyBackground = async () => {
     if (!selectedColorId) return;
 
-    setIsLoading(true); // Start loader
+    setIsLoading(true);
     try {
       const token = localStorage.getItem("authToken");
       const config = {
@@ -103,37 +110,52 @@ function App() {
         withCredentials: true,
       };
 
-      // 🔁 First: Update selected background on server
+      // Apply to UI immediately
+      setBackground(cleanColorCode(selectedColorCode)); // ✅ visual update
+      console.log("Applying color:", cleanColorCode(selectedColorCode));
+
+      // Update backend
       await axios.put(
         `${API_URL}/api/update_backgroundcoloractive/${selectedColorId}`,
         { background_color_id: selectedColorId },
         config
       );
 
-      // 🔁 Then: Re-fetch active background from server to confirm update
+      // Optionally refresh from server
       await fetchActiveBackground();
 
-      // ✅ Close modal
       setShowModal(false);
     } catch (err) {
       console.error("Failed to update background:", err.message);
     } finally {
-      setIsLoading(false); // End loader
+      setIsLoading(false);
     }
   };
 
   return (
     <div
       className="relative w-screen h-screen overflow-hidden"
-      style={
-        background?.startsWith("linear-gradient")
-          ? { background: background }
-          : { backgroundColor: background }
-      }
+      style={{ background: background || "#ffffff" }}
     >
       <button
         onClick={() => setShowModal(true)}
         className="fixed top-4 right-4 px-4 py-2 bg-white text-black rounded shadow hover:bg-gray-300 transition z-[9999]"
+        // style={{
+        //   background: "   linear-gradient(to bottom, #E91E63, #2196F3)",
+        // }}
+        style={{
+          background: background || "#ffffff", // fallback to white if null
+          backgroundSize: "cover", // makes gradient/full-screen backgrounds look right
+          backgroundRepeat: "no-repeat",
+        }}
+
+        // style={
+        //   typeof background === "string"
+        //     ? background.startsWith("linear-gradient")
+        //       ? { background }
+        //       : { backgroundColor: background }
+        //     : {}
+        // }
       >
         Change Background
       </button>

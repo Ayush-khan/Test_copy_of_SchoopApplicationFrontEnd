@@ -1,7 +1,12 @@
 import DashboardContent from "./DashboardContent.jsx";
 const AdminDashboard = () => {
   return (
-    <div className=" w-screen overflow-x-hidden h-screen">
+    <div
+      className=" w-screen overflow-x-hidden h-screen"
+      // style={{
+      //   background: "   linear-gradient(to bottom, #E91E63, #2196F3)",
+      // }}
+    >
       <DashboardContent />
     </div>
   );
