@@ -1436,7 +1436,7 @@ const LessonPlanDetailedView = () => {
                                         </table>
                                       </div>
 
-                                      {/* Table 4: Status Section */}
+                                      {/* Table 4: Status Section is */}
                                       {displayedSections.length > 0 && (
                                         <div className="w-1/3 border p-3 rounded bg-gray-50">
                                           <table className="w-full table-auto  text-sm">
