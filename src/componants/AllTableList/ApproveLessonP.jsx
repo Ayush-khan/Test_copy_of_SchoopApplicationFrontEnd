@@ -13,7 +13,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import dayjs from "dayjs";
 
-const ApproveLessonPlan = () => {
+const ApproveLessonP = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
   const academicYrFrom = localStorage.getItem("academic_yr_from");
@@ -180,60 +180,6 @@ const ApproveLessonPlan = () => {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
 
-  // const handleSearch = async () => {
-  //   setLoadingForSearch(false);
-
-  //   if (!selectedStudentId) {
-  //     setStudentError("Please select Teacher Name.");
-  //     setLoadingForSearch(false);
-  //     return;
-  //   }
-
-  //   setSearchTerm("");
-
-  //   try {
-  //     const formattedWeek = weekRange;
-
-  //     console.log("Formatted Week is: --->", formattedWeek);
-
-  //     setLoadingForSearch(true);
-  //     setTimetable([]);
-
-  //     const token = localStorage.getItem("authToken");
-
-  //     const params = {
-  //       staff_id: selectedStudentId,
-  //       week: weekRange,
-  //       month: selectedMonthId,
-  //     };
-
-  //     console.log(params);
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_approvelessonplandata`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params,
-  //       }
-  //     );
-
-  //     if (!response?.data?.data || response?.data?.data?.length === 0) {
-  //       toast.error("Approve Lesson Plan not found.");
-  //       setTimetable([]);
-  //       setShowStudentReport(false);
-  //     } else {
-  //       setTimetable(response?.data?.data);
-  //       setPageCount(Math.ceil(response?.data?.data?.length / pageSize));
-  //       setShowStudentReport(true);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching Approve Lesson Plan:", error);
-  //     toast.error("Error fetching Approve Lesson Plan. Please try again.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //     setLoadingForSearch(false);
-  //   }
-  // };
-
   const handleSearch = async () => {
     setLoadingForSearch(false);
 
@@ -383,227 +329,227 @@ const ApproveLessonPlan = () => {
 
   const handlePrint = () => {
     const printTitle = `Approve Lesson Plan  ${
-      selectedStudent?.label
+      camelCase(selectedStudent?.label)
         ? `List of ${camelCase(selectedStudent.label)}`
-        : ": Complete List of All Staff "
+        : ": Complete List of All Teacher "
     }`;
     const printContent = `
-  <div style="font-family: sans-serif; font-size: 12px; padding: 20px;">
-    <h2 style="text-align: center; font-weight: bold; font-size: 18px; margin-bottom: 20px;">${printTitle}</h2>
+    <div style="font-family: sans-serif; font-size: 12px; padding: 20px;">
+      <h2 style="text-align: center; font-weight: bold; font-size: 18px; margin-bottom: 20px;">${printTitle}</h2>
 
-    ${displayedSections
-      .map(
-        (student, index) => `
-        <div style="border: 1px solid #ccc; margin-bottom: 40px; padding: 16px; page-break-inside: avoid;">
-          <div style="position: relative; margin-bottom: 10px;">
-            <span style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); background: #E0E7FF; color: #3730A3; font-weight: bold; padding: 4px 12px; border-radius: 999px;">${
-              index + 1
-            }</span>
-            <h3 style="text-align: center; color: #C03078; font-size: 16px; font-weight: bold;">Lesson For Class ${
-              student.classname
-            } ${student.secname}</h3>
-          </div>
+      ${displayedSections
+        .map(
+          (student, index) => `
+          <div style="border: 1px solid #ccc; margin-bottom: 40px; padding: 16px; page-break-inside: avoid;">
+            <div style="position: relative; margin-bottom: 10px;">
+              <span style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); background: #E0E7FF; color: #3730A3; font-weight: bold; padding: 4px 12px; border-radius: 999px;">${
+                index + 1
+              }</span>
+              <h3 style="text-align: center; color: #C03078; font-size: 16px; font-weight: bold;">Lesson For Class ${
+                student.classname
+              } ${student.secname}</h3>
+            </div>
 
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
-            <thead>
-              <tr style="background-color: #f3f4f6;">
-                ${[
-                  "Week",
-                  "Class",
-                  "Subject",
-                  "Sub-Subject",
-                  "Period No.",
-                  "Lesson",
-                  "Name of the Lesson",
-                ]
-                  .map(
-                    (header) =>
-                      `<th style="border: 1px solid #ccc; padding: 6px; text-align: center;">${header}</th>`
-                  )
-                  .join("")}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
-                  student.week_date || ""
-                }</td>
-                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
-                  student.classname
-                } ${student.secname}</td>
-                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
-                  student.subname
-                }</td>
-                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
-                  student.sub_subject || "-"
-                }</td>
-                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
-                  student.no_of_periods
-                }</td>
-                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
-                  student.chapter_no
-                }</td>
-                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
-                  student.chaptername
-                }</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
-            ${
-              student.non_daily?.length > 0
-                ? student.non_daily
+            <table style="width: 100%;  margin-bottom: 10px;">
+              <thead>
+                <tr style="background-color: #f3f4f6;">
+                  ${[
+                    "Week",
+                    "Class",
+                    "Subject",
+                    "Sub-Subject",
+                    "Period No.",
+                    "Lesson",
+                    "Name of the Lesson",
+                  ]
                     .map(
-                      (item) => `
-                <div style="flex: 0 0 200px; min-width: 200px; border: 1px solid #ccc; padding: 8px;">
-                  <p style="font-weight: bold; color: #2563EB;">${
-                    item.heading
-                  }</p>
-                  <ul style="padding-left: 16px; margin-top: 4px;">
-                    ${item.description
-                      .map((desc) => `<li>${desc.trim()}</li>`)
-                      .join("")}
-                  </ul>
-                </div>`
+                      (header) =>
+                        `<th style="border: 1px solid #ccc; padding: 6px; text-align: center;">${header}</th>`
                     )
-                    .join("")
+                    .join("")}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                    student.week_date || ""
+                  }</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                    student.classname
+                  } ${student.secname}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                    student.subname
+                  }</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                    student.sub_subject || "-"
+                  }</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                    student.no_of_periods
+                  }</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                    student.chapter_no
+                  }</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                    student.chaptername
+                  }</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+              ${
+                student.non_daily?.length > 0
+                  ? student.non_daily
+                      .map(
+                        (item) => `
+                  <div style="flex: 0 0 200px; min-width: 200px; border: 1px solid #ccc; padding: 8px;">
+                    <p style="font-weight: bold; color: #2563EB;">${
+                      item.heading
+                    }</p>
+                    <ul style="padding-left: 16px; margin-top: 4px;">
+                      ${item.description
+                        .map((desc) => `<li>${desc.trim()}</li>`)
+                        .join("")}
+                    </ul>
+                  </div>`
+                      )
+                      .join("")
+                  : ""
+              }
+            </div>
+
+            ${
+              student.daily_changes?.length > 0
+                ? `
+              <div style="display: flex; gap: 16px; margin-bottom: 10px;">
+                <div style="flex: 2; border: 1px solid #ccc; padding: 10px;">
+                  <table style="width: 100%; ">
+                    <thead>
+                      <tr style="background-color: #f3f4f6;">
+                        <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">Start Date</th>
+                        <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">${
+                          student.daily_changes[0]?.heading || "Teaching Points"
+                        }</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${student.daily_changes[0].entries
+                        .map(
+                          (entry) => `
+                          <tr>
+                            <td style="border: 1px solid #ccc; padding: 6px;">${entry.start_date}</td>
+                            <td style="border: 1px solid #ccc; padding: 6px;">${entry.description[0]}</td>
+                          </tr>`
+                        )
+                        .join("")}
+                    </tbody>
+                  </table>
+                </div>
+                <div style="flex: 1; border: 1px solid #ccc; padding: 10px;">
+                  <table style="width: 100%; ">
+                    <thead>
+                      <tr style="background-color: #f3f4f6;">
+                        <th style="border: 1px solid #ccc; padding: 6px; text-align: center;">Status</th>
+                        <th style="border: 1px solid #ccc; padding: 6px; text-align: center;">Principal's Approval</th>
+                        <th style="border: 1px solid #ccc; padding: 6px; text-align: center;">Remark</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                          statusMap[student.status] || "-"
+                        }</td>
+                        <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                          statusMap[student.approve] || "-"
+                        }</td>
+                        <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
+                          student.remark || "-"
+                        }</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>`
                 : ""
             }
           </div>
-
-          ${
-            student.daily_changes?.length > 0
-              ? `
-            <div style="display: flex; gap: 16px; margin-bottom: 10px;">
-              <div style="flex: 2; border: 1px solid #ccc; padding: 10px;">
-                <table style="width: 100%; border-collapse: collapse;">
-                  <thead>
-                    <tr style="background-color: #f3f4f6;">
-                      <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">Start Date</th>
-                      <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">${
-                        student.daily_changes[0]?.heading || "Teaching Points"
-                      }</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${student.daily_changes[0].entries
-                      .map(
-                        (entry) => `
-                        <tr>
-                          <td style="border: 1px solid #ccc; padding: 6px;">${entry.start_date}</td>
-                          <td style="border: 1px solid #ccc; padding: 6px;">${entry.description[0]}</td>
-                        </tr>`
-                      )
-                      .join("")}
-                  </tbody>
-                </table>
-              </div>
-              <div style="flex: 1; border: 1px solid #ccc; padding: 10px;">
-                <table style="width: 100%; border-collapse: collapse;">
-                  <thead>
-                    <tr style="background-color: #f3f4f6;">
-                      <th style="border: 1px solid #ccc; padding: 6px; text-align: center;">Status</th>
-                      <th style="border: 1px solid #ccc; padding: 6px; text-align: center;">Principal's Approval</th>
-                      <th style="border: 1px solid #ccc; padding: 6px; text-align: center;">Remark</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
-                        statusMap[student.status] || "-"
-                      }</td>
-                      <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
-                        statusMap[student.approve] || "-"
-                      }</td>
-                      <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${
-                        student.remark || "-"
-                      }</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>`
-              : ""
-          }
-        </div>
-      `
-      )
-      .join("")}
-  </div>
-`;
+        `
+        )
+        .join("")}
+    </div>
+  `;
 
     const printWindow = window.open("", "_blank", "width=1000,height=800");
 
     printWindow.document.write(`
-      <html>
-        <head>
-          <title>${printTitle}</title>
-          <style>
-          @page { margin: 0; padding:0; box-sizing:border-box;   ;
-    }
-          body { margin: 0; padding: 0; box-sizing:border-box; font-family: Arial, sans-serif; }
-          #tableHeading {
-      width: 100%;
-      margin: auto; /* Centers the div horizontally */
-      display: flex;
-      justify-content: center;
-    }
+        <html>
+          <head>
+            <title>${printTitle}</title>
+            <style>
+            @page { margin: 0; padding:0; box-sizing:border-box;   ;
+      }
+            body { margin: 0; padding: 0; box-sizing:border-box; font-family: Arial, sans-serif; }
+            #tableHeading {
+        width: 100%;
+        margin: auto; /* Centers the div horizontally */
+        display: flex;
+        justify-content: center;
+      }
 
-    #tableHeading table {
-      width: 100%; /* Ensures the table fills its container */
+      #tableHeading table {
+        width: 100%; /* Ensures the table fills its container */
+        margin:auto;
+        padding:0 10em 0 10em;
+      }
+
+      #tableContainer {
+        display: flex;
+        justify-content: center; /* Centers the table horizontally */
+        width: 80%;
+
+      }
+
+      h5 {
+        width: 100%;
+        text-align: center;
+        margin: 0;  /* Remove any default margins */
+        padding: 5px 0;  /* Adjust padding if needed */
+      }
+
+      #tableMain {
+      width:100%;
       margin:auto;
+      box-sizing:border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Prevent unnecessary space */
       padding:0 10em 0 10em;
-    }
+      }
 
-    #tableContainer {
-      display: flex;
-      justify-content: center; /* Centers the table horizontally */
-      width: 80%;
+      h5 + * { /* Targets the element after h5 */
+        margin-top: 0; /* Ensures no extra space after h5 */
+      }
 
-    }
-
-    h5 {
-      width: 100%;
-      text-align: center;
-      margin: 0;  /* Remove any default margins */
-      padding: 5px 0;  /* Adjust padding if needed */
-    }
-
-    #tableMain {
-    width:100%;
-    margin:auto;
-    box-sizing:border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start; /* Prevent unnecessary space */
-    padding:0 10em 0 10em;
-    }
-
-    h5 + * { /* Targets the element after h5 */
-      margin-top: 0; /* Ensures no extra space after h5 */
-    }
-
-          table { border-spacing: 0; width: 70%; margin: auto;   }
-          th { font-size: 0.8em; background-color: #f9f9f9; }
-          td { font-size: 12px; }
-          th, td { border: 1px solid gray; padding: 8px; text-align: center; }
-          .student-photo {
-            width: 30px !important;
-            height: 30px !important;
-            object-fit: cover;
-            border-radius: 50%;
-          }
-          </style>
-        </head>
-           <body>
-          <div id="printContainer">
-              ${printContent}
-          </div>
-      </body>
-      </html>
-    `);
+            table { border-spacing: 0; width: 70%; margin: auto;   }
+            th { font-size: 0.8em; background-color: #f9f9f9; }
+            td { font-size: 12px; }
+            th, td { border: 1px solid gray; padding: 8px; text-align: center; }
+            .student-photo {
+              width: 30px !important;
+              height: 30px !important;
+              object-fit: cover;
+              border-radius: 50%;
+            }
+            </style>
+          </head>
+             <body>
+            <div id="printContainer">
+                ${printContent}
+            </div>
+        </body>
+        </html>
+      `);
 
     printWindow.document.close();
 
@@ -711,7 +657,7 @@ const ApproveLessonPlan = () => {
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
     });
 
-    const fileName = `Approve_Lesson_Plan${
+    const fileName = `Approve_Lesson_Plan_${
       camelCase(selectedStudent?.label) || "All_Teacher"
     }.xlsx`;
     XLSX.writeFile(workbook, fileName);
@@ -728,30 +674,34 @@ const ApproveLessonPlan = () => {
       .replace(/\s+/g, "")
       .toLowerCase();
 
-    // Flattened values
     const flatValues = [
       student?.teachername,
-      student?.week,
       student?.subname,
-      student?.sub_subject, // English or Hindi/Marathi text
+      student?.sub_subject,
       student?.no_of_periods?.toString(),
       student?.chapter_no?.toString(),
       student?.chaptername,
       student?.status,
       student?.approve,
       student?.remark,
+      student?.week_date,
       classAndSection,
     ]
       .filter(Boolean)
-      .map((val) =>
-        val
-          .toString()
-          .trim()
-          .replace(/\s+/g, "") // remove all spaces for better matching
-          .toLowerCase()
-      );
+      .map((val) => val.toString().trim().replace(/\s+/g, "").toLowerCase());
 
-    // Add values from non_daily (heading + description)
+    // Handle week specially for format like 16-06-2025 / 22-06-2025
+    if (student?.week_date) {
+      const weekStr = student.week_date.toString().trim();
+      flatValues.push(
+        weekStr.replace(/\s+/g, "").toLowerCase() // 16-06-2025/22-06-2025
+      );
+      flatValues.push(
+        weekStr.toLowerCase() // original spacing preserved (for partial match like "16-06-2025 / 22")
+      );
+    }
+
+    // non_daily
     if (Array.isArray(student.non_daily)) {
       student.non_daily.forEach((item) => {
         if (item.heading)
@@ -766,7 +716,7 @@ const ApproveLessonPlan = () => {
       });
     }
 
-    // Add values from daily_changes (heading + description)
+    // daily_changes
     if (Array.isArray(student.daily_changes)) {
       student.daily_changes.forEach((change) => {
         if (change.heading)
@@ -787,19 +737,16 @@ const ApproveLessonPlan = () => {
       });
     }
 
-    // Return if any value contains the search term (Unicode-safe)
     return flatValues.some((val) => val.includes(searchLower));
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
-
   return (
     <>
       <div
         className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${
           showStudentReport ? "w-full " : "w-[90%] "
         }`}
-        // className="w-full md:w-[85%]  mx-auto p-4 "
       >
         <ToastContainer />
         <div className="card pb-4  rounded-md ">
@@ -822,13 +769,12 @@ const ApproveLessonPlan = () => {
               ></div>
             </>
           )}
-
           <>
             {!showStudentReport && (
-              <div className=" w-full md:w-[100%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+              <div className=" w-full md:w-[100%]   flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2">
                 <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                   <div className="w-full md:w-[99%]  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                    {/* Staff Dropdown */}
+                    {/* Teacher */}
                     <div className="w-full  md:w-[50%] gap-x-3 justify-around my-1 md:my-4 flex md:flex-row">
                       <label
                         className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
@@ -872,8 +818,7 @@ const ApproveLessonPlan = () => {
                         )}
                       </div>
                     </div>
-
-                    {/* Month Dropdown */}
+                    {/* Month */}
                     <div className="w-full  md:w-[40%] gap-x-3 justify-around my-1 md:my-4 flex md:flex-row">
                       <label
                         className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
@@ -911,17 +856,17 @@ const ApproveLessonPlan = () => {
                           }}
                         />
                         {/* {weekError && (
-                          <div className="relative ml-1 text-danger text-xs">
-                            {weekError}
-                          </div>
-                        )} */}
+                                              <div className="relative ml-1 text-danger text-xs">
+                                                {weekError}
+                                              </div>
+                                            )} */}
                       </div>
                     </div>
-
+                    {/* OR */}
                     <div className="justify-around my-1 md:my-6 flex md:flex-row">
                       <span className="text-red-500 font-bold">OR</span>
                     </div>
-
+                    {/* Week */}
                     <div className="w-full md:w-[50%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
                       <label
                         className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
@@ -957,10 +902,10 @@ const ApproveLessonPlan = () => {
                         </div>
 
                         {/* {weekError && (
-                          <div className="relative ml-1 text-danger text-xs">
-                            {weekError}
-                          </div>
-                        )} */}
+                                              <div className="relative ml-1 text-danger text-xs">
+                                                {weekError}
+                                              </div>
+                                            )} */}
 
                         {/* Keep your DatePicker hidden but functional */}
                         <DatePicker
@@ -1043,6 +988,7 @@ const ApproveLessonPlan = () => {
                                   className="flex items-center gap-x-4 text-blue-800 font-medium"
                                   style={{ flexWrap: "nowrap" }}
                                 >
+                                  {/* Teacher */}
                                   <div className="flex items-center gap-2">
                                     <label
                                       className="text-md whitespace-nowrap"
@@ -1083,6 +1029,7 @@ const ApproveLessonPlan = () => {
                                     />
                                   </div>
 
+                                  {/* Month */}
                                   <div className="flex items-center gap-3">
                                     <label
                                       className="text-md whitespace-nowrap"
@@ -1123,6 +1070,7 @@ const ApproveLessonPlan = () => {
                                     />
                                   </div>
 
+                                  {/* Week */}
                                   <div className="flex items-center gap-3">
                                     <label
                                       className="text-md whitespace-nowrap"
@@ -1162,7 +1110,7 @@ const ApproveLessonPlan = () => {
                                       className="hidden"
                                     />
                                   </div>
-
+                                  {/* Browse */}
                                   <div>
                                     <button
                                       type="search"
@@ -1216,7 +1164,6 @@ const ApproveLessonPlan = () => {
                             />
                           </div>
                         </div>
-
                         <div
                           className=" w-[97%] h-1 mx-auto"
                           style={{ backgroundColor: "#C03078" }}
@@ -1230,52 +1177,9 @@ const ApproveLessonPlan = () => {
                               scrollbarColor: "#C03178 transparent",
                             }}
                           >
-                            {/* <div className="flex flex-col md:flex-row justify-between items-center px-2 py-1 gap-2">
-                              <label className="flex items-center gap-2 text-sm font-semibold text-indigo-600">
-                                <input
-                                  type="checkbox"
-                                  checked={selectAll}
-                                  onChange={handleSelectAll}
-                                />
-                                Select All lesson plan for approve
-                              </label>
-
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="text"
-                                  className="form-control w-32 md:w-48 py-1"
-                                  placeholder="Search"
-                                  value={searchTerm}
-                                  onChange={(e) =>
-                                    setSearchTerm(e.target.value)
-                                  }
-                                />
-
-                                <button
-                                  type="button"
-                                  onClick={handleDownloadEXL}
-                                  className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
-                                >
-                                  <FaFileExcel />
-                                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
-                                    Export to Excel
-                                  </div>
-                                </button>
-
-                                <button
-                                  onClick={handlePrint}
-                                  className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
-                                >
-                                  <FiPrinter />
-                                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
-                                    Print
-                                  </div>
-                                </button>
-                              </div>
-                            </div> */}
                             <div
                               className="flex flex-col md:flex-row justify-between items-center px-2 py-1 gap-2 
-                sticky top-0 bg-white shadow"
+                                         sticky top-0 bg-white shadow"
                             >
                               {/* Select All */}
                               <label className="flex items-center gap-2 text-sm font-semibold text-indigo-600">
@@ -1286,8 +1190,6 @@ const ApproveLessonPlan = () => {
                                 />
                                 Select All lesson plan for approve
                               </label>
-
-                              {/* Search + Buttons */}
                               <div className="flex items-center gap-2">
                                 <input
                                   type="text"
@@ -1298,7 +1200,6 @@ const ApproveLessonPlan = () => {
                                     setSearchTerm(e.target.value)
                                   }
                                 />
-
                                 <button
                                   type="button"
                                   onClick={handleDownloadEXL}
@@ -1403,10 +1304,7 @@ const ApproveLessonPlan = () => {
                                         msOverflowStyle: "none",
                                       }}
                                     >
-                                      <table
-                                        className="table-fixed border border-gray-500"
-                                        style={{ borderCollapse: "collapse" }}
-                                      >
+                                      <table className="table-fixed border border-gray-500">
                                         <thead className="bg-gray-200">
                                           <tr>
                                             {student.non_daily?.map(
@@ -1464,7 +1362,6 @@ const ApproveLessonPlan = () => {
                                         </tbody>
                                       </table>
                                     </div>
-
                                     {/* Hide Chrome/Safari scrollbar */}
                                     <style>
                                       {`
@@ -1626,22 +1523,6 @@ const ApproveLessonPlan = () => {
                             )}
                           </div>
                         </div>
-                        <div className="flex justify-end gap-4 pr-3 mb-4 mr-10">
-                          <button
-                            // onClick={() => navigate("/dashboard")}
-                            onClick={() => setShowStudentReport(false)}
-                            className="bg-yellow-300 hover:bg-yellow-400 text-white font-semibold px-4 py-2 rounded"
-                          >
-                            Back
-                          </button>
-
-                          <button
-                            onClick={handleSubmit}
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded"
-                          >
-                            {loading ? "Saving" : "Save"}
-                          </button>
-                        </div>
                       </div>
                     </div>
                   </>
@@ -1655,4 +1536,4 @@ const ApproveLessonPlan = () => {
   );
 };
 
-export default ApproveLessonPlan;
+export default ApproveLessonP;

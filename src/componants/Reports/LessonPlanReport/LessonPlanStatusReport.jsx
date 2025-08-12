@@ -396,11 +396,8 @@ const LessonPlanStatusReport = () => {
       toast.error("No data available to download the Excel sheet.");
       return;
     }
-
-    // Define headers — separate each leave type
     const headers = ["Sr No.", "Class", "Subject", "Chapter", "Date", "Status"];
 
-    // Convert displayedSections to array-of-arrays format
     const data = displayedSections.map((student, index) => [
       index + 1,
       ` ${student?.classname} ${student?.secname}`,

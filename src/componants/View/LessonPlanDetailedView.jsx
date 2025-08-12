@@ -320,7 +320,7 @@ const LessonPlanDetailedView = () => {
 
   const handlePrint = () => {
     const printTitle = `Lesson Plan In Detailed  ${
-      selectedStudent?.label
+      camelCase(selectedStudent?.label)
         ? `List of ${camelCase(selectedStudent.label)}`
         : ": Complete List of All Staff "
     }`;
@@ -414,7 +414,7 @@ const LessonPlanDetailedView = () => {
               ? `
             <div style="display: flex; gap: 16px; margin-bottom: 10px;">
               <div style="flex: 2; border: 1px solid #ccc; padding: 10px;">
-                <table style="width: 100%; ">
+                <table style="width: 100%;">
                   <thead>
                     <tr style="background-color: #f3f4f6;">
                       <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">Start Date</th>
@@ -663,30 +663,34 @@ const LessonPlanDetailedView = () => {
       .replace(/\s+/g, "")
       .toLowerCase();
 
-    // Flattened values
     const flatValues = [
       student?.teachername,
-      student?.week,
       student?.subname,
-      student?.sub_subject, // English or Hindi/Marathi text
+      student?.sub_subject,
       student?.no_of_periods?.toString(),
       student?.chapter_no?.toString(),
       student?.chaptername,
       student?.status,
       student?.approve,
       student?.remark,
+      student?.week_date,
       classAndSection,
     ]
       .filter(Boolean)
-      .map((val) =>
-        val
-          .toString()
-          .trim()
-          .replace(/\s+/g, "") // remove all spaces for better matching
-          .toLowerCase()
-      );
+      .map((val) => val.toString().trim().replace(/\s+/g, "").toLowerCase());
 
-    // Add values from non_daily (heading + description)
+    // Handle week specially for format like 16-06-2025 / 22-06-2025
+    if (student?.week_date) {
+      const weekStr = student.week_date.toString().trim();
+      flatValues.push(
+        weekStr.replace(/\s+/g, "").toLowerCase() // 16-06-2025/22-06-2025
+      );
+      flatValues.push(
+        weekStr.toLowerCase() // original spacing preserved (for partial match like "16-06-2025 / 22")
+      );
+    }
+
+    // non_daily
     if (Array.isArray(student.non_daily)) {
       student.non_daily.forEach((item) => {
         if (item.heading)
@@ -701,7 +705,7 @@ const LessonPlanDetailedView = () => {
       });
     }
 
-    // Add values from daily_changes (heading + description)
+    // daily_changes
     if (Array.isArray(student.daily_changes)) {
       student.daily_changes.forEach((change) => {
         if (change.heading)
@@ -722,7 +726,6 @@ const LessonPlanDetailedView = () => {
       });
     }
 
-    // Return if any value contains the search term (Unicode-safe)
     return flatValues.some((val) => val.includes(searchLower));
   });
 
@@ -1403,7 +1406,7 @@ const LessonPlanDetailedView = () => {
                                   {student.daily_changes?.length > 0 && (
                                     <div className="flex flex-row gap-4 mb-4">
                                       <div className="w-2/3 border p-3 rounded bg-gray-50">
-                                        <table className="w-full table-auto text-sm">
+                                        <table className="w-full table-auto border-collapse text-sm">
                                           <thead>
                                             <tr className="bg-gray-200">
                                               <th className="border px-4 py-2 text-left w-[19%] text-sm font-semibold text-gray-800">
@@ -1436,10 +1439,10 @@ const LessonPlanDetailedView = () => {
                                         </table>
                                       </div>
 
-                                      {/* Table 4: Status Section is */}
+                                      {/* Table 4: Status Section */}
                                       {displayedSections.length > 0 && (
                                         <div className="w-1/3 border p-3 rounded bg-gray-50">
-                                          <table className="w-full table-auto  text-sm">
+                                          <table className="w-full table-auto border-collapse text-sm">
                                             <thead>
                                               <tr className="bg-gray-200">
                                                 <th className="px-4 py-2 border text-sm font-semibold text-center text-gray-800">
