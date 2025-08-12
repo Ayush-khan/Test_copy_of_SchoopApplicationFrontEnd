@@ -1328,7 +1328,7 @@ function NavBar() {
           position: "fixed",
           top: "0px",
           zIndex: "10",
-          backgroundColor: "#D61D5E",
+          // backgroundColor: "#D61D5E",
         }}
       >
         <div

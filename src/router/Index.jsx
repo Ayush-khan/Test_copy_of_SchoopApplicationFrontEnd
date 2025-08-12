@@ -198,6 +198,7 @@ import SubjectMapping from "../componants/MastersModule/SubjectMapping/SubjectMa
 import ImportantLink from "../componants/ImportantLInks/ImportantLinks.jsx";
 import BookRequisition from "../componants/BookRequisition/BookRequisition.jsx";
 import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherMonthlyAttendanceDetailedReport.jsx";
+import BackgroundChanger from "../Layouts/BackgroundColorSelect/BackgroundChanger.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -206,6 +207,11 @@ function Index() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/forgotPassword" element={<ForgotPassword />} />
       <Route path="/" element={<MainLayout />}>
+        {/* BackgroundChanger module */}
+        <Route
+          path="/backgroundChanger"
+          element={<PrivateRoute element={<BackgroundChanger />} />}
+        />
         {/* Role Management */}
         <Route
           path="/manageMenus"
