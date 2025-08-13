@@ -365,7 +365,7 @@ const HomeworkNotAssignReport = () => {
 
     printWindow.document.close();
 
-    // Ensure content is fully loaded before printing
+    // Ensure content is fully loaded before printing is
     printWindow.onload = function () {
       printWindow.focus();
       printWindow.print();
