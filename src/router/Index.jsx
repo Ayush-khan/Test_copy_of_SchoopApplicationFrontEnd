@@ -288,6 +288,8 @@ import ImportantLink from "../componants/ImportantLInks/ImportantLinks.jsx";
 import SubjectMapping from "../componants/MastersModule/SubjectMapping/SubjectMapping.jsx";
 import BookRequisition from "../componants/BookRequisition/BookRequisition.jsx";
 import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherAttendanceMonthlyReport.jsx";
+import BackgroundChanger from "../Layouts/BackgroundColorSelect/BackgroundChanger.jsx";
+import HomeworkNotAssignReport from "../componants/Reports/CurriculumReport/HomewrokNotAssignReport.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -302,6 +304,11 @@ function Index() {
         <Route
           path="/manageMenus"
           element={<PrivateRoute element={<Menus />} />}
+        />
+        {/* background changer component */}
+        <Route
+          path="/backgroundChanger"
+          element={<PrivateRoute element={<BackgroundChanger />} />}
         />
         <Route
           path="/manageRoles"
@@ -933,6 +940,11 @@ function Index() {
         <Route
           path="/AttendanceDetaileMontReport"
           element={<PrivateRoute element={<AttendanceDetaileMontReport />} />}
+        />
+        {/* Curriculum report  */}
+        <Route
+          path="/homeworkNotAssignReport"
+          element={<PrivateRoute element={<HomeworkNotAssignReport />} />}
         />
         {/* Lesson plane report modules */}
         <Route
