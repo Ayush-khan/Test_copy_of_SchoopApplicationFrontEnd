@@ -411,7 +411,6 @@ const CreateEvent = () => {
                 style={{ backgroundColor: "#C03078" }}
               ></div>
               <div className="">
-                {/*  m-3 bg-gray-50 rounded-lg shadow-md */}
                 <div className="card-body w-full ml-2">
                   {loading ? (
                     <div className="flex justify-center items-center h-64">
@@ -419,30 +418,24 @@ const CreateEvent = () => {
                     </div>
                   ) : (
                     <div className="card-body w-full ml-2">
-                      <form className="space-y-8">
+                      <form className="space-y-6">
                         {/* Event Title */}
-                        <div className="flex flex-col">
-                          {/* Row: Label + Input + Checkboxes */}
-                          <div className="flex items-center">
-                            {/* Label */}
-                            <label className="w-[145px] font-semibold">
+                        {/* <div className="flex flex-col gap-1">
+                          <div className="flex flex-col lg:flex-row lg:items-center gap-2">
+                            <label className="lg:w-[130px] font-semibold">
                               Event Title{" "}
                               <span className="text-sm text-red-500">*</span>
                             </label>
-
-                            {/* Input field */}
                             <input
                               type="text"
-                              className="w-full max-w-md px-2 py-1 border border-gray-400 rounded mr-8"
+                              className="w-full lg:max-w-md px-2 py-1 border border-gray-400 rounded"
                               value={subject}
                               onChange={(e) => {
                                 setSubject(e.target.value);
-                                setErrors((prev) => ({ ...prev, title: "" })); // Clear title error
+                                setErrors((prev) => ({ ...prev, title: "" }));
                               }}
                             />
-
-                            {/* Checkboxes: Competition & Notify */}
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
                               <label className="flex items-center gap-2">
                                 <input
                                   type="checkbox"
@@ -453,7 +446,51 @@ const CreateEvent = () => {
                                 />
                                 <span>Competition</span>
                               </label>
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={notify}
+                                  onChange={(e) => setNotify(e.target.checked)}
+                                />
+                                <span>Notify</span>
+                              </label>
+                            </div>
+                          </div>
+                          {errors.title && (
+                            <p className="text-red-500 text-sm lg:ml-[147px]">
+                              {errors.title}
+                            </p>
+                          )}
+                        </div> */}
 
+                        <div className="flex flex-col gap-1">
+                          <div className="flex flex-col lg:flex-row lg:items-center gap-2">
+                            <label className="lg:w-[130px] font-semibold">
+                              Event Title{" "}
+                              <span className="text-sm text-red-500">*</span>
+                            </label>
+
+                            <input
+                              type="text"
+                              className="w-full lg:w-[400px] px-2 py-1 border-1 border-gray-400 rounded"
+                              value={subject}
+                              onChange={(e) => {
+                                setSubject(e.target.value);
+                                setErrors((prev) => ({ ...prev, title: "" }));
+                              }}
+                            />
+
+                            <div className="flex items-center gap-3">
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={competition}
+                                  onChange={(e) =>
+                                    setCompetition(e.target.checked)
+                                  }
+                                />
+                                <span>Competition</span>
+                              </label>
                               <label className="flex items-center gap-2">
                                 <input
                                   type="checkbox"
@@ -465,21 +502,20 @@ const CreateEvent = () => {
                             </div>
                           </div>
 
-                          {/* Error message shown directly below input, indented to align with input */}
                           {errors.title && (
-                            <p className="text-red-500 text-sm ml-[145px] mt-1">
+                            <p className="text-red-500 text-sm lg:ml-[147px]">
                               {errors.title}
                             </p>
                           )}
                         </div>
 
                         {/* Select Classes */}
-                        <div className="flex flex-col md:flex-row gap-3 ">
-                          <label className="font-semibold">
-                            Select Classes
+                        <div className="flex flex-col lg:flex-row gap-3">
+                          <label className="font-semibold lg:w-[147px]">
+                            Select Classes{" "}
                             <span className="text-sm text-red-500">*</span>
                           </label>
-                          <div className="w-full md:w-[66%] relative left-0 md:left-7 mt-2 grid grid-cols-4 sm:grid-cols-3 lg:grid-cols-6 gap-2  ">
+                          <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                             {allClasses.map((cls) => (
                               <div
                                 key={cls.class_id}
@@ -513,9 +549,9 @@ const CreateEvent = () => {
                                 />
                                 <span>Select All</span>
                               </label>
-                            </div>{" "}
+                            </div>
                             {errors.classError && (
-                              <p className="relative top-2 col-span-3 text-red-500 text-sm">
+                              <p className="col-span-full text-red-500 text-sm">
                                 {errors.classError}
                               </p>
                             )}
@@ -523,17 +559,17 @@ const CreateEvent = () => {
                         </div>
 
                         {/* Login Type */}
-                        <div className="flex flex-col md:flex-row gap-9">
-                          <label className="font-semibold">
-                            Login Type
+                        <div className="flex flex-col lg:flex-row gap-3">
+                          <label className="font-semibold lg:w-[147px]">
+                            Login Type{" "}
                             <span className="text-sm text-red-500">*</span>
                           </label>
-                          <div className="w-full md:w-[70%] relative left-0 md:left-7 mt-2 grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-2 ">
+                          <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                             {roles.map((cls) => (
                               <div
                                 key={cls.role_id}
                                 className="flex items-center space-x-2 hover:cursor-pointer"
-                                onClick={() => handleClassChange(cls.role_id)}
+                                onClick={() => handleRoleChange(cls.role_id)}
                               >
                                 <input
                                   type="checkbox"
@@ -558,9 +594,9 @@ const CreateEvent = () => {
                                 />
                                 <span>Select All</span>
                               </label>
-                            </div>{" "}
+                            </div>
                             {errors.roleError && (
-                              <p className="relative top-2 col-span-3 text-red-500 text-sm">
+                              <p className="col-span-full text-red-500 text-sm">
                                 {errors.roleError}
                               </p>
                             )}
@@ -568,30 +604,30 @@ const CreateEvent = () => {
                         </div>
 
                         {/* Dates and Times */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid md:grid-cols-2 gap-2">
                           {/* Start Date */}
                           <div className="flex flex-col">
-                            <div className="flex items-center">
-                              <label className="w-[150px] font-semibold">
+                            <div className="flex flex-col lg:flex-row lg:items-center">
+                              <label className="lg:w-[140px] font-semibold">
                                 Start Date{" "}
                                 <span className="text-sm text-red-500">*</span>
                               </label>
                               <input
                                 type="date"
-                                className="w-[50%] border px-2 py-1 rounded max-w-sm"
+                                className="w-full lg:w-[55%] border px-2 py-1 rounded max-w-sm"
                                 value={startDate}
                                 onChange={(e) => {
                                   setStartDate(e.target.value);
                                   setErrors((prev) => ({
                                     ...prev,
                                     startDate: "",
-                                  })); // Clear start date error
+                                  }));
                                 }}
                                 min={academicYrFrom}
                                 max={academicYrTo}
                               />
                             </div>
-                            <div className="min-h-[22px] ml-[150px] mt-1">
+                            <div className="min-h-[22px] lg:ml-[150px] mt-1">
                               {errors.startDate && (
                                 <p className="text-red-500 text-sm">
                                   {errors.startDate}
@@ -602,36 +638,35 @@ const CreateEvent = () => {
 
                           {/* End Date */}
                           <div className="flex flex-col">
-                            <div className="flex items-center">
-                              <label className="w-[100px] font-semibold">
+                            <div className="flex flex-col lg:flex-row lg:items-center">
+                              <label className="lg:w-[100px] font-semibold">
                                 End Date
                               </label>
                               <input
                                 type="date"
-                                className="w-[50%] border px-2 py-1 rounded max-w-sm"
+                                className="w-full lg:w-[55%] border px-2 py-1 rounded max-w-sm"
                                 value={endDate}
                                 onChange={(e) => setEndDate(e.target.value)}
                                 min={academicYrFrom}
                                 max={academicYrTo}
                               />
                             </div>
-                            <div className="min-h-[22px] mt-1" />
                           </div>
 
                           {/* Start Time */}
                           <div className="flex flex-col">
-                            <div className="flex items-center">
-                              <label className="w-[150px] font-semibold">
+                            <div className="flex flex-col lg:flex-row lg:items-center">
+                              <label className="lg:w-[140px] font-semibold">
                                 Start Time
                               </label>
                               <input
                                 type="time"
-                                className="w-[50%] border px-2 py-1 rounded max-w-sm"
+                                className="w-full lg:w-[55%] border px-2 py-1 rounded max-w-sm"
                                 value={startTime}
                                 onChange={(e) => setStartTime(e.target.value)}
                               />
                             </div>
-                            <div className="min-h-[22px] ml-[150px] mt-1">
+                            <div className="min-h-[22px] lg:ml-[150px] mt-1">
                               {errors.startTime && (
                                 <p className="text-red-500 text-sm">
                                   {errors.startTime}
@@ -642,42 +677,39 @@ const CreateEvent = () => {
 
                           {/* End Time */}
                           <div className="flex flex-col">
-                            <div className="flex items-center">
-                              <label className="w-[100px] font-semibold">
+                            <div className="flex flex-col lg:flex-row lg:items-center">
+                              <label className="lg:w-[100px] font-semibold">
                                 End Time
                               </label>
                               <input
                                 type="time"
-                                className="w-[50%] border px-2 py-1 rounded max-w-sm"
+                                className="w-full lg:w-[55%] border px-2 py-1 rounded max-w-sm"
                                 value={endTime}
                                 onChange={(e) => setEndTime(e.target.value)}
                               />
                             </div>
-                            <div className="min-h-[22px] mt-1" />
                           </div>
                         </div>
 
                         {/* Description */}
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col">
                           <label className="font-semibold">
                             Description{" "}
                             <span className="text-sm text-red-500">*</span>
                           </label>
                           <div className="max-w-4xl w-full">
-                            {
-                              <MarkDropdownEditor
-                                value={description}
-                                onChange={(val) => {
-                                  setDescription(val);
-                                  setErrors((prev) => ({
-                                    ...prev,
-                                    description: "",
-                                  }));
-                                }}
-                              />
-                            }
+                            <MarkDropdownEditor
+                              value={description}
+                              onChange={(val) => {
+                                setDescription(val);
+                                setErrors((prev) => ({
+                                  ...prev,
+                                  description: "",
+                                }));
+                              }}
+                            />
                             {errors.description && (
-                              <p className="relative top-1 col-span-3 text-red-500 text-sm">
+                              <p className="text-red-500 text-sm mt-1">
                                 {errors.description}
                               </p>
                             )}
@@ -687,8 +719,9 @@ const CreateEvent = () => {
                     </div>
                   )}
                 </div>
+
                 {!loading && (
-                  <div className="flex space-x-2 justify-end m-4">
+                  <div className="flex flex-wrap justify-end gap-2 m-4">
                     <button
                       onClick={() => handleSubmitAdd(false)}
                       className="btn btn-primary"

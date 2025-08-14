@@ -290,6 +290,8 @@ import BookRequisition from "../componants/BookRequisition/BookRequisition.jsx";
 import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherAttendanceMonthlyReport.jsx";
 import BackgroundChanger from "../Layouts/BackgroundColorSelect/BackgroundChanger.jsx";
 import HomeworkNotAssignReport from "../componants/Reports/CurriculumReport/HomewrokNotAssignReport.jsx";
+import News from "../componants/NewsModule/News.jsx";
+import RoleForEvent from "../componants/Events/RoleForEvent.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -318,6 +320,8 @@ function Index() {
           path="/manageRoleAccess"
           element={<PrivateRoute element={<ShowRolesWithMenu />} />}
         />
+        {/* News Module */}
+        <Route path="/news" element={<PrivateRoute element={<News />} />} />
         {/* Important links */}
         <Route
           path="/importantLinks"
@@ -768,6 +772,11 @@ function Index() {
         <Route
           path="/markDropdown"
           element={<PrivateRoute element={<MarkDropdownEditor />} />}
+        />
+        {/* Roles for events */}
+        <Route
+          path="/roleForEvent"
+          element={<PrivateRoute element={<RoleForEvent />} />}
         />
         {/* Id Cards Module */}
         {/* Student Id Card Module */}
