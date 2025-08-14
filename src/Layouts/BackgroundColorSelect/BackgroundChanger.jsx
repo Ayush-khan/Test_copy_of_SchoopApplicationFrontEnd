@@ -184,7 +184,7 @@ function BackgroundChanger() {
             </div>
           </div>
 
-          {/* Gradient Colors */}
+          {/* Gradient Colors is*/}
           <div className="flex-1 bg-gray-50 p-4 rounded-xl shadow-inner border">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold text-gray-500">
