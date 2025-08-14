@@ -968,7 +968,6 @@ date.</p>
                               {/* Keep your existing <tfoot> as-is */}
                               {filteredStudents.length > 0 && (
                                 <tfoot className="bg-gradient-to-t from-yellow-100 to-yellow-50 border-t-2 border-gray-300 text-sm">
-                                  {/* Present Row */}
                                   <tr className="font-medium text-green-700">
                                     <td
                                       className="border p-2 text-left sticky left-[0px] bg-gradient-to-t from-yellow-100 to-yellow-50"
@@ -991,12 +990,6 @@ date.</p>
                                     </td>
                                     <td className="border p-2">–</td>
                                     <td className="border p-2">
-                                      {
-                                        timetable.totals
-                                          ?.total_working_days_for_this_month
-                                      }
-                                    </td>
-                                    <td className="border p-2">
                                       {timetable.totals?.total_prev_attendance}
                                     </td>
                                     <td className="border p-2">
@@ -1004,9 +997,9 @@ date.</p>
                                     </td>
                                     <td className="border p-2">–</td>
                                     <td className="border p-2">–</td>
+                                    <td className="border p-2">–</td>
                                   </tr>
 
-                                  {/* Absent Row */}
                                   <tr className="font-medium text-red-600">
                                     <td
                                       className="border p-2 text-left sticky left-[0px] bg-gradient-to-t from-yellow-100 to-yellow-50"
@@ -1027,15 +1020,23 @@ date.</p>
                                     <td className="border p-2">
                                       {timetable.totals?.total_absent_days}
                                     </td>
-                                    <td className="border p-2">–</td>
-                                    <td className="border p-2">–</td>
-                                    <td className="border p-2">–</td>
+                                    <td className="border p-2">
+                                      {timetable.totals?.total_absent_days}
+                                    </td>
+                                    <td className="border p-2">
+                                      {timetable.totals?.total_prev_absent_days}
+                                    </td>
+                                    <td className="border p-2">
+                                      {
+                                        timetable.totals
+                                          ?.grand_total_absent_attendance
+                                      }
+                                    </td>
                                     <td className="border p-2">–</td>
                                     <td className="border p-2">–</td>
                                     <td className="border p-2">–</td>
                                   </tr>
 
-                                  {/* Total Row */}
                                   <tr className="font-bold text-blue-900 border-t border-gray-400">
                                     <td
                                       className="border p-2 text-left sticky left-[0px] bg-gradient-to-t from-yellow-100 to-yellow-50"
@@ -1059,22 +1060,39 @@ date.</p>
                                           ?.total_present_absent_days
                                       }
                                     </td>
-                                    <td className="border p-2">–</td>
-                                    <td className="border p-2">–</td>
+
+                                    <td className="border p-2">
+                                      {timetable.totals?.total_absent_days}
+                                    </td>
+
                                     <td className="border p-2">
                                       {
                                         timetable.totals
                                           ?.total_previous_attendance
                                       }
                                     </td>
+
                                     <td className="border p-2">
                                       {timetable.totals?.grand_total_attendance}
                                     </td>
-                                    <td className="border p-2">–</td>
-                                    <td className="border p-2 text-red-600">
+
+                                    <td className="border p-2">
                                       {
                                         timetable.totals
-                                          ?.grand_total_absent_attendance
+                                          ?.total_cumulative_absent_days
+                                      }
+                                    </td>
+                                    <td className="border p-2">
+                                      {
+                                        timetable.totals
+                                          ?.total_working_days_for_this_month
+                                      }
+                                    </td>
+
+                                    <td className="border p-2 ">
+                                      {
+                                        timetable.totals
+                                          ?.total_working_days_till_month
                                       }
                                     </td>
                                   </tr>
