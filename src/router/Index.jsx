@@ -292,6 +292,8 @@ import BackgroundChanger from "../Layouts/BackgroundColorSelect/BackgroundChange
 import HomeworkNotAssignReport from "../componants/Reports/CurriculumReport/HomewrokNotAssignReport.jsx";
 import News from "../componants/NewsModule/News.jsx";
 import RoleForEvent from "../componants/Events/RoleForEvent.jsx";
+import EditApproveStationery from "../componants/Stationery/EditApproveStationery.jsx";
+import ApproveStationery from "../componants/Stationery/ApproveStationery.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -1153,6 +1155,14 @@ function Index() {
         <Route
           path="/stationery"
           element={<PrivateRoute element={<Stationery />} />}
+        />
+        <Route
+          path="/approveStationery/edit/:id"
+          element={<PrivateRoute element={<EditApproveStationery />} />}
+        />
+        <Route
+          path="/approveStationery"
+          element={<PrivateRoute element={<ApproveStationery />} />}
         />
         {/* Siblings unMapping module*/}
         <Route
