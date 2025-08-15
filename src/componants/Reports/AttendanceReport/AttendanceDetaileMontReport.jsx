@@ -383,7 +383,18 @@ const AttendanceDetaileMontReport = () => {
         <td style="border: 1px solid #ccc; padding: 6px;">${
           timetable.totals.total_absent_days
         }</td>
-        <td colspan="6" style="border: 1px solid #ccc; padding: 6px;">–</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.total_absent_days
+        }</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.total_prev_absent_days
+        }</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.grand_total_absent_attendance
+        }</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">–</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">–</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">–</td>
       </tr>
       <tr style="color: #1e3a8a; font-weight: bold;">
         <td style="border: 1px solid #ccc; padding: 6px;" colspan="2">📊 Total</td>
@@ -396,16 +407,23 @@ const AttendanceDetaileMontReport = () => {
         <td style="border: 1px solid #ccc; padding: 6px;">${
           timetable.totals.total_present_absent_days
         }</td>
-        <td style="border: 1px solid #ccc; padding: 6px;">–</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.total_absent_days
+        }</td>
         <td style="border: 1px solid #ccc; padding: 6px;">${
           timetable.totals.total_previous_attendance
         }</td>
         <td style="border: 1px solid #ccc; padding: 6px;">${
           timetable.totals.grand_total_attendance
         }</td>
-        <td style="border: 1px solid #ccc; padding: 6px;">–</td>
-        <td colspan="2" style="border: 1px solid #ccc; padding: 6px; color: #dc2626;">${
-          timetable.totals.grand_total_absent_attendance
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.total_cumulative_absent_days
+        }</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.total_working_days_for_this_month
+        }</td>
+        <td style="border: 1px solid #ccc; padding: 6px;">${
+          timetable.totals.total_working_days_till_month
         }</td>
       </tr>
     </tfoot>
@@ -522,9 +540,9 @@ date.</p>
         "",
         ...(timetable.totals?.daily_absent ?? []),
         timetable.totals?.total_absent_days ?? "",
-        "–",
-        "–",
-        "–",
+        timetable.totals?.total_absent_days ?? "",
+        timetable.totals?.total_prev_absent_days ?? "",
+        timetable.totals?.grand_total_absent_attendance ?? "",
         "–",
         "–",
         "–",
@@ -534,12 +552,12 @@ date.</p>
         "",
         ...(timetable.totals?.daily_total ?? []),
         timetable.totals?.total_present_absent_days ?? "",
-        "–",
+        timetable.totals?.total_absent_days ?? "",
         timetable.totals?.total_previous_attendance ?? "",
         timetable.totals?.grand_total_attendance ?? "",
-        "–",
-        "–",
-        timetable.totals?.grand_total_absent_attendance ?? "",
+        timetable.totals?.total_cumulative_absent_days ?? "",
+        timetable.totals?.total_working_days_for_this_month ?? "",
+        timetable.totals?.total_working_days_till_month ?? "",
       ],
     ];
 
