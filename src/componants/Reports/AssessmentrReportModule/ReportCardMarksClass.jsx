@@ -51,6 +51,7 @@ const ReportCardMarksClass = () => {
     init();
     fetchtermsByClassId();
   }, []);
+
   const fetchRoleId = async () => {
     const token = localStorage.getItem("authToken");
 
@@ -133,6 +134,7 @@ const ReportCardMarksClass = () => {
   const handleClassSelect = async (selectedOption) => {
     setStudentError("");
     setSelectedStudent(selectedOption);
+    console.log(selectedOption);
     setSelectedStudentId(selectedOption?.value);
 
     // Clear previous selections and show loading
@@ -197,6 +199,9 @@ const ReportCardMarksClass = () => {
     }
   };
 
+  const formatNamePart = (name = "") =>
+    name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
+
   const fetchSubjectsByClassAndSection = async (classId, sectionId) => {
     const token = localStorage.getItem("authToken");
     try {
@@ -222,6 +227,7 @@ const ReportCardMarksClass = () => {
   // Handle search and fetch parent information
 
   const handleSearch = async () => {
+    console.log("inside handle Search");
     setLoadingForSearch(false);
     let hasError = false;
 
@@ -295,75 +301,22 @@ const ReportCardMarksClass = () => {
     }
   };
 
-  // ✅ Generate multi-row table headers
-  // const { row1, row2, row3, subjectExamHeadingMap } = useMemo(() => {
-  //   const headings = marksData?.headings || {};
+  const formatFullName = (fullName = "") =>
+    fullName
+      .trim()
+      .split(/\s+/) // split by spaces
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(" ");
 
-  //   const row1 = [
-  //     { label: "Roll No", rowspan: 3 },
-  //     { label: "Reg No", rowspan: 3 },
-  //     { label: "Student Name", rowspan: 3 },
-  //   ];
+  const getClassNum = (className) => {
+    const m = String(className ?? "").match(/\d+/); // extract digits
+    return m ? Number(m[0]) : NaN;
+  };
 
-  //   const row2 = [];
-  //   const row3 = [];
-  //   const subjectExamHeadingMap = [];
+  const classNum = getClassNum(selectedStudent?.class);
 
-  //   Object.entries(headings).forEach(([termId, subjects]) => {
-  //     Object.entries(subjects).forEach(([subjectId, subject]) => {
-  //       let totalColSpan = 0;
-
-  //       subject.exams.forEach((exam) => {
-  //         row2.push({
-  //           label: exam.exam_name,
-  //           colspan: exam.headings.length,
-  //         });
-
-  //         exam.headings.forEach((heading) => {
-  //           row3.push({
-  //             label: `${heading.heading_name}\n${heading.highest_marks}`,
-  //           });
-
-  //           subjectExamHeadingMap.push({
-  //             termId,
-  //             subjectId,
-  //             examId: exam.exam_id,
-  //             headingName: heading.heading_name,
-  //             isSubjectTotal: false,
-  //           });
-
-  //           totalColSpan += 1;
-  //         });
-  //       });
-
-  //       // Add "Total" column for the subject
-  //       row2.push({ label: "", colspan: 1 });
-  //       row3.push({ label: `Total\n${subject.total_max_all}` });
-
-  //       // Find the exam which includes "Total"
-  //       const examWithTotal = subject.exams.find((exam) =>
-  //         exam.headings.some((heading) => heading.heading_name === "Total")
-  //       );
-
-  //       subjectExamHeadingMap.push({
-  //         termId,
-  //         subjectId,
-  //         examId: examWithTotal?.exam_id ?? null,
-  //         headingName: "Total",
-  //         isSubjectTotal: true,
-  //       });
-
-  //       row1.push({
-  //         label: `${subject.subject_name}\n (Term ${termId})`,
-  //         colspan: totalColSpan + 1,
-  //       });
-  //     });
-  //   });
-
-  //   return { row1, row2, row3, subjectExamHeadingMap };
-  // }, [marksData.headings]);
   const { row1, row2, row3, subjectExamHeadingMap } = useMemo(() => {
-    const headings = timetable?.headings || {}; // ✅ use correct source
+    const headings = timetable?.headings || {};
     const row1 = [
       { label: "Roll No", rowspan: 3 },
       { label: "Reg No", rowspan: 3 },
@@ -374,18 +327,77 @@ const ReportCardMarksClass = () => {
     const row3 = [];
     const subjectExamHeadingMap = [];
 
-    Object.entries(headings).forEach(([termId, subjects]) => {
-      Object.entries(subjects).forEach(([subjectId, subject]) => {
-        const examSpan = subject.exams.reduce(
-          (acc, exam) => acc + exam.headings.length,
-          0
-        );
+    if (classNum >= 11) {
+      Object.entries(headings).forEach(([termId, subjects]) => {
+        Object.entries(subjects).forEach(([subjectId, subject]) => {
+          // ✅ add +1 for total column
+          const examSpan =
+            subject.exams.reduce((acc, exam) => acc + exam.headings.length, 0) +
+            1;
 
+          // row1 → subject name + term
+          row1.push({
+            label: `${subject.subject_name}\n (Term ${termId})`,
+            colspan: examSpan,
+          });
+
+          // row2 & row3 → loop exams
+          subject.exams.forEach((exam) => {
+            row2.push({
+              label: exam.exam_name,
+              colspan: exam.headings.length,
+            });
+
+            exam.headings.forEach((heading) => {
+              row3.push({
+                label: `${heading.heading_name}\n${heading.highest_marks}`,
+              });
+
+              subjectExamHeadingMap.push({
+                termId,
+                subjectId,
+                examId: exam.exam_id,
+                headingName: heading.heading_name,
+                marksHeadingId: heading.marks_headings_id,
+                isSubjectTotal: false,
+              });
+            });
+          });
+
+          // ✅ now push the TOTAL column
+          row2.push({
+            label: "Total",
+            colspan: 1,
+          });
+
+          row3.push({
+            label: `Total\n${subject.total_max_all}`,
+          });
+
+          subjectExamHeadingMap.push({
+            termId,
+            subjectId,
+            examId: "Total",
+            headingName: "Total",
+            marksHeadingId: null,
+            isSubjectTotal: true,
+          });
+        });
+      });
+    } else if (classNum == 9 || classNum == 10) {
+      Object.entries(headings).forEach(([subjectId, subject]) => {
+        // ✅ calculate examSpan = sum of headings + 1 (for total column)
+        const examSpan =
+          subject.exams.reduce((acc, exam) => acc + exam.headings.length, 0) +
+          1;
+
+        // row1 → Subject Name
         row1.push({
-          label: `${subject.subject_name}\n (Term ${termId})`,
+          label: `${subject.subject_name}`,
           colspan: examSpan,
         });
 
+        // row2 & row3 → loop exams
         subject.exams.forEach((exam) => {
           row2.push({
             label: exam.exam_name,
@@ -398,7 +410,6 @@ const ReportCardMarksClass = () => {
             });
 
             subjectExamHeadingMap.push({
-              termId,
               subjectId,
               examId: exam.exam_id,
               headingName: heading.heading_name,
@@ -407,8 +418,101 @@ const ReportCardMarksClass = () => {
             });
           });
         });
+
+        // Assuming classNum is available
+        if (classNum !== 10) {
+          // Find the final exam dynamically
+          const finalExam = subject.exams.find(
+            (exam) => exam.exam_name.toUpperCase() === "FINAL EXAM"
+          );
+
+          // If found, use its total_max, otherwise fallback
+          const finalExamTotalMax = finalExam
+            ? finalExam.total_max
+            : subject.total_max_all;
+
+          // Push to row2
+          row2.push({
+            label: "Total",
+            colspan: 1,
+          });
+
+          // Push to row3
+          row3.push({
+            label: `Total\n${finalExamTotalMax}`,
+          });
+
+          // Add to the heading map
+          subjectExamHeadingMap.push({
+            subjectId,
+            examId: "Total",
+            headingName: "Total",
+            marksHeadingId: null,
+            isSubjectTotal: true,
+          });
+        } else {
+          // If classNum is 10, skip adding Total column
+          console.log("Class 10 – skipping Total column");
+        }
       });
-    });
+    } else {
+      Object.entries(headings).forEach(([termId, subjects]) => {
+        Object.entries(subjects).forEach(([subjectId, subject]) => {
+          // ✅ add +1 for total column
+          const examSpan =
+            subject.exams.reduce((acc, exam) => acc + exam.headings.length, 0) +
+            1;
+
+          // row1 → subject name + term
+          row1.push({
+            label: `${subject.subject_name}\n (Term ${termId})`,
+            colspan: examSpan,
+          });
+
+          // row2 & row3 → loop exams
+          subject.exams.forEach((exam) => {
+            row2.push({
+              label: exam.exam_name,
+              colspan: exam.headings.length,
+            });
+
+            exam.headings.forEach((heading) => {
+              row3.push({
+                label: `${heading.heading_name}\n${heading.highest_marks}`,
+              });
+
+              subjectExamHeadingMap.push({
+                termId,
+                subjectId,
+                examId: exam.exam_id,
+                headingName: heading.heading_name,
+                marksHeadingId: heading.marks_headings_id,
+                isSubjectTotal: false,
+              });
+            });
+          });
+
+          //  now push the TOTAL column
+          row2.push({
+            label: "Total",
+            colspan: 1,
+          });
+
+          row3.push({
+            label: `Total\n${subject.total_max_all}`,
+          });
+
+          subjectExamHeadingMap.push({
+            termId,
+            subjectId,
+            examId: "Total",
+            headingName: "Total",
+            marksHeadingId: null,
+            isSubjectTotal: true,
+          });
+        });
+      });
+    }
 
     return { row1, row2, row3, subjectExamHeadingMap };
   }, [timetable?.headings]);
@@ -419,8 +523,64 @@ const ReportCardMarksClass = () => {
     const row3 = [];
     const columnKeys = [];
 
-    Object.entries(marksData.headings).forEach(([termId, subjects]) => {
-      Object.entries(subjects).forEach(([subjectId, subject]) => {
+    if (classNum >= 11) {
+      Object.entries(marksData.headings).forEach(([termId, subjects]) => {
+        Object.entries(subjects).forEach(([subjectId, subject]) => {
+          const totalExamHeadings = subject.exams.reduce(
+            (acc, exam) => acc + exam.headings.length,
+            0
+          );
+
+          const totalColSpan = totalExamHeadings + 1; // +1 for "Total" column
+          row1.push({ label: subject.subject_name, colspan: totalColSpan });
+
+          subject.exams.forEach((exam) => {
+            row2.push({
+              label: exam.exam_name,
+              colspan: exam.headings.length,
+            });
+
+            exam.headings.forEach((heading) => {
+              row3.push({
+                label: `${heading.heading_name}\n${heading.highest_marks}`,
+              });
+
+              columnKeys.push({
+                termId,
+                subjectId,
+                examId: exam.exam_id,
+                headingName: heading.heading_name,
+                maxMarks: heading.highest_marks,
+                isTotal: false,
+              });
+            });
+          });
+
+          // Compute total max marks for subject
+          const totalMarks = subject.exams.reduce((total, exam) => {
+            return (
+              total +
+              exam.headings.reduce(
+                (acc, heading) => acc + Number(heading.highest_marks || 0),
+                0
+              )
+            );
+          }, 0);
+
+          // Add total column for this subject
+          row2.push({ label: "", colspan: 1 });
+          row3.push({ label: `Total\n${totalMarks}` }); // 💡 This is the key change
+
+          columnKeys.push({
+            termId,
+            subjectId,
+            isSubjectTotal: true,
+            maxMarks: totalMarks,
+          });
+        });
+      });
+    } else if (classNum == 9 || classNum == 10) {
+      Object.entries(marksData.headings).forEach(([subjectId, subject]) => {
         const totalExamHeadings = subject.exams.reduce(
           (acc, exam) => acc + exam.headings.length,
           0
@@ -438,7 +598,6 @@ const ReportCardMarksClass = () => {
             });
 
             columnKeys.push({
-              termId,
               subjectId,
               examId: exam.exam_id,
               headingName: heading.heading_name,
@@ -448,29 +607,94 @@ const ReportCardMarksClass = () => {
           });
         });
 
-        // Compute total max marks for subject
-        const totalMarks = subject.exams.reduce((total, exam) => {
-          return (
-            total +
-            exam.headings.reduce(
+        // Find the FINAL EXAM in this subject
+        const finalExam = subject.exams.find(
+          (exam) => exam.exam_name.toUpperCase() === "FINAL EXAM" // case-insensitive match
+        );
+
+        let totalMarks = 0;
+
+        if (finalExam) {
+          // If Total exists, use it
+          if (finalExam.Total !== undefined) {
+            totalMarks = Number(finalExam.Total);
+          } else if (finalExam.headings && finalExam.headings.length > 0) {
+            // Sum all headings if Total is not present
+            totalMarks = finalExam.headings.reduce(
               (acc, heading) => acc + Number(heading.highest_marks || 0),
               0
-            )
-          );
-        }, 0);
+            );
+          }
+        }
 
         // Add total column for this subject
         row2.push({ label: "", colspan: 1 });
-        row3.push({ label: `Total\n${totalMarks}` }); // 💡 This is the key change
+        row3.push({ label: `Total\n${totalMarks}` });
+        // 💡 This is the key change
 
         columnKeys.push({
-          termId,
           subjectId,
           isSubjectTotal: true,
           maxMarks: totalMarks,
         });
       });
-    });
+    } else {
+      Object.entries(marksData.headings).forEach(([termId, subjects]) => {
+        Object.entries(subjects).forEach(([subjectId, subject]) => {
+          const totalExamHeadings = subject.exams.reduce(
+            (acc, exam) => acc + exam.headings.length,
+            0
+          );
+
+          const totalColSpan = totalExamHeadings + 1; // +1 for "Total" column
+          row1.push({ label: subject.subject_name, colspan: totalColSpan });
+
+          subject.exams.forEach((exam) => {
+            row2.push({
+              label: exam.exam_name,
+              colspan: exam.headings.length,
+            });
+
+            exam.headings.forEach((heading) => {
+              row3.push({
+                label: `${heading.heading_name}\n${heading.highest_marks}`,
+              });
+
+              columnKeys.push({
+                termId,
+                subjectId,
+                examId: exam.exam_id,
+                headingName: heading.heading_name,
+                maxMarks: heading.highest_marks,
+                isTotal: false,
+              });
+            });
+          });
+
+          // Compute total max marks for subject
+          const totalMarks = subject.exams.reduce((total, exam) => {
+            return (
+              total +
+              exam.headings.reduce(
+                (acc, heading) => acc + Number(heading.highest_marks || 0),
+                0
+              )
+            );
+          }, 0);
+
+          // Add total column for this subject
+          row2.push({ label: "", colspan: 1 });
+          row3.push({ label: `Total\n${totalMarks}` }); // 💡 This is the key change
+
+          columnKeys.push({
+            termId,
+            subjectId,
+            isSubjectTotal: true,
+            maxMarks: totalMarks,
+          });
+        });
+      });
+    }
 
     const theadHTML = `
       <thead>
@@ -508,9 +732,13 @@ const ReportCardMarksClass = () => {
       <tbody>
         ${marksData.data
           .map((student, idx) => {
-            const fullName = `${capitalizeFirst(student.first_name) || ""} ${
-              toLowerCaseAll(student.mid_name) || ""
-            } ${toLowerCaseAll(student.last_name) || ""}`.trim();
+            const fullName =
+              classNum >= 9
+                ? formatFullName(student.name || "")
+                : [student.first_name, student.mid_name, student.last_name]
+                    .filter(Boolean)
+                    .map(formatNamePart)
+                    .join(" ");
 
             const cells = [
               `<td style="border:1px solid #333;padding:4px;">${idx + 1}</td>`,
@@ -521,31 +749,122 @@ const ReportCardMarksClass = () => {
 
             let subjectTotal = 0;
 
-            columnKeys.forEach(
-              ({ termId, subjectId, examId, headingName, isSubjectTotal }) => {
-                if (isSubjectTotal) {
-                  // Show total of previously accumulated subject
+            if (classNum >= 11) {
+              columnKeys.forEach(
+                ({
+                  termId,
+                  subjectId,
+                  examId,
+                  headingName,
+                  isSubjectTotal,
+                }) => {
+                  if (isSubjectTotal) {
+                    // Show total of previously accumulated subject
+                    cells.push(
+                      `<td style="border:1px solid #333;padding:4px; text-align:center; font-weight:bold;">${subjectTotal}</td>`
+                    );
+                    subjectTotal = 0; // Reset for next subject
+                    return;
+                  }
+
+                  const mark =
+                    student.marks?.[termId]?.[subjectId]?.[examId]?.[
+                      headingName
+                    ];
+                  const value =
+                    mark !== undefined && mark !== null ? Number(mark) : "-";
+
+                  if (value !== "-" && !isNaN(value)) {
+                    subjectTotal += Number(value);
+                  }
+
                   cells.push(
-                    `<td style="border:1px solid #333;padding:4px; text-align:center; font-weight:bold;">${subjectTotal}</td>`
+                    `<td style="border:1px solid #333;padding:4px; text-align:center;">${value}</td>`
                   );
-                  subjectTotal = 0; // Reset for next subject
-                  return;
                 }
+              );
+            } else if (classNum == 9 || classNum == 10) {
+              columnKeys.forEach(
+                ({ subjectId, examId, headingName, isSubjectTotal }) => {
+                  if (isSubjectTotal) {
+                    const subjectMarks = student.marks?.[subjectId] || {};
+                    let subjectTotal = 0;
 
-                const mark =
-                  student.marks?.[termId]?.[subjectId]?.[examId]?.[headingName];
-                const value =
-                  mark !== undefined && mark !== null ? Number(mark) : "-";
+                    // Use only examId 103
+                    const examMarks = subjectMarks[103];
+                    if (examMarks) {
+                      if (typeof examMarks === "object") {
+                        if (examMarks.Total !== undefined) {
+                          subjectTotal = Number(examMarks.Total);
+                        } else {
+                          // Sum individual components if Total is not present
+                          Object.values(examMarks).forEach((mark) => {
+                            if (!isNaN(mark)) subjectTotal += Number(mark);
+                          });
+                        }
+                      } else if (!isNaN(examMarks)) {
+                        subjectTotal = Number(examMarks);
+                      }
+                    }
 
-                if (value !== "-" && !isNaN(value)) {
-                  subjectTotal += Number(value);
+                    // Push the total into the table cell
+                    cells.push(
+                      `<td style="border:1px solid #333;padding:4px; text-align:center; font-weight:bold;">${subjectTotal}</td>`
+                    );
+
+                    subjectTotal = 0; // Reset for next subject
+                    return;
+                  }
+
+                  const mark =
+                    student.marks?.[subjectId]?.[examId]?.[headingName];
+                  const value =
+                    mark !== undefined && mark !== null ? Number(mark) : "-";
+
+                  if (value !== "-" && !isNaN(value)) {
+                    subjectTotal += Number(value);
+                  }
+
+                  cells.push(
+                    `<td style="border:1px solid #333;padding:4px; text-align:center;">${value}</td>`
+                  );
                 }
+              );
+            } else {
+              columnKeys.forEach(
+                ({
+                  termId,
+                  subjectId,
+                  examId,
+                  headingName,
+                  isSubjectTotal,
+                }) => {
+                  if (isSubjectTotal) {
+                    // Show total of previously accumulated subject
+                    cells.push(
+                      `<td style="border:1px solid #333;padding:4px; text-align:center; font-weight:bold;">${subjectTotal}</td>`
+                    );
+                    subjectTotal = 0; // Reset for next subject
+                    return;
+                  }
 
-                cells.push(
-                  `<td style="border:1px solid #333;padding:4px; text-align:center;">${value}</td>`
-                );
-              }
-            );
+                  const mark =
+                    student.marks?.[termId]?.[subjectId]?.[examId]?.[
+                      headingName
+                    ];
+                  const value =
+                    mark !== undefined && mark !== null ? Number(mark) : "-";
+
+                  if (value !== "-" && !isNaN(value)) {
+                    subjectTotal += Number(value);
+                  }
+
+                  cells.push(
+                    `<td style="border:1px solid #333;padding:4px; text-align:center;">${value}</td>`
+                  );
+                }
+              );
+            }
 
             return `<tr>${cells.join("")}</tr>`;
           })
@@ -590,6 +909,7 @@ const ReportCardMarksClass = () => {
       win.close();
     };
   };
+
   const generateMarksExcelData = () => {
     const aoa = [];
     const merges = [];
@@ -675,35 +995,138 @@ const ReportCardMarksClass = () => {
     aoa.push(level1, level2, level3, level4); // Add level4 now
 
     const dataRows = filteredData.map((student) => {
-      const fullName = `${capitalizeFirst(student.first_name) || ""} ${
-        toLowerCaseAll(student.mid_name) || ""
-      } ${toLowerCaseAll(student.last_name) || ""}`.trim();
+      const fullName =
+        classNum >= 9
+          ? formatFullName(student.name || "")
+          : [student.first_name, student.mid_name, student.last_name]
+              .filter(Boolean)
+              .map(formatNamePart)
+              .join(" ");
 
-      const row = [
-        student.roll_no,
-        student.reg_no,
-        fullName,
-        ...subjectExamHeadingMap.map(
-          ({ termId, subjectId, examId, headingName, isSubjectTotal }) => {
-            if (isSubjectTotal) {
+      if (classNum >= 11) {
+        const row = [
+          student.roll_no,
+          student.reg_no,
+          fullName,
+          ...subjectExamHeadingMap.map(
+            ({ termId, subjectId, examId, headingName, isSubjectTotal }) => {
               const subjectExams = student.marks?.[termId]?.[subjectId] || {};
-              for (const examKey in subjectExams) {
-                if (subjectExams[examKey]?.Total !== undefined) {
-                  return subjectExams[examKey].Total;
-                }
-              }
-              return "-";
-            } else {
-              return (
-                student.marks?.[termId]?.[subjectId]?.[examId]?.[headingName] ??
-                "-"
-              );
-            }
-          }
-        ),
-      ];
 
-      return row;
+              if (isSubjectTotal) {
+                // ✅ Calculate total by summing all exam values
+                let total = 0;
+                let hasMarks = false;
+
+                for (const examKey in subjectExams) {
+                  const examObj = subjectExams[examKey];
+                  for (const key in examObj) {
+                    const val = examObj[key];
+                    if (typeof val === "number") {
+                      total += val;
+                      hasMarks = true;
+                    }
+                  }
+                }
+
+                return hasMarks ? total : "-";
+              } else {
+                // ✅ Show normal exam mark
+                return (
+                  student.marks?.[termId]?.[subjectId]?.[examId]?.[
+                    headingName
+                  ] ?? "-"
+                );
+              }
+            }
+          ),
+        ];
+
+        return row;
+      } else if (classNum === 9 || classNum === 10) {
+        const row = [
+          student.roll_no,
+          student.reg_no,
+          fullName,
+          ...subjectExamHeadingMap.map(
+            ({ subjectId, examId, headingName, isSubjectTotal }) => {
+              const subjectExams = student.marks?.[subjectId] || {};
+
+              if (isSubjectTotal) {
+                let total = 0;
+                let hasMarks = false;
+
+                // Only consider examId 103
+                const examObj = subjectExams[103];
+                if (examObj) {
+                  // If examObj has a Total property, use it
+                  if (examObj.Total !== undefined) {
+                    total = Number(examObj.Total);
+                    hasMarks = true;
+                  } else {
+                    // Otherwise, sum all numeric values
+                    for (const key in examObj) {
+                      const val = examObj[key];
+                      if (typeof val === "number") {
+                        total += val;
+                        hasMarks = true;
+                      }
+                    }
+                  }
+                }
+
+                return hasMarks ? total : "-";
+              } else {
+                return (
+                  student.marks?.[subjectId]?.[examId]?.[headingName] ?? "-"
+                );
+              }
+            }
+          ),
+        ];
+
+        return row;
+      } else {
+        const row = [
+          student.roll_no,
+          student.reg_no,
+          fullName,
+          ...subjectExamHeadingMap.map(
+            ({ termId, subjectId, examId, headingName, isSubjectTotal }) => {
+              const subjectExams = student.marks?.[termId]?.[subjectId] || {};
+
+              if (isSubjectTotal) {
+                let total = 0;
+                let hasMarks = false;
+
+                for (const examKey in subjectExams) {
+                  const examObj = subjectExams[examKey];
+                  for (const key in examObj) {
+                    const val = examObj[key];
+                    if (typeof val === "number") {
+                      total += val;
+                      hasMarks = true;
+                    }
+                  }
+                }
+                if (hasMarks) {
+                  total = total / 2;
+                }
+
+                return hasMarks ? total : "-";
+              } else {
+                // Show normal exam mark
+                return (
+                  student.marks?.[termId]?.[subjectId]?.[examId]?.[
+                    headingName
+                  ] ?? "-"
+                );
+              }
+            }
+          ),
+        ];
+
+        return row;
+      }
     });
 
     return { aoa: [...aoa, ...dataRows], merges };
@@ -782,11 +1205,13 @@ const ReportCardMarksClass = () => {
 
   const filteredData =
     timetable?.data?.filter((student) => {
-      const fullName = `${student.first_name} ${student.mid_name || ""} ${
-        student.last_name || ""
-      }`
-        .toLowerCase()
-        .trim();
+      const fullName =
+        classNum >= 9
+          ? formatFullName(student.name || "")
+          : [student.first_name, student.mid_name, student.last_name]
+              .filter(Boolean)
+              .map(formatNamePart)
+              .join(" ");
 
       const rollNo = (student.roll_no || "").toString().toLowerCase();
       const regNo = (student.reg_no || "").toString().toLowerCase();
@@ -846,7 +1271,7 @@ const ReportCardMarksClass = () => {
                           className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
                           htmlFor="studentSelect"
                         >
-                          Class <span className="text-red-500">*</span>
+                          Class<span className="text-red-500">*</span>
                           {/* Staff */}
                         </label>
                         <div className="w-full md:w-[85%]">
@@ -957,7 +1382,7 @@ const ReportCardMarksClass = () => {
 
                       {/* Subject Dropdown */}
                       <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                        <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
+                        <label className="w-full md:w-[38%] text-md pl-0 md:pl-5 mt-1.5">
                           Subject
                         </label>
                         <div className="w-full md:w-[85%]">
@@ -1237,64 +1662,232 @@ const ReportCardMarksClass = () => {
                                             minWidth: "160px",
                                           }}
                                         >
-                                          {`${
-                                            capitalizeFirst(
-                                              student.first_name
-                                            ) || ""
-                                          } ${
-                                            toLowerCaseAll(student.mid_name) ||
-                                            ""
-                                          } ${
-                                            toLowerCaseAll(student.last_name) ||
-                                            ""
-                                          }`.trim()}
+                                          {classNum >= 9
+                                            ? formatFullName(student.name) || ""
+                                            : `${[
+                                                student.first_name,
+                                                student.mid_name,
+                                                student.last_name,
+                                              ]
+                                                .filter(Boolean) // remove null/undefined/empty
+                                                .map(formatNamePart) // capitalize each part
+                                                .join(" ")}`}
                                         </td>
 
                                         {/* Scrollable Mark Columns */}
-                                        {subjectExamHeadingMap.map(
-                                          (
-                                            {
-                                              termId,
-                                              subjectId,
-                                              examId,
-                                              headingName,
-                                              isSubjectTotal,
-                                            },
-                                            index
-                                          ) => {
-                                            let value = "";
 
-                                            if (isSubjectTotal) {
-                                              const subjectExams =
-                                                student.marks?.[termId]?.[
-                                                  subjectId
-                                                ] || {};
-                                              for (const examKey in subjectExams) {
-                                                const exam =
-                                                  subjectExams[examKey];
-                                                if (exam?.Total !== undefined) {
-                                                  value = exam.Total;
-                                                  break;
+                                        {classNum >= 11
+                                          ? // Map for Class 11 & above
+                                            subjectExamHeadingMap.map(
+                                              (
+                                                {
+                                                  termId,
+                                                  subjectId,
+                                                  examId,
+                                                  headingName,
+                                                  isSubjectTotal,
+                                                },
+                                                index
+                                              ) => {
+                                                let value = "";
+
+                                                if (isSubjectTotal) {
+                                                  const subjectMarks =
+                                                    student.marks?.[termId]?.[
+                                                      subjectId
+                                                    ] || {};
+                                                  let total = 0;
+
+                                                  Object.entries(
+                                                    subjectMarks
+                                                  ).forEach(
+                                                    ([examKey, examMarks]) => {
+                                                      if (examKey === "Total")
+                                                        return;
+
+                                                      if (
+                                                        typeof examMarks ===
+                                                        "object"
+                                                      ) {
+                                                        if (
+                                                          examMarks.Total !==
+                                                          undefined
+                                                        ) {
+                                                          total += Number(
+                                                            examMarks.Total
+                                                          );
+                                                        } else {
+                                                          Object.values(
+                                                            examMarks
+                                                          ).forEach((mark) => {
+                                                            if (!isNaN(mark))
+                                                              total +=
+                                                                Number(mark);
+                                                          });
+                                                        }
+                                                      }
+                                                    }
+                                                  );
+
+                                                  value = total;
+                                                } else {
+                                                  value =
+                                                    student.marks?.[termId]?.[
+                                                      subjectId
+                                                    ]?.[examId]?.[
+                                                      headingName
+                                                    ] ?? "";
                                                 }
-                                              }
-                                            } else {
-                                              value =
-                                                student.marks?.[termId]?.[
-                                                  subjectId
-                                                ]?.[examId]?.[headingName] ??
-                                                "";
-                                            }
 
-                                            return (
-                                              <td
-                                                key={index}
-                                                className="border-2 border-gray-400 px-3 py-1 text-center whitespace-nowrap"
-                                              >
-                                                {value}
-                                              </td>
-                                            );
-                                          }
-                                        )}
+                                                return (
+                                                  <td
+                                                    key={index}
+                                                    className="border-2 border-gray-400 px-3 py-1 text-center whitespace-nowrap"
+                                                  >
+                                                    {value}{" "}
+                                                    {/* wrapped for 11 & above */}
+                                                  </td>
+                                                );
+                                              }
+                                            )
+                                          : classNum >= 9
+                                          ? // Map for Class 9 & 10
+                                            subjectExamHeadingMap.map(
+                                              (
+                                                {
+                                                  subjectId,
+                                                  examId,
+                                                  headingName,
+                                                  isSubjectTotal,
+                                                },
+                                                index
+                                              ) => {
+                                                let value = "";
+
+                                                if (isSubjectTotal) {
+                                                  const subjectMarks =
+                                                    student.marks?.[
+                                                      subjectId
+                                                    ] || {};
+                                                  let total = 0;
+
+                                                  // Use only examId 103
+                                                  const examMarks =
+                                                    subjectMarks[103];
+                                                  if (examMarks) {
+                                                    if (
+                                                      typeof examMarks ===
+                                                      "object"
+                                                    ) {
+                                                      if (
+                                                        examMarks.Total !==
+                                                        undefined
+                                                      ) {
+                                                        total = Number(
+                                                          examMarks.Total
+                                                        );
+                                                      } else {
+                                                        // Sum individual components if Total is not present
+                                                        Object.values(
+                                                          examMarks
+                                                        ).forEach((mark) => {
+                                                          if (!isNaN(mark))
+                                                            total +=
+                                                              Number(mark);
+                                                        });
+                                                      }
+                                                    } else if (
+                                                      !isNaN(examMarks)
+                                                    ) {
+                                                      total = Number(examMarks);
+                                                    }
+                                                  }
+
+                                                  value = total;
+                                                } else {
+                                                  value =
+                                                    student.marks?.[
+                                                      subjectId
+                                                    ]?.[103]?.[headingName] ??
+                                                    "";
+                                                }
+
+                                                return (
+                                                  <td
+                                                    key={index}
+                                                    className="border-2 border-gray-400 px-3 py-1 text-center whitespace-nowrap"
+                                                  >
+                                                    {value}
+                                                  </td>
+                                                );
+                                              }
+                                            )
+                                          : // Map Nursery to 8
+                                            subjectExamHeadingMap.map(
+                                              (
+                                                {
+                                                  termId,
+                                                  subjectId,
+                                                  examId,
+                                                  headingName,
+                                                  isSubjectTotal,
+                                                },
+                                                index
+                                              ) => {
+                                                let value = "";
+
+                                                if (isSubjectTotal) {
+                                                  const subjectMarks =
+                                                    student.marks?.[termId]?.[
+                                                      subjectId
+                                                    ] || {};
+
+                                                  let total = 0;
+
+                                                  Object.entries(
+                                                    subjectMarks
+                                                  ).forEach(
+                                                    ([examKey, examMarks]) => {
+                                                      if (examKey === "Total")
+                                                        return; // skip overall Total if present
+
+                                                      if (
+                                                        typeof examMarks ===
+                                                        "object"
+                                                      ) {
+                                                        if (
+                                                          examMarks.Total !==
+                                                          undefined
+                                                        ) {
+                                                          total += Number(
+                                                            examMarks.Total
+                                                          );
+                                                        }
+                                                      }
+                                                    }
+                                                  );
+
+                                                  value = total;
+                                                } else {
+                                                  value =
+                                                    student.marks?.[termId]?.[
+                                                      subjectId
+                                                    ]?.[examId]?.[
+                                                      headingName
+                                                    ] ?? "";
+                                                }
+
+                                                return (
+                                                  <td
+                                                    key={index}
+                                                    className="border-2 border-gray-400 px-3 py-1 text-center whitespace-nowrap"
+                                                  >
+                                                    {value}{" "}
+                                                    {/* wrapped same as 11 & above */}
+                                                  </td>
+                                                );
+                                              }
+                                            )}
                                       </tr>
                                     ))
                                   : filteredData.length === 0 && (

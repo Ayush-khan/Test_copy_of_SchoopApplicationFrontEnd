@@ -294,6 +294,7 @@ import News from "../componants/NewsModule/News.jsx";
 import RoleForEvent from "../componants/Events/RoleForEvent.jsx";
 import EditApproveStationery from "../componants/Stationery/EditApproveStationery.jsx";
 import ApproveStationery from "../componants/Stationery/ApproveStationery.jsx";
+import ViewBookAvailability from "../componants/View/ViewBookAvailability.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -994,6 +995,11 @@ function Index() {
         <Route
           path="/lessonPlanDetailedView"
           element={<PrivateRoute element={<LessonPlanDetailedView />} />}
+        />
+        {/* View Book Availability module*/}
+        <Route
+          path="/viewBookAvailability"
+          element={<PrivateRoute element={<ViewBookAvailability />} />}
         />
         {/* Attendance Marking Status Report */}
         <Route
