@@ -110,87 +110,175 @@ const LandingPage = () => {
     const year = today.getFullYear();
     return `${day} ${monthName} ${year}`;
   }
+  // const handleResetPassword = async () => {
+  //   setTouched({ userId: true });
+  //   if (!isValid) return;
+
+  //   setLoading(true);
+  //   setNewPasswordLoading(true);
+  //   setBackendError(""); // clear any old error
+
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("user_id", userId);
+
+  //     let shortName = "0";
+  //     let schoolResponse;
+
+  //     // 🔹 Step 1: Try validate_staff_user API
+  //     const staffResponse = await axios.post(
+  //       "https://api.aceventura.in/demo/evolvuUserService/validate_staff_user",
+  //       formData
+  //     );
+
+  //     if (
+  //       Array.isArray(staffResponse.data) &&
+  //       staffResponse.data.length > 0 &&
+  //       staffResponse.data[0].short_name !== "0"
+  //     ) {
+  //       shortName = staffResponse.data[0].short_name;
+  //       schoolResponse = staffResponse.data;
+  //     } else {
+  //       // 🔸 Step 2: Fallback to validate_user API
+  //       const userResponse = await axios.post(
+  //         "https://api.aceventura.in/demo/evolvuUserService/validate_user",
+  //         formData
+  //       );
+
+  //       if (typeof userResponse.data === "string") {
+  //         toast.error(userResponse.data);
+  //         setBackendError(userResponse.data);
+  //         return;
+  //       }
+
+  //       if (Array.isArray(userResponse.data) && userResponse.data.length > 0) {
+  //         shortName = userResponse.data[0].short_name;
+  //         schoolResponse = userResponse.data;
+  //       } else {
+  //         toast.error("Invalid user.");
+  //         return;
+  //       }
+  //     }
+
+  //     // ✅ Use connectdatabase API to check access and connect
+  //     const accessFormData = new FormData();
+  //     accessFormData.append("short_name", shortName);
+
+  //     const connectResponse = await axios.post(
+  //       `${API_URL}/api/connectdatabase`,
+  //       accessFormData,
+  //       {
+  //         withCredentials: true, // Include cookies in request (optional but often necessary)
+  //       }
+  //     );
+
+  //     if (
+  //       typeof connectResponse.data === "object" &&
+  //       connectResponse.data.message == "Connected to school DB"
+  //     ) {
+  //       document.cookie = `short_name=${shortName}; path=/; path=/; expires=${expiryDate.toUTCString()}; SameSite=None; Secure`;
+  //       toast.success("Redirecting...");
+  //       setTimeout(() => {
+  //         setShowLandingPage(true);
+  //       }, 1000);
+  //     } else {
+  //       toast.error(
+  //         connectResponse.data.message || "Database connection failed."
+  //       );
+  //     }
+  //   } catch (error) {
+  //     const errMsg =
+  //       error.response?.data === "Not a valid user"
+  //         ? "Not a valid user"
+  //         : error.response?.data?.message ||
+  //           "Something went wrong. Please try again.";
+  //     toast.error(errMsg);
+  //     setBackendError(errMsg);
+  //   } finally {
+  //     setLoading(false);
+  //     setNewPasswordLoading(false);
+  //   }
+  // };
+  const setShortNameCookieFromUserId = async (userId, API_URL) => {
+    const formData = new FormData();
+    formData.append("user_id", userId);
+
+    let shortName = "0";
+
+    // Step 1: validate_staff_user
+    const staffResponse = await axios.post(
+      "https://api.aceventura.in/demo/evolvuUserService/validate_staff_user",
+      formData
+    );
+
+    if (
+      Array.isArray(staffResponse.data) &&
+      staffResponse.data.length > 0 &&
+      staffResponse.data[0].short_name !== "0"
+    ) {
+      shortName = staffResponse.data[0].short_name;
+    } else {
+      // Step 2: fallback to validate_user
+      const userResponse = await axios.post(
+        "https://api.aceventura.in/demo/evolvuUserService/validate_user",
+        formData
+      );
+
+      if (typeof userResponse.data === "string") {
+        throw new Error(userResponse.data);
+      }
+
+      if (Array.isArray(userResponse.data) && userResponse.data.length > 0) {
+        shortName = userResponse.data[0].short_name;
+      } else {
+        throw new Error("Invalid user.");
+      }
+    }
+
+    // Connect to DB
+    const accessFormData = new FormData();
+    accessFormData.append("short_name", shortName);
+
+    const connectResponse = await axios.post(
+      `${API_URL}/api/connectdatabase`,
+      accessFormData,
+      { withCredentials: true }
+    );
+
+    if (
+      !connectResponse.data.message ||
+      connectResponse.data.message !== "Connected to school DB"
+    ) {
+      throw new Error(connectResponse.data.message || "Connection failed");
+    }
+
+    // Set cookie manually with expiry
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 7); // 7 days expiry
+    document.cookie = `short_name=${shortName}; path=/; expires=${expiryDate.toUTCString()}; SameSite=None; Secure`;
+  };
+
   const handleResetPassword = async () => {
     setTouched({ userId: true });
     if (!isValid) return;
 
     setLoading(true);
     setNewPasswordLoading(true);
-    setBackendError(""); // clear any old error
+    setBackendError("");
 
     try {
-      const formData = new FormData();
-      formData.append("user_id", userId);
+      await setShortNameCookieFromUserId(userId, API_URL);
 
-      let shortName = "0";
-      let schoolResponse;
-
-      // 🔹 Step 1: Try validate_staff_user API
-      const staffResponse = await axios.post(
-        "https://api.aceventura.in/demo/evolvuUserService/validate_staff_user",
-        formData
-      );
-
-      if (
-        Array.isArray(staffResponse.data) &&
-        staffResponse.data.length > 0 &&
-        staffResponse.data[0].short_name !== "0"
-      ) {
-        shortName = staffResponse.data[0].short_name;
-        schoolResponse = staffResponse.data;
-      } else {
-        // 🔸 Step 2: Fallback to validate_user API
-        const userResponse = await axios.post(
-          "https://api.aceventura.in/demo/evolvuUserService/validate_user",
-          formData
-        );
-
-        if (typeof userResponse.data === "string") {
-          toast.error(userResponse.data);
-          setBackendError(userResponse.data);
-          return;
-        }
-
-        if (Array.isArray(userResponse.data) && userResponse.data.length > 0) {
-          shortName = userResponse.data[0].short_name;
-          schoolResponse = userResponse.data;
-        } else {
-          toast.error("Invalid user.");
-          return;
-        }
-      }
-
-      // ✅ Use connectdatabase API to check access and connect
-      const accessFormData = new FormData();
-      accessFormData.append("short_name", shortName);
-
-      const connectResponse = await axios.post(
-        `${API_URL}/api/connectdatabase`,
-        accessFormData,
-        {
-          withCredentials: true, // Include cookies in request (optional but often necessary)
-        }
-      );
-
-      if (
-        typeof connectResponse.data === "object" &&
-        connectResponse.data.message == "Connected to school DB"
-      ) {
-        document.cookie = `short_name=${shortName}; path=/; path=/; expires=${expiryDate.toUTCString()}; SameSite=None; Secure`;
-        toast.success("Redirecting...");
-        setTimeout(() => {
-          setShowLandingPage(true);
-        }, 1000);
-      } else {
-        toast.error(
-          connectResponse.data.message || "Database connection failed."
-        );
-      }
+      toast.success("Redirecting...");
+      setTimeout(() => {
+        setShowLandingPage(true);
+      }, 1000);
     } catch (error) {
       const errMsg =
         error.response?.data === "Not a valid user"
           ? "Not a valid user"
-          : error.response?.data?.message ||
+          : error.message ||
+            error.response?.data?.message ||
             "Something went wrong. Please try again.";
       toast.error(errMsg);
       setBackendError(errMsg);
