@@ -432,17 +432,50 @@ function ImportantLink() {
     }
   };
 
+  // const validateSectionName = (title, url, type_link) => {
+  //   const errors = {};
+  //   if (!title || title.trim() === "") {
+  //     errors.title = "Please enter Title.";
+  //   }
+  //   if (!url || url === "") {
+  //     errors.url = "Please enter URL.";
+  //   }
+  //   if (!type_link || type_link === "") {
+  //     errors.type_link = "Please select link type.";
+  //   }
+  //   return errors;
+  // };
+
   const validateSectionName = (title, url, type_link) => {
     const errors = {};
+
     if (!title || title.trim() === "") {
       errors.title = "Please enter Title.";
     }
-    if (!url || url === "") {
+
+    if (!url || url.trim() === "") {
       errors.url = "Please enter URL.";
+    } else {
+      // URL validation using regex
+      const urlPattern = new RegExp(
+        "^(https?:\\/\\/)" + // protocol
+          "((([a-z\\d]([a-z\\d-]*[a-z\\d])*))\\.)+" + // domain name
+          "[a-z]{2,}" + // extension
+          "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+          "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+          "(\\#[-a-z\\d_]*)?$",
+        "i"
+      );
+
+      if (!urlPattern.test(url)) {
+        errors.url = "Please enter a valid URL.";
+      }
     }
+
     if (!type_link || type_link === "") {
       errors.type_link = "Please select link type.";
     }
+
     return errors;
   };
 
@@ -522,7 +555,7 @@ function ImportantLink() {
           ></div>
 
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 w-full md:w-[full] mx-auto w-overflow-y-scroll lg:overflow-x-hidden">
+            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
