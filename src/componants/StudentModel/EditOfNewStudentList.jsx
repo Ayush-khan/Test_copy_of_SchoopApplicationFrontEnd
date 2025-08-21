@@ -149,6 +149,8 @@ function EditOfNewStudentList() {
     m_emailid: "",
     m_adhar_no: "",
     udise_pen_no: "",
+    apaar_id: "",
+    
     // Preferences
     SetToReceiveSMS: "",
     SetEmailIDAsUsername: "",
@@ -239,6 +241,7 @@ function EditOfNewStudentList() {
         m_emailid: student?.parents?.m_emailid || "",
         m_adhar_no: student?.parents?.m_adhar_no || "",
         udise_pen_no: student.udise_pen_no || " ",
+        apaar_id: student.apaar_id || " ",
         // Preferences
         SetToReceiveSMS: "",
         SetEmailIDAsUsername: "",
@@ -2150,6 +2153,26 @@ function EditOfNewStudentList() {
                   )}
                 </div>
               )}
+              <div className="mt-2">
+                  <label
+                    htmlFor="Apaar_no"
+                    className="block font-bold text-xs mb-0.5"
+                  >
+                    Apaar ID No.
+                  </label>
+                  <input
+                    type="text"
+                    id="Apaar_no"
+                    name="apaar_id"
+                    maxLength={12}
+                    value={formData.apaar_id}
+                    className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^a-zA-Z0-9]/g, ''); 
+                      handleChange({ target: { name: 'apaar_id', value } });
+                    }}
+                  />
+                </div>
               {/* Address Information */}
               <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
                 {" "}

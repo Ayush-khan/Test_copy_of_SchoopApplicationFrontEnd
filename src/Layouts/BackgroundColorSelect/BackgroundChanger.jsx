@@ -155,7 +155,7 @@ function BackgroundChanger() {
       {/* Header */}
       <div className="flex justify-between items-center ">
         <h3 className="text-gray-800 text-xl font-semibold">
-          🎨 Select Your Background
+          🎨 Background Color Picker
         </h3>
         <RxCross1
           className="text-3xl text-red-600 cursor-pointer hover:bg-red-100 rounded-full p-1"

@@ -80,8 +80,13 @@ const LessonPlanDetailedView = () => {
     setWeekError("");
 
     if (date) {
-      const startDate = dayjs(date).format("DD-MM-YYYY");
-      const endDate = dayjs(date).add(6, "day").format("DD-MM-YYYY");
+      // Find Monday of the week
+      const monday = dayjs(date).startOf("week").add(1, "day"); // dayjs startOf('week') defaults to Sunday, so +1 day is Monday
+      const sunday = monday.add(6, "day");
+
+      const startDate = monday.format("DD-MM-YYYY");
+      const endDate = sunday.format("DD-MM-YYYY");
+
       setWeekRange(`${startDate} / ${endDate}`);
     } else {
       setWeekRange("");
@@ -173,6 +178,7 @@ const LessonPlanDetailedView = () => {
 
   const handleSearch = async () => {
     setLoadingForSearch(false);
+    setLoading(true);
 
     if (!selectedStudentId) {
       setStudentError("Please select Teacher Name.");
@@ -200,7 +206,7 @@ const LessonPlanDetailedView = () => {
 
       console.log(params);
       const response = await axios.get(
-        `${API_URL}/api/get_approvelessonplandata`,
+        `${API_URL}/api/get_lesson_plan_detailed_report`,
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
@@ -210,7 +216,7 @@ const LessonPlanDetailedView = () => {
       if (!response?.data?.data || response?.data?.data?.length === 0) {
         toast.error("Lesson Plan In Detailed not found.");
         setTimetable([]);
-        setShowStudentReport(false);
+        // setShowStudentReport(false);
       } else {
         setTimetable(response?.data?.data);
         setPageCount(Math.ceil(response?.data?.data?.length / pageSize));
@@ -222,6 +228,7 @@ const LessonPlanDetailedView = () => {
     } finally {
       setIsSubmitting(false);
       setLoadingForSearch(false);
+      setLoading(false);
     }
   };
 
@@ -231,92 +238,6 @@ const LessonPlanDetailedView = () => {
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
-
-  const handleSelectAll = () => {
-    if (selectAll) {
-      setSelectedApprovals([]);
-    } else {
-      const allSelected = displayedSections.map((student) => ({
-        lesson_plan_id: student.lesson_plan_id,
-        unq_id: student.unq_id,
-        remark: studentRemarks[student.lesson_plan_id] || "",
-      }));
-      setSelectedApprovals(allSelected);
-    }
-    setSelectAll(!selectAll);
-  };
-
-  const handleApprovalChange = (student) => {
-    const exists = selectedApprovals.find(
-      (item) => item.lesson_plan_id === student.lesson_plan_id
-    );
-
-    let updated;
-
-    if (exists) {
-      updated = selectedApprovals.filter(
-        (item) => item.lesson_plan_id !== student.lesson_plan_id
-      );
-    } else {
-      updated = [
-        ...selectedApprovals,
-        {
-          lesson_plan_id: student.lesson_plan_id,
-          unq_id: student.unq_id,
-          remark: studentRemarks[student.lesson_plan_id] || "",
-        },
-      ];
-    }
-
-    setSelectedApprovals(updated);
-    setSelectAll(updated.length === displayedSections.length);
-  };
-
-  const handleSubmit = async () => {
-    setLoading(true);
-    const token = localStorage.getItem("authToken");
-    const plansToSubmit = displayedSections
-      .filter((student) =>
-        selectedApprovals.some(
-          (approval) => approval.lesson_plan_id === student.lesson_plan_id
-        )
-      )
-
-      .map((student) => ({
-        lesson_plan_id: student.lesson_plan_id,
-        unq_id: student.unq_id,
-        remark: studentRemarks[student.lesson_plan_id] || "",
-      }));
-
-    if (plansToSubmit.length === 0) {
-      toast.error("Please select at least one lesson plan to approve.");
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/update_approvelessonplanstatus`,
-        {
-          teacher_id: selectedStudentId,
-          plans: plansToSubmit,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.data.status === 200) {
-        toast.success("Lesson plans updated successfully.");
-      } else {
-        toast.error("Failed to update lesson plans.");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("An error occurred while submitting the data.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handlePrint = () => {
     const printTitle = `Lesson Plan In Detailed  ${
@@ -737,7 +658,6 @@ const LessonPlanDetailedView = () => {
         className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${
           showStudentReport ? "w-full " : "w-[90%] "
         }`}
-        // className="w-full md:w-[85%]  mx-auto p-4 "
       >
         <ToastContainer />
         <div className="card pb-4  rounded-md ">
@@ -753,7 +673,7 @@ const LessonPlanDetailedView = () => {
                 />
               </div>
               <div
-                className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+                className=" relative w-[97%]   -top-6 h-1  mx-auto bg-red-700"
                 style={{
                   backgroundColor: "#C03078",
                 }}
@@ -817,7 +737,7 @@ const LessonPlanDetailedView = () => {
                         className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
                         htmlFor="studentSelect"
                       >
-                        Month
+                        Month<span className="text-red-500">*</span>
                       </label>
                       <div className="w-full md:w-[65%]">
                         <Select
@@ -863,10 +783,10 @@ const LessonPlanDetailedView = () => {
 
                     <div className="w-full md:w-[50%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
                       <label
-                        className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
+                        className="ml-0 md:ml-4 w-full md:w-[60%] text-md mt-1.5"
                         htmlFor="fromDate"
                       >
-                        Select Week{" "}
+                        Select Week<span className="text-red-500">*</span>
                       </label>
                       <div className="w-full">
                         <div className="relative text-sm text-gray-700 mt-0.5 border border-gray-300 p-2 rounded flex items-center justify-between cursor-pointer">
@@ -961,610 +881,533 @@ const LessonPlanDetailedView = () => {
 
             {showStudentReport && (
               <>
-                {timetable.length > 0 && (
-                  <>
-                    <div className="w-full  mx-auto transition-all duration-300">
-                      <div className="card mx-auto shadow-lg">
-                        <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
-                          <div className="w-full flex flex-row items-center justify-between mr-0 md:mr-4 gap-x-1">
-                            <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
-                              Lesson Plan In Detailed
-                            </h3>
-                            <div className="flex items-center w-full">
+                {/* {timetable.length > 0 && ( */}
+                <>
+                  <div className="w-full  mx-auto transition-all duration-300">
+                    <div className="card mx-auto shadow-lg">
+                      <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
+                        <div className="w-full flex flex-row items-center justify-between mr-0 md:mr-4 gap-x-1">
+                          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
+                            Lesson Plan In Detailed
+                          </h3>
+                          <div className="flex items-center w-full">
+                            <div
+                              className="bg-blue-50 border-l-2 border-r-2 text-[1em] border-pink-500 rounded-md shadow-md mx-auto px-6 py-2"
+                              style={{
+                                overflowX: "auto",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
                               <div
-                                className="bg-blue-50 border-l-2 border-r-2 text-[1em] border-pink-500 rounded-md shadow-md mx-auto px-6 py-2"
-                                style={{
-                                  overflowX: "auto",
-                                  whiteSpace: "nowrap",
-                                }}
+                                className="flex items-center gap-x-4 text-blue-800 font-medium"
+                                style={{ flexWrap: "nowrap" }}
                               >
-                                <div
-                                  className="flex items-center gap-x-4 text-blue-800 font-medium"
-                                  style={{ flexWrap: "nowrap" }}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <label
-                                      className="text-md whitespace-nowrap"
-                                      htmlFor="studentSelect"
-                                    >
-                                      Teacher{" "}
-                                      <span className="text-red-500">*</span>
-                                    </label>
-                                    <Select
-                                      menuPortalTarget={document.body}
-                                      menuPosition="fixed"
-                                      id="studentSelect"
-                                      value={selectedStudent}
-                                      onChange={handleStudentSelect}
-                                      options={studentOptions}
-                                      placeholder={
-                                        loadingExams ? "Loading..." : "Select"
-                                      }
-                                      isSearchable
-                                      isClearable
-                                      className="text-sm min-w-[180px]"
-                                      isDisabled={loadingExams}
-                                      styles={{
-                                        control: (provided) => ({
-                                          ...provided,
-                                          fontSize: ".9em",
-                                          minHeight: "30px",
-                                        }),
-                                        menu: (provided) => ({
-                                          ...provided,
-                                          fontSize: "1em",
-                                        }),
-                                        option: (provided) => ({
-                                          ...provided,
-                                          fontSize: ".9em",
-                                        }),
-                                      }}
-                                    />
-                                  </div>
+                                <div className="flex items-center gap-2">
+                                  <label
+                                    className="text-md whitespace-nowrap"
+                                    htmlFor="studentSelect"
+                                  >
+                                    Teacher{" "}
+                                    <span className="text-red-500">*</span>
+                                  </label>
+                                  <Select
+                                    menuPortalTarget={document.body}
+                                    menuPosition="fixed"
+                                    id="studentSelect"
+                                    value={selectedStudent}
+                                    onChange={handleStudentSelect}
+                                    options={studentOptions}
+                                    placeholder={
+                                      loadingExams ? "Loading..." : "Select"
+                                    }
+                                    isSearchable
+                                    isClearable
+                                    className="text-sm min-w-[180px]"
+                                    isDisabled={loadingExams}
+                                    styles={{
+                                      control: (provided) => ({
+                                        ...provided,
+                                        fontSize: ".9em",
+                                        minHeight: "30px",
+                                      }),
+                                      menu: (provided) => ({
+                                        ...provided,
+                                        fontSize: "1em",
+                                      }),
+                                      option: (provided) => ({
+                                        ...provided,
+                                        fontSize: ".9em",
+                                      }),
+                                    }}
+                                  />
+                                </div>
 
-                                  <div className="flex items-center gap-3">
-                                    <label
-                                      className="text-md whitespace-nowrap"
-                                      htmlFor="monthSelect"
-                                    >
-                                      Month{" "}
-                                      <span className="text-red-500">*</span>
-                                    </label>
-                                    <Select
-                                      menuPortalTarget={document.body}
-                                      menuPosition="fixed"
-                                      id="monthSelect"
-                                      value={selectedMonth}
-                                      onChange={handleMonthSelect}
-                                      options={monthOptions}
-                                      placeholder={
-                                        loadingExams ? "Loading..." : "Select"
-                                      }
-                                      isSearchable
-                                      isClearable
-                                      className="text-sm min-w-[180px]"
-                                      isDisabled={loadingExams}
-                                      styles={{
-                                        control: (provided) => ({
-                                          ...provided,
-                                          fontSize: ".9em",
-                                          minHeight: "30px",
-                                        }),
-                                        menu: (provided) => ({
-                                          ...provided,
-                                          fontSize: "1em",
-                                        }),
-                                        option: (provided) => ({
-                                          ...provided,
-                                          fontSize: ".9em",
-                                        }),
-                                      }}
-                                    />
-                                  </div>
+                                <div className="flex items-center gap-3">
+                                  <label
+                                    className="text-md whitespace-nowrap"
+                                    htmlFor="monthSelect"
+                                  >
+                                    Month{" "}
+                                    <span className="text-red-500">*</span>
+                                  </label>
+                                  <Select
+                                    menuPortalTarget={document.body}
+                                    menuPosition="fixed"
+                                    id="monthSelect"
+                                    value={selectedMonth}
+                                    onChange={handleMonthSelect}
+                                    options={monthOptions}
+                                    placeholder={
+                                      loadingExams ? "Loading..." : "Select"
+                                    }
+                                    isSearchable
+                                    isClearable
+                                    className="text-sm min-w-[180px]"
+                                    isDisabled={loadingExams}
+                                    styles={{
+                                      control: (provided) => ({
+                                        ...provided,
+                                        fontSize: ".9em",
+                                        minHeight: "30px",
+                                      }),
+                                      menu: (provided) => ({
+                                        ...provided,
+                                        fontSize: "1em",
+                                      }),
+                                      option: (provided) => ({
+                                        ...provided,
+                                        fontSize: ".9em",
+                                      }),
+                                    }}
+                                  />
+                                </div>
 
-                                  <div className="flex items-center gap-3">
-                                    <label
-                                      className="text-md whitespace-nowrap"
-                                      htmlFor="fromDate"
+                                <div className="flex items-center gap-3">
+                                  <label
+                                    className="text-md whitespace-nowrap"
+                                    htmlFor="fromDate"
+                                  >
+                                    Week <span className="text-red-500">*</span>
+                                  </label>
+                                  <div className="relative text-sm text-gray-700 border border-gray-300 p-2 rounded flex items-center justify-between cursor-pointer min-w-[160px]">
+                                    <div
+                                      onClick={openDatePicker}
+                                      className="flex-1 flex items-center"
                                     >
-                                      Week
-                                    </label>
-                                    <div className="relative text-sm text-gray-700 border border-gray-300 p-2 rounded flex items-center justify-between cursor-pointer min-w-[160px]">
-                                      <div
-                                        onClick={openDatePicker}
-                                        className="flex-1 flex items-center"
-                                      >
-                                        {weekRange ? (
-                                          <span>{weekRange}</span>
-                                        ) : (
-                                          <FaRegCalendarAlt className="text-pink-500" />
-                                        )}
-                                      </div>
-                                      {weekRange && (
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setFromDate(null);
-                                            setWeekRange("");
-                                          }}
-                                          className="text-gray-400 hover:text-red-500 ml-2"
-                                        >
-                                          <RxCross1 className="text-xs text-red-600" />
-                                        </button>
+                                      {weekRange ? (
+                                        <span>{weekRange}</span>
+                                      ) : (
+                                        <FaRegCalendarAlt className="text-pink-500" />
                                       )}
                                     </div>
-                                    <DatePicker
-                                      ref={datePickerRef}
-                                      selected={fromDate}
-                                      onChange={handleDateChange}
-                                      dateFormat="dd-MM-yyyy"
-                                      className="hidden"
-                                    />
+                                    {weekRange && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setFromDate(null);
+                                          setWeekRange("");
+                                        }}
+                                        className="text-gray-400 hover:text-red-500 ml-2"
+                                      >
+                                        <RxCross1 className="text-xs text-red-600" />
+                                      </button>
+                                    )}
                                   </div>
+                                  <DatePicker
+                                    ref={datePickerRef}
+                                    selected={fromDate}
+                                    onChange={handleDateChange}
+                                    dateFormat="dd-MM-yyyy"
+                                    className="hidden"
+                                  />
+                                </div>
 
-                                  <div>
-                                    <button
-                                      type="search"
-                                      onClick={handleSearch}
-                                      style={{ backgroundColor: "#2196F3" }}
-                                      className={`btn h-8 w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-2 rounded ${
-                                        loadingForSearch
-                                          ? "opacity-50 cursor-not-allowed"
-                                          : ""
-                                      }`}
-                                      disabled={loadingForSearch}
-                                    >
-                                      {loadingForSearch ? (
-                                        <span className="flex items-center">
-                                          <svg
-                                            className="animate-spin h-4 w-4 mr-2 text-white"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                          >
-                                            <circle
-                                              className="opacity-25"
-                                              cx="12"
-                                              cy="12"
-                                              r="10"
-                                              stroke="currentColor"
-                                              strokeWidth="4"
-                                            ></circle>
-                                            <path
-                                              className="opacity-75"
-                                              fill="currentColor"
-                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                            ></path>
-                                          </svg>
-                                          Browsing...
-                                        </span>
-                                      ) : (
-                                        "Browse"
-                                      )}
-                                    </button>
-                                  </div>
+                                <div>
+                                  <button
+                                    type="search"
+                                    onClick={handleSearch}
+                                    style={{ backgroundColor: "#2196F3" }}
+                                    className={`btn h-8 w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-2 rounded ${
+                                      loadingForSearch
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
+                                    disabled={loadingForSearch}
+                                  >
+                                    {loadingForSearch ? (
+                                      <span className="flex items-center">
+                                        <svg
+                                          className="animate-spin h-4 w-4 mr-2 text-white"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                          ></circle>
+                                          <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                          ></path>
+                                        </svg>
+                                        Browsing...
+                                      </span>
+                                    ) : (
+                                      "Browse"
+                                    )}
+                                  </button>
                                 </div>
                               </div>
                             </div>
                           </div>
-
-                          <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ">
-                            <RxCross1
-                              className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
-                              onClick={() => setShowStudentReport(false)}
-                            />
-                          </div>
                         </div>
 
+                        <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ">
+                          <RxCross1
+                            className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
+                            onClick={() => setShowStudentReport(false)}
+                          />
+                        </div>
+                      </div>
+
+                      <div
+                        className=" w-[97%] h-1 mx-auto"
+                        style={{ backgroundColor: "#C03078" }}
+                      ></div>
+
+                      <div className="card-body w-full">
                         <div
-                          className=" w-[97%] h-1 mx-auto"
-                          style={{ backgroundColor: "#C03078" }}
-                        ></div>
-
-                        <div className="card-body w-full">
+                          className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
+                          style={{
+                            scrollbarWidth: "thin",
+                            scrollbarColor: "#C03178 transparent",
+                          }}
+                        >
                           <div
-                            className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
-                            style={{
-                              scrollbarWidth: "thin",
-                              scrollbarColor: "#C03178 transparent",
-                            }}
+                            className="flex flex-col md:flex-row justify-between items-center px-2 py-1 gap-2 
+                                sticky top-0 bg-white shadow"
                           >
-                            {/* <div className="flex flex-col md:flex-row justify-between items-center px-2 py-1 gap-2">
-                              <label className="flex items-center gap-2 text-sm font-semibold text-indigo-600">
-                                Total Lesson Plans:{" "}
-                                {displayedSections.length || 0}
-                              </label>
+                            <label className="flex items-center gap-2 text-sm font-semibold text-indigo-600">
+                              Total Lesson Plans:{" "}
+                              {displayedSections.length || 0}
+                            </label>
 
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="text"
-                                  className="form-control w-32 md:w-48 py-1"
-                                  placeholder="Search"
-                                  value={searchTerm}
-                                  onChange={(e) =>
-                                    setSearchTerm(e.target.value)
-                                  }
-                                />
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                className="form-control w-32 md:w-48 py-1"
+                                placeholder="Search"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                              />
 
-                                <button
-                                  type="button"
-                                  onClick={handleDownloadEXL}
-                                  className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
-                                >
-                                  <FaFileExcel />
-                                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
-                                    Export to Excel
-                                  </div>
-                                </button>
+                              <button
+                                type="button"
+                                onClick={handleDownloadEXL}
+                                className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
+                              >
+                                <FaFileExcel />
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                                  Export to Excel
+                                </div>
+                              </button>
 
-                                <button
-                                  onClick={handlePrint}
-                                  className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
-                                >
-                                  <FiPrinter />
-                                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
-                                    Print
-                                  </div>
-                                </button>
-                              </div>
-                            </div> */}
+                              <button
+                                onClick={handlePrint}
+                                className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                              >
+                                <FiPrinter />
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                                  Print
+                                </div>
+                              </button>
+                            </div>
+                          </div>
 
-                            <div
-                              className="flex flex-col md:flex-row justify-between items-center px-2 py-1 gap-2 
-                sticky top-0 bg-white shadow"
-                            >
-                              <label className="flex items-center gap-2 text-sm font-semibold text-indigo-600">
-                                Total Lesson Plans:{" "}
-                                {displayedSections.length || 0}
-                              </label>
-
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="text"
-                                  className="form-control w-32 md:w-48 py-1"
-                                  placeholder="Search"
-                                  value={searchTerm}
-                                  onChange={(e) =>
-                                    setSearchTerm(e.target.value)
-                                  }
-                                />
-
-                                <button
-                                  type="button"
-                                  onClick={handleDownloadEXL}
-                                  className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
-                                >
-                                  <FaFileExcel />
-                                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
-                                    Export to Excel
-                                  </div>
-                                </button>
-
-                                <button
-                                  onClick={handlePrint}
-                                  className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
-                                >
-                                  <FiPrinter />
-                                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
-                                    Print
-                                  </div>
-                                </button>
+                          {loading ? (
+                            <div className="absolute left-[4%] w-[100%] text-center flex justify-center items-center mt-14">
+                              <div className="text-center text-xl text-blue-700">
+                                Please wait while data is loading...
                               </div>
                             </div>
-
-                            {Array.isArray(displayedSections) &&
+                          ) : Array.isArray(displayedSections) &&
                             displayedSections.length > 0 ? (
-                              displayedSections.map((student, index) => (
+                            displayedSections.map((student, index) => (
+                              <div
+                                key={index}
+                                className="mb-10 border rounded-lg shadow-md p-1"
+                              >
+                                {/* Heading: Lesson For [Classname Section] */}
+                                <div className="relative">
+                                  <span className="absolute left-0 top-3 -translate-y-1/2 bg-indigo-100 text-indigo-700 text-sm px-3 py-1 rounded-full shadow">
+                                    {index + 1}
+                                  </span>
+                                  <h2 className="text-lg font-semibold text-center text-[#C03078]">
+                                    Lesson For Class {student.classname}{" "}
+                                    {student.secname}
+                                  </h2>
+                                </div>
+
+                                {/* Table 1: General Info */}
+                                <table className="w-full table-auto border border-gray-500 mb-4">
+                                  <thead className="bg-gray-200">
+                                    <tr>
+                                      {[
+                                        "Week",
+                                        "Subject",
+                                        "Sub-Subject",
+                                        "Period No.",
+                                        "Lesson",
+                                        "Name of the Lesson",
+                                      ].map((header, i) => (
+                                        <th
+                                          key={i}
+                                          className="px-4 py-2 border text-sm font-semibold text-center text-gray-800"
+                                        >
+                                          {header}
+                                        </th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr className="text-center text-sm text-gray-700">
+                                      <td className="border px-4 py-2">
+                                        {student.week_date}
+                                      </td>
+                                      <td className="border px-4 py-2">
+                                        {student.subname}
+                                      </td>
+                                      <td className="border px-4 py-2">
+                                        {student.sub_subject || "-"}
+                                      </td>
+                                      <td className="border px-4 py-2">
+                                        {student.no_of_periods}
+                                      </td>
+                                      <td className="border px-4 py-2">
+                                        {student.chapter_no}
+                                      </td>
+                                      <td className="border px-4 py-2">
+                                        {student.chaptername}
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+
+                                {/* Table 2: Non Daily Sections */}
+
                                 <div
-                                  key={index}
-                                  className="mb-10 border rounded-lg shadow-md p-1"
+                                  className="overflow-x-auto mb-4"
+                                  style={{
+                                    overflowX: "auto",
+                                    scrollbarWidth: "none", // hides Firefox scrollbar
+                                    msOverflowStyle: "none", // hides IE/Edge scrollbar
+                                  }}
                                 >
-                                  {/* Heading: Lesson For [Classname Section] */}
-                                  <div className="relative">
-                                    <span className="absolute left-0 top-3 -translate-y-1/2 bg-indigo-100 text-indigo-700 text-sm px-3 py-1 rounded-full shadow">
-                                      {index + 1}
-                                    </span>
-                                    <h2 className="text-lg font-semibold text-center text-[#C03078]">
-                                      Lesson For Class {student.classname}{" "}
-                                      {student.secname}
-                                    </h2>
-                                  </div>
-
-                                  {/* Table 1: General Info */}
-                                  <table className="w-full table-auto border border-gray-500 mb-4">
-                                    <thead className="bg-gray-200">
-                                      <tr>
-                                        {[
-                                          "Week",
-                                          "Subject",
-                                          "Sub-Subject",
-                                          "Period No.",
-                                          "Lesson",
-                                          "Name of the Lesson",
-                                        ].map((header, i) => (
-                                          <th
-                                            key={i}
-                                            className="px-4 py-2 border text-sm font-semibold text-center text-gray-800"
-                                          >
-                                            {header}
-                                          </th>
-                                        ))}
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      <tr className="text-center text-sm text-gray-700">
-                                        <td className="border px-4 py-2">
-                                          {student.week_date}
-                                        </td>
-                                        <td className="border px-4 py-2">
-                                          {student.subname}
-                                        </td>
-                                        <td className="border px-4 py-2">
-                                          {student.sub_subject || "-"}
-                                        </td>
-                                        <td className="border px-4 py-2">
-                                          {student.no_of_periods}
-                                        </td>
-                                        <td className="border px-4 py-2">
-                                          {student.chapter_no}
-                                        </td>
-                                        <td className="border px-4 py-2">
-                                          {student.chaptername}
-                                        </td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
-
-                                  {/* Table 2: Non Daily Sections */}
-
                                   <div
-                                    className="overflow-x-auto mb-4"
+                                    className="min-w-max"
                                     style={{
                                       overflowX: "auto",
-                                      scrollbarWidth: "none", // hides Firefox scrollbar
-                                      msOverflowStyle: "none", // hides IE/Edge scrollbar
+                                      scrollbarWidth: "none",
+                                      msOverflowStyle: "none",
                                     }}
                                   >
-                                    <div
-                                      className="min-w-max"
-                                      style={{
-                                        overflowX: "auto",
-                                        scrollbarWidth: "none",
-                                        msOverflowStyle: "none",
-                                      }}
-                                    >
-                                      <table className="table-fixed border border-gray-500">
-                                        <thead className="bg-gray-200">
-                                          <tr>
-                                            {student.non_daily?.map(
-                                              (item, i) => (
-                                                <th
-                                                  key={i}
-                                                  className={`px-6 py-2 border text-sm font-semibold text-center text-gray-800 ${
-                                                    i ===
+                                    <table className="table-fixed border border-gray-500">
+                                      <thead className="bg-gray-200">
+                                        <tr>
+                                          {student.non_daily?.map((item, i) => (
+                                            <th
+                                              key={i}
+                                              className={`px-6 py-2 border text-sm font-semibold text-center text-gray-800 ${
+                                                i ===
+                                                student.non_daily.length - 1
+                                                  ? "sticky left-0 bg-gray-200"
+                                                  : ""
+                                              }`}
+                                              style={{ width: "210px" }}
+                                            >
+                                              {item.heading}
+                                            </th>
+                                          ))}
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {Array.from({
+                                          length: Math.max(
+                                            ...student.non_daily.map(
+                                              (item) =>
+                                                item.description?.length || 0
+                                            )
+                                          ),
+                                        }).map((_, rowIndex) => (
+                                          <tr
+                                            key={rowIndex}
+                                            className="text-left text-sm text-gray-700"
+                                          >
+                                            {student.non_daily.map(
+                                              (item, colIndex) => (
+                                                <td
+                                                  key={colIndex}
+                                                  className={`border px-2 py-1 ${
+                                                    colIndex ===
                                                     student.non_daily.length - 1
-                                                      ? "sticky left-0 bg-gray-200"
+                                                      ? "sticky left-0 bg-white"
                                                       : ""
                                                   }`}
-                                                  style={{ width: "150px" }}
+                                                  style={{ width: "210px" }}
                                                 >
-                                                  {item.heading}
-                                                </th>
+                                                  {item.description?.[
+                                                    rowIndex
+                                                  ] || ""}
+                                                </td>
                                               )
                                             )}
                                           </tr>
-                                        </thead>
-                                        <tbody>
-                                          {Array.from({
-                                            length: Math.max(
-                                              ...student.non_daily.map(
-                                                (item) =>
-                                                  item.description?.length || 0
-                                              )
-                                            ),
-                                          }).map((_, rowIndex) => (
-                                            <tr
-                                              key={rowIndex}
-                                              className="text-left text-sm text-gray-700"
-                                            >
-                                              {student.non_daily.map(
-                                                (item, colIndex) => (
-                                                  <td
-                                                    key={colIndex}
-                                                    className={`border px-2 py-1 ${
-                                                      colIndex ===
-                                                      student.non_daily.length -
-                                                        1
-                                                        ? "sticky left-0 bg-white"
-                                                        : ""
-                                                    }`}
-                                                    style={{ width: "150px" }}
-                                                  >
-                                                    {item.description?.[
-                                                      rowIndex
-                                                    ] || ""}
-                                                  </td>
-                                                )
-                                              )}
-                                            </tr>
-                                          ))}
-                                        </tbody>
-                                      </table>
-                                    </div>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
 
-                                    {/* Hide Chrome/Safari scrollbar */}
-                                    <style>
-                                      {`
+                                  {/* Hide Chrome/Safari scrollbar */}
+                                  <style>
+                                    {`
                                          .overflow-x-auto::-webkit-scrollbar {
                                            display: none;
                                            }
                                       `}
-                                    </style>
-                                  </div>
+                                  </style>
+                                </div>
 
-                                  {/* Table 3: Daily Teaching Points */}
-                                  {student.daily_changes?.length > 0 && (
-                                    <div className="flex flex-row gap-4 mb-4">
-                                      <div className="w-2/3 border p-3 rounded bg-gray-50">
+                                {/* Table 3: Daily Teaching Points */}
+                                {student.daily_changes?.length > 0 && (
+                                  <div className="flex flex-row gap-4 mb-4">
+                                    <div className="w-2/3 border p-3 rounded bg-gray-50">
+                                      <table className="w-full table-auto border-collapse text-sm">
+                                        <thead>
+                                          <tr className="bg-gray-200">
+                                            <th className="border px-4 py-2 text-left w-[19%] text-sm font-semibold text-gray-800">
+                                              Start Date
+                                            </th>
+                                            <th className="border px-4 py-2 text-left text-sm font-semibold text-gray-800">
+                                              {student.daily_changes[0]
+                                                ?.heading || "Teaching Points"}
+                                            </th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {student.daily_changes[0]?.entries.map(
+                                            (entry, idx) => (
+                                              <tr
+                                                key={idx}
+                                                className="even:bg-white odd:bg-gray-50"
+                                              >
+                                                <td className="border px-4 py-2">
+                                                  {entry.start_date}
+                                                </td>
+                                                <td className="border px-4 py-2">
+                                                  {entry.description[0]}
+                                                </td>
+                                              </tr>
+                                            )
+                                          )}
+                                        </tbody>
+                                      </table>
+                                    </div>
+
+                                    {/* Table 4: Status Section */}
+                                    {displayedSections.length > 0 && (
+                                      <div className="w-1/3 border p-3 rounded bg-gray-50">
                                         <table className="w-full table-auto border-collapse text-sm">
                                           <thead>
                                             <tr className="bg-gray-200">
-                                              <th className="border px-4 py-2 text-left w-[19%] text-sm font-semibold text-gray-800">
-                                                Start Date
+                                              <th className="px-4 py-2 border text-sm font-semibold text-center text-gray-800">
+                                                Status
                                               </th>
-                                              <th className="border px-4 py-2 text-left text-sm font-semibold text-gray-800">
-                                                {student.daily_changes[0]
-                                                  ?.heading ||
-                                                  "Teaching Points"}
+                                              <th className="px-4 py-2 border text-sm font-semibold text-center text-gray-800">
+                                                Principal's Approval
                                               </th>
                                             </tr>
                                           </thead>
                                           <tbody>
-                                            {student.daily_changes[0]?.entries.map(
-                                              (entry, idx) => (
-                                                <tr
-                                                  key={idx}
-                                                  className="even:bg-white odd:bg-gray-50"
-                                                >
-                                                  <td className="border px-4 py-2">
-                                                    {entry.start_date}
-                                                  </td>
-                                                  <td className="border px-4 py-2">
-                                                    {entry.description[0]}
-                                                  </td>
-                                                </tr>
-                                              )
-                                            )}
+                                            {/* Status + Approval Row */}
+                                            <tr className="even:bg-white odd:bg-gray-50 text-center">
+                                              {/* Status */}
+                                              <td className="border px-2 py-3">
+                                                {statusMap[student.status]}
+                                              </td>
+
+                                              {/* Principal's Approval */}
+                                              <td className="border px-2 py-3">
+                                                <div className="flex justify-center items-center gap-2">
+                                                  {statusMap[student.approve]}
+                                                </div>
+                                              </td>
+                                            </tr>
+
+                                            {/* Remark Label Row */}
+                                            <tr className="bg-gray-200">
+                                              <th
+                                                colSpan={2}
+                                                className="px-4 py-2 border text-sm font-semibold text-left text-gray-800"
+                                              >
+                                                Remark
+                                              </th>
+                                            </tr>
+
+                                            {/* Remark Input Row */}
+                                            <tr>
+                                              <td
+                                                colSpan={2}
+                                                className="border px-2 py-2"
+                                              >
+                                                <textarea
+                                                  rows={4}
+                                                  className="border rounded px-2 py-3 w-full text-sm resize-y"
+                                                  value={
+                                                    studentRemarks[
+                                                      student.lesson_plan_id
+                                                    ] || ""
+                                                  }
+                                                  readOnly
+                                                  maxLength={1000}
+                                                />
+                                              </td>
+                                            </tr>
                                           </tbody>
                                         </table>
                                       </div>
-
-                                      {/* Table 4: Status Section */}
-                                      {displayedSections.length > 0 && (
-                                        <div className="w-1/3 border p-3 rounded bg-gray-50">
-                                          <table className="w-full table-auto border-collapse text-sm">
-                                            <thead>
-                                              <tr className="bg-gray-200">
-                                                <th className="px-4 py-2 border text-sm font-semibold text-center text-gray-800">
-                                                  Status
-                                                </th>
-                                                <th className="px-4 py-2 border text-sm font-semibold text-center text-gray-800">
-                                                  Principal's Approval
-                                                </th>
-                                              </tr>
-                                            </thead>
-                                            <tbody>
-                                              {/* Status + Approval Row */}
-                                              <tr className="even:bg-white odd:bg-gray-50 text-center">
-                                                {/* Status */}
-                                                <td className="border px-2 py-3">
-                                                  {statusMap[student.status]}
-                                                </td>
-
-                                                {/* Principal's Approval */}
-                                                <td className="border px-2 py-3">
-                                                  <div className="flex justify-center items-center gap-2">
-                                                    {/* <input
-                                                      type="checkbox"
-                                                      checked={selectedApprovals.some(
-                                                        (item) =>
-                                                          item.lesson_plan_id ===
-                                                          student.lesson_plan_id
-                                                      )}
-                                                      onChange={() =>
-                                                        handleApprovalChange(
-                                                          student
-                                                        )
-                                                      }
-                                                    /> */}
-                                                    <span>Approve</span>
-                                                  </div>
-                                                </td>
-                                              </tr>
-
-                                              {/* Remark Label Row */}
-                                              <tr className="bg-gray-200">
-                                                <th
-                                                  colSpan={2}
-                                                  className="px-4 py-2 border text-sm font-semibold text-left text-gray-800"
-                                                >
-                                                  Remark
-                                                </th>
-                                              </tr>
-
-                                              {/* Remark Input Row */}
-                                              <tr>
-                                                <td
-                                                  colSpan={2}
-                                                  className="border px-2 py-2"
-                                                >
-                                                  <textarea
-                                                    rows={4}
-                                                    className="border rounded px-2 py-3 w-full text-sm resize-y"
-                                                    value={
-                                                      studentRemarks[
-                                                        student.lesson_plan_id
-                                                      ] || ""
-                                                    }
-                                                    // onChange={(e) => {
-                                                    //   const remark =
-                                                    //     e.target.value;
-                                                    //   setStudentRemarks(
-                                                    //     (prev) => ({
-                                                    //       ...prev,
-                                                    //       [student.lesson_plan_id]:
-                                                    //         remark,
-                                                    //     })
-                                                    //   );
-
-                                                    //   setSelectedApprovals(
-                                                    //     (prev) =>
-                                                    //       prev.map((item) =>
-                                                    //         item.lesson_plan_id ===
-                                                    //         student.lesson_plan_id
-                                                    //           ? {
-                                                    //               ...item,
-                                                    //               remark,
-                                                    //             }
-                                                    //           : item
-                                                    //       )
-                                                    //   );
-                                                    // }}
-                                                    readOnly
-                                                    maxLength={1000}
-                                                  />
-                                                </td>
-                                              </tr>
-                                            </tbody>
-                                          </table>
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              ))
-                            ) : (
-                              <div className="absolute left-[1%] w-[100%] text-center flex justify-center items-center mt-14">
-                                <div className="text-center text-xl text-red-700">
-                                  Oops! No data found..
-                                </div>
+                                    )}
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex justify-end gap-4 pr-3 mb-4 mr-10">
-                          <button
-                            // onClick={() => navigate("/dashboard")}
-                            onClick={() => setShowStudentReport(false)}
-                            className="bg-yellow-300 hover:bg-yellow-400 text-white font-semibold px-4 py-2 rounded"
-                          >
-                            Back
-                          </button>
+                            ))
+                          ) : (
+                            <div className="absolute left-[1%] w-[100%] text-center flex justify-center items-center mt-14">
+                              <div className="text-center text-xl text-red-700">
+                                Oops! No data found..
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
+                      <div className="flex justify-end gap-4 pr-3 mb-4 mr-10">
+                        <button
+                          // onClick={() => navigate("/dashboard")}
+                          onClick={() => setShowStudentReport(false)}
+                          className="bg-yellow-300 hover:bg-yellow-400 text-white font-semibold px-4 py-2 rounded"
+                        >
+                          Back
+                        </button>
+                      </div>
                     </div>
-                  </>
-                )}
+                  </div>
+                </>
+                {/* )} */}
               </>
             )}
           </>
