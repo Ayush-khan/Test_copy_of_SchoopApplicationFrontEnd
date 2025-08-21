@@ -353,7 +353,7 @@ const StaffMonthlyAttendanceRepo = () => {
     <>
       <div className="w-full md:w-[95%] mx-auto p-4 ">
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
+        <div className="card p-2 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Staff Monthly Attendance Report
@@ -366,7 +366,7 @@ const StaffMonthlyAttendanceRepo = () => {
             />
           </div>
           <div
-            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-[98%] -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}

@@ -290,6 +290,11 @@ import BookRequisition from "../componants/BookRequisition/BookRequisition.jsx";
 import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherAttendanceMonthlyReport.jsx";
 import BackgroundChanger from "../Layouts/BackgroundColorSelect/BackgroundChanger.jsx";
 import HomeworkNotAssignReport from "../componants/Reports/CurriculumReport/HomewrokNotAssignReport.jsx";
+import News from "../componants/NewsModule/News.jsx";
+import RoleForEvent from "../componants/Events/RoleForEvent.jsx";
+import EditApproveStationery from "../componants/Stationery/EditApproveStationery.jsx";
+import ApproveStationery from "../componants/Stationery/ApproveStationery.jsx";
+import ViewBookAvailability from "../componants/View/ViewBookAvailability.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -318,6 +323,8 @@ function Index() {
           path="/manageRoleAccess"
           element={<PrivateRoute element={<ShowRolesWithMenu />} />}
         />
+        {/* News Module */}
+        <Route path="/news" element={<PrivateRoute element={<News />} />} />
         {/* Important links */}
         <Route
           path="/importantLinks"
@@ -769,6 +776,11 @@ function Index() {
           path="/markDropdown"
           element={<PrivateRoute element={<MarkDropdownEditor />} />}
         />
+        {/* Roles for events */}
+        <Route
+          path="/roleForEvent"
+          element={<PrivateRoute element={<RoleForEvent />} />}
+        />
         {/* Id Cards Module */}
         {/* Student Id Card Module */}
         <Route
@@ -984,6 +996,11 @@ function Index() {
           path="/lessonPlanDetailedView"
           element={<PrivateRoute element={<LessonPlanDetailedView />} />}
         />
+        {/* View Book Availability module*/}
+        <Route
+          path="/viewBookAvailability"
+          element={<PrivateRoute element={<ViewBookAvailability />} />}
+        />
         {/* Attendance Marking Status Report */}
         <Route
           path="/attendanceMarkingStatusRepo"
@@ -1144,6 +1161,14 @@ function Index() {
         <Route
           path="/stationery"
           element={<PrivateRoute element={<Stationery />} />}
+        />
+        <Route
+          path="/approveStationery/edit/:id"
+          element={<PrivateRoute element={<EditApproveStationery />} />}
+        />
+        <Route
+          path="/approveStationery"
+          element={<PrivateRoute element={<ApproveStationery />} />}
         />
         {/* Siblings unMapping module*/}
         <Route
