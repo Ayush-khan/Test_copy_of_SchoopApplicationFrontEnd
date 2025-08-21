@@ -1951,7 +1951,7 @@ function Form() {
               )}
               <div className="mt-2">
                   <label
-                    htmlFor="studentAadharNumber"
+                    htmlFor="Apaar_id"
                     className="block font-bold text-xs mb-0.5"
                   >
                     Apaar ID No.
@@ -1963,7 +1963,10 @@ function Form() {
                     maxLength={12}
                     value={formData.apaar_id}
                     className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^a-zA-Z0-9]/g, ''); 
+                      handleChange({ target: { name: 'apaar_id', value } });
+                    }}
                     // onBlur={handleBlur}
                   />
                 </div>

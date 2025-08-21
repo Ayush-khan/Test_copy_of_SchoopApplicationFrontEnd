@@ -1449,7 +1449,7 @@ const LeavingCertificate = () => {
                     </div>
                     <div>
                       <label
-                        htmlFor="stu_aadhaar_no"
+                        htmlFor="apaar_id"
                         className="block font-bold text-xs mb-2"
                       >
                         APAAR ID No.{" "}
@@ -1461,7 +1461,8 @@ const LeavingCertificate = () => {
                         maxLength={12}
                         value={formData.apaar_id}
                         onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white-200 shadow-inner"
+                        readOnly
+                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                       />
                     </div>
                   </div>
