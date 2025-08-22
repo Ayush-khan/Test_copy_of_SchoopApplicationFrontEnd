@@ -224,8 +224,6 @@ const ReportCardMarksClass = () => {
     }
   };
 
-  // Handle search and fetch parent information
-
   const handleSearch = async () => {
     console.log("inside handle Search");
     setLoadingForSearch(false);
@@ -384,9 +382,9 @@ const ReportCardMarksClass = () => {
           });
         });
       });
-    } else if (classNum == 9 || classNum == 10) {
+    } else if (classNum == 9) {
       Object.entries(headings).forEach(([subjectId, subject]) => {
-        // ✅ calculate examSpan = sum of headings + 1 (for total column)
+        //  calculate examSpan = sum of headings + 1 (for total column)
         const examSpan =
           subject.exams.reduce((acc, exam) => acc + exam.headings.length, 0) +
           1;
@@ -419,41 +417,67 @@ const ReportCardMarksClass = () => {
           });
         });
 
-        // Assuming classNum is available
-        if (classNum !== 10) {
-          // Find the final exam dynamically
-          const finalExam = subject.exams.find(
-            (exam) => exam.exam_name.toUpperCase() === "FINAL EXAM"
-          );
+        // Always calculate Total for 9 and 10
+        const finalExam = subject.exams.find(
+          (exam) => exam.exam_name.toUpperCase() === "FINAL EXAM"
+        );
 
-          // If found, use its total_max, otherwise fallback
-          const finalExamTotalMax = finalExam
-            ? finalExam.total_max
-            : subject.total_max_all;
+        const finalExamTotalMax = finalExam
+          ? finalExam.total_max
+          : subject.total_max_all;
 
-          // Push to row2
+        row2.push({
+          label: "Total",
+          colspan: 1,
+        });
+
+        row3.push({
+          label: `Total\n${finalExamTotalMax}`,
+        });
+
+        subjectExamHeadingMap.push({
+          subjectId,
+          examId: "Total",
+          headingName: "Total",
+          marksHeadingId: null,
+          isSubjectTotal: true,
+        });
+      });
+    } else if (classNum == 10) {
+      Object.entries(headings).forEach(([subjectId, subject]) => {
+        // calculate examSpan = sum of headings (NO +1 now, since no total)
+        const examSpan = subject.exams.reduce(
+          (acc, exam) => acc + exam.headings.length,
+          0
+        );
+
+        // row1 → Subject Name
+        row1.push({
+          label: `${subject.subject_name}`,
+          colspan: examSpan,
+        });
+
+        // row2 & row3 → loop exams
+        subject.exams.forEach((exam) => {
           row2.push({
-            label: "Total",
-            colspan: 1,
+            label: exam.exam_name,
+            colspan: exam.headings.length,
           });
 
-          // Push to row3
-          row3.push({
-            label: `Total\n${finalExamTotalMax}`,
-          });
+          exam.headings.forEach((heading) => {
+            row3.push({
+              label: `${heading.heading_name}\n${heading.highest_marks}`,
+            });
 
-          // Add to the heading map
-          subjectExamHeadingMap.push({
-            subjectId,
-            examId: "Total",
-            headingName: "Total",
-            marksHeadingId: null,
-            isSubjectTotal: true,
+            subjectExamHeadingMap.push({
+              subjectId,
+              examId: exam.exam_id,
+              headingName: heading.heading_name,
+              marksHeadingId: heading.marks_headings_id,
+              isSubjectTotal: false, // will never be true now
+            });
           });
-        } else {
-          // If classNum is 10, skip adding Total column
-          console.log("Class 10 – skipping Total column");
-        }
+        });
       });
     } else {
       Object.entries(headings).forEach(([termId, subjects]) => {
@@ -1750,9 +1774,8 @@ const ReportCardMarksClass = () => {
                                                 );
                                               }
                                             )
-                                          : classNum >= 9
-                                          ? // Map for Class 9 & 10
-                                            subjectExamHeadingMap.map(
+                                          : classNum == 9
+                                          ? subjectExamHeadingMap.map(
                                               (
                                                 {
                                                   subjectId,
@@ -1771,9 +1794,10 @@ const ReportCardMarksClass = () => {
                                                     ] || {};
                                                   let total = 0;
 
-                                                  // Use only examId 103
+                                                  // Pick the marks for the current examId dynamically
                                                   const examMarks =
                                                     subjectMarks[103];
+
                                                   if (examMarks) {
                                                     if (
                                                       typeof examMarks ===
@@ -1787,7 +1811,6 @@ const ReportCardMarksClass = () => {
                                                           examMarks.Total
                                                         );
                                                       } else {
-                                                        // Sum individual components if Total is not present
                                                         Object.values(
                                                           examMarks
                                                         ).forEach((mark) => {
@@ -1805,12 +1828,40 @@ const ReportCardMarksClass = () => {
 
                                                   value = total;
                                                 } else {
+                                                  // Fetch specific exam marks using dynamic examId + headingName
                                                   value =
                                                     student.marks?.[
                                                       subjectId
-                                                    ]?.[103]?.[headingName] ??
-                                                    "";
+                                                    ]?.[examId]?.[
+                                                      headingName
+                                                    ] ?? "";
                                                 }
+
+                                                return (
+                                                  <td
+                                                    key={index}
+                                                    className="border-2 border-gray-400 px-3 py-1 text-center whitespace-nowrap"
+                                                  >
+                                                    {value}
+                                                  </td>
+                                                );
+                                              }
+                                            )
+                                          : classNum == 10
+                                          ? subjectExamHeadingMap.map(
+                                              (
+                                                {
+                                                  subjectId,
+                                                  examId,
+                                                  headingName,
+                                                },
+                                                index
+                                              ) => {
+                                                // Directly fetch specific exam marks
+                                                const value =
+                                                  student.marks?.[subjectId]?.[
+                                                    examId
+                                                  ]?.[headingName] ?? "";
 
                                                 return (
                                                   <td
