@@ -295,6 +295,7 @@ import RoleForEvent from "../componants/Events/RoleForEvent.jsx";
 import EditApproveStationery from "../componants/Stationery/EditApproveStationery.jsx";
 import ApproveStationery from "../componants/Stationery/ApproveStationery.jsx";
 import ViewBookAvailability from "../componants/View/ViewBookAvailability.jsx";
+import UpdateClasswiseStudentDetails from "../componants/StudentModel/UpdateClaswiseStudenDeails/UpdateClasswiseStudentDetails.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -991,6 +992,11 @@ function Index() {
             />
           }
         />{" "}
+        {/* UpdateClasswiseStudentDetails module */}
+        <Route
+          path="/updateClasswiseStudentDetails"
+          element={<PrivateRoute element={<UpdateClasswiseStudentDetails />} />}
+        />
         {/* Lesson plan Detailed Report */}
         <Route
           path="/lessonPlanDetailedView"
