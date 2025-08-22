@@ -117,7 +117,7 @@ const UpdateClasswiseStudentDetails = () => {
 
   const handleClassSelect = (selectedOption) => {
     setSelectedClass(selectedOption);
-    // setClassError("");
+    setNameErrorForClass("");
 
     setSelectedDivision(null); // Reset division dropdown
     setDivisionForForm([]); // Clear division options
@@ -130,6 +130,7 @@ const UpdateClasswiseStudentDetails = () => {
 
   const handleDivisionSelect = (selectedOption) => {
     setSelectedDivision(selectedOption); // Ensure correct value is set
+    setNameErrorForDivision("");
   };
 
   const fetchFields = async () => {
@@ -168,6 +169,7 @@ const UpdateClasswiseStudentDetails = () => {
 
   const handleFieldSelect = (selectedOption) => {
     setSelectedField(selectedOption); // full option with fullData
+    setNameErrorForField("");
     setSelectedFieldId(selectedOption?.value); // just column_name
     setSelectedFieldData(selectedOption?.fullData || null); // store full field details
   };
@@ -177,6 +179,7 @@ const UpdateClasswiseStudentDetails = () => {
     setSearchTerm("");
     setNameErrorForClass("");
     setNameErrorForDivision("");
+    setNameErrorForField("");
 
     setNameErrorForStudent("");
     setErrors({});
@@ -233,6 +236,7 @@ const UpdateClasswiseStudentDetails = () => {
         const fetchedData = response?.data;
         console.log("fetched data", fetchedData);
         setstudentInformation(response?.data?.data);
+        setPendingChanges([]);
       } else {
         toast.error("No data found for the selected class.");
       }
@@ -379,282 +383,9 @@ const UpdateClasswiseStudentDetails = () => {
       }
     } catch (error) {
       console.error("Full API Error Response:", error.response);
-      toast.error(`Error: ${error.response?.data?.message || error.message}`);
+      toast.error(`${error.response?.data?.message || error.message}`);
     }
   };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!studentInformation?.length) {
-  //       toast.error("No student data to update.");
-  //       return;
-  //     }
-
-  //     let firstInvalidField = null;
-  //     const errors = {};
-
-  //     const updatedStudentInformation = studentInformation.map((student) => {
-  //       let studentHasError = false;
-  //       const field = selectedFieldData; // single object
-  //       const pending = pendingChanges.find(
-  //         (s) => s.student_id === student.student_id
-  //       );
-  //       const fieldValue =
-  //         pending?.[field.column_name] ?? student[field.column_name];
-  //       // const fieldValue = student[field.column_name];
-  //       const fieldKey = `${student.student_id}-${field.column_name}`;
-
-  //       // Required check
-  //       if (
-  //         !field.nullable &&
-  //         (!fieldValue || fieldValue.toString().trim() === "")
-  //       ) {
-  //         studentHasError = true;
-  //         errors[fieldKey] = `${field.label} is required`;
-  //       }
-
-  //       // Max length check
-  //       if (
-  //         field.max_length &&
-  //         fieldValue &&
-  //         fieldValue.length > field.max_length
-  //       ) {
-  //         studentHasError = true;
-  //         errors[
-  //           fieldKey
-  //         ] = `${field.label} must not exceed ${field.max_length} characters`;
-  //       }
-
-  //       // Data type validation
-  //       if (
-  //         field.data_type === "int" &&
-  //         fieldValue &&
-  //         isNaN(Number(fieldValue))
-  //       ) {
-  //         studentHasError = true;
-  //         errors[fieldKey] = `${field.label} must be a number`;
-  //       }
-
-  //       if (field.data_type === "date" && fieldValue) {
-  //         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  //         if (!dateRegex.test(fieldValue)) {
-  //           studentHasError = true;
-  //           errors[fieldKey] = `${field.label} must be in YYYY-MM-DD format`;
-  //         }
-  //       }
-
-  //       if (
-  //         (field.input_type === "radio" || field.input_type === "dropdown") &&
-  //         field.options
-  //       ) {
-  //         const options = JSON.parse(field.options || "[]");
-  //         const allowedValues = options.map((o) => o.option); // <-- compare against "M" / "F"
-
-  //         if (fieldValue && !allowedValues.includes(fieldValue)) {
-  //           studentHasError = true;
-  //           errors[
-  //             fieldKey
-  //           ] = `${field.label} must be one of the allowed options`;
-  //         }
-  //       }
-
-  //       return { ...student, hasError: studentHasError };
-  //     });
-
-  //     const firstInvalidStudent = updatedStudentInformation.find(
-  //       (s) => s.hasError
-  //     );
-
-  //     if (firstInvalidStudent) {
-  //       console.log("Validation errors found:", errors);
-
-  //       Object.keys(errors).forEach((key) => {
-  //         const fieldElement = studentRefs.current[key];
-  //         if (fieldElement) {
-  //           fieldElement.classList.add("border-red-500", "ring-red-300");
-  //           if (!firstInvalidField) {
-  //             firstInvalidField = fieldElement;
-  //           }
-  //         }
-  //       });
-
-  //       // 🚨 Toast for first error
-  //       const firstErrorMessage = Object.values(errors)[0];
-  //       if (firstErrorMessage) {
-  //         toast.error(firstErrorMessage);
-  //       } else {
-  //         toast.error("Please fix the highlighted errors.");
-  //       }
-
-  //       if (firstInvalidField) {
-  //         firstInvalidField.focus();
-  //         firstInvalidField.scrollIntoView({
-  //           behavior: "smooth",
-  //           block: "center",
-  //         });
-  //       }
-
-  //       return; // stop submit if validation fails
-  //     }
-
-  //     console.log("inside handleSubmit, no validation errors");
-
-  //     const payload = {
-  //       students: pendingChanges.map((change) => ({
-  //         student_id: change.student_id,
-  //         [selectedFieldData.column_name]:
-  //           change[selectedFieldData.column_name] || null,
-  //       })),
-  //     };
-
-  //     const response = await axios.put(
-  //       `${API_URL}/api/update_studentdatawithfielddata`,
-  //       payload,
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success("Student details updated successfully!");
-  //       setPendingChanges([]);
-  //       setIsModalOpen(false);
-  //     } else {
-  //       toast.error(
-  //         `Failed to update student details. Status: ${response.status}`
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("Full API Error Response:", error.response);
-
-  //     if (error.response?.status === 422) {
-  //       const backendErrors = error.response.data.errors || {};
-  //       const formattedErrors = {};
-
-  //       Object.entries(backendErrors).forEach(([key, messages]) => {
-  //         const match = key.match(/^students\.(\d+)\.(.+)$/);
-  //         if (match) {
-  //           const studentIndex = Number(match[1]);
-  //           const fieldName = match[2];
-  //           const studentId = studentInformation[studentIndex]?.student_id;
-
-  //           if (studentId) {
-  //             if (!formattedErrors[studentId]) formattedErrors[studentId] = {};
-  //             formattedErrors[studentId][fieldName] = messages[0];
-  //           }
-  //         }
-  //       });
-
-  //       setBackendErrors(formattedErrors);
-  //       toast.error("Some student fields are invalid. Please check.");
-  //     } else {
-  //       toast.error(`Error: ${error.response?.data?.message || error.message}`);
-  //     }
-  //   }
-  // };
-
-  // const handleInputChange = (e, studentId, fieldName) => {
-  //   const { value } = e.target;
-
-  //   // Update pending changes
-  //   setPendingChanges((prev) => {
-  //     const updated = prev.some((s) => s.student_id === studentId)
-  //       ? prev.map((s) =>
-  //           s.student_id === studentId
-  //             ? { ...s, [fieldName]: value, hasChanged: true }
-  //             : s
-  //         )
-  //       : [
-  //           { student_id: studentId, [fieldName]: value, hasChanged: true },
-  //           ...prev,
-  //         ];
-
-  //     return updated;
-  //   });
-
-  //   let error = "";
-
-  //   const fieldArray = Array.isArray(selectedFieldData)
-  //     ? selectedFieldData
-  //     : [selectedFieldData];
-
-  //   const fieldMeta = fieldArray.find(
-  //     (field) => field.column_name === fieldName
-  //   );
-
-  //   if (fieldMeta) {
-  //     // Required check
-  //     if (!fieldMeta.nullable && (!value || value.toString().trim() === "")) {
-  //       error = `${fieldMeta.label || fieldName} is required.`;
-  //     }
-  //     // Max length check
-  //     else if (
-  //       fieldMeta.max_length &&
-  //       value &&
-  //       value.length > fieldMeta.max_length
-  //     ) {
-  //       error = `${fieldMeta.label || fieldName} must not exceed ${
-  //         fieldMeta.max_length
-  //       } characters.`;
-  //     }
-  //     // Data type: int
-  //     else if (fieldMeta.data_type === "int" && value && isNaN(Number(value))) {
-  //       error = `${fieldMeta.label || fieldName} must be a number.`;
-  //     }
-  //     // Data type: date
-  //     else if (fieldMeta.data_type === "date" && value) {
-  //       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  //       if (!dateRegex.test(value)) {
-  //         error = `${
-  //           fieldMeta.label || fieldName
-  //         } must be in YYYY-MM-DD format.`;
-  //       }
-  //     }
-  //     // Dropdown / Radio options
-  //     else if (
-  //       (fieldMeta.input_type === "radio" ||
-  //         fieldMeta.input_type === "dropdown") &&
-  //       fieldMeta.options
-  //     ) {
-  //       try {
-  //         const options = JSON.parse(fieldMeta.options || "[]");
-  //         const allowedValues = options.map((o) => o.option);
-  //         if (value && !allowedValues.includes(value)) {
-  //           error = `${
-  //             fieldMeta.label || fieldName
-  //           } must be one of the allowed options.`;
-  //         }
-  //       } catch {
-  //         console.warn(
-  //           "Invalid JSON in field options for",
-  //           fieldMeta.column_name
-  //         );
-  //       }
-  //     }
-  //   }
-
-  //   // Update inline errors
-  //   setErrors((prevErrors) => ({
-  //     ...prevErrors,
-  //     [studentId]: {
-  //       ...prevErrors[studentId],
-  //       [fieldName]: error,
-  //     },
-  //   }));
-
-  //   // Remove backend errors if user fixes field
-  //   setBackendErrors((prevErrors) => {
-  //     const newErrors = { ...prevErrors };
-  //     if (newErrors[studentId] && newErrors[studentId][fieldName]) {
-  //       delete newErrors[studentId][fieldName];
-  //       if (Object.keys(newErrors[studentId]).length === 0) {
-  //         delete newErrors[studentId];
-  //       }
-  //     }
-  //     return newErrors;
-  //   });
-  // };
 
   const handleInputChange = (e, studentId, fieldName) => {
     const { value } = e.target;
@@ -834,10 +565,10 @@ const UpdateClasswiseStudentDetails = () => {
         <div className="w-full md:container mt-1">
           {/* Search Section */}
           {/* <div className="pt-2 md:pt-4"></div> */}
-          <div className="pt-8 w-full md:w-[80%]  relative ml-0 md:ml-[10%]  border-1 flex justify-start flex-col md:flex-row gap-x-1  bg-white rounded-lg mt-2 md:mt-6 p-2 ">
-            <div className="w-full flex md:flex-row justify-start items-center">
+          <div className="pt-8 w-full md:w-[85%]  relative ml-0 md:ml-[10%]  border-1 flex  flex-col md:flex-row gap-x-1  bg-white rounded-lg mt-2 md:mt-6 p-2 ">
+            <div className="w-full flex md:flex-row  items-center">
               <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                <div className="w-full gap-x-1 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row ">
+                <div className="w-full gap-x-1 md:gap-x-6  my-1 md:my-4 flex md:flex-row ">
                   <label
                     className="text-md mt-1.5 mr-1 md:mr-0 inline-flex"
                     htmlFor="classSelect"
@@ -845,7 +576,7 @@ const UpdateClasswiseStudentDetails = () => {
                     Class <span className="text-red-500">*</span>
                   </label>
 
-                  <div className="w-full md:w-[30%]">
+                  <div className="w-full md:w-[28%]">
                     <Select
                       id="classSelect"
                       value={selectedClass}
@@ -879,7 +610,7 @@ const UpdateClasswiseStudentDetails = () => {
                     Division <span className="text-red-500">*</span>
                   </label>
 
-                  <div className="w-full md:w-[30%]">
+                  <div className="w-full md:w-[28%]">
                     <Select
                       id="divisionSelect"
                       value={selectedDivision}
@@ -913,7 +644,7 @@ const UpdateClasswiseStudentDetails = () => {
                     Fields <span className="text-red-500">*</span>
                   </label>
 
-                  <div className="w-full md:w-[30%]">
+                  <div className="w-full md:w-[38%]">
                     <Select
                       id="divisionSelect"
                       value={selectedField}
@@ -986,9 +717,7 @@ const UpdateClasswiseStudentDetails = () => {
             <div className="w-full md:container mx-auto py-4 px-4 ">
               <div className="card mx-auto w-full shadow-lg">
                 <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
-                  <h6 className="text-gray-700 mt-1 text-nowrap">
-                    Select Students for Update Details
-                  </h6>
+                  <h6 className="text-gray-700 mt-1 text-lg ">Student List</h6>
                   <div className="box-border flex md:gap-x-2  ">
                     <div className=" w-1/2 md:w-fit mr-1">
                       <input
@@ -1113,7 +842,13 @@ const UpdateClasswiseStudentDetails = () => {
                                         case "number":
                                           return (
                                             <input
-                                              type="number"
+                                              type="text"
+                                              inputMode="numeric"
+                                              pattern="[0-9]*"
+                                              maxLength={
+                                                selectedFieldData.max_length ||
+                                                undefined
+                                              }
                                               value={
                                                 pendingChanges.find(
                                                   (s) =>
@@ -1142,10 +877,6 @@ const UpdateClasswiseStudentDetails = () => {
                                                   student.student_id,
                                                   colName
                                                 )
-                                              }
-                                              maxLength={
-                                                selectedFieldData.max_length ||
-                                                undefined
                                               }
                                               ref={(el) => {
                                                 if (el) {
@@ -1434,6 +1165,16 @@ const UpdateClasswiseStudentDetails = () => {
                         "Update"
                       )}
                     </button>
+
+                    <button
+                      type="button"
+                      onClick={() => navigate("/dashboard")}
+                      disabled={loading}
+                      className={`ml-2 bg-yellow-400 hover:bg-yellow-400 text-white font-bold py-1 px-4 rounded 
+    ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                    >
+                      Back
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1548,17 +1289,17 @@ const UpdateClasswiseStudentDetails = () => {
                 <div className="flex justify-end gap-3 p-4 border-t">
                   <button
                     type="button"
+                    onClick={handleSubmit}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    {loading ? "Updating" : "Update"}
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setIsModalOpen(false)}
                     className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  >
-                    Yes, Update
                   </button>
                 </div>
               </div>
