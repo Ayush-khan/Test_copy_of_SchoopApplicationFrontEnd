@@ -23,6 +23,7 @@ function News() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
   const [newSectionName, setNewSectionName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -169,19 +170,6 @@ function News() {
     setCurrentPage(data.selected);
   };
 
-  // const handleEdit = (section) => {
-  //   console.log("imahe name", section.image_name);
-  //   setCurrentSection(section);
-  //   setNewSectionName(section.title || "");
-  //   setnewDescription(section.description || "");
-  //   setUrl(section.url || "");
-  //   setActiveTillDate(section.active_till_date || "");
-  //   setSelectedImage(section.image_name);
-
-  //   setFieldErrors({}); // Clear previous errors
-  //   setShowEditModal(true);
-  // };
-
   const handleEdit = (section) => {
     console.log("image name", section.image_name);
     setCurrentSection(section);
@@ -214,7 +202,7 @@ function News() {
     setActiveTillDate("");
     setSelectedImage(null);
     setSelectedImageName(null);
-
+    setShowPublishModal(false);
     setCurrentSection(null);
     setFieldErrors({});
     setNameError("");
@@ -268,70 +256,6 @@ function News() {
       setIsSubmitting(false);
     }
   };
-
-  // const handleSubmitEdit = async () => {
-  //   if (isSubmitting) return;
-  //   setIsSubmitting(true);
-
-  //   const validationErrors = validateSectionName(newSectionName, description);
-  //   if (Object.keys(validationErrors).length) {
-  //     setFieldErrors(validationErrors);
-  //     setIsSubmitting(false);
-  //     return;
-  //   }
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     if (!token) {
-  //       throw new Error("No authentication token found");
-  //     }
-  //     const formData = new FormData();
-  //     formData.append("title", newSectionName);
-  //     formData.append("url", url);
-  //     formData.append("description", description);
-  //     formData.append("active_till_date", activeTillDate);
-
-  //     if (selectedImage) {
-  //       formData.append("image", selectedImage);
-  //     }
-
-  //     console.log("current section", currentSection);
-
-  //     await axios.put(
-  //       `${API_URL}/api/update_news/${currentSection.news_id}`,
-  //       formData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         withCredentials: true,
-  //       }
-  //     );
-
-  //     fetchSections();
-  //     handleCloseModal();
-  //     toast.success("News updated successfully!");
-  //   } catch (error) {
-  //     console.error("Error editing link:", error);
-  //     if (error.response && error.response.status === 422) {
-  //       const errors = error.response.data.errors || {};
-  //       setFieldErrors((prev) => ({
-  //         ...prev,
-  //         title: errors.title?.[0] || "",
-  //         description: errors.description?.[0] || "",
-  //       }));
-
-  //       Object.values(errors).forEach((errArr) =>
-  //         errArr.forEach((err) => toast.error(err))
-  //       );
-  //     } else {
-  //       toast.error("Server error. Please try again later.");
-  //     }
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
 
   const handleSubmitEdit = async () => {
     if (isSubmitting) return;
@@ -474,15 +398,31 @@ function News() {
     }
   };
 
-  const handlePublish = async (newsId) => {
+  const handlePublish = (id) => {
+    console.log("the deleted news id", id);
+    const sectionToPublish = sections.find((sec) => sec.news_id === id);
+    console.log("the deleted news for sectiontodelete", sectionToPublish);
+    setCurrentSection(sectionToPublish);
+    setShowPublishModal(true);
+  };
+
+  const handleSubmitPublish = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("No authentication token found");
       }
 
+      if (!token || !currentSection || !currentSection.news_id) {
+        throw new Error("News Id is missing");
+      }
+
+      console.log("delete this news", currentSection.news_id);
+
       const response = await axios.put(
-        `${API_URL}/api/publish_news/${newsId}`,
+        `${API_URL}/api/publish_news/${currentSection.news_id}`,
         {},
         {
           headers: {
@@ -494,7 +434,8 @@ function News() {
 
       if (response.data.success) {
         toast.success("News published successfully!");
-        fetchSections(); // Refresh the list to reflect publish status
+        fetchSections();
+        setShowPublishModal(false);
       } else {
         toast.error(response.data.message || "Failed to publish the news.");
       }
@@ -505,6 +446,9 @@ function News() {
       } else {
         toast.error("Server error. Please try again later.");
       }
+    } finally {
+      setShowPublishModal(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -548,14 +492,39 @@ function News() {
     }));
   };
 
+  // const handleChangeUrl = (e) => {
+  //   const value = e.target.value;
+  //   setUrl(value);
+
+  //   const errors = validateSectionName(newSectionName, value, newDepartmentId);
+  //   setFieldErrors((prevErrors) => ({
+  //     ...prevErrors,
+  //     url: errors.url,
+  //   }));
+  // };
+
+  const validateUrl = (url) => {
+    const urlPattern = new RegExp(
+      "^(https?:\\/\\/)" + // must start with http:// or https://
+        "((([a-zA-Z0-9-]+)\\.)+[a-zA-Z]{2,})" + // domain
+        "(\\:\\d+)?(\\/.*)?$", // optional port & path
+      "i"
+    );
+
+    if (!url || !urlPattern.test(url)) {
+      return "Please enter a valid URL.";
+    }
+    return null;
+  };
+
   const handleChangeUrl = (e) => {
     const value = e.target.value;
     setUrl(value);
 
-    const errors = validateSectionName(newSectionName, value, newDepartmentId);
+    const errorMessage = validateUrl(value);
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
-      url: errors.url,
+      url: errorMessage,
     }));
   };
 
@@ -873,6 +842,13 @@ function News() {
                         onChange={handleChangeUrl}
                         placeholder="https://example.com"
                       />
+                      <div className="absolute top-9 left-1/3">
+                        {fieldErrors.url && (
+                          <small className="text-danger text-xs">
+                            {fieldErrors.url}
+                          </small>
+                        )}
+                      </div>
                     </div>
 
                     <div className="relative mb-3 flex justify-center mx-4 items-center">
@@ -1025,6 +1001,13 @@ function News() {
                       onChange={handleChangeUrl}
                       placeholder="https://example.com"
                     />
+                    <div className="absolute top-9 left-1/3">
+                      {fieldErrors.url && (
+                        <small className="text-danger text-xs">
+                          {fieldErrors.url}
+                        </small>
+                      )}
+                    </div>
                   </div>
 
                   <div className="relative mb-3 flex justify-center mx-4 items-center">
@@ -1072,85 +1055,6 @@ function News() {
             </div>
           </div>
         )}
-
-        {/* {showViewModal && (
-          <div
-            className="modal"
-            style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="flex justify-between p-3">
-                  <h5 className="modal-title">View News</h5>
-                  <RxCross1
-                    className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                    type="button"
-                    // className="btn-close text-red-600"
-                    onClick={handleCloseModal}
-                  />
-                </div>
-                <div
-                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                  style={{
-                    backgroundColor: "#C03078",
-                  }}
-                ></div>
-                <div className="modal-body">
-                  <div className=" relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="title" className="w-1/2 mt-2">
-                      Title
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control shadow-md mb-2"
-                      id="title"
-                      value={newSectionName}
-                      readOnly
-                    />
-                  </div>
-
-                  <div className="relative mb-3 flex justify-center mx-4">
-                    <label htmlFor="url" className="w-1/2 mt-2">
-                      URL
-                    </label>
-                    <input
-                      type="url"
-                      className="form-control shadow-md mb-2"
-                      id="url"
-                      value={url}
-                    />
-                  </div>
-
-                  <div className="relative mb-3 flex justify-center mx-4">
-                    <label htmlFor="linktype" className="w-1/2 mt-2">
-                      Type
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control shadow-md mb-2"
-                      value={newDepartmentId}
-                      readOnly
-                    />
-                  </div>
-
-                  <div className=" relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="publisher" className="w-1/2 mt-2">
-                      Description
-                    </label>
-                    <textarea
-                      type="text"
-                      maxLength={100}
-                      className="form-control shadow-md mb-2"
-                      id="publisher"
-                      value={description}
-                      readOnly
-                    />{" "}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )} */}
 
         {showViewModal && (
           <div
@@ -1230,7 +1134,7 @@ function News() {
                   </div>
 
                   {/* Image */}
-                  {selectedImage ? (
+                  {/* {selectedImage ? (
                     <div className="relative mb-3 flex justify-center mx-4 ">
                       <label htmlFor="imageUpload" className="w-[50%] mt-2">
                         Attachments
@@ -1240,6 +1144,21 @@ function News() {
                         alt="News"
                         className="shadow-md mb-2 max-h-40 object-contain border p-1"
                       />
+                    </div>
+                  ) : (
+                    ""
+                  )} */}
+                  {/* Image */}
+                  {selectedImage ? (
+                    <div className="relative mb-3 flex justify-center mx-4">
+                      <label className="w-1/2 mt-2">Attachments</label>
+                      <div className="form-control shadow-md mb-2 flex items-center justify-start">
+                        <img
+                          src={selectedImage}
+                          alt="News"
+                          className="max-h-40 object-contain border p-1"
+                        />
+                      </div>
                     </div>
                   ) : (
                     ""
@@ -1287,6 +1206,49 @@ function News() {
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showPublishModal && (
+          <div
+            className="modal"
+            style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">Confirm Publish</h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    onClick={handleCloseModal}
+                  />
+                </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="modal-body">
+                  <p>
+                    Are you sure you want to publish News :{" "}
+                    {currentSection?.title}?
+                  </p>
+                </div>
+                <div className=" flex justify-end p-3">
+                  <button
+                    type="button"
+                    className="btn btn-danger px-3 mb-2"
+                    style={{}}
+                    onClick={handleSubmitPublish}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Publishing..." : "Publish"}
                   </button>
                 </div>
               </div>
