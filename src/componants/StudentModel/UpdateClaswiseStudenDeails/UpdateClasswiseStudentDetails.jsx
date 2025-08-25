@@ -310,37 +310,37 @@ const UpdateClasswiseStudentDetails = () => {
         }
       }
 
-      if (
-        (field.input_type === "radio" || field.input_type === "dropdown") &&
-        field.options
-      ) {
-        const options = JSON.parse(field.options || "[]");
-        const allowedValues = options.map((o) => o.option);
+      // if (
+      //   (field.input_type === "radio" || field.input_type === "dropdown") &&
+      //   field.options
+      // ) {
+      //   const options = JSON.parse(field.options || "[]");
+      //   const allowedValues = options.map((o) => o.option);
 
-        if (fieldValue && !allowedValues.includes(fieldValue)) {
-          studentHasError = true;
-          errors[
-            fieldKey
-          ] = `${field.label} must be one of the allowed options`;
-        }
-      }
+      //   if (fieldValue && !allowedValues.includes(fieldValue)) {
+      //     studentHasError = true;
+      //     errors[
+      //       fieldKey
+      //     ] = `${field.label} must be one of the allowed options`;
+      //   }
+      // }
 
-      if (field.input_type === "select" && field.options) {
-        try {
-          const options = JSON.parse(field.options || "[]");
-          // IMPORTANT: Use `o.value` for validation (this is usually what gets submitted)
-          const allowedValues = options.map((o) => o.value);
+      // if (field.input_type === "select" && field.options) {
+      //   try {
+      //     const options = JSON.parse(field.options || "[]");
 
-          if (fieldValue && !allowedValues.includes(fieldValue)) {
-            studentHasError = true;
-            errors[
-              fieldKey
-            ] = `${field.label} must be one of the allowed options`;
-          }
-        } catch (err) {
-          console.error("Invalid options JSON for select:", field.options);
-        }
-      }
+      //     const allowedValues = options.map((o) => o.value);
+
+      //     if (fieldValue && !allowedValues.includes(fieldValue)) {
+      //       studentHasError = true;
+      //       errors[
+      //         fieldKey
+      //       ] = `${field.label} must be one of the allowed options`;
+      //     }
+      //   } catch (err) {
+      //     console.error("Invalid options JSON for select:", field.options);
+      //   }
+      // }
 
       return { ...student, hasError: studentHasError };
     });
@@ -1739,13 +1739,28 @@ const UpdateClasswiseStudentDetails = () => {
                 </div>
 
                 <div className="flex justify-end gap-3 p-4 border-t">
-                  <button
+                  {/* <button
                     type="button"
                     onClick={handleSubmit}
                     className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                   >
                     {loading ? "Updating" : "Update"}
-                  </button>
+                  </button> */}
+                  {pendingChanges.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={loading}
+                      className={`px-4 py-2 text-white rounded ${
+                        loading
+                          ? "bg-blue-400 cursor-not-allowed"
+                          : "bg-blue-600 hover:bg-blue-700"
+                      }`}
+                    >
+                      {loading ? "Updating..." : "Update"}
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
