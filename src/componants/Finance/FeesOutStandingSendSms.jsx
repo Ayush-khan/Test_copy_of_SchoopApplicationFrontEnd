@@ -26,7 +26,7 @@ const FeesOutStandingSendSms = () => {
   const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
   const [selectedTab, setSelectedTab] = useState("installment");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState("Your child's fees payment is due. Please make the payment at the earliest. If already paid please send details to school admin");
   const messageRef = useRef(null);
 
   const maxCharacters = 900;
@@ -243,7 +243,7 @@ const FeesOutStandingSendSms = () => {
         toast.success("Send message for pending fees successfully!");
         setSelectedClass(null);
         setSelectedInstallment(null);
-        setMessage("");
+        setMessage("Your child's fees payment is due. Please make the payment at the earliest. If already paid please send details to school admin");
 
         setSelectedStudent(null); // Reset student selection
         setSelectedStudents([]); // Clear selected students
