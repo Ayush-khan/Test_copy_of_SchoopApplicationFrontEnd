@@ -33,6 +33,7 @@ function ViewStaff() {
     aadhar_card_no: "",
     teacher_image_name: null,
     user_id: "",
+    teacher_id: "",
   });
   const [photoPreview, setPhotoPreview] = useState(null);
   // Role ID to Name Mapping
@@ -111,7 +112,7 @@ function ViewStaff() {
           teacher_image_name: teacher.teacher_image_name || null,
           role_id: user.role_id || null,
           user_id: user.user_id !== null ? user.user_id : "",
-
+          teacher_id: staff.tc_id || "",
           role_name: role_name,
         });
         console.log("role_name", formData.role_name);
@@ -130,6 +131,35 @@ function ViewStaff() {
         }
       });
   }, [staff?.teacher_id, navigate]);
+  const [classes, setClasses] = useState([]);
+
+  const fetchTeacherCategory = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+
+      setClasses(response.data.data); // Assuming response has 'data' property holding the categories array
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  useEffect(() => {
+    fetchTeacherCategory();
+  }, []);
+  const getTeacherCategoryName = (tc_id) => {
+    const category = classes.find((cat) => cat.tc_id === tc_id);
+    return category ? category.name : "Unknown Category";
+  };
 
   console.log("staff", staff);
   console.log("formData_teacher_image--->", formData.teacher_image);
@@ -258,6 +288,17 @@ function ViewStaff() {
                   )}
                 </div>
               ))}
+              <div>
+                <label
+                  htmlFor="teacher_category"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Teacher Category
+                </label>
+                <p className="input-field h-9  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
+                  {getTeacherCategoryName(formData.teacher_id)}{" "}
+                </p>
+              </div>
               <div className="col-span-1">
                 <label
                   htmlFor="experience"
