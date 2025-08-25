@@ -302,9 +302,7 @@ const UpdateClasswiseStudentDetails = () => {
       }
 
       if (
-        (field.input_type === "radio" ||
-          field.input_type === "dropdown" ||
-          field.input_type === "select") &&
+        (field.input_type === "radio" || field.input_type === "dropdown") &&
         field.options
       ) {
         const options = JSON.parse(field.options || "[]");
@@ -315,6 +313,23 @@ const UpdateClasswiseStudentDetails = () => {
           errors[
             fieldKey
           ] = `${field.label} must be one of the allowed options`;
+        }
+      }
+
+      if (field.input_type === "select" && field.options) {
+        try {
+          const options = JSON.parse(field.options || "[]");
+          // IMPORTANT: Use `o.value` for validation (this is usually what gets submitted)
+          const allowedValues = options.map((o) => o.value);
+
+          if (fieldValue && !allowedValues.includes(fieldValue)) {
+            studentHasError = true;
+            errors[
+              fieldKey
+            ] = `${field.label} must be one of the allowed options`;
+          }
+        } catch (err) {
+          console.error("Invalid options JSON for select:", field.options);
         }
       }
 
@@ -935,10 +950,75 @@ const UpdateClasswiseStudentDetails = () => {
                                             />
                                           );
 
+                                        // case "select":
+                                        //   if (selectedFieldData.options) {
+                                        //     const options = JSON.parse(
+                                        //       selectedFieldData.options
+                                        //     );
+                                        //     const selectedValue =
+                                        //       pendingChanges.find(
+                                        //         (s) =>
+                                        //           s.student_id ===
+                                        //           student.student_id
+                                        //       )?.[colName] ??
+                                        //       student[colName] ??
+                                        //       "";
+                                        //     return (
+                                        //       <select
+                                        //         value={selectedValue}
+                                        //         className={`border rounded px-2 py-1 text-sm w-full ${
+                                        //           errors[student.student_id]?.[
+                                        //             colName
+                                        //           ]
+                                        //             ? "border-red-500"
+                                        //             : ""
+                                        //         }`}
+                                        //         required={
+                                        //           selectedFieldData.nullable ===
+                                        //           0
+                                        //         }
+                                        //         onChange={(e) =>
+                                        //           handleInputChange(
+                                        //             e,
+                                        //             student.student_id,
+                                        //             colName
+                                        //           )
+                                        //         }
+                                        //         maxLength={
+                                        //           selectedFieldData.max_length ||
+                                        //           undefined
+                                        //         }
+                                        //         ref={(el) => {
+                                        //           if (el) {
+                                        //             studentRefs.current[
+                                        //               `${student.student_id}-${colName}`
+                                        //             ] = el;
+                                        //           }
+                                        //         }}
+                                        //       >
+                                        //         <option value="">
+                                        //           -- Select --
+                                        //         </option>
+                                        //         {options.map((opt, i) => (
+                                        //           <option
+                                        //             key={i}
+                                        //             value={opt.option || opt}
+                                        //           >
+                                        //             {opt.value || opt}
+                                        //           </option>
+                                        //         ))}
+                                        //       </select>
+                                        //     );
+                                        //   }
+                                        //   // return <span>{value}</span>;
+                                        //   return (
+                                        //     <span>{student[colName]}</span>
+                                        //   );
+
                                         case "select":
                                           if (selectedFieldData.options) {
                                             const options = JSON.parse(
-                                              selectedFieldData.options
+                                              selectedFieldData.options || "[]"
                                             );
                                             const selectedValue =
                                               pendingChanges.find(
@@ -948,6 +1028,7 @@ const UpdateClasswiseStudentDetails = () => {
                                               )?.[colName] ??
                                               student[colName] ??
                                               "";
+
                                             return (
                                               <select
                                                 value={selectedValue}
@@ -987,15 +1068,14 @@ const UpdateClasswiseStudentDetails = () => {
                                                 {options.map((opt, i) => (
                                                   <option
                                                     key={i}
-                                                    value={opt.option || opt}
+                                                    value={opt.value}
                                                   >
-                                                    {opt.value || opt}
+                                                    {opt.option}
                                                   </option>
                                                 ))}
                                               </select>
                                             );
                                           }
-                                          // return <span>{value}</span>;
                                           return (
                                             <span>{student[colName]}</span>
                                           );
@@ -1213,19 +1293,19 @@ const UpdateClasswiseStudentDetails = () => {
                   <table className="w-full text-sm border border-gray-300 rounded-lg overflow-hidden">
                     <thead className="bg-gray-100">
                       <tr>
-                        <th className="text-center p-2 lg:px-3 border border-gray-950 text-sm">
+                        <th className="w-[7%] text-center p-2 lg:px-3 border border-gray-950 text-sm">
                           Sr. No.
                         </th>
-                        <th className="text-center p-2 lg:px-3 border border-gray-950 text-sm">
+                        <th className="w-[10%] text-center p-2 lg:px-3 border border-gray-950 text-sm">
                           Roll No
                         </th>
-                        <th className="text-center p-2 lg:px-3 border border-gray-950 text-sm">
+                        <th className="w-[25%] text-center p-2 lg:px-3 border border-gray-950 text-sm">
                           Student Name
                         </th>
-                        <th className="text-center p-2 lg:px-3 border border-gray-950 text-sm">
+                        <th className="w-[20%] text-center p-2 lg:px-3 border border-gray-950 text-sm">
                           Old Value
                         </th>
-                        <th className="text-center p-2 lg:px-3 border border-gray-950 text-sm">
+                        <th className="w-[20%] text-center p-2 lg:px-3 border border-gray-950 text-sm">
                           New Value
                         </th>
                       </tr>
