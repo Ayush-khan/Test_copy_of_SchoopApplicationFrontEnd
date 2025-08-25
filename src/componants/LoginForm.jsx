@@ -37,6 +37,7 @@ const LoginForm = ({ userId }) => {
           user_id: email,
           password: password,
           rememberme: rememberMe,
+          short_name: sortNameCookie,
         },
         {
           withCredentials: true, // ✅ Send browser cookies
