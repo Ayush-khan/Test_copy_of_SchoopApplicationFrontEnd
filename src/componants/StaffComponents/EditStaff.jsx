@@ -1,6 +1,5 @@
 // second try up
 import React, { useState, useEffect } from "react";
-import { FaUserCircle } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -44,6 +43,7 @@ function EditStaff() {
     section_id: "",
     isDelete: "N",
     role_id: "", // Ensure it's a string or empty
+    tc_id: "",
   });
   // console.log("the formdata set", formData);
   const [errors, setErrors] = useState({});
@@ -53,6 +53,7 @@ function EditStaff() {
   const MAX_DATE = "2006-12-31";
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
+  const [teacherCategories, setTeacherCategories] = useState([]);
 
   console.log("employeeID", staff);
   useEffect(() => {
@@ -88,6 +89,7 @@ function EditStaff() {
         section_id: staff.section_id || "",
         isDelete: staff.isDelete || "N",
         role_id: staff.role_id || "", // Ensure it's a string or empty
+        tc_id: staff.tc_id || "",
       });
       if (staff?.teacher_image_name) {
         setPhotoPreview(
@@ -98,6 +100,25 @@ function EditStaff() {
         );
       }
     }
+    const fetchTeacherCategories = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.data?.success && Array.isArray(response.data.data)) {
+          setTeacherCategories(response.data.data);
+        } else {
+          toast.error("Failed to load teacher categories");
+        }
+      } catch (error) {
+        console.error("Error fetching teacher categories:", error);
+        toast.error("Error fetching teacher categories");
+      }
+    };
+
+    fetchTeacherCategories();
   }, [staff, API_URL]);
   // Validation functions
   const validatePhone = (phone) => {
@@ -440,7 +461,7 @@ function EditStaff() {
   return (
     <div className="container mx-auto p-4 ">
       <ToastContainer />
-      <div className="card p-4 rounded-md ">
+      <div className="card p-2 rounded-md ">
         <div className=" card-header mb-4 flex justify-between items-center ">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             Edit Staff information
@@ -459,7 +480,7 @@ function EditStaff() {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <p className="  md:absolute md:right-10  md:top-[10%]   text-gray-500 ">
+        <p className="  md:absolute md:right-7  md:top-[9%]   text-gray-500 ">
           <span className="text-red-500">*</span>indicates mandatory information
         </p>
         <form
@@ -937,6 +958,37 @@ function EditStaff() {
                       {errors.aadhar_card_no}
                     </span>
                   )}
+                </div>
+                <div>
+                  <label
+                    htmlFor="tc_id"
+                    className="block font-bold text-xs mb-2"
+                  >
+                    Teacher Category
+                  </label>
+                  <select
+                    id="tc_id"
+                    name="tc_id"
+                    value={formData.tc_id}
+                    onChange={handleChange}
+                    className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                    required
+                  >
+                    <option className="bg-gray-300" value="">
+                      Select
+                    </option>
+                    {teacherCategories.map((cat) => (
+                      <option key={cat.tc_id} value={cat.tc_id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* {errors.tc_id && (
+                  <span className="text-red-500 text-xs">
+                    {errors.tc_id}
+                  </span>
+                )} */}
                 </div>
                 <div>
                   <div>
