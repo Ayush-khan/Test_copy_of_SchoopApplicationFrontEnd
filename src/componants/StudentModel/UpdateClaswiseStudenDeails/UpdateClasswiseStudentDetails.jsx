@@ -47,6 +47,7 @@ const UpdateClasswiseStudentDetails = () => {
 
   const [pendingChanges, setPendingChanges] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeFieldData, setActiveFieldData] = useState(null);
 
   const studentRefs = useRef({});
 
@@ -167,13 +168,20 @@ const UpdateClasswiseStudentDetails = () => {
     [fields]
   );
 
-  const handleFieldSelect = (selectedOption) => {
-    setSelectedField(selectedOption); // full option with fullData
-    setNameErrorForField("");
-    setSelectedFieldId(selectedOption?.value); // just column_name
-    setSelectedFieldData(selectedOption?.fullData || null); // store full field details
-  };
+  // const handleFieldSelect = (selectedOption) => {
+  //   setSelectedField(selectedOption); // full option with fullData
+  //   setNameErrorForField("");
+  //   setSelectedFieldId(selectedOption?.value); // just column_name
+  //   setSelectedFieldData(selectedOption?.fullData || null); // store full field details
+  // };
 
+  const handleFieldSelect = (selectedOption) => {
+    setSelectedField(selectedOption);
+    setNameErrorForField("");
+
+    setSelectedFieldId(selectedOption?.value);
+    setSelectedFieldData(selectedOption?.fullData || null);
+  };
   const handleSearch = async () => {
     setNameError("");
     setSearchTerm("");
@@ -199,6 +207,7 @@ const UpdateClasswiseStudentDetails = () => {
       setNameErrorForField("Please select a field.");
       hasError = true;
     }
+    setActiveFieldData(selectedFieldData);
 
     if (hasError) return;
 
@@ -366,6 +375,27 @@ const UpdateClasswiseStudentDetails = () => {
     }
 
     return true;
+  };
+
+  const getDisplayValue = (fieldData, rawValue) => {
+    if (!fieldData) return rawValue ?? "—";
+
+    if (
+      (fieldData.input_type === "select" ||
+        fieldData.input_type === "radio" ||
+        fieldData.input_type === "dropdown") &&
+      fieldData.options
+    ) {
+      try {
+        const options = JSON.parse(fieldData.options || "[]");
+        const match = options.find((o) => o.option === rawValue);
+        return match ? match.value : rawValue || "—"; // show label if found
+      } catch (err) {
+        console.error("Invalid options JSON", err);
+      }
+    }
+
+    return rawValue ?? "—";
   };
 
   const handleSubmit = async () => {
@@ -765,10 +795,16 @@ const UpdateClasswiseStudentDetails = () => {
                             <th className="px-2 w-full md:w-[40%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Student Name
                             </th>
-                            {selectedFieldData && (
+                            {/* {selectedFieldData && (
                               <th className="px-2 w-full md:w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 {selectedFieldData.label ||
                                   selectedFieldData.column_name}
+                              </th>
+                            )} */}
+                            {activeFieldData && (
+                              <th className="px-2 w-full md:w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                {activeFieldData.label ||
+                                  activeFieldData.column_name}
                               </th>
                             )}
                           </tr>
@@ -805,7 +841,7 @@ const UpdateClasswiseStudentDetails = () => {
                                   </p>
                                 </td>
 
-                                {selectedFieldData && (
+                                {/* {selectedFieldData && (
                                   <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                     {(() => {
                                       const colName =
@@ -1190,6 +1226,326 @@ const UpdateClasswiseStudentDetails = () => {
                                       }
                                     })()}
                                   </td>
+                                )} */}
+
+                                {activeFieldData && (
+                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                    {(() => {
+                                      const colName =
+                                        activeFieldData.column_name;
+                                      const value = student[colName] || "";
+
+                                      switch (activeFieldData.input_type) {
+                                        case "text":
+                                          return (
+                                            <input
+                                              type="text"
+                                              value={
+                                                pendingChanges.find(
+                                                  (s) =>
+                                                    s.student_id ===
+                                                    student.student_id
+                                                )?.[colName] ??
+                                                student[colName] ??
+                                                ""
+                                              }
+                                              onChange={(e) =>
+                                                handleInputChange(
+                                                  e,
+                                                  student.student_id,
+                                                  colName
+                                                )
+                                              }
+                                              maxLength={
+                                                activeFieldData.max_length ||
+                                                undefined
+                                              }
+                                              ref={(el) => {
+                                                if (el) {
+                                                  studentRefs.current[
+                                                    `${student.student_id}-${colName}`
+                                                  ] = el;
+                                                }
+                                              }}
+                                              className={`border rounded px-2 py-1 text-sm w-full ${
+                                                errors[student.student_id]?.[
+                                                  colName
+                                                ]
+                                                  ? "border-red-500"
+                                                  : ""
+                                              }`}
+                                            />
+                                          );
+
+                                        case "number":
+                                          return (
+                                            <input
+                                              type="text"
+                                              inputMode="numeric"
+                                              pattern="[0-9]*"
+                                              maxLength={
+                                                activeFieldData.max_length ||
+                                                undefined
+                                              }
+                                              value={
+                                                pendingChanges.find(
+                                                  (s) =>
+                                                    s.student_id ===
+                                                    student.student_id
+                                                )?.[colName] ??
+                                                student[colName] ??
+                                                ""
+                                              }
+                                              className={`border rounded px-2 py-1 text-sm w-full ${
+                                                errors[student.student_id]?.[
+                                                  colName
+                                                ]
+                                                  ? "border-red-500"
+                                                  : ""
+                                              }`}
+                                              placeholder={
+                                                activeFieldData.label
+                                              }
+                                              required={
+                                                activeFieldData.nullable === 0
+                                              }
+                                              onChange={(e) =>
+                                                handleInputChange(
+                                                  e,
+                                                  student.student_id,
+                                                  colName
+                                                )
+                                              }
+                                              ref={(el) => {
+                                                if (el) {
+                                                  studentRefs.current[
+                                                    `${student.student_id}-${colName}`
+                                                  ] = el;
+                                                }
+                                              }}
+                                            />
+                                          );
+
+                                        case "date":
+                                          return (
+                                            <input
+                                              type="date"
+                                              value={
+                                                pendingChanges.find(
+                                                  (s) =>
+                                                    s.student_id ===
+                                                    student.student_id
+                                                )?.[colName] ??
+                                                (student[colName]
+                                                  ? student[colName].split(
+                                                      "T"
+                                                    )[0]
+                                                  : "")
+                                              }
+                                              className={`border rounded px-2 py-1 text-sm w-full ${
+                                                errors[student.student_id]?.[
+                                                  colName
+                                                ]
+                                                  ? "border-red-500"
+                                                  : ""
+                                              }`}
+                                              required={
+                                                activeFieldData.nullable === 0
+                                              }
+                                              onChange={(e) =>
+                                                handleInputChange(
+                                                  e,
+                                                  student.student_id,
+                                                  colName
+                                                )
+                                              }
+                                              maxLength={
+                                                activeFieldData.max_length ||
+                                                undefined
+                                              }
+                                              ref={(el) => {
+                                                if (el) {
+                                                  studentRefs.current[
+                                                    `${student.student_id}-${colName}`
+                                                  ] = el;
+                                                }
+                                              }}
+                                            />
+                                          );
+
+                                        case "select":
+                                          if (activeFieldData.options) {
+                                            const options = JSON.parse(
+                                              activeFieldData.options || "[]"
+                                            );
+                                            const selectedValue =
+                                              pendingChanges.find(
+                                                (s) =>
+                                                  s.student_id ===
+                                                  student.student_id
+                                              )?.[colName] ??
+                                              student[colName] ??
+                                              "";
+
+                                            return (
+                                              <select
+                                                value={selectedValue}
+                                                className={`border rounded px-2 py-1 text-sm w-full ${
+                                                  errors[student.student_id]?.[
+                                                    colName
+                                                  ]
+                                                    ? "border-red-500"
+                                                    : ""
+                                                }`}
+                                                required={
+                                                  activeFieldData.nullable === 0
+                                                }
+                                                onChange={(e) =>
+                                                  handleInputChange(
+                                                    e,
+                                                    student.student_id,
+                                                    colName
+                                                  )
+                                                }
+                                                maxLength={
+                                                  activeFieldData.max_length ||
+                                                  undefined
+                                                }
+                                                ref={(el) => {
+                                                  if (el) {
+                                                    studentRefs.current[
+                                                      `${student.student_id}-${colName}`
+                                                    ] = el;
+                                                  }
+                                                }}
+                                              >
+                                                <option value="">
+                                                  -- Select --
+                                                </option>
+                                                {options.map((opt, i) => (
+                                                  <option
+                                                    key={i}
+                                                    value={opt.value}
+                                                  >
+                                                    {opt.option}
+                                                  </option>
+                                                ))}
+                                              </select>
+                                            );
+                                          }
+                                          return (
+                                            <span>{student[colName]}</span>
+                                          );
+
+                                        case "radio": {
+                                          const radioValue =
+                                            pendingChanges.find(
+                                              (s) =>
+                                                s.student_id ===
+                                                student.student_id
+                                            )?.[colName] ??
+                                            student[colName] ??
+                                            "";
+
+                                          return (
+                                            <div className="flex items-center justify-center gap-2">
+                                              {JSON.parse(
+                                                activeFieldData.options || "[]"
+                                              ).map((opt, i) => (
+                                                <label
+                                                  key={i}
+                                                  className="flex items-center gap-1 text-sm"
+                                                >
+                                                  <input
+                                                    type="radio"
+                                                    name={`radio-${student.student_id}-${colName}`} // unique per row
+                                                    value={opt.option}
+                                                    checked={
+                                                      radioValue === opt.option
+                                                    }
+                                                    required={
+                                                      activeFieldData.nullable ===
+                                                      0
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleInputChange(
+                                                        e,
+                                                        student.student_id,
+                                                        colName
+                                                      )
+                                                    }
+                                                    maxLength={
+                                                      activeFieldData.max_length ||
+                                                      undefined
+                                                    }
+                                                    ref={(el) => {
+                                                      if (el) {
+                                                        studentRefs.current[
+                                                          `${student.student_id}-${colName}`
+                                                        ] = el;
+                                                      }
+                                                    }}
+                                                  />
+                                                  {opt.value}
+                                                </label>
+                                              ))}
+                                            </div>
+                                          );
+                                        }
+
+                                        case "textarea": {
+                                          const textareaValue =
+                                            pendingChanges.find(
+                                              (s) =>
+                                                s.student_id ===
+                                                student.student_id
+                                            )?.[colName] ??
+                                            student[colName] ??
+                                            "";
+                                          return (
+                                            <textarea
+                                              value={textareaValue}
+                                              maxLength={
+                                                activeFieldData.max_length ||
+                                                undefined
+                                              }
+                                              className={`border rounded px-2 py-1 text-sm w-full m-1 ${
+                                                errors[student.student_id]?.[
+                                                  colName
+                                                ]
+                                                  ? "border-red-500"
+                                                  : ""
+                                              }`}
+                                              placeholder={
+                                                activeFieldData.label
+                                              }
+                                              required={
+                                                activeFieldData.nullable === 0
+                                              }
+                                              onChange={(e) =>
+                                                handleInputChange(
+                                                  e,
+                                                  student.student_id,
+                                                  colName
+                                                )
+                                              }
+                                              ref={(el) => {
+                                                if (el) {
+                                                  studentRefs.current[
+                                                    `${student.student_id}-${colName}`
+                                                  ] = el;
+                                                }
+                                              }}
+                                              rows={3}
+                                            />
+                                          );
+                                        }
+
+                                        default:
+                                          return <span>{value}</span>;
+                                      }
+                                    })()}
+                                  </td>
                                 )}
                               </tr>
                             ))
@@ -1344,13 +1700,29 @@ const UpdateClasswiseStudentDetails = () => {
                               </td>
 
                               {/* Old Value */}
-                              <td className="p-2 border text-center">
+                              {/* <td className="p-2 border text-center">
                                 {student?.[colName] ?? "—"}
+                              </td> */}
+
+                              {/* New Value */}
+                              {/* <td className="p-2 border text-center">
+                                {change?.[colName] ?? "—"}
+                              </td> */}
+
+                              {/* Old Value */}
+                              <td className="p-2 border text-center">
+                                {getDisplayValue(
+                                  activeFieldData,
+                                  student?.[colName]
+                                )}
                               </td>
 
                               {/* New Value */}
                               <td className="p-2 border text-center">
-                                {change?.[colName] ?? "—"}
+                                {getDisplayValue(
+                                  activeFieldData,
+                                  change?.[colName]
+                                )}
                               </td>
                             </tr>
                           );
