@@ -22,7 +22,9 @@ function ImportantLink() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const [showPublishModal, setShowPublishModal] = useState(false);
+
   const [showViewModal, setShowViewModal] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
   const [newSectionName, setNewSectionName] = useState("");
@@ -190,6 +192,7 @@ function ImportantLink() {
     setCurrentSection(null);
     setFieldErrors({});
     setNameError("");
+
     setShowPublishModal(false);
   };
 
@@ -427,6 +430,7 @@ function ImportantLink() {
 
       const response = await axios.put(
         `${API_URL}/api/publish_importantlink/${currentSection.link_id}`,
+
         {},
         {
           headers: {
@@ -439,6 +443,7 @@ function ImportantLink() {
       if (response.data.success) {
         toast.success("Link published successfully!");
         fetchSections(); // Refresh the list to reflect publish status
+
         setShowPublishModal(false);
       } else {
         toast.error(response.data.message || "Failed to publish the link.");

@@ -67,6 +67,7 @@ function RemarkObservationStudent() {
   const [subjectError, setSubjectError] = useState("");
   const [noticeDescError, setNoticeDescError] = useState("");
   // const [showViewModal, setShowViewModal] = useState(false);
+
   const [remarkData, setRemarkData] = useState({
     teacherName: "",
     remarkSubject: "",
@@ -1108,9 +1109,11 @@ function RemarkObservationStudent() {
                       remarkData.attachments.length > 0 ? (
                         remarkData.attachments.map((file, index) => (
                           <div key={index} className="flex items-center gap-2">
+
                             <button
                               onClick={() => openModal(file)}
                               className="text-blue-600 underline text-sm break-all text-left"
+
                             >
                               {file.image_name}
                             </button>

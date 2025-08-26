@@ -58,12 +58,7 @@ const EditEvent = () => {
 
         setSubject(data.title || ""); // Event Title
         setSelectedClasses(data.classes || []);
-        // setSelectedRoles(() => {
-        //   if (Array.isArray(data.login_type)) return data.login_type;
-        //   if (typeof data.login_type === "string")
-        //     return data.login_type.split(",");
-        //   return [];
-        // });
+
         setSelectedRoles(() => {
           const loginTypes = Array.isArray(data.login_type)
             ? data.login_type

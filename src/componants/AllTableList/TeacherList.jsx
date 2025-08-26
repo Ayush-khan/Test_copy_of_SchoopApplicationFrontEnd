@@ -299,6 +299,7 @@ function TeacherList() {
                             onChange={toggleSelectAll}
                           />{" "}
                         </th>
+
                         <th className="px-0.5 w-full md:w-[15%] mx-auto text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Teachers Name
                         </th>
@@ -504,6 +505,7 @@ function TeacherList() {
                         <th className=" px-0.5 w-full md:w-[20%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                           Leave Status
                         </th>
+
                         <th className=" px-0.5 w-full md:w-[30%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                           Class
                         </th>

@@ -84,12 +84,12 @@ const Footer = () => {
   };
 
   return (
-    <footer>
+    <footer className="w-full">
       <div
-        className="flex flex-col md:flex-row justify-between items-center text-white shadow-lg px-3"
+        className="flex flex-col md:flex-row justify-between items-center text-white shadow-lg px-3 "
         style={{ backgroundColor: "#2196f3" }}
       >
-        <div className="md:mb-0 text-sm md:text-base pt-3">
+        <div className="md:mb-0 text-sm md:text-base h-10 mt-2">
           <p>
             Copyright © 2016-2018{" "}
             <a
@@ -105,7 +105,7 @@ const Footer = () => {
           </p>
         </div>
 
-        <div className="md:mb-0 text-sm md:text-base pt-3">
+        <div className="md:mb-0 text-sm md:text-base h-10 mt-2 ">
           <p>
             <button
               onClick={handleOpenModal}
@@ -116,11 +116,11 @@ const Footer = () => {
           </p>
         </div>
 
-        <div className="text-sm md:text-base">
+        <div className="text-sm md:text-base h-10 mt-2">
           <p>
             <a
               href="mailto:supportsacs@aceventura.in"
-              className="no-underline text-white flex items-center justify-center md:justify-start hover:underline pt-3"
+              className="no-underline text-white flex items-center justify-center md:justify-start hover:underline "
             >
               <MdMarkEmailRead className="text-white text-lg mr-2" />
               Contact for app support

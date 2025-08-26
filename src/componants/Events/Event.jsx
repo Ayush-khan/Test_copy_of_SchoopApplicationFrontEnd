@@ -573,6 +573,39 @@ function Event() {
     }
   };
 
+  // const downloadCsv = async (fileUrl) => {
+  //   if (!fileUrl || fileUrl === "undefined") {
+  //     toast.error("Rejected file is not available to download.");
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) throw new Error("No authentication token found");
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/download_csv_rejected/${fileUrl}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         responseType: "blob",
+  //       }
+  //     );
+
+  //     let filename = "rejected_template.csv";
+  //     if (selectedClasses.length > 0 && allClasses.length > 0) {
+  //       const selectedClassNames = allClasses
+  //         .filter((cls) => selectedClasses.includes(cls.class_id))
+  //         .map((cls) => cls.name.replace(/\s+/g, "_"));
+  //       filename = `${selectedClassNames.join("_")}.rejected.template.csv`;
+  //     }
+
+  //     triggerFileDownload(response.data, filename);
+  //   } catch (error) {
+  //     console.error("Error downloading template:", error);
+  //     toast.error("Failed to download the file.");
+  //   }
+  // };
+
   const handleUpload = async () => {
     if (!selectedFile) {
       setErrorMessage("Please select a file first.");
@@ -595,6 +628,7 @@ function Event() {
     }
 
     setLoading(true);
+
     const formData = new FormData();
     formData.append("file", selectedFile);
 
@@ -1550,6 +1584,7 @@ function Event() {
                             ?.split(",")
                             .map((id) => {
                               if (id === "A") return "Admin"; // static fallback
+
                               const role = roles.find(
                                 (role) => role.role_id === id
                               );

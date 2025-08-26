@@ -54,21 +54,40 @@ const ForgotPassword = () => {
     return `${day} ${monthName} ${year}`;
   }
   useEffect(() => {
-    fetchClasses();
+    fetchSchoolName();
   }, []);
-  const fetchClasses = async () => {
+  // 🍪 Helper to get cookie
+  const getCookie = (name) => {
+    const match = document.cookie.match(
+      new RegExp("(^| )" + name + "=([^;]+)")
+    );
+    return match ? decodeURIComponent(match[2]) : null;
+  };
+
+  const fetchSchoolName = async () => {
     setLoading(true);
 
+    const shortName = getCookie("short_name");
+
+    if (!shortName) {
+      toast.error("Short name cookie not found.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await axios.get(`${API_URL}/api/get_schoolname`, {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_schoolname?short_name=${shortName}`,
+        {
+          withCredentials: true,
+        }
+      );
 
       const schoolData = response?.data?.data;
 
       // Set both school name and academic year
       setSchoolInfo({
-        name: schoolData?.page_title, // or page_title if preferred
+        name: schoolData?.page_title,
         academicYear: schoolData?.academic_yr,
       });
     } catch (error) {
@@ -77,6 +96,28 @@ const ForgotPassword = () => {
       setLoading(false);
     }
   };
+
+  // const fetchSchoolName = async () => {
+  //   setLoading(true);
+
+  //   try {
+  //     const response = await axios.get(`${API_URL}/api/get_schoolname`, {
+  //       withCredentials: true,
+  //     });
+
+  //     const schoolData = response?.data?.data;
+
+  //     // Set both school name and academic year
+  //     setSchoolInfo({
+  //       name: schoolData?.page_title, // or page_title if preferred
+  //       academicYear: schoolData?.academic_yr,
+  //     });
+  //   } catch (error) {
+  //     toast.error(error.message || "Failed to fetch school information.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const handleResetPassword = async () => {
     setTouched({
       userId: true,
@@ -89,6 +130,8 @@ const ForgotPassword = () => {
     }
 
     setLoading(true);
+    const shortName = getCookie("short_name");
+
     try {
       const response = await axios.post(
         `${API_URL}/api/update_forgotpassword`,
@@ -96,6 +139,7 @@ const ForgotPassword = () => {
           user_id: userId,
           answer_one: motherName,
           dob: dob,
+          short_name: shortName, // ✅ Include here
         }
       );
 
@@ -120,12 +164,14 @@ const ForgotPassword = () => {
     }
 
     setNewPasswordLoading(true); // Start loading
+    const shortName = getCookie("short_name");
 
     try {
       const response = await axios.post(
         `${API_URL}/api/save_newpasswordforgot`,
         {
           user_id: userId,
+          short_name: shortName, // ✅ Include here
         }
       );
 
