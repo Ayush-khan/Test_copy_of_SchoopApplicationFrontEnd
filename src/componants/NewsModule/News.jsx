@@ -1115,10 +1115,12 @@ function News() {
                     </label>
                     <input
                       type="url"
-                      className="form-control shadow-md mb-2"
+                      className="form-control shadow-md mb-2 cursor-pointer underline"
                       id="url"
                       value={url}
                       readOnly
+                      onClick={() => window.open(url, "_blank")}
+                      style={{ color: "#2563eb" }} // Tailwind blue-600 hex
                     />
                   </div>
 
