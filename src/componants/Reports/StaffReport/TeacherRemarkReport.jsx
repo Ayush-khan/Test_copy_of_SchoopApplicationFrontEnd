@@ -444,24 +444,24 @@ const TeacherRemarkReport = () => {
                   : "pb-4 w-full md:w-[80%]"
               }`}
             >
-              <div className="w-full md:w-[80%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
+              <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                 {/* <div className="w-full  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row"> */}
                 <div
                   className={`  w-full gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
                     timetable.length > 0
-                      ? "w-full md:w-[75%]  wrelative left-0"
+                      ? "w-full md:w-[80%]  wrelative left-0"
                       : " w-full md:w-[95%] relative left-10"
                   }`}
                 >
                   {/* Class Dropdown */}
-                  <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                  <div className="w-full  md:w-[70%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
-                      className="w-full md:w-[30%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="w-full md:w-[40%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
                       Staff
                     </label>
-                    <div className="w-full md:w-[80%]">
+                    <div className="w-full md:w-full">
                       <Select
                         menuPortalTarget={document.body}
                         menuPosition="fixed"
@@ -564,7 +564,7 @@ const TeacherRemarkReport = () => {
               {timetable.length > 0 && (
                 <div className="p-2 px-3  bg-gray-100 border-none flex justify-between items-center">
                   <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
-                    <div className="w-1/2 md:w-[95%] mr-1 ">
+                    <div className="w-1/2 md:w-[100%] mr-1 ">
                       <input
                         type="text"
                         className="form-control"
