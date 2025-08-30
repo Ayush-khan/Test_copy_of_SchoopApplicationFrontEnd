@@ -532,12 +532,24 @@ function Event() {
   };
 
   // Handle file selection
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    setSelectedFile(file); // Set the selected file to state
-    setErrorMessage(""); // Clear any previous error
-    setUploadStatus(""); // Clear any previous success
-    setErrorMessageUrl("");
+  // const handleFileChange = (event) => {
+  //   const file = event.target.files[0];
+  //   setSelectedFile(file); // Set the selected file to state
+  //   setErrorMessage(""); // Clear any previous error
+  //   setUploadStatus(""); // Clear any previous success
+  //   setErrorMessageUrl("");
+  // };
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+
+      setErrorMessage("");
+      setErrorMessageUrl("");
+      setUploadStatus("");
+    }
+
+    e.target.value = null;
   };
 
   const downloadCsv = async (fileUrl) => {
