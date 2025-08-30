@@ -22,7 +22,6 @@ function ImportantLink() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showPublishModal, setShowPublishModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
   const [newSectionName, setNewSectionName] = useState("");
@@ -190,7 +189,6 @@ function ImportantLink() {
     setCurrentSection(null);
     setFieldErrors({});
     setNameError("");
-    setShowPublishModal(false);
   };
 
   const handleSubmitAdd = async () => {
@@ -400,33 +398,15 @@ function ImportantLink() {
     }
   };
 
-  const handlePublish = (id) => {
-    console.log("the deleted link id", id);
-    const sectionToPublish = sections.find((sec) => sec.link_id === id);
-    console.log(
-      "the publish inporatant link for sectiontoPublish",
-      sectionToPublish
-    );
-    setCurrentSection(sectionToPublish);
-    setShowPublishModal(true);
-  };
-
-  const handleSubmitPublish = async () => {
+  const handlePublish = async (linkId) => {
     try {
       const token = localStorage.getItem("authToken");
-
       if (!token) {
         throw new Error("No authentication token found");
       }
 
-      if (!token || !currentSection || !currentSection.link_id) {
-        throw new Error("Link Id is missing");
-      }
-
-      console.log("publish this link", currentSection.link_id);
-
       const response = await axios.put(
-        `${API_URL}/api/publish_importantlink/${currentSection.link_id}`,
+        `${API_URL}/api/publish_importantlink/${linkId}`,
         {},
         {
           headers: {
@@ -439,7 +419,6 @@ function ImportantLink() {
       if (response.data.success) {
         toast.success("Link published successfully!");
         fetchSections(); // Refresh the list to reflect publish status
-        setShowPublishModal(false);
       } else {
         toast.error(response.data.message || "Failed to publish the link.");
       }
@@ -450,56 +429,20 @@ function ImportantLink() {
       } else {
         toast.error("Server error. Please try again later.");
       }
-    } finally {
-      setIsSubmitting(false);
-      setShowPublishModal(false);
     }
   };
 
-  // const validateSectionName = (title, url, type_link) => {
-  //   const errors = {};
-  //   if (!title || title.trim() === "") {
-  //     errors.title = "Please enter Title.";
-  //   }
-  //   if (!url || url === "") {
-  //     errors.url = "Please enter URL.";
-  //   }
-  //   if (!type_link || type_link === "") {
-  //     errors.type_link = "Please select link type.";
-  //   }
-  //   return errors;
-  // };
-
   const validateSectionName = (title, url, type_link) => {
     const errors = {};
-
     if (!title || title.trim() === "") {
       errors.title = "Please enter Title.";
     }
-
-    if (!url || url.trim() === "") {
+    if (!url || url === "") {
       errors.url = "Please enter URL.";
-    } else {
-      // URL validation using regex
-      const urlPattern = new RegExp(
-        "^(https?:\\/\\/)" + // protocol
-          "((([a-z\\d]([a-z\\d-]*[a-z\\d])*))\\.)+" + // domain name
-          "[a-z]{2,}" + // extension
-          "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
-          "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
-          "(\\#[-a-z\\d_]*)?$",
-        "i"
-      );
-
-      if (!urlPattern.test(url)) {
-        errors.url = "Please enter a valid URL.";
-      }
     }
-
     if (!type_link || type_link === "") {
       errors.type_link = "Please select link type.";
     }
-
     return errors;
   };
 
@@ -579,7 +522,7 @@ function ImportantLink() {
           ></div>
 
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+            <div className="h-96 lg:h-96 w-full md:w-[full] mx-auto w-overflow-y-scroll lg:overflow-x-hidden">
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
@@ -663,6 +606,7 @@ function ImportantLink() {
                                 className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                                 onClick={() => handleView(section)}
                               >
+                                {/* <FontAwesomeIcon icon={faView} /> */}
                                 <MdOutlineRemoveRedEye className="font-bold text-xl" />
                               </button>
                             )}
@@ -1044,11 +988,9 @@ function ImportantLink() {
                     </label>
                     <input
                       type="url"
-                      className="form-control shadow-md mb-2 cursor-pointer underline"
+                      className="form-control shadow-md mb-2"
                       id="url"
                       value={url}
-                      onClick={() => window.open(url, "_blank")}
-                      style={{ color: "#2563eb" }}
                     />
                   </div>
 
@@ -1120,49 +1062,6 @@ function ImportantLink() {
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Deleting..." : "Delete"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showPublishModal && (
-          <div
-            className="modal"
-            style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="flex justify-between p-3">
-                  <h5 className="modal-title">Confirm Publish</h5>
-                  <RxCross1
-                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                    type="button"
-                    onClick={handleCloseModal}
-                  />
-                </div>
-                <div
-                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                  style={{
-                    backgroundColor: "#C03078",
-                  }}
-                ></div>
-                <div className="modal-body">
-                  <p>
-                    Are you sure you want to publish Important Link :{" "}
-                    {currentSection?.title}?
-                  </p>
-                </div>
-                <div className=" flex justify-end p-3">
-                  <button
-                    type="button"
-                    className="btn btn-danger px-3 mb-2"
-                    style={{}}
-                    onClick={handleSubmitPublish}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Publishing..." : "Publish"}
                   </button>
                 </div>
               </div>

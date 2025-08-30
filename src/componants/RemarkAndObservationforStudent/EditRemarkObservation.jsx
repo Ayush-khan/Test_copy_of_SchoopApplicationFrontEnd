@@ -24,7 +24,6 @@ const EditRemarkandObservation = () => {
     classError: "",
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { id } = useParams();
   console.log("id", id);
 
@@ -50,7 +49,7 @@ const EditRemarkandObservation = () => {
     remark_desc: "",
     remark_type: "",
     remark_id: "",
-    filenottobedeleted: [], // existing uploaded files (to preview, not delete)
+    filenotbedeleted: [], // existing uploaded files (to preview, not delete)
     userfile: [], // new files (if any, uploaded in edit)
   });
 
@@ -62,7 +61,7 @@ const EditRemarkandObservation = () => {
         remark_subject: location.state.remark_subject || "",
         remark_desc: location.state.remark || location.state.remark_desc || "",
         remark_type: location.state.remark_type || "Remark",
-        filenottobedeleted: location.state.files || [], //
+        filenotbedeleted: location.state.files || [], //
         userfile: [], // no new file uploads initially
         subjectname:
           location.state.subjectname || location.state.subjectname || "",
@@ -140,27 +139,23 @@ const EditRemarkandObservation = () => {
     }
   };
 
-  // const handleFileUpload = (e) => {
-  //   const files = Array.from(e.target.files);
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     userfile: files,
-  //   }));
+  // const handleFileUpload = (event) => {
+  //   const files = Array.from(event.target.files);
+  //   setUploadedFiles((prevFiles) => [...prevFiles, ...files]);
   // };
 
   const handleFileUpload = (e) => {
-    const newFiles = Array.from(e.target.files);
-
+    const files = Array.from(e.target.files);
     setFormData((prev) => ({
       ...prev,
-      userfile: [...prev.userfile, ...newFiles], // append to existing
+      userfile: files,
     }));
   };
 
   const handleRemoveOldFile = (indexToRemove) => {
     setFormData((prev) => ({
       ...prev,
-      filenottobedeleted: prev.filenottobedeleted.filter(
+      filenotbedeleted: prev.filenotbedeleted.filter(
         (_, index) => index !== indexToRemove
       ),
     }));
@@ -189,115 +184,50 @@ const EditRemarkandObservation = () => {
       remark_desc: "",
       remark_type: "Remark",
       remark_id: "",
-      filenottobedeleted: [],
+      filenotbedeleted: [],
       userfile: [],
+      subjectname: "",
+      fullname: "",
+      classname: "",
     });
 
+    setSelectedClasses([]);
     setIsObservation(false);
   };
-
-  // const handleSubmitEdit = async (e) => {
-  //   e.preventDefault();
-
-  //   setIsSubmitting(true);
-
-  //   if (!validateForm()) return;
-  //   const formDataToSend = new FormData();
-
-  //   // 1. Add basic text fields
-  //   formDataToSend.append("remark_id", formData.remark_id);
-  //   formDataToSend.append("remark_subject", formData.remark_subject);
-  //   formDataToSend.append("remark_desc", formData.remark_desc);
-  //   formDataToSend.append("remark_type", isObservation ? "Y" : "N");
-
-  //   // 2. Append new files (userfile[])
-  //   formData.userfile.forEach((file) => {
-  //     formDataToSend.append("userfile[]", file);
-  //   });
-
-  //   // 3. Append old files (filenottobedeleted[])
-
-  //   formData.filenottobedeleted.forEach((file, index) => {
-  //     formDataToSend.append(
-  //       `filenottobedeleted[${index}][file_url]`,
-  //       file.file_url
-  //     );
-  //     formDataToSend.append(
-  //       `filenottobedeleted[${index}][image_name]`,
-  //       file.image_name
-  //     );
-  //   });
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/update_remarkforstudent/${id}`,
-  //       formDataToSend,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "multipart/form-data",
-  //         },
-  //       }
-  //     );
-
-  //     if (response.data.success) {
-  //       toast.success("Remark updated successfully!");
-  //       navigate("/remObsStudent");
-  //     } else {
-  //       toast.error(response.data.message || "Something went wrong");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error updating remark:", error);
-  //     toast.error("Error updating remark");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
 
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
 
-    if (isSubmitting) return;
-    setIsSubmitting(true);
+    if (!validateForm()) return;
+    const formDataToSend = new FormData();
 
-    if (!validateForm()) {
-      setIsSubmitting(false);
-      return;
-    }
+    // 1. Add basic text fields
+    formDataToSend.append("remark_id", formData.remark_id);
+    formDataToSend.append("remark_subject", formData.remark_subject);
+    formDataToSend.append("remark_desc", formData.remark_desc);
+    formDataToSend.append("remark_type", isObservation ? "yes" : " ");
+
+    // 2. Append new files (userfile[])
+    formData.userfile.forEach((file) => {
+      formDataToSend.append("userfile[]", file);
+    });
+
+    // 3. Append old files (filenotbedeleted[])
+    // Assumes backend accepts file_url/image_name for retained files
+    formData.filenotbedeleted.forEach((file, index) => {
+      formDataToSend.append(
+        `filenotbedeleted[${index}][file_url]`,
+        file.file_url
+      );
+      formDataToSend.append(
+        `filenotbedeleted[${index}][image_name]`,
+        file.image_name
+      );
+    });
 
     try {
       const token = localStorage.getItem("authToken");
-      if (!token) throw new Error("Authentication token is missing");
 
-      const formDataToSend = new FormData();
-
-      // Basic Fields
-      formDataToSend.append("remark_id", formData.remark_id);
-      formDataToSend.append("remark_subject", formData.remark_subject);
-      formDataToSend.append("remark_desc", formData.remark_desc);
-      formDataToSend.append("remark_type", isObservation ? "yes" : "");
-
-      // New Files
-      formData.userfile?.forEach((file) => {
-        formDataToSend.append("userfile[]", file);
-      });
-
-      formData.filenottobedeleted?.forEach((file, index) => {
-        const fileName =
-          file.image_name || file.file_url?.split("/").pop() || "";
-
-        // formDataToSend.append(`filenottobedeleted[${index}]`, file.file_url);
-        formDataToSend.append(`filenottobedeleted[${index}]`, fileName);
-      });
-
-      // Debug log
-      for (let pair of formDataToSend.entries()) {
-        console.log(`${pair[0]}:`, pair[1]);
-      }
-
-      // API call
       const response = await axios.post(
         `${API_URL}/api/update_remarkforstudent/${id}`,
         formDataToSend,
@@ -306,25 +236,18 @@ const EditRemarkandObservation = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-          withCredentials: true,
         }
       );
 
       if (response.data.success) {
-        toast.success("Remark Updated successfully!");
-
-        // Delay navigation by 32 seconds (32,000 milliseconds)
-        setTimeout(() => {
-          navigate("/remObsStudent");
-        }, 2000);
+        toast.success("Remark updated successfully!");
+        navigate("/remObsStudent");
       } else {
         toast.error(response.data.message || "Something went wrong");
       }
     } catch (error) {
       console.error("Error updating remark:", error);
-      toast.error("Error updating remark. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      toast.error("Error updating remark");
     }
   };
 
@@ -391,7 +314,6 @@ const EditRemarkandObservation = () => {
                             readOnly
                             value={formData.fullname}
                             className="w-full bg-gray-200 text-gray-700 p-2 rounded"
-                            maxLength={100}
                           />
                           {errors.classError && (
                             <p className="text-red-500 mt-1">
@@ -412,7 +334,6 @@ const EditRemarkandObservation = () => {
                             value={formData.subjectname}
                             readOnly
                             className="w-full bg-gray-200 text-gray-700 p-2 rounded"
-                            maxLength={350}
                           />
                           {errors.classError && (
                             <p className="text-red-500 mt-1">
@@ -508,13 +429,13 @@ const EditRemarkandObservation = () => {
                             <p className="text-pink-500 text-xs mt-1">
                               (Each file must not exceed a maximum size of 2MB)
                             </p>
-                            {formData.filenottobedeleted?.length > 0 && (
+                            {formData.filenotbedeleted?.length > 0 && (
                               <div className="mt-2">
                                 <label className="text-sm text-gray-700">
                                   Previously Uploaded Files:
                                 </label>
                                 <ul className="list-disc ml-5 text-blue-600 underline text-sm">
-                                  {formData.filenottobedeleted.map(
+                                  {formData.filenotbedeleted.map(
                                     (file, index) => (
                                       <li
                                         key={index}
@@ -565,9 +486,8 @@ const EditRemarkandObservation = () => {
                     type="button"
                     onClick={handleSubmitEdit}
                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                    disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Updaing..." : "Update"}
+                    Update
                   </button>
 
                   <button

@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { FaUserCircle } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -30,7 +31,6 @@ function CreateStaff() {
     employee_id: "",
     teacher_image_name: null,
     special_sub: "",
-    tc_id: "",
   });
   const [errors, setErrors] = useState({});
   const [employeeIdBackendError, setEmployeeIdBackendError] = useState("");
@@ -41,30 +41,6 @@ function CreateStaff() {
   const MAX_DATE = "2006-12-31";
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
-
-  const [teacherCategories, setTeacherCategories] = useState([]);
-
-  useEffect(() => {
-    const fetchTeacherCategories = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (response.data?.success && Array.isArray(response.data.data)) {
-          setTeacherCategories(response.data.data);
-        } else {
-          toast.error("Failed to load teacher categories");
-        }
-      } catch (error) {
-        console.error("Error fetching teacher categories:", error);
-        toast.error("Error fetching teacher categories");
-      }
-    };
-
-    fetchTeacherCategories();
-  }, [API_URL]);
 
   // Validation functions
   const validatePhone = (phone) => {
@@ -299,7 +275,7 @@ function CreateStaff() {
   return (
     <div className="container mx-auto p-4 ">
       <ToastContainer />
-      <div className="card p-2 rounded-md ">
+      <div className="card p-4 rounded-md ">
         <div className=" card-header mb-4 flex justify-between items-center ">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             Create a New Staff
@@ -319,7 +295,7 @@ function CreateStaff() {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <p className="  md:absolute md:right-7  md:top-[9%]   text-gray-500 ">
+        <p className="  md:absolute md:right-10  md:top-[10%]   text-gray-500 ">
           <span className="text-red-500">*</span>indicates mandatory information
         </p>
         <form
@@ -537,6 +513,29 @@ function CreateStaff() {
                   </div>
                 )}
               </div>
+
+              {/* <div>
+              <label
+                htmlFor=" birthday"
+                className="block font-bold  text-xs mb-2"
+              >
+                Date Of Birth <span className="text-red-500">*</span>
+              </label>
+              <input
+                // type="date"
+                type="date"
+                id=" birthday"
+                name=" birthday"
+                value={formData.birthday}
+                // placeholder="dd/MM/yyyy"
+                onChange={handleChange}
+                className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                // required
+              />
+              {errors.birthday && (
+                <span className="text-red-500 text-xs">{errors.birthday}</span>
+              )}
+            </div> */}
               <div>
                 <label
                   htmlFor="experience"
@@ -747,35 +746,6 @@ function CreateStaff() {
                   <span className="text-red-500 text-xs">{errors.role}</span>
                 )}
               </div>
-              <div>
-                <label htmlFor="tc_id" className="block font-bold text-xs mb-2">
-                  Teacher Category
-                </label>
-                <select
-                  id="tc_id"
-                  name="tc_id"
-                  value={formData.tc_id}
-                  onChange={handleChange}
-                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-                  required
-                >
-                  <option className="bg-gray-300" value="">
-                    Select
-                  </option>
-                  {teacherCategories.map((cat) => (
-                    <option key={cat.tc_id} value={cat.tc_id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-
-                {/* {errors.tc_id && (
-                  <span className="text-red-500 text-xs">
-                    {errors.tc_id}
-                  </span>
-                )} */}
-              </div>
-
               <div>
                 <div>
                   <label

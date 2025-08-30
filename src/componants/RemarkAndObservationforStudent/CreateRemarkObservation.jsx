@@ -374,7 +374,7 @@ const CreateRemarkObservation = () => {
                     <div className="space-y-4 mr-10">
                       {/* Class Selection */}
                       <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-                        <label className="w-[19%] text-[1em] text-gray-700">
+                        <label className="w-[18%] text-[1em] text-gray-700">
                           Select Class <span className="text-red-500">*</span>
                         </label>
                         <div className="flex-1">
@@ -479,7 +479,7 @@ const CreateRemarkObservation = () => {
 
                       {/* Subject Selection */}
                       <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-                        <label className="w-[19%] text-[1em] text-gray-700">
+                        <label className="w-[18%] text-[1em] text-gray-700">
                           Subject
                         </label>
                         <div className="flex-1">
@@ -501,7 +501,7 @@ const CreateRemarkObservation = () => {
 
                       {/* Subject of Remark */}
                       <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-                        <label className="w-[19%] text-[1em] text-gray-700">
+                        <label className="w-[18%] text-[1em] text-gray-700">
                           Subject of Remark{" "}
                           <span className="text-red-500">*</span>
                         </label>
@@ -511,7 +511,6 @@ const CreateRemarkObservation = () => {
                             className="w-[40%] px-2 py-2 border border-gray-700 rounded-md shadow-md"
                             value={remarkSubject}
                             onChange={handleRemarkSubjectChange}
-                            maxLength={100}
                           />
                           {errors.remarkSubjectError && (
                             <p className="text-red-500 text-sm mt-1">
@@ -523,7 +522,7 @@ const CreateRemarkObservation = () => {
 
                       {/* Remark */}
                       <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-                        <label className="w-[19%] text-[1em] text-gray-700">
+                        <label className="w-[18%] text-[1em] text-gray-700">
                           Remark <span className="text-red-500">*</span>
                         </label>
                         <div className="flex-1">
@@ -532,7 +531,6 @@ const CreateRemarkObservation = () => {
                             className="w-[40%] px-2 py-1 border border-gray-700 rounded-md shadow-md"
                             value={remarkDescription}
                             onChange={handleRemarkDescriptionChange}
-                            maxLength={350}
                           />
                           {errors.remarkDescriptionError && (
                             <p className="text-red-500 text-sm mt-1">

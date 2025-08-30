@@ -97,7 +97,6 @@ function ViewStudent() {
     f_blood_group: "",
     has_specs: "",
     udise_pen_no: "",
-    apaar_id: "",
     user_id: "",
     // Preferences
     SetToReceiveSMS: "",
@@ -169,7 +168,6 @@ function ViewStudent() {
         m_emailid: student?.parents?.m_emailid || "",
         m_adhar_no: student?.parents?.m_adhar_no || "",
         udise_pen_no: student.udise_pen_no || " ",
-        apaar_id: student.apaar_id || " ",
         user_id: student?.user_master?.user_id || " ",
         SetToReceiveSMS: student.SetToReceiveSMS || "",
         SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
@@ -598,22 +596,6 @@ function ViewStudent() {
                 type="text"
                 disabled
                 value={formData.stu_aadhaar_no}
-                className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
-
-                // onBlur={handleBlur}
-              />
-            </div>{" "}
-            <div className="mt-2">
-              <label
-                htmlFor="studentAadharNumber"
-                className="block font-bold text-xs mb-0.5"
-              >
-                APAAR ID No.
-              </label>
-              <input
-                type="text"
-                disabled
-                value={formData.apaar_id}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}

@@ -58,26 +58,11 @@ const EditEvent = () => {
 
         setSubject(data.title || ""); // Event Title
         setSelectedClasses(data.classes || []);
-        // setSelectedRoles(() => {
-        //   if (Array.isArray(data.login_type)) return data.login_type;
-        //   if (typeof data.login_type === "string")
-        //     return data.login_type.split(",");
-        //   return [];
-        // });
         setSelectedRoles(() => {
-          const loginTypes = Array.isArray(data.login_type)
-            ? data.login_type
-            : typeof data.login_type === "string"
-            ? data.login_type.split(",")
-            : [];
-
-          return loginTypes
-            .map((id) => {
-              if (id === "A") return "Admin"; // Static mapping for A
-              const role = roles.find((r) => String(r.role_id) === String(id));
-              return role?.name || id; // Show role name if found, or fallback to ID
-            })
-            .filter(Boolean); // Remove null/undefined
+          if (Array.isArray(data.login_type)) return data.login_type;
+          if (typeof data.login_type === "string")
+            return data.login_type.split(",");
+          return [];
         });
 
         setStartDate(data.start_date || "");
@@ -237,7 +222,7 @@ const EditEvent = () => {
                           {/* Input with specific spacing */}
                           <input
                             type="text"
-                            className="w-full max-w-md px-2 py-1 border border-gray-400 rounded mr-4" // <- sets custom gap
+                            className="w-full max-w-md px-2 py-1 border border-gray-400 rounded mr-8" // <- sets custom gap
                             value={subject}
                             onChange={(e) => setSubject(e.target.value)}
                           />

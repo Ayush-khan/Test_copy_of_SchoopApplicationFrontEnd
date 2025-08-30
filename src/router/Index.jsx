@@ -1,93 +1,3 @@
-// // All Routes protected code is here
-
-// import { Route, Router, Routes } from "react-router-dom";
-// import CreateStudent from "../componants/CreateStudent";
-// import StudentList from "../componants/StudentList";
-// import DemoTable from "../componants/DemoTable";
-// import StudentEdit from "../componants/StudentEdit";
-// import Login from "../componants/LoginForm";
-// import NavBar from "../Layouts/NavBar";
-// import UserProfile from "../componants/UserProfile";
-// import LandingPage from "../componants/LandingPage";
-// import AdminDashboard from "../componants/Dashbord/AdminDashboard";
-// import EventCard from "../componants/Dashbord/EventCard";
-// import NoticeBord from "../componants/Dashbord/NoticeBord";
-// import StudentsChart from "../componants/Dashbord/Charts/StudentsChart";
-// import PrivateRoute from "../utils/PrivateRoute";
-// import ClassList from "../componants/TableComponentsNikhilbhai/ClassList";
-// import Sections from "../componants/TableComponentsNikhilbhai/Sections";
-// import NotificationPage from "../componants/NotificationPage";
-// import StaffBirthdayTabList from "../componants/AllTableList/StaffBirthdayTabList";
-// import TickitingCountList from "../componants/AllTableList/TickitingCountList";
-// import FeePendingList from "../componants/AllTableList/FeePendingList.jsx";
-// import ChangePassword from "../componants/ChangePassword.jsx";
-// import PageNotFounde from "./PageNotFound.jsx";
-// function Index() {
-//   return (
-//     <Routes>
-//       <Route
-//         path="/student-create"
-//         element={<PrivateRoute element={<CreateStudent/>} />}
-//       />
-//       <Route
-//         path="/student-list"
-//         element={<PrivateRoute element={<StudentList/>} />}
-//       />
-//       <Route
-//         path="/student/:id/edit"
-//         element={<PrivateRoute element={<StudentEdit/>} />}
-//       />
-//       <Route
-//         path="/student-demo-table"
-//         element={<PrivateRoute element={<DemoTable/>} />}
-//       />
-//       <Route path="/eventcard" element={<PrivateRoute element={<EventCard/>} />} />
-//       <Route
-//         path="/dashboard"
-//         element={<PrivateRoute element={<AdminDashboard/>} />}
-//       />
-
-//       <Route path="/navbar" element={<PrivateRoute element={<NavBar/>} />} />
-//       <Route
-//         path="/myprofile"
-//         element={<PrivateRoute element={<UserProfile/>} />}
-//       />
-
-//       {/* Nikhil bhai pages */}
-//       <Route path="/classlist" element={<PrivateRoute element={<ClassList/>} />} />
-//       <Route path="/sections" element={<PrivateRoute element={<Sections/>} />} />
-//       <Route path="/" element={<LandingPage />} />
-//       <Route path="/login" element={<Login />} />
-//       <Route path="/notification" element={<NotificationPage />} />
-//       {/* <Route path="/notification" element={<NotificationPage />} /> */}
-//       {/* ALlTableList EndPoints */}
-//       {/* <StaffBirthdayTabList /> */}
-//       {/* <TickitingCountList /> */}
-//       {/* Routes for the listing cards */}
-//       {/* changepassword route */}
-//       <Route path="/changepassword" element={<ChangePassword />} />
-//       <Route
-//         path="/ticktinglist"
-//         element={<PrivateRoute element={<TickitingCountList/>} />}
-//       />
-//       <Route
-//         path="/feependinglist"
-//         element={<PrivateRoute element={<FeePendingList/>} />}
-//       />
-//       <Route
-//         path="/staffbirthlist"
-//         element={<PrivateRoute element={<StaffBirthdayTabList/>} />}
-//       />
-//       {/* Page Not FOund Routes */}
-//       <Route path="*" element={<PrivateRoute element={<PageNotFounde/>} />} />
-//     </Routes>
-//   );
-// }
-
-// export default Index;
-
-// // second outlet used try
-
 import { Route, Router, Routes } from "react-router-dom";
 import CreateStudent from "../componants/StudentModel/CreateStudent.jsx";
 import StudentList from "../componants/StudentList";
@@ -275,7 +185,7 @@ import LessonPlanStatusReport from "../componants/Reports/LessonPlanReport/Lesso
 import LessonPlanSummarisedReport from "../componants/Reports/LessonPlanReport/LessonPlanSummarisedReport.jsx";
 import HomeworkStatusReport from "../componants/Reports/LessonPlanReport/HomeworkStatusReport.jsx";
 import ClasswiseHomeworkDetailReport from "../componants/Reports/LessonPlanReport/ClasswiseHomeworkDetailReport.jsx";
-import TeacherAttendanceMonthlyReport from "../componants/Reports/TeacherAttendanceMonthlyReport.jsx";
+import TeacherAttendanceMonthlyReport from "../componants/Reports/TeacherMonthlyAttendanceDetailedReport.jsx";
 import FullTermMarksClass from "../componants/Reports/AssessmentrReportModule/FullTermMarksClass.jsx";
 import LessonPlanDetailedView from "../componants/View/LessonPlanDetailedView.jsx";
 import IciciFeePaymentReport from "../componants/Reports/IciciFeePaymentReport.jsx";
@@ -284,37 +194,28 @@ import Event from "../componants/Events/Event.jsx";
 import CreateEvent from "../componants/Events/CreateEvent.jsx";
 import EditEvent from "../componants/Events/EditEvent.jsx";
 import MarkDropdownEditor from "../componants/Events/MarkDropdownEditor.jsx";
-import ImportantLink from "../componants/ImportantLInks/ImportantLinks.jsx";
 import SubjectMapping from "../componants/MastersModule/SubjectMapping/SubjectMapping.jsx";
+import ImportantLink from "../componants/ImportantLInks/ImportantLinks.jsx";
 import BookRequisition from "../componants/BookRequisition/BookRequisition.jsx";
-import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherAttendanceMonthlyReport.jsx";
+import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherMonthlyAttendanceDetailedReport.jsx";
 import BackgroundChanger from "../Layouts/BackgroundColorSelect/BackgroundChanger.jsx";
-import HomeworkNotAssignReport from "../componants/Reports/CurriculumReport/HomewrokNotAssignReport.jsx";
-import News from "../componants/NewsModule/News.jsx";
-import RoleForEvent from "../componants/Events/RoleForEvent.jsx";
-import EditApproveStationery from "../componants/Stationery/EditApproveStationery.jsx";
-import ApproveStationery from "../componants/Stationery/ApproveStationery.jsx";
-import ViewBookAvailability from "../componants/View/ViewBookAvailability.jsx";
-import UpdateClasswiseStudentDetails from "../componants/StudentModel/UpdateClaswiseStudenDeails/UpdateClasswiseStudentDetails.jsx";
 
 // import Menus from "../c";
 function Index() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/notification" element={<NotificationPage />} />
       <Route path="/forgotPassword" element={<ForgotPassword />} />
       <Route path="/" element={<MainLayout />}>
+        {/* BackgroundChanger module */}
+        <Route
+          path="/backgroundChanger"
+          element={<PrivateRoute element={<BackgroundChanger />} />}
+        />
         {/* Role Management */}
         <Route
           path="/manageMenus"
           element={<PrivateRoute element={<Menus />} />}
-        />
-        {/* background changer component */}
-        <Route
-          path="/backgroundChanger"
-          element={<PrivateRoute element={<BackgroundChanger />} />}
         />
         <Route
           path="/manageRoles"
@@ -324,8 +225,10 @@ function Index() {
           path="/manageRoleAccess"
           element={<PrivateRoute element={<ShowRolesWithMenu />} />}
         />
-        {/* News Module */}
-        <Route path="/news" element={<PrivateRoute element={<News />} />} />
+        <Route
+          path="/manageRoleAccess/:roleId"
+          element={<PrivateRoute element={<ManageRoleAccess />} />}
+        />
         {/* Important links */}
         <Route
           path="/importantLinks"
@@ -340,10 +243,6 @@ function Index() {
         <Route
           path="/bookRequisition"
           element={<PrivateRoute element={<BookRequisition />} />}
-        />
-        <Route
-          path="/manageRoleAccess/:roleId"
-          element={<PrivateRoute element={<ManageRoleAccess />} />}
         />
         {/* <Route
           path="/TestForAllfunctionlity"
@@ -777,11 +676,6 @@ function Index() {
           path="/markDropdown"
           element={<PrivateRoute element={<MarkDropdownEditor />} />}
         />
-        {/* Roles for events */}
-        <Route
-          path="/roleForEvent"
-          element={<PrivateRoute element={<RoleForEvent />} />}
-        />
         {/* Id Cards Module */}
         {/* Student Id Card Module */}
         <Route
@@ -954,11 +848,6 @@ function Index() {
           path="/AttendanceDetaileMontReport"
           element={<PrivateRoute element={<AttendanceDetaileMontReport />} />}
         />
-        {/* Curriculum report  */}
-        <Route
-          path="/homeworkNotAssignReport"
-          element={<PrivateRoute element={<HomeworkNotAssignReport />} />}
-        />
         {/* Lesson plane report modules */}
         <Route
           path="/lessonPlanStatusReport"
@@ -983,7 +872,7 @@ function Index() {
             <PrivateRoute element={<TeacherAttendanceMonthlyReport />} />
           }
         />
-        {/* Teacher Monthly Attendance Detailed Report Monthly Attendance Report */}
+        {/* Staff Monthly Attendance Report */}
         <Route
           path="/teacherAttendanceMonthlyReport"
           element={
@@ -992,20 +881,10 @@ function Index() {
             />
           }
         />{" "}
-        {/* UpdateClasswiseStudentDetails module */}
-        <Route
-          path="/updateClasswiseStudentDetails"
-          element={<PrivateRoute element={<UpdateClasswiseStudentDetails />} />}
-        />
         {/* Lesson plan Detailed Report */}
         <Route
           path="/lessonPlanDetailedView"
           element={<PrivateRoute element={<LessonPlanDetailedView />} />}
-        />
-        {/* View Book Availability module*/}
-        <Route
-          path="/viewBookAvailability"
-          element={<PrivateRoute element={<ViewBookAvailability />} />}
         />
         {/* Attendance Marking Status Report */}
         <Route
@@ -1167,14 +1046,6 @@ function Index() {
         <Route
           path="/stationery"
           element={<PrivateRoute element={<Stationery />} />}
-        />
-        <Route
-          path="/approveStationery/edit/:id"
-          element={<PrivateRoute element={<EditApproveStationery />} />}
-        />
-        <Route
-          path="/approveStationery"
-          element={<PrivateRoute element={<ApproveStationery />} />}
         />
         {/* Siblings unMapping module*/}
         <Route

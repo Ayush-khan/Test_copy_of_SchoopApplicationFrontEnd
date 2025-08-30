@@ -226,25 +226,25 @@ const handleSearch = () => {
               <table className="min-w-full leading-normal table-auto">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className=" px-0.5 w-full md:w-[8%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-base font-semibold text-gray-900  tracking-wider">
+                    <th className=" px-0.5 w-full md:w-[8%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                       S.No
                     </th>
-                    <th className=" px-0.5 w-full md:w-[20%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-base font-semibold text-gray-900  tracking-wider">
+                    <th className=" px-0.5 w-full md:w-[30%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                       Category Name
                     </th>
-                    <th className=" px-0.5 text-center lg:px-1 py-2  border border-gray-950 text-base font-semibold text-gray-900  tracking-wider">
+                    <th className=" px-0.5 text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                       Admission fees
                     </th>
-                    <th className=" px-0.5 text-center lg:px-1 py-2  border border-gray-950 text-base font-semibold text-gray-900  tracking-wider">
+                    <th className=" px-0.5 text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                       Installment 1
                     </th>
-                    <th className="px-2  py-2 border border-gray-950 text-base font-semibold text-center text-gray-900">
+                    <th className="px-2  py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
                       Installment 2
                     </th>
-                    <th className="px-2  py-2 border border-gray-950 text-base font-semibold text-center text-gray-900">
+                    <th className="px-2  py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
                       Installment 3
                     </th>
-                    <th className="px-2  py-2 border border-gray-950 text-base font-semibold text-center text-gray-900">
+                    <th className="px-2  py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
                       Total
                     </th>
                   </tr>
@@ -472,7 +472,7 @@ const handleSearch = () => {
             scrollbarColor: "#C03178 transparent",
           }}
         >
-          <table className="w-[800px] mx-auto leading-normal table-auto">
+          <table className="min-w-full leading-normal table-auto">
             <thead>
               <tr className="bg-gray-100">
                 {["Sr No.", "Fee Type", "Amount (₹)"].map((header, index) => (

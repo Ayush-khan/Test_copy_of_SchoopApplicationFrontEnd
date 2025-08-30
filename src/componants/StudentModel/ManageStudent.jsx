@@ -2287,9 +2287,7 @@ function ManageSubjectList() {
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.user_master?.user_id}
                                 </td>
-                                {(roleId === "A" ||
-                                  roleId === "M" ||
-                                  roleId === "U") && (
+                                {(roleId === "A" || roleId === "M") && (
                                   <>
                                     <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                       <button

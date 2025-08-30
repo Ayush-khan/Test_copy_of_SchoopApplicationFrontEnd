@@ -284,12 +284,12 @@ const FeesCategoryStudentAllotment = () => {
                               {[
                                 "Sr No.",
                                 "Roll No.",
-                                "Student Name",
+                                "Student name",
                                 "Fees Category",
                               ].map((header, index) => (
                                 <th
                                   key={index}
-                                  className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-base font-semibold text-gray-900 tracking-wider"
+                                  className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
                                 >
                                   {header}
                                 </th>
@@ -311,18 +311,9 @@ const FeesCategoryStudentAllotment = () => {
                                     {student.roll_no || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {`${student?.first_name || ""} ${
-                                    student?.mid_name || ""
-                                  } ${student?.last_name || ""}`
-                                    .split(" ")
-                                    .map((word) =>
-                                      word
-                                        ? word.charAt(0).toUpperCase() +
-                                          word.slice(1).toLowerCase()
-                                        : ""
-                                    )
-                                    .join(" ")
-                                    .trim()}{" "}
+                                    {student.first_name}{" "}
+                                    {student.mid_name?.trim() || ""}{" "}
+                                    {student.last_name}
                                   </td>
 
                                   <td className="px-2 py-2 text-center border border-gray-300">

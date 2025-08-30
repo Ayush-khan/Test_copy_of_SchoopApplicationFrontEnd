@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Select from "react-select";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
-import MarkDropdownEditor from "./MarkDropdownEditor";
 
 function Event() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -532,24 +531,12 @@ function Event() {
   };
 
   // Handle file selection
-  // const handleFileChange = (event) => {
-  //   const file = event.target.files[0];
-  //   setSelectedFile(file); // Set the selected file to state
-  //   setErrorMessage(""); // Clear any previous error
-  //   setUploadStatus(""); // Clear any previous success
-  //   setErrorMessageUrl("");
-  // };
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-
-      setErrorMessage("");
-      setErrorMessageUrl("");
-      setUploadStatus("");
-    }
-
-    e.target.value = null;
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    setSelectedFile(file); // Set the selected file to state
+    setErrorMessage(""); // Clear any previous error
+    setUploadStatus(""); // Clear any previous success
+    setErrorMessageUrl("");
   };
 
   const downloadCsv = async (fileUrl) => {
@@ -585,28 +572,46 @@ function Event() {
     }
   };
 
+  // const downloadCsv = async (fileUrl) => {
+  //   if (!fileUrl || fileUrl === "undefined") {
+  //     toast.error("Rejected file is not available to download.");
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) throw new Error("No authentication token found");
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/download_csv_rejected/${fileUrl}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         responseType: "blob",
+  //       }
+  //     );
+
+  //     let filename = "rejected_template.csv";
+  //     if (selectedClasses.length > 0 && allClasses.length > 0) {
+  //       const selectedClassNames = allClasses
+  //         .filter((cls) => selectedClasses.includes(cls.class_id))
+  //         .map((cls) => cls.name.replace(/\s+/g, "_"));
+  //       filename = `${selectedClassNames.join("_")}.rejected.template.csv`;
+  //     }
+
+  //     triggerFileDownload(response.data, filename);
+  //   } catch (error) {
+  //     console.error("Error downloading template:", error);
+  //     toast.error("Failed to download the file.");
+  //   }
+  // };
+
   const handleUpload = async () => {
     if (!selectedFile) {
       setErrorMessage("Please select a file first.");
       return;
     }
 
-    setErrorMessage("");
-    setErrorMessageUrl("");
-    setUploadStatus("");
-
-    const fileName = selectedFile.name.trim();
-
-    // Accept if filename ends with "_event.csv" or "_rejected_template.csv" (+ optional numbered suffix like (1), (2))
-    const validPattern = /_(event|rejected_template)(\s?\(\d+\))?\.csv$/i;
-    const validPatternone = /(event|rejected_template)(\s?\(\d+\))?\.csv$/i;
-
-    if (!validPattern.test(fileName) && !validPatternone.test(fileName)) {
-      toast.warning("Please check if correct file is selected for upload.");
-      return;
-    }
-
-    setLoading(true);
+    setLoading(true); // Show loader
     const formData = new FormData();
     formData.append("file", selectedFile);
 
@@ -615,6 +620,8 @@ function Event() {
       if (!token) {
         throw new Error("No authentication token found");
       }
+
+      console.log("File is valid CSV", formData);
 
       const response = await axios.post(
         `${API_URL}/api/import_event_csv`,
@@ -626,21 +633,23 @@ function Event() {
         }
       );
 
+      console.log("Response of bulk upload:", response);
+
       if (response.status === 200) {
         toast.success("Events Data posted successfully!");
         setIsDataPosted(true);
         setSelectedFile(null);
         fetchEvents();
       }
-
       setTimeout(() => {
         handleReset();
       }, 2000);
     } catch (error) {
-      setLoading(false);
+      setLoading(false); // Hide loader
 
       const showErrorForUploading = error?.response?.data?.message;
       const showErrorForUploadingUrl = error?.response?.data?.invalid_rows;
+      console.log("Error from API:", showErrorForUploading);
 
       setErrorMessage(
         !showErrorForUploading
@@ -648,81 +657,19 @@ function Event() {
           : `Error: ${showErrorForUploading}.`
       );
 
-      setErrorMessageUrl(`${showErrorForUploadingUrl}`);
+      const fullErrorMessageUrl = `${showErrorForUploadingUrl}`;
+      setErrorMessageUrl(fullErrorMessageUrl);
+      console.log("Full error message URL:", errorMessageUrl);
 
       toast.error(
         !showErrorForUploading
           ? "Error uploading file."
           : error?.response?.data?.message
       );
+
+      console.error("Error uploading file:", showErrorForUploading);
     }
   };
-
-  // const handleUpload = async () => {
-  //   if (!selectedFile) {
-  //     setErrorMessage("Please select a file first.");
-  //     return;
-  //   }
-
-  //   setLoading(true); // Show loader
-  //   const formData = new FormData();
-  //   formData.append("file", selectedFile);
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       throw new Error("No authentication token found");
-  //     }
-
-  //     console.log("File is valid CSV", formData);
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/import_event_csv`,
-  //       formData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     console.log("Response of bulk upload:", response);
-
-  //     if (response.status === 200) {
-  //       toast.success("Events Data posted successfully!");
-  //       setIsDataPosted(true);
-  //       setSelectedFile(null);
-  //       fetchEvents();
-  //     }
-  //     setTimeout(() => {
-  //       handleReset();
-  //     }, 2000);
-  //   } catch (error) {
-  //     setLoading(false); // Hide loader
-
-  //     const showErrorForUploading = error?.response?.data?.message;
-  //     const showErrorForUploadingUrl = error?.response?.data?.invalid_rows;
-  //     console.log("Error from API:", showErrorForUploading);
-
-  //     setErrorMessage(
-  //       !showErrorForUploading
-  //         ? "Failed to upload file. Please try again..."
-  //         : `Error: ${showErrorForUploading}.`
-  //     );
-
-  //     const fullErrorMessageUrl = `${showErrorForUploadingUrl}`;
-  //     setErrorMessageUrl(fullErrorMessageUrl);
-  //     console.log("Full error message URL:", errorMessageUrl);
-
-  //     toast.error(
-  //       !showErrorForUploading
-  //         ? "Error uploading file."
-  //         : error?.response?.data?.message
-  //     );
-
-  //     console.error("Error uploading file:", showErrorForUploading);
-  //   }
-  // };
 
   const formatDate = (dateString) => {
     if (!dateString) return " ";
@@ -803,7 +750,7 @@ function Event() {
 
   return (
     <>
-      <div className="md:mx-auto md:w-[90%] p-4 bg-white mt-4 ">
+      <div className="md:mx-auto md:w-[85%] p-4 bg-white mt-4 ">
         <div className="w-full  flex flex-row justify-between">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Event
@@ -1534,7 +1481,7 @@ function Event() {
                         Login Type
                         {/* <span className="text-sm text-red-500">*</span> */}
                       </label>
-                      {/* <input
+                      <input
                         type="text"
                         className="form-control bg-gray-200"
                         value={
@@ -1546,27 +1493,6 @@ function Event() {
                               );
                               if (!role) {
                                 console.warn("Missing role for ID:", id); // <- Debug missing role
-                              }
-                              return role?.name;
-                            })
-                            .filter(Boolean)
-                            .join(", ") || ""
-                        }
-                        readOnly
-                      /> */}
-                      <input
-                        type="text"
-                        className="form-control bg-gray-200"
-                        value={
-                          selectedHoliday?.login_type
-                            ?.split(",")
-                            .map((id) => {
-                              if (id === "A") return "Admin"; // static fallback
-                              const role = roles.find(
-                                (role) => role.role_id === id
-                              );
-                              if (!role) {
-                                console.warn("Missing role for ID:", id);
                               }
                               return role?.name;
                             })
@@ -1652,10 +1578,10 @@ function Event() {
                     </div>
 
                     {/* Description */}
-                    {/* <div className="flex flex-row">
+                    <div className="flex flex-row">
                       <label className="w-[150px] font-semibold">
                         Description
-                        
+                        {/* <span className="text-sm text-red-500">*</span> */}
                       </label>
                       <textarea
                         className="form-control bg-gray-200"
@@ -1663,16 +1589,6 @@ function Event() {
                         value={selectedHoliday?.event_desc || ""}
                         readOnly
                       />
-                    </div> */}
-                    <div className="flex flex-col gap-2">
-                      <label className="font-semibold">Description</label>
-                      <div className="max-w-4xl w-full">
-                        <MarkDropdownEditor
-                          value={selectedHoliday?.event_desc || ""}
-                          readOnly
-                          disabled
-                        />
-                      </div>
                     </div>
                   </form>
                 </div>

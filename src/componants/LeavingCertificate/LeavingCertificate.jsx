@@ -37,7 +37,6 @@ const LeavingCertificate = () => {
     mid_name: "",
     last_name: "",
     udise_pen_no: "",
-    apaar_id: "",
     stud_id_no: "",
     promoted_to: " ",
     last_exam: "",
@@ -385,7 +384,6 @@ const LeavingCertificate = () => {
       academic_yr: "",
       stud_id: "",
       udise_pen_no: "",
-      apaar_id: "",
     });
 
     try {
@@ -429,7 +427,6 @@ const LeavingCertificate = () => {
           mid_name: fetchedData.studentinformation.mid_name || "",
           last_name: fetchedData.studentinformation.last_name || "",
           udise_pen_no: fetchedData.studentinformation.udise_pen_no || "",
-          apaar_id: fetchedData.studentinformation.apaar_id || "",
           promoted_to: fetchedData.studentinformation.promoted_to || "",
           last_exam: fetchedData.studentinformation.last_exam || "",
 
@@ -681,7 +678,6 @@ const LeavingCertificate = () => {
       academic_yr: "",
       stud_id: "",
       udise_pen_no: "",
-      apaar_id: "",
     });
 
     try {
@@ -721,7 +717,6 @@ const LeavingCertificate = () => {
           mid_name: fetchedData.studentinformation.mid_name || "",
           last_name: fetchedData.studentinformation.last_name || "",
           udise_pen_no: fetchedData.studentinformation.udise_pen_no || "",
-          apaar_id: fetchedData.studentinformation.apaar_id || "",
           promoted_to: fetchedData.studentinformation.promoted_to || "",
           last_exam: fetchedData.studentinformation.last_exam || "",
           stud_id: fetchedData.studentinformation.student_id || " ",
@@ -900,7 +895,6 @@ const LeavingCertificate = () => {
       academic_yr: formData.academic_yr || "",
       stud_id: formData.stud_id || "",
       udise_pen_no: formData.udise_pen_no || "",
-      apaar_id: formData.apaar_id || "",
     };
 
     try {
@@ -948,7 +942,6 @@ const LeavingCertificate = () => {
           mid_name: "",
           last_name: "",
           udise_pen_no: "",
-          apaar_id: "",
           stud_id_no: "",
           promoted_to: " ",
           last_exam: "",
@@ -1013,7 +1006,6 @@ const LeavingCertificate = () => {
       mid_name: "",
       last_name: "",
       udise_pen_no: "",
-      apaar_id: "",
       stud_id_no: "",
       promoted_to: " ",
       last_exam: "",
@@ -1446,24 +1438,6 @@ const LeavingCertificate = () => {
                           {errors.stu_aadhaar_no}
                         </span>
                       )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="apaar_id"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        APAAR ID No.{" "}
-                      </label>
-                      <input
-                        type="text"
-                        id="apaar_id"
-                        name="apaar_id"
-                        maxLength={12}
-                        value={formData.apaar_id}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
                     </div>
                   </div>
                 </fieldset>
@@ -2129,19 +2103,19 @@ const LeavingCertificate = () => {
                       </label>
                       <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
                         {[
-                          "Foot ball",
-                          "Basket Ball",
-                          "Volley Ball",
+                          "Football",
+                          "Basketball",
+                          "Volleyball",
                           "Tennis",
                           "Kho Kho",
                           "Table Tennis",
-                          "Kabadi",
+                          "Kabaddi",
                           "Cricket",
                           "Athletics",
                           "Dodgeball",
                           "Throwball",
                           "Handball",
-                          "Tug of war",
+                          "Tug of War",
                           "Gymnastics",
                           "Skating",
                           "Martial Arts",

@@ -81,7 +81,7 @@ const CreateRemarkObservationStudent = () => {
     return Array.isArray(allClasses)
       ? allClasses.map((cls) => ({
           value: cls.student_id,
-          label: `${cls?.first_name} ${cls.last_name} (${cls.classname}-${cls.sectionname})`,
+          label: `${cls?.first_name} ${cls.mid_name || ""} (${cls.last_name})`,
           class_id: cls.class_id,
           section_id: cls.section_id,
         }))
@@ -365,7 +365,6 @@ const CreateRemarkObservationStudent = () => {
                             className="w-[60%] px-2 py-2 border border-gray-700 rounded-md shadow-md"
                             value={remarkSubject}
                             onChange={handleRemarkSubjectChange}
-                            maxLength={100}
                           />
                           {errors.remarkSubjectError && (
                             <p className="text-red-500 text-sm mt-1">
@@ -386,7 +385,6 @@ const CreateRemarkObservationStudent = () => {
                             className="w-[60%] px-2 py-1 border border-gray-700 rounded-md shadow-md"
                             value={remarkDescription}
                             onChange={handleRemarkDescriptionChange}
-                            maxLength={350}
                           />
                           {errors.remarkDescriptionError && (
                             <p className="text-red-500 text-sm mt-1">

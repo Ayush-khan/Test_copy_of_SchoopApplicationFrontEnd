@@ -27,7 +27,6 @@ function CreateCareTacker() {
     employee_id: "",
     teacher_image_name: null,
     special_sub: "",
-    tc_id: "",
   });
   const [errors, setErrors] = useState({});
   const [backendErrors, setBackendErrors] = useState({});
@@ -306,7 +305,7 @@ function CreateCareTacker() {
   return (
     <div className="container mx-auto p-4 ">
       <ToastContainer />
-      <div className="card p-2 rounded-md ">
+      <div className="card p-4 rounded-md ">
         <div className=" card-header mb-4 flex justify-between items-center ">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             Create Caretaker
@@ -326,7 +325,7 @@ function CreateCareTacker() {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <p className="  md:absolute md:right-7  md:top-[12%]   text-gray-500 ">
+        <p className="  md:absolute md:right-10  md:top-[15%]   text-gray-500 ">
           <span className="text-red-500">*</span>indicates mandatory information
         </p>
         <form
@@ -652,7 +651,7 @@ function CreateCareTacker() {
               <div>
                 <label
                   htmlFor="teacher_id"
-                  className="blosck font-bold text-xs mb-2"
+                  className="block font-bold text-xs mb-2"
                 >
                   Teacher Category <span className="text-red-500">*</span>
                 </label>

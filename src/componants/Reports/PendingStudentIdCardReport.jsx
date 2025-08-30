@@ -388,7 +388,7 @@ const PendingStudentIdCardReport = () => {
     <>
       <div className="w-full md:w-[100%] mx-auto p-4 ">
         <ToastContainer />
-        <div className="card p-2 rounded-md ">
+        <div className="card p-4 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Pending Students ID Card Report

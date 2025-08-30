@@ -24,7 +24,6 @@ function EditOfNewStudentList() {
   const { student } = location.state || {};
   // console.log("new Student list for check ", student);
   const [classForSiblingMapping, setClassForSiblingMapping] = useState(null);
-  const [houses, setHouses] = useState([]);
 
   const [classes, setClasses] = useState([]);
   const [divisions, setDivisions] = useState([]);
@@ -44,29 +43,6 @@ function EditOfNewStudentList() {
 
   // Fetch class names
   useEffect(() => {
-    const fetchHouses = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        const response = await axios.get(
-          "https://sms.evolvu.in/arnolds_test/public/api/get_houses",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.data?.success && Array.isArray(response.data.data)) {
-          setHouses(response.data.data);
-        } else {
-          toast.error("Failed to load house list");
-        }
-      } catch (error) {
-        console.error("Error fetching houses:", error);
-        toast.error("Error fetching houses");
-      }
-    };
-
     const fetchClassNames = async () => {
       try {
         const token = localStorage.getItem("authToken");
@@ -79,7 +55,7 @@ function EditOfNewStudentList() {
         toast.error("Error fetching class names");
       }
     };
-    fetchHouses();
+
     fetchClassNames();
   }, [API_URL]);
 
@@ -173,8 +149,6 @@ function EditOfNewStudentList() {
     m_emailid: "",
     m_adhar_no: "",
     udise_pen_no: "",
-    apaar_id: "",
-
     // Preferences
     SetToReceiveSMS: "",
     SetEmailIDAsUsername: "",
@@ -265,7 +239,6 @@ function EditOfNewStudentList() {
         m_emailid: student?.parents?.m_emailid || "",
         m_adhar_no: student?.parents?.m_adhar_no || "",
         udise_pen_no: student.udise_pen_no || " ",
-        apaar_id: student.apaar_id || " ",
         // Preferences
         SetToReceiveSMS: "",
         SetEmailIDAsUsername: "",
@@ -2029,13 +2002,13 @@ function EditOfNewStudentList() {
                   value={formData.house}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
+                  // onBlur={handleBlur}
                 >
-                  <option value="">Select</option>
-                  {houses.map((house) => (
-                    <option key={house.house_id} value={house.house_id}>
-                      {house.house_name}
-                    </option>
-                  ))}
+                  <option>Select</option>
+                  <option value="D">Diamond</option>
+                  <option value="E">Emerald</option>
+                  <option value="R">Ruby</option>
+                  <option value="S">Sapphire</option>
                 </select>
               </div>
               {/* Admision in class */}
@@ -2177,26 +2150,6 @@ function EditOfNewStudentList() {
                   )}
                 </div>
               )}
-              <div className="mt-2">
-                <label
-                  htmlFor="Apaar_no"
-                  className="block font-bold text-xs mb-0.5"
-                >
-                  Apaar ID No.
-                </label>
-                <input
-                  type="text"
-                  id="Apaar_no"
-                  name="apaar_id"
-                  maxLength={12}
-                  value={formData.apaar_id}
-                  className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/[^a-zA-Z0-9]/g, "");
-                    handleChange({ target: { name: "apaar_id", value } });
-                  }}
-                />
-              </div>
               {/* Address Information */}
               <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
                 {" "}
