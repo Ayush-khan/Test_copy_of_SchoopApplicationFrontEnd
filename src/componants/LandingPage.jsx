@@ -76,6 +76,24 @@ const LandingPage = () => {
   const isValid = userId.trim();
   const API_URL = import.meta.env.VITE_API_URL; // url for host
   const expiryDate = new Date();
+  const [sortNameIs, setSortNameIs] = useState("");
+  const [supportEmail, setSupportEmail] = useState("supportsacs@aceventura.in");
+  // Academic year helper
+  function getAcademicYearLast() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1; // January = 1
+
+    let lastYear;
+    if (month >= 7) {
+      lastYear = year + 1; // July or later, academic year ends next year
+    } else {
+      lastYear = year; // Before July, academic year ends current year
+    }
+
+    return `2016-${lastYear}`;
+  }
+
   expiryDate.setDate(expiryDate.getDate() + 1); // 1 day later
   useEffect(() => {
     const handleResize = () => {
@@ -110,95 +128,6 @@ const LandingPage = () => {
     const year = today.getFullYear();
     return `${day} ${monthName} ${year}`;
   }
-  // const handleResetPassword = async () => {
-  //   setTouched({ userId: true });
-  //   if (!isValid) return;
-
-  //   setLoading(true);
-  //   setNewPasswordLoading(true);
-  //   setBackendError(""); // clear any old error
-
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("user_id", userId);
-
-  //     let shortName = "0";
-  //     let schoolResponse;
-
-  //     // 🔹 Step 1: Try validate_staff_user API
-  //     const staffResponse = await axios.post(
-  //       "https://api.aceventura.in/demo/evolvuUserService/validate_staff_user",
-  //       formData
-  //     );
-
-  //     if (
-  //       Array.isArray(staffResponse.data) &&
-  //       staffResponse.data.length > 0 &&
-  //       staffResponse.data[0].short_name !== "0"
-  //     ) {
-  //       shortName = staffResponse.data[0].short_name;
-  //       schoolResponse = staffResponse.data;
-  //     } else {
-  //       // 🔸 Step 2: Fallback to validate_user API
-  //       const userResponse = await axios.post(
-  //         "https://api.aceventura.in/demo/evolvuUserService/validate_user",
-  //         formData
-  //       );
-
-  //       if (typeof userResponse.data === "string") {
-  //         toast.error(userResponse.data);
-  //         setBackendError(userResponse.data);
-  //         return;
-  //       }
-
-  //       if (Array.isArray(userResponse.data) && userResponse.data.length > 0) {
-  //         shortName = userResponse.data[0].short_name;
-  //         schoolResponse = userResponse.data;
-  //       } else {
-  //         toast.error("Invalid user.");
-  //         return;
-  //       }
-  //     }
-
-  //     // ✅ Use connectdatabase API to check access and connect
-  //     const accessFormData = new FormData();
-  //     accessFormData.append("short_name", shortName);
-
-  //     const connectResponse = await axios.post(
-  //       `${API_URL}/api/connectdatabase`,
-  //       accessFormData,
-  //       {
-  //         withCredentials: true, // Include cookies in request (optional but often necessary)
-  //       }
-  //     );
-
-  //     if (
-  //       typeof connectResponse.data === "object" &&
-  //       connectResponse.data.message == "Connected to school DB"
-  //     ) {
-  //       document.cookie = `short_name=${shortName}; path=/; path=/; expires=${expiryDate.toUTCString()}; SameSite=None; Secure`;
-  //       toast.success("Redirecting...");
-  //       setTimeout(() => {
-  //         setShowLandingPage(true);
-  //       }, 1000);
-  //     } else {
-  //       toast.error(
-  //         connectResponse.data.message || "Database connection failed."
-  //       );
-  //     }
-  //   } catch (error) {
-  //     const errMsg =
-  //       error.response?.data === "Not a valid user"
-  //         ? "Not a valid user"
-  //         : error.response?.data?.message ||
-  //           "Something went wrong. Please try again.";
-  //     toast.error(errMsg);
-  //     setBackendError(errMsg);
-  //   } finally {
-  //     setLoading(false);
-  //     setNewPasswordLoading(false);
-  //   }
-  // };
   const setShortNameCookieFromUserId = async (userId, API_URL) => {
     const formData = new FormData();
     formData.append("user_id", userId);
@@ -230,6 +159,7 @@ const LandingPage = () => {
 
       if (Array.isArray(userResponse.data) && userResponse.data.length > 0) {
         shortName = userResponse.data[0].short_name;
+        sortNameIs(shortName);
       } else {
         throw new Error("Invalid user.");
       }
@@ -256,6 +186,17 @@ const LandingPage = () => {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 7); // 7 days expiry
     document.cookie = `short_name=${shortName}; path=/; expires=${expiryDate.toUTCString()}; SameSite=None; Secure`;
+    // ✅ Call support email API only after DB is connected
+    try {
+      const response = await axios.get(`${API_URL}/api/get_supportemailid`, {
+        params: { short_name: shortName },
+      });
+      if (response.data?.data?.support_email_id) {
+        setSupportEmail(response.data.data.support_email_id);
+      }
+    } catch (error) {
+      console.error("Failed to fetch support email", error);
+    }
   };
 
   const handleResetPassword = async () => {
@@ -288,6 +229,41 @@ const LandingPage = () => {
     }
   };
 
+  // if (showLandingPage) {
+  //   // ✅ Landing Page View
+  //   return (
+  //     <div className={loginStyles.loginContainer}>
+  //       <ToastContainer />
+  //       <div
+  //         className={`${loginStyles.loginContainerChild} bg-none lg:h-5/6 lg:flex lg:justify-start`}
+  //       >
+  //         <LoginForm userId={userId} />
+  //         {isMobileView && (
+  //           <button
+  //             className={`${loginStyles.notificationButton} flex justify-between`}
+  //             onClick={() => toast.info("Instruction clicked")}
+  //           >
+  //             <span>
+  //               <IoArrowUndoCircle fontSize={"1.5em"} />
+  //             </span>{" "}
+  //             General Instruction
+  //           </button>
+  //         )}
+
+  //       </div>
+  //       {!isMobileView && (
+  //         <div
+  //           className={`${loginStyles.notificationContainer} flex lg:justify-end lg:w-full lg:h-5/6`}
+  //         >
+  //           <Notification />
+  //         </div>
+  //       )}
+
+  //     </div>
+
+  //   );
+  // }
+
   if (showLandingPage) {
     // ✅ Landing Page View
     return (
@@ -316,6 +292,35 @@ const LandingPage = () => {
             <Notification />
           </div>
         )}
+
+        {/* Footer Added Here */}
+        <footer className="w-full   absolute top-[93%]">
+          <div className="flex flex-col md:flex-row justify-between items-center text-white/90 shadow-lg px-3 py-2 bg-white/20 backdrop-blur-md">
+            <div className="text-sm md:text-base h-7">
+              <p>
+                Copyright © {getAcademicYearLast()}{" "}
+                <a
+                  href="https://www.aceventura.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold hover:underline text-pink-300"
+                >
+                  Aceventura Services
+                </a>
+                . All rights reserved.
+              </p>
+            </div>
+            <div className="text-sm md:text-base h-7">
+              <a
+                href="mailto:aceventuraservices@gmail.com"
+                className="no-underline text-white/90 flex items-center hover:underline"
+              >
+                <MdMarkEmailRead className="text-white text-lg mr-2" />
+                Contact for app support
+              </a>
+            </div>
+          </div>
+        </footer>
       </div>
     );
   }
@@ -430,7 +435,8 @@ const LandingPage = () => {
           <div className="flex flex-col md:flex-row justify-between items-center text-white/90 shadow-lg px-3 py-2 bg-white/20 backdrop-blur-md">
             <div className="text-sm md:text-base h-5">
               <p>
-                Copyright © 2016-2018{" "}
+                {/* Copyright © 2016-2018{" "} */}
+                Copyright © {getAcademicYearLast()}{" "}
                 <a
                   href="https://www.aceventura.in"
                   target="_blank"
@@ -444,7 +450,7 @@ const LandingPage = () => {
             </div>
             <div className="text-sm md:text-base h-5">
               <a
-                href="mailto:supportsacs@aceventura.in"
+                href={`mailto:aceventuraservices@gmail.com`}
                 className="no-underline text-white/90 flex items-center hover:underline"
               >
                 <MdMarkEmailRead className="text-white text-lg mr-2" />

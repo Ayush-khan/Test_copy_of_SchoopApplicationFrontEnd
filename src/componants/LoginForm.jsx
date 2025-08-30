@@ -14,6 +14,20 @@ const LoginForm = ({ userId }) => {
   const [loading, setLoading] = useState(false);
   const toggleShowPassword = () => setShowPassword(!showPassword);
   const [rememberMe, setRememberMe] = useState(false); // ✅ NEW
+  function getAcademicYearLast() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1; // Jan=1
+
+    let lastYear;
+    if (month >= 7) {
+      lastYear = year + 1; // July ya baad -> session ka end next year
+    } else {
+      lastYear = year; // July se pehle -> session ka end current year
+    }
+
+    return `2016-${lastYear}`;
+  }
 
   const navigate = useNavigate();
   const getCookie = (name) => {
