@@ -1044,11 +1044,9 @@ function ImportantLink() {
                     </label>
                     <input
                       type="url"
-                      className="form-control shadow-md mb-2 cursor-pointer underline"
+                      className="form-control shadow-md mb-2"
                       id="url"
                       value={url}
-                      onClick={() => window.open(url, "_blank")}
-                      style={{ color: "#2563eb" }}
                     />
                   </div>
 

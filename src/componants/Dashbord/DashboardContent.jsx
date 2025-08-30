@@ -430,22 +430,24 @@ const DashboardContent = () => {
               <div className="relative top-3 h-10 bg-gray-300 rounded w-1/3"></div>
             </div>
           ) : roleId === "M" ? (
-            <Card
-              title="Approve Lesson Plans"
-              value={approvedLessonPlaneCount}
-              spanLabel="Pending"
-              color="#4CAF50"
-              icon={
-                <FaClipboardCheck
-                  style={{
-                    color: "green",
-                    backgroundColor: "white",
-                    padding: "10px",
-                    borderRadius: "50%",
-                  }}
-                />
-              }
-            />
+            <Link to="/approveLessonP" className="no-underline">
+              <Card
+                title="Approve Lesson Plans"
+                value={approvedLessonPlaneCount}
+                spanLabel="Pending"
+                color="#4CAF50"
+                icon={
+                  <FaClipboardCheck
+                    style={{
+                      color: "green",
+                      backgroundColor: "white",
+                      padding: "10px",
+                      borderRadius: "50%",
+                    }}
+                  />
+                }
+              />
+            </Link>
           ) : roleId === "T" ? (
             // Leave card for roleId "T"
             <Link to="#" className="no-underline">

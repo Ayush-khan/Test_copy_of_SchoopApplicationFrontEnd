@@ -543,7 +543,7 @@ const IciciFeePaymentReport = () => {
         }`}
       >
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
+        <div className="card rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               ICICI Fee Payment Report
@@ -556,7 +556,7 @@ const IciciFeePaymentReport = () => {
             />
           </div>
           <div
-            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-[98%]  -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
@@ -564,28 +564,26 @@ const IciciFeePaymentReport = () => {
 
           <>
             <div
-              className={`w-full flex flex-wrap md:flex-nowrap items-end justify-between gap-3 p-1 ${
-                timetable.length > 0 ? "md:w-[100%]" : "md:w-[90%]"
+              className={`w-full flex flex-nowrap items-end justify-between gap-4 overflow-x-auto p-2 ${
+                timetable.length > 0 ? "md:w-[98%]" : "md:w-[90%]"
               }`}
             >
-              {/* All Filter Fields + Search Button (Left Side) */}
-              <div className="flex flex-wrap items-end gap-4 flex-grow">
-                {/* Order ID */}
-                <div className="flex flex-col">
+              <div className="flex flex-wrap items-start gap-4 flex-grow ml-3 pb-4">
+                <div className="flex flex-col flex-1 min-w-[100px]">
                   <label className="text-md mb-1" htmlFor="orderId">
                     Order ID
                   </label>
+
                   <input
                     type="text"
                     id="orderId"
-                    className="border border-gray-300 rounded-md px-3 py-2 w-[180px]"
+                    className="border border-gray-300 rounded-md px-3 py-2 w-full"
                     value={orderId}
                     onChange={(e) => setOrderId(e.target.value)}
                   />
                 </div>
 
-                {/* Student Name */}
-                <div className="flex flex-col">
+                <div className="flex flex-col flex-1 min-w-[100px]">
                   <label className="text-md mb-1">Student Name</label>
                   <Select
                     menuPortalTarget={document.body}
@@ -596,12 +594,11 @@ const IciciFeePaymentReport = () => {
                     placeholder="Select"
                     isSearchable
                     isClearable
-                    className="text-sm w-[200px]"
+                    className="text-sm w-full"
                   />
                 </div>
 
-                {/* From Date */}
-                <div className="flex flex-col">
+                <div className="flex flex-col flex-1 min-w-[100px]">
                   <label className="text-md mb-1">
                     From Date<span className="text-red-500">*</span>
                   </label>
@@ -609,14 +606,16 @@ const IciciFeePaymentReport = () => {
                     type="date"
                     value={fromDate}
                     onChange={(e) => handleChangeDate(e, "fromDate")}
-                    className="text-sm border border-gray-300 rounded px-2 py-2 w-[180px]"
+                    className="text-sm border border-gray-300 rounded px-2 py-2 w-full"
                     min={academicYrFrom}
                     max={academicYrTo}
                   />
+                  <div className="text-xs text-red-500">
+                    {formDateError && <span>{formDateError}</span>}
+                  </div>
                 </div>
 
-                {/* To Date */}
-                <div className="flex flex-col">
+                <div className="flex flex-col flex-1 min-w-[100px]">
                   <label className="text-md mb-1">
                     To Date<span className="text-red-500">*</span>
                   </label>
@@ -624,14 +623,16 @@ const IciciFeePaymentReport = () => {
                     type="date"
                     value={toDate}
                     onChange={(e) => handleChangeDate(e, "toDate")}
-                    className="text-sm border border-gray-300 rounded px-2 py-2 w-[180px]"
+                    className="text-sm border border-gray-300 rounded px-2 py-2 w-full"
                     min={fromDate || academicYrFrom}
                     max={academicYrTo}
                   />
+                  <div className="text-xs text-red-500">
+                    {toDateError && <span>{toDateError}</span>}
+                  </div>
                 </div>
 
-                {/* Account Type */}
-                <div className="flex flex-col">
+                <div className="flex flex-col flex-1 min-w-[100px]">
                   <label className="text-md mb-1">
                     Account Type<span className="text-red-500">*</span>
                   </label>
@@ -644,17 +645,16 @@ const IciciFeePaymentReport = () => {
                     placeholder="Select"
                     isSearchable
                     isClearable={false}
-                    className="text-sm w-[180px]"
+                    className="text-sm w-full"
                   />
                 </div>
 
-                {/* Search Button */}
-                <div className="flex items-end">
+                <div className="flex flex-col justify-end mt-6 min-w-[60px]">
                   <button
                     type="search"
                     onClick={handleSearch}
                     style={{ backgroundColor: "#2196F3" }}
-                    className={`btn h-10 text-white font-bold px-6 rounded ${
+                    className={`btn h-10 text-white font-bold px-6 rounded w-full ${
                       loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                     disabled={loadingForSearch}
@@ -688,37 +688,36 @@ const IciciFeePaymentReport = () => {
                     )}
                   </button>
                 </div>
-              </div>
 
-              {/* Right Side Search Filter (Appears only if timetable > 0) */}
-              {timetable.length > 0 && (
-                <div className="flex gap-1 items-end  bg-gray-100 p-2">
-                  <input
-                    type="text"
-                    className="form-control border border-gray-300 rounded px-2 py-1 text-sm"
-                    placeholder="Search"
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleDownloadEXL}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                  >
-                    <FaFileExcel />
-                  </button>
-                  <button
-                    onClick={handlePrint}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                  >
-                    <FiPrinter />
-                  </button>
-                </div>
-              )}
+                {timetable.length > 0 && (
+                  <div className="ml-auto w-[300px] flex-nowrap flex gap-2 items-center mt-3 bg-gray-100 p-2">
+                    <input
+                      type="text"
+                      className="form-control border border-gray-300 rounded px-2 py-1 text-sm"
+                      placeholder="Search"
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleDownloadEXL}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                    >
+                      <FaFileExcel />
+                    </button>
+                    <button
+                      onClick={handlePrint}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                    >
+                      <FiPrinter />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {timetable.length > 0 && (
               <>
-                <div className="w-full  mt-4">
+                <div className="w-full px-4 mb-4 ">
                   <div className="card mx-auto lg:w-full shadow-lg">
                     <div className="card-body w-full">
                       <div

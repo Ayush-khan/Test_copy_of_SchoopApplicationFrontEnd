@@ -6,8 +6,8 @@ import { faUser, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import LoadingSpinner from "../componants/common/LoadingSpinner.jsx"; // Import the LoadingSpinner component
 import styles from "../CSS/LoginForm.module.css";
 
-const LoginForm = ({ userId }) => {
-  const [email, setEmail] = useState(userId || "");
+const LoginForm = () => {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -16,33 +16,18 @@ const LoginForm = ({ userId }) => {
   const [rememberMe, setRememberMe] = useState(false); // ✅ NEW
 
   const navigate = useNavigate();
-  const getCookie = (name) => {
-    const cookieValue = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith(name + "="));
-    return cookieValue ? cookieValue.split("=")[1] : null;
-  };
 
   const handleSubmit = async (e) => {
     const API_URL = import.meta.env.VITE_API_URL; // url for host
-    const sortNameCookie = getCookie("short_name");
-    console.log("sortNameCookie", sortNameCookie);
     e.preventDefault();
     setErrors({});
     setLoading(true); // Set loading to true when form is submitted
     try {
-      const response = await axios.post(
-        `${API_URL}/api/login`,
-        {
-          user_id: email,
-          password: password,
-          rememberme: rememberMe,
-          short_name: sortNameCookie,
-        },
-        {
-          withCredentials: true, // ✅ Send browser cookies
-        }
-      );
+      const response = await axios.post(`${API_URL}/api/login`, {
+        user_id: email,
+        password: password,
+        rememberme: rememberMe,
+      });
       console.log(
         "responseerror",
         response.data.success,
@@ -97,9 +82,7 @@ const LoginForm = ({ userId }) => {
           newErrors.password = "This password not using Bcrypt encryption.";
         } else {
           newErrors.api =
-            error.response.data.error ||
-            message ||
-            "An unexpected error occurred. Please try again later.";
+            message || "An unexpected error occurred. Please try again later.";
         }
       } else {
         newErrors.api = "Network error or server is unreachable.";
@@ -121,15 +104,11 @@ const LoginForm = ({ userId }) => {
             <FontAwesomeIcon icon={faUser} className={styles.userIcon} />
             <input
               type="text"
-              readOnly={!!userId} // Make input read-only if userId is provided
               id="email"
               name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter User Id"
-              className={`
-    ${userId ? "bg-gray-600  cursor-not-allowed" : "bg-gray-600 "}
-    focus:outline-none focus:ring-2 focus:ring-blue-400`}
               required
             />
           </div>
@@ -145,9 +124,6 @@ const LoginForm = ({ userId }) => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
-              className={`
-   
-    focus:outline-none focus:ring-2 focus:ring-blue-400`}
             />
             <FontAwesomeIcon
               icon={showPassword ? faEyeSlash : faEye}

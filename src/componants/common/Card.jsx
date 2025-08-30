@@ -1,5 +1,4 @@
 // just implenetn loader
-
 import styles from "../../CSS/DashbordCss/Card.module.css";
 import { FaSpinner } from "react-icons/fa"; // Import the spinner icon
 
@@ -19,7 +18,6 @@ const Card = ({
     value === null ||
     (Array.isArray(value) && value.length === 0);
 
-  // Loader component when data is loading
   const renderLoader = () => (
     <FaSpinner className="animate-spin text-blue-500" />
   );
@@ -36,8 +34,8 @@ const Card = ({
         )}
 
         <div
-          className={styles["card-title"]}
-          style={{ fontSize: "12px", fontWeight: "400" }}
+          className={`${styles["card-title"]} text-gray-600`}
+          style={{ fontSize: ".8em", fontWeight: "600" }}
         >
           {title}
         </div>
@@ -49,12 +47,9 @@ const Card = ({
           width: "50%",
           display: "flex",
           justifyContent: title === "Fee" ? "flex-start" : "center",
-          // justifyContent: "center",
           fontWeight: "500",
         }}
       >
-        {/* If is loading (value is missing, empty string, or empty array), show the loader */}
-        {/* {isLoading ? renderLoader() : value} */}
         <div
           className="flex justify-center items-center gap-x-1   w-full text-center"
           style={{ textAlign: "center" }}
@@ -68,14 +63,7 @@ const Card = ({
             <div>{renderLoader()}</div>
           ) : title === "Fee Pending" ? (
             <div className="mx-2 -space-y-2 text-[.8em]">
-              <div className="flex justify-between items-center gap-x-2">
-                {/* <span className="text-red-600 font-semibold">
-                  {new Intl.NumberFormat("en-IN", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(valuePendingFee)}
-                </span> */}
-              </div>
+              <div className="flex justify-between items-center gap-x-2"></div>
             </div>
           ) : title === "Fee" ? (
             <div className="mx-2 -space-y-2 text-[.7em]">
@@ -102,7 +90,9 @@ const Card = ({
             <div>
               <div
                 className={
-                  title === "Approve Lesson Plans" ? "text-red-600" : ""
+                  title === "Approve Lesson Plans"
+                    ? "text-red-600 text-[1.3em]"
+                    : "text-[1.3em]"
                 }
               >
                 {value}
@@ -110,44 +100,6 @@ const Card = ({
               <div>{valuePendingFee}</div>
             </div>
           )}
-
-          {/* {isLoading ? (
-            <div>{renderLoader()}</div>
-          ) : title === "Fee" ? (
-            <div className="mx-2   -space-y-2 text-[.7em]  ">
-              <div className="flex justify-between item-center gap-x-2">
-                <span className="text-green-700 font-semibold">Collected:</span>
-                <span className="text-green-600 font-semibold">
-                  {new Intl.NumberFormat("en-IN", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(value)}
-                </span>
-              </div>
-              <div className="flex justify-between tem-center gap-x-2">
-                <span className="text-red-700 font-semibold">Pending:</span>
-                <span className="text-red-600 font-semibold">
-                  {new Intl.NumberFormat("en-IN", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(valuePendingFee)}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div>
-              
-              <div
-                className={
-                  title === "Approve Lesson Plans" ? "text-red-600" : ""
-                }
-              >
-                {value}
-              </div>
-
-              <div>{valuePendingFee}</div>
-            </div>
-          )} */}
         </div>
       </div>
     </div>

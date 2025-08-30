@@ -4,8 +4,6 @@ import axios from "axios";
 import Styles from "./EventCard.module.css"; // Import CSS module
 import Loader from "../common/LoaderFinal/DashboardLoadder/Loader";
 import { useNavigate } from "react-router-dom";
-// import MarkDropdownEditor from "../Event/MarkDropdownEditor";
-import MarkDropdownEditor from "../Events/MarkDropdownEditor";
 
 const EventCard = () => {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -174,7 +172,7 @@ const EventCard = () => {
                     >{` (class-${event?.class_name})`}</span>
                   </h5>
                   <div className="mb-3">
-                    {/* <div
+                    <div
                       className={`${Styles?.discription} box-border shadow-inner mb-0 p-2 text-sm sm:mb-1 mt-0 text-gray-800`}
                       style={{
                         maxHeight: "80px", // Adjust height as needed
@@ -185,25 +183,7 @@ const EventCard = () => {
                       }}
                     >
                       {event?.event_desc}
-                    </div> */}
-
-                    <div
-                      className={`${Styles?.discription} box-border shadow-inner mb-0 p-2 text-sm sm:mb-1 mt-0 text-gray-800`}
-                      style={{
-                        maxHeight: "80px", // same as your earlier styling
-                        overflowY: "auto",
-                        padding: "8px",
-                        backgroundColor: "#f9f9f9",
-                      }}
-                    >
-                      <MarkDropdownEditor
-                        value={event?.event_desc || ""}
-                        readOnly
-                        disabled
-                        className="w-full text-sm text-gray-800 bg-transparent cursor-not-allowed"
-                      />
                     </div>
-
                     <p
                       style={{
                         fontSize: ".9em",

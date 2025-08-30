@@ -84,7 +84,6 @@
 
 // export default MarkDropdownEditor;
 
-// second try work correct only for link also
 import React, { useRef } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -114,23 +113,6 @@ function imageHandler() {
   };
 }
 
-function linkHandler() {
-  const url = prompt("Enter the URL:");
-
-  if (url) {
-    const range = this.quill.getSelection();
-    if (range) {
-      // insert link text if nothing is selected
-      if (range.length === 0) {
-        this.quill.insertText(range.index, url, "link", url);
-      } else {
-        // apply link format on selected text
-        this.quill.format("link", url);
-      }
-    }
-  }
-}
-
 const MarkDropdownEditor = ({ value, onChange, readOnly = false }) => {
   const quillRef = useRef(null);
 
@@ -151,7 +133,6 @@ const MarkDropdownEditor = ({ value, onChange, readOnly = false }) => {
           ],
           handlers: {
             image: imageHandler,
-            link: linkHandler,
           },
         },
       };

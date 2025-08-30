@@ -142,8 +142,8 @@ const LessonPlanDetailedView = () => {
 
       setTeacher(teacherClasses);
     } catch (error) {
-      toast.error("Error fetching teacher ");
-      console.error("Error fetching teacher:", error);
+      toast.error("Error fetching teacher timetable");
+      console.error("Error fetching teacher timetable:", error);
     } finally {
       setLoadingExams(false);
     }
@@ -182,13 +182,6 @@ const LessonPlanDetailedView = () => {
 
     if (!selectedStudentId) {
       setStudentError("Please select Teacher Name.");
-      setLoadingForSearch(false);
-      return;
-    }
-
-    if (!weekRange && !selectedMonthId) {
-      toast.error("Please select either Week or Month.");
-      setWeekError("Please select either Week or Month.");
       setLoadingForSearch(false);
       return;
     }
@@ -356,12 +349,8 @@ const LessonPlanDetailedView = () => {
                       .map(
                         (entry) => `
                         <tr>
-                          <td style="border: 1px solid #ccc; padding: 6px;">${
-                            entry.start_date
-                          }</td>
-                         <td style="border: 1px solid #ccc; padding: 6px;">
-            ${entry.description.map((point) => point).join("<br>")}
-          </td>
+                          <td style="border: 1px solid #ccc; padding: 6px;">${entry.start_date}</td>
+                          <td style="border: 1px solid #ccc; padding: 6px;">${entry.description[0]}</td>
                         </tr>`
                       )
                       .join("")}
@@ -552,7 +541,7 @@ const LessonPlanDetailedView = () => {
         student.daily_changes[0].entries.forEach((entry) => {
           sheetData.push([
             entry.start_date || "-",
-            entry.description ? entry.description.join("\n") : "-",
+            entry.description?.[0] || "-",
           ]);
         });
       } else {
@@ -1320,14 +1309,8 @@ const LessonPlanDetailedView = () => {
                                                 <td className="border px-4 py-2">
                                                   {entry.start_date}
                                                 </td>
-                                                <td className="border py-2">
-                                                  <ul className=" space-y-1 ">
-                                                    {entry.description.map(
-                                                      (point, i) => (
-                                                        <li key={i}>{point}</li>
-                                                      )
-                                                    )}
-                                                  </ul>
+                                                <td className="border px-4 py-2">
+                                                  {entry.description[0]}
                                                 </td>
                                               </tr>
                                             )

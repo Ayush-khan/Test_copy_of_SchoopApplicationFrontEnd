@@ -237,7 +237,7 @@ const EditEvent = () => {
                           {/* Input with specific spacing */}
                           <input
                             type="text"
-                            className="w-full max-w-md px-2 py-1 border border-gray-400 rounded mr-4" // <- sets custom gap
+                            className="w-full max-w-md px-2 py-1 border border-gray-400 rounded mr-8" // <- sets custom gap
                             value={subject}
                             onChange={(e) => setSubject(e.target.value)}
                           />
