@@ -47,6 +47,8 @@ function News() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImageName, setSelectedImageName] = useState(""); // just name/url of previous or current image
 
+  const [removeImageFlag, setRemoveImageFlag] = useState(false); // ← delete existing image?
+  const fileInputRef = useRef(null);
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
 
@@ -171,7 +173,6 @@ function News() {
   };
 
   const handleEdit = (section) => {
-    console.log("image name", section.image_name);
     setCurrentSection(section);
     setNewSectionName(section.title || "");
     setnewDescription(section.description || "");
@@ -179,8 +180,8 @@ function News() {
     setActiveTillDate(section.active_till_date || "");
 
     setSelectedImage(section.image_name);
-    // setSelectedImageName(section.image_name); // <-- Add this
     setSelectedImageName(section.image_name?.split("/").pop() || "");
+    console.log("selected IMage", section.image_name);
 
     setFieldErrors({});
     setShowEditModal(true);
@@ -257,6 +258,73 @@ function News() {
     }
   };
 
+  // const handleSubmitEdit = async () => {
+  //   if (isSubmitting) return;
+  //   setIsSubmitting(true);
+
+  //   const validationErrors = validateSectionName(newSectionName, description);
+  //   if (Object.keys(validationErrors).length) {
+  //     setFieldErrors(validationErrors);
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     if (!token) {
+  //       throw new Error("No authentication token found");
+  //     }
+
+  //     const formData = new FormData();
+  //     formData.append("title", newSectionName.trim() || currentSection.title);
+  //     formData.append("url", url);
+  //     formData.append("description", description);
+  //     formData.append("active_till_date", activeTillDate);
+
+  //     if (selectedImage) {
+  //       formData.append("image", selectedImage);
+  //     }
+  //     console.log(selectedImage);
+  //     console.log("selectedImage", selectedImage);
+
+  //     console.log("current section", currentSection);
+
+  //     await axios.post(
+  //       `${API_URL}/api/update_news/${currentSection.news_id}`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         withCredentials: true,
+  //       }
+  //     );
+
+  //     fetchSections();
+  //     handleCloseModal();
+  //     toast.success("News updated successfully!");
+  //   } catch (error) {
+  //     console.error("Error editing link:", error);
+  //     if (error.response && error.response.status === 422) {
+  //       const errors = error.response.data.errors || {};
+  //       setFieldErrors((prev) => ({
+  //         ...prev,
+  //         title: errors.title?.[0] || "",
+  //         description: errors.description?.[0] || "",
+  //       }));
+
+  //       Object.values(errors).forEach((errArr) =>
+  //         errArr.forEach((err) => toast.error(err))
+  //       );
+  //     } else {
+  //       toast.error("Server error. Please try again later.");
+  //     }
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const handleSubmitEdit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -270,10 +338,7 @@ function News() {
 
     try {
       const token = localStorage.getItem("authToken");
-
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
+      if (!token) throw new Error("No authentication token found");
 
       const formData = new FormData();
       formData.append("title", newSectionName.trim() || currentSection.title);
@@ -281,19 +346,27 @@ function News() {
       formData.append("description", description);
       formData.append("active_till_date", activeTillDate);
 
-      if (selectedImage) {
+      if (selectedImage instanceof File) {
+        // ✅ new file selected
         formData.append("image", selectedImage);
+      } else if (selectedImage) {
+        // ✅ old image kept (not removed)
+        const oldFileName = selectedImage.split("/").pop();
+        formData.append("filenottobedeleted", oldFileName);
+      } else {
+        // ✅ user removed old image
+        formData.append("filenottobedeleted", "");
       }
 
-      console.log("current section", currentSection);
+      for (const pair of formData.entries()) {
+        console.log("FormData:", pair[0], pair[1]);
+      }
 
       await axios.post(
         `${API_URL}/api/update_news/${currentSection.news_id}`,
         formData,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         }
       );
@@ -303,14 +376,13 @@ function News() {
       toast.success("News updated successfully!");
     } catch (error) {
       console.error("Error editing link:", error);
-      if (error.response && error.response.status === 422) {
+      if (error.response?.status === 422) {
         const errors = error.response.data.errors || {};
         setFieldErrors((prev) => ({
           ...prev,
           title: errors.title?.[0] || "",
           description: errors.description?.[0] || "",
         }));
-
         Object.values(errors).forEach((errArr) =>
           errArr.forEach((err) => toast.error(err))
         );
@@ -323,7 +395,7 @@ function News() {
   };
 
   const handleView = (section) => {
-    console.log("image_name", section.image_name);
+    // console.log("image_name", section.image_name);
     setNewSectionName(section.title);
     setUrl(section.url);
     setSelectedImage(section.image_name);
@@ -492,17 +564,6 @@ function News() {
     }));
   };
 
-  // const handleChangeUrl = (e) => {
-  //   const value = e.target.value;
-  //   setUrl(value);
-
-  //   const errors = validateSectionName(newSectionName, value, newDepartmentId);
-  //   setFieldErrors((prevErrors) => ({
-  //     ...prevErrors,
-  //     url: errors.url,
-  //   }));
-  // };
-
   const validateUrl = (url) => {
     const urlPattern = new RegExp(
       "^(https?:\\/\\/)" + // must start with http:// or https://
@@ -592,7 +653,7 @@ function News() {
                         Description
                       </th>
                       <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Posted By
+                        Posted Date
                       </th>
                       <th className="px-2 w-full md:w-[12%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Active Till Date
@@ -1028,7 +1089,7 @@ function News() {
                       <span className="mr-2">{selectedImageName}</span>
                       <button
                         onClick={() => {
-                          setSelectedImage();
+                          setSelectedImage(null);
                           setSelectedImageName("");
                         }}
                         className="text-red-500 text-lg font-bold cursor-pointer"
@@ -1115,10 +1176,12 @@ function News() {
                     </label>
                     <input
                       type="url"
-                      className="form-control shadow-md mb-2"
+                      className="form-control shadow-md mb-2 cursor-pointer underline"
                       id="url"
                       value={url}
                       readOnly
+                      onClick={() => window.open(url, "_blank")}
+                      style={{ color: "#2563eb" }} // Tailwind blue-600 hex
                     />
                   </div>
 

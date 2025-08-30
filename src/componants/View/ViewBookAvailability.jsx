@@ -23,7 +23,7 @@ const ViewBookAvailability = () => {
 
   const [selectedCategoryGroupId, setSelectedCategoryGroupId] = useState(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-  //   const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
 
   const [author, setAuthor] = useState("");
@@ -33,10 +33,10 @@ const ViewBookAvailability = () => {
   const navigate = useNavigate();
   const [loadingExams, setLoadingExams] = useState(false);
 
-  const [accountError, setAccountError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [timetable, setTimetable] = useState([]);
+  const [isNewArrival, setIsNewArrival] = useState(false);
 
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
@@ -48,7 +48,7 @@ const ViewBookAvailability = () => {
   useEffect(() => {
     fetchCategoryGroup();
     fetchCategoryName();
-    handleSearch();
+    // handleSearch();
   }, []);
 
   const fetchCategoryGroup = async () => {
@@ -139,21 +139,68 @@ const ViewBookAvailability = () => {
     L: "Lost",
   };
 
+  // const handleSearch = async () => {
+  //   setLoadingForSearch(true);
+  //   setIsSubmitting(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     // Build params only if field has value
+  //     let params = {};
+  //     if (assessionNo) params.accession_no = assessionNo;
+  //     if (title) params.title = title;
+  //     if (author) params.author = author;
+  //     if (selectedCategoryGroup)
+  //       params.category_group_id = selectedCategoryGroup.value;
+  //     if (selectedCategory) params.category_id = selectedCategory.value;
+
+  //     console.log("Search Params:", params);
+
+  //     const response = await axios.get(`${API_URL}/api/get_all_books`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //       params,
+  //       paramsSerializer: (params) => {
+  //         return new URLSearchParams(params).toString();
+  //       },
+  //     });
+
+  //     console.log("API Response:", response?.data);
+
+  //     if (!response?.data?.data || response?.data?.data?.length === 0) {
+  //       setTimetable([]);
+  //       toast.error("No records found for selected criteria.");
+  //     } else {
+  //       setTimetable(response?.data?.data);
+  //       setPageCount(Math.ceil(response?.data?.data?.length / pageSize));
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching report:", error);
+  //     toast.error("Error fetching data. Please try again.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //     setLoadingForSearch(false);
+  //   }
+  // };
+
   const handleSearch = async () => {
     setLoadingForSearch(true);
     setIsSubmitting(true);
+    setLoading(true);
 
     try {
       const token = localStorage.getItem("authToken");
 
       // Build params only if field has value
       let params = {};
-      if (assessionNo) params.assession_no = assessionNo;
+      if (assessionNo) params.accession_no = assessionNo;
       if (title) params.title = title;
       if (author) params.author = author;
       if (selectedCategoryGroup)
         params.category_group_id = selectedCategoryGroup.value;
       if (selectedCategory) params.category_id = selectedCategory.value;
+
+      if (isNewArrival) params.is_new = true;
 
       console.log("Search Params:", params);
 
@@ -180,6 +227,7 @@ const ViewBookAvailability = () => {
     } finally {
       setIsSubmitting(false);
       setLoadingForSearch(false);
+      setLoading(false);
     }
   };
 
@@ -408,44 +456,31 @@ const ViewBookAvailability = () => {
   }, [searchTerm]);
 
   const filteredSections = timetable.filter((student) => {
-    // Normalize search term: Trim and replace multiple spaces with a single space
     const searchLower = searchTerm.trim().replace(/\s+/g, " ").toLowerCase();
 
-    const formatDate = (dateString) => {
-      if (!dateString) return "";
-
-      // Ensure we remove the time part if present
-      const cleanDate = dateString.split(" ")[0]; // Extract only YYYY-MM-DD
-      const [year, month, day] = cleanDate.split("-");
-      return `${day}/${month}/${year} || ${day}-${month}-${year}`;
-    };
-
-    // Function to normalize text: trim spaces, replace multiple spaces with one, and convert to lowercase
     const normalize = (value) =>
       value?.toString().trim().replace(/\s+/g, " ").toLowerCase() || "";
 
     // Normalize all relevant fields for search
     const studentName = normalize(student?.book_title);
-    const orderId = normalize(student?.OrderId);
+    const accessionNo = normalize(student?.accession_no);
     const className = normalize(student?.author);
-    const dateofTrnx = normalize(formatDate(student?.Trnx_date));
-    const installmentNo = normalize(student?.installment_no);
-    const paymentId = normalize(student?.razorpay_payment_id);
     const status = normalize(student?.Status_code);
     const amount = normalize(student?.copy_id);
     const receiptNo = normalize(student?.location_of_book);
+    const combined = normalize(
+      `${student?.call_no || ""} / ${student?.category_name || ""}`
+    );
 
     // Check if the search term is present in any of the specified fields
     return (
       studentName.includes(searchLower) ||
-      orderId.includes(searchLower) ||
+      accessionNo.includes(searchLower) ||
       className.includes(searchLower) ||
-      dateofTrnx.includes(searchLower) ||
-      installmentNo.includes(searchLower) ||
-      paymentId.includes(searchLower) ||
       status.includes(searchLower) ||
       amount.includes(searchLower) ||
-      receiptNo.includes(searchLower)
+      receiptNo.includes(searchLower) ||
+      combined.includes(searchLower)
     );
   });
 
@@ -475,169 +510,13 @@ const ViewBookAvailability = () => {
             />
           </div>
           <div
-            className=" relative w-full -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-[98%] -top-6 h-1  mx-auto bg-red-700 "
             style={{
               backgroundColor: "#C03078",
             }}
           ></div>
 
           <>
-            {/* <div className="flex flex-wrap gap-4 items-end p-2">
-              <div className="w-full flex flex-wrap items-start gap-4 p-2 mr-2 ml-2">
-                
-                <div className="flex flex-col h-[80px]">
-                  <label className="text-md mb-1" htmlFor="orderId">
-                    Enter/Scan Accession No.
-                  </label>
-                  <input
-                    type="text"
-                    id="orderId"
-                    placeholder="Accession No."
-                    className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-[180px]"
-                    value={orderId}
-                    onChange={(e) => setOrderId(e.target.value)}
-                  />
-                </div>
-                
-                <div className="flex flex-col h-[80px]">
-                  <label className="text-md mb-1" htmlFor="studentSelect">
-                    Category group name
-                  </label>
-                  <Select
-                    menuPortalTarget={document.body}
-                    menuPosition="fixed"
-                    id="studentSelect"
-                    value={selectedStudent}
-                    onChange={handleStudentSelect}
-                    options={studentOptions}
-                    placeholder={loadingExams ? "Loading..." : "Select"}
-                    isSearchable
-                    isClearable
-                    isDisabled={loadingExams}
-                    className="text-sm w-[220px]"
-                  />
-                </div>
-
-                
-                <div className="flex flex-col h-[80px]">
-                  <label className="text-md mb-1" htmlFor="studentSelect">
-                    Call No. / Category
-                  </label>
-                  <Select
-                    menuPortalTarget={document.body}
-                    menuPosition="fixed"
-                    id="studentSelect"
-                    value={selectedStudent}
-                    onChange={handleStudentSelect}
-                    options={studentOptions}
-                    placeholder={loadingExams ? "Loading..." : "Select"}
-                    isSearchable
-                    isClearable
-                    isDisabled={loadingExams}
-                    className="text-sm w-[220px]"
-                  />
-                </div>
-
-                
-                <div className="flex flex-col h-[80px]">
-                  <label className="text-md mb-1" htmlFor="studentSelect">
-                    Book Title
-                  </label>
-                  <Select
-                    menuPortalTarget={document.body}
-                    menuPosition="fixed"
-                    id="studentSelect"
-                    value={selectedStudent}
-                    onChange={handleStudentSelect}
-                    options={studentOptions}
-                    placeholder={loadingExams ? "Loading..." : "Select"}
-                    isSearchable
-                    isClearable
-                    isDisabled={loadingExams}
-                    className="text-sm w-[220px]"
-                  />
-                </div>
-
-                
-                <div className="flex flex-col h-[80px]">
-                  <label className="text-md mb-1" htmlFor="studentSelect">
-                    Author
-                  </label>
-                  <Select
-                    menuPortalTarget={document.body}
-                    menuPosition="fixed"
-                    id="studentSelect"
-                    value={selectedStudent}
-                    onChange={handleStudentSelect}
-                    options={studentOptions}
-                    placeholder={loadingExams ? "Loading..." : "Select"}
-                    isSearchable
-                    isClearable
-                    isDisabled={loadingExams}
-                    className="text-sm w-[220px]"
-                  />
-                </div>
-
-                
-                <div className="flex flex-col h-[80px] ">
-                  <label className="text-md mb-1" htmlFor="accountType">
-                    New Arrival<span className="text-sm text-red-500">*</span>
-                  </label>
-                  <div className="flex justify-center mt-2">
-                    <input
-                      type="checkbox"
-                      className="w-5 h-5 text-blue-600 accent-blue-600"
-                    />
-                  </div>
-
-                  <div className="h-[16px] text-red-500 text-xs mt-1">
-                    {accountError && <span>{accountError}</span>}
-                  </div>
-                </div>
-
-                
-                <div className="flex items-end mt-4">
-                  <button
-                    type="search"
-                    onClick={handleSearch}
-                    style={{ backgroundColor: "#2196F3" }}
-                    className={`btn h-10 btn-primary text-white font-bold py-1 px-6 rounded ${
-                      loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    disabled={loadingForSearch}
-                  >
-                    {loadingForSearch ? (
-                      <span className="flex items-center">
-                        <svg
-                          className="animate-spin h-4 w-4 mr-2 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          ></path>
-                        </svg>
-                        Searching...
-                      </span>
-                    ) : (
-                      "Search"
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div> */}
-
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-4">
               {/* Enter/Scan Accession No. */}
               <div className="flex flex-col">
@@ -711,9 +590,12 @@ const ViewBookAvailability = () => {
                   <input
                     type="checkbox"
                     className="w-5 h-5 text-blue-600 accent-blue-600"
+                    checked={isNewArrival}
+                    onChange={(e) => setIsNewArrival(e.target.checked)}
                   />
                   <label className="text-md">New Arrival</label>
                 </div>
+
                 <button
                   type="search"
                   onClick={handleSearch}
@@ -735,7 +617,7 @@ const ViewBookAvailability = () => {
                   <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                     <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                        List of Available Books
+                        List of Books
                       </h3>
                       <div className="w-1/2 md:w-[18%] mr-1 ">
                         <input
@@ -789,25 +671,25 @@ const ViewBookAvailability = () => {
                         <thead>
                           <tr className="bg-gray-100">
                             <th
-                              style={{ width: "70px" }}
+                              style={{ width: "10px" }}
                               className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold"
                             >
                               Sr No.
                             </th>
                             <th
-                              style={{ width: "100px" }}
+                              style={{ width: "30px" }}
                               className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold"
                             >
                               Accession No.
                             </th>
                             <th
-                              style={{ width: "300px" }}
+                              style={{ width: "200px" }}
                               className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold"
                             >
                               Book Title
                             </th>
                             <th
-                              style={{ width: "200px" }}
+                              style={{ width: "150px" }}
                               className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold"
                             >
                               Author
@@ -819,7 +701,7 @@ const ViewBookAvailability = () => {
                               Call No./Category
                             </th>
                             <th
-                              style={{ width: "180px" }}
+                              style={{ width: "200px" }}
                               className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold"
                             >
                               Location
@@ -834,7 +716,13 @@ const ViewBookAvailability = () => {
                         </thead>
 
                         <tbody>
-                          {displayedSections.length ? (
+                          {loading ? (
+                            <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                              <div className=" text-center text-xl text-blue-700">
+                                Please wait while data is loading...
+                              </div>
+                            </div>
+                          ) : displayedSections.length ? (
                             displayedSections?.map((student, index) => (
                               <tr
                                 key={student.adm_form_pk}
@@ -850,10 +738,21 @@ const ViewBookAvailability = () => {
                                   {student?.book_title || " "}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.author || " "}
+                                  {student?.author
+                                    ? student.author
+                                        .toLowerCase()
+                                        .split(" ")
+                                        .map(
+                                          (word) =>
+                                            word.charAt(0).toUpperCase() +
+                                            word.slice(1)
+                                        )
+                                        .join(" ")
+                                    : " "}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.call_no || ""}
+                                  {student?.call_no || ""} /{" "}
+                                  {student?.category_name || ""}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student?.location_of_book || " "}

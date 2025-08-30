@@ -85,9 +85,12 @@ const CreateEvent = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_rolesforevent`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_activerolesforevent`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       //  Use only the actual array
       const rolesData = response.data?.data || [];
@@ -707,6 +710,7 @@ const CreateEvent = () => {
                                   description: "",
                                 }));
                               }}
+                              maxlength={255}
                             />
                             {errors.description && (
                               <p className="text-red-500 text-sm mt-1">
