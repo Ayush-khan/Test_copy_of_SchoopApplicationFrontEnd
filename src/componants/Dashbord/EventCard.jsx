@@ -4,7 +4,6 @@ import axios from "axios";
 import Styles from "./EventCard.module.css"; // Import CSS module
 import Loader from "../common/LoaderFinal/DashboardLoadder/Loader";
 import { useNavigate } from "react-router-dom";
-// import MarkDropdownEditor from "../Event/MarkDropdownEditor";
 import MarkDropdownEditor from "../Events/MarkDropdownEditor";
 
 const EventCard = () => {

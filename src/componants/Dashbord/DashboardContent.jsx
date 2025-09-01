@@ -25,7 +25,6 @@ import { MdAssessment } from "react-icons/md";
 import ClassWiseAcademicPerformance from "./ClassWiseAcademicPerformance.jsx";
 import TimeTableForTeacherDashbord from "./TimeTableForTeacherDashbord.jsx";
 import TicketForDashboard from "./TicketForDashboard.jsx";
-import { useLocation } from "react-router-dom";
 
 const DashboardContent = () => {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -47,18 +46,6 @@ const DashboardContent = () => {
   const [approvedLessonPlaneCount, setApprovedLessonPlaneCount] = useState("");
   const [error, setError] = useState(null);
   const [roleId, setRoleId] = useState(null);
-  const location = useLocation();
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get("reload") === "true") {
-      // Remove ?reload=true from URL
-      window.history.replaceState(null, "", location.pathname);
-
-      // Then reload
-      window.location.reload();
-    }
-  }, [location]);
 
   useEffect(() => {
     fetchRoleId();
