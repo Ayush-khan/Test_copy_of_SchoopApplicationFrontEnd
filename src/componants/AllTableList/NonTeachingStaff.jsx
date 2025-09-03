@@ -1,56 +1,88 @@
 import axios from "axios";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ChevronDoubleLeft } from "react-bootstrap-icons";
+import Select from "react-select";
 
 function NonTeachingStaff() {
   const API_URL = import.meta.env.VITE_API_URL;
-  const [staffBirthday, setStaffBirthday] = useState([]);
-  const [studentBirthday, setStudentBirthday] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Non-Teaching Staff Attendance");
   const [loadingForSend, setLoadingForSend] = useState(false);
-  const [fromDate, setFromDate] = useState("");
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const pageSize = 10;
+
   const [absentTeachers, setAbsentTeachers] = useState([]);
   const [leaveCount, setLeaveCount] = useState(0);
 
   const [presentTeachers, setPresentTeachers] = useState([]);
   const [prsentCount, setPrsentCount] = useState(0);
 
-  const [description, setDescription] = useState("");
   const [message, setMessage] = useState("");
+
+  const [categories, setCategories] = useState([]);
+  const [selectedTeacherCategory, setSelectedTeacherCategory] = useState(null);
+  const [teacherCategoryId, setTeacherCategoryId] = useState(null);
+  const [teacherCategoryError, setTeacherCategoryError] = useState("");
+  const [loadingClasses, setLoadingClasses] = useState(false);
+  const [loadingError, setLoadingError] = useState(false);
 
   const maxCharacters = 900;
 
   useEffect(() => {
-    // fetchBirthdayList();
     fetchAbsentNonTeachingStaff();
-
-    // handleSearch();
+    fetchTeacherCategory();
   }, []);
 
-  const getTodayInDDMMYYYY = () => {
-    const today = new Date();
-    const day = String(today.getDate()).padStart(2, "0");
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const year = today.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
+  // const fetchAbsentNonTeachingStaff = async () => {
+  //   const today = new Date().toISOString().split("T")[0]; // e.g., "2025-06-17"
 
-  const getFormattedFirstName = (fullName) => {
-    const first = fullName?.split(" ")[0] || "";
-    return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
-  };
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token found");
+  //     }
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_absentnonteacherfortoday`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         params: {
+  //           date: today, // passing date as query param
+  //         },
+  //       }
+  //     );
+
+  //     console.log("response", response);
+  //     const absentStaff = response.data?.data?.nonteacher_absent || [];
+  //     console.log("Absent staff", absentStaff);
+
+  //     const presentStaff = response.data?.data?.nonteacher_present || [];
+  //     console.log("Present staff", presentStaff);
+
+  //     setAbsentTeachers(absentStaff);
+  //     setPresentTeachers(presentStaff);
+  //     setPrsentCount(presentStaff.length);
+  //     setLeaveCount(absentStaff.length);
+  //   } catch (error) {
+  //     setError(error.message || "Something went wrong while fetching data.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const fetchAbsentNonTeachingStaff = async () => {
-    const today = new Date().toISOString().split("T")[0]; // e.g., "2025-06-17"
+    setLoading(true);
+    setLoadingError(false); // reset before fetching
+    const today = new Date().toISOString().split("T")[0]; // e.g., "2025-09-02"
 
     try {
       const token = localStorage.getItem("authToken");
@@ -65,52 +97,195 @@ function NonTeachingStaff() {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            date: today, // passing date as query param
+            date: today,
+            category: selectedTeacherCategory?.label,
           },
         }
       );
 
-      console.log("response", response);
       const absentStaff = response.data?.data?.nonteacher_absent || [];
-      console.log("Absent staff", absentStaff);
-
       const presentStaff = response.data?.data?.nonteacher_present || [];
+
+      console.log("Absent staff", absentStaff);
       console.log("Present staff", presentStaff);
 
       setAbsentTeachers(absentStaff);
       setPresentTeachers(presentStaff);
       setPrsentCount(presentStaff.length);
-      setLeaveCount(absentStaff.length);
+
+      const totalAbsentCount = absentStaff.reduce((total, group) => {
+        return total + (group.teachers?.length || 0); // sum staff per category
+      }, 0);
+
+      setLeaveCount(totalAbsentCount);
+
+      // ✅ set loadingError if both absent & present lists are empty
+      if (absentStaff.length === 0 && presentStaff.length === 0) {
+        setLoadingError(true);
+      }
     } catch (error) {
       setError(error.message || "Something went wrong while fetching data.");
+      setLoadingError(true); // error = treat as no data
     } finally {
       setLoading(false);
     }
   };
 
+  // const fetchAbsentNonTeachingStaff = async () => {
+  //   setLoading(true);
+  //   const today = new Date().toISOString().split("T")[0]; // e.g., "2025-09-02"
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token found");
+  //     }
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_absentnonteacherfortoday`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         params: {
+  //           date: today,
+  //           category: selectedTeacherCategory?.label,
+  //         },
+  //       }
+  //     );
+
+  //     const absentStaff = response.data?.data?.nonteacher_absent || [];
+  //     const presentStaff = response.data?.data?.nonteacher_present || [];
+
+  //     console.log("Absent staff", absentStaff);
+  //     console.log("Present staff", presentStaff);
+
+  //     setAbsentTeachers(absentStaff);
+  //     setPresentTeachers(presentStaff);
+  //     setPrsentCount(presentStaff.length);
+  //     const totalAbsentCount = absentStaff.reduce((total, group) => {
+  //       return total + (group.teachers?.length || 0); // sum staff per category
+  //     }, 0);
+
+  //     setLeaveCount(totalAbsentCount);
+  //     // setLeaveCount(absentStaff.length);
+  //   } catch (error) {
+  //     setError(error.message || "Something went wrong while fetching data.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const handleSearch = async () => {
+    setLoading(true);
+    setError("");
+    await fetchAbsentNonTeachingStaff();
+  };
+
+  const fetchTeacherCategory = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data?.data) {
+        setCategories(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching teacher category:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTeacherCategory = (selectedOption) => {
+    console.log("Selected Teacher Category:", selectedOption?.value);
+    setTeacherCategoryError("");
+    setSelectedTeacherCategory(selectedOption);
+    setTeacherCategoryId(selectedOption?.value);
+  };
+
+  const teacherCategoryOptions = useMemo(
+    () =>
+      categories.map((cat) => ({
+        value: cat.tc_id,
+        label: cat.name,
+      })),
+    [categories]
+  );
+
   const handleTabChange = (tab) => {
     setActiveTab(tab); // Update the active tab state
   };
 
-  const filteredStudentBirthday = studentBirthday.filter((student) => {
-    const searchLower = searchTerm.toLocaleLowerCase().trim();
-    const fullName = `${student.first_name || ""} ${student.mid_name || ""} ${
-      student.last_name || ""
-    }`.toLowerCase();
-    const className = `${student.classname || ""} ${
-      student.sectionname || ""
-    }`.toLowerCase();
-    const mobile = `${student.phone_no || ""}`.toLowerCase();
-    const email = `${student.email_id || ""} ${
-      student.email_id || ""
-    }`.toLowerCase();
+  const filteredPresentTeachers = presentTeachers.filter((student) => {
+    const searchLower = searchTerm.toLowerCase().trim();
+
+    const fullName = `${student.name || ""}`.toLowerCase();
+    const category = `${student.teachercategoryname || ""}`.toLowerCase();
+    const phone = `${student.phone || ""}`.toLowerCase();
+    const classSection = `${student.class_section || ""}`.toLowerCase();
+    const punchIn = `${student.punch_in || ""}`.toLowerCase();
+    const punchOut = `${student.punch_out || ""}`.toLowerCase();
+
     return (
       fullName.includes(searchLower) ||
-      className.includes(searchLower) ||
-      mobile.includes(searchLower) ||
-      email.includes(searchLower)
+      category.includes(searchLower) ||
+      phone.includes(searchLower) ||
+      classSection.includes(searchLower) ||
+      punchIn.includes(searchLower) ||
+      punchOut.includes(searchLower)
     );
   });
+
+  console.log(filteredPresentTeachers);
+
+  // const filteredAbsentTeachers = absentTeachers.filter((student) => {
+  //   const searchLower = searchTerm.toLocaleLowerCase().trim();
+  //   const fullName = `${student.name || ""}`.toLowerCase();
+  //   const className = `${student.classname || ""} ${
+  //     student.sectionname || ""
+  //   }`.toLowerCase();
+  //   const mobile = `${student.phone_no || ""}`.toLowerCase();
+
+  //   const staffCategory = `${student.category_name || ""}`.toLowerCase();
+  //   const staffDesignaion = `${student.designation || ""}`.toLowerCase();
+  //   return (
+  //     fullName.includes(searchLower) ||
+  //     className.includes(searchLower) ||
+  //     mobile.includes(searchLower) ||
+  //     staffCategory.includes(searchLower) ||
+  //     staffDesignaion.includes(searchLower)
+  //   );
+  // });
+
+  const filteredAbsentTeachers = absentTeachers
+    .map((group) => ({
+      category_name: group.category_name,
+      teachers: group.teachers.filter((teacher) => {
+        const searchLower = searchTerm.toLowerCase().trim();
+
+        const fullName = `${teacher.name || ""}`.toLowerCase();
+        const mobile = `${teacher.phone || ""}`.toLowerCase();
+        const staffCategory = `${group.category_name || ""}`.toLowerCase();
+        const staffDesignation = `${teacher.designation || ""}`.toLowerCase();
+
+        return (
+          fullName.includes(searchLower) ||
+          mobile.includes(searchLower) ||
+          staffCategory.includes(searchLower) ||
+          staffDesignation.includes(searchLower)
+        );
+      }),
+    }))
+    // remove empty groups
+    .filter((group) => group.teachers.length > 0);
+
+  console.log(filteredAbsentTeachers);
 
   const [selectedIds, setSelectedIds] = useState([]);
 
@@ -185,6 +360,14 @@ function NonTeachingStaff() {
     }
   };
 
+  const toTitleCase = (str = "") => {
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   return (
     <>
       <ToastContainer />
@@ -228,6 +411,51 @@ function NonTeachingStaff() {
             </li>
           ))}
         </ul>
+        {activeTab === "Non-Teaching Staff on leave" && (
+          <div className="mb-2 mt-0">
+            <div className="w-full md:w-[78%] gap-x-0 mx-auto flex flex-col  md:gap-y-0 md:flex-row">
+              <div className="w-full md:w-[50%] gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
+                <label
+                  className="text-md mt-1.5 mr-1 md:mr-0"
+                  htmlFor="classSelect"
+                >
+                  Teacher Category
+                </label>
+                <div className="w-full md:w-[57%]">
+                  <Select
+                    id="classSelect"
+                    value={selectedTeacherCategory}
+                    onChange={handleTeacherCategory}
+                    options={teacherCategoryOptions}
+                    placeholder={
+                      loadingClasses ? "Loading section..." : "Select"
+                    }
+                    isSearchable
+                    isClearable
+                    className="text-sm"
+                    styles={{
+                      menu: (provided) => ({
+                        ...provided,
+                        zIndex: 1050,
+                      }),
+                    }}
+                    isDisabled={loadingClasses}
+                  />
+                </div>
+              </div>
+              <div className="mt-1">
+                <button
+                  onClick={handleSearch}
+                  type="button"
+                  disabled={loading}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                  {loading ? "Searching..." : "Search"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Tab Content */}
         <div className="w-full">
           <div className="card mx-auto lg:w-full shadow-lg">
@@ -244,20 +472,26 @@ function NonTeachingStaff() {
                         month: "long",
                       })} `}
                 </h3>
+                <div className="box-border flex md:gap-x-2 justify-end md:h-10 ml-2">
+                  <div className=" w-1/2 md:w-fit mr-1">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search"
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             <div
-              className=" relative w-[97%]   mb-3 h-1 mx-auto bg-red-700"
+              className=" relative w-[97%] h-1 mx-auto bg-red-700"
               style={{
                 backgroundColor: "#C03078",
               }}
             ></div>
             <div className="bg-white rounded-md mt-3 mb-3 w-[90%] md:ml-16">
-              {loading ? (
-                <div className="text-center text-xl py-10 text-blue-700">
-                  Please wait while data is loading...
-                </div>
-              ) : activeTab === "Non-Teaching Staff Attendance" ? (
+              {activeTab === "Non-Teaching Staff Attendance" ? (
                 <div
                   className="h-auto lg:h-96 overflow-y-scroll"
                   style={{
@@ -301,8 +535,26 @@ function NonTeachingStaff() {
                       </tr>
                     </thead>
                     <tbody>
-                      {presentTeachers.length > 0 ? (
-                        presentTeachers.map((student, index) => (
+                      {loading ? (
+                        <tr>
+                          <td
+                            colSpan="9"
+                            className="text-center text-xl py-5 text-blue-700 border border-gray-950"
+                          >
+                            Please wait while data is loading...
+                          </td>
+                        </tr>
+                      ) : loadingError ? (
+                        <tr>
+                          <td
+                            colSpan="9"
+                            className="text-center text-xl py-5 text-red-700 border border-gray-950"
+                          >
+                            No Staff are Late Today.
+                          </td>
+                        </tr>
+                      ) : filteredPresentTeachers.length > 0 ? (
+                        filteredPresentTeachers.map((student, index) => (
                           <tr
                             key={student.student_id}
                             className={`${
@@ -341,7 +593,6 @@ function NonTeachingStaff() {
                                     : "text-gray-900"
                                 }`}
                               >
-                                {/* {(student.name)} */}
                                 {student?.name
                                   ? student.name
                                       .toLowerCase()
@@ -402,7 +653,6 @@ function NonTeachingStaff() {
                                     : "text-gray-900"
                                 }`}
                               >
-                                {/* {student.late_time || "-"} */}
                                 {student.late === "Y" &&
                                 student.punch_time &&
                                 student.late_time
@@ -440,7 +690,7 @@ function NonTeachingStaff() {
                       ) : (
                         <tr>
                           <td
-                            colSpan="8"
+                            colSpan="9"
                             className="text-center text-xl py-5 text-red-700 border border-gray-950"
                           >
                             No Staff are Late Today.
@@ -454,93 +704,137 @@ function NonTeachingStaff() {
                 <div
                   className="h-96 lg:h-96 overflow-y-scroll"
                   style={{
-                    scrollbarWidth: "thin", // Firefox
-                    scrollbarColor: "#C03178 transparent", // Firefox
+                    scrollbarWidth: "thin",
+                    scrollbarColor: "#C03178 transparent",
                   }}
                 >
-                  <table className="min-w-full leading-normal table-auto">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="px-1 w-full md:w-[10%] mx-auto py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
-                          S.No
-                        </th>
-                        <th className=" px-0.5 w-full md:w-[30%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
-                          Staff Name
-                        </th>
-                        <th className=" px-0.5 w-full md:w-[20%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
-                          Designation
-                        </th>
-                        <th className=" px-0.5 md:w-[20%] text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
-                          Mobile No.
-                        </th>
-                        <th className=" px-0.5 w-full md:w-[%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
-                          Leave Status
-                        </th>
-                      </tr>
-                    </thead>
-                    {absentTeachers.length > 0 ? (
-                      absentTeachers.map((staff, index) => (
-                        <tr
-                          key={staff.teacher_id}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
+                  {filteredAbsentTeachers.length > 0 ? (
+                    filteredAbsentTeachers.map((group, groupIndex) => (
+                      <div key={group.category_name} className="mb-2">
+                        <h2
+                          className="text-lg font-bold text-center"
+                          style={{ color: "#C03178" }}
                         >
-                          <td className="text-center border border-gray-950 text-sm">
-                            <p className="text-gray-900 relative top-2">
-                              {index + 1}
-                            </p>
-                          </td>
-                          <td className="text-center border border-gray-950 text-sm">
-                            <p className="text-gray-900 relative top-2 ">
-                              {/* {staff?.name || " "} */}
-                              {staff?.name
-                                ? staff.name
-                                    .toLowerCase()
-                                    .split(" ")
-                                    .map((word) =>
-                                      word
-                                        .split("'")
-                                        .map(
-                                          (part) =>
-                                            part.charAt(0).toUpperCase() +
-                                            part.slice(1)
-                                        )
-                                        .join("'")
-                                    )
-                                    .join(" ")
-                                : " "}
-                            </p>
-                          </td>
-                          <td className="text-center border border-gray-950 text-sm">
-                            <p className="text-gray-900 relative top-2">
-                              {staff?.designation || " - "}
-                            </p>
-                          </td>
+                          {group.category_name}
+                        </h2>
 
-                          <td className="text-center border border-gray-950 text-sm">
-                            <p className="text-gray-900 relative top-2">
-                              {staff?.phone || " "}
-                            </p>
-                          </td>
-                          <td className="text-center border border-gray-950 text-sm">
-                            <p className="text-gray-900 relative top-2">
-                              {staff?.leave_status || " - "}
-                            </p>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan="4"
-                          className="text-center text-xl py-5 text-red-700"
-                        >
-                          No Satff are on Leave Today.
-                        </td>
-                      </tr>
-                    )}
-                  </table>
+                        <table className="min-w-full leading-normal table-auto border-collapse border border-gray-950">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="px-1 w-[7%] py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
+                                Sr.No
+                              </th>
+                              <th className="px-1 w-[25%] py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
+                                Teacher Name
+                              </th>
+
+                              <th className="px-1 w-[25%] py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
+                                Designation
+                              </th>
+
+                              <th className="px-1 w-[12%] py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
+                                Mobile No.
+                              </th>
+                              <th className="px-1 w-[15%] py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
+                                Leave Status
+                              </th>
+                            </tr>
+                          </thead>
+
+                          <tbody>
+                            {loading ? (
+                              <tr>
+                                <td
+                                  colSpan="5"
+                                  className="text-center text-xl py-5 text-blue-700 border border-gray-950"
+                                >
+                                  Please wait while data is loading...
+                                </td>
+                              </tr>
+                            ) : loadingError ? (
+                              <tr>
+                                <td
+                                  colSpan="5"
+                                  className="text-center text-xl py-5 text-red-700 border border-gray-950"
+                                >
+                                  No Staff are on Leave Today..
+                                </td>
+                              </tr>
+                            ) : group.teachers && group.teachers.length > 0 ? (
+                              group.teachers.map((staff, index) => (
+                                <tr
+                                  key={staff.teacher_id}
+                                  className={`${
+                                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                  } hover:bg-gray-100`}
+                                >
+                                  <td className="text-center border border-gray-950 text-sm">
+                                    <p className="text-gray-900 relative top-2">
+                                      {index + 1}
+                                    </p>
+                                  </td>
+                                  <td className="text-center border border-gray-950 text-sm">
+                                    <p className="text-gray-900 relative top-2">
+                                      {staff?.name
+                                        ? staff.name
+                                            .toLowerCase()
+                                            .split(" ")
+                                            .map((word) =>
+                                              word
+                                                .split("'")
+                                                .map(
+                                                  (part) =>
+                                                    part
+                                                      .charAt(0)
+                                                      .toUpperCase() +
+                                                    part.slice(1)
+                                                )
+                                                .join("'")
+                                            )
+                                            .join(" ")
+                                        : " "}
+                                    </p>
+                                  </td>
+
+                                  <td className="text-center border border-gray-950 text-sm">
+                                    <p className="text-gray-900 relative top-2">
+                                      {staff?.designation || " "}
+                                    </p>
+                                  </td>
+
+                                  <td className="text-center border border-gray-950 text-sm">
+                                    <p className="text-gray-900 relative top-2">
+                                      {staff?.phone || " "}
+                                    </p>
+                                  </td>
+                                  <td className="text-center border border-gray-950 text-sm">
+                                    <p className="text-gray-900 relative top-2">
+                                      {staff?.leave_status || "-"}
+                                    </p>
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td
+                                  colSpan="5"
+                                  className="text-center text-xl py-5 text-red-700 border border-gray-950"
+                                >
+                                  No Staff are on Leave Today..
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    ))
+                  ) : (
+                    <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                      <div className=" text-center text-xl text-red-700">
+                        No Staff are Leave Today..
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

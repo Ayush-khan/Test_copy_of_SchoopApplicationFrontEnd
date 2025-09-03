@@ -7,11 +7,16 @@ import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import { RxCross1 } from "react-icons/rx";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
 // import { RxCross1 } from "react-icons/rx";
 
 const LeavingCertificate = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [booksPending, setBooksPending] = useState(false);
+  const [pendingBookCount, setPendingBookCount] = useState("");
   const [classesforForm, setClassesforForm] = useState([]);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [classIdForSearch, setClassIdForSearch] = useState(null);
@@ -27,8 +32,13 @@ const LeavingCertificate = () => {
   const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
 
   const [selectedActivities, setSelectedActivities] = useState([]);
-
+  const [pendingBookDetails, setPendingBookDetails] = useState([]);
   const navigate = useNavigate();
+  const capitalizeFirst = (str) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  };
+
   const [formData, setFormData] = useState({
     sr_no: "",
     grn_no: "",
@@ -225,11 +235,41 @@ const LeavingCertificate = () => {
   // State for loading indicators
   const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const formatDate = (dateStr) => {
+    if (!dateStr || dateStr === "0000-00-00") return "Not Returned";
+
+    // Safely parse date without timezone shift
+    const [year, month, day] = dateStr.split("-");
+    return `${day}-${month}-${year}`; // dd-mm-yyyy
+  };
 
   useEffect(() => {
     // Fetch both classes and student names on component mount
     fetchInitialDataAndStudents();
   }, []);
+  const fetchPendingBookCount = async () => {
+    try {
+      if (!selectedStudentId) return;
+
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(
+        `${API_URL}/api/get_pendingbooksreturnforstudent?student_id=${selectedStudentId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data && response.data.status === 200) {
+        setPendingBookCount(response.data.data);
+        setPendingBookDetails(response.data.bookdetails || []);
+      } else {
+        console.warn("Unexpected response format or failed status");
+      }
+    } catch (error) {
+      console.error("Error fetching pending book count:", error);
+    }
+  };
 
   const fetchInitialDataAndStudents = async () => {
     try {
@@ -259,7 +299,12 @@ const LeavingCertificate = () => {
       setLoadingStudents(false);
     }
   };
-
+  const handleAdd = () => {
+    setShowAddModal(true);
+  };
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+  };
   const fetchStudentNameWithClassId = async (section_id = null) => {
     try {
       setLoadingStudents(true);
@@ -339,7 +384,9 @@ const LeavingCertificate = () => {
     setNameError("");
     setNameErrorForClass("");
     setErrors({}); // Clears all field-specific errors
-
+    setBooksPending(false);
+    setPendingBookCount("");
+    setPendingBookDetails([]);
     if (!selectedStudent) {
       setNameError("Please select Student Name.");
       toast.error("Please select Student Name.!");
@@ -461,6 +508,9 @@ const LeavingCertificate = () => {
           toast.error(
             "Leaving Certificate Already Generated. Please go to manage to download the Leaving Certificate."
           );
+        } else if (response.data && response.data.status === 409) {
+          fetchPendingBookCount();
+          setBooksPending(true);
         } else {
           // Show a generic error message if the error is not a 403
           toast.error("No data found for the selected student.");
@@ -1203,15 +1253,43 @@ const LeavingCertificate = () => {
             <LoaderStyle />
           </div>
         )}{" "}
-        {parentInformation && (
-          <div className=" w-full  md:container mx-auto py-4 p-4 px-4  ">
-            <div className="    card  px-3 rounded-md ">
-              {/* <div className="card p-4 rounded-md "> */}
-              <div className=" card-header mb-4 flex justify-between items-center  ">
-                <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-                  Student Information
-                </h5>
-                {/*
+        {booksPending ? (
+          <div className="mt-6 mx-auto w-[95%]  bg-yellow-50 border-l-4 border-r-4 border-yellow-500 shadow-lg p-2 rounded-lg text-yellow-900 text-center space-y-4 animate-fade-in">
+            <div className="text-xl font-semibold flex items-center justify-center ">
+              ⚠️
+              <span>
+                <span className="text-red-600 font-bold">
+                  {pendingBookCount}
+                </span>{" "}
+                book{pendingBookCount > 1 ? "s are" : " is"} pending for return.
+              </span>
+            </div>
+
+            <button
+              onClick={handleAdd}
+              className="inline-flex items-center gap-2 p-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-base rounded-md border-2 border-red-700 shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              📚 View Pending Books
+            </button>
+
+            <p className="text-lg font-medium text-gray-700">
+              Leaving Certificate{" "}
+              <span className="font-bold text-red-600">
+                cannot be generated
+              </span>{" "}
+              until all books are returned to the library.
+            </p>
+          </div>
+        ) : (
+          parentInformation && (
+            <div className=" w-full  md:container mx-auto py-4 p-4 px-4  ">
+              <div className="    card  px-3 rounded-md ">
+                {/* <div className="card p-4 rounded-md "> */}
+                <div className=" card-header mb-4 flex justify-between items-center  ">
+                  <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+                    Student Information
+                  </h5>
+                  {/*
                 <RxCross1
                   className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                   onClick={() => {
@@ -1219,421 +1297,423 @@ const LeavingCertificate = () => {
                     navigate("/careTacker");
                   }}
                 /> */}
-              </div>
-              <div
-                className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
-                style={{
-                  backgroundColor: "#C03078",
-                }}
-              ></div>
-              <p className=" text-[.9em] md:absolute md:right-8  md:top-[5%]   text-gray-500 ">
-                <span className="text-red-500 ">*</span>indicates mandatory
-                information
-              </p>
-              <form
-                onSubmit={handleSubmit}
-                className=" w-full gap-x-1 md:gap-x-14  gap-y-1   overflow-x-hidden shadow-md p-4  bg-gray-50 mb-4"
-              >
-                {/* Document Information */}
-                <fieldset className="mb-4">
-                  <h5 className="col-span-4 text-blue-400 pb-2">
-                    {/* <legend className="font-semibold text-[1.2em]"> */}
-                    Document Information
-                    {/* </legend> */}
-                  </h5>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                      <label
-                        htmlFor="sr_no"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        LC No. <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="sr_no"
-                        name="sr_no"
-                        value={formData.sr_no}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="grn_no"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        General Register No.{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="grn_no"
-                        name="grn_no"
-                        maxLength={10}
-                        value={formData.grn_no}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.grn_no && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.grn_no}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="date"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Issue Date <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        id="date"
-                        name="date"
-                        value={formData.date}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.date && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.date}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </fieldset>
-                {/* Student Identity */}
-                <fieldset className="mb-4">
-                  {/* <legend className="font-bold"> */}
-                  <h5 className="col-span-4 text-blue-400 py-2">
-                    Student Identity
-                  </h5>
-                  {/* </legend> */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className=" ">
-                      <label
-                        htmlFor="staffName"
-                        className="block font-bold  text-xs mb-2"
-                      >
-                        First Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={200}
-                        id="staffName"
-                        name="first_name"
-                        value={formData.first_name}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.first_name && (
-                        <div className="text-red-500 text-xs ml-1 ">
-                          {errors.first_name}
-                        </div>
-                      )}
-                    </div>
-                    <div className=" ">
-                      <label
-                        htmlFor="staffMidName"
-                        className="block font-bold  text-xs mb-2"
-                      >
-                        Mid Name
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={200}
-                        id="staffMidName"
-                        name="mid_name"
-                        value={formData.mid_name}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                    </div>
-                    <div className=" ">
-                      <label
-                        htmlFor="staffLastName"
-                        className="block font-bold  text-xs mb-2"
-                      >
-                        Surname
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={200}
-                        id="staffLastName"
-                        name="last_name"
-                        value={formData.last_name}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="stud_id_no"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        STUDENT ID NO <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="stud_id_no"
-                        name="stud_id_no"
-                        maxLength={25}
-                        value={formData.stud_id_no}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.stud_id_no && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.stud_id_no}
-                        </span>
-                      )}
-                    </div>
-
-                    {classIdForSearch > 427 && (
-                      <div className="mt-2">
+                </div>
+                <div
+                  className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <p className=" text-[.9em] md:absolute md:right-8  md:top-[5%]   text-gray-500 ">
+                  <span className="text-red-500 ">*</span>indicates mandatory
+                  information
+                </p>
+                <form
+                  onSubmit={handleSubmit}
+                  className=" w-full gap-x-1 md:gap-x-14  gap-y-1   overflow-x-hidden shadow-md p-4  bg-gray-50 mb-4"
+                >
+                  {/* Document Information */}
+                  <fieldset className="mb-4">
+                    <h5 className="col-span-4 text-blue-400 pb-2">
+                      {/* <legend className="font-semibold text-[1.2em]"> */}
+                      Document Information
+                      {/* </legend> */}
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
                         <label
-                          htmlFor="studentAadharNumber"
-                          className="block font-bold text-xs mb-0.5"
+                          htmlFor="sr_no"
+                          className="block font-bold text-xs mb-2"
                         >
-                          Udise Pen No. <span className="text-red-500">*</span>
+                          LC No. <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
-                          id="Udise_no"
-                          name="udise_pen_no"
-                          maxLength={14}
-                          value={formData.udise_pen_no}
-                          // className="input-field block w-full  border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                          id="sr_no"
+                          name="sr_no"
+                          value={formData.sr_no}
                           readOnly
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="grn_no"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          General Register No.{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="grn_no"
+                          name="grn_no"
+                          maxLength={10}
+                          value={formData.grn_no}
                           onChange={handleChange}
-                          // onBlur={handleBlur}
-                        />{" "}
-                        {errors.udise_pen_no && (
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.grn_no && (
                           <span className="text-red-500 text-xs ml-1 h-1">
-                            {errors.udise_pen_no}
+                            {errors.grn_no}
                           </span>
                         )}
                       </div>
-                    )}
-                    <div>
-                      <label
-                        htmlFor="stu_aadhaar_no"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        UDI NO.(Aadhar Card No.){" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="stu_aadhaar_no"
-                        name="stu_aadhaar_no"
-                        maxLength={12}
-                        value={formData.stu_aadhaar_no}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.stu_aadhaar_no && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.stu_aadhaar_no}
-                        </span>
-                      )}
+                      <div>
+                        <label
+                          htmlFor="date"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Issue Date <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          id="date"
+                          name="date"
+                          value={formData.date}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.date && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.date}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <label
-                        htmlFor="apaar_id"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        APAAR ID No.{" "}
-                      </label>
-                      <input
-                        type="text"
-                        id="apaar_id"
-                        name="apaar_id"
-                        maxLength={12}
-                        value={formData.apaar_id}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                    </div>
-                  </div>
-                </fieldset>
-                {/* Parent Details */}
-                <fieldset className="mb-4">
-                  {/* <legend className="font-bold"> */}
-                  <h5 className="col-span-4 text-blue-400 py-2">
-                    Parent Details
-                  </h5>
-                  {/* </legend> */}
+                  </fieldset>
+                  {/* Student Identity */}
+                  <fieldset className="mb-4">
+                    {/* <legend className="font-bold"> */}
+                    <h5 className="col-span-4 text-blue-400 py-2">
+                      Student Identity
+                    </h5>
+                    {/* </legend> */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className=" ">
+                        <label
+                          htmlFor="staffName"
+                          className="block font-bold  text-xs mb-2"
+                        >
+                          First Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={200}
+                          id="staffName"
+                          name="first_name"
+                          value={formData.first_name}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.first_name && (
+                          <div className="text-red-500 text-xs ml-1 ">
+                            {errors.first_name}
+                          </div>
+                        )}
+                      </div>
+                      <div className=" ">
+                        <label
+                          htmlFor="staffMidName"
+                          className="block font-bold  text-xs mb-2"
+                        >
+                          Mid Name
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={200}
+                          id="staffMidName"
+                          name="mid_name"
+                          value={formData.mid_name}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                      </div>
+                      <div className=" ">
+                        <label
+                          htmlFor="staffLastName"
+                          className="block font-bold  text-xs mb-2"
+                        >
+                          Surname
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={200}
+                          id="staffLastName"
+                          name="last_name"
+                          value={formData.last_name}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="stud_id_no"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          STUDENT ID NO <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="stud_id_no"
+                          name="stud_id_no"
+                          maxLength={25}
+                          value={formData.stud_id_no}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.stud_id_no && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.stud_id_no}
+                          </span>
+                        )}
+                      </div>
 
-                  <div className="w-full md:w-[80%]  grid grid-cols-1 md:grid-cols-2   gap-x-6 gap-4">
-                    {" "}
-                    <div>
-                      <label
-                        htmlFor="father_name"
-                        className="block font-bold  text-xs mb-2"
-                      >
-                        Father's Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={50}
-                        id="father_name"
-                        name="father_name"
-                        value={formData.father_name}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.father_name && (
-                        <div className="text-red-500 text-xs ml-1 ">
-                          {errors.father_name}
+                      {classIdForSearch > 427 && (
+                        <div className="mt-2">
+                          <label
+                            htmlFor="studentAadharNumber"
+                            className="block font-bold text-xs mb-0.5"
+                          >
+                            Udise Pen No.{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            id="Udise_no"
+                            name="udise_pen_no"
+                            maxLength={14}
+                            value={formData.udise_pen_no}
+                            // className="input-field block w-full  border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                            readOnly
+                            className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                            onChange={handleChange}
+                            // onBlur={handleBlur}
+                          />{" "}
+                          {errors.udise_pen_no && (
+                            <span className="text-red-500 text-xs ml-1 h-1">
+                              {errors.udise_pen_no}
+                            </span>
+                          )}
                         </div>
                       )}
+                      <div>
+                        <label
+                          htmlFor="stu_aadhaar_no"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          UDI NO.(Aadhar Card No.){" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="stu_aadhaar_no"
+                          name="stu_aadhaar_no"
+                          maxLength={12}
+                          value={formData.stu_aadhaar_no}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.stu_aadhaar_no && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.stu_aadhaar_no}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="apaar_id"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          APAAR ID No.{" "}
+                        </label>
+                        <input
+                          type="text"
+                          id="apaar_id"
+                          name="apaar_id"
+                          maxLength={12}
+                          value={formData.apaar_id}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label
-                        htmlFor="mother_name"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Mother's Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="mother_name"
-                        name="mother_name"
-                        maxLength={50}
-                        value={formData.mother_name}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.mother_name && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.mother_name}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </fieldset>
-                {/* Academic Details */}
-                <fieldset className="mb-4">
-                  {/* <legend className="font-bold"> */}
-                  <h5 className="col-span-4 text-blue-400 py-2">
-                    Academic Details
-                  </h5>
-                  {/* </legend> */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                      <label
-                        htmlFor="religion"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Religion
-                      </label>
-                      <input
-                        type="text"
-                        id="religion"
-                        name="religion"
-                        maxLength={20}
-                        value={formData.religion}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="caste"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Caste
-                      </label>
-                      <input
-                        type="text"
-                        id="caste"
-                        name="caste"
-                        maxLength={20}
-                        value={formData.caste}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                    </div>{" "}
-                    <div className="grid   col-span-2 row-span-2 ">
-                      <label
-                        htmlFor="subjects"
-                        className="block font-bold text-xs  col-span-3"
-                      >
-                        Subjects Studied <span className="text-red-500">*</span>
-                      </label>
+                  </fieldset>
+                  {/* Parent Details */}
+                  <fieldset className="mb-4">
+                    {/* <legend className="font-bold"> */}
+                    <h5 className="col-span-4 text-blue-400 py-2">
+                      Parent Details
+                    </h5>
+                    {/* </legend> */}
 
-                      {formData.subjectsFor &&
-                      formData.subjectsFor.length > 0 ? (
-                        formData.subjectsFor.map((subject, index) => (
-                          <div key={index} className="grid-col-3 relative ">
-                            <label className="">
+                    <div className="w-full md:w-[80%]  grid grid-cols-1 md:grid-cols-2   gap-x-6 gap-4">
+                      {" "}
+                      <div>
+                        <label
+                          htmlFor="father_name"
+                          className="block font-bold  text-xs mb-2"
+                        >
+                          Father's Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={50}
+                          id="father_name"
+                          name="father_name"
+                          value={formData.father_name}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.father_name && (
+                          <div className="text-red-500 text-xs ml-1 ">
+                            {errors.father_name}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="mother_name"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Mother's Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="mother_name"
+                          name="mother_name"
+                          maxLength={50}
+                          value={formData.mother_name}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.mother_name && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.mother_name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </fieldset>
+                  {/* Academic Details */}
+                  <fieldset className="mb-4">
+                    {/* <legend className="font-bold"> */}
+                    <h5 className="col-span-4 text-blue-400 py-2">
+                      Academic Details
+                    </h5>
+                    {/* </legend> */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <label
+                          htmlFor="religion"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Religion
+                        </label>
+                        <input
+                          type="text"
+                          id="religion"
+                          name="religion"
+                          maxLength={20}
+                          value={formData.religion}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="caste"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Caste
+                        </label>
+                        <input
+                          type="text"
+                          id="caste"
+                          name="caste"
+                          maxLength={20}
+                          value={formData.caste}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                      </div>{" "}
+                      <div className="grid   col-span-2 row-span-2 ">
+                        <label
+                          htmlFor="subjects"
+                          className="block font-bold text-xs  col-span-3"
+                        >
+                          Subjects Studied{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+
+                        {formData.subjectsFor &&
+                        formData.subjectsFor.length > 0 ? (
+                          formData.subjectsFor.map((subject, index) => (
+                            <div key={index} className="grid-col-3 relative ">
+                              <label className="">
+                                <input
+                                  type="checkbox"
+                                  name="subjects"
+                                  value={subject.name}
+                                  checked={formData.selectedSubjects.includes(
+                                    subject.name
+                                  )}
+                                  onChange={(e) =>
+                                    handleSubjectSelection(e, subject.name)
+                                  }
+                                  className="form-checkbox h-4 w-4 text-blue-600"
+                                />
+                                <span className="ml-1 text-sm">
+                                  {subject.name}
+                                </span>
+                              </label>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-gray-500 col-span-3">
+                            No subjects available
+                          </p>
+                        )}
+
+                        {selectedClassForSubject == "10" && (
+                          <div className="col-span-1 relative  ">
+                            <label className="inline-flex items-center">
                               <input
                                 type="checkbox"
                                 name="subjects"
-                                value={subject.name}
+                                value="Basic Mathematics"
                                 checked={formData.selectedSubjects.includes(
-                                  subject.name
+                                  "Basic Mathematics"
                                 )}
                                 onChange={(e) =>
-                                  handleSubjectSelection(e, subject.name)
+                                  handleSubjectSelection(e, "Basic Mathematics")
                                 }
                                 className="form-checkbox h-4 w-4 text-blue-600"
                               />
                               <span className="ml-1 text-sm">
-                                {subject.name}
+                                Basic Mathematics
                               </span>
                             </label>
                           </div>
-                        ))
-                      ) : (
-                        <p className="text-sm text-gray-500 col-span-3">
-                          No subjects available
-                        </p>
-                      )}
-
-                      {selectedClassForSubject == "10" && (
-                        <div className="col-span-1 relative  ">
-                          <label className="inline-flex items-center">
-                            <input
-                              type="checkbox"
-                              name="subjects"
-                              value="Basic Mathematics"
-                              checked={formData.selectedSubjects.includes(
-                                "Basic Mathematics"
-                              )}
-                              onChange={(e) =>
-                                handleSubjectSelection(e, "Basic Mathematics")
-                              }
-                              className="form-checkbox h-4 w-4 text-blue-600"
-                            />
-                            <span className="ml-1 text-sm">
-                              Basic Mathematics
-                            </span>
-                          </label>
-                        </div>
-                      )}
-                      {errors.selectedSubjects && (
-                        <span className="text-red-500 text-xs ml-1 h-1 col-span-3">
-                          {errors.selectedSubjects}
-                        </span>
-                      )}
-                    </div>
-                    {/* <div className="grid col-span-2 row-span-2">
+                        )}
+                        {errors.selectedSubjects && (
+                          <span className="text-red-500 text-xs ml-1 h-1 col-span-3">
+                            {errors.selectedSubjects}
+                          </span>
+                        )}
+                      </div>
+                      {/* <div className="grid col-span-2 row-span-2">
                       <label
                         htmlFor="subjects"
                         className="block font-bold text-xs col-span-3"
@@ -1698,624 +1778,624 @@ const LeavingCertificate = () => {
                         </span>
                       )}
                     </div> */}
-                    <div>
-                      <label
-                        htmlFor="subcaste"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Sub-Caste
-                      </label>
-                      <input
-                        type="text"
-                        id="subcaste"
-                        name="subcaste"
-                        maxLength={100}
-                        value={formData.subcaste}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="PromotedTo"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Promoted to <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="PromotedTo"
-                        name="promoted_to"
-                        maxLength={100}
-                        value={formData.promoted_to}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.promoted_to && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.promoted_to}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="School/Board"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        School/Board Annual Exam Last Taken with Result{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="School/Board"
-                        name="last_exam"
-                        maxLength={100}
-                        value={formData.last_exam}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.last_exam && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.last_exam}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </fieldset>
-                {/* Personal Information */}
-                <fieldset className="mb-4">
-                  {/* <legend className="font-bold"> */}
-                  <h5 className="col-span-4 text-blue-400 py-2">
-                    Personal Information
-                  </h5>
-                  {/* </legend> */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                      <label
-                        htmlFor="birthPlace"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Birth Place <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="birthPlace"
-                        maxLength={20}
-                        name="birth_place"
-                        value={formData.birth_place}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.birth_place && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.birth_place}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="state"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        State <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="state"
-                        name="state"
-                        maxLength={50}
-                        value={formData.state}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.state && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.state}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="mother_tongue"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Mother Tongue <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="mother_tongue"
-                        name="mother_tongue"
-                        maxLength={50}
-                        value={formData.mother_tongue}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.mother_tongue && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.mother_tongue}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="dob"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Date of Birth <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        id="dob"
-                        min={MIN_DATE} // Set minimum date
-                        max={MAX_DATE} // Set maximum date to today
-                        name="dob"
-                        value={formData.dob}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.dob && (
-                        <div className="text-red-500 text-xs ml-1 ">
-                          {errors.dob}
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="dob_words"
-                        className="block font-bold  text-xs mb-2"
-                      >
-                        Birth date in words{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <textarea
-                        type="text"
-                        maxLength={100}
-                        id="dob_words"
-                        name="dob_words"
-                        value={formData.dob_words}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.dob_words && (
-                        <div className="text-red-500 text-xs ml-1 ">
-                          {errors.dob_words}
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="nationality"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Nationality <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="nationality"
-                        name="nationality"
-                        maxLength={100}
-                        value={formData.nationality}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.nationality && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.nationality}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </fieldset>
-                {/* Admission Details */}
-                <fieldset className="mb-4">
-                  {/* <legend className="font-bold"> */}
-                  <h5 className="col-span-4 text-blue-400 py-2">
-                    Admission and School Records{" "}
-                  </h5>
-                  {/* </legend> */}
-
-                  <div className="grid grid-cols-1 md:grid-cols-4  gap-4">
-                    <div>
-                      <label
-                        htmlFor="prev_school_class"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Previous School Attended{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="prev_school_class"
-                        maxLength={100}
-                        name="prev_school_class"
-                        value={formData.prev_school_class}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.prev_school_class && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.prev_school_class}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="admission_date"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Date of Admission{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        id="admission_date"
-                        name="admission_date"
-                        value={formData.admission_date}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.admission_date && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.admission_date}
-                        </span>
-                      )}
-                    </div>
-                    <div className=" ">
-                      <label
-                        htmlFor="admission_class"
-                        className="block font-bold text-xs mb-2 "
-                      >
-                        Admitted in Class
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="admission_class"
-                        maxLength={100}
-                        name="admission_class"
-                        value={formData?.admission_class}
-                        onChange={handleChange}
-                        readOnly
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                      />
-                      {errors.admission_class && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.admission_class}
-                        </span>
-                      )}
-                    </div>{" "}
-                    <div>
-                      <label
-                        htmlFor="Date_of_Leaving_School"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Date of Leaving School
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        id="Date_of_Leaving_School"
-                        name="leaving_date"
-                        value={formData.leaving_date}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.leaving_date && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.leaving_date}
-                        </span>
-                      )}
-                    </div>{" "}
-                    {/* Dropdown for Proof of DOB submitted */}
-                    <div className="">
-                      <label
-                        htmlFor="dob_proof"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Proof of DOB Submitted at the Time of Admission
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        id="dob_proof"
-                        name="dob_proof"
-                        value={formData.dob_proof}
-                        onChange={handleChange}
-                        className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      >
-                        <option value="">Select</option>
-                        <option value="Birth Certificate">
-                          Birth Certificate
-                        </option>
-                        <option value="School Leaving Certificate">
-                          School Leaving Certificate
-                        </option>
-                        <option value="Aadhar Card">Aadhar Card</option>
-                        <option value="Passport">Passport</option>
-                      </select>
-                      {errors.dob_proof && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.dob_proof}
-                        </span>
-                      )}
-                    </div>{" "}
-                    <div className="">
-                      <label
-                        htmlFor="part_of"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Whether Part of (NCC Cadet, Boy Scout, Girl Guide)
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        id="part_of"
-                        name="part_of"
-                        value={formData.part_of}
-                        onChange={handleChange}
-                        className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      >
-                        <option value="">Select</option>
-                        <option value="NCC Cadet">NCC Cadet</option>
-                        <option value="Boy Scout">Boy Scout</option>
-                        <option value="Girl Guide">Girl Guide</option>
-                        <option value="N.A">N.A</option>
-                      </select>
-                      {errors.part_of && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.part_of}
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-3">
-                      <label
-                        htmlFor="reason_leaving"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Reason for Leaving{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="reason_leaving"
-                        name="reason_leaving"
-                        maxLength={100}
-                        value={formData.reason_leaving}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.reason_leaving && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.reason_leaving}
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-3">
-                      <label
-                        htmlFor="application_date"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Date of application for Certificate{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        id="application_date"
-                        name="application_date"
-                        value={formData.application_date}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.application_date && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.application_date}
-                        </span>
-                      )}
-                    </div>
-                    {/* // In your component JSX, display the error message */}
-                    <div className="grid col-span-4 row-span-1">
-                      <label
-                        htmlFor="activities"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Extra-Curricular Activities{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
-                        {[
-                          "Foot ball",
-                          "Basket Ball",
-                          "Volley Ball",
-                          "Tennis",
-                          "Kho Kho",
-                          "Table Tennis",
-                          "Kabadi",
-                          "Cricket",
-                          "Athletics",
-                          "Dodgeball",
-                          "Throwball",
-                          "Handball",
-                          "Tug of war",
-                          "Gymnastics",
-                          "Skating",
-                          "Martial Arts",
-                          "Badminton",
-                          "Chess",
-                          "Carrom",
-                        ].map((games) => (
-                          <div key={games} className="flex items-center">
-                            <input
-                              type="checkbox"
-                              id={games}
-                              value={games}
-                              onChange={handleCheckboxChange}
-                              className="mr-2"
-                            />
-                            <label htmlFor={games} className="text-sm">
-                              {games}
-                            </label>
-                          </div>
-                        ))}
+                      <div>
+                        <label
+                          htmlFor="subcaste"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Sub-Caste
+                        </label>
+                        <input
+                          type="text"
+                          id="subcaste"
+                          name="subcaste"
+                          maxLength={100}
+                          value={formData.subcaste}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
                       </div>
-                      {errors.activities && (
-                        <span className="text-red-500 text-xs ml-1 h-1 mt-2">
-                          {errors.activities}
-                        </span>
-                      )}
+                      <div>
+                        <label
+                          htmlFor="PromotedTo"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Promoted to <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="PromotedTo"
+                          name="promoted_to"
+                          maxLength={100}
+                          value={formData.promoted_to}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.promoted_to && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.promoted_to}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="School/Board"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          School/Board Annual Exam Last Taken with Result{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="School/Board"
+                          name="last_exam"
+                          maxLength={100}
+                          value={formData.last_exam}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.last_exam && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.last_exam}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <label
-                        htmlFor="attendance"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Attendance <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="attendance"
-                        maxLength={7}
-                        name="attendance"
-                        value={formData.attendance}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.attendance && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.attendance}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="fee_month"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Month Up to Which School Fees are Paid{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="fee_month"
-                        name="fee_month"
-                        maxLength={50}
-                        value={formData.fee_month}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.fee_month && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.fee_month}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="standard_studying"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Class in Which Last Studied in
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={20}
-                        id="standard_studying"
-                        name="standard_studying"
-                        value={formData.standard_studying}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.standard_studying && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.standard_studying}
-                        </span>
-                      )}
-                    </div>{" "}
-                    {/* Display selected value for reference */}
-                  </div>
-                </fieldset>
+                  </fieldset>
+                  {/* Personal Information */}
+                  <fieldset className="mb-4">
+                    {/* <legend className="font-bold"> */}
+                    <h5 className="col-span-4 text-blue-400 py-2">
+                      Personal Information
+                    </h5>
+                    {/* </legend> */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <label
+                          htmlFor="birthPlace"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Birth Place <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="birthPlace"
+                          maxLength={20}
+                          name="birth_place"
+                          value={formData.birth_place}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.birth_place && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.birth_place}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="state"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          State <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="state"
+                          name="state"
+                          maxLength={50}
+                          value={formData.state}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.state && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.state}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="mother_tongue"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Mother Tongue <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="mother_tongue"
+                          name="mother_tongue"
+                          maxLength={50}
+                          value={formData.mother_tongue}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.mother_tongue && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.mother_tongue}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="dob"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Date of Birth <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          id="dob"
+                          min={MIN_DATE} // Set minimum date
+                          max={MAX_DATE} // Set maximum date to today
+                          name="dob"
+                          value={formData.dob}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.dob && (
+                          <div className="text-red-500 text-xs ml-1 ">
+                            {errors.dob}
+                          </div>
+                        )}
+                      </div>
 
-                {/* Certificate Information */}
-                <fieldset className="mb-4">
-                  <h5 className="col-span-4 text-blue-400 py-2">
-                    Certificate Information
-                  </h5>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                      <label
-                        htmlFor="application_date"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Date of Application for Certificate{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        id="application_date"
-                        name="application_date"
-                        value={formData.application_date}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.application_date && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.application_date}
-                        </span>
-                      )}
+                      <div>
+                        <label
+                          htmlFor="dob_words"
+                          className="block font-bold  text-xs mb-2"
+                        >
+                          Birth date in words{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                          type="text"
+                          maxLength={100}
+                          id="dob_words"
+                          name="dob_words"
+                          value={formData.dob_words}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.dob_words && (
+                          <div className="text-red-500 text-xs ml-1 ">
+                            {errors.dob_words}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="nationality"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Nationality <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="nationality"
+                          name="nationality"
+                          maxLength={100}
+                          value={formData.nationality}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.nationality && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.nationality}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <label
-                        htmlFor="conduct"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Conduct <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="conduct"
-                        name="conduct"
-                        maxLength={100}
-                        value={formData.conduct}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.conduct && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.conduct}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="remark"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Any Other Remarks{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="remark"
-                        name="remark"
-                        maxLength={100}
-                        value={formData.remark}
-                        onChange={handleChange}
-                        className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      />
-                      {errors.remark && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.remark}
-                        </span>
-                      )}
-                    </div>
+                  </fieldset>
+                  {/* Admission Details */}
+                  <fieldset className="mb-4">
+                    {/* <legend className="font-bold"> */}
+                    <h5 className="col-span-4 text-blue-400 py-2">
+                      Admission and School Records{" "}
+                    </h5>
+                    {/* </legend> */}
 
-                    {/* <div>
+                    <div className="grid grid-cols-1 md:grid-cols-4  gap-4">
+                      <div>
+                        <label
+                          htmlFor="prev_school_class"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Previous School Attended{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="prev_school_class"
+                          maxLength={100}
+                          name="prev_school_class"
+                          value={formData.prev_school_class}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.prev_school_class && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.prev_school_class}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="admission_date"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Date of Admission{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          id="admission_date"
+                          name="admission_date"
+                          value={formData.admission_date}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.admission_date && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.admission_date}
+                          </span>
+                        )}
+                      </div>
+                      <div className=" ">
+                        <label
+                          htmlFor="admission_class"
+                          className="block font-bold text-xs mb-2 "
+                        >
+                          Admitted in Class
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="admission_class"
+                          maxLength={100}
+                          name="admission_class"
+                          value={formData?.admission_class}
+                          onChange={handleChange}
+                          readOnly
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                        />
+                        {errors.admission_class && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.admission_class}
+                          </span>
+                        )}
+                      </div>{" "}
+                      <div>
+                        <label
+                          htmlFor="Date_of_Leaving_School"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Date of Leaving School
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          id="Date_of_Leaving_School"
+                          name="leaving_date"
+                          value={formData.leaving_date}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.leaving_date && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.leaving_date}
+                          </span>
+                        )}
+                      </div>{" "}
+                      {/* Dropdown for Proof of DOB submitted */}
+                      <div className="">
+                        <label
+                          htmlFor="dob_proof"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Proof of DOB Submitted at the Time of Admission
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          id="dob_proof"
+                          name="dob_proof"
+                          value={formData.dob_proof}
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        >
+                          <option value="">Select</option>
+                          <option value="Birth Certificate">
+                            Birth Certificate
+                          </option>
+                          <option value="School Leaving Certificate">
+                            School Leaving Certificate
+                          </option>
+                          <option value="Aadhar Card">Aadhar Card</option>
+                          <option value="Passport">Passport</option>
+                        </select>
+                        {errors.dob_proof && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.dob_proof}
+                          </span>
+                        )}
+                      </div>{" "}
+                      <div className="">
+                        <label
+                          htmlFor="part_of"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Whether Part of (NCC Cadet, Boy Scout, Girl Guide)
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          id="part_of"
+                          name="part_of"
+                          value={formData.part_of}
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        >
+                          <option value="">Select</option>
+                          <option value="NCC Cadet">NCC Cadet</option>
+                          <option value="Boy Scout">Boy Scout</option>
+                          <option value="Girl Guide">Girl Guide</option>
+                          <option value="N.A">N.A</option>
+                        </select>
+                        {errors.part_of && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.part_of}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-3">
+                        <label
+                          htmlFor="reason_leaving"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Reason for Leaving{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="reason_leaving"
+                          name="reason_leaving"
+                          maxLength={100}
+                          value={formData.reason_leaving}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.reason_leaving && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.reason_leaving}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-3">
+                        <label
+                          htmlFor="application_date"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Date of application for Certificate{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          id="application_date"
+                          name="application_date"
+                          value={formData.application_date}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.application_date && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.application_date}
+                          </span>
+                        )}
+                      </div>
+                      {/* // In your component JSX, display the error message */}
+                      <div className="grid col-span-4 row-span-1">
+                        <label
+                          htmlFor="activities"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Extra-Curricular Activities{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
+                          {[
+                            "Foot ball",
+                            "Basket Ball",
+                            "Volley Ball",
+                            "Tennis",
+                            "Kho Kho",
+                            "Table Tennis",
+                            "Kabadi",
+                            "Cricket",
+                            "Athletics",
+                            "Dodgeball",
+                            "Throwball",
+                            "Handball",
+                            "Tug of war",
+                            "Gymnastics",
+                            "Skating",
+                            "Martial Arts",
+                            "Badminton",
+                            "Chess",
+                            "Carrom",
+                          ].map((games) => (
+                            <div key={games} className="flex items-center">
+                              <input
+                                type="checkbox"
+                                id={games}
+                                value={games}
+                                onChange={handleCheckboxChange}
+                                className="mr-2"
+                              />
+                              <label htmlFor={games} className="text-sm">
+                                {games}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                        {errors.activities && (
+                          <span className="text-red-500 text-xs ml-1 h-1 mt-2">
+                            {errors.activities}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="attendance"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Attendance <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="attendance"
+                          maxLength={7}
+                          name="attendance"
+                          value={formData.attendance}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.attendance && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.attendance}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="fee_month"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Month Up to Which School Fees are Paid{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="fee_month"
+                          name="fee_month"
+                          maxLength={50}
+                          value={formData.fee_month}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.fee_month && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.fee_month}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="standard_studying"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Class in Which Last Studied in
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={20}
+                          id="standard_studying"
+                          name="standard_studying"
+                          value={formData.standard_studying}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.standard_studying && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.standard_studying}
+                          </span>
+                        )}
+                      </div>{" "}
+                      {/* Display selected value for reference */}
+                    </div>
+                  </fieldset>
+
+                  {/* Certificate Information */}
+                  <fieldset className="mb-4">
+                    <h5 className="col-span-4 text-blue-400 py-2">
+                      Certificate Information
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <label
+                          htmlFor="application_date"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Date of Application for Certificate{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          id="application_date"
+                          name="application_date"
+                          value={formData.application_date}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.application_date && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.application_date}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="conduct"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Conduct <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="conduct"
+                          name="conduct"
+                          maxLength={100}
+                          value={formData.conduct}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.conduct && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.conduct}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="remark"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Any Other Remarks{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="remark"
+                          name="remark"
+                          maxLength={100}
+                          value={formData.remark}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {errors.remark && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.remark}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* <div>
                         <label
                           htmlFor="academic_year"
                           className="block font-bold text-xs mb-2"
@@ -2336,101 +2416,177 @@ const LeavingCertificate = () => {
                           </span>
                         )}
                       </div> */}
-                    {/* Dropdown for Academic Year */}
-                    <div className="mb-4">
-                      <label
-                        htmlFor="academic_yr"
-                        className="block font-bold text-xs mb-2"
-                      >
-                        Academic Year <span className="text-red-500">*</span>
-                      </label>
-
-                      <select
-                        id="academic_yr"
-                        name="academic_yr"
-                        value={formData.academic_yr || ""}
-                        // onChange={handleChange}
-                        onChange={handleChange}
-                        className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                      >
-                        <option value="">Select</option>
-                        {formData.academicStudent &&
-                        formData.academicStudent.length > 0 ? (
-                          formData.academicStudent.map((item, index) => (
-                            <option key={index} value={item.academic_yr}>
-                              {item.academic_yr}
-                            </option>
-                          ))
-                        ) : (
-                          <option value="" disabled>
-                            No academic years available
-                          </option>
-                        )}
-                      </select>
-
-                      {errors.academic_yr && (
-                        <span className="text-red-500 text-xs ml-1 h-1">
-                          {errors.academic_yr}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </fieldset>
-
-                <div className="col-span-3 space-x-2 text-right">
-                  {/* Generate PDF Button */}
-                  <button
-                    type="submit" // triggers form submission
-                    onClick={handleSubmit}
-                    style={{ backgroundColor: "#2196F3" }}
-                    className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                      loading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <span className="flex items-center">
-                        <svg
-                          className="animate-spin h-4 w-4 mr-2 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
+                      {/* Dropdown for Academic Year */}
+                      <div className="mb-4">
+                        <label
+                          htmlFor="academic_yr"
+                          className="block font-bold text-xs mb-2"
                         >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          ></path>
-                        </svg>
-                        Loading...
-                      </span>
-                    ) : (
-                      "Generate PDF"
-                    )}
-                  </button>
+                          Academic Year <span className="text-red-500">*</span>
+                        </label>
 
-                  {/* Back Button */}
-                  <button
-                    type="button" // prevents form submission
-                    onClick={handleBack}
-                    className="text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
-                  >
-                    Back
-                  </button>
-                </div>
-              </form>
+                        <select
+                          id="academic_yr"
+                          name="academic_yr"
+                          value={formData.academic_yr || ""}
+                          // onChange={handleChange}
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        >
+                          <option value="">Select</option>
+                          {formData.academicStudent &&
+                          formData.academicStudent.length > 0 ? (
+                            formData.academicStudent.map((item, index) => (
+                              <option key={index} value={item.academic_yr}>
+                                {item.academic_yr}
+                              </option>
+                            ))
+                          ) : (
+                            <option value="" disabled>
+                              No academic years available
+                            </option>
+                          )}
+                        </select>
+
+                        {errors.academic_yr && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.academic_yr}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </fieldset>
+
+                  <div className="col-span-3 space-x-2 text-right">
+                    {/* Generate PDF Button */}
+                    <button
+                      type="submit" // triggers form submission
+                      onClick={handleSubmit}
+                      style={{ backgroundColor: "#2196F3" }}
+                      className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                        loading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <span className="flex items-center">
+                          <svg
+                            className="animate-spin h-4 w-4 mr-2 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            ></path>
+                          </svg>
+                          Loading...
+                        </span>
+                      ) : (
+                        "Generate PDF"
+                      )}
+                    </button>
+
+                    {/* Back Button */}
+                    <button
+                      type="button" // prevents form submission
+                      onClick={handleBack}
+                      className="text-white font-bold py-1 bg-yellow-500 hover:bg-yellow-600 border-1 border-yellow-500 px-4 rounded"
+                    >
+                      Back
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
+          )
         )}
       </div>
+
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg w-[95%] max-w-5xl max-h-full overflow-auto">
+            <div className="flex justify-between items-center px-4 py-2.5 border-b border-gray-200">
+              <h6 className="text-lg font-bold text-gray-600 mt-1">
+                Books Pending For Return
+              </h6>
+              <RxCross1
+                className="text-3xl  text-red-600 cursor-pointer hover:bg-red-100 p-1 rounded-full"
+                onClick={handleCloseModal}
+              />
+            </div>
+            <div className="h-1 w-[98%] mx-auto bg-[#C03078] mb-3"></div>
+            <div className="px-6 pb-6">
+              {pendingBookDetails.length > 0 ? (
+                <table className="w-full table-auto  border border-gray-400 shadow-md">
+                  <thead className="bg-gray-200 text-gray-700">
+                    <tr>
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                        Sr No.
+                      </th>{" "}
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                        Student Name
+                      </th>
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                        Accession No.
+                      </th>
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                        Book Title
+                      </th>
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center text-nowrap">
+                        Issue Date
+                      </th>
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center text-nowrap">
+                        Due Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-center">
+                    {pendingBookDetails.map((book, index) => (
+                      <tr key={index}>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {index + 1}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {capitalizeFirst(book?.first_name)}{" "}
+                          {capitalizeFirst(book?.last_name)}
+                        </td>
+
+                        <td className="border border-gray-300 px-4 py-2">
+                          {book?.copy_id}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {book?.book_title}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 ">
+                          {formatDate(book?.issue_date)}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {formatDate(book?.due_date)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-center text-gray-500">
+                  No pending books to display.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
