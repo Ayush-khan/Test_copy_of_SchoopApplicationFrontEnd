@@ -236,9 +236,11 @@ const LeavingCertificate = () => {
   const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const formatDate = (dateStr) => {
-    if (dateStr === "0000-00-00") return "Not Returned";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(); // e.g., "7/16/2025"
+    if (!dateStr || dateStr === "0000-00-00") return "Not Returned";
+
+    // Safely parse date without timezone shift
+    const [year, month, day] = dateStr.split("-");
+    return `${day}-${month}-${year}`; // dd-mm-yyyy
   };
 
   useEffect(() => {
@@ -2513,7 +2515,7 @@ const LeavingCertificate = () => {
 
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg w-[90%] max-w-5xl max-h-full overflow-auto">
+          <div className="bg-white rounded-lg shadow-lg w-[95%] max-w-5xl max-h-full overflow-auto">
             <div className="flex justify-between items-center px-4 py-2.5 border-b border-gray-200">
               <h6 className="text-lg font-bold text-gray-600 mt-1">
                 Books Pending For Return
@@ -2541,10 +2543,10 @@ const LeavingCertificate = () => {
                       <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
                         Book Title
                       </th>
-                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center text-nowrap">
                         Issue Date
                       </th>
-                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center text-nowrap">
                         Due Date
                       </th>
                     </tr>
@@ -2566,11 +2568,11 @@ const LeavingCertificate = () => {
                         <td className="border border-gray-300 px-4 py-2">
                           {book?.book_title}
                         </td>
-                        <td className="border border-gray-300 px-4 py-2">
+                        <td className="border border-gray-300 px-4 py-2 ">
                           {formatDate(book?.issue_date)}
                         </td>
                         <td className="border border-gray-300 px-4 py-2">
-                          {formatDate(book?.issue_date)}
+                          {formatDate(book?.due_date)}
                         </td>
                       </tr>
                     ))}
