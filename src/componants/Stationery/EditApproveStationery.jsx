@@ -111,10 +111,20 @@ const EditApproveStationery = () => {
     }));
   };
 
+  const toTitleCase = (str = "") => {
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   useEffect(() => {
     if (allstationery) {
       setFormData({
-        teacher_name: allstationery.teacher_name || "",
+        teacher_name: allstationery.teacher_name
+          ? toTitleCase(allstationery.teacher_name)
+          : "",
         stationery_name: allstationery.stationery_name || "",
         requisition_id: allstationery.requisition_id || "",
         approved_date: allstationery.approved_date || "",
@@ -150,7 +160,7 @@ const EditApproveStationery = () => {
 
       const form = new FormData();
       form.append("status", formData.status?.value || "A");
-      form.append("comment", formData.comments || "");
+      form.append("comments", formData.comments || "");
       form.append("approved_by", regId);
 
       const response = await axios.post(
@@ -197,7 +207,7 @@ const EditApproveStationery = () => {
           />
         </div>
         <div
-          className=" relative w-[98%] -top-6 h-1  mx-auto bg-red-700"
+          className=" relative w-full -top-6 h-1  mx-auto bg-red-700"
           style={{
             backgroundColor: "#C03078",
           }}
@@ -355,7 +365,7 @@ const EditApproveStationery = () => {
             </div>
 
             <div className=" relative mb-3 flex justify-center  mx-4">
-              <label htmlFor="comment" className="w-1/2 mt-2">
+              <label htmlFor="comments" className="w-1/2 mt-2">
                 Approver's Comment
               </label>
               <textarea
