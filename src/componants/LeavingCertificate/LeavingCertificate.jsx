@@ -7,11 +7,14 @@ import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import { RxCross1 } from "react-icons/rx";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
 // import { RxCross1 } from "react-icons/rx";
 
 const LeavingCertificate = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [booksPending, setBooksPending] = useState(false);
   const [pendingBookCount, setPendingBookCount] = useState("");
   const [classesforForm, setClassesforForm] = useState([]);
@@ -29,8 +32,13 @@ const LeavingCertificate = () => {
   const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
 
   const [selectedActivities, setSelectedActivities] = useState([]);
-
+  const [pendingBookDetails, setPendingBookDetails] = useState([]);
   const navigate = useNavigate();
+  const capitalizeFirst = (str) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  };
+
   const [formData, setFormData] = useState({
     sr_no: "",
     grn_no: "",
@@ -227,6 +235,11 @@ const LeavingCertificate = () => {
   // State for loading indicators
   const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const formatDate = (dateStr) => {
+    if (dateStr === "0000-00-00") return "Not Returned";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString(); // e.g., "7/16/2025"
+  };
 
   useEffect(() => {
     // Fetch both classes and student names on component mount
@@ -234,7 +247,7 @@ const LeavingCertificate = () => {
   }, []);
   const fetchPendingBookCount = async () => {
     try {
-      if (!selectedStudentId) return; // Skip if student ID is not selected
+      if (!selectedStudentId) return;
 
       const token = localStorage.getItem("authToken");
 
@@ -246,9 +259,8 @@ const LeavingCertificate = () => {
       );
 
       if (response.data && response.data.status === 200) {
-        //  const isPending = response.data.data === 1;
-
-        setPendingBookCount(response.data.data); // true if books pending, false if none
+        setPendingBookCount(response.data.data);
+        setPendingBookDetails(response.data.bookdetails || []);
       } else {
         console.warn("Unexpected response format or failed status");
       }
@@ -285,7 +297,12 @@ const LeavingCertificate = () => {
       setLoadingStudents(false);
     }
   };
-
+  const handleAdd = () => {
+    setShowAddModal(true);
+  };
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+  };
   const fetchStudentNameWithClassId = async (section_id = null) => {
     try {
       setLoadingStudents(true);
@@ -366,6 +383,8 @@ const LeavingCertificate = () => {
     setNameErrorForClass("");
     setErrors({}); // Clears all field-specific errors
     setBooksPending(false);
+    setPendingBookCount("");
+    setPendingBookDetails([]);
     if (!selectedStudent) {
       setNameError("Please select Student Name.");
       toast.error("Please select Student Name.!");
@@ -1233,16 +1252,31 @@ const LeavingCertificate = () => {
           </div>
         )}{" "}
         {booksPending ? (
-          <div className="mt-6 mx-auto w-[95%] text-[1.1em] bg-yellow-100 border-l-4 border-r-4 shadow-md border-yellow-500 text-yellow-800 p-4 rounded text-center">
-            <div className="mb-2  text-lg font-semibold text-red-600">
-              📚 <span className="text-pink-600">({pendingBookCount})</span>{" "}
-              book
-              {pendingBookCount > 1 ? "s are" : " is"} pending for return.
+          <div className="mt-6 mx-auto w-[95%]  bg-yellow-50 border-l-4 border-r-4 border-yellow-500 shadow-lg p-2 rounded-lg text-yellow-900 text-center space-y-4 animate-fade-in">
+            <div className="text-xl font-semibold flex items-center justify-center ">
+              ⚠️
+              <span>
+                <span className="text-red-600 font-bold">
+                  {pendingBookCount}
+                </span>{" "}
+                book{pendingBookCount > 1 ? "s are" : " is"} pending for return.
+              </span>
             </div>
-            <div className=" font-medium">
-              Leaving Certificate can not be generated until all books are
-              returned to the library.
-            </div>
+
+            <button
+              onClick={handleAdd}
+              className="inline-flex items-center gap-2 p-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-base rounded-md border-2 border-red-700 shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              📚 View Pending Books
+            </button>
+
+            <p className="text-lg font-medium text-gray-700">
+              Leaving Certificate{" "}
+              <span className="font-bold text-red-600">
+                cannot be generated
+              </span>{" "}
+              until all books are returned to the library.
+            </p>
           </div>
         ) : (
           parentInformation && (
@@ -2476,6 +2510,81 @@ const LeavingCertificate = () => {
           )
         )}
       </div>
+
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg w-[90%] max-w-5xl max-h-full overflow-auto">
+            <div className="flex justify-between items-center px-4 py-2.5 border-b border-gray-200">
+              <h6 className="text-lg font-bold text-gray-600 mt-1">
+                Books Pending For Return
+              </h6>
+              <RxCross1
+                className="text-3xl  text-red-600 cursor-pointer hover:bg-red-100 p-1 rounded-full"
+                onClick={handleCloseModal}
+              />
+            </div>
+            <div className="h-1 w-[98%] mx-auto bg-[#C03078] mb-3"></div>
+            <div className="px-6 pb-6">
+              {pendingBookDetails.length > 0 ? (
+                <table className="w-full table-auto  border border-gray-400 shadow-md">
+                  <thead className="bg-gray-200 text-gray-700">
+                    <tr>
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                        Sr No.
+                      </th>{" "}
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                        Student Name
+                      </th>
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                        Accession No.
+                      </th>
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                        Book Title
+                      </th>
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                        Issue Date
+                      </th>
+                      <th className="border font-semibold border-gray-300 px-4 py-2 text-center">
+                        Due Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-center">
+                    {pendingBookDetails.map((book, index) => (
+                      <tr key={index}>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {index + 1}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {capitalizeFirst(book?.first_name)}{" "}
+                          {capitalizeFirst(book?.last_name)}
+                        </td>
+
+                        <td className="border border-gray-300 px-4 py-2">
+                          {book?.copy_id}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {book?.book_title}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {formatDate(book?.issue_date)}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {formatDate(book?.issue_date)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-center text-gray-500">
+                  No pending books to display.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

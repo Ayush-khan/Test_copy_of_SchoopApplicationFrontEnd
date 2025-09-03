@@ -77,7 +77,7 @@ function NavBar() {
 
     if (!token) {
       console.error("No authentication token found");
-      toast.error("Authentication token not found Please login again");
+      // toast.error("Authentication token not found Please login again");
       navigate("/"); // 👈 Redirect to login
       return; // 👈
     }
@@ -109,7 +109,7 @@ function NavBar() {
       const token = localStorage.getItem("authToken");
       if (!token) {
         // throw new Error("No authentication token is found");
-        toast.error("Authentication token not found Please login again");
+        // toast.error("Authentication token not found Please login again");
         navigate("/"); // 👈 Redirect to login
         return; // 👈
       }
@@ -132,7 +132,7 @@ function NavBar() {
         // Handle expired token
         console.log("tokeneeee error--->", errorMsg, response?.data?.message);
         if (errorMsg === "Token has expired") {
-          toast.error("Session expired. Please login again.");
+          // toast.error("Session expired. Please login again.");
           localStorage.removeItem("authToken"); // Optional: clear old token
           navigate("/"); // Redirect to login
           return;
@@ -148,7 +148,7 @@ function NavBar() {
         const errorMsg = error.response?.data?.message;
         // Handle expired token
         if (errorMsg === "Token has expired") {
-          toast.error("Session expired. Please login again.");
+          // toast.error("Session expired. Please login again.");
           localStorage.removeItem("authToken"); // Optional: clear old token
           navigate("/"); // Redirect to login
           return;
@@ -231,7 +231,7 @@ function NavBar() {
 
       if (!token) {
         console.error("No authentication token found");
-        toast.error("Authentication token not found Please login again");
+        // toast.error("Authentication token not found Please login again");
         navigate("/"); // 👈 Redirect to login
         return; // 👈
       }
@@ -262,7 +262,7 @@ function NavBar() {
         const errorMsg = sessionResponse?.data?.message;
         // Handle expired token
         if (errorMsg === "Token has expired") {
-          toast.error("Session expired. Please login again.");
+          // toast.error("Session expired. Please login again.");
           localStorage.removeItem("authToken"); // Optional: clear old token
           navigate("/"); // Redirect to login
           return;
@@ -292,7 +292,7 @@ function NavBar() {
         const errorMsg = error.response?.data?.message;
         // Handle expired token
         if (errorMsg === "Token has expired") {
-          toast.error("Session expired. Please login again.");
+          // toast.error("Session expired. Please login again.");
           localStorage.removeItem("authToken"); // Optional: clear old token
           navigate("/"); // Redirect to login
           return;
