@@ -67,13 +67,33 @@ const LessonPlanSummarisedReport = () => {
     }
   };
 
+  // const handleDateChange = (date) => {
+  //   setFromDate(date);
+  //   setWeekError("");
+
+  //   if (date) {
+  //     const startDate = dayjs(date).format("DD-MM-YYYY");
+  //     const endDate = dayjs(date).add(6, "day").format("DD-MM-YYYY"); // 7 days including selected date
+  //     setWeekRange(`${startDate} / ${endDate}`);
+  //   } else {
+  //     setWeekRange("");
+  //   }
+  // };
+
   const handleDateChange = (date) => {
     setFromDate(date);
     setWeekError("");
 
     if (date) {
-      const startDate = dayjs(date).format("DD-MM-YYYY");
-      const endDate = dayjs(date).add(6, "day").format("DD-MM-YYYY"); // 7 days including selected date
+      const selectedDate = dayjs(date);
+
+      // Adjust to Monday
+      const monday = selectedDate.startOf("week").add(1, "day"); // Monday is day 1 (Sunday is 0)
+      const sunday = monday.add(6, "day"); // Sunday of the same week
+
+      const startDate = monday.format("DD-MM-YYYY");
+      const endDate = sunday.format("DD-MM-YYYY");
+
       setWeekRange(`${startDate} / ${endDate}`);
     } else {
       setWeekRange("");
@@ -215,10 +235,17 @@ const LessonPlanSummarisedReport = () => {
     }
   };
 
+  const camelCase = (str) =>
+    str
+      ?.toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+
   const handlePrint = () => {
     const printTitle = `Lesson Plan Summarised Report  ${
       selectedStudent?.label
-        ? `List of ${selectedStudent.label}`
+        ? `List of ${camelCase(selectedStudent.label)}`
         : ": Complete List of All Staff "
     }`;
     const printContent = `
@@ -416,35 +443,72 @@ const LessonPlanSummarisedReport = () => {
 
     // Generate and download the Excel file
     const fileName = `Lesson_Plan_Summarised_Report
-    ${selectedStudent?.label || "For All Staff"}.xlsx`;
+    ${camelCase(selectedStudent?.label) || "For All Staff"}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
   console.log("row", timetable);
 
   const filteredSections = timetable.filter((student) => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = searchTerm.toLowerCase().trim();
 
     // Extract relevant fields and convert them to lowercase for case-insensitive search
-    const teacherName = student?.teachername?.toLowerCase() || "";
+    const subSubject = (student?.sub_subject || "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ");
     const week = student?.week?.toLowerCase() || "";
     const totalHours =
       student?.time_difference_decimal?.toString().toLowerCase() || "";
+    const nameLesson = (student?.chaptername || "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ");
+    const subject = (student?.subname || "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ");
+
+    const status = (statusMap[student?.status] || "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ");
+
+    const remark = (student?.remark || "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ");
+
+    const periodNo = student?.no_of_periods?.toString().toLowerCase() || "";
+    const chapterNo = student?.chapter_no?.toString().toLowerCase() || "";
 
     // Check if the search term is present in any of the specified fields
     return (
-      teacherName.includes(searchLower) ||
+      subSubject.includes(searchLower) ||
       week.includes(searchLower) ||
-      totalHours.includes(searchLower)
+      totalHours.includes(searchLower) ||
+      nameLesson.includes(searchLower) ||
+      subject.includes(searchLower) ||
+      periodNo.includes(searchLower) ||
+      chapterNo.includes(searchLower) ||
+      status.includes(searchLower) ||
+      remark.includes(searchLower)
     );
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
   return (
     <>
-      <div className="w-full md:w-[85%] mx-auto p-4 ">
+      {/* <div className="w-full md:w-[85%] mx-auto p-4 "> */}
+      <div
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
+          timetable.length > 0
+            ? "w-full md:w-[100%] scale-100"
+            : "w-full md:w-[95%] scale-[0.98]"
+        }`}
+      >
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
+        <div className="card rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Lesson Plan Summarised Report
@@ -457,25 +521,37 @@ const LessonPlanSummarisedReport = () => {
             />
           </div>
           <div
-            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
           ></div>
 
           <>
-            <div className=" w-full md:w-[95%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+            <div
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
+                timetable.length > 0
+                  ? "pb-0 w-full md:w-[99%]"
+                  : "pb-4 w-full md:w-[85%]"
+              }`}
+            >
               <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                <div
+                  className={`  w-full gap-x-0 md:gap-x-3  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
+                    timetable.length > 0
+                      ? "w-full md:w-[100%]  wrelative left-0"
+                      : " w-full md:w-[100%] relative left-10"
+                  }`}
+                >
                   {/* Staff Dropdown */}
                   <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
-                      className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="w-full md:w-[43%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      Staff <span className="text-red-500">*</span>
+                      Teacher <span className="text-red-500">*</span>
                     </label>
-                    <div className="w-full md:w-[65%]">
+                    <div className="w-full md:w-[60%]">
                       <Select
                         menuPortalTarget={document.body}
                         menuPosition="fixed"
@@ -512,44 +588,62 @@ const LessonPlanSummarisedReport = () => {
                     </div>
                   </div>
 
-                  <div className="w-full md:w-[50%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
+                  <div className="w-full md:w-[80%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
                     <label
                       className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
                       htmlFor="fromDate"
                     >
-                      Select Week{" "}
+                      Select Week
                       <span className="text-sm text-red-500">*</span>
                     </label>
+
                     <div className="w-full">
-                      <div
-                        className="text-sm text-gray-700 mt-0.5 border border-gray-300 p-2 rounded cursor-pointer"
-                        onClick={openDatePicker}
-                      >
-                        {weekRange || (
-                          <FaRegCalendarAlt className="text-pink-500  " />
+                      <div className="relative text-sm text-gray-700 mt-0.5 border border-gray-300 p-2 rounded flex items-center justify-between cursor-pointer">
+                        <div
+                          onClick={openDatePicker}
+                          className="flex-1 flex items-center"
+                        >
+                          {weekRange ? (
+                            <span>{weekRange}</span>
+                          ) : (
+                            <FaRegCalendarAlt className="text-pink-500" />
+                          )}
+                        </div>
+
+                        {weekRange && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // prevent openDatePicker when clicking X
+                              setFromDate(null);
+                              setWeekRange("");
+                            }}
+                            className="text-gray-400 hover:text-red-500 ml-2"
+                          >
+                            <RxCross1 className="text-xs text-red-600 " />
+                          </button>
                         )}
                       </div>
+
                       {weekError && (
                         <div className="relative ml-1 text-danger text-xs">
                           {weekError}
                         </div>
                       )}
 
+                      {/* Keep your DatePicker hidden but functional */}
                       <DatePicker
                         ref={datePickerRef}
                         selected={fromDate}
                         onChange={handleDateChange}
                         dateFormat="dd-MM-yyyy"
-                        className=" outline-none relative -top-10 text-sm w-[1px] h-[1px]  bg-white"
-                        // isClearable
+                        className="hidden" // clean way instead of 1px trick
                       />
                     </div>
                   </div>
 
-                  {/* Subject Dropdown */}
                   <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
-                      className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
                       Subject
@@ -585,8 +679,6 @@ const LessonPlanSummarisedReport = () => {
                       />
                     </div>
                   </div>
-
-                  {/* Browse Button */}
                   <div className="mt-1">
                     <button
                       type="search"
@@ -627,58 +719,49 @@ const LessonPlanSummarisedReport = () => {
                     </button>
                   </div>
                 </div>
+                {timetable.length > 0 && (
+                  <div className="ml-3 mr-3 mt-0 p-2 px-3 w-[360px] bg-gray-100 border-none flex justify-between items-center">
+                    <div className="w-full flex flex-row justify-between mr-0 md:mr-3 ">
+                      <div className="w-1/2 md:w-[98%] mr-1 ">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Search "
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                      <button
+                        type="button"
+                        onClick={handleDownloadEXL}
+                        className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
+                      >
+                        <FaFileExcel />
+                        <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                          Export to Excel
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={handlePrint}
+                        className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                      >
+                        <FiPrinter />
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                          Print
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             {timetable.length > 0 && (
               <>
-                <div className="w-full  mt-4">
+                <div className="w-full  px-4 mb-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                      <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
-                        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          List of Lesson Plan Summarised Report
-                        </h3>
-                        <div className="w-1/2 md:w-[18%] mr-1 ">
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search "
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
-                        <button
-                          type="button"
-                          onClick={handleDownloadEXL}
-                          className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
-                        >
-                          <FaFileExcel />
-
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                            Exports to excel
-                          </div>
-                        </button>
-
-                        <button
-                          onClick={handlePrint}
-                          className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
-                        >
-                          <FiPrinter />
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                            Print{" "}
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-                    <div
-                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                      style={{
-                        backgroundColor: "#C03078",
-                      }}
-                    ></div>
-
                     <div className="card-body w-full">
                       <div
                         className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo ,useRef} from "react";
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
@@ -26,7 +26,8 @@ const FeesOutStandingSendSms = () => {
   const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
   const [selectedTab, setSelectedTab] = useState("installment");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState("Your child's fees payment is due. Please make the payment at the earliest. If already paid please send details to school admin");
+  const messageRef = useRef(null);
 
   const maxCharacters = 900;
 
@@ -198,6 +199,16 @@ const FeesOutStandingSendSms = () => {
       );
       hasError = true;
     }
+    if (message.length === 0){
+      setErrors("Message is required.");
+      toast.error("Message is required.");
+      messageRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      messageRef.current?.focus();
+      hasError = true;
+    }
+    else {
+      setErrors(""); // clear error if valid
+    }
     // Exit if there are validation errors
     if (hasError) return;
 
@@ -232,7 +243,7 @@ const FeesOutStandingSendSms = () => {
         toast.success("Send message for pending fees successfully!");
         setSelectedClass(null);
         setSelectedInstallment(null);
-        setMessage("");
+        setMessage("Your child's fees payment is due. Please make the payment at the earliest. If already paid please send details to school admin");
 
         setSelectedStudent(null); // Reset student selection
         setSelectedStudents([]); // Clear selected students
@@ -638,6 +649,7 @@ const FeesOutStandingSendSms = () => {
                         <div className="flex justify-center mt-2">
                           <div className="w-full md:w-[50%] relative">
                             <textarea
+                             ref={messageRef}
                               value={message}
                               onChange={(e) => {
                                 if (e.target.value.length <= maxCharacters) {
@@ -647,7 +659,7 @@ const FeesOutStandingSendSms = () => {
                               className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none"
                               placeholder="Enter message"
                             ></textarea>
-
+                            {errors && <p className="text-red-600 text-sm mt-1">{errors.message}</p>}
                             <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none">
                               {message.length} / {maxCharacters}
                             </div>

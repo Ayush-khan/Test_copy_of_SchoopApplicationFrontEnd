@@ -43,25 +43,18 @@ const LessonPlanStatusReport = () => {
   useEffect(() => {
     fetchExams();
     fetchLeaveType();
-    // handleSearch();
   }, []);
-
-  // useEffect(() => {
-  //   if (selectedStudentId) {
-  //     fetchClass();
-  //   }
-  // }, [selectedStudentId]);
 
   const fetchExams = async () => {
     try {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/staff_list`, {
+      const response = await axios.get(`${API_URL}/api/get_allstaff`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("Class", response);
-      setStudentNameWithClassId(response?.data || []);
+      setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching Classes");
       console.error("Error fetching Classes:", error);
@@ -154,9 +147,11 @@ const LessonPlanStatusReport = () => {
     if (!Array.isArray(teacher)) return [];
 
     return teacher.map((cls) => ({
-      value: cls?.class_id,
+      value: {
+        class_id: cls?.class_id,
+        section_id: cls?.section_id,
+      },
       label: `${cls.classname} ${cls.sectionname}`,
-      section_id: cls?.section_id,
     }));
   }, [teacher]);
 
@@ -165,6 +160,13 @@ const LessonPlanStatusReport = () => {
     { value: "C", label: "Complete" },
   ];
 
+  const camelCase = (str) =>
+    str
+      ?.toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+
   const handleSearch = async () => {
     setSearchTerm("");
     setStudentError("");
@@ -172,7 +174,7 @@ const LessonPlanStatusReport = () => {
     setLeaveTypes([]);
     setPageCount(0);
     setIsSubmitting(true);
-    setLoadingForSearch(true);
+    setLoadingForSearch(false);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -184,8 +186,7 @@ const LessonPlanStatusReport = () => {
       }
 
       if (!selectedStudentId) {
-        // toast.error("Please select a teacher before searching.");
-        setStudentError("Please select staff.");
+        setStudentError("Please select Teacher.");
         setLoadingForSearch(false);
         setIsSubmitting(false);
         return;
@@ -196,12 +197,12 @@ const LessonPlanStatusReport = () => {
         teacher_id: selectedStudentId,
       };
 
-      if (selectedClassId) {
-        params.class_id = selectedClassId;
+      if (selectedClass?.value?.class_id) {
+        params.class_id = selectedClass.value.class_id;
       }
 
-      if (selectedClass?.section_id) {
-        params.section_id = selectedClass.section_id;
+      if (selectedClass?.value?.section_id) {
+        params.section_id = selectedClass.value.section_id;
       }
 
       if (selectedStatus?.value) {
@@ -245,8 +246,8 @@ const LessonPlanStatusReport = () => {
   const handlePrint = () => {
     const printTitle = `Lesson Plan Status Report  ${
       selectedStudent?.label
-        ? `List of ${selectedStudent.label}`
-        : ": Complete List of All Staff "
+        ? `List of ${camelCase(selectedStudent.label)}`
+        : ": Complete List of All Teacher "
     }`;
     const printContent = `
     <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
@@ -395,11 +396,8 @@ const LessonPlanStatusReport = () => {
       toast.error("No data available to download the Excel sheet.");
       return;
     }
-
-    // Define headers — separate each leave type
     const headers = ["Sr No.", "Class", "Subject", "Chapter", "Date", "Status"];
 
-    // Convert displayedSections to array-of-arrays format
     const data = displayedSections.map((student, index) => [
       index + 1,
       ` ${student?.classname} ${student?.secname}`,
@@ -427,7 +425,7 @@ const LessonPlanStatusReport = () => {
 
     // Generate file name and trigger download
     const fileName = `Lesson_Plan_Status_Report_${
-      selectedStudent?.label || "All_Staff"
+      camelCase(selectedStudent?.label) || "All_Teacher"
     }.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
@@ -467,9 +465,16 @@ const LessonPlanStatusReport = () => {
 
   return (
     <>
-      <div className="w-full md:w-[85%] mx-auto p-4 ">
+      {/* <div className="w-full md:w-[85%] mx-auto p-4 "> */}
+      <div
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
+          timetable.length > 0
+            ? "w-full md:w-[98%] scale-100"
+            : "w-full md:w-[95%] scale-[0.98]"
+        }`}
+      >
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
+        <div className="card rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Lesson Plan Status Report
@@ -482,23 +487,37 @@ const LessonPlanStatusReport = () => {
             />
           </div>
           <div
-            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
           ></div>
 
           <>
-            <div className=" w-full md:w-[95%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+            {/* <div className=" w-full md:w-[95%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2"> */}
+            <div
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
+                timetable.length > 0
+                  ? "pb-0 w-full md:w-[99%]"
+                  : "pb-4 w-full md:w-[80%]"
+              }`}
+            >
               <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                {/* <div className="w-full  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row"> */}
+                <div
+                  className={`  w-full gap-x-0 md:gap-x-8  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
+                    timetable.length > 0
+                      ? "w-full md:w-[100%]  wrelative left-0"
+                      : " w-full md:w-[95%] relative left-10"
+                  }`}
+                >
                   {/* Staff Dropdown */}
                   <div className="w-full  md:w-[70%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
-                      className="w-full md:w-[30%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      Staff <span className="text-sm text-red-500">*</span>
+                      Teacher <span className="text-sm text-red-500">*</span>
                     </label>
                     <div className="w-full md:w-[70%]">
                       <Select
@@ -540,7 +559,7 @@ const LessonPlanStatusReport = () => {
                   {/* Class Dropdown */}
                   <div className="w-full  md:w-[70%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
-                      className="w-full md:w-[20%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="classSelect"
                     >
                       Class
@@ -578,7 +597,7 @@ const LessonPlanStatusReport = () => {
                   </div>
 
                   {/* Status */}
-                  <div className="w-full  md:w-[70%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
+                  <div className="w-full  md:w-[70%] gap-x-2 justify-between my-1 md:my-4 flex md:flex-row">
                     <label
                       className="ml-0 md:ml-4 w-full md:w-[20%] text-md mt-1.5"
                       htmlFor="status"
@@ -655,13 +674,49 @@ const LessonPlanStatusReport = () => {
                   </div>
                 </div>
               </div>
+              {timetable.length > 0 && (
+                <div className="p-2 px-3 w-[400px] bg-gray-100 border-none flex justify-between items-center">
+                  <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
+                    <div className="w-1/2 md:w-[95%] mr-1 ">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search "
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                    <button
+                      type="button"
+                      onClick={handleDownloadEXL}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
+                    >
+                      <FaFileExcel />
+                      <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                        Export to Excel
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handlePrint}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                    >
+                      <FiPrinter />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                        Print
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* {timetable.length > 0 && ( */}
             <>
-              <div className="w-full  mt-4">
+              <div className="w-full px-4 mb-4 mt-4">
                 <div className="card mx-auto lg:w-full shadow-lg">
-                  <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                  {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                     <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                         List of Lesson Plan Status Report
@@ -704,7 +759,7 @@ const LessonPlanStatusReport = () => {
                     style={{
                       backgroundColor: "#C03078",
                     }}
-                  ></div>
+                  ></div> */}
 
                   <div className="card-body w-full">
                     <div

@@ -115,8 +115,8 @@ const ApproveLessonPlan = () => {
 
       setTeacher(teacherClasses);
     } catch (error) {
-      toast.error("Error fetching teacher timetable");
-      console.error("Error fetching teacher timetable:", error);
+      toast.error("Error fetching teacher ");
+      console.error("Error fetching teacher :", error);
     } finally {
       setLoadingExams(false);
     }
@@ -588,7 +588,7 @@ const ApproveLessonPlan = () => {
         student.daily_changes[0].entries.forEach((entry) => {
           sheetData.push([
             entry.start_date || "-",
-            entry.description?.[0] || "-",
+            entry.description ? entry.description.join("\n") : "-",
           ]);
         });
       } else {
@@ -697,7 +697,7 @@ const ApproveLessonPlan = () => {
         }`}
       >
         <ToastContainer />
-        <div className="card rounded-md ">
+        <div className="card p-2 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Approve Lesson Plan
@@ -710,7 +710,7 @@ const ApproveLessonPlan = () => {
             />
           </div>
           <div
-            className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
@@ -1128,7 +1128,7 @@ const ApproveLessonPlan = () => {
                       </div>
                     </div>
 
-                    <div className="flex justify-end gap-y-4 gap-2 pr-3 mb-4 mr-10">
+                    <div className="flex justify-end gap-4 pr-3 mb-4 mr-10">
                       <button
                         onClick={() => navigate("/dashboard")}
                         className="bg-yellow-300 hover:bg-yellow-400 text-white font-semibold px-4 py-2 rounded"

@@ -44,6 +44,11 @@ function TeacherList() {
     return `${day}-${month}-${year}`;
   };
 
+  const getFormattedFirstName = (fullName) => {
+    const first = fullName?.split(" ")[0] || "";
+    return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+  };
+
   const fetchAbsentTeacherList = async () => {
     const today = new Date().toISOString().split("T")[0]; // e.g., "2025-06-17"
 
@@ -202,7 +207,7 @@ function TeacherList() {
   return (
     <>
       <ToastContainer />
-      <div className="md:mx-auto md:w-[80%] p-3 bg-white mt-2">
+      <div className="md:mx-auto md:w-[90%] p-3 bg-white mt-2">
         <div className="card-header flex justify-between items-center">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Today's Attendance
@@ -282,10 +287,10 @@ function TeacherList() {
                   <table className="min-w-full leading-normal table-auto">
                     <thead>
                       <tr className="bg-gray-100">
-                        <th className="px-0.5 w-full md:w-[7%] mx-auto text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        <th className="px-0.5 w-full md:w-[5%] mx-auto text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Sr.No
                         </th>
-                        <th className="px-0.5 w-full md:w-[7%] mx-auto text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        <th className="px-0.5 w-full md:w-[6%] mx-auto text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Select All
                           <br />
                           <input
@@ -294,26 +299,27 @@ function TeacherList() {
                             onChange={toggleSelectAll}
                           />{" "}
                         </th>
-                        <th className="px-0.5 w-full md:w-[20%] mx-auto text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                          Teachers name
-                        </th>
+
                         <th className="px-0.5 w-full md:w-[15%] mx-auto text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Teachers Name
+                        </th>
+                        <th className="px-0.5 w-full md:w-[13%] mx-auto text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Teachers Category
                         </th>
-                        <th className="px-0.5 text-center md:w-[20%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                          Class
-                        </th>
-                        <th className="px-0.5 text-center md:w-[10%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        <th className="px-0.5 text-center md:w-[8%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Punch In
                         </th>
-                        <th className="px-0.5 text-center md:w-[10%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        <th className="px-0.5 text-center md:w-[8%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Punch Out
                         </th>
                         <th className="px-0.5 text-center md:w-[10%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Delay Time
                         </th>
-                        <th className="px-0.5 text-center  md:w-[35%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        <th className="px-0.5 text-center  md:w-[13%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Mobile No.
+                        </th>
+                        <th className="px-0.5 text-center md:w-[20%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Class
                         </th>
                       </tr>
                     </thead>
@@ -358,9 +364,26 @@ function TeacherList() {
                                     : "text-gray-900"
                                 }`}
                               >
-                                {student.name}
+                                {/* {student.name} */}
+                                {student?.name
+                                  ? student.name
+                                      .toLowerCase()
+                                      .split(" ")
+                                      .map((word) =>
+                                        word
+                                          .split("'")
+                                          .map(
+                                            (part) =>
+                                              part.charAt(0).toUpperCase() +
+                                              part.slice(1)
+                                          )
+                                          .join("'")
+                                      )
+                                      .join(" ")
+                                  : " "}
                               </p>
                             </td>
+
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${
@@ -372,17 +395,7 @@ function TeacherList() {
                                 {student.teachercategoryname}
                               </p>
                             </td>
-                            <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
-                              <p
-                                className={`whitespace-no-wrap relative top-2 ${
-                                  student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
-                                }`}
-                              >
-                                {student.class_section || "-"}
-                              </p>
-                            </td>
+
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${
@@ -446,17 +459,25 @@ function TeacherList() {
                                 {student.phone || " "}
                               </p>
                             </td>
+                            <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
+                              <p
+                                className={`whitespace-no-wrap relative top-2 ${
+                                  student.late === "Y"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
+                                }`}
+                              >
+                                {student.class_section || "-"}
+                              </p>
+                            </td>
                           </tr>
                         ))
                       ) : (
-                        <tr>
-                          <td
-                            colSpan="8"
-                            className="text-center text-xl py-5 text-red-700 border border-gray-950"
-                          >
-                            No Teachers are Late Today.
-                          </td>
-                        </tr>
+                        <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                          <div className=" text-center text-xl text-red-700">
+                            No Teachers are Late Today..
+                          </div>
+                        </div>
                       )}
                     </tbody>
                   </table>
@@ -475,18 +496,18 @@ function TeacherList() {
                         <th className="px-1 w-full md:w-[10%] mx-auto py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
                           S.No
                         </th>
-                        <th className=" px-0.5 w-full md:w-[30%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
-                          Teachers name
+                        <th className=" px-0.5 w-full md:w-[25%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                          Teachers Name
+                        </th>
+                        <th className=" px-0.5 md:w-[15%] text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                          Mobile No.
+                        </th>
+                        <th className=" px-0.5 w-full md:w-[20%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
+                          Leave Status
                         </th>
 
                         <th className=" px-0.5 w-full md:w-[30%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                           Class
-                        </th>
-                        <th className=" px-0.5 md:w-[10%] text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
-                          Mobile No.
-                        </th>
-                        <th className=" px-0.5 w-full md:w-[%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
-                          Leave Status
                         </th>
                       </tr>
                     </thead>
@@ -498,29 +519,44 @@ function TeacherList() {
                             index % 2 === 0 ? "bg-white" : "bg-gray-100"
                           } hover:bg-gray-50`}
                         >
-                          <td className="text-center border border-gray-950 text-sm">
+                          <td className="text-center border border-gray-950 text-sm px-2 lg:px-2">
                             <p className="text-gray-900">{index + 1}</p>
                           </td>
-                          <td className="text-center border border-gray-950 text-sm">
+                          <td className="text-center border border-gray-950 text-sm px-2 lg:px-2">
                             <p className="text-gray-900">
-                              {staff?.name || " "}
+                              {/* {(staff?.name || " ")} */}
+                              {staff?.name
+                                ? staff.name
+                                    .toLowerCase()
+                                    .split(" ")
+                                    .map((word) =>
+                                      word
+                                        .split("'")
+                                        .map(
+                                          (part) =>
+                                            part.charAt(0).toUpperCase() +
+                                            part.slice(1)
+                                        )
+                                        .join("'")
+                                    )
+                                    .join(" ")
+                                : " "}
                             </p>
                           </td>
 
-                          <td className="text-center border border-gray-950 text-sm">
-                            <p className="text-gray-900">
-                              {staff?.class_section || " - "}
-                            </p>
-                          </td>
-
-                          <td className="text-center border border-gray-950 text-sm">
+                          <td className="text-center border border-gray-950 text-sm px-2 lg:px-2">
                             <p className="text-gray-900">
                               {staff?.phone || " "}
                             </p>
                           </td>
-                          <td className="text-center border border-gray-950 text-sm">
+                          <td className="text-center border border-gray-950 text-sm px-2 lg:px-2">
                             <p className="text-gray-900">
                               {staff?.leave_status || " - "}
+                            </p>
+                          </td>
+                          <td className="text-center border border-gray-950 text-sm px-2 lg:px-2">
+                            <p className="text-gray-900">
+                              {staff?.class_section || " - "}
                             </p>
                           </td>
                         </tr>

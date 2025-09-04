@@ -29,11 +29,23 @@ function BookRequisition() {
   const [description, setnewDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [session, setSession] = useState("");
+  const [regId, setRegId] = useState(null);
+  const [roleId, setRoleId] = useState(null);
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
 
   const pageSize = 10;
+
+  useEffect(() => {
+    fetchsessionData();
+  }, []);
+
+  useEffect(() => {
+    if (regId && roleId) {
+      fetchSections();
+    }
+  }, [regId, roleId]);
 
   const fetchsessionData = async () => {
     try {
@@ -50,7 +62,10 @@ function BookRequisition() {
         withCredentials: true,
       });
       console.log("session data", response.data);
+      setRegId(response?.data?.user?.reg_id);
+      setRoleId(response?.data?.user?.role_id);
 
+      console.log("response?.data?.user?.reg_id", response?.data?.user?.reg_id);
       setSession(response.data);
     } catch (error) {
       setError(error.message);
@@ -59,7 +74,36 @@ function BookRequisition() {
     }
   };
 
+  // const fetchSections = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     if (!token) {
+  //       throw new Error("No authentication token found");
+  //     }
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_BookRequisition/${regId}/${roleId}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         withCredentials: true,
+  //       }
+  //     );
+  //     console.log("Book Requsition data", response.data.data);
+
+  //     setSections(response.data.data);
+  //   } catch (error) {
+  //     setError(error.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchSections = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -67,14 +111,20 @@ function BookRequisition() {
         throw new Error("No authentication token found");
       }
 
-      const response = await axios.get(`${API_URL}/api/get_BookRequisition`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
-      console.log("Book Requsition data", response.data.data);
+      // Normalize roleId -> only S or T
+      const memberType = roleId === "S" ? "S" : "T";
 
+      const response = await axios.get(
+        `${API_URL}/api/get_BookRequisition/${regId}/${memberType}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      console.log("Book Requisition data", response.data.data);
       setSections(response.data.data);
     } catch (error) {
       setError(error.message);
@@ -82,11 +132,6 @@ function BookRequisition() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchsessionData();
-    fetchSections();
-  }, []);
 
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
@@ -407,7 +452,7 @@ function BookRequisition() {
           ></div>
 
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 w-full md:w-[full%] mx-auto w-overflow-y-scroll lg:overflow-x-hidden">
+            <div className="h-96 lg:h-96  overflow-y-scroll lg:overflow-x-hidden">
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>

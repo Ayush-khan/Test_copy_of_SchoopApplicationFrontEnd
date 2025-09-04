@@ -44,6 +44,11 @@ function NonTeachingStaff() {
     return `${day}-${month}-${year}`;
   };
 
+  const getFormattedFirstName = (fullName) => {
+    const first = fullName?.split(" ")[0] || "";
+    return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+  };
+
   const fetchAbsentNonTeachingStaff = async () => {
     const today = new Date().toISOString().split("T")[0]; // e.g., "2025-06-17"
 
@@ -276,7 +281,7 @@ function NonTeachingStaff() {
                           />{" "}
                         </th>
                         <th className="px-0.5 w-full md:w-[25%] mx-auto text-center lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                          Staff name
+                          Staff Name
                         </th>
                         <th className="px-0.5 text-center md:w-[15%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Staff Category
@@ -336,7 +341,34 @@ function NonTeachingStaff() {
                                     : "text-gray-900"
                                 }`}
                               >
-                                {student.name}
+                                {/* {(student.name)} */}
+                                {student?.name
+                                  ? student.name
+                                      .toLowerCase()
+                                      .split(" ")
+                                      .map((word) =>
+                                        word
+                                          .split("'")
+                                          .map(
+                                            (part) =>
+                                              part.charAt(0).toUpperCase() +
+                                              part.slice(1)
+                                          )
+                                          .join("'")
+                                      )
+                                      .join(" ")
+                                  : " "}
+                              </p>
+                            </td>
+                            <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
+                              <p
+                                className={`whitespace-no-wrap relative top-2 ${
+                                  student.late === "Y"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
+                                }`}
+                              >
+                                {student.teachercategoryname}
                               </p>
                             </td>
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
@@ -444,7 +476,7 @@ function NonTeachingStaff() {
                           S.No
                         </th>
                         <th className=" px-0.5 w-full md:w-[30%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
-                          Staff name
+                          Staff Name
                         </th>
                         <th className=" px-0.5 w-full md:w-[20%] mx-auto text-center lg:px-1 py-2  border border-gray-950 text-sm font-semibold text-gray-900  tracking-wider">
                           Designation
@@ -472,7 +504,23 @@ function NonTeachingStaff() {
                           </td>
                           <td className="text-center border border-gray-950 text-sm">
                             <p className="text-gray-900 relative top-2 ">
-                              {staff?.name || " "}
+                              {/* {staff?.name || " "} */}
+                              {staff?.name
+                                ? staff.name
+                                    .toLowerCase()
+                                    .split(" ")
+                                    .map((word) =>
+                                      word
+                                        .split("'")
+                                        .map(
+                                          (part) =>
+                                            part.charAt(0).toUpperCase() +
+                                            part.slice(1)
+                                        )
+                                        .join("'")
+                                    )
+                                    .join(" ")
+                                : " "}
                             </p>
                           </td>
                           <td className="text-center border border-gray-950 text-sm">

@@ -509,7 +509,7 @@ function SubjectMapping() {
                     ) : displayedClasses.length ? (
                       displayedClasses.map((classItem, index) => (
                         <tr
-                          key={classItem.sub_mapping}
+                          key={`${index}-${classItem.sub_mapping}`}
                           className={`${
                             index % 2 === 0 ? "bg-white" : "bg-gray-100"
                           } hover:bg-gray-50`}
@@ -541,23 +541,31 @@ function SubjectMapping() {
                           </td>
 
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                              onClick={() => handleEdit(classItem)}
-                            >
-                              <FontAwesomeIcon icon={faEdit} />
-                            </button>
+                            {classItem.isDelete === "Y" ? (
+                              <button
+                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                onClick={() => handleEdit(classItem)}
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                              </button>
+                            ) : (
+                              ""
+                            )}
                           </td>
 
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                              onClick={() =>
-                                handleDelete(classItem.sub_mapping)
-                              }
-                            >
-                              <FontAwesomeIcon icon={faTrash} />
-                            </button>
+                            {classItem.isDelete === "Y" ? (
+                              <button
+                                className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                onClick={() =>
+                                  handleDelete(classItem.sub_mapping)
+                                }
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                            ) : (
+                              ""
+                            )}
                           </td>
                         </tr>
                       ))

@@ -194,11 +194,20 @@ import Event from "../componants/Events/Event.jsx";
 import CreateEvent from "../componants/Events/CreateEvent.jsx";
 import EditEvent from "../componants/Events/EditEvent.jsx";
 import MarkDropdownEditor from "../componants/Events/MarkDropdownEditor.jsx";
-import SubjectMapping from "../componants/MastersModule/SubjectMapping/SubjectMapping.jsx";
+
 import ImportantLink from "../componants/ImportantLInks/ImportantLinks.jsx";
+import SubjectMapping from "../componants/MastersModule/SubjectMapping/SubjectMapping.jsx";
 import BookRequisition from "../componants/BookRequisition/BookRequisition.jsx";
-import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherMonthlyAttendanceDetailedReport.jsx";
 import BackgroundChanger from "../Layouts/BackgroundColorSelect/BackgroundChanger.jsx";
+import HomeworkNotAssignReport from "../componants/Reports/CurriculumReport/HomewrokNotAssignReport.jsx";
+import News from "../componants/NewsModule/News.jsx";
+import RoleForEvent from "../componants/Events/RoleForEvent.jsx";
+import EditApproveStationery from "../componants/Stationery/EditApproveStationery.jsx";
+import ApproveStationery from "../componants/Stationery/ApproveStationery.jsx";
+import ViewBookAvailability from "../componants/View/ViewBookAvailability.jsx";
+import UpdateClasswiseStudentDetails from "../componants/StudentModel/UpdateClaswiseStudenDeails/UpdateClasswiseStudentDetails.jsx";
+import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherMonthlyAttendanceDetailedReport.jsx";
+// import BackgroundChanger from "../Layouts/BackgroundColorSelect/BackgroundChanger.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -217,6 +226,11 @@ function Index() {
           path="/manageMenus"
           element={<PrivateRoute element={<Menus />} />}
         />
+        {/* background changer component */}
+        <Route
+          path="/backgroundChanger"
+          element={<PrivateRoute element={<BackgroundChanger />} />}
+        />
         <Route
           path="/manageRoles"
           element={<PrivateRoute element={<Roles />} />}
@@ -224,6 +238,23 @@ function Index() {
         <Route
           path="/manageRoleAccess"
           element={<PrivateRoute element={<ShowRolesWithMenu />} />}
+        />
+        {/* News Module */}
+        <Route path="/news" element={<PrivateRoute element={<News />} />} />
+        {/* Important links */}
+        <Route
+          path="/importantLinks"
+          element={<PrivateRoute element={<ImportantLink />} />}
+        />
+        {/* Subjectmapping */}
+        <Route
+          path="/subjetMappinig"
+          element={<PrivateRoute element={<SubjectMapping />} />}
+        />
+        {/* Book requisition */}
+        <Route
+          path="/bookRequisition"
+          element={<PrivateRoute element={<BookRequisition />} />}
         />
         <Route
           path="/manageRoleAccess/:roleId"
@@ -676,6 +707,11 @@ function Index() {
           path="/markDropdown"
           element={<PrivateRoute element={<MarkDropdownEditor />} />}
         />
+        {/* Roles for events */}
+        <Route
+          path="/roleForEvent"
+          element={<PrivateRoute element={<RoleForEvent />} />}
+        />
         {/* Id Cards Module */}
         {/* Student Id Card Module */}
         <Route
@@ -848,6 +884,11 @@ function Index() {
           path="/AttendanceDetaileMontReport"
           element={<PrivateRoute element={<AttendanceDetaileMontReport />} />}
         />
+        {/* Curriculum report  */}
+        <Route
+          path="/homeworkNotAssignReport"
+          element={<PrivateRoute element={<HomeworkNotAssignReport />} />}
+        />
         {/* Lesson plane report modules */}
         <Route
           path="/lessonPlanStatusReport"
@@ -872,7 +913,7 @@ function Index() {
             <PrivateRoute element={<TeacherAttendanceMonthlyReport />} />
           }
         />
-        {/* Staff Monthly Attendance Report */}
+        {/* Teacher Monthly Attendance Detailed Report Monthly Attendance Report */}
         <Route
           path="/teacherAttendanceMonthlyReport"
           element={
@@ -881,10 +922,20 @@ function Index() {
             />
           }
         />{" "}
+        {/* UpdateClasswiseStudentDetails module */}
+        <Route
+          path="/updateClasswiseStudentDetails"
+          element={<PrivateRoute element={<UpdateClasswiseStudentDetails />} />}
+        />
         {/* Lesson plan Detailed Report */}
         <Route
           path="/lessonPlanDetailedView"
           element={<PrivateRoute element={<LessonPlanDetailedView />} />}
+        />
+        {/* View Book Availability module*/}
+        <Route
+          path="/viewBookAvailability"
+          element={<PrivateRoute element={<ViewBookAvailability />} />}
         />
         {/* Attendance Marking Status Report */}
         <Route
@@ -1046,6 +1097,14 @@ function Index() {
         <Route
           path="/stationery"
           element={<PrivateRoute element={<Stationery />} />}
+        />
+        <Route
+          path="/approveStationery/edit/:id"
+          element={<PrivateRoute element={<EditApproveStationery />} />}
+        />
+        <Route
+          path="/approveStationery"
+          element={<PrivateRoute element={<ApproveStationery />} />}
         />
         {/* Siblings unMapping module*/}
         <Route

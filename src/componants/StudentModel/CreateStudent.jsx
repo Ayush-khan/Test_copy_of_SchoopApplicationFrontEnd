@@ -15,7 +15,7 @@ function Form() {
   // for unique user name
   const [usernameError, setUsernameError] = useState(""); // To store the error message
   const [isImageCropped, setIsImageCropped] = useState(false);
-
+  const [houses, setHouses] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
   const [loadingForUsername, setLoadingForUsername] = useState(false);
@@ -39,7 +39,7 @@ function Form() {
 
   const studentData = location.state?.student || null;
   const section_id = location.state?.section_id || null;
-  console.log("Student being edited:", studentData);
+  console.log("Student being edited:", studentData.apaar_id);
   console.log("Section ID passed for back navigation:", section_id);
 
   // Fetch class names
@@ -56,7 +56,30 @@ function Form() {
         toast.error("Error fetching class names");
       }
     };
+    const fetchHouses = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(
+          "https://sms.evolvu.in/arnolds_test/public/api/get_houses",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
+        if (response.data?.success && Array.isArray(response.data.data)) {
+          setHouses(response.data.data);
+        } else {
+          toast.error("Failed to load house list");
+        }
+      } catch (error) {
+        console.error("Error fetching houses:", error);
+        toast.error("Error fetching houses");
+      }
+    };
+
+    fetchHouses();
     fetchClassNames();
   }, [API_URL]);
 
@@ -151,6 +174,7 @@ function Form() {
     m_emailid: "",
     m_adhar_no: "",
     udise_pen_no: "",
+    apaar_id: "",
     // Preferences
     SetToReceiveSMS: "",
     SetEmailIDAsUsername: "",
@@ -241,6 +265,7 @@ function Form() {
         m_emailid: student?.parents?.m_emailid || "",
         m_adhar_no: student?.parents?.m_adhar_no || "",
         udise_pen_no: student.udise_pen_no || " ",
+        apaar_id: student.apaar_id || " ",
         has_specs: student.has_specs || " ",
         m_blood_group: student?.parents?.m_blood_group || " ",
         f_blood_group: student?.parents?.f_blood_group || " ",
@@ -1789,7 +1814,7 @@ function Form() {
                   </p>
                 )}
               </div>{" "}
-              <div className="mt-2">
+              {/* <div className="mt-2">
                 <label
                   htmlFor="house"
                   className="block font-bold text-xs mb-0.5"
@@ -1809,6 +1834,28 @@ function Form() {
                   <option value="E">Emerald</option>
                   <option value="R">Ruby</option>
                   <option value="S">Sapphire</option>
+                </select>
+              </div> */}
+              <div className="mt-2">
+                <label
+                  htmlFor="house"
+                  className="block font-bold text-xs mb-0.5"
+                >
+                  House
+                </label>
+                <select
+                  id="house"
+                  name="house"
+                  value={formData.house}
+                  className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                  onChange={handleChange}
+                >
+                  <option value="">Select</option>
+                  {houses.map((house) => (
+                    <option key={house.house_id} value={house.house_id}>
+                      {house.house_name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="mt-2">
@@ -1947,6 +1994,27 @@ function Form() {
                   )}
                 </div>
               )}
+              <div className="mt-2">
+                <label
+                  htmlFor="Apaar_id"
+                  className="block font-bold text-xs mb-0.5"
+                >
+                  Apaar ID No.
+                </label>
+                <input
+                  type="text"
+                  id="Apaar_id"
+                  name="apaar_id"
+                  maxLength={12}
+                  value={formData.apaar_id}
+                  className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^a-zA-Z0-9]/g, "");
+                    handleChange({ target: { name: "apaar_id", value } });
+                  }}
+                  // onBlur={handleBlur}
+                />
+              </div>
               {/* Address Information */}
               <h5 className="col-span-4 text-blue-400 mt-2 relative top-4">
                 {" "}

@@ -72,8 +72,8 @@ const Card = ({ title, TotalValue, presentValue, color, icon, roleId }) => {
           <div className={`${styles.icon} text-6xl text-blue-500`}>{icon}</div>
         )}
         <div
-          className={styles["card-title"]}
-          style={{ fontSize: "12px", fontWeight: "400" }}
+          className={`${styles["card-title"]} text-gray-600`}
+          style={{ fontSize: ".8em", fontWeight: "600" }}
         >
           {title}
         </div>
@@ -93,7 +93,7 @@ const Card = ({ title, TotalValue, presentValue, color, icon, roleId }) => {
         {shouldShowValues && (
           <div
             className="flex align-item-center justify-between text-sm gap-1 flex-col"
-            style={{ fontSize: ".9em" }}
+            style={{ fontSize: "1.3em" }}
           >
             <div style={{ textAlign: "center" }}>
               {isLoading
