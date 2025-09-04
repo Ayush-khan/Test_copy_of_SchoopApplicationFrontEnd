@@ -422,7 +422,7 @@ const LeavingCertificate = () => {
       subjects: [], // Empty array for selected subjects
       promoted_to: "",
       attendance: "",
-      last_fee_paid_month: "",
+      fee_month: "",
       part_of: "",
       selectedActivities: [], // Empty array for selected activities
       application_date: "",
@@ -496,7 +496,7 @@ const LeavingCertificate = () => {
           // dob_words: fetchedData.dobinwords || "", // Directly from fetched data
           dob_words: fetchedData.dobinwords || " ",
           attendance: fetchedData.total_attendance || "",
-          last_fee_paid_month: fetchedData.last_fee_paid_month || "",
+          fee_month: fetchedData.last_fee_paid_month || "",
           nationality: fetchedData.studentinformation.nationality || "",
           stu_aadhaar_no: fetchedData.studentinformation.stu_aadhaar_no || "",
           teacher_image_name:
@@ -555,7 +555,7 @@ const LeavingCertificate = () => {
       "dob_proof",
       "stu_aadhaar_no",
       "attendance",
-      "last_fee_paid_month",
+      "fee_month",
       "remark",
       "conduct",
     ];
@@ -722,7 +722,7 @@ const LeavingCertificate = () => {
       subjects: [], // Empty array for selected subjects
       promoted_to: "",
       attendance: "",
-      last_fee_paid_month: "",
+      fee_month: "",
       part_of: "",
       selectedActivities: [], // Empty array for selected activities
       application_date: "",
@@ -787,10 +787,11 @@ const LeavingCertificate = () => {
           mother_tongue: fetchedData.studentinformation.mother_tongue || "",
           dob: fetchedData.studentinformation.dob || "",
           // dob_words: convertDateToWords(fetchedData.studentinformation.dob),
+          admission_class: fetchedData.studentinformation.admission_class || "",
+
           dob_words: fetchedData.dobinwords || " ",
           attendance: fetchedData.total_attendance || "",
-          last_fee_paid_month: fetchedData.last_fee_paid_month || "",
-
+          fee_month: fetchedData.last_fee_paid_month || "",
           nationality: fetchedData.studentinformation.nationality || "",
           stu_aadhaar_no: fetchedData.studentinformation.stu_aadhaar_no || "",
           teacher_image_name:
@@ -943,7 +944,7 @@ const LeavingCertificate = () => {
       subjects: formData.selectedSubjects || [], // Ensure it's an array of subject names
       promoted_to: formData.promoted_to || "",
       attendance: formData.attendance || "",
-      last_fee_paid_month: formData.last_fee_paid_month || "",
+      fee_month: formData.fee_month || "",
       part_of: formData.part_of || "",
       games: selectedActivities || [], // Ensure it's an array of game names
       application_date: formatDateString(formData.application_date),
@@ -2276,7 +2277,7 @@ const LeavingCertificate = () => {
                       </div>
                       <div>
                         <label
-                          htmlFor="last_fee_paid_month"
+                          htmlFor="fee_month"
                           className="block font-bold text-xs mb-2"
                         >
                           Month Up to Which School Fees are Paid{" "}
@@ -2284,16 +2285,16 @@ const LeavingCertificate = () => {
                         </label>
                         <input
                           type="text"
-                          id="last_fee_paid_month"
-                          name="last_fee_paid_month"
+                          id="fee_month"
+                          name="fee_month"
                           // maxLength={50}
-                          value={formData.last_fee_paid_month}
+                          value={formData.fee_month}
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                        {errors.last_fee_paid_month && (
+                        {errors.fee_month && (
                           <span className="text-red-500 text-xs ml-1 h-1">
-                            {errors.last_fee_paid_month}
+                            {errors.fee_month}
                           </span>
                         )}
                       </div>
