@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,6 +7,8 @@ import LoadingSpinner from "../componants/common/LoadingSpinner.jsx"; // Import 
 import styles from "../CSS/LoginForm.module.css";
 
 const LoginForm = ({ userId }) => {
+  const API_URL = import.meta.env.VITE_API_URL; // url for host
+  const [roleName, setRoleName] = useState("");
   const [email, setEmail] = useState(userId || "");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
@@ -36,9 +38,32 @@ const LoginForm = ({ userId }) => {
       .find((row) => row.startsWith(name + "="));
     return cookieValue ? cookieValue.split("=")[1] : null;
   };
+  useEffect(() => {
+    fetchUserRole();
+  }, []);
+
+  const fetchUserRole = async () => {
+    const sortNameCookie = getCookie("short_name");
+
+    try {
+      const response = await axios.get(`${API_URL}/api/get_roleofuser`, {
+        params: {
+          short_name: sortNameCookie,
+          user_id: userId,
+        },
+      });
+
+      const roleId = response.data?.data?.[0]?.role_id;
+
+      if (roleId) {
+        setRoleName(roleId); // or setRoleId if you rename the state
+      }
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+    }
+  };
 
   const handleSubmit = async (e) => {
-    const API_URL = import.meta.env.VITE_API_URL; // url for host
     const sortNameCookie = getCookie("short_name");
     console.log("sortNameCookie", sortNameCookie);
     e.preventDefault();

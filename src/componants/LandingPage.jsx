@@ -293,7 +293,14 @@ const LandingPage = () => {
   if (showLandingPage) {
     // ✅ Landing Page View
     return (
-      <div className={loginStyles.loginContainer}>
+      <div
+        className={loginStyles.loginContainer}
+        style={{
+          background: `url(${
+            schoolImageUrl || "/default-bg.jpg"
+          }) center center/cover no-repeat fixed`,
+        }}
+      >
         <ToastContainer />
         <div
           className={`${loginStyles.loginContainerChild} bg-none lg:h-5/6 lg:flex lg:justify-start`}
@@ -370,16 +377,16 @@ const LandingPage = () => {
             className={`${styles.navbar} w-screen flex items-center justify-between px-2 h-12 text-white shadow-lg py-2 bg-white/20 backdrop-blur-md`}
           >
             <div className="w-full flex justify-between items-center px-1">
-              {/* <img
+              <img
                 src="/logoSchoolimg.png"
                 alt="Logo"
                 className="h-24 relative bottom-2"
-              /> */}
-              <img
+              />
+              {/* <img
                 src={schoolImageUrl}
                 alt="Logo"
                 className="h-24 relative bottom-2 object-contain"
-              />
+              /> */}
               <h1 className="flex-grow text-center text-yellow-100 font-semibold text-[2em] ">
                 EvolvU Smart School
               </h1>
