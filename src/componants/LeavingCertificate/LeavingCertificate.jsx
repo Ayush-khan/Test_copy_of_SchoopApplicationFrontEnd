@@ -422,7 +422,7 @@ const LeavingCertificate = () => {
       subjects: [], // Empty array for selected subjects
       promoted_to: "",
       attendance: "",
-      fee_month: "",
+      last_fee_paid_month: "",
       part_of: "",
       selectedActivities: [], // Empty array for selected activities
       application_date: "",
@@ -496,6 +496,7 @@ const LeavingCertificate = () => {
           // dob_words: fetchedData.dobinwords || "", // Directly from fetched data
           dob_words: fetchedData.dobinwords || " ",
           attendance: fetchedData.total_attendance || "",
+          last_fee_paid_month: fetchedData.last_fee_paid_month || "",
           nationality: fetchedData.studentinformation.nationality || "",
           stu_aadhaar_no: fetchedData.studentinformation.stu_aadhaar_no || "",
           teacher_image_name:
@@ -554,7 +555,7 @@ const LeavingCertificate = () => {
       "dob_proof",
       "stu_aadhaar_no",
       "attendance",
-      "fee_month",
+      "last_fee_paid_month",
       "remark",
       "conduct",
     ];
@@ -721,7 +722,7 @@ const LeavingCertificate = () => {
       subjects: [], // Empty array for selected subjects
       promoted_to: "",
       attendance: "",
-      fee_month: "",
+      last_fee_paid_month: "",
       part_of: "",
       selectedActivities: [], // Empty array for selected activities
       application_date: "",
@@ -788,6 +789,8 @@ const LeavingCertificate = () => {
           // dob_words: convertDateToWords(fetchedData.studentinformation.dob),
           dob_words: fetchedData.dobinwords || " ",
           attendance: fetchedData.total_attendance || "",
+          last_fee_paid_month: fetchedData.last_fee_paid_month || "",
+
           nationality: fetchedData.studentinformation.nationality || "",
           stu_aadhaar_no: fetchedData.studentinformation.stu_aadhaar_no || "",
           teacher_image_name:
@@ -940,7 +943,7 @@ const LeavingCertificate = () => {
       subjects: formData.selectedSubjects || [], // Ensure it's an array of subject names
       promoted_to: formData.promoted_to || "",
       attendance: formData.attendance || "",
-      fee_month: formData.fee_month || "",
+      last_fee_paid_month: formData.last_fee_paid_month || "",
       part_of: formData.part_of || "",
       games: selectedActivities || [], // Ensure it's an array of game names
       application_date: formatDateString(formData.application_date),
@@ -2273,7 +2276,7 @@ const LeavingCertificate = () => {
                       </div>
                       <div>
                         <label
-                          htmlFor="fee_month"
+                          htmlFor="last_fee_paid_month"
                           className="block font-bold text-xs mb-2"
                         >
                           Month Up to Which School Fees are Paid{" "}
@@ -2281,16 +2284,16 @@ const LeavingCertificate = () => {
                         </label>
                         <input
                           type="text"
-                          id="fee_month"
-                          name="fee_month"
-                          maxLength={50}
-                          value={formData.fee_month}
+                          id="last_fee_paid_month"
+                          name="last_fee_paid_month"
+                          // maxLength={50}
+                          value={formData.last_fee_paid_month}
                           onChange={handleChange}
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
-                        {errors.fee_month && (
+                        {errors.last_fee_paid_month && (
                           <span className="text-red-500 text-xs ml-1 h-1">
-                            {errors.fee_month}
+                            {errors.last_fee_paid_month}
                           </span>
                         )}
                       </div>
