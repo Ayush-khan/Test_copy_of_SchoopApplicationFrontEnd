@@ -146,7 +146,7 @@ const EditLeavingCertificate = () => {
             remark: fetchedData.remark || "",
             academic_yr: fetchedData.academic_yr || "",
             conduct: fetchedData.conduct || "",
-            last_fee_paid_month: fetchedData.last_fee_paid_month || "",
+            // last_fee_paid_month: fetchedData.last_fee_paid_month || "",
             subjects: DataStudentAc.classsubject || [],
             // selectedActivities: (fetchedData.games || "").split(","),
             subjectsFor: classsubject, // All subjects to display
