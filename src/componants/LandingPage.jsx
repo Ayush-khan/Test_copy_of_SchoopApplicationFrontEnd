@@ -67,6 +67,8 @@ import { IoArrowUndoCircle } from "react-icons/io5";
 
 const LandingPage = () => {
   const [userId, setUserId] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [schoolImageUrl, setSchoolImageUrl] = useState("");
   const [newPasswordLoading, setNewPasswordLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({ userId: false });
@@ -79,6 +81,7 @@ const LandingPage = () => {
   const [sortNameIs, setSortNameIs] = useState("");
   const [supportEmail, setSupportEmail] = useState("supportsacs@aceventura.in");
   // Academic year helper
+
   function getAcademicYearLast() {
     const now = new Date();
     const year = now.getFullYear();
@@ -102,7 +105,12 @@ const LandingPage = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
+  const getCookie = (name) => {
+    const cookieValue = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="));
+    return cookieValue ? cookieValue.split("=")[1] : null;
+  };
   const handleBlur = (field) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
@@ -128,6 +136,23 @@ const LandingPage = () => {
     const year = today.getFullYear();
     return `${day} ${monthName} ${year}`;
   }
+
+  const fetchSchoolImages = async (shortName) => {
+    const sortNameCookie = getCookie("short_name");
+
+    try {
+      const response = await axios.get(`${API_URL}/api/get_backgroundimage`, {
+        params: { short_name: sortNameCookie },
+      });
+
+      const { logo, school_image } = response.data?.data || {};
+      setLogoUrl(logo || "");
+      setSchoolImageUrl(school_image || "");
+    } catch (error) {
+      console.error("Error fetching logo and background image:", error);
+    }
+  };
+
   const setShortNameCookieFromUserId = async (userId, API_URL) => {
     const formData = new FormData();
     formData.append("user_id", userId);
@@ -159,7 +184,9 @@ const LandingPage = () => {
 
       if (Array.isArray(userResponse.data) && userResponse.data.length > 0) {
         shortName = userResponse.data[0].short_name;
-        sortNameIs(shortName);
+
+        setSortNameIs(shortName);
+        // await fetchSchoolImages(shortName); // ✅ Fetch and store logo/bg
       } else {
         throw new Error("Invalid user.");
       }
@@ -209,7 +236,7 @@ const LandingPage = () => {
 
     try {
       await setShortNameCookieFromUserId(userId, API_URL);
-
+      await fetchSchoolImages(sortNameIs);
       toast.success("Redirecting...");
       setTimeout(() => {
         setShowLandingPage(true);
@@ -267,12 +294,21 @@ const LandingPage = () => {
   if (showLandingPage) {
     // ✅ Landing Page View
     return (
-      <div className={loginStyles.loginContainer}>
+      <div
+        className={loginStyles.loginContainer}
+        style={{
+          background: `url(${
+            schoolImageUrl || "/default-bg.jpg"
+          }) center center/cover no-repeat fixed`,
+        }}
+      >
         <ToastContainer />
         <div
           className={`${loginStyles.loginContainerChild} bg-none lg:h-5/6 lg:flex lg:justify-start`}
         >
-          <LoginForm userId={userId} />
+          {/* <LoginForm userId={userId} /> */}
+          <LoginForm userId={userId} sortName={sortNameIs} />
+
           {isMobileView && (
             <button
               className={`${loginStyles.notificationButton} flex justify-between`}
@@ -347,6 +383,11 @@ const LandingPage = () => {
                 alt="Logo"
                 className="h-24 relative bottom-2"
               />
+              {/* <img
+                src={schoolImageUrl}
+                alt="Logo"
+                className="h-24 relative bottom-2 object-contain"
+              /> */}
               <h1 className="flex-grow text-center text-yellow-100 font-semibold text-[2em] ">
                 EvolvU Smart School
               </h1>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,6 +7,8 @@ import LoadingSpinner from "../componants/common/LoadingSpinner.jsx"; // Import 
 import styles from "../CSS/LoginForm.module.css";
 
 const LoginForm = ({ userId }) => {
+  const API_URL = import.meta.env.VITE_API_URL; // url for host
+  const [roleName, setRoleName] = useState("");
   const [email, setEmail] = useState(userId || "");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
@@ -36,9 +38,32 @@ const LoginForm = ({ userId }) => {
       .find((row) => row.startsWith(name + "="));
     return cookieValue ? cookieValue.split("=")[1] : null;
   };
+  useEffect(() => {
+    fetchUserRole();
+  }, []);
+
+  const fetchUserRole = async () => {
+    const sortNameCookie = getCookie("short_name");
+
+    try {
+      const response = await axios.get(`${API_URL}/api/get_roleofuser`, {
+        params: {
+          short_name: sortNameCookie,
+          user_id: userId,
+        },
+      });
+
+      const roleId = response.data?.data?.[0]?.role_id;
+
+      if (roleId) {
+        setRoleName(roleId); // or setRoleId if you rename the state
+      }
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+    }
+  };
 
   const handleSubmit = async (e) => {
-    const API_URL = import.meta.env.VITE_API_URL; // url for host
     const sortNameCookie = getCookie("short_name");
     console.log("sortNameCookie", sortNameCookie);
     e.preventDefault();
@@ -126,108 +151,145 @@ const LoginForm = ({ userId }) => {
   };
 
   return (
-    <div className={styles.loginForm}>
-      <h2>Log-In</h2>
-      <p>Enter your details to login to your account</p>
-      <form onSubmit={handleSubmit}>
-        <div className={styles.formGroup}>
-          <div className={styles.inputWrapper}>
-            <FontAwesomeIcon icon={faUser} className={styles.userIcon} />
-            <input
-              type="text"
-              readOnly={!!userId} // Make input read-only if userId is provided
-              id="email"
-              name="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter User Id"
-              className={`
+    <>
+      <div className={styles.loginForm}>
+        <h2>Log-In</h2>
+        <p>Enter your details to login to your account</p>
+        <form onSubmit={handleSubmit}>
+          <div className={styles.formGroup}>
+            <div className={styles.inputWrapper}>
+              <FontAwesomeIcon icon={faUser} className={styles.userIcon} />
+              <input
+                type="text"
+                readOnly={!!userId} // Make input read-only if userId is provided
+                id="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter User Id"
+                className={`
     ${userId ? "bg-gray-600  cursor-not-allowed" : "bg-gray-600 "}
     focus:outline-none focus:ring-2 focus:ring-blue-400`}
-              required
-            />
+                required
+              />
+            </div>
+            {errors.email && (
+              <span className={styles.error}>{errors.email}</span>
+            )}
           </div>
-          {errors.email && <span className={styles.error}>{errors.email}</span>}
-        </div>
-        <div className={styles.formGroup}>
-          <div className={styles.passwordWrapper}>
-            <input
-              type={showPassword ? "text" : "password"}
-              id="password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              required
-              className={`
+          <div className={styles.formGroup}>
+            <div className={styles.passwordWrapper}>
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                required
+                className={`
    
     focus:outline-none focus:ring-2 focus:ring-blue-400`}
-            />
-            <FontAwesomeIcon
-              icon={showPassword ? faEyeSlash : faEye}
-              className={styles.eyeIcon}
-              onClick={toggleShowPassword}
-            />
+              />
+              <FontAwesomeIcon
+                icon={showPassword ? faEyeSlash : faEye}
+                className={styles.eyeIcon}
+                onClick={toggleShowPassword}
+              />
+            </div>
+            {errors.password && (
+              <div
+                className={`${styles.error} text-center w-[90%] mx-auto  text-nowrap text-xs`}
+              >
+                {errors.password}
+              </div>
+            )}
           </div>
-          {errors.password && (
+          {errors.onlyAdminAllowError && (
             <div
-              className={`${styles.error} text-center w-[90%] mx-auto  text-nowrap text-xs`}
+              className={`${styles.error} text-center w-[90%] mx-auto relative -top-4 text-nowrap text-xs`}
             >
-              {errors.password}
+              {errors.onlyAdminAllowError}
             </div>
           )}
-        </div>
-        {errors.onlyAdminAllowError && (
-          <div
-            className={`${styles.error} text-center w-[90%] mx-auto relative -top-4 text-nowrap text-xs`}
-          >
-            {errors.onlyAdminAllowError}
-          </div>
-        )}
 
-        {errors.api && (
-          <span
-            className={`${styles.error} text-center relative -left-3  text-nowrap text-xs`}
+          {errors.api && (
+            <span
+              className={`${styles.error} text-center relative -left-3  text-nowrap text-xs`}
+            >
+              {errors.api}
+            </span>
+          )}
+          <div className="flex items-center ml-3 mb-0.5 ">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="mr-1"
+            />
+            <label
+              htmlFor="rememberMe"
+              // className="text-sm font-medium text-gray-700"
+              className={`text-sm font-medium text-gray-900  `}
+            >
+              Remember me
+            </label>
+          </div>
+          <button
+            type="submit"
+            className={`${styles.loginButton} flex place-items-center justify-center`}
+            disabled={loading}
           >
-            {errors.api}
-          </span>
-        )}
-        <div className="flex items-center ml-3 mb-0.5 ">
-          <input
-            type="checkbox"
-            id="rememberMe"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            className="mr-1"
-          />
-          <label
-            htmlFor="rememberMe"
-            // className="text-sm font-medium text-gray-700"
-            className={`text-sm font-medium text-gray-900  `}
+            {loading ? <LoadingSpinner /> : "Login"}
+          </button>
+          <div
+            className={`${styles.forgotPassword} w-full flex justify-center items-center mx-auto `}
           >
-            Remember me
-          </label>
+            <a
+              onClick={() => navigate("/forgotPassword")}
+              className="text-blue-600 text-sm font-semibold cursor-pointer border-b-2 border-transparent hover:border-blue-800 hover:text-blue-800 transition duration-200 ease-in-out"
+            >
+              I forgot my password?
+            </a>
+          </div>
+          <div className={styles.formFooter}></div>
+        </form>
+      </div>
+      <div className={styles.formFooter}></div>
+
+      {(roleName === "P" || roleName === "T") && (
+        <div className="mt-4 text-center">
+          <p className="text-sm font-semibold text-gray-800">
+            {roleName === "P" ? "Parent app" : "Teacher app"} now available in
+          </p>
+          <div className="flex justify-center items-center mt-1 gap-2">
+            <a
+              href="https://play.google.com/store/apps/details?id=in.aceventura.evolvuschool.teacherapp"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+                alt="Get it on Google Play"
+                className="h-10"
+              />
+            </a>
+            <a
+              href="https://www.apple.com/in/app-store/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+                alt="Download on the App Store"
+                className="h-10"
+              />
+            </a>
+          </div>
         </div>
-        <button
-          type="submit"
-          className={`${styles.loginButton} flex place-items-center justify-center`}
-          disabled={loading}
-        >
-          {loading ? <LoadingSpinner /> : "Login"}
-        </button>
-        <div
-          className={`${styles.forgotPassword} w-full flex justify-center items-center mx-auto `}
-        >
-          <a
-            onClick={() => navigate("/forgotPassword")}
-            className="text-blue-600 text-sm font-semibold cursor-pointer border-b-2 border-transparent hover:border-blue-800 hover:text-blue-800 transition duration-200 ease-in-out"
-          >
-            I forgot my password?
-          </a>
-        </div>
-        <div className={styles.formFooter}></div>
-      </form>
-    </div>
+      )}
+    </>
   );
 };
 
