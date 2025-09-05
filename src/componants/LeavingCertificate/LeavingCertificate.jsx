@@ -939,10 +939,10 @@ const LeavingCertificate = () => {
       admission_date: formatDateString(formData.admission_date),
       admission_class: formData.admission_class || "",
       leaving_date: formatDateString(formData.leaving_date),
-      standard_studying: formData.classname || "",
+      standard_studying: formData.standard_studying || "",
       last_exam: formData.last_exam || "",
       state: formData.state || "",
-      subjects: formData?.selectedSubjects || [], // Ensure it's an array of subject names
+      subjects: formData.selectedSubjects || [], // Ensure it's an array of subject names
       promoted_to: formData.promoted_to || "",
       attendance: formData.attendance || "",
       fee_month: formData.fee_month || "",
