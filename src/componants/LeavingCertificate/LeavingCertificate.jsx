@@ -2573,10 +2573,10 @@ const LeavingCertificate = () => {
                         <td className="border border-gray-300 px-4 py-2">
                           {book?.book_title}
                         </td>
-                        <td className="border border-gray-300 px-4 py-2 ">
+                        <td className="border border-gray-300 px-4 py-2 text-nowrap ">
                           {formatDate(book?.issue_date)}
                         </td>
-                        <td className="border border-gray-300 px-4 py-2">
+                        <td className="border border-gray-300 px-4 py-2 text-nowrap">
                           {formatDate(book?.due_date)}
                         </td>
                       </tr>
