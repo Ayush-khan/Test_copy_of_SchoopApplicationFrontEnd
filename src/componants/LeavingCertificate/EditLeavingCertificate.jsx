@@ -538,6 +538,8 @@ const EditLeavingCertificate = () => {
           apaar_id: fetchedData.studentinformation.apaar_id || "",
           promoted_to: fetchedData.studentinformation.promoted_to || "",
           last_exam: fetchedData.studentinformation.last_exam || "",
+          standard_studying: fetchedData.studentinformation.classname || "",
+
           stud_id: fetchedData.studentinformation.stud_id || " ",
           father_name: fetchedData.studentinformation.father_name || "",
           mother_name: fetchedData.studentinformation.mother_name || "",

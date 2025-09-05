@@ -483,7 +483,7 @@ const LeavingCertificate = () => {
           stud_id: fetchedData.studentinformation.student_id || " ",
           father_name: fetchedData.studentinformation.father_name || "",
           mother_name: fetchedData.studentinformation.mother_name || "",
-
+          standard_studying: fetchedData.studentinformation.classname || "",
           admission_date: fetchedData.studentinformation.admission_date || "",
           religion: fetchedData.studentinformation.religion || "",
           caste: fetchedData.studentinformation.caste || "",
@@ -775,6 +775,7 @@ const LeavingCertificate = () => {
           apaar_id: fetchedData.studentinformation.apaar_id || "",
           promoted_to: fetchedData.studentinformation.promoted_to || "",
           last_exam: fetchedData.studentinformation.last_exam || "",
+          standard_studying: fetchedData.studentinformation.classname || "",
           stud_id: fetchedData.studentinformation.student_id || " ",
           father_name: fetchedData.studentinformation.father_name || "",
           mother_name: fetchedData.studentinformation.mother_name || "",
@@ -938,10 +939,10 @@ const LeavingCertificate = () => {
       admission_date: formatDateString(formData.admission_date),
       admission_class: formData.admission_class || "",
       leaving_date: formatDateString(formData.leaving_date),
-      standard_studying: formData.standard_studying || "",
+      standard_studying: formData.classname || "",
       last_exam: formData.last_exam || "",
       state: formData.state || "",
-      subjects: formData.selectedSubjects || [], // Ensure it's an array of subject names
+      subjects: formData?.selectedSubjects || [], // Ensure it's an array of subject names
       promoted_to: formData.promoted_to || "",
       attendance: formData.attendance || "",
       fee_month: formData.fee_month || "",
@@ -1670,7 +1671,7 @@ const LeavingCertificate = () => {
                                   type="checkbox"
                                   name="subjects"
                                   value={subject.name}
-                                  checked={formData.selectedSubjects.includes(
+                                  checked={formData?.selectedSubjects?.includes(
                                     subject.name
                                   )}
                                   onChange={(e) =>
@@ -1697,7 +1698,7 @@ const LeavingCertificate = () => {
                                 type="checkbox"
                                 name="subjects"
                                 value="Basic Mathematics"
-                                checked={formData.selectedSubjects.includes(
+                                checked={formData?.selectedSubjects?.includes(
                                   "Basic Mathematics"
                                 )}
                                 onChange={(e) =>
