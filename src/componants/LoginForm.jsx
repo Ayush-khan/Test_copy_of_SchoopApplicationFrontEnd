@@ -56,7 +56,25 @@ const LoginForm = ({ userId }) => {
       const roleId = response.data?.data?.[0]?.role_id;
 
       if (roleId) {
-        setRoleName(roleId); // or setRoleId if you rename the state
+        setRoleName(roleId); // or setRoleId
+
+        // Prepare FormData
+        const formData = new FormData();
+        formData.append("role_id", roleId);
+
+        // Second API call: POST with role_id
+        const postResponse = await axios.post(
+          `https://api.aceventura.in/demo/evolvuUserService/get_app_urls`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        console.log("Second API response (POST):", postResponse.data);
+        // Do something with postResponse if needed
       }
     } catch (error) {
       console.error("Error fetching user role:", error);
