@@ -319,17 +319,47 @@ function Event() {
     setSelectedHoliday(holiday);
   };
 
+  // const handleSelectAll = () => {
+  //   setSelectAll(!selectAll);
+  //   if (!selectAll) {
+  //     // Select all students
+  //     const allHolidayIds = holidays.map((holiday) => holiday.unq_id);
+  //     setSelectedHolidays(allHolidayIds);
+  //     console.log("allEvents", allHolidayIds);
+  //   } else {
+  //     // Deselect all students
+  //     setSelectedHolidays([]);
+  //   }
+  // };
+
   const handleSelectAll = () => {
-    setSelectAll(!selectAll);
-    if (!selectAll) {
-      // Select all students
-      const allHolidayIds = holidays.map((holiday) => holiday.unq_id);
-      setSelectedHolidays(allHolidayIds);
-      console.log("allEvents", allHolidayIds);
-    } else {
-      // Deselect all students
-      setSelectedHolidays([]);
+    if (!holidays || holidays.length === 0) {
+      toast.warning("No events available to select.");
+      return;
     }
+
+    setSelectAll((prev) => {
+      const newSelectAll = !prev;
+
+      if (newSelectAll) {
+        // Only select events that are not yet published
+        const unpublishedHolidayIds = holidays
+          .filter((holiday) => holiday.publish === "N")
+          .map((holiday) => holiday.unq_id);
+
+        if (unpublishedHolidayIds.length === 0) {
+          toast.warning("No events available for publish.");
+        }
+
+        setSelectedHolidays(unpublishedHolidayIds);
+        console.log("allUnpublishedEvents", unpublishedHolidayIds);
+      } else {
+        // Deselect all events
+        setSelectedHolidays([]);
+      }
+
+      return newSelectAll;
+    });
   };
 
   const handleCheckboxChange = (holidayId) => {
@@ -340,9 +370,70 @@ function Event() {
     }
   };
 
+  // const handlePublish = async () => {
+  //   if (selectedHolidays.length === 0) {
+  //     toast.warning("Please select at least one Event to publish.");
+  //     return;
+  //   }
+
+  //   setIsSubmitting(true);
+  //   const token = localStorage.getItem("authToken");
+
+  //   if (!token) {
+  //     alert("Authentication required. Please log in.");
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const formData = new FormData();
+  //     selectedHolidays.forEach((id) => {
+  //       formData.append("checkbxuniqid[]", id);
+  //     });
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/update_publishevent`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     const data = response.data;
+
+  //     if (data.success) {
+  //       toast.success(data.message || "Event published successfully!");
+  //       setHolidays((prev) =>
+  //         prev.map((holiday) =>
+  //           selectedHolidays.includes(holiday.unq_id)
+  //             ? { ...holiday, publish: "Y" }
+  //             : holiday
+  //         )
+  //       );
+  //       setSelectedHolidays([]);
+  //     } else {
+  //       toast.error(data.message || "Failed to publish events.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error publishing events:", error);
+  //     toast.error("An error occurred while publishing events.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const handlePublish = async () => {
-    if (selectedHolidays.length === 0) {
-      toast.warning("Please select at least one Event to publish.");
+    // 1️⃣ Check if there are any events at all
+    if (!holidays || holidays.length === 0) {
+      toast.warning("No events available for publish.");
+      return;
+    }
+
+    // 2️⃣ Check if the user selected any events
+    if (!selectedHolidays || selectedHolidays.length === 0) {
+      toast.warning("Please select at least one event to publish.");
       return;
     }
 
@@ -357,17 +448,13 @@ function Event() {
 
     try {
       const formData = new FormData();
-      selectedHolidays.forEach((id) => {
-        formData.append("checkbxuniqid[]", id);
-      });
+      selectedHolidays.forEach((id) => formData.append("checkbxuniqid[]", id));
 
       const response = await axios.post(
         `${API_URL}/api/update_publishevent`,
         formData,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -383,6 +470,7 @@ function Event() {
           )
         );
         setSelectedHolidays([]);
+        setSelectAll(false);
       } else {
         toast.error(data.message || "Failed to publish events.");
       }
