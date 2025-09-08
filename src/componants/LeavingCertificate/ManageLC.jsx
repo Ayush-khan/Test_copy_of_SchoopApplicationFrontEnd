@@ -727,6 +727,7 @@ function ManageLC() {
                                   statusText = "Issued";
                                   showEditButton = true;
                                   showDownloadButton = true;
+                                  showDeleteButton = true;
                                 } else if (subject.IsGenerated === "Y") {
                                   statusText = "Generated";
                                   showIssueButton = true;
