@@ -131,6 +131,8 @@ const EditLeavingCertificate = () => {
             date_of_admission: fetchedData.date_of_admission || "",
             admission_class: fetchedData.admission_class || "",
             attendance: fetchedData.attendance || "",
+            fee_month: fetchedData.fee_month || "",
+
             reason_leaving: fetchedData.reason_leaving || "",
             application_date: fetchedData.application_date || "",
             leaving_date: fetchedData.leaving_date || "",
@@ -144,7 +146,7 @@ const EditLeavingCertificate = () => {
             remark: fetchedData.remark || "",
             academic_yr: fetchedData.academic_yr || "",
             conduct: fetchedData.conduct || "",
-            fee_month: fetchedData.fee_month || "",
+            // fee_month: fetchedData.fee_month || "",
             subjects: DataStudentAc.classsubject || [],
             // selectedActivities: (fetchedData.games || "").split(","),
             subjectsFor: classsubject, // All subjects to display
@@ -536,6 +538,8 @@ const EditLeavingCertificate = () => {
           apaar_id: fetchedData.studentinformation.apaar_id || "",
           promoted_to: fetchedData.studentinformation.promoted_to || "",
           last_exam: fetchedData.studentinformation.last_exam || "",
+          standard_studying: fetchedData.studentinformation.classname || "",
+
           stud_id: fetchedData.studentinformation.stud_id || " ",
           father_name: fetchedData.studentinformation.father_name || "",
           mother_name: fetchedData.studentinformation.mother_name || "",
@@ -550,6 +554,8 @@ const EditLeavingCertificate = () => {
           dob: fetchedData.studentinformation.dob || "",
           dob_words: convertDateToWords(fetchedData.studentinformation.dob),
           attendance: fetchedData.total_attendance || "",
+          fee_month: fetchedData.last_fee_paid_month || "",
+
           nationality: fetchedData.studentinformation.nationality || "",
           aadhar_no: fetchedData.studentinformation.aadhar_no || "",
           teacher_image_name:
@@ -1709,7 +1715,7 @@ const EditLeavingCertificate = () => {
                 <input
                   type="text"
                   id="fee_month"
-                  maxLength={50}
+                  // maxLength={50}
                   name="fee_month"
                   value={formData.fee_month}
                   onChange={handleChange}

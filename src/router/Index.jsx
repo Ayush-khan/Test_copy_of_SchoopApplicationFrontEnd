@@ -206,8 +206,11 @@ import EditApproveStationery from "../componants/Stationery/EditApproveStationer
 import ApproveStationery from "../componants/Stationery/ApproveStationery.jsx";
 import ViewBookAvailability from "../componants/View/ViewBookAvailability.jsx";
 import UpdateClasswiseStudentDetails from "../componants/StudentModel/UpdateClaswiseStudenDeails/UpdateClasswiseStudentDetails.jsx";
-import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherMonthlyAttendanceDetailedReport.jsx";
-// import BackgroundChanger from "../Layouts/BackgroundColorSelect/BackgroundChanger.jsx";
+
+// import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherMonthlyAttendanceDetailedReport.jsx";
+
+import HPCSubjectList from "../componants/MastersModule/HPCSubectModule/HPCSubjectList.jsx";
+import HPCSubjectAllotment from "../componants/MastersModule/HPCSubectModule/HPCSubjectAllotment.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -569,6 +572,15 @@ function Index() {
           path="/SubjectAllotmentHSC"
           element={<PrivateRoute element={<SubjectAllotmentHSC />} />}
         />
+        {/* HPCS subject list module */}
+        <Route
+          path="/hpcSubjectList"
+          element={<PrivateRoute element={<HPCSubjectList />} />}
+        />
+        <Route
+          path="/hpcSubjectAllotment"
+          element={<PrivateRoute element={<HPCSubjectAllotment />} />}
+        />
         {/* SubjectForReportCard module */}
         <Route
           path="/subjectforReportcard"
@@ -917,9 +929,7 @@ function Index() {
         <Route
           path="/teacherAttendanceMonthlyReport"
           element={
-            <PrivateRoute
-              element={<TeacherMonthlyAttendanceDetailedReport />}
-            />
+            <PrivateRoute element={<TeacherAttendanceMonthlyReport />} />
           }
         />{" "}
         {/* UpdateClasswiseStudentDetails module */}

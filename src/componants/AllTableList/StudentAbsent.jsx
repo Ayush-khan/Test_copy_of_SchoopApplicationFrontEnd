@@ -1,191 +1,329 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import ReactPaginate from "react-paginate";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { RxCross1 } from "react-icons/rx";
-import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
-// import AllotSubjectTab from "./AllotMarksHeadingTab";
 import Select from "react-select";
-function StudentAbsent() {
-  const API_URL = import.meta.env.VITE_API_URL; // URL for host
-  const [activeTab, setActiveTab] = useState("Manage");
-  const [classes, setClasses] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  const [classIdForManage, setclassIdForManage] = useState("");
-  const [sectionIdForManage, setSectionIdForManage] = useState("");
-  //   For the dropdown of Teachers name api
-  const [countAbsentStudent, setCountAbsentStudents] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageCount, setPageCount] = useState(0);
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
+import { RxCross1 } from "react-icons/rx";
 
-  //   for allot subject checkboxes
-  const [error, setError] = useState(null);
-  const [nameError, setNameError] = useState(null);
-  // for react-search of manage tab teacher Edit and select class
+const StudentAbsent = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedStudentForStudent, setSelectedStudentForStudent] =
+    useState(null);
+  const [classesforForm, setClassesforForm] = useState([]);
+  const [classIdForSearch, setClassIdForSearch] = useState(null);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [nameError, setNameError] = useState("");
+  const [nameErrorForClass, setNameErrorForClass] = useState("");
+  const [nameErrorForStudent, setNameErrorForStudent] = useState("");
+  const [nameErrorForClassForStudent, setNameErrorForClassForStudent] =
+    useState("");
   const [selectedClass, setSelectedClass] = useState(null);
-  // for Edit model
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedClassForStudent, setSelectedClassForStudent] = useState(null);
+  const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
-  const previousPageRef = useRef(0);
-  const prevSearchTermRef = useRef("");
+  const [loadingForSearch, setLoadingForSearch] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("installment");
+  const [message, setMessage] = useState("");
+
+  const maxCharacters = 150;
 
   const navigate = useNavigate();
-  const pageSize = 10;
-  useEffect(() => {
-    fetchClassNames();
-    handleSearch();
-  }, []);
-  const classOptions = classes.map((cls) => ({
-    value: `${cls?.get_class?.name}-${cls.name}`,
-    label: `${cls?.get_class?.name} ${cls.name}`,
-    class_id: cls.class_id,
-    section_id: cls.section_id,
-  }));
 
-  const handleClassSelect = (selectedOption) => {
-    setNameError("");
-    setSelectedClass(selectedOption);
+  // for form
+  const [errors, setErrors] = useState({});
+  const [backendErrors, setBackendErrors] = useState({});
+  const [loadingClasses, setLoadingClasses] = useState(false);
+  const [loadingStudents, setLoadingStudents] = useState(false);
 
-    if (selectedOption) {
-      setclassIdForManage(selectedOption.class_id);
-      setSectionIdForManage(selectedOption.section_id);
-    } else {
-      setclassIdForManage(" ");
-      setSectionIdForManage(" ");
-    }
-    console.log("setSelectedClass", selectedClass);
-    console.log("setclassIdForManage", classIdForManage);
-    console.log("setSectionIdForManage", sectionIdForManage);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // format YYYY-MM-DD
+  });
+
+  // const [selectedInstallment, setSelectedInstallment] = useState({
+  //   value: 75,
+  //   label: "75%",
+  // });
+
+  const toTitleCase = (str = "") => {
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   };
 
-  const fetchClassNames = async () => {
+  useEffect(() => {
+    // Fetch both classes and student names on component mount
+    fetchInitialDataAndStudents();
+  }, []);
+
+  const fetchInitialDataAndStudents = async () => {
     try {
+      setLoadingClasses(true);
+      setLoadingStudents(true);
+
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_class_section`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (Array.isArray(response.data)) {
-        setClasses(response.data);
-        console.log("the name and section", response.data);
-      } else {
-        setError("Unexpected data format");
-      }
+
+      // Fetch classes and students concurrently
+      const [classResponse] = await Promise.all([
+        axios.get(`${API_URL}/api/sections `, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+      console.log("data of names of class", classResponse.data);
+
+      setClassesforForm(classResponse.data || []);
     } catch (error) {
-      console.error("Error fetching class and section names:", error);
-      setError("Error fetching class and section names");
+      toast.error("Error fetching Class data.");
+    } finally {
+      // Stop loading for both dropdowns
+      setLoadingClasses(false);
+      setLoadingStudents(false);
+    }
+  };
+
+  const handleClassSelect = (selectedOption) => {
+    console.log("selectedoption", selectedOption?.key);
+    setNameErrorForClass("");
+    setSelectedClass(selectedOption);
+    setSelectedStudent(null);
+    setSelectedStudentId(null);
+    setClassIdForSearch(selectedOption?.key);
+  };
+
+  // Dropdown options
+  const classOptions = useMemo(
+    () =>
+      classesforForm.map((cls) => ({
+        value: cls.department_id,
+        label: `${cls.name}`,
+
+        key: `${cls.department_id}`,
+      })),
+    [classesforForm]
+  );
+
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  console.log("seletedStudents[]", selectedStudents);
+
+  // utility: generate percentage options
+  // const getInstallmentOptions = () => {
+  //   const options = [];
+  //   for (let i = 60; i <= 100; i += 5) {
+  //     options.push({ value: i, label: `${i}%` });
+  //   }
+  //   return options;
+  // };
+
+  const getInstallmentOptions = () =>
+    Array.from({ length: 9 }, (_, i) => {
+      const value = 60 + i * 5; // 60, 65, 70, ... 100
+      return { value, label: `${value}%` };
+    });
+
+  // generate options once
+  const installmentOptions = getInstallmentOptions();
+
+  // set default value to 75% from the same list
+  const [selectedInstallment, setSelectedInstallment] = useState(
+    installmentOptions.find((opt) => opt.value === 75) || null
+  );
+
+  useEffect(() => {
+    if (!selectedInstallment) {
+      setSelectedInstallment(
+        installmentOptions.find((opt) => opt.value === 75)
+      );
+    }
+  }, [installmentOptions]);
+
+  const handleSelectAll = () => {
+    setSelectAll(!selectAll);
+
+    if (!selectAll) {
+      // Select only students with at least one parent email
+      const validStudentIds = parentInformation
+        .filter((student) => student?.student_id)
+        .map((student) => student.student_id);
+
+      setSelectedStudents(validStudentIds);
+    } else {
+      // Deselect all students
+      setSelectedStudents([]);
+    }
+  };
+
+  const handleCheckboxChange = (studentId) => {
+    if (selectedStudents.includes(studentId)) {
+      setSelectedStudents(selectedStudents.filter((id) => id !== studentId));
+    } else {
+      setSelectedStudents([...selectedStudents, studentId]);
     }
   };
 
   const handleSearch = async () => {
-    if (isSubmitting) return; // Prevent re-submitting
-    setIsSubmitting(true);
-
-    // if (!classIdForManage) {
-    //   setNameError("Please select the class.");
-    //   setIsSubmitting(false);
-    //   return;
-    // }
+    setNameError("");
     setSearchTerm("");
+    setNameErrorForClass("");
+    setNameErrorForClassForStudent("");
+    setNameErrorForStudent("");
+    setErrors({});
+
+    let hasError = false;
+    if (!selectedClass) {
+      setNameErrorForClass("Please select a section.");
+      hasError = true;
+    }
+
+    if (hasError) return;
+
     try {
+      setParentInformation(null);
+      setSelectedStudentForStudent(null);
+      setSelectedStudentForStudent([]);
+      setSelectedClassForStudent(null);
+      setSelectedClassForStudent([]);
+      setSelectedStudents([]);
+      setSelectAll(false);
+      setLoadingForSearch(true);
+
       const token = localStorage.getItem("authToken");
-      setLoading(true);
+
       const response = await axios.get(
-        `${API_URL}/api/get_absentstudentfortoday`,
+        `${API_URL}/api/get_studentslistattendance`,
         {
           headers: { Authorization: `Bearer ${token}` },
           params: {
-            class_id: classIdForManage,
-            section_id: sectionIdForManage,
+            department_id: classIdForSearch,
+            threshold: selectedInstallment?.value || "%",
+            end_date: selectedDate,
           },
         }
       );
-      console.log(
-        "the response of the AllotMarksHeadingTab is *******",
-        response.data
-      );
-      if (response?.data?.data.absent_student.length > 0) {
-        setSubjects(response?.data?.data.absent_student);
-        setPageCount(
-          Math.ceil(response?.data?.data.absent_student.length / 10)
-        ); // Example pagination logic
-        setCountAbsentStudents(response?.data?.data?.count_absent_student);
+
+      console.log("response of the student absent data", response.data);
+
+      if (response?.data) {
+        setParentInformation(response?.data?.data);
       } else {
-        setSubjects([]);
-        setCountAbsentStudents("");
-        toast.error(
-          `Hooray! No students are absent today in ${selectedClass.label} `
-        );
+        toast.error("No data found for the selected class.");
       }
     } catch (error) {
-      console.error(
-        "Error fetching Bonafied certificates Listing:",
-        error.response.data.message
-      );
-      setError("Error fetching Bonafied certificates");
-      toast.error(error.response.data.message);
+      console.log("error is", error);
+      console.log("error is", error.response);
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
-      setLoading(false);
+      setLoadingForSearch(false);
     }
   };
 
-  const handlePageClick = (data) => {
-    setCurrentPage(data.selected);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    let hasError = false;
+    if (selectedStudents.length === 0) {
+      toast.error(
+        "Please select at least one student to send message to the parents."
+      );
+      hasError = true;
+    }
+    // Exit if there are validation errors
+    if (hasError) return;
+
+    try {
+      setLoading(true); // Start loading
+
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token is found");
+      }
+
+      const postData = {
+        student_id: selectedStudents,
+        message: message,
+      };
+
+      // Make the API call
+      const response = await axios.post(
+        `${API_URL}/api/send_messageforattendance`,
+        postData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Handle successful response
+      if (response.status === 200) {
+        toast.success("Message sended successfully!");
+        setSelectedClass(null);
+        setSelectedInstallment(null);
+        setMessage("");
+
+        setSelectedStudent(null); // Reset student selection
+        setSelectedStudents([]); // Clear selected students
+        setErrors({});
+        setSelectedStudentForStudent(null);
+        setSelectedStudentForStudent([]);
+        setSelectedClassForStudent(null);
+        setSelectedClassForStudent([]);
+        setNameErrorForClassForStudent("");
+        setNameErrorForStudent("");
+        setSelectAll(null);
+        setBackendErrors({});
+        setTimeout(() => {
+          setParentInformation(null);
+        }, 500);
+      }
+    } catch (error) {
+      console.error("Error:", error.response?.data);
+
+      // Display error message
+      toast.error("An error occurred while sending message.");
+
+      if (error.response && error.response.data) {
+        setBackendErrors(error.response.data || {});
+      }
+    } finally {
+      setLoading(false); // Stop loading
+    }
   };
 
-  useEffect(() => {
-    const trimmedSearch = searchTerm.trim().toLowerCase();
+  const filteredParents = parentInformation
+    ? parentInformation.filter((student) => {
+        const searchLower = searchTerm.trim().toLowerCase();
 
-    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
-      previousPageRef.current = currentPage;
-      setCurrentPage(0);
-    }
+        const fullName = `${student.first_name || ""} ${
+          student.mid_name || ""
+        } ${student.last_name || ""}`
+          .toLowerCase()
+          .trim();
 
-    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
-      setCurrentPage(previousPageRef.current);
-    }
+        const className = `${student.classname || ""} ${
+          student.sectionname || ""
+        }`
+          .toLowerCase()
+          .trim();
 
-    prevSearchTermRef.current = trimmedSearch;
-  }, [searchTerm]);
-
-  const searchLower = searchTerm.trim().toLowerCase();
-  const filteredSections = subjects.filter((student) => {
-    const fullName = `${student.first_name} ${student.mid_name || ""} ${
-      student.last_name
-    }`.toLowerCase();
-    const className = student.classname?.toString().toLowerCase() || "";
-    const sectionName = student.sectionname?.toString().toLowerCase() || "";
-
-    return (
-      fullName.includes(searchLower) ||
-      className.includes(searchLower) ||
-      sectionName.includes(searchLower)
-    );
-  });
-
-  //   const filteredSections = subjects.filter((section) => {
-  //     // Convert the teacher's name and subject's name to lowercase for case-insensitive comparison
-  //     const subjectNameIs = section?.stud_name.toLowerCase() || "";
-
-  //     // Check if the search term is present in either the teacher's name or the subject's name
-  //     return subjectNameIs.toLowerCase().includes(searchLower);
-  //   });
-  const displayedSections = filteredSections.slice(
-    currentPage * pageSize,
-    (currentPage + 1) * pageSize
-  );
+        return (
+          fullName.includes(searchLower) || className.includes(searchLower)
+        );
+      })
+    : [];
 
   return (
-    <>
-      {/* <ToastContainer /> */}
-      <div className="md:mx-auto md:w-[65%] p-4 bg-white mt-4 ">
+    <div>
+      <ToastContainer />
+
+      <div className="md:mx-auto md:w-[90%] p-4 bg-white mt-4 ">
         <div className=" card-header  flex justify-between items-center  ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-            Today's Absent Students
+            Student's Attendance Less than 75%
           </h3>
           <RxCross1
             className="float-end relative -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -200,183 +338,331 @@ function StudentAbsent() {
             backgroundColor: "#C03078",
           }}
         ></div>
-
-        <div className="bg-white  rounded-md -mt-5">
-          {activeTab === "Manage" && (
-            <div>
-              <ToastContainer />
-              <div className="mb-4">
-                <div className="   md:w-[85%] relative left-[5%]  md:mt-[7%] ">
-                  <div className="form-group mt-4 w-full md:w-[80%] flex justify-start gap-x-1 md:gap-x-6">
-                    <label
-                      htmlFor="classSection"
-                      className="w-1/4 pt-2 items-center text-center"
-                    >
-                      Select Class
-                    </label>
-                    <div className="w-full">
-                      <Select
-                        value={selectedClass}
-                        onChange={handleClassSelect}
-                        options={classOptions}
-                        placeholder="Class"
-                        isSearchable
-                        isClearable
-                        className=" text-sm w-full md:w-[60%] item-center relative left-0 md:left-4"
-                      />
-                      {nameError && (
-                        <div className=" relative top-0.5 left-3 ml-1 text-danger text-xs">
-                          {nameError}
-                        </div>
-                      )}{" "}
+        <div className="w-full md:container">
+          {/* Search Section */}
+          <div className="w-[90%] ml-6 flex md:flex-row justify-start items-center">
+            <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+              <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
+                <label
+                  className="text-md mt-1.5 mr-1 md:mr-0"
+                  htmlFor="classSelect"
+                >
+                  Section<span className="text-red-500">*</span>
+                </label>
+                <div className="w-full md:w-[57%]">
+                  <Select
+                    id="classSelect"
+                    value={selectedClass}
+                    onChange={handleClassSelect}
+                    options={classOptions}
+                    placeholder={
+                      loadingClasses ? "Loading section..." : "Select"
+                    }
+                    isSearchable
+                    isClearable
+                    className="text-sm"
+                    styles={{
+                      menu: (provided) => ({
+                        ...provided,
+                        zIndex: 1050, // Set your desired z-index value
+                      }),
+                    }}
+                    isDisabled={loadingClasses}
+                  />
+                  {nameErrorForClass && (
+                    <div className="h-8 relative ml-1 text-danger text-xs">
+                      {nameErrorForClass}
                     </div>
-                    <button
-                      onClick={handleSearch}
-                      type="button"
-                      disabled={isSubmitting}
-                      className="btn h-10  w-18 md:w-auto relative  right-0 md:right-[15%] btn-primary"
+                  )}
+                </div>
+              </div>
+
+              <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
+                <label
+                  className="text-md mt-1.5 mr-1 md:mr-0"
+                  htmlFor="installmentSelect"
+                >
+                  Less Than
+                </label>
+                <div className="w-full md:w-[57%]">
+                  <Select
+                    id="installmentSelect"
+                    value={selectedInstallment}
+                    onChange={setSelectedInstallment}
+                    options={installmentOptions}
+                    placeholder="Select"
+                    isSearchable
+                    isClearable
+                    className="text-sm"
+                    styles={{
+                      menu: (provided) => ({
+                        ...provided,
+                        zIndex: 1050,
+                      }),
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
+                <label
+                  className="text-md mt-1.5 mr-1 md:mr-0"
+                  htmlFor="dateSelect"
+                >
+                  By Date
+                </label>
+                <div className="w-full md:w-[57%]">
+                  <input
+                    type="date"
+                    id="dateSelect"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="search"
+                onClick={handleSearch}
+                style={{ backgroundColor: "#2196F3" }}
+                className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                  loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={loadingForSearch}
+              >
+                {loadingForSearch ? (
+                  <span className="flex items-center">
+                    <svg
+                      className="animate-spin h-4 w-4 mr-2 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
                     >
-                      {isSubmitting ? "Searching..." : "Search"}
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      ></path>
+                    </svg>
+                    Loading...
+                  </span>
+                ) : (
+                  "Browse"
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Form Section - Displayed when parentInformation is fetched */}
+          {parentInformation && (
+            <div className="w-full md:container mx-auto py-4 px-4 ">
+              <div className="card mx-auto w-full shadow-lg">
+                <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
+                  <h6 className="text-gray-700 mt-1   text-nowrap">
+                    Select Students
+                  </h6>
+                  <div className="box-border flex md:gap-x-2  ">
+                    <div className=" w-1/2 md:w-fit mr-1">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search"
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className=" relative w-[97%] h-1  mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="card-body w-full ">
+                  <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full mx-auto">
+                    <div className="bg-white rounded-lg shadow-xs">
+                      <table className="min-w-full leading-normal table-auto">
+                        <thead className=" ">
+                          <tr className="bg-gray-200 ">
+                            <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Sr. No
+                            </th>
+                            <th className="px-2 text-center w-full md:w-[4%]  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <input
+                                type="checkbox"
+                                checked={selectAll}
+                                onChange={handleSelectAll}
+                                className="cursor-pointer"
+                              />{" "}
+                              All
+                            </th>
+
+                            <th className="px-2 w-full md:w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Student Name
+                            </th>
+                            <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Class
+                            </th>
+                            <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Attendance
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredParents.length ? (
+                            filteredParents.map((student, index) => (
+                              <tr
+                                key={student.student_id}
+                                className={`${
+                                  index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                                } hover:bg-gray-50`}
+                              >
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                  <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                    {index + 1}
+                                  </p>
+                                </td>
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                  <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedStudents.includes(
+                                        student.student_id
+                                      )}
+                                      onChange={() =>
+                                        handleCheckboxChange(student.student_id)
+                                      }
+                                      className="cursor-pointer"
+                                    />
+                                  </p>
+                                </td>
+
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                  <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                    {toTitleCase(
+                                      `${student.first_name || ""} ${
+                                        student.mid_name || ""
+                                      } ${student.last_name || ""}`
+                                    )}
+                                  </p>
+                                </td>
+
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                  <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                    {student.classname} {student.sectionname}
+                                  </p>
+                                </td>
+
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                  <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                    {student?.attendance_percentage || ""}
+                                    {" %"}
+                                  </p>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                              <div className=" text-center text-xl text-red-700">
+                                Oops! No data found..
+                              </div>
+                            </div>
+                          )}
+                        </tbody>
+                      </table>
+                      {filteredParents.length > 0 && (
+                        <div className="flex flex-col items-center mt-2">
+                          <div className="w-full md:w-[50%]">
+                            {/* Label aligned to start of the box */}
+                            <label className="mb-1 font-normal block text-left">
+                              Dear Parent ,
+                            </label>
+
+                            <div className="relative">
+                              <textarea
+                                value={message}
+                                onChange={(e) => {
+                                  if (e.target.value.length <= maxCharacters) {
+                                    setMessage(e.target.value);
+                                  }
+                                }}
+                                className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none"
+                                placeholder="Enter message"
+                              ></textarea>
+
+                              <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none">
+                                {message.length} / {maxCharacters}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>{" "}
+                  <div className="text-center">
+                    <p className="text-blue-500 font-semibold mt-1">
+                      Selected Students:{" "}
+                      <h6 className=" inline text-pink-600">
+                        {selectedStudents.length}
+                      </h6>
+                    </p>
+                  </div>
+                  <div className="col-span-3 mb-2  text-right">
+                    <button
+                      type="submit"
+                      onClick={handleSubmit}
+                      style={{ backgroundColor: "#2196F3" }}
+                      className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                        loading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <span className="flex items-center">
+                          <svg
+                            className="animate-spin h-4 w-4 mr-2 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            ></path>
+                          </svg>
+                          Sending...
+                        </span>
+                      ) : (
+                        "Send Message"
+                      )}
                     </button>
                   </div>
                 </div>
               </div>
-              {subjects.length > 0 && (
-                <div className="container mt-8">
-                  <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                      <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                        {/* List of Students Absent Today{" "} */}
-                        Today's Absentee List{" "}
-                        <span className="text-[.8em] pb-1 text-blue-500">
-                          {selectedClass?.label
-                            ? `(${selectedClass.label} | Absent: ${countAbsentStudent} Students)`
-                            : `(Total Absent - ${countAbsentStudent})`}
-                        </span>
-                      </h3>
-                      <div className="w-1/2 md:w-fit mr-1 ">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search "
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div
-                      className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                      style={{
-                        backgroundColor: "#C03078",
-                      }}
-                    ></div>
-
-                    <div className="card-body w-full">
-                      <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-                        <table className="min-w-full leading-normal table-auto">
-                          <thead>
-                            <tr className="bg-gray-200">
-                              <th className="px-2 text-center w-full md:w-[10%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Sr.No
-                              </th>
-                              <th className="px-2 text-center   lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Student Name
-                              </th>
-                              <th className="px-2  text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Class
-                              </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Section
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {loading ? (
-                              <tr>
-                                <td
-                                  colSpan="4"
-                                  className="text-center py-6 text-blue-700"
-                                >
-                                  <div className="flex justify-center items-center h-64">
-                                    <LoaderStyle />
-                                  </div>{" "}
-                                </td>
-                              </tr>
-                            ) : displayedSections.length ? (
-                              displayedSections.map((classItem, index) => (
-                                <tr
-                                  key={index}
-                                  className={`${
-                                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                                  } hover:bg-gray-50`}
-                                >
-                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                      {currentPage * pageSize + index + 1}
-                                    </p>
-                                  </td>
-                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                      {classItem.first_name}{" "}
-                                      {classItem.mid_name || ""}{" "}
-                                      {classItem.last_name}
-                                    </p>
-                                  </td>
-                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                      {classItem.classname}
-                                    </p>
-                                  </td>
-                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                      {classItem.sectionname}
-                                    </p>
-                                  </td>
-                                </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td
-                                  colSpan="4"
-                                  className="text-center py-6 text-red-700"
-                                >
-                                  Oops! No data found...
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                      <div className=" flex justify-center pt-2 -mb-3">
-                        <ReactPaginate
-                          previousLabel={"Previous"}
-                          nextLabel={"Next"}
-                          breakLabel={"..."}
-                          pageCount={pageCount}
-                          onPageChange={handlePageClick}
-                          marginPagesDisplayed={1}
-                          pageRangeDisplayed={1}
-                          containerClassName={"pagination"}
-                          pageClassName={"page-item"}
-                          pageLinkClassName={"page-link"}
-                          previousClassName={"page-item"}
-                          previousLinkClassName={"page-link"}
-                          nextClassName={"page-item"}
-                          nextLinkClassName={"page-link"}
-                          breakClassName={"page-item"}
-                          breakLinkClassName={"page-link"}
-                          activeClassName={"active"}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
       </div>
-    </>
+    </div>
   );
-}
+};
 
 export default StudentAbsent;
