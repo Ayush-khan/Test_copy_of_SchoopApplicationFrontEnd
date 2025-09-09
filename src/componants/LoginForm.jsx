@@ -9,6 +9,10 @@ import styles from "../CSS/LoginForm.module.css";
 const LoginForm = ({ userId }) => {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
   const [roleName, setRoleName] = useState("");
+  const [appLinks, setAppLinks] = useState([]);
+  // const [appLinks, setAppLinks] = useState([]);
+  const [currentRoleId, setCurrentRoleId] = useState("");
+
   const [email, setEmail] = useState(userId || "");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
@@ -41,7 +45,65 @@ const LoginForm = ({ userId }) => {
   useEffect(() => {
     fetchUserRole();
   }, []);
+  const roleNameMap = {
+    A: "Admin",
+    B: "Bus",
+    E: "Data Entry",
+    F: "Finance",
+    L: "Librarian",
+    M: "Management",
+    N: "Printer",
+    O: "Owner",
+    P: "Parent",
+    R: "AceVentura Support",
+    S: "Student",
+    T: "Teacher",
+    U: "AceVentura",
+    X: "Support Staff",
+    Y: "Security",
+    CC: "Curriculum Coordinator",
+    MA: "Main Admin",
+    TM: "Timetable Planner",
+  };
 
+  // const fetchUserRole = async () => {
+  //   const sortNameCookie = getCookie("short_name");
+
+  //   try {
+  //     const response = await axios.get(`${API_URL}/api/get_roleofuser`, {
+  //       params: {
+  //         short_name: sortNameCookie,
+  //         user_id: userId,
+  //       },
+  //     });
+
+  //     const roleId = response.data?.data?.[0]?.role_id;
+
+  //     if (roleId) {
+  //       setRoleName(roleId); // or setRoleId
+
+  //       // Prepare FormData
+  //       const formData = new FormData();
+  //       formData.append("role_id", roleId);
+
+  //       // Second API call: POST with role_id
+  //       const postResponse = await axios.post(
+  //         `https://api.aceventura.in/demo/evolvuUserService/get_app_urls`,
+  //         formData,
+  //         {
+  //           headers: {
+  //             "Content-Type": "multipart/form-data",
+  //           },
+  //         }
+  //       );
+
+  //       console.log("Second API response (POST):", postResponse.data);
+  //       // Do something with postResponse if needed
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching user role:", error);
+  //   }
+  // };
   const fetchUserRole = async () => {
     const sortNameCookie = getCookie("short_name");
 
@@ -56,13 +118,13 @@ const LoginForm = ({ userId }) => {
       const roleId = response.data?.data?.[0]?.role_id;
 
       if (roleId) {
-        setRoleName(roleId); // or setRoleId
+        setCurrentRoleId(roleId);
+        const roleLabel = roleNameMap[roleId] || "User";
+        setRoleName(roleLabel);
 
-        // Prepare FormData
         const formData = new FormData();
         formData.append("role_id", roleId);
 
-        // Second API call: POST with role_id
         const postResponse = await axios.post(
           `https://api.aceventura.in/demo/evolvuUserService/get_app_urls`,
           formData,
@@ -73,11 +135,12 @@ const LoginForm = ({ userId }) => {
           }
         );
 
-        console.log("Second API response (POST):", postResponse.data);
-        // Do something with postResponse if needed
+        const apps = postResponse?.data?.data || [];
+        const filteredApps = apps.filter((app) => app.role_id === roleId);
+        setAppLinks(filteredApps);
       }
     } catch (error) {
-      console.error("Error fetching user role:", error);
+      console.error("Error fetching user role or app URLs:", error);
     }
   };
 
@@ -270,6 +333,35 @@ const LoginForm = ({ userId }) => {
         </div>
         <div className={styles.formFooter}></div>
       </form>
+
+      {/* ✅ App download links section */}
+      {appLinks.length > 0 && (
+        <div className="text-center">
+          <h6 className="text-md font-semibold mb-2">
+            {roleName} app now available in <span>🙂</span>
+          </h6>
+          <div className="flex justify-center gap-4 mt-2">
+            {appLinks.map((app) => (
+              <a
+                key={app.app_id}
+                href={app.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  src={
+                    app.type === "android"
+                      ? "https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+                      : "https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+                  }
+                  alt={`${roleName} ${app.type} app`}
+                  className="h-10"
+                />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
