@@ -212,6 +212,9 @@ import UpdateClasswiseStudentDetails from "../componants/StudentModel/UpdateClas
 import HPCSubjectList from "../componants/MastersModule/HPCSubectModule/HPCSubjectList.jsx";
 import HPCSubjectAllotment from "../componants/MastersModule/HPCSubectModule/HPCSubjectAllotment.jsx";
 
+import TeacherMonthlyAttendanceDetailedReport from "../componants/Reports/TeacherMonthlyAttendanceDetailedReport.jsx";
+// import BackgroundChanger from "../Layouts/BackgroundColorSelect/BackgroundChanger.jsx";
+
 // import Menus from "../c";
 function Index() {
   return (

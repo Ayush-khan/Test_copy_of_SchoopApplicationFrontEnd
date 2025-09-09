@@ -622,17 +622,6 @@ function NonTeachingStaff() {
                                 {student.teachercategoryname}
                               </p>
                             </td>
-                            <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
-                              <p
-                                className={`whitespace-no-wrap relative top-2 ${
-                                  student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
-                                }`}
-                              >
-                                {student.teachercategoryname}
-                              </p>
-                            </td>
 
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p

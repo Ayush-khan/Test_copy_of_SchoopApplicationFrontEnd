@@ -11,7 +11,7 @@ const ForgotPassword = () => {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
   const [userId, setUserId] = useState("");
   const [newPasswordLoading, setNewPasswordLoading] = useState(false);
-
+  const [logoUrl, setLogoUrl] = useState("");
   const [schoolInfo, setSchoolInfo] = useState({});
   const [motherName, setMotherName] = useState("");
   const [dob, setDob] = useState("");
@@ -43,7 +43,12 @@ const ForgotPassword = () => {
       "November",
       "December",
     ];
-
+    const getCookie = (name) => {
+      const cookieValue = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(name + "="));
+      return cookieValue ? cookieValue.split("=")[1] : null;
+    };
     const today = new Date();
     const day = String(today.getDate()).padStart(2, "0");
     const monthIndex = today.getMonth();
@@ -55,7 +60,23 @@ const ForgotPassword = () => {
   }
   useEffect(() => {
     fetchSchoolName();
+    fetchSchoolImages();
   }, []);
+  const fetchSchoolImages = async () => {
+    const sortNameCookie = getCookie("short_name");
+
+    try {
+      const response = await axios.get(`${API_URL}/api/get_backgroundimage`, {
+        params: { short_name: sortNameCookie },
+      });
+
+      const { logo } = response.data?.data || {};
+      setLogoUrl(logo || "");
+      // setSchoolImageUrl(school_image || "");
+    } catch (error) {
+      console.error("Error fetching logo and background image:", error);
+    }
+  };
   // 🍪 Helper to get cookie
   const getCookie = (name) => {
     const match = document.cookie.match(
@@ -208,7 +229,7 @@ const ForgotPassword = () => {
             {" "}
             <div className="w-full flex justify-between items-center px-2">
               <img
-                src="/ArnoldsLogo.png"
+                src={logoUrl}
                 alt="Logo"
                 className="h-10 bg-transparent"
                 style={{ fontSize: "2em" }}

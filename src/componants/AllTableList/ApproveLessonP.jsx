@@ -758,6 +758,7 @@ const ApproveLessonP = () => {
         }`}
       >
         <ToastContainer />
+<<<<<<< HEAD
         <div className="card pb-4  rounded-md ">
           {!showStudentReport && (
             <>
@@ -769,6 +770,159 @@ const ApproveLessonP = () => {
                   className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                   onClick={() => setShowStudentReport(false)}
                 />
+=======
+        <div className="card p-2 rounded-md ">
+          <div className=" card-header mb-4 flex justify-between items-center ">
+            <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+              Approve Lesson Plan
+            </h5>
+            <RxCross1
+              className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+              onClick={() => {
+                navigate("/dashboard");
+              }}
+            />
+          </div>
+          <div
+            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+            style={{
+              backgroundColor: "#C03078",
+            }}
+          ></div>
+
+          <>
+            <div
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
+                timetable.length > 0
+                  ? "pb-0 w-full md:w-[99%]"
+                  : "pb-4 w-full md:w-[80%]"
+              }`}
+            >
+              {/* <div className=" w-full md:w-[95%] flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2"> */}
+              <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
+                <div className="w-full md:w-[85%] gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                  {/* Staff Dropdown */}
+                  <div className="w-full  md:w-[50%] gap-x-3 justify-around my-1 md:my-4 flex md:flex-row">
+                    <label
+                      className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
+                      htmlFor="studentSelect"
+                    >
+                      Teacher <span className="text-red-500">*</span>
+                    </label>
+                    <div className="w-full md:w-[65%]">
+                      <Select
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        id="studentSelect"
+                        value={selectedStudent}
+                        onChange={handleStudentSelect}
+                        options={studentOptions}
+                        placeholder={loadingExams ? "Loading..." : "Select"}
+                        isSearchable
+                        isClearable
+                        className="text-sm"
+                        isDisabled={loadingExams}
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            fontSize: ".9em", // Adjust font size for selected value
+                            minHeight: "30px", // Reduce height
+                          }),
+                          menu: (provided) => ({
+                            ...provided,
+                            fontSize: "1em", // Adjust font size for dropdown options
+                          }),
+                          option: (provided) => ({
+                            ...provided,
+                            fontSize: ".9em", // Adjust font size for each option
+                          }),
+                        }}
+                      />
+                      {studentError && (
+                        <div className="h-8 relative ml-1 text-danger text-xs">
+                          {studentError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="w-full md:w-[50%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
+                    <label
+                      className="ml-0 md:ml-4 w-full md:w-[80%] text-md mt-1.5"
+                      htmlFor="fromDate"
+                    >
+                      Select Week{" "}
+                      {/* <span className="text-sm text-red-500">*</span> */}
+                    </label>
+                    <div className="w-full">
+                      <div
+                        className="text-sm text-gray-700 mt-0.5 border border-gray-300 p-2 rounded cursor-pointer"
+                        onClick={openDatePicker}
+                      >
+                        {weekRange || (
+                          <FaRegCalendarAlt className="text-pink-500" />
+                        )}
+                      </div>
+
+                      {weekError && (
+                        <div className="relative ml-1 text-danger text-xs">
+                          {weekError}
+                        </div>
+                      )}
+
+                      <DatePicker
+                        ref={datePickerRef}
+                        selected={fromDate}
+                        onChange={handleDateChange}
+                        dateFormat="dd-MM-yyyy"
+                        minDate={minDate}
+                        maxDate={maxDate}
+                        className="outline-none relative -top-10 text-sm w-[1px] h-[1px] bg-white"
+                      />
+                    </div>
+                  </div>
+                  {/* Browse Button */}
+                  <div className="mt-1">
+                    <button
+                      type="search"
+                      onClick={handleSearch}
+                      style={{ backgroundColor: "#2196F3" }}
+                      className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                        loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                      disabled={loadingForSearch}
+                    >
+                      {loadingForSearch ? (
+                        <span className="flex items-center">
+                          <svg
+                            className="animate-spin h-4 w-4 mr-2 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            ></path>
+                          </svg>
+                          Browsing...
+                        </span>
+                      ) : (
+                        "Browse"
+                      )}
+                    </button>
+                  </div>
+                </div>
+>>>>>>> feature
               </div>
               <div
                 className=" relative w-[97%]   -top-6 h-1  mx-auto bg-red-700"
@@ -896,6 +1050,7 @@ const ApproveLessonP = () => {
                             )}
                           </div>
 
+<<<<<<< HEAD
                           {weekRange && (
                             <button
                               onClick={(e) => {
@@ -929,6 +1084,9 @@ const ApproveLessonP = () => {
 
                     {/* Browse Button */}
                     <div className="mt-1">
+=======
+                    <div className="flex justify-end gap-4 pr-3 mb-4 mr-10">
+>>>>>>> feature
                       <button
                         type="search"
                         onClick={handleSearch}
