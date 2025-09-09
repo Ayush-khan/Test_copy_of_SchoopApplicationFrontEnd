@@ -73,6 +73,7 @@ function Event() {
   const [showUploadSection, setShowUploadSection] = useState(false);
   const [eventData, setEventData] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [loadingEvent, setLoadingEvent] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -253,7 +254,7 @@ function Event() {
   };
 
   const fetchEvents = async () => {
-    setLoading(true);
+    setLoadingEvent(true);
     setLoadingForSearch(true);
     try {
       const token = localStorage.getItem("authToken");
@@ -273,14 +274,14 @@ function Event() {
         setDateLimits(getDateLimits(academicYear));
       }
 
-      console.log("holidays", response.data.data);
+      console.log("events", response.data.data);
       setHolidays(response.data.data || []);
       setPageCount(Math.ceil((response.data.data?.length || 0) / pageSize));
     } catch (error) {
       console.error("Fetch error:", error);
       toast.error("Error fetching events data.");
     } finally {
-      setLoading(false);
+      setLoadingEvent(false);
       setLoadingForSearch(false);
     }
   };
@@ -338,29 +339,63 @@ function Event() {
       return;
     }
 
+    // Find all unpublished events only
+    const unpublishedHolidayIds = holidays
+      .filter((holiday) => holiday.publish === "N")
+      .map((holiday) => holiday.unq_id);
+
+    if (unpublishedHolidayIds.length === 0) {
+      toast.warning("No unpublished events available for publish.");
+      setSelectAll(false); // ✅ make sure checkbox stays unchecked
+      setSelectedHolidays([]);
+      return;
+    }
+
     setSelectAll((prev) => {
       const newSelectAll = !prev;
 
       if (newSelectAll) {
-        // Only select events that are not yet published
-        const unpublishedHolidayIds = holidays
-          .filter((holiday) => holiday.publish === "N")
-          .map((holiday) => holiday.unq_id);
-
-        if (unpublishedHolidayIds.length === 0) {
-          toast.warning("No events available for publish.");
-        }
-
+        // ✅ Only unpublished IDs will be selected
         setSelectedHolidays(unpublishedHolidayIds);
         console.log("allUnpublishedEvents", unpublishedHolidayIds);
       } else {
-        // Deselect all events
+        // Deselect all
         setSelectedHolidays([]);
       }
 
       return newSelectAll;
     });
   };
+
+  // const handleSelectAll = () => {
+  //   if (!holidays || holidays.length === 0) {
+  //     toast.warning("No events available to select.");
+  //     return;
+  //   }
+
+  //   setSelectAll((prev) => {
+  //     const newSelectAll = !prev;
+
+  //     if (newSelectAll) {
+  //       // Only select events that are not yet published
+  //       const unpublishedHolidayIds = holidays
+  //         .filter((holiday) => holiday.publish === "N")
+  //         .map((holiday) => holiday.unq_id);
+
+  //       if (unpublishedHolidayIds.length === 0) {
+  //         toast.warning("No events available for publish.");
+  //       }
+
+  //       setSelectedHolidays(unpublishedHolidayIds);
+  //       console.log("allUnpublishedEvents", unpublishedHolidayIds);
+  //     } else {
+  //       // Deselect all events
+  //       setSelectedHolidays([]);
+  //     }
+
+  //     return newSelectAll;
+  //   });
+  // };
 
   const handleCheckboxChange = (holidayId) => {
     if (selectedHolidays.includes(holidayId)) {
@@ -449,6 +484,7 @@ function Event() {
     try {
       const formData = new FormData();
       selectedHolidays.forEach((id) => formData.append("checkbxuniqid[]", id));
+      console.log("selectedHolidys", selectedHolidays);
 
       const response = await axios.post(
         `${API_URL}/api/update_publishevent`,
@@ -619,14 +655,6 @@ function Event() {
     document.body.removeChild(link); // Cleanup after download
   };
 
-  // Handle file selection
-  // const handleFileChange = (event) => {
-  //   const file = event.target.files[0];
-  //   setSelectedFile(file); // Set the selected file to state
-  //   setErrorMessage(""); // Clear any previous error
-  //   setUploadStatus(""); // Clear any previous success
-  //   setErrorMessageUrl("");
-  // };
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -856,10 +884,31 @@ function Event() {
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
 
+  // useEffect(() => {
+  //   const filtered = (Array.isArray(holidays) ? holidays : [])
+  //     .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+  //     .filter((holiday) => {
+  //       if (!searchTerm) return true;
+
+  //       const searchLower = searchTerm.toLowerCase().trim();
+  //       const holidayName = holiday?.title?.toLowerCase().trim() || "";
+  //       const holidayStartDate =
+  //         holiday?.start_date?.toLowerCase().trim() || "";
+  //       const createdBy = holiday?.created_by_name?.toLowerCase().trim() || "";
+
+  //       return (
+  //         holidayName.includes(searchLower) ||
+  //         holidayStartDate.includes(searchLower) ||
+  //         createdBy.includes(searchLower)
+  //       );
+  //     });
+
+  //   setFilteredSections(filtered);
+  // }, [holidays, searchTerm]);
+
   useEffect(() => {
-    const filtered = (Array.isArray(holidays) ? holidays : [])
-      .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
-      .filter((holiday) => {
+    const filtered = (Array.isArray(holidays) ? holidays : []).filter(
+      (holiday) => {
         if (!searchTerm) return true;
 
         const searchLower = searchTerm.toLowerCase().trim();
@@ -873,11 +922,13 @@ function Event() {
           holidayStartDate.includes(searchLower) ||
           createdBy.includes(searchLower)
         );
-      });
+      }
+    );
 
     setFilteredSections(filtered);
   }, [holidays, searchTerm]);
 
+  console.log("filtered events", filteredSections);
   useEffect(() => {
     setPageCount(Math.ceil(filteredSections.length / pageSize));
   }, [filteredSections, pageSize]);
@@ -1376,7 +1427,7 @@ function Event() {
                         )}
                       </tbody> */}
                       <tbody>
-                        {loading ? (
+                        {loadingEvent ? (
                           <div className="absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                             <div className=" text-center text-xl text-blue-700">
                               Please Wait While Data is Loading...
@@ -1385,9 +1436,8 @@ function Event() {
                         ) : displayedSections.length ? (
                           displayedSections.map((holiday, index) => (
                             <tr
-                              key={holiday.unq_id}
+                              key={holiday.latest_event_id}
                               className="text-sm"
-                              // onClick={() => handlePublish(holiday.holiday_id)}
                             >
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {currentPage * pageSize + index + 1}
