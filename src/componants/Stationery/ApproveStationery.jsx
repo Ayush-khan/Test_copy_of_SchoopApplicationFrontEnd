@@ -1,11 +1,12 @@
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 
@@ -71,6 +72,13 @@ function ApproveStatoinery() {
     setCurrentLeave(null);
   };
 
+  // const handleSubmitEdit = (stationery) => {
+  //   console.log("this is the inside handle submit", stationery.requisition_id);
+  //   navigate(`/approveStationery/edit/${stationery.requisition_id}`, {
+  //     state: { allstationery: stationery },
+  //   });
+  // };
+
   const handleSubmitEdit = (stationery) => {
     localStorage.setItem("editStationery", JSON.stringify(stationery));
     navigate(`/approveStationery/edit/${stationery.requisition_id}`, {
@@ -123,6 +131,15 @@ function ApproveStatoinery() {
     return `${day}-${month}-${year}`;
   };
 
+  // utility function
+  const toTitleCase = (str = "") => {
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
 
@@ -138,41 +155,23 @@ function ApproveStatoinery() {
     prevSearchTermRef.current = trimmedSearch;
   }, [searchTerm]);
 
-  // const filteredStaffs = Array.isArray(staffs)
-  //   ? staffs.filter((leave) => {
-  //       const search = String(searchTerm).trim().toLowerCase();
-  //       return (
-  //         String(leave.teacher_name).toLowerCase().includes(search) ||
-  //         String(leave.stationery_name).toLowerCase().includes(search) ||
-  //         String(formatDate(leave.date)).toLowerCase().includes(search) ||
-  //         String(formatDate(leave.approved_date))
-  //           .toLowerCase()
-  //           .includes(search) || // Leave End Date
-  //         String(leave.quantity).toLowerCase().includes(search) ||
-  //         String(leave.status).toLowerCase().includes(search) ||
-  //         String(leave.requisition_id).toLowerCase().includes(search)
-  //       );
-  //     })
-  //   : [];
-  const filteredStaffs = useMemo(() => {
-    if (!Array.isArray(staffs)) return [];
+  const filteredStaffs = Array.isArray(staffs)
+    ? staffs.filter((leave) => {
+        const search = String(searchTerm).trim().toLowerCase();
+        return (
+          String(leave.teacher_name).toLowerCase().includes(search) ||
+          String(leave.stationery_name).toLowerCase().includes(search) ||
+          String(formatDate(leave.date)).toLowerCase().includes(search) ||
+          String(formatDate(leave.approved_date))
+            .toLowerCase()
+            .includes(search) || // Leave End Date
+          String(leave.quantity).toLowerCase().includes(search) ||
+          String(leave.status).toLowerCase().includes(search) ||
+          String(leave.requisition_id).toLowerCase().includes(search)
+        );
+      })
+    : [];
 
-    const search = String(searchTerm).trim().toLowerCase();
-
-    return staffs.filter((leave) => {
-      return (
-        String(leave.teacher_name).toLowerCase().includes(search) ||
-        String(leave.stationery_name).toLowerCase().includes(search) ||
-        String(formatDate(leave.date)).toLowerCase().includes(search) ||
-        String(formatDate(leave.approved_date))
-          .toLowerCase()
-          .includes(search) ||
-        String(leave.quantity).toLowerCase().includes(search) ||
-        String(leave.status).toLowerCase().includes(search) ||
-        String(leave.requisition_id).toLowerCase().includes(search)
-      );
-    });
-  }, [staffs, searchTerm]);
   console.log("filetred staff leave", filteredStaffs);
 
   useEffect(() => {
@@ -193,7 +192,7 @@ function ApproveStatoinery() {
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Approve Stationery
             </h3>
-            <div className="box-border flex gap-x-3 justify-end md:h-10 ml-2">
+            <div className="box-border flex md:gap-x-2 justify-end md:h-10 ml-2">
               <div className=" w-1/2 md:w-fit mr-1">
                 <input
                   type="text"
@@ -203,7 +202,7 @@ function ApproveStatoinery() {
                 />
               </div>
               <RxCross1
-                className=" text-xl md:text-2xl float-end relative right-2  top-2 text-red-600 hover:cursor-pointer hover:bg-red-100"
+                className="float-end relative right-2 text-base top-2 text-red-600 hover:cursor-pointer hover:bg-red-100"
                 onClick={() => {
                   navigate("/dashboard");
                 }}
@@ -239,7 +238,7 @@ function ApproveStatoinery() {
                         Raised By
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Edit
+                        Options
                       </th>
                     </tr>
                   </thead>
@@ -258,40 +257,46 @@ function ApproveStatoinery() {
                             index % 2 === 0 ? "bg-white" : "bg-gray-100"
                           } hover:bg-gray-50`}
                         >
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          <td className="text-center px-2 lg:px-3 py-1 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {currentPage * pageSize + index + 1}
                             </p>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          <td className="text-center px-2 lg:px-3 py-1 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {leave.requisition_id}
                             </p>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          <td className="text-center px-2 lg:px-3 py-1 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {leave.stationery_name}
                             </p>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          <td className="text-center px-2 lg:px-3 py-1 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {leave.approved_date === "0000-00-00"
                                 ? " "
                                 : formatDate(leave.date)}
                             </p>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                          <td className="text-center px-2 lg:px-3 py-1 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {leave.teacher_name}
+                              {toTitleCase(leave.teacher_name)}
                             </p>
                           </td>
 
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
+                          <td className="text-center px-2 lg:px-3 py-1 border border-gray-950 text-sm">
+                            {/* <button
                               className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                               onClick={() => handleSubmitEdit(leave)}
                             >
                               <FontAwesomeIcon icon={faEdit} />
+                            </button> */}
+                            <button
+                              className="bg-green-600 text-white px-1 py-1 rounded hover:bg-green-700"
+                              onClick={() => handleSubmitEdit(leave)}
+                            >
+                              View Details
                             </button>
                           </td>
                         </tr>

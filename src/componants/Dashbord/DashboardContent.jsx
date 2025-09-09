@@ -430,7 +430,7 @@ const DashboardContent = () => {
               <div className="relative top-3 h-10 bg-gray-300 rounded w-1/3"></div>
             </div>
           ) : roleId === "M" ? (
-            <Link to="/approveLessonP" className="no-underline">
+            <Link to="#" className="no-underline">
               <Card
                 title="Approve Lesson Plans"
                 value={approvedLessonPlaneCount}

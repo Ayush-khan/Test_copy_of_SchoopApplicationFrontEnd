@@ -519,6 +519,9 @@ function Sections() {
                         <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Section name
                         </th>
+                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Classes
+                        </th>
 
                         {roleId === "U" && (
                           <>
@@ -558,6 +561,11 @@ function Sections() {
                             <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                               <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                 {section?.name}
+                              </p>
+                            </td>
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                {section?.class_names}
                               </p>
                             </td>
                             {roleId === "U" && (
