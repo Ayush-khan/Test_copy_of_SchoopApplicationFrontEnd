@@ -1,0 +1,1295 @@
+import { useState, useEffect, useMemo } from "react";
+import axios from "axios";
+import Select from "react-select";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
+import { RxCross1 } from "react-icons/rx";
+
+const Domain = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingForSearch, setLoadingForSearch] = useState(false);
+
+  const navigate = useNavigate();
+  const [loadingExams, setLoadingExams] = useState(false);
+  const [studentError, setStudentError] = useState("");
+  const [termError, setTermError] = useState("");
+  const [domainError, setDomainError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [termsOptions, setTermsOptions] = useState([]);
+  const [selectedTerms, setSelectedTerms] = useState(null);
+  const [loadingTermsData, setLoadingTermsData] = useState(false);
+
+  const [timetable, setTimetable] = useState([]);
+
+  const pageSize = 10;
+  const [pageCount, setPageCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [roleId, setRoleId] = useState("");
+  const [regId, setRegId] = useState("");
+
+  const [domain, setDomain] = useState([]);
+  const [selectedDomain, setSelectedDomain] = useState(null);
+  const [selectedDomainId, setSelectedDomainId] = useState(null);
+  const [selectedSectionId, setSelectedSectionId] = useState(null);
+  const [selectedRecords, setSelectedRecords] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isUnPublishing, setIsUnPublishing] = useState(false);
+  const [showStudentReport, setShowStudentReport] = useState(false);
+  const [checkPublish, setCheckPublish] = useState("");
+
+  useEffect(() => {
+    fetchDataRoleId();
+    fetchtermsByClassId();
+  }, []);
+
+  useEffect(() => {
+    if (!roleId || !regId) return; // guard against empty
+    fetchClasses(roleId, regId);
+  }, [roleId, regId]);
+
+  useEffect(() => {
+    if (selectedStudentId) {
+      console.log("Triggering fetchDomain with class_id:", selectedStudentId);
+      fetchDomain(selectedStudentId);
+    }
+  }, [selectedStudentId]);
+
+  const fetchClasses = async (roleId, regId) => {
+    const token = localStorage.getItem("authToken");
+    setLoadingExams(true);
+
+    try {
+      if (roleId === "T") {
+        const response = await axios.get(
+          `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const mappedData = (response.data.data || [])
+          .filter((item) => item.is_class_teacher === 1)
+          .map((cls) => ({
+            value: cls.class_id,
+            class_id: cls.class_id,
+            section_id: cls.section_id,
+            classname: cls.classname,
+            sectionname: cls.sectionname,
+            label: `${cls.classname} ${cls.sectionname}`,
+          }));
+
+        setStudentNameWithClassId(mappedData || []);
+
+        setStudentNameWithClassId(mappedData || []);
+      } else {
+        const response = await axios.get(`${API_URL}/api/g`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setStudentNameWithClassId(response?.data || []);
+      }
+    } catch (error) {
+      toast.error("Error fetching Classes");
+      console.error("Error fetching Classes:", error);
+    } finally {
+      setLoadingExams(false);
+    }
+  };
+
+  const fetchtermsByClassId = async () => {
+    const token = localStorage.getItem("authToken");
+    try {
+      const response = await axios.get(`${API_URL}/api/get_Term`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const mappedExams =
+        response?.data?.map((exam) => ({
+          label: exam.name,
+          value: exam?.term_id,
+        })) || [];
+
+      setTermsOptions(mappedExams);
+    } catch (err) {
+      console.error("Error fetching exams:", err);
+    } finally {
+      setLoadingTermsData(false);
+    }
+  };
+
+  const studentOptions = useMemo(() => {
+    if (!studentNameWithClassId) return [];
+
+    return studentNameWithClassId.map((cls) => {
+      if (roleId === "T") {
+        return {
+          value: cls.class_id, // ✅ class_id
+          section_id: cls.section_id, // ✅ section_id
+          classname: cls.classname,
+          sectionname: cls.sectionname,
+          label: `${cls.classname} ${cls.sectionname}`,
+        };
+      } else {
+        return {
+          value: cls.class_id,
+          section_id: cls.section_id,
+          classname: cls.get_class?.name,
+          sectionname: cls.name,
+          label: `${cls.get_class?.name} ${cls.name}`,
+        };
+      }
+    });
+  }, [studentNameWithClassId, roleId]);
+
+  const handleStudentSelect = (selectedOption) => {
+    setStudentError("");
+    setSelectedStudent(selectedOption);
+
+    setSelectedStudentId(selectedOption?.value); // class_id
+    setSelectedSectionId(selectedOption?.section_id); // section_id
+
+    console.log("Selected class_id:", selectedOption?.value);
+    console.log("Selected section_id:", selectedOption?.section_id);
+  };
+
+  const fetchDomain = async (classId) => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+
+      const response = await axios.get(
+        `${API_URL}/api/get_domains/${classId}`, // ✅ pass class_id
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
+
+      console.log("Domain data:", response.data.data);
+
+      setDomain(response.data.data);
+      setPageCount(Math.ceil((response.data?.data?.length || 0) / pageSize));
+    } catch (error) {
+      console.log("fetchDomain error:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const domainOptions = domain.map((cls) => ({
+    value: cls.dm_id,
+    label: `${cls?.domainname}  `,
+  }));
+
+  const handleDomainSelect = (selectedOption) => {
+    setDomainError("");
+    setSelectedDomain(selectedOption);
+    setSelectedDomainId(selectedOption?.value);
+    console.log("Selected domain_id:", selectedOption?.value);
+  };
+
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const role_id = sessionResponse.data.user.role_id;
+      const reg_id = sessionResponse.data.user.reg_id;
+
+      setRoleId(role_id);
+      setRegId(reg_id);
+
+      console.log("roleIDis:", role_id); // use local variable
+      console.log("reg id:", reg_id);
+
+      return { roleId, regId };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  const toCamelCase = (name) => {
+    if (!name) return "";
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  const handleSearch = async () => {
+    setLoadingForSearch(false);
+
+    if (!selectedStudentId) {
+      setStudentError("Please select Class.");
+      setLoadingForSearch(false);
+      return;
+    }
+    if (!selectedSectionId) {
+      setStudentError("Section is missing.");
+      setLoadingForSearch(false);
+      return;
+    }
+    if (!selectedTerms) {
+      setTermError("Please select Term.");
+      setLoadingForSearch(false);
+      return;
+    }
+    if (!selectedDomainId) {
+      setDomainError("Please select Domain.");
+      setLoadingForSearch(false);
+      return;
+    }
+
+    try {
+      setLoadingForSearch(true);
+      setTimetable([]);
+      const token = localStorage.getItem("authToken");
+
+      const params = {
+        class_id: selectedStudentId,
+        section_id: selectedSectionId,
+        dm_id: selectedDomainId,
+        term_id: selectedTerms,
+      };
+
+      const response = await axios.get(
+        `${API_URL}/api/get_studentparametervalue`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params,
+        }
+      );
+
+      // if (!response?.data?.data || response?.data?.data?.length === 0) {
+      //   toast.error("Student Domain data not found.");
+      //   setTimetable([]);
+      // } else {
+      //   setTimetable(response?.data?.data);
+      //   setPageCount(Math.ceil(response?.data?.data?.length / pageSize));
+      //   setShowStudentReport(true);
+      // }
+      if (!response?.data?.data || response?.data?.data?.length === 0) {
+        toast.error("Student Domain data not found.");
+        setTimetable([]);
+        setSelectedRecords([]); // clear previous selections
+      } else {
+        const data = response.data.data;
+        const checkPublish = response.data.publish;
+        console.log("handleSearch", checkPublish);
+        setCheckPublish(checkPublish);
+        setTimetable(data);
+        setPageCount(Math.ceil(data.length / pageSize));
+        setShowStudentReport(true);
+
+        // Populate selectedRecords with previously saved values
+        const preSelected = [];
+        data.forEach((student) => {
+          student.parameters.forEach((param) => {
+            if (param.value) {
+              // check if API returned a saved value
+              preSelected.push({
+                student_id: student.student_id,
+                parameter_id: param.parameter_id,
+                value: param.value,
+              });
+            }
+          });
+        });
+
+        setSelectedRecords(preSelected);
+      }
+    } catch (error) {
+      console.error("Error fetching Student Domain:", error);
+      toast.error("Error fetching Student Domain. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+      setLoadingForSearch(false);
+    }
+  };
+
+  const handleSelectParameter = (studentId, parameterId, value) => {
+    setSelectedRecords((prev) => {
+      // Check if record already exists
+      const exists = prev.find(
+        (rec) =>
+          rec.student_id === studentId && rec.parameter_id === parameterId
+      );
+
+      if (exists) {
+        // Update existing record
+        return prev.map((rec) =>
+          rec.student_id === studentId && rec.parameter_id === parameterId
+            ? { ...rec, value }
+            : rec
+        );
+      } else {
+        // Add new record
+        return [
+          ...prev,
+          { student_id: studentId, parameter_id: parameterId, value },
+        ];
+      }
+    });
+  };
+
+  const handleSubmit = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+
+    try {
+      const token = localStorage.getItem("authToken");
+
+      console.log("✅ Selected Records before submit:", selectedRecords);
+
+      const payload = {
+        term_id: selectedTerms,
+        class_id: selectedStudentId,
+        section_id: selectedSectionId,
+        dm_id: selectedDomainId,
+        records: selectedRecords, // use only the edited state
+      };
+
+      const response = await axios.post(
+        `${API_URL}/api/save_domainparametervalue`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response?.data?.status === 200) {
+        toast.success("Student parameter data saved successfully!");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setShowStudentReport(false);
+      }
+    } catch (error) {
+      console.error(" Error saving student parameters:", error);
+      toast.error("Error saving data. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSubmitPublish = async () => {
+    if (isPublishing) return;
+    setIsPublishing(true);
+
+    try {
+      const token = localStorage.getItem("authToken");
+
+      console.log("✅ Selected Records before submit:", selectedRecords);
+
+      const payload = {
+        term_id: selectedTerms,
+        class_id: selectedStudentId,
+        section_id: selectedSectionId,
+        dm_id: selectedDomainId,
+        records: selectedRecords, // use only the edited state
+      };
+
+      const response = await axios.post(
+        `${API_URL}/api/savenpublish_domainparametervalue`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response?.data?.status === 200) {
+        toast.success("Student parameter data saved & publish successfully!");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setShowStudentReport(false);
+      }
+    } catch (error) {
+      console.error(" Error saving student parameters:", error);
+      toast.error("Error saving data. Please try again.");
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handleSubmitUnPublish = async () => {
+    if (isUnPublishing) return;
+    setIsUnPublishing(true);
+    setLoadingForSearch(false);
+
+    if (!selectedStudentId) {
+      setStudentError("Please select Class.");
+      setLoadingForSearch(false);
+      return;
+    }
+    if (!selectedSectionId) {
+      setStudentError("Section is missing.");
+      setLoadingForSearch(false);
+      return;
+    }
+    if (!selectedTerms) {
+      setTermError("Please select Term.");
+      setLoadingForSearch(false);
+      return;
+    }
+    if (!selectedDomainId) {
+      setDomainError("Please select Domain.");
+      setLoadingForSearch(false);
+      return;
+    }
+
+    try {
+      setLoadingForSearch(true);
+      setTimetable([]);
+      const token = localStorage.getItem("authToken");
+
+      const params = {
+        class_id: selectedStudentId,
+        section_id: selectedSectionId,
+        dm_id: selectedDomainId,
+        term_id: selectedTerms,
+      };
+
+      const response = await axios.get(
+        `${API_URL}/api/unpublish_domainparametervalue`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params,
+        }
+      );
+
+      if (!response?.data?.data || response?.data?.data?.length === 0) {
+        toast.success("Student Domain data Unpubluish successfully.");
+        setTimetable([]);
+        setSelectedRecords([]); // clear previous selections
+        setCheckPublish("");
+        handleSearch();
+      } else {
+        const data = response.data.data;
+        const checkPublish = response.data.publish;
+        console.log("handleSearch", checkPublish);
+        setCheckPublish(checkPublish);
+        setTimetable(data);
+        setPageCount(Math.ceil(data.length / pageSize));
+        setShowStudentReport(true);
+
+        // Populate selectedRecords with previously saved values
+        const preSelected = [];
+        data.forEach((student) => {
+          student.parameters.forEach((param) => {
+            if (param.value) {
+              // check if API returned a saved value
+              preSelected.push({
+                student_id: student.student_id,
+                parameter_id: param.parameter_id,
+                value: param.value,
+              });
+            }
+          });
+        });
+
+        setSelectedRecords(preSelected);
+      }
+    } catch (error) {
+      console.error("Error fetching Student Domain:", error);
+      toast.error("Error fetching Student Domain. Please try again.");
+    } finally {
+      setIsUnPublishing(false);
+      setLoadingForSearch(false);
+    }
+  };
+
+  const filteredSections = timetable.filter((section) => {
+    const searchLower = searchTerm.toLowerCase();
+
+    const regNo = section?.reg_no?.toLowerCase() || "";
+    const admissionClass = section?.admission_class?.toLowerCase() || "";
+    const studentName = `${section?.first_name || ""} ${
+      section?.mid_name?.trim() || ""
+    } ${section?.last_name || ""}`
+      .toLowerCase()
+      .trim();
+
+    const name = section?.name?.toLowerCase().trim() || "";
+
+    return (
+      regNo.includes(searchLower) ||
+      admissionClass.includes(searchLower) ||
+      studentName.includes(searchLower) ||
+      name.includes(searchLower)
+    );
+  });
+
+  const displayedSections = filteredSections.slice(currentPage * pageSize);
+  return (
+    <>
+      <div
+        className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${
+          showStudentReport ? "w-full " : "w-[90%] "
+        }`}
+      >
+        <ToastContainer />
+        <div className="card  rounded-md ">
+          {!showStudentReport && (
+            <>
+              <div className=" card-header mb-4 flex justify-between items-center ">
+                <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+                  Domain
+                </h5>
+                <RxCross1
+                  className="  relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                  onClick={() => {
+                    navigate("/dashboard");
+                  }}
+                />
+              </div>
+              <div
+                className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
+                style={{
+                  backgroundColor: "#C03078",
+                }}
+              ></div>
+            </>
+          )}
+
+          <>
+            {/* <div
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
+                timetable.length > 0
+                  ? "pb-0 w-full md:w-[99%]"
+                  : "pb-4 w-full md:w-[90%]"
+              }`}
+            >
+              <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
+                <div
+                  className={`  w-full gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
+                    timetable.length > 0
+                      ? "w-full md:w-[90%]  wrelative left-0"
+                      : " w-full md:w-[98%] relative left-10"
+                  }`}
+                >
+                  <div className="w-full md:w-[50%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
+                    <label
+                      className="md:w-[30%] text-md pl-0 md:pl-5 mt-1.5"
+                      htmlFor="studentSelect"
+                    >
+                      Class <span className="text-sm text-red-500">*</span>
+                    </label>
+                    <div className=" w-full md:w-[65%]">
+                      <Select
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        id="studentSelect"
+                        value={selectedStudent}
+                        onChange={handleStudentSelect}
+                        options={studentOptions}
+                        placeholder={loadingExams ? "Loading..." : "Select"}
+                        isSearchable
+                        isClearable
+                        className="text-sm"
+                        isDisabled={loadingExams}
+                      />
+                      {studentError && (
+                        <div className="h-8 relative ml-1 text-danger text-xs">
+                          {studentError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                    <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
+                      Terms <span className="text-sm text-red-500">*</span>
+                    </label>
+                    <div className="w-full md:w-[85%]">
+                      <Select
+                        value={
+                          termsOptions.find(
+                            (opt) => opt.value === selectedTerms
+                          ) || null
+                        }
+                        onChange={(option) =>
+                          setSelectedTerms(option ? option.value : null)
+                        }
+                        options={termsOptions}
+                        placeholder={
+                          loadingTermsData ? "Loading..." : "Select..."
+                        }
+                        isSearchable
+                        isClearable
+                        isDisabled={loadingTermsData}
+                        className="text-sm"
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            fontSize: "1em",
+                            minHeight: "30px",
+                          }),
+                          menu: (provided) => ({
+                            ...provided,
+                            fontSize: "1em",
+                          }),
+                          option: (provided) => ({
+                            ...provided,
+                            fontSize: ".9em",
+                          }),
+                        }}
+                      />
+                      {termError && (
+                        <div className="h-8 relative ml-1 text-danger text-xs">
+                          {termError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="w-full  md:w-[60%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                    <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
+                      Domain <span className="text-sm text-red-500">*</span>
+                    </label>
+                    <div className="w-full md:w-[85%]">
+                      <Select
+                        value={selectedDomain}
+                        // onChange={(option) => setSelectedDomain(option)}
+                        onChange={handleDomainSelect}
+                        options={domainOptions}
+                        placeholder={
+                          loadingTermsData ? "Loading..." : "Select..."
+                        }
+                        isSearchable
+                        isClearable
+                        isDisabled={loadingTermsData}
+                        className="text-sm"
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            fontSize: "1em",
+                            minHeight: "30px",
+                          }),
+                          menu: (provided) => ({
+                            ...provided,
+                            fontSize: "1em",
+                          }),
+                          option: (provided) => ({
+                            ...provided,
+                            fontSize: ".9em",
+                          }),
+                        }}
+                      />
+                      {domainError && (
+                        <div className="h-8 relative ml-1 text-danger text-xs">
+                          {domainError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-1">
+                    <button
+                      type="search"
+                      onClick={handleSearch}
+                      style={{ backgroundColor: "#2196F3" }}
+                      className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                        loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                      disabled={loadingForSearch}
+                    >
+                      {loadingForSearch ? (
+                        <span className="flex items-center">
+                          <svg
+                            className="animate-spin h-4 w-4 mr-2 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            ></path>
+                          </svg>
+                          Browsing...
+                        </span>
+                      ) : (
+                        "Browse"
+                      )}
+                    </button>
+                  </div>
+                </div>{" "}
+              </div>
+            </div> */}
+
+            {!showStudentReport && (
+              <div className=" w-full md:w-[100%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2">
+                <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
+                  <div className="w-full md:w-[99%]  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                    <div className="w-full md:w-[50%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
+                      <label
+                        className="md:w-[30%] text-md pl-0 md:pl-5 mt-1.5"
+                        htmlFor="studentSelect"
+                      >
+                        Class <span className="text-sm text-red-500">*</span>
+                      </label>
+                      <div className=" w-full md:w-[65%]">
+                        <Select
+                          menuPortalTarget={document.body}
+                          menuPosition="fixed"
+                          id="studentSelect"
+                          value={selectedStudent}
+                          onChange={handleStudentSelect}
+                          options={studentOptions}
+                          placeholder={loadingExams ? "Loading..." : "Select"}
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          isDisabled={loadingExams}
+                        />
+                        {studentError && (
+                          <div className="h-8 relative ml-1 text-danger text-xs">
+                            {studentError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                      <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
+                        Terms <span className="text-sm text-red-500">*</span>
+                      </label>
+                      <div className="w-full md:w-[85%]">
+                        <Select
+                          value={
+                            termsOptions.find(
+                              (opt) => opt.value === selectedTerms
+                            ) || null
+                          }
+                          // onChange={(option) =>
+                          //   setSelectedTerms(option ? option.value : null)
+                          // }
+                          onChange={(option) => {
+                            setSelectedTerms(option ? option.value : null);
+                            if (termError) setTermError(""); // Clear error when user selects
+                          }}
+                          options={termsOptions}
+                          placeholder={
+                            loadingTermsData ? "Loading..." : "Select..."
+                          }
+                          isSearchable
+                          isClearable
+                          isDisabled={loadingTermsData}
+                          className="text-sm"
+                          styles={{
+                            control: (provided) => ({
+                              ...provided,
+                              fontSize: "1em",
+                              minHeight: "30px",
+                            }),
+                            menu: (provided) => ({
+                              ...provided,
+                              fontSize: "1em",
+                            }),
+                            option: (provided) => ({
+                              ...provided,
+                              fontSize: ".9em",
+                            }),
+                          }}
+                        />
+                        {termError && (
+                          <div className="h-8 relative ml-1 text-danger text-xs">
+                            {termError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="w-full  md:w-[60%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                      <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
+                        Domain <span className="text-sm text-red-500">*</span>
+                      </label>
+                      <div className="w-full md:w-[85%]">
+                        <Select
+                          value={selectedDomain}
+                          onChange={handleDomainSelect}
+                          options={domainOptions}
+                          placeholder={
+                            loadingTermsData ? "Loading..." : "Select..."
+                          }
+                          isSearchable
+                          isClearable
+                          isDisabled={loadingTermsData}
+                          className="text-sm"
+                          styles={{
+                            control: (provided) => ({
+                              ...provided,
+                              fontSize: "1em",
+                              minHeight: "30px",
+                            }),
+                            menu: (provided) => ({
+                              ...provided,
+                              fontSize: "1em",
+                            }),
+                            option: (provided) => ({
+                              ...provided,
+                              fontSize: ".9em",
+                            }),
+                          }}
+                        />
+                        {domainError && (
+                          <div className="h-8 relative ml-1 text-danger text-xs">
+                            {domainError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-1">
+                      <button
+                        type="search"
+                        onClick={handleSearch}
+                        style={{ backgroundColor: "#2196F3" }}
+                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                          loadingForSearch
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={loadingForSearch}
+                      >
+                        {loadingForSearch ? (
+                          <span className="flex items-center">
+                            <svg
+                              className="animate-spin h-4 w-4 mr-2 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              ></path>
+                            </svg>
+                            Browsing...
+                          </span>
+                        ) : (
+                          "Browse"
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showStudentReport && (
+              <>
+                {/* {timetable.length > 0 && ( */}
+                <>
+                  <div className="w-full">
+                    <div className="card mx-auto lg:w-full shadow-lg">
+                      <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
+                        <div className="w-full flex flex-row items-center justify-between ">
+                          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
+                            Domain
+                          </h3>
+                          <div className="flex items-center w-full">
+                            <div
+                              className="bg-blue-50 border-l-2 border-r-2 text-[1em] border-pink-500 rounded-md shadow-md mx-auto px-6 "
+                              style={{
+                                // overflowX: "auto",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              <div
+                                className="flex items-center gap-x-4 text-blue-800 font-medium"
+                                style={{ flexWrap: "nowrap" }}
+                              >
+                                <div className="w-full md:w-[40%] gap-x-2 justify-around  my-1 md:my-4 flex md:flex-row ">
+                                  <label
+                                    className="md:w-[33%] text-md pl-0 md:pl-5 mt-1.5"
+                                    htmlFor="studentSelect"
+                                  >
+                                    Class{" "}
+                                    <span className="text-sm text-red-500">
+                                      *
+                                    </span>
+                                  </label>
+                                  <div className=" w-full md:w-[65%]">
+                                    <Select
+                                      menuPortalTarget={document.body}
+                                      menuPosition="fixed"
+                                      id="studentSelect"
+                                      value={selectedStudent}
+                                      onChange={handleStudentSelect}
+                                      options={studentOptions}
+                                      placeholder={
+                                        loadingExams ? "Loading..." : "Select"
+                                      }
+                                      isSearchable
+                                      isClearable
+                                      className="text-sm"
+                                      isDisabled={loadingExams}
+                                    />
+                                    {studentError && (
+                                      <div className="h-8 relative ml-1 text-danger text-xs">
+                                        {studentError}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                                  <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
+                                    Terms{" "}
+                                    <span className="text-sm text-red-500">
+                                      *
+                                    </span>
+                                  </label>
+                                  <div className="w-full md:w-[85%]">
+                                    <Select
+                                      menuPortalTarget={document.body}
+                                      menuPosition="fixed"
+                                      value={
+                                        termsOptions.find(
+                                          (opt) => opt.value === selectedTerms
+                                        ) || null
+                                      }
+                                      onChange={(option) => {
+                                        setSelectedTerms(
+                                          option ? option.value : null
+                                        );
+                                        if (termError) setTermError(""); // Clear error when user selects
+                                      }}
+                                      options={termsOptions}
+                                      placeholder={
+                                        loadingTermsData
+                                          ? "Loading..."
+                                          : "Select..."
+                                      }
+                                      isSearchable
+                                      isClearable
+                                      isDisabled={loadingTermsData}
+                                      className="text-sm"
+                                    />
+                                    {termError && (
+                                      <div className="h-8 relative ml-1 text-danger text-xs">
+                                        {termError}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="w-full  md:w-[60%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                                  <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
+                                    Domain{" "}
+                                    <span className="text-sm text-red-500">
+                                      *
+                                    </span>
+                                  </label>
+                                  <div className="w-full md:w-[85%]">
+                                    <Select
+                                      menuPortalTarget={document.body}
+                                      menuPosition="fixed"
+                                      value={selectedDomain}
+                                      onChange={handleDomainSelect}
+                                      options={domainOptions}
+                                      placeholder={
+                                        loadingTermsData
+                                          ? "Loading..."
+                                          : "Select..."
+                                      }
+                                      isSearchable
+                                      isClearable
+                                      isDisabled={loadingTermsData}
+                                      className="text-sm"
+                                    />
+                                    {domainError && (
+                                      <div className="h-8 relative ml-1 text-danger text-xs">
+                                        {domainError}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <button
+                                    type="search"
+                                    onClick={handleSearch}
+                                    style={{ backgroundColor: "#2196F3" }}
+                                    className={`btn h-8 w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-2 rounded ${
+                                      loadingForSearch
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
+                                    disabled={loadingForSearch}
+                                  >
+                                    {loadingForSearch ? (
+                                      <span className="flex items-center">
+                                        <svg
+                                          className="animate-spin h-4 w-4 mr-2 text-white"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                          ></circle>
+                                          <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                          ></path>
+                                        </svg>
+                                        Browsing...
+                                      </span>
+                                    ) : (
+                                      "Browse"
+                                    )}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ">
+                          <RxCross1
+                            className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
+                            onClick={() => setShowStudentReport(false)}
+                          />
+                        </div>
+                      </div>
+
+                      <div
+                        className=" w-[97%] h-1 mx-auto"
+                        style={{ backgroundColor: "#C03078" }}
+                      ></div>
+                      <div className="card-body w-full">
+                        <div
+                          className="h-96 lg:h-96 overflow-y-scroll"
+                          //  overflow-x-scroll
+                          style={{
+                            scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
+                            scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
+                          }}
+                        >
+                          <table className="min-w-full leading-normal table-auto ">
+                            <thead
+                              className="sticky top-0  bg-gray-200"
+                              style={{ zIndex: "1px" }}
+                            >
+                              <tr className="bg-gray-200">
+                                {[
+                                  "Sr No.",
+                                  "Roll No.",
+                                  "Student Name",
+                                  "Parameters",
+                                  "Options",
+                                ].map((header, index) => {
+                                  const columnWidths = [
+                                    "w-[7%]",
+                                    "w-[7%]",
+                                    "w-[19%]",
+                                    "w-[35%]",
+                                    "w-[30%]",
+                                  ];
+
+                                  return (
+                                    <th
+                                      key={index}
+                                      className={`px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${columnWidths[index]}`}
+                                    >
+                                      {header}
+                                    </th>
+                                  );
+                                })}
+                              </tr>
+                            </thead>
+
+                            <tbody>
+                              {loadingForSearch ? (
+                                <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                  <div className=" text-center text-xl text-blue-700">
+                                    Please wait while data is loading...
+                                  </div>
+                                </div>
+                              ) : displayedSections.length ? (
+                                displayedSections.map((student, index) => {
+                                  const parameters = student.parameters || []; // assume array of parameters
+                                  return parameters.map((param, pIndex) => (
+                                    <tr
+                                      key={`${student.student_id}-${pIndex}`}
+                                      className="border border-gray-300"
+                                    >
+                                      {/* Show Sr No, Roll No, Student Name only for first parameter row */}
+                                      {pIndex === 0 && (
+                                        <>
+                                          <td
+                                            rowSpan={parameters.length}
+                                            className="px-2 py-2 text-center border border-gray-300"
+                                          >
+                                            {index + 1}
+                                          </td>
+                                          <td
+                                            rowSpan={parameters.length}
+                                            className="px-2 py-2 text-center border border-gray-300"
+                                          >
+                                            {student.roll_no || ""}
+                                          </td>
+                                          <td
+                                            rowSpan={parameters.length}
+                                            className="px-2 py-2 text-center border border-gray-300"
+                                          >
+                                            {toCamelCase(student.name || "")}
+                                          </td>
+                                        </>
+                                      )}
+
+                                      {/* Parameters */}
+                                      <td className="px-2 py-2 border border-gray-300">
+                                        {param.parameter}
+                                      </td>
+
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {[
+                                          "Beginner",
+                                          "Progressing",
+                                          "Proficient",
+                                        ].map((level) => {
+                                          const selectedValue =
+                                            selectedRecords.find(
+                                              (rec) =>
+                                                rec.student_id ===
+                                                  student.student_id &&
+                                                rec.parameter_id ===
+                                                  param.parameter_id
+                                            )?.value;
+
+                                          return (
+                                            <label key={level} className="mr-4">
+                                              <input
+                                                type="radio"
+                                                name={`param-${student.student_id}-${param.parameter_id}`}
+                                                value={level}
+                                                checked={
+                                                  selectedValue === level
+                                                } // automatically pre-selects saved value
+                                                onChange={() =>
+                                                  handleSelectParameter(
+                                                    student.student_id,
+                                                    param.parameter_id,
+                                                    level
+                                                  )
+                                                }
+                                              />
+                                              {level}
+                                            </label>
+                                          );
+                                        })}
+                                      </td>
+                                    </tr>
+                                  ));
+                                })
+                              ) : (
+                                <tr>
+                                  <td
+                                    colSpan={5}
+                                    className="text-center text-xl text-red-700 py-4"
+                                  >
+                                    Oops! No data found..
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                          {loadingForSearch ? (
+                            ""
+                          ) : (
+                            <div className="flex justify-end gap-3 mt-4 mr-4">
+                              <button
+                                type="button"
+                                onClick={handleSubmit}
+                                className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
+                                disabled={isSaving}
+                              >
+                                {isSaving ? "Saving..." : "Save"}
+                              </button>
+
+                              {checkPublish === "Y" ? (
+                                <button
+                                  type="button"
+                                  onClick={handleSubmitUnPublish}
+                                  className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
+                                  disabled={isUnPublishing}
+                                >
+                                  {isUnPublishing
+                                    ? "Unpublishing..."
+                                    : "Unpublish"}
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={handleSubmitPublish}
+                                  className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
+                                  disabled={isPublishing}
+                                >
+                                  {isPublishing
+                                    ? "Publishing..."
+                                    : "Save & Publish"}
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                className="bg-yellow-300 hover:bg-yellow-400 text-white font-medium px-4 py-2 rounded-lg shadow-md"
+                                onClick={() => setShowStudentReport(false)}
+                              >
+                                Back
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+                {/* )} */}
+              </>
+            )}
+          </>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Domain;

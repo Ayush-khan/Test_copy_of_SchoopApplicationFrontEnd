@@ -10,7 +10,7 @@ import Select from "react-select";
 function NonTeachingStaff() {
   const API_URL = import.meta.env.VITE_API_URL;
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Non-Teaching Staff Attendance");
@@ -31,7 +31,6 @@ function NonTeachingStaff() {
   const [teacherCategoryId, setTeacherCategoryId] = useState(null);
   const [teacherCategoryError, setTeacherCategoryError] = useState("");
   const [loadingClasses, setLoadingClasses] = useState(false);
-  const [loadingError, setLoadingError] = useState(false);
 
   const maxCharacters = 900;
 
@@ -81,7 +80,6 @@ function NonTeachingStaff() {
 
   const fetchAbsentNonTeachingStaff = async () => {
     setLoading(true);
-    setLoadingError(false); // reset before fetching
     const today = new Date().toISOString().split("T")[0]; // e.g., "2025-09-02"
 
     try {
@@ -112,69 +110,18 @@ function NonTeachingStaff() {
       setAbsentTeachers(absentStaff);
       setPresentTeachers(presentStaff);
       setPrsentCount(presentStaff.length);
-
       const totalAbsentCount = absentStaff.reduce((total, group) => {
         return total + (group.teachers?.length || 0); // sum staff per category
       }, 0);
 
       setLeaveCount(totalAbsentCount);
-
-      // ✅ set loadingError if both absent & present lists are empty
-      if (absentStaff.length === 0 && presentStaff.length === 0) {
-        setLoadingError(true);
-      }
+      // setLeaveCount(absentStaff.length);
     } catch (error) {
       setError(error.message || "Something went wrong while fetching data.");
-      setLoadingError(true); // error = treat as no data
     } finally {
       setLoading(false);
     }
   };
-
-  // const fetchAbsentNonTeachingStaff = async () => {
-  //   setLoading(true);
-  //   const today = new Date().toISOString().split("T")[0]; // e.g., "2025-09-02"
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       throw new Error("No authentication token found");
-  //     }
-
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_absentnonteacherfortoday`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         params: {
-  //           date: today,
-  //           category: selectedTeacherCategory?.label,
-  //         },
-  //       }
-  //     );
-
-  //     const absentStaff = response.data?.data?.nonteacher_absent || [];
-  //     const presentStaff = response.data?.data?.nonteacher_present || [];
-
-  //     console.log("Absent staff", absentStaff);
-  //     console.log("Present staff", presentStaff);
-
-  //     setAbsentTeachers(absentStaff);
-  //     setPresentTeachers(presentStaff);
-  //     setPrsentCount(presentStaff.length);
-  //     const totalAbsentCount = absentStaff.reduce((total, group) => {
-  //       return total + (group.teachers?.length || 0); // sum staff per category
-  //     }, 0);
-
-  //     setLeaveCount(totalAbsentCount);
-  //     // setLeaveCount(absentStaff.length);
-  //   } catch (error) {
-  //     setError(error.message || "Something went wrong while fetching data.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
   const handleSearch = async () => {
     setLoading(true);
     setError("");
@@ -182,7 +129,7 @@ function NonTeachingStaff() {
   };
 
   const fetchTeacherCategory = async () => {
-    setLoading(true);
+    // setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -198,7 +145,7 @@ function NonTeachingStaff() {
     } catch (error) {
       console.error("Error fetching teacher category:", error);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -266,25 +213,26 @@ function NonTeachingStaff() {
   const filteredAbsentTeachers = absentTeachers
     .map((group) => ({
       category_name: group.category_name,
-      teachers: group.teachers.filter((teacher) => {
+      teachers: group.teachers.filter((staff) => {
         const searchLower = searchTerm.toLowerCase().trim();
 
-        const fullName = `${teacher.name || ""}`.toLowerCase();
-        const mobile = `${teacher.phone || ""}`.toLowerCase();
-        const staffCategory = `${group.category_name || ""}`.toLowerCase();
-        const staffDesignation = `${teacher.designation || ""}`.toLowerCase();
+        const fullName = `${staff.name || ""}`.toLowerCase();
+        const mobile = `${staff.phone || ""}`.toLowerCase();
+        const category = `${group.category_name || ""}`.toLowerCase(); // ✅ from parent
+        const leaveStatus = `${staff.leave_status || ""}`.toLowerCase();
+        const classSection = `${staff.class_section || ""}`.toLowerCase();
 
         return (
           fullName.includes(searchLower) ||
           mobile.includes(searchLower) ||
-          staffCategory.includes(searchLower) ||
-          staffDesignation.includes(searchLower)
+          category.includes(searchLower) ||
+          leaveStatus.includes(searchLower) ||
+          classSection.includes(searchLower)
         );
       }),
     }))
-    // remove empty groups
+    // remove groups with no matching teachers
     .filter((group) => group.teachers.length > 0);
-
   console.log(filteredAbsentTeachers);
 
   const [selectedIds, setSelectedIds] = useState([]);
@@ -419,7 +367,7 @@ function NonTeachingStaff() {
                   className="text-md mt-1.5 mr-1 md:mr-0"
                   htmlFor="classSelect"
                 >
-                  Teacher Category
+                  Staff Category
                 </label>
                 <div className="w-full md:w-[57%]">
                   <Select
@@ -491,7 +439,11 @@ function NonTeachingStaff() {
               }}
             ></div>
             <div className="bg-white rounded-md mt-3 mb-3 w-[90%] md:ml-16">
-              {activeTab === "Non-Teaching Staff Attendance" ? (
+              {loading ? (
+                <div className="text-center text-xl py-10 text-blue-700">
+                  Please wait while data is loading...
+                </div>
+              ) : activeTab === "Non-Teaching Staff Attendance" ? (
                 <div
                   className="h-auto lg:h-96 overflow-y-scroll"
                   style={{
@@ -535,25 +487,7 @@ function NonTeachingStaff() {
                       </tr>
                     </thead>
                     <tbody>
-                      {loading ? (
-                        <tr>
-                          <td
-                            colSpan="9"
-                            className="text-center text-xl py-5 text-blue-700 border border-gray-950"
-                          >
-                            Please wait while data is loading...
-                          </td>
-                        </tr>
-                      ) : loadingError ? (
-                        <tr>
-                          <td
-                            colSpan="9"
-                            className="text-center text-xl py-5 text-red-700 border border-gray-950"
-                          >
-                            No Staff are Late Today.
-                          </td>
-                        </tr>
-                      ) : filteredPresentTeachers.length > 0 ? (
+                      {filteredPresentTeachers.length > 0 ? (
                         filteredPresentTeachers.map((student, index) => (
                           <tr
                             key={student.student_id}
@@ -593,6 +527,7 @@ function NonTeachingStaff() {
                                     : "text-gray-900"
                                 }`}
                               >
+                                {/* {(student.name)} */}
                                 {student?.name
                                   ? student.name
                                       .toLowerCase()
@@ -609,17 +544,6 @@ function NonTeachingStaff() {
                                       )
                                       .join(" ")
                                   : " "}
-                              </p>
-                            </td>
-                            <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
-                              <p
-                                className={`whitespace-no-wrap relative top-2 ${
-                                  student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
-                                }`}
-                              >
-                                {student.teachercategoryname}
                               </p>
                             </td>
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
@@ -664,6 +588,7 @@ function NonTeachingStaff() {
                                     : "text-gray-900"
                                 }`}
                               >
+                                {/* {student.late_time || "-"} */}
                                 {student.late === "Y" &&
                                 student.punch_time &&
                                 student.late_time
@@ -729,49 +654,31 @@ function NonTeachingStaff() {
                           {group.category_name}
                         </h2>
 
-                        <table className="min-w-full leading-normal table-auto border-collapse border border-gray-950">
+                        <table className="min-w-full leading-normal table-auto  border border-gray-950">
                           <thead>
                             <tr className="bg-gray-100">
-                              <th className="px-1 w-[7%] py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
-                                Sr.No
+                              <th className="px-1 w-[7%] mx-auto lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
+                                Sr. No
                               </th>
-                              <th className="px-1 w-[25%] py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
-                                Teacher Name
+                              <th className="px-1 w-[25%] mx-auto lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
+                                Staff Name
                               </th>
 
-                              <th className="px-1 w-[25%] py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
+                              <th className="px-1 w-[25%] mx-auto lg:px-1  py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
                                 Designation
                               </th>
 
-                              <th className="px-1 w-[12%] py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
+                              <th className="px-1 w-[12%] mx-auto lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
                                 Mobile No.
                               </th>
-                              <th className="px-1 w-[15%] py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
+                              <th className="px-1 w-[15%]  mx-auto lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">
                                 Leave Status
                               </th>
                             </tr>
                           </thead>
 
                           <tbody>
-                            {loading ? (
-                              <tr>
-                                <td
-                                  colSpan="5"
-                                  className="text-center text-xl py-5 text-blue-700 border border-gray-950"
-                                >
-                                  Please wait while data is loading...
-                                </td>
-                              </tr>
-                            ) : loadingError ? (
-                              <tr>
-                                <td
-                                  colSpan="5"
-                                  className="text-center text-xl py-5 text-red-700 border border-gray-950"
-                                >
-                                  No Staff are on Leave Today..
-                                </td>
-                              </tr>
-                            ) : group.teachers && group.teachers.length > 0 ? (
+                            {group.teachers && group.teachers.length > 0 ? (
                               group.teachers.map((staff, index) => (
                                 <tr
                                   key={staff.teacher_id}
@@ -826,14 +733,11 @@ function NonTeachingStaff() {
                                 </tr>
                               ))
                             ) : (
-                              <tr>
-                                <td
-                                  colSpan="5"
-                                  className="text-center text-xl py-5 text-red-700 border border-gray-950"
-                                >
-                                  No Staff are on Leave Today..
-                                </td>
-                              </tr>
+                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                <div className=" text-center text-xl text-red-700">
+                                  No Staff are Leave Today..
+                                </div>
+                              </div>
                             )}
                           </tbody>
                         </table>

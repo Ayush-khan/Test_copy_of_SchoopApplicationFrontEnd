@@ -184,7 +184,6 @@ const LandingPage = () => {
 
       if (Array.isArray(userResponse.data) && userResponse.data.length > 0) {
         shortName = userResponse.data[0].short_name;
-
         setSortNameIs(shortName);
         // await fetchSchoolImages(shortName); // ✅ Fetch and store logo/bg
       } else {
