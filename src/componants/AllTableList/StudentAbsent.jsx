@@ -43,10 +43,8 @@ const StudentAbsent = () => {
     return today.toISOString().split("T")[0]; // format YYYY-MM-DD
   });
 
-  // const [selectedInstallment, setSelectedInstallment] = useState({
-  //   value: 75,
-  //   label: "75%",
-  // });
+  const academicYrFrom = localStorage.getItem("academic_yr_from");
+  const academicYrTo = localStorage.getItem("academic_yr_to");
 
   const toTitleCase = (str = "") => {
     return str
@@ -177,6 +175,11 @@ const StudentAbsent = () => {
     let hasError = false;
     if (!selectedClass) {
       setNameErrorForClass("Please select a section.");
+      hasError = true;
+    }
+
+    if (!selectedDate) {
+      setNameErrorForStudent("Please select a date.");
       hasError = true;
     }
 
@@ -392,7 +395,7 @@ const StudentAbsent = () => {
                     options={installmentOptions}
                     placeholder="Select"
                     isSearchable
-                    isClearable
+                    // isClearable
                     className="text-sm"
                     styles={{
                       menu: (provided) => ({
@@ -409,16 +412,28 @@ const StudentAbsent = () => {
                   className="text-md mt-1.5 mr-1 md:mr-0"
                   htmlFor="dateSelect"
                 >
-                  By Date
+                  By Date <span className="text-red-500">*</span>
                 </label>
                 <div className="w-full md:w-[57%]">
                   <input
                     type="date"
                     id="dateSelect"
                     value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedDate(e.target.value);
+                      if (e.target.value) {
+                        setNameErrorForStudent("");
+                      }
+                    }}
                     className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min={academicYrFrom}
+                    max={academicYrTo}
                   />
+                  {nameErrorForStudent && (
+                    <div className="h-8 relative ml-1 text-danger text-xs">
+                      {nameErrorForStudent}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -582,12 +597,11 @@ const StudentAbsent = () => {
                       {filteredParents.length > 0 && (
                         <div className="flex flex-col items-center mt-2">
                           <div className="w-full md:w-[50%]">
-                            {/* Label aligned to start of the box */}
                             <label className="mb-1 font-normal block text-left">
                               Dear Parent ,
                             </label>
 
-                            <div className="relative">
+                            <div className="relative w-full">
                               <textarea
                                 value={message}
                                 onChange={(e) => {
@@ -595,15 +609,51 @@ const StudentAbsent = () => {
                                     setMessage(e.target.value);
                                   }
                                 }}
-                                className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none"
+                                className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
                                 placeholder="Enter message"
                               ></textarea>
 
-                              <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none">
+                              {message && (
+                                <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
+                                  {message + "  "}Login to school application
+                                  for details - Evolvu
+                                </div>
+                              )}
+
+                              <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
                                 {message.length} / {maxCharacters}
                               </div>
                             </div>
                           </div>
+
+                          {/* <div className="w-full md:w-[50%]">
+                            <label className="mb-1 font-normal block text-left">
+                              Dear Parent ,
+                            </label>
+
+                            <div className="relative w-full">
+                              <textarea
+                                value={message}
+                                onChange={(e) => {
+                                  if (e.target.value.length <= maxCharacters) {
+                                    setMessage(e.target.value);
+                                  }
+                                }}
+                                className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm text-black font-normal"
+                                placeholder="Enter message"
+                              ></textarea>
+
+                              <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
+                                {message.length} / {maxCharacters}
+                              </div>
+                            </div>
+
+                            {message && (
+                              <label className="text-gray-400 text-sm font-normal block text-left">
+                                Login to school application for details - Evolvu
+                              </label>
+                            )}
+                          </div> */}
                         </div>
                       )}
                     </div>
@@ -666,3 +716,57 @@ const StudentAbsent = () => {
 };
 
 export default StudentAbsent;
+
+{
+  /* <div className="relative w-full">
+                              <textarea
+                                value={message}
+                                onChange={(e) => {
+                                  if (e.target.value.length <= maxCharacters) {
+                                    setMessage(e.target.value);
+                                  }
+                                }}
+                                className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
+                                placeholder="Enter message"
+                              ></textarea>
+
+                              {message && (
+                                <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
+                                  {message + "  "}Login to school application
+                                  for details - Evolvu
+                                </div>
+                              )}
+
+                              <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
+                                {message.length} / {maxCharacters}
+                              </div>
+                            </div> */
+}
+
+// correct
+
+{
+  /* <div className="relative w-full">
+                              <textarea
+                                value={message}
+                                onChange={(e) => {
+                                  if (e.target.value.length <= maxCharacters) {
+                                    setMessage(e.target.value);
+                                  }
+                                }}
+                                className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm text-black font-normal"
+                                placeholder="Enter message"
+                              ></textarea>
+
+                              {message && (
+                                <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm font-normal z-0">
+                                  {`${"      ".repeat(message.length)}`}Login to
+                                  school application for details - Evolvu
+                                </div>
+                              )}
+
+                              <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
+                                {message.length} / {maxCharacters}
+                              </div>
+                            </div> */
+}
