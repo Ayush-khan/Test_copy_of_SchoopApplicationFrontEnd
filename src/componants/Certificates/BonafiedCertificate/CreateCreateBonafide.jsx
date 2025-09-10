@@ -19,6 +19,13 @@ const CreateCreateBonafide = () => {
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
+  const getCookie = (name) => {
+    const cookieValue = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="));
+    return cookieValue ? cookieValue.split("=")[1] : null;
+  };
+  const sortNameCookie = getCookie("short_name");
 
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -43,6 +50,11 @@ const CreateCreateBonafide = () => {
 
     purpose: " ",
     teacher_image_name: null,
+    reg_no: "",
+    caste: "",
+    subcaste: "",
+    birth_place: "",
+    state: "",
   });
 
   const getYearInWords = (year) => {
@@ -292,7 +304,7 @@ const CreateCreateBonafide = () => {
     setNameError("");
     setNameErrorForClass("");
     setErrors({}); // Clears all field-specific errors
-
+    console.log("sortname in the bonafide certificate", sortNameCookie);
     if (!selectedStudent) {
       setNameError("Please select Student Name.");
       toast.error("Please select Student Name.!");
@@ -322,7 +334,13 @@ const CreateCreateBonafide = () => {
       class_division: "",
       purpose: "",
       nationality: "",
-
+      reg_no: "",
+      religion: "",
+      caste: "",
+      subcaste: "",
+      birth_place: "",
+      state: "",
+      permant_add: "",
       // Add other fields here if needed
     });
     try {
@@ -420,6 +438,16 @@ const CreateCreateBonafide = () => {
     // Validate address
     if (!formData.dob_words) newErrors.dob_words = "This field is required";
     if (!formData.nationality) newErrors.nationality = "This field is required";
+    if (sortNameCookie === "HSCS") {
+      if (!formData.reg_no) errors.reg_no = "Required";
+      if (!formData.mother_name) errors.mother_name = "Required";
+      if (!formData.religion) errors.religion = "Required";
+      if (!formData.caste) errors.caste = "Required";
+      if (!formData.subcaste) errors.subcaste = "Required";
+      if (!formData.birth_place) errors.birth_place = "Required";
+      if (!formData.state) errors.state = "Required";
+      if (!formData.permant_add) errors.permant_add = "Required";
+    }
 
     setErrors(newErrors);
     return newErrors;
@@ -607,69 +635,6 @@ const CreateCreateBonafide = () => {
       setLoading(false); // Stop loading
     }
   };
-
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   const validationErrors = validate();
-  //   const errorsToCheck = validationErrors || {};
-
-  //   if (Object.keys(errorsToCheck).length > 0) {
-  //     setErrors(errorsToCheck);
-  //     return;
-  //   }
-
-  //   const formattedFormData = {
-  //     ...formData,
-  //     dob: formatDateString(formData.dob),
-  //     admission_date: formatDateString(formData.admission_date),
-  //   };
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       throw new Error("No authentication token is found");
-  //     }
-
-  //     // Make an API call with the "blob" response type to download the PDF
-  //     const response = await axios.post(
-  //       `${API_URL}/api/save_pdfbonafide`,
-  //       formattedFormData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         responseType: "blob", // Set response type to blob to handle PDF data
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success("Student information updated successfully!");
-
-  //       // Create a URL for the PDF blob and initiate download
-  //       const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-  //       const pdfUrl = URL.createObjectURL(pdfBlob);
-  //       const link = document.createElement("a");
-  //       link.href = pdfUrl;
-  //       link.download = "BonafideCertificate.pdf"; // PDF file name
-  //       document.body.appendChild(link);
-  //       link.click();
-  //       document.body.removeChild(link);
-
-  //       // setTimeout(() => {
-  //       //   navigate("/careTacker");
-  //       // }, 3000);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error.response.data, error.response.sr_no);
-  //     toast.error("An error occurred while updating the Student information.");
-
-  //     if (error.response && error.response) {
-  //       setBackendErrors(error.response || {});
-  //     } else {
-  //       toast.error(error.response.sr_no);
-  //     }
-  //   }
-  // };
 
   return (
     <div>
@@ -1015,6 +980,153 @@ const CreateCreateBonafide = () => {
                       </span>
                     )}
                   </div>
+                  {/* Additional fields for HSCS */}
+                  {sortNameCookie === "HSCS" && (
+                    <>
+                      <div>
+                        <label
+                          htmlFor="reg_no"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          General Register No.
+                        </label>
+                        <input
+                          type="text"
+                          id="reg_no"
+                          name="reg_no"
+                          value={formData.reg_no}
+                          readOnly
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="mother_name"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Mother's Name
+                        </label>
+                        <input
+                          type="text"
+                          id="mother_name"
+                          name="mother_name"
+                          value={formData.mother_name}
+                          readOnly
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="religion"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Religion
+                        </label>
+                        <input
+                          type="text"
+                          id="religion"
+                          name="religion"
+                          value={formData.religion}
+                          readOnly
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="caste"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Caste
+                        </label>
+                        <input
+                          type="text"
+                          id="caste"
+                          name="caste"
+                          value={formData.caste}
+                          readOnly
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="subcaste"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Sub-Caste
+                        </label>
+                        <input
+                          type="text"
+                          id="subcaste"
+                          name="subcaste"
+                          value={formData.subcaste || ""}
+                          readOnly
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="birth_place"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Birth Place
+                        </label>
+                        <input
+                          type="text"
+                          id="birth_place"
+                          name="birth_place"
+                          value={formData.birth_place}
+                          readOnly
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="state"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          State
+                        </label>
+                        <input
+                          type="text"
+                          id="state"
+                          name="state"
+                          value={formData.state}
+                          readOnly
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                        />
+                      </div>
+
+                      <div className="col-span-3">
+                        <label
+                          htmlFor="permant_add"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Address
+                        </label>
+                        <textarea
+                          id="permant_add"
+                          name="permant_add"
+                          value={formData.permant_add}
+                          readOnly
+                          onChange={handleChange}
+                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                        />
+                      </div>
+                    </>
+                  )}
 
                   <div className="col-span-3 text-right">
                     <button
