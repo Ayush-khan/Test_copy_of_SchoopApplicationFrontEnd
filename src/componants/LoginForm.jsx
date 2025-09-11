@@ -44,14 +44,7 @@ const LoginForm = ({ userId }) => {
   };
   useEffect(() => {
     fetchUserRole();
-
-    // ✅ Fetch background color on page load if token exists
-    const existingToken = localStorage.getItem("authToken");
-    if (existingToken) {
-      fetchAndSetBgColor(existingToken);
-    }
   }, []);
-
   const roleNameMap = {
     A: "Admin",
     B: "Bus",
@@ -112,35 +105,6 @@ const LoginForm = ({ userId }) => {
       console.error("Error fetching user role or app URLs:", error);
     }
   };
-  const fetchAndSetBgColor = async (token) => {
-    try {
-      const sortName = getCookie("short_name");
-
-      const config = {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        withCredentials: true,
-        params: { short_name: sortName },
-      };
-
-      const bgResponse = await axios.get(
-        `${API_URL}/api/get_activebackgroundcolor`,
-        config
-      );
-      const active = bgResponse?.data?.data?.[0];
-
-      const bgColor =
-        active?.color_code && typeof active.color_code === "string"
-          ? active.color_code
-          : "#f0f2f5"; // fallback color
-
-      // ✅ Save to cookie
-      document.cookie = `bg_color=${encodeURIComponent(
-        bgColor
-      )}; path=/; max-age=86400`;
-    } catch (err) {
-      console.error("Error fetching background color:", err.message);
-    }
-  };
 
   const handleSubmit = async (e) => {
     const sortNameCookie = getCookie("short_name");
@@ -194,9 +158,6 @@ const LoginForm = ({ userId }) => {
           settings: response.data.settings,
         };
         sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
-        // ✅ Step 1: Fetch background color
-
-        await fetchAndSetBgColor(response?.data?.token); // ✅ Fetch and set bg color after login
         navigate("/dashboard");
       } else {
         return;
