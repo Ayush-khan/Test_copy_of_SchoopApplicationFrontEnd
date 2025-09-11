@@ -123,8 +123,8 @@ button:hover {
 }
 .formFooter {
   text-align: center;
-  margin-top: 20px;
-  margin-bottom: 40px;
+  margin-top: 8px;
+  /* margin-bottom: 40px; */
 }
 
 .register {

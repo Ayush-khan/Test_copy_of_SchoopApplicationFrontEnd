@@ -336,17 +336,22 @@ const LoginForm = ({ userId }) => {
 
       {/* ✅ App download links section */}
       {appLinks.length > 0 && (
-        <div className="text-center">
-          <h6 className="text-md font-semibold mb-2">
-            {roleName} app now available in <span>🙂</span>
+        <div className=" text-center bg-white rounded-xl  shadow-md border border-gray-200">
+          {/* Title first */}
+          <h6 className=" font-semibold text-gray-800 mt-2">
+            {roleName} app is now available in{" "}
+            <span className="text-lg">📱</span>
           </h6>
-          <div className="flex justify-center gap-4 mt-2">
+
+          {/* App badges in a strict horizontal row */}
+          <div className="flex flex-row justify-center items-center gap-y-4">
             {appLinks.map((app) => (
               <a
                 key={app.app_id}
                 href={app.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="transition-all duration-200 hover:scale-105 hover:bg-gray-100 rounded-lg p-1"
               >
                 <img
                   src={
@@ -355,7 +360,7 @@ const LoginForm = ({ userId }) => {
                       : "https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
                   }
                   alt={`${roleName} ${app.type} app`}
-                  className="h-10"
+                  className="h-10 object-contain"
                 />
               </a>
             ))}
