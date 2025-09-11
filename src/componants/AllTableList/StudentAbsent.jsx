@@ -263,7 +263,7 @@ const StudentAbsent = () => {
 
       // Handle successful response
       if (response.status === 200) {
-        toast.success("Message sended successfully!");
+        toast.success("Message sent successfully!");
         setSelectedClass(null);
         setSelectedInstallment(null);
         setMessage("");
