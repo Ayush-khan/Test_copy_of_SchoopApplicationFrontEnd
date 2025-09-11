@@ -100,7 +100,7 @@ import "./App.css";
 import Index from "./router/Index";
 
 function App() {
-  const defaultBackground = "linear-gradient(to bottom, #E91E63, #2196F3)";
+  // const defaultBackground = "linear-gradient(to bottom, #E91E63, #2196F3)";
   const [background, setBackground] = useState(null);
 
   const getCookie = (name) => {
@@ -115,7 +115,8 @@ function App() {
     if (bg) {
       setBackground(bg);
     } else {
-      setBackground(defaultBackground);
+      // setBackground(defaultBackground);
+      console.log("No bg_color cookie found");
     }
   }, []);
 
