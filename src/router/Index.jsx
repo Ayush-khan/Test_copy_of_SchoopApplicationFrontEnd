@@ -298,6 +298,11 @@ import ViewBookAvailability from "../componants/View/ViewBookAvailability.jsx";
 import UpdateClasswiseStudentDetails from "../componants/StudentModel/UpdateClaswiseStudenDeails/UpdateClasswiseStudentDetails.jsx";
 import HPCSubjectList from "../componants/MastersModule/HPCSubectModule/HPCSubjectList.jsx";
 import HPCSubjectAllotment from "../componants/MastersModule/HPCSubectModule/HPCSubjectAllotment.jsx";
+import Domain from "../componants/MastersModule/DomainModules/Domain.jsx";
+import EditDomainDetails from "../componants/MastersModule/DomainModules/EditDomainDetails.jsx";
+import CreateDomainDetails from "../componants/MastersModule/DomainModules/CreateDomainDetails.jsx";
+import DomainDetails from "../componants/MastersModule/DomainModules/DomainDetails.jsx";
+import DomainCompentencies from "../componants/MastersModule/DomainModules/DomainCompentencies.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -641,6 +646,24 @@ function Index() {
           path="/SubjectAllotmentHSC"
           element={<PrivateRoute element={<SubjectAllotmentHSC />} />}
         />
+        {/* Domain and Domain Compentencies modules */}
+        <Route
+          path="/domainCompentencies"
+          element={<PrivateRoute element={<DomainCompentencies />} />}
+        />
+        <Route
+          path="/domainDetails"
+          element={<PrivateRoute element={<DomainDetails />} />}
+        />
+        <Route
+          path="/createDomainDetails"
+          element={<PrivateRoute element={<CreateDomainDetails />} />}
+        />
+        <Route
+          path="/editDomainDetails/:id"
+          element={<PrivateRoute element={<EditDomainDetails />} />}
+        />
+        <Route path="/domain" element={<PrivateRoute element={<Domain />} />} />
         {/* HPCS subject list module */}
         <Route
           path="/hpcSubjectList"

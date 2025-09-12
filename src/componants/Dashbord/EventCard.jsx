@@ -187,19 +187,22 @@ const EventCard = () => {
                     </div> */}
 
                     <div
-                      className={`${Styles?.discription} box-border shadow-inner mb-0 p-2 text-sm sm:mb-1 mt-0 text-gray-800`}
+                      className={`${Styles?.discription} box-border bg-cyan-400 shadow-inner mb-0  text-sm sm:mb-1 mt-0 text-gray-800`}
                       style={{
                         maxHeight: "80px", // same as your earlier styling
                         overflowY: "auto",
-                        padding: "8px",
-                        backgroundColor: "#f9f9f9",
+                        padding: "2px",
+                        // backgroundColor: "#C334A2",
+                        width: "100%",
+                        // backgroundColor: "#f9f9f9",
+                        wordBreak: "break-word", // Ensures long words break to fit
                       }}
                     >
                       <MarkDropdownEditor
                         value={event?.event_desc || ""}
                         readOnly
                         disabled
-                        className="w-full text-sm text-gray-800 bg-transparent cursor-not-allowed"
+                        className="w-full text-sm  text-gray-800 bg-transparent cursor-not-allowed"
                       />
                     </div>
 

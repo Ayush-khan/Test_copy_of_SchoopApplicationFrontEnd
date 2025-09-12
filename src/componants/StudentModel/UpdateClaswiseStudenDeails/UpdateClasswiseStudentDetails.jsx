@@ -590,9 +590,9 @@ const UpdateClasswiseStudentDetails = () => {
     <div>
       <ToastContainer />
 
-      <div className="md:mx-auto md:w-[90%] p-4 bg-white mt-4 ">
+      <div className="md:mx-auto md:w-[90%] p-2.5 bg-white mt-4 ">
         <div className=" w-full flex justify-between items-center ">
-          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+          <h3 className="text-gray-700  text-[1.2em] lg:text-xl text-nowrap">
             Update Classwise Student Details
           </h3>
           <RxCross1
@@ -607,10 +607,10 @@ const UpdateClasswiseStudentDetails = () => {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <div className="w-full md:container mt-1">
+        <div className="w-full md:container">
           {/* Search Section */}
-          {/* <div className="pt-2 md:pt-4"></div> */}
-          <div className="pt-8 w-full md:w-[85%]  relative ml-0 md:ml-[10%]  border-1 flex  flex-col md:flex-row gap-x-1  bg-white rounded-lg mt-2 md:mt-6 p-2 ">
+
+          <div className="w-full md:w-[85%]  relative ml-0 md:ml-[10%] ">
             <div className="w-full flex md:flex-row  items-center">
               <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                 <div className="w-full gap-x-1 md:gap-x-6  my-1 md:my-4 flex md:flex-row ">
@@ -759,7 +759,7 @@ const UpdateClasswiseStudentDetails = () => {
           </div>
           {/* Form Section - Displayed when studentInformation is fetched */}
           {studentInformation && (
-            <div className="w-full md:container mx-auto py-4 px-4 ">
+            <div className="w-full md:container mx-auto py-2 px-4 ">
               <div className="card mx-auto w-full shadow-lg">
                 <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
                   <h6 className="text-gray-700 mt-1 text-lg ">Student List</h6>
