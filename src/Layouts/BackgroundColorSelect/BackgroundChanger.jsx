@@ -19,7 +19,12 @@ function BackgroundChanger() {
   useEffect(() => {
     fetchInitialData();
   }, []);
-
+  const getCookie = (name) => {
+    const cookieValue = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="));
+    return cookieValue ? cookieValue.split("=")[1] : null;
+  };
   const fetchInitialData = async () => {
     await fetchActiveBackground(); // 1. Get active background color
     await fetchAllColors(); // 2. Load all colors
@@ -27,6 +32,8 @@ function BackgroundChanger() {
   };
 
   const fetchActiveBackground = async () => {
+    const shortNameFromCookie = getCookie("short_name");
+
     try {
       const token = localStorage.getItem("authToken");
       const config = {
@@ -34,7 +41,7 @@ function BackgroundChanger() {
         withCredentials: true,
       };
       const res = await axios.get(
-        `${API_URL}/api/get_activebackgroundcolor`,
+        `${API_URL}/api/get_activebackgroundcolor?short_name=${shortNameFromCookie}`,
         config
       );
       const active = res?.data?.data?.[0];
