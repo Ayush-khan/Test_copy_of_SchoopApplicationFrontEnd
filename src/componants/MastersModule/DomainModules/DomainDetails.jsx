@@ -183,8 +183,6 @@ function DomainDetails() {
     );
   });
 
-  // console.log("filtered domainlist", filteredStaffs);
-
   useEffect(() => {
     setPageCount(Math.ceil(filteredStaffs.length / pageSize));
   }, [filteredStaffs, pageSize]);
