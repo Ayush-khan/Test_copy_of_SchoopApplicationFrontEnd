@@ -4,7 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
-import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
+import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import { useNavigate } from "react-router-dom";
 import "react-quill/dist/quill.snow.css";
 import Select from "react-select";
@@ -30,7 +30,7 @@ const EditDomainDetails = () => {
   const [allClasses, setAllClasses] = useState([]);
   const [selectedClasses, setSelectedClasses] = useState(null);
   const [loading, setLoading] = useState(false); // Loader state
-  // const [details, setDetails] = useState([{ competency: "", outcome: "" }]);
+
   const [details, setDetails] = useState([]);
 
   const [errors, setErrors] = useState({});
@@ -161,7 +161,7 @@ const EditDomainDetails = () => {
   };
 
   const competencyOptions = compentencies.map((dept) => ({
-    value: dept.name,
+    value: dept.dm_competency_id,
     label: dept.name,
   }));
 
@@ -176,17 +176,6 @@ const EditDomainDetails = () => {
     });
   };
 
-  // const handleSubjectSelect = (selectedOption) => {
-  //   setSelectedSubject(selectedOption);
-  //   setSubjectIdForManage(selectedOption ? selectedOption.value : null);
-
-  //   // remove error when user selects
-  //   setErrors((prev) => {
-  //     const { hpc_sm_id, ...rest } = prev;
-  //     return rest;
-  //   });
-  // };
-
   const handleSubjectSelect = (selectedOption) => {
     setSelectedSubject(selectedOption);
     setSubjectIdForManage(selectedOption ? selectedOption.value : null);
@@ -198,6 +187,20 @@ const EditDomainDetails = () => {
     });
   };
 
+  // const handleCompentencySelect = (selectedOption, index) => {
+  //   const updatedDetails = [...details];
+  //   updatedDetails[index].competency = selectedOption
+  //     ? selectedOption.value
+  //     : "";
+  //   setDetails(updatedDetails);
+
+  //   // remove error for this row competency
+  //   setErrors((prev) => {
+  //     const { [`competency_${index}`]: _, ...rest } = prev;
+  //     return rest;
+  //   });
+  // };
+
   const handleCompentencySelect = (selectedOption, index) => {
     const updatedDetails = [...details];
     updatedDetails[index].competency = selectedOption
@@ -205,34 +208,62 @@ const EditDomainDetails = () => {
       : "";
     setDetails(updatedDetails);
 
-    // remove error for this row competency
+    // remove any error for this row
     setErrors((prev) => {
       const { [`competency_${index}`]: _, ...rest } = prev;
       return rest;
     });
   };
 
+  // const handleChange = (index, field, value) => {
+  //   const updatedDetails = [...details];
+  //   updatedDetails[index][field] = value;
+  //   setDetails(updatedDetails);
+
+  //   // remove error for this row outcome if typing
+  //   if (field === "outcome") {
+  //     setErrors((prev) => {
+  //       const { [`outcome_${index}`]: _, ...rest } = prev;
+  //       return rest;
+  //     });
+  //   }
+  // };
+
   const handleChange = (index, field, value) => {
     const updatedDetails = [...details];
     updatedDetails[index][field] = value;
     setDetails(updatedDetails);
 
-    // remove error for this row outcome if typing
+    // Remove error for this row outcome if typing
     if (field === "outcome") {
       setErrors((prev) => {
-        const { [`outcome_${index}`]: _, ...rest } = prev;
-        return rest;
+        const updatedErrors = { ...prev };
+        if (updatedErrors.details && updatedErrors.details[index]) {
+          updatedErrors.details[index] = {
+            ...updatedErrors.details[index],
+            outcome: "", // clear outcome error
+          };
+        }
+        return updatedErrors;
       });
     }
   };
+
+  // const handleAddRow = () => {
+  //   setDetails([...details, { competency: "", outcome: "" }]);
+  // };
+
+  // const handleRemoveRow = (index) => {
+  //   const updated = details.filter((_, i) => i !== index);
+  //   setDetails(updated);
+  // };
 
   const handleAddRow = () => {
     setDetails([...details, { competency: "", outcome: "" }]);
   };
 
   const handleRemoveRow = (index) => {
-    const updated = details.filter((_, i) => i !== index);
-    setDetails(updated);
+    setDetails(details.filter((_, i) => i !== index));
   };
 
   useEffect(() => {
@@ -295,10 +326,20 @@ const EditDomainDetails = () => {
     }
   }, [roles]);
 
+  // useEffect(() => {
+  //   if (domainParameter && domainParameter.length > 0) {
+  //     const mappedDetails = domainParameter.map((param) => ({
+  //       competency: param.competencies || "",
+  //       outcome: param.learning_outcomes || "",
+  //     }));
+  //     setDetails(mappedDetails);
+  //   }
+  // }, [domainParameter]);
+
   useEffect(() => {
     if (domainParameter && domainParameter.length > 0) {
       const mappedDetails = domainParameter.map((param) => ({
-        competency: param.competencies || "",
+        competency: param.dm_competency_id || "", // store the ID here
         outcome: param.learning_outcomes || "",
       }));
       setDetails(mappedDetails);
@@ -326,16 +367,31 @@ const EditDomainDetails = () => {
       newErrors.curriculum_goal = "Curriculum Goal is required";
     }
 
-    details.forEach((row, index) => {
-      const rowErrors = {};
-      // if (!row.competency) {
-      //   rowErrors.competency = "Competency is required";
-      // }
-      if (!row.outcome || row.outcome.trim() === "") {
-        rowErrors.outcome = "Learning outcome is required";
+    const anyMainFieldFilled =
+      classIdForManage ||
+      (name && name.trim() !== "") ||
+      (curriculumGoal && curriculumGoal.trim() !== "");
+
+    // Validate learning outcomes only if some main field is filled
+    if (anyMainFieldFilled) {
+      if (details.length === 0) {
+        toast.error("At least one detail is required.");
+        newErrors.details[0] = {
+          outcome: "", // just string, not toast
+        };
+      } else {
+        details.forEach((row, index) => {
+          const rowErrors = {};
+          // if (!row.competency) {
+          //   rowErrors.competency = "Competency is required";
+          // }
+          if (!row.outcome || row.outcome.trim() === "") {
+            rowErrors.outcome = "Learning outcome is required";
+          }
+          newErrors.details[index] = rowErrors;
+        });
       }
-      newErrors.details[index] = rowErrors;
-    });
+    }
 
     const hasErrors =
       Object.keys(newErrors).length > 1 ||
@@ -633,11 +689,37 @@ const EditDomainDetails = () => {
                                       {/* Competencies */}
                                       <td className="border border-gray-300 px-3 py-2">
                                         <div className="flex flex-col">
-                                          <Select
+                                          {/* <Select
                                             value={
                                               competencyOptions.find(
                                                 (opt) =>
                                                   opt.value === row.competency
+                                              ) || null
+                                            }
+                                            onChange={(selectedOption) =>
+                                              handleCompentencySelect(
+                                                selectedOption,
+                                                index
+                                              )
+                                            }
+                                            options={competencyOptions}
+                                            placeholder="Select Competency"
+                                            isClearable
+                                            isSearchable
+                                            className="text-sm"
+                                            menuPortalTarget={document.body}
+                                            styles={{
+                                              menuPortal: (base) => ({
+                                                ...base,
+                                                zIndex: 9999,
+                                              }),
+                                            }}
+                                          /> */}
+                                          <Select
+                                            value={
+                                              competencyOptions.find(
+                                                (opt) =>
+                                                  opt.value == row.competency // use == to handle number/string mismatch
                                               ) || null
                                             }
                                             onChange={(selectedOption) =>

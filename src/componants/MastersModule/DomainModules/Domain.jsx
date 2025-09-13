@@ -25,6 +25,7 @@ const Domain = () => {
   const [termsOptions, setTermsOptions] = useState([]);
   const [selectedTerms, setSelectedTerms] = useState(null);
   const [loadingTermsData, setLoadingTermsData] = useState(false);
+  const [publishErrors, setPublishErrors] = useState({});
 
   const [timetable, setTimetable] = useState([]);
 
@@ -46,6 +47,13 @@ const Domain = () => {
   const [showStudentReport, setShowStudentReport] = useState(false);
   const [checkPublish, setCheckPublish] = useState("");
 
+  const [subject, setSubject] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [subjectIdForManage, setSubjectIdForManage] = useState(null);
+  const [subjectError, setSubjectError] = useState("");
+
+  const [hasShownError, setHasShownError] = useState(false);
+
   useEffect(() => {
     fetchDataRoleId();
     fetchtermsByClassId();
@@ -56,12 +64,30 @@ const Domain = () => {
     fetchClasses(roleId, regId);
   }, [roleId, regId]);
 
+  // useEffect(() => {
+  //   if (selectedStudentId) {
+  //     console.log("Triggering fetchDomain with class_id:", selectedStudentId);
+  //     fetchDomain(selectedStudentId);
+  //     fetchSubject(selectedStudentId);
+  //   }
+  // }, [selectedStudentId]);
+
   useEffect(() => {
-    if (selectedStudentId) {
-      console.log("Triggering fetchDomain with class_id:", selectedStudentId);
-      fetchDomain(selectedStudentId);
+    if (selectedStudentId && subjectIdForManage) {
+      console.log(
+        "Triggering fetchDomain with class_id:",
+        selectedStudentId,
+        "and subject_id:",
+        subjectIdForManage
+      );
+
+      fetchDomain(selectedStudentId, subjectIdForManage);
     }
-  }, [selectedStudentId]);
+
+    if (selectedStudentId) {
+      fetchSubject(selectedStudentId);
+    }
+  }, [selectedStudentId, subjectIdForManage]);
 
   const fetchClasses = async (roleId, regId) => {
     const token = localStorage.getItem("authToken");
@@ -161,14 +187,15 @@ const Domain = () => {
     console.log("Selected section_id:", selectedOption?.section_id);
   };
 
-  const fetchDomain = async (classId) => {
+  const fetchDomain = async (classId, subjectId) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
 
+      // ✅ Build URL with both classId and subjectId
       const response = await axios.get(
-        `${API_URL}/api/get_domains/${classId}`, // ✅ pass class_id
+        `${API_URL}/api/get_domains/${classId}?subject_id=${subjectId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -196,6 +223,35 @@ const Domain = () => {
     setSelectedDomain(selectedOption);
     setSelectedDomainId(selectedOption?.value);
     console.log("Selected domain_id:", selectedOption?.value);
+  };
+
+  const fetchSubject = async (classId) => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${API_URL}/api/get_hpc_subject_Alloted_for_report_card/${classId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const rolesData = response.data.subjectAllotments || [];
+      setSubject(rolesData);
+    } catch (error) {
+      toast.error("Error fetching subjects");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const subjectOptions = subject.map((dept) => ({
+    value: dept.hpc_sm_id,
+    label: dept.subject_name,
+  }));
+
+  const handleSubjectSelect = (selectedOption) => {
+    setSubjectError("");
+    setSelectedSubject(selectedOption);
+    setSubjectIdForManage(selectedOption ? selectedOption.value : null);
   };
 
   const fetchDataRoleId = async () => {
@@ -246,6 +302,11 @@ const Domain = () => {
       setLoadingForSearch(false);
       return;
     }
+    if (!subjectIdForManage) {
+      setSubjectError("Please select Subject.");
+      setLoadingForSearch(false);
+      return;
+    }
     if (!selectedTerms) {
       setTermError("Please select Term.");
       setLoadingForSearch(false);
@@ -265,6 +326,7 @@ const Domain = () => {
       const params = {
         class_id: selectedStudentId,
         section_id: selectedSectionId,
+        subject_id: subjectIdForManage,
         dm_id: selectedDomainId,
         term_id: selectedTerms,
       };
@@ -277,14 +339,6 @@ const Domain = () => {
         }
       );
 
-      // if (!response?.data?.data || response?.data?.data?.length === 0) {
-      //   toast.error("Student Domain data not found.");
-      //   setTimetable([]);
-      // } else {
-      //   setTimetable(response?.data?.data);
-      //   setPageCount(Math.ceil(response?.data?.data?.length / pageSize));
-      //   setShowStudentReport(true);
-      // }
       if (!response?.data?.data || response?.data?.data?.length === 0) {
         toast.error("Student Domain data not found.");
         setTimetable([]);
@@ -361,6 +415,7 @@ const Domain = () => {
       const payload = {
         term_id: selectedTerms,
         class_id: selectedStudentId,
+        subject_id: subjectIdForManage,
         section_id: selectedSectionId,
         dm_id: selectedDomainId,
         records: selectedRecords, // use only the edited state
@@ -385,21 +440,98 @@ const Domain = () => {
     }
   };
 
+  // const handleSubmitPublish = async () => {
+  //   if (isPublishing) return;
+  //   setIsPublishing(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     console.log("✅ Selected Records before submit:", selectedRecords);
+
+  //     const payload = {
+  //       term_id: selectedTerms,
+  //       class_id: selectedStudentId,
+  //       section_id: selectedSectionId,
+  //       dm_id: selectedDomainId,
+  //       records: selectedRecords, // use only the edited state
+  //     };
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/savenpublish_domainparametervalue`,
+  //       payload,
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
+
+  //     if (response?.data?.status === 200) {
+  //       toast.success("Student parameter data saved & publish successfully!");
+  //       window.scrollTo({ top: 0, behavior: "smooth" });
+  //       setShowStudentReport(false);
+  //     }
+  //   } catch (error) {
+  //     console.error(" Error saving student parameters:", error);
+  //     toast.error("Error saving data. Please try again.");
+  //   } finally {
+  //     setIsPublishing(false);
+  //   }
+  // };
+
   const handleSubmitPublish = async () => {
     if (isPublishing) return;
-    setIsPublishing(true);
 
+    const newErrors = {};
+    let firstErrorElement = null;
+    let foundError = false;
+
+    for (const student of displayedSections) {
+      for (const param of student.parameters || []) {
+        const selectedValue = selectedRecords.find(
+          (rec) =>
+            rec.student_id === student.student_id &&
+            rec.parameter_id === param.parameter_id
+        )?.value;
+
+        if (!selectedValue) {
+          const key = `${student.student_id}-${param.parameter_id}`;
+          newErrors[key] = "Please select a level";
+
+          // scroll to first error
+          firstErrorElement = document.querySelector(
+            `[name="param-${student.student_id}-${param.parameter_id}"]`
+          );
+
+          foundError = true;
+          break; // stop checking other params for this student
+        }
+      }
+      if (foundError) break; // stop checking other students
+    }
+
+    if (foundError) {
+      setPublishErrors(newErrors);
+      toast.error("Please fill all student parameter values before publishing");
+      if (firstErrorElement) {
+        firstErrorElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        firstErrorElement.focus();
+      }
+      return;
+    }
+
+    // ✅ No validation errors → continue API call
+    setIsPublishing(true);
     try {
       const token = localStorage.getItem("authToken");
-
-      console.log("✅ Selected Records before submit:", selectedRecords);
 
       const payload = {
         term_id: selectedTerms,
         class_id: selectedStudentId,
         section_id: selectedSectionId,
+        subject_id: subjectIdForManage,
         dm_id: selectedDomainId,
-        records: selectedRecords, // use only the edited state
+        records: selectedRecords,
       };
 
       const response = await axios.post(
@@ -409,17 +541,91 @@ const Domain = () => {
       );
 
       if (response?.data?.status === 200) {
-        toast.success("Student parameter data saved & publish successfully!");
+        toast.success("Student parameter data saved & published successfully!");
         window.scrollTo({ top: 0, behavior: "smooth" });
         setShowStudentReport(false);
       }
     } catch (error) {
-      console.error(" Error saving student parameters:", error);
+      console.error("Error saving student parameters:", error);
       toast.error("Error saving data. Please try again.");
     } finally {
       setIsPublishing(false);
     }
   };
+
+  // const handleSubmitPublish = async () => {
+  //   if (isPublishing) return;
+
+  //   // ✅ Build validation errors
+  //   const newErrors = {};
+  //   let firstErrorElement = null;
+
+  //   displayedSections.forEach((student) => {
+  //     (student.parameters || []).forEach((param) => {
+  //       const selectedValue = selectedRecords.find(
+  //         (rec) =>
+  //           rec.student_id === student.student_id &&
+  //           rec.parameter_id === param.parameter_id
+  //       )?.value;
+
+  //       if (!selectedValue) {
+  //         const key = `${student.student_id}-${param.parameter_id}`;
+  //         newErrors[key] = "Please select a level";
+
+  //         // find DOM element to scroll into view
+  //         if (!firstErrorElement) {
+  //           firstErrorElement = document.querySelector(
+  //             `[name="param-${student.student_id}-${param.parameter_id}"]`
+  //           );
+  //         }
+  //       }
+  //     });
+  //   });
+
+  //   if (Object.keys(newErrors).length > 0) {
+  //     setPublishErrors(newErrors);
+  //     toast.error("Please fill all student parameter values before publishing");
+  //     if (firstErrorElement) {
+  //       firstErrorElement.scrollIntoView({
+  //         behavior: "smooth",
+  //         block: "center",
+  //       });
+  //       firstErrorElement.focus();
+  //     }
+  //     return;
+  //   }
+
+  //   // ✅ No validation errors → continue API call
+  //   setIsPublishing(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     const payload = {
+  //       term_id: selectedTerms,
+  //       class_id: selectedStudentId,
+  //       section_id: selectedSectionId,
+  //       dm_id: selectedDomainId,
+  //       records: selectedRecords,
+  //     };
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/savenpublish_domainparametervalue`,
+  //       payload,
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
+
+  //     if (response?.data?.status === 200) {
+  //       toast.success("Student parameter data saved & published successfully!");
+  //       window.scrollTo({ top: 0, behavior: "smooth" });
+  //       setShowStudentReport(false);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error saving student parameters:", error);
+  //     toast.error("Error saving data. Please try again.");
+  //   } finally {
+  //     setIsPublishing(false);
+  //   }
+  // };
 
   const handleSubmitUnPublish = async () => {
     if (isUnPublishing) return;
@@ -455,6 +661,7 @@ const Domain = () => {
       const params = {
         class_id: selectedStudentId,
         section_id: selectedSectionId,
+        subject_id: subjectIdForManage,
         dm_id: selectedDomainId,
         term_id: selectedTerms,
       };
@@ -530,11 +737,12 @@ const Domain = () => {
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
+
   return (
     <>
       <div
-        className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${
-          showStudentReport ? "w-full " : "w-[90%] "
+        className={` transition-all duration-500 w-[100%]  mx-auto p-4 ${
+          showStudentReport ? "w-full " : "w-[100%] "
         }`}
       >
         <ToastContainer />
@@ -562,187 +770,13 @@ const Domain = () => {
           )}
 
           <>
-            {/* <div
-              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
-                timetable.length > 0
-                  ? "pb-0 w-full md:w-[99%]"
-                  : "pb-4 w-full md:w-[90%]"
-              }`}
-            >
-              <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div
-                  className={`  w-full gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
-                    timetable.length > 0
-                      ? "w-full md:w-[90%]  wrelative left-0"
-                      : " w-full md:w-[98%] relative left-10"
-                  }`}
-                >
-                  <div className="w-full md:w-[50%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
-                    <label
-                      className="md:w-[30%] text-md pl-0 md:pl-5 mt-1.5"
-                      htmlFor="studentSelect"
-                    >
-                      Class <span className="text-sm text-red-500">*</span>
-                    </label>
-                    <div className=" w-full md:w-[65%]">
-                      <Select
-                        menuPortalTarget={document.body}
-                        menuPosition="fixed"
-                        id="studentSelect"
-                        value={selectedStudent}
-                        onChange={handleStudentSelect}
-                        options={studentOptions}
-                        placeholder={loadingExams ? "Loading..." : "Select"}
-                        isSearchable
-                        isClearable
-                        className="text-sm"
-                        isDisabled={loadingExams}
-                      />
-                      {studentError && (
-                        <div className="h-8 relative ml-1 text-danger text-xs">
-                          {studentError}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                    <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
-                      Terms <span className="text-sm text-red-500">*</span>
-                    </label>
-                    <div className="w-full md:w-[85%]">
-                      <Select
-                        value={
-                          termsOptions.find(
-                            (opt) => opt.value === selectedTerms
-                          ) || null
-                        }
-                        onChange={(option) =>
-                          setSelectedTerms(option ? option.value : null)
-                        }
-                        options={termsOptions}
-                        placeholder={
-                          loadingTermsData ? "Loading..." : "Select..."
-                        }
-                        isSearchable
-                        isClearable
-                        isDisabled={loadingTermsData}
-                        className="text-sm"
-                        styles={{
-                          control: (provided) => ({
-                            ...provided,
-                            fontSize: "1em",
-                            minHeight: "30px",
-                          }),
-                          menu: (provided) => ({
-                            ...provided,
-                            fontSize: "1em",
-                          }),
-                          option: (provided) => ({
-                            ...provided,
-                            fontSize: ".9em",
-                          }),
-                        }}
-                      />
-                      {termError && (
-                        <div className="h-8 relative ml-1 text-danger text-xs">
-                          {termError}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="w-full  md:w-[60%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                    <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
-                      Domain <span className="text-sm text-red-500">*</span>
-                    </label>
-                    <div className="w-full md:w-[85%]">
-                      <Select
-                        value={selectedDomain}
-                        // onChange={(option) => setSelectedDomain(option)}
-                        onChange={handleDomainSelect}
-                        options={domainOptions}
-                        placeholder={
-                          loadingTermsData ? "Loading..." : "Select..."
-                        }
-                        isSearchable
-                        isClearable
-                        isDisabled={loadingTermsData}
-                        className="text-sm"
-                        styles={{
-                          control: (provided) => ({
-                            ...provided,
-                            fontSize: "1em",
-                            minHeight: "30px",
-                          }),
-                          menu: (provided) => ({
-                            ...provided,
-                            fontSize: "1em",
-                          }),
-                          option: (provided) => ({
-                            ...provided,
-                            fontSize: ".9em",
-                          }),
-                        }}
-                      />
-                      {domainError && (
-                        <div className="h-8 relative ml-1 text-danger text-xs">
-                          {domainError}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-1">
-                    <button
-                      type="search"
-                      onClick={handleSearch}
-                      style={{ backgroundColor: "#2196F3" }}
-                      className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                        loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                      disabled={loadingForSearch}
-                    >
-                      {loadingForSearch ? (
-                        <span className="flex items-center">
-                          <svg
-                            className="animate-spin h-4 w-4 mr-2 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                            ></path>
-                          </svg>
-                          Browsing...
-                        </span>
-                      ) : (
-                        "Browse"
-                      )}
-                    </button>
-                  </div>
-                </div>{" "}
-              </div>
-            </div> */}
-
             {!showStudentReport && (
               <div className=" w-full md:w-[100%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2">
                 <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                  <div className="w-full md:w-[99%]  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                    <div className="w-full md:w-[50%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
+                  <div className="w-full md:w-[99%]  gap-x-0 md:gap-x-4 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                    <div className="w-full md:w-[45%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                       <label
-                        className="md:w-[30%] text-md pl-0 md:pl-5 mt-1.5"
+                        className="md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
                         htmlFor="studentSelect"
                       >
                         Class <span className="text-sm text-red-500">*</span>
@@ -769,6 +803,35 @@ const Domain = () => {
                       </div>
                     </div>
 
+                    <div className="w-full md:w-[58%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
+                      <label
+                        className="md:w-[30%] text-md pl-0 md:pl-5 mt-1.5"
+                        htmlFor="studentSelect"
+                      >
+                        Subject <span className="text-sm text-red-500">*</span>
+                      </label>
+                      <div className=" w-full md:w-[65%]">
+                        <Select
+                          menuPortalTarget={document.body}
+                          menuPosition="fixed"
+                          id="subjectSelect"
+                          value={selectedSubject}
+                          onChange={handleSubjectSelect}
+                          options={subjectOptions}
+                          placeholder={loadingExams ? "Loading..." : "Select"}
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          isDisabled={loadingExams}
+                        />
+                        {subjectError && (
+                          <div className="h-8 relative ml-1 text-danger text-xs">
+                            {subjectError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
                     <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                       <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
                         Terms <span className="text-sm text-red-500">*</span>
@@ -780,9 +843,6 @@ const Domain = () => {
                               (opt) => opt.value === selectedTerms
                             ) || null
                           }
-                          // onChange={(option) =>
-                          //   setSelectedTerms(option ? option.value : null)
-                          // }
                           onChange={(option) => {
                             setSelectedTerms(option ? option.value : null);
                             if (termError) setTermError(""); // Clear error when user selects
@@ -819,8 +879,8 @@ const Domain = () => {
                       </div>
                     </div>
 
-                    <div className="w-full  md:w-[60%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                      <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
+                    <div className="w-full  md:w-[58%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                      <label className="w-full md:w-[37%] text-md pl-0 md:pl-5 mt-1.5">
                         Domain <span className="text-sm text-red-500">*</span>
                       </label>
                       <div className="w-full md:w-[85%]">
@@ -917,171 +977,158 @@ const Domain = () => {
                             Domain
                           </h3>
                           <div className="flex items-center w-full">
-                            <div
-                              className="bg-blue-50 border-l-2 border-r-2 text-[1em] border-pink-500 rounded-md shadow-md mx-auto px-6 "
-                              style={{
-                                // overflowX: "auto",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              <div
-                                className="flex items-center gap-x-4 text-blue-800 font-medium"
-                                style={{ flexWrap: "nowrap" }}
-                              >
-                                <div className="w-full md:w-[40%] gap-x-2 justify-around  my-1 md:my-4 flex md:flex-row ">
-                                  <label
-                                    className="md:w-[33%] text-md pl-0 md:pl-5 mt-1.5"
-                                    htmlFor="studentSelect"
-                                  >
-                                    Class{" "}
-                                    <span className="text-sm text-red-500">
-                                      *
-                                    </span>
-                                  </label>
-                                  <div className=" w-full md:w-[65%]">
-                                    <Select
-                                      menuPortalTarget={document.body}
-                                      menuPosition="fixed"
-                                      id="studentSelect"
-                                      value={selectedStudent}
-                                      onChange={handleStudentSelect}
-                                      options={studentOptions}
-                                      placeholder={
-                                        loadingExams ? "Loading..." : "Select"
-                                      }
-                                      isSearchable
-                                      isClearable
-                                      className="text-sm"
-                                      isDisabled={loadingExams}
-                                    />
-                                    {studentError && (
-                                      <div className="h-8 relative ml-1 text-danger text-xs">
-                                        {studentError}
-                                      </div>
-                                    )}
-                                  </div>
+                            <div className="flex flex-row flex-nowrap items-center gap-4 w-full overflow-x-auto bg-blue-50 border-l-2 border-r-2 border-pink-500 rounded-md shadow-md px-4 py-2">
+                              {/* Class */}
+                              <div className="flex items-center gap-2 flex-1 min-w-[150px]">
+                                <label
+                                  className="whitespace-nowrap text-sm sm:text-md"
+                                  htmlFor="studentSelect"
+                                >
+                                  Class <span className="text-red-500">*</span>
+                                </label>
+                                <div className="flex-1">
+                                  <Select
+                                    menuPortalTarget={document.body}
+                                    menuPosition="fixed"
+                                    id="studentSelect"
+                                    value={selectedStudent}
+                                    onChange={handleStudentSelect}
+                                    options={studentOptions}
+                                    placeholder={
+                                      loadingExams ? "Loading..." : "Select"
+                                    }
+                                    isSearchable
+                                    isClearable
+                                    className="text-sm"
+                                    isDisabled={loadingExams}
+                                  />
+                                  {studentError && (
+                                    <div className="text-danger text-xs mt-1">
+                                      {studentError}
+                                    </div>
+                                  )}
                                 </div>
+                              </div>
 
-                                <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                                  <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
-                                    Terms{" "}
-                                    <span className="text-sm text-red-500">
-                                      *
-                                    </span>
-                                  </label>
-                                  <div className="w-full md:w-[85%]">
-                                    <Select
-                                      menuPortalTarget={document.body}
-                                      menuPosition="fixed"
-                                      value={
-                                        termsOptions.find(
-                                          (opt) => opt.value === selectedTerms
-                                        ) || null
-                                      }
-                                      onChange={(option) => {
-                                        setSelectedTerms(
-                                          option ? option.value : null
-                                        );
-                                        if (termError) setTermError(""); // Clear error when user selects
-                                      }}
-                                      options={termsOptions}
-                                      placeholder={
-                                        loadingTermsData
-                                          ? "Loading..."
-                                          : "Select..."
-                                      }
-                                      isSearchable
-                                      isClearable
-                                      isDisabled={loadingTermsData}
-                                      className="text-sm"
-                                    />
-                                    {termError && (
-                                      <div className="h-8 relative ml-1 text-danger text-xs">
-                                        {termError}
-                                      </div>
-                                    )}
-                                  </div>
+                              {/* Subject */}
+                              <div className="flex items-center gap-2 flex-1 min-w-[230px]">
+                                <label className="whitespace-nowrap text-sm sm:text-md">
+                                  Subject{" "}
+                                  <span className="text-red-500">*</span>
+                                </label>
+                                <div className="flex-1">
+                                  <Select
+                                    menuPortalTarget={document.body}
+                                    menuPosition="fixed"
+                                    value={selectedSubject}
+                                    onChange={handleSubjectSelect}
+                                    options={subjectOptions}
+                                    placeholder={
+                                      loadingExams ? "Loading..." : "Select"
+                                    }
+                                    isSearchable
+                                    isClearable
+                                    className="text-sm"
+                                    isDisabled={loadingExams}
+                                  />
+                                  {subjectError && (
+                                    <div className="text-danger text-xs mt-1">
+                                      {subjectError}
+                                    </div>
+                                  )}
                                 </div>
+                              </div>
 
-                                <div className="w-full  md:w-[60%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                                  <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
-                                    Domain{" "}
-                                    <span className="text-sm text-red-500">
-                                      *
-                                    </span>
-                                  </label>
-                                  <div className="w-full md:w-[85%]">
-                                    <Select
-                                      menuPortalTarget={document.body}
-                                      menuPosition="fixed"
-                                      value={selectedDomain}
-                                      onChange={handleDomainSelect}
-                                      options={domainOptions}
-                                      placeholder={
-                                        loadingTermsData
-                                          ? "Loading..."
-                                          : "Select..."
-                                      }
-                                      isSearchable
-                                      isClearable
-                                      isDisabled={loadingTermsData}
-                                      className="text-sm"
-                                    />
-                                    {domainError && (
-                                      <div className="h-8 relative ml-1 text-danger text-xs">
-                                        {domainError}
-                                      </div>
-                                    )}
-                                  </div>
+                              {/* Terms */}
+                              <div className="flex items-center gap-2 flex-1 min-w-[180px]">
+                                <label className="whitespace-nowrap text-sm sm:text-md">
+                                  Terms <span className="text-red-500">*</span>
+                                </label>
+                                <div className="flex-1">
+                                  <Select
+                                    menuPortalTarget={document.body}
+                                    menuPosition="fixed"
+                                    value={
+                                      termsOptions.find(
+                                        (opt) => opt.value === selectedTerms
+                                      ) || null
+                                    }
+                                    onChange={(option) => {
+                                      setSelectedTerms(
+                                        option ? option.value : null
+                                      );
+                                      if (termError) setTermError("");
+                                    }}
+                                    options={termsOptions}
+                                    placeholder={
+                                      loadingTermsData
+                                        ? "Loading..."
+                                        : "Select..."
+                                    }
+                                    isSearchable
+                                    isClearable
+                                    isDisabled={loadingTermsData}
+                                    className="text-sm"
+                                  />
+                                  {termError && (
+                                    <div className="text-danger text-xs mt-1">
+                                      {termError}
+                                    </div>
+                                  )}
                                 </div>
+                              </div>
 
-                                <div>
-                                  <button
-                                    type="search"
-                                    onClick={handleSearch}
-                                    style={{ backgroundColor: "#2196F3" }}
-                                    className={`btn h-8 w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-2 rounded ${
-                                      loadingForSearch
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : ""
-                                    }`}
-                                    disabled={loadingForSearch}
-                                  >
-                                    {loadingForSearch ? (
-                                      <span className="flex items-center">
-                                        <svg
-                                          className="animate-spin h-4 w-4 mr-2 text-white"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          fill="none"
-                                          viewBox="0 0 24 24"
-                                        >
-                                          <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                          ></circle>
-                                          <path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                          ></path>
-                                        </svg>
-                                        Browsing...
-                                      </span>
-                                    ) : (
-                                      "Browse"
-                                    )}
-                                  </button>
+                              {/* Domain */}
+                              <div className="flex items-center gap-2 flex-1 min-w-[230px]">
+                                <label className="whitespace-nowrap text-sm sm:text-md">
+                                  Domain <span className="text-red-500">*</span>
+                                </label>
+                                <div className="flex-1">
+                                  <Select
+                                    menuPortalTarget={document.body}
+                                    menuPosition="fixed"
+                                    value={selectedDomain}
+                                    onChange={handleDomainSelect}
+                                    options={domainOptions}
+                                    placeholder={
+                                      loadingTermsData
+                                        ? "Loading..."
+                                        : "Select..."
+                                    }
+                                    isSearchable
+                                    isClearable
+                                    isDisabled={loadingTermsData}
+                                    className="text-sm"
+                                  />
+                                  {domainError && (
+                                    <div className="text-danger text-xs mt-1">
+                                      {domainError}
+                                    </div>
+                                  )}
                                 </div>
+                              </div>
+
+                              {/* Browse button */}
+                              <div className="flex items-center min-w-[120px]">
+                                <button
+                                  type="button"
+                                  onClick={handleSearch}
+                                  style={{ backgroundColor: "#2196F3" }}
+                                  className={`btn h-9 w-full btn-primary text-white font-bold px-3 rounded ${
+                                    loadingForSearch
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                  disabled={loadingForSearch}
+                                >
+                                  {loadingForSearch ? "Browsing..." : "Browse"}
+                                </button>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ">
+                        <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ml-2">
                           <RxCross1
                             className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
                             onClick={() => setShowStudentReport(false)}
@@ -1089,20 +1136,33 @@ const Domain = () => {
                         </div>
                       </div>
 
-                      <div
-                        className=" w-[97%] h-1 mx-auto"
-                        style={{ backgroundColor: "#C03078" }}
-                      ></div>
+                      <div className="w-[97%] mx-auto text-center">
+                        {/* Top colored line */}
+                        <div
+                          className="h-1"
+                          style={{ backgroundColor: "#C03078" }}
+                        ></div>
+
+                        {/* Subject + Domain centered below */}
+                        <div
+                          className="mt-2 font-semibold text-center"
+                          style={{ color: "#C03078" }}
+                        >
+                          {selectedSubject?.label} {" : "}{" "}
+                          {selectedDomain?.label}
+                        </div>
+                      </div>
+
                       <div className="card-body w-full">
                         <div
-                          className="h-96 lg:h-96 overflow-y-scroll"
-                          //  overflow-x-scroll
+                          className="h-96 overflow-y-auto"
                           style={{
-                            scrollbarWidth: "thin", // Makes scrollbar thin in Firefox
-                            scrollbarColor: "#C03178 transparent", // Sets track and thumb color in Firefox
+                            // maxHeight: "calc(100vh - 220px)", // adjusts automatically with screen height
+                            scrollbarWidth: "thin",
+                            scrollbarColor: "#C03178 transparent",
                           }}
                         >
-                          <table className="min-w-full leading-normal table-auto ">
+                          <table className="min-w-full  leading-normal table-auto ">
                             <thead
                               className="sticky top-0  bg-gray-200"
                               style={{ zIndex: "1px" }}
@@ -1116,17 +1176,17 @@ const Domain = () => {
                                   "Options",
                                 ].map((header, index) => {
                                   const columnWidths = [
-                                    "w-[7%]",
-                                    "w-[7%]",
-                                    "w-[19%]",
-                                    "w-[35%]",
-                                    "w-[30%]",
+                                    "w-[5%]",
+                                    "w-[6%]",
+                                    "w-[15%]",
+                                    "w-[45%]",
+                                    "w-[24%]",
                                   ];
 
                                   return (
                                     <th
                                       key={index}
-                                      className={`px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${columnWidths[index]}`}
+                                      className={`px-2 text-center lg:px-3 py-2 border-2 border-gray-400 text-sm font-semibold text-gray-900 tracking-wider ${columnWidths[index]}`}
                                     >
                                       {header}
                                     </th>
@@ -1150,72 +1210,178 @@ const Domain = () => {
                                       key={`${student.student_id}-${pIndex}`}
                                       className="border border-gray-300"
                                     >
-                                      {/* Show Sr No, Roll No, Student Name only for first parameter row */}
                                       {pIndex === 0 && (
                                         <>
                                           <td
                                             rowSpan={parameters.length}
-                                            className="px-2 py-2 text-center border border-gray-300"
+                                            className="px-2 py-1 text-center  border-2 border-gray-400"
                                           >
                                             {index + 1}
                                           </td>
                                           <td
                                             rowSpan={parameters.length}
-                                            className="px-2 py-2 text-center border border-gray-300"
+                                            className="px-2 py-1 text-center border-2 border-gray-400"
                                           >
                                             {student.roll_no || ""}
                                           </td>
                                           <td
                                             rowSpan={parameters.length}
-                                            className="px-2 py-2 text-center border border-gray-300"
+                                            className="px-2 py-1 text-center border-2 border-gray-400"
                                           >
                                             {toCamelCase(student.name || "")}
                                           </td>
                                         </>
                                       )}
 
-                                      {/* Parameters */}
-                                      <td className="px-2 py-2 border border-gray-300">
-                                        {param.parameter}
-                                      </td>
+                                      {pIndex === parameters.length - 1 ? (
+                                        //Last parameter row
+                                        <>
+                                          <td className="px-2 py-2 border-b-2 text-sm border-r-2 border-gray-400">
+                                            {param.parameter} test
+                                          </td>
+                                          <td className="px-2 py-2 text-center text-sm border-b-2 border-r-2 border-gray-400">
+                                            {[
+                                              "Beginner",
+                                              "Progressing",
+                                              "Proficient",
+                                            ].map((level) => {
+                                              const selectedValue =
+                                                selectedRecords.find(
+                                                  (rec) =>
+                                                    rec.student_id ===
+                                                      student.student_id &&
+                                                    rec.parameter_id ===
+                                                      param.parameter_id
+                                                )?.value;
 
-                                      <td className="px-2 py-2 text-center border border-gray-300">
-                                        {[
-                                          "Beginner",
-                                          "Progressing",
-                                          "Proficient",
-                                        ].map((level) => {
-                                          const selectedValue =
-                                            selectedRecords.find(
-                                              (rec) =>
-                                                rec.student_id ===
-                                                  student.student_id &&
-                                                rec.parameter_id ===
-                                                  param.parameter_id
-                                            )?.value;
+                                              return (
+                                                <label
+                                                  key={level}
+                                                  className="mr-4"
+                                                >
+                                                  <input
+                                                    type="radio"
+                                                    name={`param-${student.student_id}-${param.parameter_id}`}
+                                                    value={level}
+                                                    checked={
+                                                      selectedValue === level
+                                                    }
+                                                    onChange={() =>
+                                                      handleSelectParameter(
+                                                        student.student_id,
+                                                        param.parameter_id,
+                                                        level
+                                                      )
+                                                    }
+                                                  />
+                                                  {level}
+                                                </label>
+                                              );
+                                            })}
+                                          </td>
+                                        </>
+                                      ) : pIndex === 0 ? (
+                                        // First parameter row
+                                        <>
+                                          <td className="px-2 py-2 text-sm border-r-2 border-gray-400">
+                                            {param.parameter} test
+                                          </td>
+                                          <td className="px-2 py-2 text-center text-sm  border-r-2 border-gray-400">
+                                            {[
+                                              "Beginner",
+                                              "Progressing",
+                                              "Proficient",
+                                            ].map((level) => {
+                                              const selectedValue =
+                                                selectedRecords.find(
+                                                  (rec) =>
+                                                    rec.student_id ===
+                                                      student.student_id &&
+                                                    rec.parameter_id ===
+                                                      param.parameter_id
+                                                )?.value;
 
-                                          return (
-                                            <label key={level} className="mr-4">
-                                              <input
-                                                type="radio"
-                                                name={`param-${student.student_id}-${param.parameter_id}`}
-                                                value={level}
-                                                checked={
-                                                  selectedValue === level
-                                                } // automatically pre-selects saved value
-                                                onChange={() =>
-                                                  handleSelectParameter(
-                                                    student.student_id,
-                                                    param.parameter_id,
-                                                    level
-                                                  )
-                                                }
-                                              />
-                                              {level}
-                                            </label>
-                                          );
-                                        })}
-                                      </td>
+                                              return (
+                                                <label
+                                                  key={level}
+                                                  className="mr-4"
+                                                >
+                                                  <input
+                                                    type="radio"
+                                                    name={`param-${student.student_id}-${param.parameter_id}`}
+                                                    value={level}
+                                                    checked={
+                                                      selectedValue === level
+                                                    }
+                                                    onChange={() =>
+                                                      handleSelectParameter(
+                                                        student.student_id,
+                                                        param.parameter_id,
+                                                        level
+                                                      )
+                                                    }
+                                                  />
+                                                  {level}
+                                                </label>
+                                              );
+                                            })}
+                                          </td>
+                                        </>
+                                      ) : (
+                                        //Middle parameter rows
+                                        <>
+                                          <td className="px-2 py-2  text-sm border-r-2 border-gray-400">
+                                            {param.parameter}
+                                          </td>
+                                          <td className="px-2 py-2 text-center text-sm  border-r-2 border-gray-400">
+                                            {[
+                                              "Beginner",
+                                              "Progressing",
+                                              "Proficient",
+                                            ].map((level) => {
+                                              const selectedValue =
+                                                selectedRecords.find(
+                                                  (rec) =>
+                                                    rec.student_id ===
+                                                      student.student_id &&
+                                                    rec.parameter_id ===
+                                                      param.parameter_id
+                                                )?.value;
+
+                                              return (
+                                                <label
+                                                  key={level}
+                                                  className="mr-4"
+                                                >
+                                                  <input
+                                                    type="radio"
+                                                    name={`param-${student.student_id}-${param.parameter_id}`}
+                                                    value={level}
+                                                    checked={
+                                                      selectedValue === level
+                                                    }
+                                                    onChange={() =>
+                                                      handleSelectParameter(
+                                                        student.student_id,
+                                                        param.parameter_id,
+                                                        level
+                                                      )
+                                                    }
+                                                  />
+                                                  {level}
+                                                </label>
+                                              );
+                                            })}
+
+                                            {/* Uncomment if you want inline validation error */}
+                                            {/* {publishErrors[`${student.student_id}-${param.parameter_id}`] && (
+        <p className="text-red-500 text-xs mt-1">
+          {publishErrors[`${student.student_id}-${param.parameter_id}`]}
+        </p>
+      )} */}
+                                          </td>
+                                        </>
+                                      )}
                                     </tr>
                                   ));
                                 })
