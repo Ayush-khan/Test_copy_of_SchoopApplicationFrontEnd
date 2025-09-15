@@ -195,7 +195,9 @@ const LoginForm = ({ userId }) => {
         };
         sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
         navigate("/dashboard");
-        return; // ❌ STOP here, skip setLoading(false)
+        return;
+      } else {
+        return;
       }
     } catch (error) {
       const newErrors = {};
