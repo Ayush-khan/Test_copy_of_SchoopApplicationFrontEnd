@@ -26,6 +26,7 @@ import { Outlet } from "react-router-dom";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
 import axios from "axios";
+import LoadingSpinner from "../componants/common/LoadingSpinner";
 
 function MainLayout() {
   const defaultBackground = "linear-gradient(to bottom, #E91E63, #2196F3)";
@@ -76,7 +77,42 @@ function MainLayout() {
     fetchActiveBackground();
   }, []);
 
-  if (background === null) return null;
+  if (background !== null) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center bg-white relative">
+        {/* Overlay with blur */}
+        <div className="fixed top-0 left-0 w-full h-full bg-white bg-opacity-80 backdrop-blur-sm z-40"></div>
+
+        {/* Loader content */}
+        <div className="z-50 flex flex-col items-center space-y-6 px-6">
+          {/* Google Meet style minimal avatar / icon animation */}
+          <div className="relative w-24 h-24 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+
+          {/* Animated dots like Google Meet waiting */}
+          <div className="flex space-x-2">
+            {[...Array(3)].map((_, i) => (
+              <span
+                key={i}
+                className="w-4 h-4 bg-blue-600 rounded-full animate-bounce"
+                style={{ animationDelay: `${i * 0.2}s` }}
+              ></span>
+            ))}
+          </div>
+
+          {/* Engaging Text */}
+          <p className="text-center text-blue-800 text-lg font-semibold animate-pulse">
+            🚀 Just a moment... Your dashboard is launching!
+          </p>
+
+          {/* Optional fun tip/message */}
+          <p className="text-sm text-gray-500 text-center max-w-xs">
+            Meanwhile, stretch your neck or blink your eyes 👀 — healthy habits
+            matter!
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
