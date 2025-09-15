@@ -77,7 +77,7 @@ function MainLayout() {
     fetchActiveBackground();
   }, []);
 
-  if (background !== null) {
+  if (background === null) {
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-white relative">
         {/* Overlay with blur */}
