@@ -99,12 +99,22 @@ const LandingPage = () => {
 
   expiryDate.setDate(expiryDate.getDate() + 1); // 1 day later
   useEffect(() => {
+    const deleteCookie = (name) => {
+      document.cookie = `${name}=; path=/; max-age=0; SameSite=None; Secure`;
+    };
+
+    deleteCookie("short_name");
+    deleteCookie("background_color");
+
+    console.log("Deleted cookies: short_name, background_color");
+
     const handleResize = () => {
       setIsMobileView(window.innerWidth <= 768);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
   const getCookie = (name) => {
     const cookieValue = document.cookie
       .split("; ")
