@@ -1,4 +1,4 @@
-// workin corrct.is correct
+// workin corrct.is correct is like that
 
 // import { Outlet } from "react-router-dom";
 // import NavBar from "./NavBar";
