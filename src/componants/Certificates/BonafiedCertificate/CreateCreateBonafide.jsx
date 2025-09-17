@@ -2134,6 +2134,34 @@ const CreateCreateBonafide = () => {
                       </div>
                     )}
                   </div>
+
+                  {sortNameCookie === "HSCS" && (
+                    // Purpose input field here
+                    <div>
+                      <label
+                        htmlFor="reg_no"
+                        className="block font-bold text-xs mb-2"
+                      >
+                        General Register No.{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="reg_no"
+                        name="reg_no"
+                        readOnly
+                        value={formData.reg_no}
+                        onChange={handleChange}
+                        className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                      />
+                      {errors.reg_no && (
+                        <span className="text-red-500 text-xs ml-2">
+                          {errors.reg_no}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   <div>
                     <label
                       htmlFor="date_of_joining"
@@ -2203,55 +2231,31 @@ const CreateCreateBonafide = () => {
                       </div>
                     )}
                   </div>
-                  <div>
-                    <label
-                      htmlFor="dob"
-                      className="block font-bold text-xs mb-2"
-                    >
-                      Date of Birth <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      id="dob"
-                      min={MIN_DATE} // Set minimum date
-                      max={MAX_DATE} // Set maximum date to today
-                      name="dob"
-                      readOnly
-                      value={formData.dob}
-                      onChange={handleChange}
-                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
-                    />
-                    {errors.dob && (
-                      <div className="text-red-500 text-xs ml-2">
-                        {errors.dob}
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="dob_words"
-                      className="block font-bold  text-xs mb-2"
-                    >
-                      Birth date in words{" "}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      type="text"
-                      maxLength={100}
-                      id="dob_words"
-                      name="dob_words"
-                      readOnly
-                      value={formData.dob_words}
-                      onChange={handleChange}
-                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
-                    />
-                    {errors.dob_words && (
-                      <div className="text-red-500 text-xs ml-2">
-                        {errors.dob_words}
-                      </div>
-                    )}
-                  </div>
+                  {sortNameCookie === "HSCS" && (
+                    // Purpose input field here
+                    <div>
+                      <label
+                        htmlFor="mother_name"
+                        className="block font-bold text-xs mb-2"
+                      >
+                        Mother's Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="mother_name"
+                        name="mother_name"
+                        readOnly
+                        value={formData.mother_name}
+                        onChange={handleChange}
+                        className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                      />
+                      {errors.mother_name && (
+                        <span className="text-red-500 text-xs ml-2">
+                          {errors.mother_name}
+                        </span>
+                      )}
+                    </div>
+                  )}
 
                   <div>
                     <label
@@ -2277,101 +2281,34 @@ const CreateCreateBonafide = () => {
                     )}
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor="employeeId"
-                      className="block font-bold  text-xs mb-2"
-                    >
-                      Purpose <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      maxLength={50}
-                      id="employeeId"
-                      name="purpose"
-                      value={formData.purpose}
-                      onChange={handleChange}
-                      className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                    />
-                    {errors.purpose && (
-                      <span className="text-red-500 text-xs ml-2">
-                        {errors.purpose}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="Nationality"
-                      className="block font-bold  text-xs mb-2"
-                    >
-                      Nationality <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      maxLength={20}
-                      id="Nationality"
-                      name="nationality"
-                      readOnly
-                      value={formData.nationality}
-                      onChange={handleChange}
-                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
-                    />
-                    {errors.nationality && (
-                      <span className="text-red-500 text-xs ml-2">
-                        {errors.nationality}
-                      </span>
-                    )}
-                  </div>
+                  {sortNameCookie !== "HSCS" && (
+                    <div>
+                      <label
+                        htmlFor="employeeId"
+                        className="block font-bold  text-xs mb-2"
+                      >
+                        Purpose <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        maxLength={50}
+                        id="employeeId"
+                        name="purpose"
+                        value={formData.purpose}
+                        onChange={handleChange}
+                        className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                      />
+                      {errors.purpose && (
+                        <span className="text-red-500 text-xs ml-2">
+                          {errors.purpose}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   {/* Additional fields for HSCS */}
                   {sortNameCookie === "HSCS" && (
                     <>
-                      <div>
-                        <label
-                          htmlFor="reg_no"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          General Register No.{" "}
-                          <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="reg_no"
-                          name="reg_no"
-                          readOnly
-                          value={formData.reg_no}
-                          onChange={handleChange}
-                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
-                        />
-                        {errors.reg_no && (
-                          <span className="text-red-500 text-xs ml-2">
-                            {errors.reg_no}
-                          </span>
-                        )}
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="mother_name"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Mother's Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="mother_name"
-                          name="mother_name"
-                          readOnly
-                          value={formData.mother_name}
-                          onChange={handleChange}
-                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
-                        />
-                        {errors.mother_name && (
-                          <span className="text-red-500 text-xs ml-2">
-                            {errors.mother_name}
-                          </span>
-                        )}
-                      </div>
-
                       <div>
                         <label
                           htmlFor="religion"
@@ -2468,29 +2405,104 @@ const CreateCreateBonafide = () => {
                           </span>
                         )}
                       </div>
-
-                      <div className="col-span-3">
-                        <label
-                          htmlFor="permant_add"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Address <span className="text-red-500">*</span>
-                        </label>
-                        <textarea
-                          id="permant_add"
-                          name="permant_add"
-                          readOnly
-                          value={formData.permant_add}
-                          onChange={handleChange}
-                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
-                        />
-                        {errors.permant_add && (
-                          <span className="text-red-500 text-xs ml-2">
-                            {errors.permant_add}
-                          </span>
-                        )}
-                      </div>
                     </>
+                  )}
+                  <div>
+                    <label
+                      htmlFor="dob"
+                      className="block font-bold text-xs mb-2"
+                    >
+                      Date of Birth <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      id="dob"
+                      min={MIN_DATE} // Set minimum date
+                      max={MAX_DATE} // Set maximum date to today
+                      name="dob"
+                      readOnly
+                      value={formData.dob}
+                      onChange={handleChange}
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
+                    />
+                    {errors.dob && (
+                      <div className="text-red-500 text-xs ml-2">
+                        {errors.dob}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="dob_words"
+                      className="block font-bold  text-xs mb-2"
+                    >
+                      Birth date in words{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      type="text"
+                      maxLength={100}
+                      id="dob_words"
+                      name="dob_words"
+                      readOnly
+                      value={formData.dob_words}
+                      onChange={handleChange}
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
+                    />
+                    {errors.dob_words && (
+                      <div className="text-red-500 text-xs ml-2">
+                        {errors.dob_words}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="Nationality"
+                      className="block font-bold  text-xs mb-2"
+                    >
+                      Nationality <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      maxLength={20}
+                      id="Nationality"
+                      name="nationality"
+                      readOnly
+                      value={formData.nationality}
+                      onChange={handleChange}
+                      className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
+                    />
+                    {errors.nationality && (
+                      <span className="text-red-500 text-xs ml-2">
+                        {errors.nationality}
+                      </span>
+                    )}
+                  </div>
+
+                  {sortNameCookie === "HSCS" && (
+                    // Purpose input field here
+                    <div className="col-span-3">
+                      <label
+                        htmlFor="permant_add"
+                        className="block font-bold text-xs mb-2"
+                      >
+                        Address <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        id="permant_add"
+                        name="permant_add"
+                        readOnly
+                        value={formData.permant_add}
+                        onChange={handleChange}
+                        className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                      />
+                      {errors.permant_add && (
+                        <span className="text-red-500 text-xs ml-2">
+                          {errors.permant_add}
+                        </span>
+                      )}
+                    </div>
                   )}
 
                   <div className="col-span-3 text-right">

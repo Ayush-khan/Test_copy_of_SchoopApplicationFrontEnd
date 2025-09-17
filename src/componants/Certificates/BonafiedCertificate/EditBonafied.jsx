@@ -18,6 +18,13 @@ const EditBonafied = () => {
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
+  const getCookie = (name) => {
+    const cookieValue = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="));
+    return cookieValue ? cookieValue.split("=")[1] : null;
+  };
+  const sortNameCookie = getCookie("short_name");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,6 +51,11 @@ const EditBonafied = () => {
 
     purpose: " ",
     teacher_image_name: null,
+    reg_no: "",
+    caste: "",
+    subcaste: "",
+    birth_place: "",
+    state: "",
   });
 
   const section_id =
@@ -51,10 +63,63 @@ const EditBonafied = () => {
   console.log("edit page bonafied student for back navigation:", section_id);
 
   // Fetch initial data on component load
+  // useEffect(() => {
+  //   const fetchInitialData = async () => {
+  //     try {
+  //       setLoading(true); // Start loading
+  //       const token = localStorage.getItem("authToken");
+
+  //       if (!token) throw new Error("No authentication token found");
+
+  //       const response = await axios.get(
+  //         `${API_URL}/api/get_databonafidestudent/${student?.sr_no}`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+
+  //       if (response?.data?.data) {
+  //         const fetchedData = response.data.data; // Extract the data
+
+  //         setParentInformation(fetchedData); // Assuming response data contains form data
+
+  //         // Populate formData with the fetched data
+  //         setFormData({
+  //           sr_no: fetchedData.sr_no || "",
+  //           date: today || "", // Directly from the fetched data
+  //           stud_name: fetchedData.stud_name || "",
+  //           dob: fetchedData.dob || "",
+  //           dob_words: fetchedData.dob_words || " ",
+  //           issue_date_bonafide: fetchedData.issue_date_bonafide || "",
+  //           father_name: fetchedData.father_name || "",
+  //           class_division: fetchedData.class_division || "",
+  //           academic_yr: fetchedData.academic_yr || "",
+  //           IsGenerated: fetchedData.IsGenerated || "",
+  //           IsDeleted: fetchedData.IsDeleted || "",
+  //           IsIssued: fetchedData.IsIssued || "",
+  //           stud_id: fetchedData.stud_id || "",
+  //           purpose: fetchedData.purpose || " ",
+  //           nationality: fetchedData.nationality || "",
+
+  //           // Add other fields as needed
+  //         });
+  //       } else {
+  //         toast.error("Failed to load data");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching initial data:", error);
+  //       toast.error("Error fetching initial data");
+  //     } finally {
+  //       setLoading(false); // Stop loading
+  //     }
+  //   };
+
+  //   fetchInitialData();
+  // }, []);
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        setLoading(true); // Start loading
+        setLoading(true);
         const token = localStorage.getItem("authToken");
 
         if (!token) throw new Error("No authentication token found");
@@ -67,31 +132,48 @@ const EditBonafied = () => {
         );
 
         if (response?.data?.data) {
-          const fetchedData = response.data.data; // Extract the data
+          const data = response.data.data;
 
-          setParentInformation(fetchedData); // Assuming response data contains form data
+          setParentInformation(data); // optional but you may use it
 
-          // Populate formData with the fetched data
-          setFormData({
-            sr_no: fetchedData.sr_no || "",
-            date: today || "", // Directly from the fetched data
+          const baseFormData = {
+            sr_no: data.sr_no || "",
+            date: data.issue_date_bonafide || today,
+            stud_name: data.stud_name || "",
+            father_name: data.father_name || "",
+            mother_name: "",
+            dob: data.dob || "",
+            dob_words: data.dob_words || "",
+            class_division: data.class_division || "",
+            purpose: data.purpose || "",
+            nationality: data.nationality || "",
+            reg_no: "",
+            religion: "",
+            caste: "",
+            subcaste: "",
+            birth_place: "",
+            state: "",
+            permant_add: "",
+            stud_id: data.stud_id || "",
+            academic_yr: data.academic_yr || "",
+            IsGenerated: data.IsGenerated || "",
+            IsDeleted: data.IsDeleted || "",
+            IsIssued: data.IsIssued || "",
+          };
 
-            stud_name: fetchedData.stud_name || "",
-            dob: fetchedData.dob || "",
-            dob_words: fetchedData.dob_words || " ",
-            issue_date_bonafide: fetchedData.issue_date_bonafide || "",
-            father_name: fetchedData.father_name || "",
-            class_division: fetchedData.class_division || "",
-            academic_yr: fetchedData.academic_yr || "",
-            IsGenerated: fetchedData.IsGenerated || "",
-            IsDeleted: fetchedData.IsDeleted || "",
-            IsIssued: fetchedData.IsIssued || "",
-            stud_id: fetchedData.stud_id || "",
-            purpose: fetchedData.purpose || " ",
-            nationality: fetchedData.nationality || "",
+          // For HSCS or SACS, fill additional fields
+          if (["HSCS", "SACS"].includes(sortNameCookie)) {
+            baseFormData.reg_no = data.reg_no || "";
+            baseFormData.mother_name = data.mother_name || "";
+            baseFormData.religion = data.religion || "";
+            baseFormData.caste = data.caste || "";
+            baseFormData.subcaste = data.subcaste || "";
+            baseFormData.birth_place = data.birth_place || "";
+            baseFormData.state = data.state || "";
+            baseFormData.permant_add = data.permant_add || "";
+          }
 
-            // Add other fields as needed
-          });
+          setFormData(baseFormData);
         } else {
           toast.error("Failed to load data");
         }
@@ -99,7 +181,7 @@ const EditBonafied = () => {
         console.error("Error fetching initial data:", error);
         toast.error("Error fetching initial data");
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     };
 
