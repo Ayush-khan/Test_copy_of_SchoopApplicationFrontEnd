@@ -1725,7 +1725,9 @@ const CreateCreateBonafide = () => {
     if (!formData.dob_words) errors.dob_words = "This field is required";
     if (!formData.class_division)
       errors.class_division = "This field is required";
-    if (!formData.purpose) errors.purpose = "This field is required";
+    if (!isHSCS && !formData.purpose) {
+      errors.purpose = "This field is required";
+    }
     if (!formData.nationality) errors.nationality = "This field is required";
 
     // Extra validations for HSCS
@@ -1819,7 +1821,6 @@ const CreateCreateBonafide = () => {
             if (!trimmed) newErrors.purpose = "This field is required";
             else delete newErrors.purpose;
           } else {
-            // If HSCS, clear any existing purpose error
             delete newErrors.purpose;
           }
           break;
@@ -1877,11 +1878,14 @@ const CreateCreateBonafide = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log("starting submit1");
+
     const validationErrors = validate();
     const errorsToCheck = validationErrors || {};
-
+    console.log("starting submit2");
     if (Object.keys(errorsToCheck).length > 0) {
       setErrors(errorsToCheck);
+      console.log("error in submit---->", errorsToCheck);
       return;
     }
 
