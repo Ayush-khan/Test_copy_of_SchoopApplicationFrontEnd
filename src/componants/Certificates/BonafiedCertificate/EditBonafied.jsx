@@ -18,6 +18,13 @@ const EditBonafied = () => {
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
+  const getCookie = (name) => {
+    const cookieValue = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="));
+    return cookieValue ? cookieValue.split("=")[1] : null;
+  };
+  const sortNameCookie = getCookie("short_name");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,6 +51,11 @@ const EditBonafied = () => {
 
     purpose: " ",
     teacher_image_name: null,
+    reg_no: "",
+    caste: "",
+    subcaste: "",
+    birth_place: "",
+    state: "",
   });
 
   const section_id =
@@ -51,10 +63,63 @@ const EditBonafied = () => {
   console.log("edit page bonafied student for back navigation:", section_id);
 
   // Fetch initial data on component load
+  // useEffect(() => {
+  //   const fetchInitialData = async () => {
+  //     try {
+  //       setLoading(true); // Start loading
+  //       const token = localStorage.getItem("authToken");
+
+  //       if (!token) throw new Error("No authentication token found");
+
+  //       const response = await axios.get(
+  //         `${API_URL}/api/get_databonafidestudent/${student?.sr_no}`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+
+  //       if (response?.data?.data) {
+  //         const fetchedData = response.data.data; // Extract the data
+
+  //         setParentInformation(fetchedData); // Assuming response data contains form data
+
+  //         // Populate formData with the fetched data
+  //         setFormData({
+  //           sr_no: fetchedData.sr_no || "",
+  //           date: today || "", // Directly from the fetched data
+  //           stud_name: fetchedData.stud_name || "",
+  //           dob: fetchedData.dob || "",
+  //           dob_words: fetchedData.dob_words || " ",
+  //           issue_date_bonafide: fetchedData.issue_date_bonafide || "",
+  //           father_name: fetchedData.father_name || "",
+  //           class_division: fetchedData.class_division || "",
+  //           academic_yr: fetchedData.academic_yr || "",
+  //           IsGenerated: fetchedData.IsGenerated || "",
+  //           IsDeleted: fetchedData.IsDeleted || "",
+  //           IsIssued: fetchedData.IsIssued || "",
+  //           stud_id: fetchedData.stud_id || "",
+  //           purpose: fetchedData.purpose || " ",
+  //           nationality: fetchedData.nationality || "",
+
+  //           // Add other fields as needed
+  //         });
+  //       } else {
+  //         toast.error("Failed to load data");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching initial data:", error);
+  //       toast.error("Error fetching initial data");
+  //     } finally {
+  //       setLoading(false); // Stop loading
+  //     }
+  //   };
+
+  //   fetchInitialData();
+  // }, []);
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        setLoading(true); // Start loading
+        setLoading(true);
         const token = localStorage.getItem("authToken");
 
         if (!token) throw new Error("No authentication token found");
@@ -67,31 +132,48 @@ const EditBonafied = () => {
         );
 
         if (response?.data?.data) {
-          const fetchedData = response.data.data; // Extract the data
+          const data = response.data.data;
 
-          setParentInformation(fetchedData); // Assuming response data contains form data
+          setParentInformation(data); // optional but you may use it
 
-          // Populate formData with the fetched data
-          setFormData({
-            sr_no: fetchedData.sr_no || "",
-            date: today || "", // Directly from the fetched data
+          const baseFormData = {
+            sr_no: data.sr_no || "",
+            date: data.issue_date_bonafide || today,
+            stud_name: data.stud_name || "",
+            father_name: data.father_name || "",
+            mother_name: "",
+            dob: data.dob || "",
+            dob_words: data.dob_words || "",
+            class_division: data.class_division || "",
+            purpose: data.purpose || "",
+            nationality: data.nationality || "",
+            reg_no: "",
+            religion: "",
+            caste: "",
+            subcaste: "",
+            birth_place: "",
+            state: "",
+            permant_add: "",
+            stud_id: data.stud_id || "",
+            academic_yr: data.academic_yr || "",
+            IsGenerated: data.IsGenerated || "",
+            IsDeleted: data.IsDeleted || "",
+            IsIssued: data.IsIssued || "",
+          };
 
-            stud_name: fetchedData.stud_name || "",
-            dob: fetchedData.dob || "",
-            dob_words: fetchedData.dob_words || " ",
-            issue_date_bonafide: fetchedData.issue_date_bonafide || "",
-            father_name: fetchedData.father_name || "",
-            class_division: fetchedData.class_division || "",
-            academic_yr: fetchedData.academic_yr || "",
-            IsGenerated: fetchedData.IsGenerated || "",
-            IsDeleted: fetchedData.IsDeleted || "",
-            IsIssued: fetchedData.IsIssued || "",
-            stud_id: fetchedData.stud_id || "",
-            purpose: fetchedData.purpose || " ",
-            nationality: fetchedData.nationality || "",
+          // For HSCS or SACS, fill additional fields
+          if (["HSCS", "SACS"].includes(sortNameCookie)) {
+            baseFormData.reg_no = data.reg_no || "";
+            baseFormData.mother_name = data.mother_name || "";
+            baseFormData.religion = data.religion || "";
+            baseFormData.caste = data.caste || "";
+            baseFormData.subcaste = data.subcaste || "";
+            baseFormData.birth_place = data.birth_place || "";
+            baseFormData.state = data.state || "";
+            baseFormData.permant_add = data.permant_add || "";
+          }
 
-            // Add other fields as needed
-          });
+          setFormData(baseFormData);
         } else {
           toast.error("Failed to load data");
         }
@@ -99,7 +181,7 @@ const EditBonafied = () => {
         console.error("Error fetching initial data:", error);
         toast.error("Error fetching initial data");
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     };
 
@@ -250,124 +332,284 @@ const EditBonafied = () => {
   // Calculate today's date
   const today = new Date().toISOString().split("T")[0];
 
-  const validate = () => {
-    const newErrors = {};
+  // const validate = () => {
+  //   const newErrors = {};
 
-    // Validate name
-    if (!formData.stud_name) newErrors.stud_name = "Name is required";
-    else if (!/^[^\d].*/.test(formData.stud_name))
-      newErrors.stud_name = "Name should not start with a number";
+  //   // Validate name
+  //   if (!formData.stud_name) newErrors.stud_name = "Name is required";
+  //   else if (!/^[^\d].*/.test(formData.stud_name))
+  //     newErrors.stud_name = "Name should not start with a number";
 
-    // Validate name
-    if (!formData.father_name) newErrors.father_name = "Name is required";
-    else if (!/^[^\d].*/.test(formData.father_name))
-      newErrors.father_name = "Name should not start with a number";
-    // Validate academic qualifications (now a single text input)
-    if (!formData.class_division)
-      newErrors.class_division = "Class and Division is required";
-    if (!formData.sr_no) newErrors.sr_no = "Serial number is required";
+  //   // Validate name
+  //   if (!formData.father_name) newErrors.father_name = "Name is required";
+  //   else if (!/^[^\d].*/.test(formData.father_name))
+  //     newErrors.father_name = "Name should not start with a number";
+  //   // Validate academic qualifications (now a single text input)
+  //   if (!formData.class_division)
+  //     newErrors.class_division = "Class and Division is required";
+  //   if (!formData.sr_no) newErrors.sr_no = "Serial number is required";
 
-    // Validate dob
-    if (!formData.dob) newErrors.dob = "Date of Birth is required";
-    if (!formData.father_name)
-      newErrors.father_name = "Father Name is required";
+  //   // Validate dob
+  //   if (!formData.dob) newErrors.dob = "Date of Birth is required";
+  //   if (!formData.father_name)
+  //     newErrors.father_name = "Father Name is required";
 
-    // Validate date of joining
-    if (!formData.date) newErrors.date = " Date is required";
+  //   // Validate date of joining
+  //   if (!formData.date) newErrors.date = " Date is required";
 
-    // Validate Employee Id
-    if (!formData.purpose) newErrors.purpose = "purpose is required";
-    // Validate address
-    if (!formData.dob_words)
-      newErrors.dob_words = "  Birth date in words is required";
-    if (!formData.nationality)
-      newErrors.nationality = "Nationality is required";
+  //   // Validate Employee Id
+  //   if (!formData.purpose) newErrors.purpose = "purpose is required";
+  //   // Validate address
+  //   if (!formData.dob_words)
+  //     newErrors.dob_words = "  Birth date in words is required";
+  //   if (!formData.nationality)
+  //     newErrors.nationality = "Nationality is required";
 
-    setErrors(newErrors);
-    return newErrors;
-  };
+  //   setErrors(newErrors);
+  //   return newErrors;
+  // };
 
   // Handle change for form fields
+
+  // const handleChange = (event) => {
+  //   const { name, value } = event.target;
+  //   let newValue = value;
+
+  //   if (name === "dob") {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       dob: value,
+  //       dob_words: convertDateToWords(value),
+  //     }));
+  //   } else {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       [name]: value,
+  //     }));
+  //   }
+  //   // Update formData for the field
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     [name]: newValue,
+  //   }));
+
+  //   // Field-specific validation
+  //   let fieldErrors = {};
+
+  //   // Name validation
+  //   if (name === "stud_name") {
+  //     if (!newValue) fieldErrors.stud_name = "Name is required";
+  //     else if (/^\d/.test(newValue))
+  //       fieldErrors.stud_name = "Name should not start with a number";
+  //   }
+  //   if (name === "father_name") {
+  //     if (!newValue) fieldErrors.father_name = "Name is required";
+  //     else if (/^\d/.test(newValue))
+  //       fieldErrors.father_name = "Name should not start with a number";
+  //   }
+
+  //   // Academic Qualification validation
+  //   if (name === "class_division") {
+  //     if (!newValue)
+  //       fieldErrors.class_division = "Class and Division is required";
+  //   }
+
+  //   // Date of Birth validation
+  //   if (name === "dob") {
+  //     if (!newValue) fieldErrors.dob = "Date of Birth is required";
+  //   }
+  //   // serial number
+
+  //   if (name === "sr_no") {
+  //     if (!newValue) fieldErrors.sr_no = "Serial number is required";
+  //   }
+  //   if (name === "father_name") {
+  //     if (!newValue) fieldErrors.father_name = "Father Name is required";
+  //   }
+
+  //   // Date of Joining validation
+  //   if (name === "date") {
+  //     if (!newValue) fieldErrors.date = " Date is required";
+  //   }
+
+  //   // Employee ID validation
+  //   if (name === "purpose") {
+  //     if (!newValue) fieldErrors.purpose = "Purpose  is required";
+  //   }
+
+  //   // Address validation
+  //   if (name === "dob_words") {
+  //     if (!newValue)
+  //       fieldErrors.dob_words = "  Birth date in words is required";
+  //   }
+  //   if (name === "nationality") {
+  //     if (!newValue) fieldErrors.nationality = "Nationality is required";
+  //   }
+
+  //   // Update the errors state with the new field errors
+  //   setErrors((prevErrors) => ({
+  //     ...prevErrors,
+  //     [name]: fieldErrors[name],
+  //   }));
+  // };
+  // ---------- Handle Change / On Field Update ----------
+  // ---------- Validation Function ----------
+  const validate = () => {
+    const errors = {};
+    const isHSCS = sortNameCookie === "HSCS";
+
+    // Basic validations (always required)
+    if (!formData.sr_no) errors.sr_no = "This field is required";
+    if (!formData.stud_name) errors.stud_name = "This field is required";
+    if (!formData.father_name) errors.father_name = "This field is required";
+    if (!formData.date) errors.date = "This field is required";
+    if (!formData.dob) errors.dob = "This field is required";
+    if (!formData.dob_words) errors.dob_words = "This field is required";
+    if (!formData.class_division)
+      errors.class_division = "This field is required";
+    if (!isHSCS && !formData.purpose) {
+      errors.purpose = "This field is required";
+    }
+    if (!formData.nationality) errors.nationality = "This field is required";
+
+    // Extra validations for HSCS
+    if (isHSCS) {
+      if (!formData.reg_no) errors.reg_no = "This field is required";
+      if (!formData.mother_name) errors.mother_name = "This field is required";
+      if (!formData.birth_place) errors.birth_place = "This field is required";
+      if (!formData.state) errors.state = "This field is required";
+      if (!formData.permant_add) errors.permant_add = "This field is required";
+      // religion, caste, subcaste are optional
+    }
+
+    // Additional field-specific checks
+    if (formData.stud_name && /^\d/.test(formData.stud_name)) {
+      errors.stud_name = "Name should not start with a number";
+    }
+    if (formData.father_name && /^\d/.test(formData.father_name)) {
+      errors.father_name = "Name should not start with a number";
+    }
+
+    return errors;
+  };
+
+  // ---------- Handle Change / On Field Update ----------
   const handleChange = (event) => {
     const { name, value } = event.target;
-    let newValue = value;
+    const isHSCS = sortNameCookie === "HSCS";
 
-    if (name === "dob") {
-      setFormData((prev) => ({
-        ...prev,
-        dob: value,
-        dob_words: convertDateToWords(value),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-    // Update formData for the field
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: newValue,
+    // Update form data
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      // If updating dob, also compute dob_words
+      ...(name === "dob" ? { dob_words: convertDateToWords(value) } : {}),
     }));
 
-    // Field-specific validation
-    let fieldErrors = {};
+    // Validate this single field
+    setErrors((prevErrors) => {
+      const newErrors = { ...prevErrors };
 
-    // Name validation
-    if (name === "stud_name") {
-      if (!newValue) fieldErrors.stud_name = "Name is required";
-      else if (/^\d/.test(newValue))
-        fieldErrors.stud_name = "Name should not start with a number";
-    }
-    if (name === "father_name") {
-      if (!newValue) fieldErrors.father_name = "Name is required";
-      else if (/^\d/.test(newValue))
-        fieldErrors.father_name = "Name should not start with a number";
-    }
+      // Clear the error for this field if value is ok
+      const trimmed = (value || "").trim();
 
-    // Academic Qualification validation
-    if (name === "class_division") {
-      if (!newValue)
-        fieldErrors.class_division = "Class and Division is required";
-    }
+      switch (name) {
+        case "stud_name":
+          if (!trimmed) newErrors.stud_name = "This field is required";
+          else if (/^\d/.test(trimmed))
+            newErrors.stud_name = "Name should not start with a number";
+          else delete newErrors.stud_name;
+          break;
 
-    // Date of Birth validation
-    if (name === "dob") {
-      if (!newValue) fieldErrors.dob = "Date of Birth is required";
-    }
-    // serial number
+        case "father_name":
+          if (!trimmed) newErrors.father_name = "This field is required";
+          else if (/^\d/.test(trimmed))
+            newErrors.father_name = "Name should not start with a number";
+          else delete newErrors.father_name;
+          break;
 
-    if (name === "sr_no") {
-      if (!newValue) fieldErrors.sr_no = "Serial number is required";
-    }
-    if (name === "father_name") {
-      if (!newValue) fieldErrors.father_name = "Father Name is required";
-    }
+        case "class_division":
+          if (!trimmed) newErrors.class_division = "This field is required";
+          else delete newErrors.class_division;
+          break;
 
-    // Date of Joining validation
-    if (name === "date") {
-      if (!newValue) fieldErrors.date = " Date is required";
-    }
+        case "sr_no":
+          if (!trimmed) newErrors.sr_no = "This field is required";
+          else delete newErrors.sr_no;
+          break;
 
-    // Employee ID validation
-    if (name === "purpose") {
-      if (!newValue) fieldErrors.purpose = "Purpose  is required";
-    }
+        case "dob":
+          if (!trimmed) newErrors.dob = "This field is required";
+          else delete newErrors.dob;
+          break;
 
-    // Address validation
-    if (name === "dob_words") {
-      if (!newValue)
-        fieldErrors.dob_words = "  Birth date in words is required";
-    }
-    if (name === "nationality") {
-      if (!newValue) fieldErrors.nationality = "Nationality is required";
-    }
+        case "date":
+          if (!trimmed) newErrors.date = "This field is required";
+          else delete newErrors.date;
+          break;
 
-    // Update the errors state with the new field errors
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [name]: fieldErrors[name],
-    }));
+        case "dob_words":
+          if (!trimmed) newErrors.dob_words = "This field is required";
+          else delete newErrors.dob_words;
+          break;
+
+        case "nationality":
+          if (!trimmed) newErrors.nationality = "This field is required";
+          else delete newErrors.nationality;
+          break;
+
+        case "purpose":
+          if (!isHSCS) {
+            if (!trimmed) newErrors.purpose = "This field is required";
+            else delete newErrors.purpose;
+          } else {
+            delete newErrors.purpose;
+          }
+          break;
+
+        // HSCS fields
+        case "reg_no":
+          if (isHSCS) {
+            if (!trimmed) newErrors.reg_no = "This field is required";
+            else delete newErrors.reg_no;
+          }
+          break;
+
+        case "mother_name":
+          if (isHSCS) {
+            if (!trimmed) newErrors.mother_name = "This field is required";
+            else delete newErrors.mother_name;
+          }
+          break;
+
+        case "birth_place":
+          if (isHSCS) {
+            if (!trimmed) newErrors.birth_place = "This field is required";
+            else delete newErrors.birth_place;
+          }
+          break;
+
+        case "state":
+          if (isHSCS) {
+            if (!trimmed) newErrors.state = "This field is required";
+            else delete newErrors.state;
+          }
+          break;
+
+        case "permant_add":
+          if (isHSCS) {
+            if (!trimmed) newErrors.permant_add = "This field is required";
+            else delete newErrors.permant_add;
+          }
+          break;
+
+        default:
+          // No specific validation for other optional fields
+          break;
+      }
+
+      return newErrors;
+    });
   };
 
   const formatDateString = (dateString) => {
@@ -514,8 +756,14 @@ const EditBonafied = () => {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <p className=" text-[.9em] md:absolute md:right-8  md:top-[15%]   text-gray-500 ">
-          <span className="text-red-500 ">*</span>indicates mandatory
+        <p
+          className={`text-[.9em] text-gray-500 ${
+            sortNameCookie === "HSCS"
+              ? "md:absolute md:right-5 md:top-[7.5%]"
+              : "md:absolute md:right-5 md:top-[13%]"
+          }`}
+        >
+          <span className="text-red-500">*</span> indicates mandatory
           information
         </p>
         {loadingForSearchAcy && (
@@ -525,7 +773,7 @@ const EditBonafied = () => {
         )}{" "}
         <form
           onSubmit={handleSubmit}
-          className="  md:mx-5 overflow-x-hidden shadow-md p-2 bg-gray-50 mb-4"
+          className="  border-1 overflow-x-hidden shadow-md p-2 bg-gray-100 mb-4"
         >
           <div className=" flex flex-col gap-4 md:grid  md:grid-cols-3 md:gap-x-14 md:mx-10 gap-y-1 pt-4 pb-4">
             <div className=" ">
@@ -536,8 +784,8 @@ const EditBonafied = () => {
                 type="text"
                 maxLength={100}
                 id="sr_no"
-                name="sr_no"
                 readOnly
+                name="sr_no"
                 value={formData.sr_no}
                 onChange={handleChange}
                 className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
@@ -551,6 +799,33 @@ const EditBonafied = () => {
                 <div className="text-red-500 text-xs ml-2">{errors.sr_no}</div>
               )}
             </div>
+
+            {sortNameCookie === "HSCS" && (
+              // Purpose input field here
+              <div>
+                <label
+                  htmlFor="reg_no"
+                  className="block font-bold text-xs mb-2"
+                >
+                  General Register No. <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="reg_no"
+                  name="reg_no"
+                  readOnly
+                  value={formData.reg_no}
+                  onChange={handleChange}
+                  className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                />
+                {errors.reg_no && (
+                  <span className="text-red-500 text-xs ml-2">
+                    {errors.reg_no}
+                  </span>
+                )}
+              </div>
+            )}
+
             <div>
               <label
                 htmlFor="date_of_joining"
@@ -583,9 +858,9 @@ const EditBonafied = () => {
                 maxLength={200}
                 id="staffName"
                 name="stud_name"
+                readOnly
                 value={formData.stud_name}
                 onChange={handleChange}
-                readOnly
                 className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
               />
               {errors.stud_name && (
@@ -607,9 +882,9 @@ const EditBonafied = () => {
                 maxLength={50}
                 id="father_name"
                 name="father_name"
+                readOnly
                 value={formData.father_name}
                 onChange={handleChange}
-                readOnly
                 className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
               />
               {errors.father_name && (
@@ -618,6 +893,182 @@ const EditBonafied = () => {
                 </div>
               )}
             </div>
+            {sortNameCookie === "HSCS" && (
+              // Purpose input field here
+              <div>
+                <label
+                  htmlFor="mother_name"
+                  className="block font-bold text-xs mb-2"
+                >
+                  Mother's Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="mother_name"
+                  name="mother_name"
+                  readOnly
+                  value={formData.mother_name}
+                  onChange={handleChange}
+                  className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                />
+                {errors.mother_name && (
+                  <span className="text-red-500 text-xs ml-2">
+                    {errors.mother_name}
+                  </span>
+                )}
+              </div>
+            )}
+
+            <div>
+              <label
+                htmlFor="class_division"
+                className="block font-bold  text-xs mb-2"
+              >
+                Class/Divsion <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                // maxLength={12}
+                id="class_division"
+                name="class_division"
+                readOnly
+                value={formData.class_division}
+                onChange={handleChange} // Using the handleChange function to update formData and validate
+                className="input-field block w-full outline-none border border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+              />
+              {errors.class_division && (
+                <span className="text-red-500 text-xs ml-2">
+                  {errors.class_division}
+                </span>
+              )}
+            </div>
+
+            {sortNameCookie !== "HSCS" && (
+              <div>
+                <label
+                  htmlFor="employeeId"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Purpose <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  maxLength={50}
+                  id="employeeId"
+                  name="purpose"
+                  value={formData.purpose}
+                  onChange={handleChange}
+                  className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                />
+                {errors.purpose && (
+                  <span className="text-red-500 text-xs ml-2">
+                    {errors.purpose}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Additional fields for HSCS */}
+            {sortNameCookie === "HSCS" && (
+              <>
+                <div>
+                  <label
+                    htmlFor="religion"
+                    className="block font-bold text-xs mb-2"
+                  >
+                    Religion
+                  </label>
+                  <input
+                    type="text"
+                    id="religion"
+                    name="religion"
+                    value={formData.religion}
+                    onChange={handleChange}
+                    className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="caste"
+                    className="block font-bold text-xs mb-2"
+                  >
+                    Caste
+                  </label>
+                  <input
+                    type="text"
+                    id="caste"
+                    name="caste"
+                    value={formData.caste}
+                    onChange={handleChange}
+                    className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="subcaste"
+                    className="block font-bold text-xs mb-2"
+                  >
+                    Sub-Caste
+                  </label>
+                  <input
+                    type="text"
+                    id="subcaste"
+                    name="subcaste"
+                    value={formData.subcaste || ""}
+                    onChange={handleChange}
+                    className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="birth_place"
+                    className="block font-bold text-xs mb-2"
+                  >
+                    Birth Place <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="birth_place"
+                    name="birth_place"
+                    readOnly
+                    value={formData.birth_place}
+                    onChange={handleChange}
+                    className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                  />
+                  {errors.birth_place && (
+                    <span className="text-red-500 text-xs ml-2">
+                      {errors.birth_place}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="state"
+                    className="block font-bold text-xs mb-2"
+                  >
+                    State <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="state"
+                    name="state"
+                    readOnly
+                    value={formData.state}
+                    onChange={handleChange}
+                    className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                  />
+                  {errors.state && (
+                    <span className="text-red-500 text-xs ml-2">
+                      {errors.state}
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
             <div>
               <label htmlFor="dob" className="block font-bold text-xs mb-2">
                 Date of Birth <span className="text-red-500">*</span>
@@ -628,9 +1079,9 @@ const EditBonafied = () => {
                 min={MIN_DATE} // Set minimum date
                 max={MAX_DATE} // Set maximum date to today
                 name="dob"
+                readOnly
                 value={formData.dob}
                 onChange={handleChange}
-                readOnly
                 className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
               />
               {errors.dob && (
@@ -650,62 +1101,15 @@ const EditBonafied = () => {
                 maxLength={100}
                 id="dob_words"
                 name="dob_words"
+                readOnly
                 value={formData.dob_words}
                 onChange={handleChange}
-                readOnly
                 className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
               />
               {errors.dob_words && (
                 <div className="text-red-500 text-xs ml-2">
                   {errors.dob_words}
                 </div>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="class_division"
-                className="block font-bold  text-xs mb-2"
-              >
-                Class/Divsion <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                // maxLength={12}
-                id="class_division"
-                readOnly
-                name="class_division"
-                value={formData.class_division}
-                onChange={handleChange} // Using the handleChange function to update formData and validate
-                className="input-field block w-full outline-none border border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-              />
-              {errors.class_division && (
-                <span className="text-red-500 text-xs ml-2">
-                  {errors.class_division}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="employeeId"
-                className="block font-bold  text-xs mb-2"
-              >
-                Purpose <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                maxLength={50}
-                id="employeeId"
-                name="purpose"
-                value={formData.purpose}
-                onChange={handleChange}
-                className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-              />
-              {errors.purpose && (
-                <span className="text-red-500 text-xs ml-2">
-                  {errors.purpose}
-                </span>
               )}
             </div>
             <div>
@@ -720,9 +1124,9 @@ const EditBonafied = () => {
                 maxLength={20}
                 id="Nationality"
                 name="nationality"
+                readOnly
                 value={formData.nationality}
                 onChange={handleChange}
-                readOnly
                 className="block  border w-full border-gray-900 rounded-md py-1 px-3  bg-gray-200 outline-none shadow-inner"
               />
               {errors.nationality && (
@@ -731,6 +1135,31 @@ const EditBonafied = () => {
                 </span>
               )}
             </div>
+
+            {sortNameCookie === "HSCS" && (
+              // Purpose input field here
+              <div className="col-span-3">
+                <label
+                  htmlFor="permant_add"
+                  className="block font-bold text-xs mb-2"
+                >
+                  Address <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="permant_add"
+                  name="permant_add"
+                  readOnly
+                  value={formData.permant_add}
+                  onChange={handleChange}
+                  className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 outline-none shadow-inner"
+                />
+                {errors.permant_add && (
+                  <span className="text-red-500 text-xs ml-2">
+                    {errors.permant_add}
+                  </span>
+                )}
+              </div>
+            )}
 
             <div className="col-span-3 text-right">
               <button
