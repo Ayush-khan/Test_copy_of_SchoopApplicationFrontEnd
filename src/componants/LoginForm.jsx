@@ -20,6 +20,9 @@ const LoginForm = ({ userId }) => {
   const [loading, setLoading] = useState(false);
   const toggleShowPassword = () => setShowPassword(!showPassword);
   const [rememberMe, setRememberMe] = useState(false); // ✅ NEW
+  const [background, setBackground] = useState(null);
+  const defaultBackground = "linear-gradient(to bottom, #E91E63, #2196F3)";
+
   function getAcademicYearLast() {
     const now = new Date();
     const year = now.getFullYear();
@@ -44,7 +47,40 @@ const LoginForm = ({ userId }) => {
   };
   useEffect(() => {
     fetchUserRole();
+    fetchAndSetBackground();
   }, []);
+
+  const fetchAndSetBackground = async () => {
+    const sortName = getCookie("short_name");
+
+    // ✅ Agar short_name cookie nahi hai toh default color set karo
+    if (!sortName) {
+      setBackground(defaultBackground);
+      return;
+    }
+
+    try {
+      const res = await axios.get(`${API_URL}/api/get_activebackgroundcolor`, {
+        withCredentials: true,
+        params: { short_name: sortName },
+      });
+
+      const color = res?.data?.data?.[0]?.color_code;
+
+      if (color && typeof color === "string") {
+        // ✅ Save in cookie
+        document.cookie = `background_color=${color}; path=/; max-age=86400`;
+        setBackground(color);
+      } else {
+        document.cookie = `background_color=; path=/; max-age=0`;
+        setBackground(defaultBackground);
+      }
+    } catch (error) {
+      console.error("Failed to fetch background:", error.message);
+      setBackground(defaultBackground);
+    }
+  };
+
   const roleNameMap = {
     A: "Admin",
     B: "Bus",
@@ -159,6 +195,7 @@ const LoginForm = ({ userId }) => {
         };
         sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
         navigate("/dashboard");
+        return;
       } else {
         return;
       }
