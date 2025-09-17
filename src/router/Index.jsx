@@ -216,6 +216,8 @@ import EditDomainDetails from "../componants/MastersModule/DomainModules/EditDom
 import CreateDomainDetails from "../componants/MastersModule/DomainModules/CreateDomainDetails.jsx";
 import DomainDetails from "../componants/MastersModule/DomainModules/DomainDetails.jsx";
 import DomainCompentencies from "../componants/MastersModule/DomainModules/DomainCompentencies.jsx";
+import SelfAssessment from "../componants/MastersModule/DomainModules/SelfAssessment/SelfAssessment.jsx";
+import SelfAssamentMaster from "../componants/MastersModule/DomainModules/SelfAssessment/SelfAssamentMaster.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -603,6 +605,15 @@ function Index() {
         <Route
           path="/hpcSubjectAllotment"
           element={<PrivateRoute element={<HPCSubjectAllotment />} />}
+        />
+        {/*  */}
+        <Route
+          path="/selfAssessmentMaster"
+          element={<PrivateRoute element={<SelfAssamentMaster />} />}
+        />
+        <Route
+          path="/selfAssessment"
+          element={<PrivateRoute element={<SelfAssessment />} />}
         />
         {/* SubjectForReportCard module */}
         <Route
