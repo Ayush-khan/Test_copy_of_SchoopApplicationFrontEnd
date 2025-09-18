@@ -305,6 +305,10 @@ import DomainDetails from "../componants/MastersModule/DomainModules/DomainDetai
 import DomainCompentencies from "../componants/MastersModule/DomainModules/DomainCompentencies.jsx";
 import SelfAssessment from "../componants/MastersModule/DomainModules/SelfAssessment/SelfAssessment.jsx";
 import SelfAssamentMaster from "../componants/MastersModule/DomainModules/SelfAssessment/SelfAssamentMaster.jsx";
+import PeerFeedbackMaster from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PeerFeedbackMaster.jsx";
+import ImageCropperRC from "../componants/MastersModule/DomainModules/ImageCropperRC.jsx";
+import PhotoUploadForReportCard from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PhotoUploadForReportCard.jsx";
+import PeerFeedback from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PeerFeedback.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -674,6 +678,22 @@ function Index() {
         <Route
           path="/hpcSubjectAllotment"
           element={<PrivateRoute element={<HPCSubjectAllotment />} />}
+        />
+        <Route
+          path="/photoUploadForRC"
+          element={<PrivateRoute element={<PhotoUploadForReportCard />} />}
+        />
+        <Route
+          path="/imageCropperRc"
+          element={<PrivateRoute element={<ImageCropperRC />} />}
+        />
+        <Route
+          path="/peerFeedback"
+          element={<PrivateRoute element={<PeerFeedback />} />}
+        />
+        <Route
+          path="/peerFeedbackMaster"
+          element={<PrivateRoute element={<PeerFeedbackMaster />} />}
         />
         {/*  */}
         <Route

@@ -54,6 +54,14 @@ const Domain = () => {
 
   const [hasShownError, setHasShownError] = useState(false);
 
+  const [appliedFilters, setAppliedFilters] = useState({
+    class_id: null,
+    section_id: null,
+    term_id: null,
+    dm_id: null,
+    subject_id: null,
+  });
+
   useEffect(() => {
     fetchDataRoleId();
     fetchtermsByClassId();
@@ -63,14 +71,6 @@ const Domain = () => {
     if (!roleId || !regId) return; // guard against empty
     fetchClasses(roleId, regId);
   }, [roleId, regId]);
-
-  // useEffect(() => {
-  //   if (selectedStudentId) {
-  //     console.log("Triggering fetchDomain with class_id:", selectedStudentId);
-  //     fetchDomain(selectedStudentId);
-  //     fetchSubject(selectedStudentId);
-  //   }
-  // }, [selectedStudentId]);
 
   useEffect(() => {
     if (selectedStudentId && subjectIdForManage) {
@@ -180,8 +180,12 @@ const Domain = () => {
     setStudentError("");
     setSelectedStudent(selectedOption);
 
-    setSelectedStudentId(selectedOption?.value); // class_id
-    setSelectedSectionId(selectedOption?.section_id); // section_id
+    setSelectedStudentId(selectedOption?.value);
+    setSelectedSectionId(selectedOption?.section_id);
+
+    setSelectedSubject("");
+    setSelectedDomain("");
+    setSelectedTerms("");
 
     console.log("Selected class_id:", selectedOption?.value);
     console.log("Selected section_id:", selectedOption?.section_id);
@@ -252,6 +256,9 @@ const Domain = () => {
     setSubjectError("");
     setSelectedSubject(selectedOption);
     setSubjectIdForManage(selectedOption ? selectedOption.value : null);
+    console.log("hpc_sm_id", selectedOption.value);
+    setSelectedTerms("");
+    setSelectedDomain("");
   };
 
   const fetchDataRoleId = async () => {
@@ -323,19 +330,29 @@ const Domain = () => {
       setTimetable([]);
       const token = localStorage.getItem("authToken");
 
-      const params = {
+      // const params = {
+      //   class_id: selectedStudentId,
+      //   section_id: selectedSectionId,
+      //   subject_id: subjectIdForManage,
+      //   dm_id: selectedDomainId,
+      //   term_id: selectedTerms,
+      // };
+
+      // ✅ Freeze current dropdown values into applied filters
+      const filters = {
         class_id: selectedStudentId,
         section_id: selectedSectionId,
+        term_id: selectedTerms,
         subject_id: subjectIdForManage,
         dm_id: selectedDomainId,
-        term_id: selectedTerms,
       };
+      setAppliedFilters(filters);
 
       const response = await axios.get(
         `${API_URL}/api/get_studentparametervalue`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params,
+          params: filters,
         }
       );
 
@@ -412,12 +429,33 @@ const Domain = () => {
 
       console.log("✅ Selected Records before submit:", selectedRecords);
 
-      const payload = {
+      const filtersToUse = appliedFilters || {
         term_id: selectedTerms,
         class_id: selectedStudentId,
-        subject_id: subjectIdForManage,
         section_id: selectedSectionId,
+        subject_id: subjectIdForManage,
         dm_id: selectedDomainId,
+      };
+
+      if (
+        !filtersToUse.class_id ||
+        !filtersToUse.section_id ||
+        !filtersToUse.term_id ||
+        !filtersToUse.subject_id ||
+        !filtersToUse.dm_id
+      ) {
+        toast.error("Please select Class, Section, and Term before saving.");
+        setIsSaving(false);
+        return;
+      }
+
+      const payload = {
+        // term_id: selectedTerms,
+        // class_id: selectedStudentId,
+        // subject_id: subjectIdForManage,
+        // section_id: selectedSectionId,
+        // dm_id: selectedDomainId,
+        ...filtersToUse,
         records: selectedRecords, // use only the edited state
       };
 
@@ -428,56 +466,30 @@ const Domain = () => {
       );
 
       if (response?.data?.status === 200) {
-        toast.success("Student parameter data saved successfully!");
+        toast.success("Student Domain data saved successfully!");
         window.scrollTo({ top: 0, behavior: "smooth" });
+        if (!appliedFilters) {
+          setAppliedFilters(filtersToUse);
+        }
         setShowStudentReport(false);
       }
     } catch (error) {
-      console.error(" Error saving student parameters:", error);
+      console.error(" Error saving student domain:", error);
       toast.error("Error saving data. Please try again.");
     } finally {
       setIsSaving(false);
     }
   };
 
-  // const handleSubmitPublish = async () => {
-  //   if (isPublishing) return;
-  //   setIsPublishing(true);
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     console.log("✅ Selected Records before submit:", selectedRecords);
-
-  //     const payload = {
-  //       term_id: selectedTerms,
-  //       class_id: selectedStudentId,
-  //       section_id: selectedSectionId,
-  //       dm_id: selectedDomainId,
-  //       records: selectedRecords, // use only the edited state
-  //     };
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/savenpublish_domainparametervalue`,
-  //       payload,
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-
-  //     if (response?.data?.status === 200) {
-  //       toast.success("Student parameter data saved & publish successfully!");
-  //       window.scrollTo({ top: 0, behavior: "smooth" });
-  //       setShowStudentReport(false);
-  //     }
-  //   } catch (error) {
-  //     console.error(" Error saving student parameters:", error);
-  //     toast.error("Error saving data. Please try again.");
-  //   } finally {
-  //     setIsPublishing(false);
-  //   }
-  // };
-
   const handleSubmitPublish = async () => {
     if (isPublishing) return;
+
+    if (!appliedFilters) {
+      toast.error(
+        "Please select Class, Section, and Term and click Browse first."
+      );
+      return;
+    }
 
     const newErrors = {};
     let firstErrorElement = null;
@@ -509,7 +521,7 @@ const Domain = () => {
 
     if (foundError) {
       setPublishErrors(newErrors);
-      toast.error("Please fill all student parameter values before publishing");
+      toast.error("Please fill all student domain values before publishing");
       if (firstErrorElement) {
         firstErrorElement.scrollIntoView({
           behavior: "smooth",
@@ -525,12 +537,20 @@ const Domain = () => {
     try {
       const token = localStorage.getItem("authToken");
 
+      // const payload = {
+      //   term_id: selectedTerms,
+      //   class_id: selectedStudentId,
+      //   section_id: selectedSectionId,
+      //   subject_id: subjectIdForManage,
+      //   dm_id: selectedDomainId,
+      //   records: selectedRecords,
+      // };
       const payload = {
-        term_id: selectedTerms,
-        class_id: selectedStudentId,
-        section_id: selectedSectionId,
-        subject_id: subjectIdForManage,
-        dm_id: selectedDomainId,
+        term_id: appliedFilters.term_id,
+        class_id: appliedFilters.class_id,
+        section_id: appliedFilters.section_id,
+        subject_id: appliedFilters.subject_id,
+        dm_id: appliedFilters.dm_id,
         records: selectedRecords,
       };
 
@@ -541,96 +561,29 @@ const Domain = () => {
       );
 
       if (response?.data?.status === 200) {
-        toast.success("Student parameter data saved & published successfully!");
+        toast.success("Student Domain data saved & published successfully!");
         window.scrollTo({ top: 0, behavior: "smooth" });
         setShowStudentReport(false);
       }
     } catch (error) {
-      console.error("Error saving student parameters:", error);
+      console.error("Error saving student domain:", error);
       toast.error("Error saving data. Please try again.");
     } finally {
       setIsPublishing(false);
     }
   };
 
-  // const handleSubmitPublish = async () => {
-  //   if (isPublishing) return;
-
-  //   // ✅ Build validation errors
-  //   const newErrors = {};
-  //   let firstErrorElement = null;
-
-  //   displayedSections.forEach((student) => {
-  //     (student.parameters || []).forEach((param) => {
-  //       const selectedValue = selectedRecords.find(
-  //         (rec) =>
-  //           rec.student_id === student.student_id &&
-  //           rec.parameter_id === param.parameter_id
-  //       )?.value;
-
-  //       if (!selectedValue) {
-  //         const key = `${student.student_id}-${param.parameter_id}`;
-  //         newErrors[key] = "Please select a level";
-
-  //         // find DOM element to scroll into view
-  //         if (!firstErrorElement) {
-  //           firstErrorElement = document.querySelector(
-  //             `[name="param-${student.student_id}-${param.parameter_id}"]`
-  //           );
-  //         }
-  //       }
-  //     });
-  //   });
-
-  //   if (Object.keys(newErrors).length > 0) {
-  //     setPublishErrors(newErrors);
-  //     toast.error("Please fill all student parameter values before publishing");
-  //     if (firstErrorElement) {
-  //       firstErrorElement.scrollIntoView({
-  //         behavior: "smooth",
-  //         block: "center",
-  //       });
-  //       firstErrorElement.focus();
-  //     }
-  //     return;
-  //   }
-
-  //   // ✅ No validation errors → continue API call
-  //   setIsPublishing(true);
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     const payload = {
-  //       term_id: selectedTerms,
-  //       class_id: selectedStudentId,
-  //       section_id: selectedSectionId,
-  //       dm_id: selectedDomainId,
-  //       records: selectedRecords,
-  //     };
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/savenpublish_domainparametervalue`,
-  //       payload,
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-
-  //     if (response?.data?.status === 200) {
-  //       toast.success("Student parameter data saved & published successfully!");
-  //       window.scrollTo({ top: 0, behavior: "smooth" });
-  //       setShowStudentReport(false);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error saving student parameters:", error);
-  //     toast.error("Error saving data. Please try again.");
-  //   } finally {
-  //     setIsPublishing(false);
-  //   }
-  // };
-
   const handleSubmitUnPublish = async () => {
     if (isUnPublishing) return;
     setIsUnPublishing(true);
     setLoadingForSearch(false);
+
+    if (!appliedFilters) {
+      toast.error(
+        "Please select Class, Section, and Term and click Browse first."
+      );
+      return;
+    }
 
     if (!selectedStudentId) {
       setStudentError("Please select Class.");
@@ -658,12 +611,20 @@ const Domain = () => {
       setTimetable([]);
       const token = localStorage.getItem("authToken");
 
+      // const params = {
+      //   class_id: selectedStudentId,
+      //   section_id: selectedSectionId,
+      //   subject_id: subjectIdForManage,
+      //   dm_id: selectedDomainId,
+      //   term_id: selectedTerms,
+      // };
+
       const params = {
-        class_id: selectedStudentId,
-        section_id: selectedSectionId,
-        subject_id: subjectIdForManage,
-        dm_id: selectedDomainId,
-        term_id: selectedTerms,
+        class_id: appliedFilters.class_id,
+        section_id: appliedFilters.section_id,
+        term_id: appliedFilters.term_id,
+        subject_id: appliedFilters.subject_id,
+        dm_id: appliedFilters.dm_id,
       };
 
       const response = await axios.get(
@@ -687,7 +648,7 @@ const Domain = () => {
         setCheckPublish(checkPublish);
         setTimetable(data);
         setPageCount(Math.ceil(data.length / pageSize));
-        setShowStudentReport(true);
+        setShowStudentReport(false);
 
         // Populate selectedRecords with previously saved values
         const preSelected = [];
@@ -776,7 +737,7 @@ const Domain = () => {
                   <div className="w-full md:w-[99%]  gap-x-0 md:gap-x-4 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                     <div className="w-full md:w-[45%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                       <label
-                        className="md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
+                        className="md:w-[40%] text-md pl-0 md:pl-5 mt-1.5"
                         htmlFor="studentSelect"
                       >
                         Class <span className="text-sm text-red-500">*</span>
@@ -805,7 +766,7 @@ const Domain = () => {
 
                     <div className="w-full md:w-[58%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                       <label
-                        className="md:w-[30%] text-md pl-0 md:pl-5 mt-1.5"
+                        className="md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
                         htmlFor="studentSelect"
                       >
                         Subject <span className="text-sm text-red-500">*</span>
@@ -833,7 +794,7 @@ const Domain = () => {
                     </div>
 
                     <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                      <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
+                      <label className="w-full md:w-[40%] text-md pl-0 md:pl-5 mt-1.5">
                         Terms <span className="text-sm text-red-500">*</span>
                       </label>
                       <div className="w-full md:w-[85%]">
@@ -880,7 +841,7 @@ const Domain = () => {
                     </div>
 
                     <div className="w-full  md:w-[58%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                      <label className="w-full md:w-[37%] text-md pl-0 md:pl-5 mt-1.5">
+                      <label className="w-full md:w-[40%] text-md pl-0 md:pl-5 mt-1.5">
                         Domain <span className="text-sm text-red-500">*</span>
                       </label>
                       <div className="w-full md:w-[85%]">
@@ -978,7 +939,6 @@ const Domain = () => {
                           </h3>
                           <div className="flex items-center w-full">
                             <div className="flex flex-row flex-nowrap items-center gap-4 w-full overflow-x-auto bg-blue-50 border-l-2 border-r-2 border-pink-500 rounded-md shadow-md px-4 py-2">
-                              {/* Class */}
                               <div className="flex items-center gap-2 flex-1 min-w-[150px]">
                                 <label
                                   className="whitespace-nowrap text-sm sm:text-md"
@@ -1010,8 +970,7 @@ const Domain = () => {
                                 </div>
                               </div>
 
-                              {/* Subject */}
-                              <div className="flex items-center gap-2 flex-1 min-w-[230px]">
+                              <div className="flex items-center gap-2 flex-1 min-w-[200px]">
                                 <label className="whitespace-nowrap text-sm sm:text-md">
                                   Subject{" "}
                                   <span className="text-red-500">*</span>
@@ -1039,7 +998,6 @@ const Domain = () => {
                                 </div>
                               </div>
 
-                              {/* Terms */}
                               <div className="flex items-center gap-2 flex-1 min-w-[180px]">
                                 <label className="whitespace-nowrap text-sm sm:text-md">
                                   Terms <span className="text-red-500">*</span>
@@ -1078,8 +1036,7 @@ const Domain = () => {
                                 </div>
                               </div>
 
-                              {/* Domain */}
-                              <div className="flex items-center gap-2 flex-1 min-w-[230px]">
+                              <div className="flex items-center gap-2 flex-1 min-w-[200px]">
                                 <label className="whitespace-nowrap text-sm sm:text-md">
                                   Domain <span className="text-red-500">*</span>
                                 </label>
@@ -1108,8 +1065,7 @@ const Domain = () => {
                                 </div>
                               </div>
 
-                              {/* Browse button */}
-                              <div className="flex items-center min-w-[120px]">
+                              <div className="flex items-center min-w-[90px]">
                                 <button
                                   type="button"
                                   onClick={handleSearch}
@@ -1145,7 +1101,7 @@ const Domain = () => {
 
                         {/* Subject + Domain centered below */}
                         <div
-                          className="mt-2 font-semibold text-center"
+                          className="font-semibold text-center"
                           style={{ color: "#C03078" }}
                         >
                           {selectedSubject?.label} {" : "}{" "}
@@ -1153,7 +1109,7 @@ const Domain = () => {
                         </div>
                       </div>
 
-                      <div className="card-body w-full">
+                      <div className="card-body w-full pt-0">
                         <div
                           className="h-96 overflow-y-auto"
                           style={{
@@ -1168,30 +1124,21 @@ const Domain = () => {
                               style={{ zIndex: "1px" }}
                             >
                               <tr className="bg-gray-200">
-                                {[
-                                  "Sr No.",
-                                  "Roll No.",
-                                  "Student Name",
-                                  "Parameters",
-                                  "Options",
-                                ].map((header, index) => {
-                                  const columnWidths = [
-                                    "w-[5%]",
-                                    "w-[6%]",
-                                    "w-[15%]",
-                                    "w-[45%]",
-                                    "w-[24%]",
-                                  ];
-
-                                  return (
-                                    <th
-                                      key={index}
-                                      className={`px-2 text-center lg:px-3 py-2 border-2 border-gray-400 text-sm font-semibold text-gray-900 tracking-wider ${columnWidths[index]}`}
-                                    >
-                                      {header}
-                                    </th>
-                                  );
-                                })}
+                                <th className="px-2 lg:px-3 py-2 border-2 border-gray-400 text-center text-sm font-semibold text-gray-900 tracking-wider">
+                                  Sr No.
+                                </th>
+                                <th className="px-2 lg:px-3 py-2 border-2 border-gray-400 text-center text-sm font-semibold text-gray-900 tracking-wider">
+                                  Roll No.
+                                </th>
+                                <th className="px-2 lg:px-3 py-2 border-2 border-gray-400 text-center text-sm font-semibold text-gray-900 tracking-wider w-[15%]">
+                                  Student Name
+                                </th>
+                                <th className="px-2 lg:px-3 py-2 border-2 border-gray-400 text-center text-sm font-semibold text-gray-900 tracking-wider w-[45%]">
+                                  Parameters
+                                </th>
+                                <th className="px-2 lg:px-3 py-2 border-2 border-gray-400 text-center text-sm font-semibold text-gray-900 tracking-wider w-[25%]">
+                                  Options
+                                </th>
                               </tr>
                             </thead>
 
@@ -1237,7 +1184,7 @@ const Domain = () => {
                                         //Last parameter row
                                         <>
                                           <td className="px-2 py-2 border-b-2 text-sm border-r-2 border-gray-400">
-                                            {param.parameter} test
+                                            {param.parameter}
                                           </td>
                                           <td className="px-2 py-2 text-center text-sm border-b-2 border-r-2 border-gray-400">
                                             {[
@@ -1284,7 +1231,7 @@ const Domain = () => {
                                         // First parameter row
                                         <>
                                           <td className="px-2 py-2 text-sm border-r-2 border-gray-400">
-                                            {param.parameter} test
+                                            {param.parameter}
                                           </td>
                                           <td className="px-2 py-2 text-center text-sm  border-r-2 border-gray-400">
                                             {[
