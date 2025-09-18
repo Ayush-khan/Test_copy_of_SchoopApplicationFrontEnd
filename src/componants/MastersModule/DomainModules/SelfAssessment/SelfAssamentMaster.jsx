@@ -79,7 +79,7 @@ function SelfAssessmentMaster() {
         }
       );
 
-      console.log("self assessment", response.data.data);
+      console.log("learner's feedback", response.data.data);
       setSections(response.data.data);
       setPageCount(Math.ceil(response.data.length / pageSize));
     } catch (error) {
@@ -275,7 +275,7 @@ function SelfAssessmentMaster() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Self Assesssment Parameter added successfully!");
+      toast.success("Learner's Feedback Parameter added successfully!");
       reset();
     } catch (error) {
       console.error("Error adding parameter:", error);
@@ -328,7 +328,7 @@ function SelfAssessmentMaster() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Self Assessment Parameter updated successfully!");
+      toast.success("Learner's Feedback Parameter updated successfully!");
     } catch (error) {
       console.error("Error editing parametr:", error);
       console.log("erroris", error.response);
@@ -384,14 +384,14 @@ function SelfAssessmentMaster() {
         fetchSections();
         setShowDeleteModal(false);
         setCurrentSection(null);
-        toast.success("Self Assessment Parameter deleted successfully!");
+        toast.success("Learner's Feedback Parameter deleted successfully!");
       } else {
         toast.error(response.data.message || "Failed to delete parameter");
       }
     } catch (error) {
       if (error.response && error.response.status === 409) {
         toast.error(
-          "Cannot Delete. This self assessment paramter already use in self assessment."
+          "Cannot Delete. This learner's feedback paramter already use in learner's feedback."
         );
       } else {
         toast.error("Something went wrong. Please try again.");
@@ -458,7 +458,7 @@ function SelfAssessmentMaster() {
         <div className="card mx-auto lg:w-[70%] shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Self Assessment Parameter
+              Learner's Feedback Parameter
             </h3>{" "}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -652,7 +652,7 @@ function SelfAssessmentMaster() {
                 <div className="modal-content">
                   <div className="flex justify-between p-3">
                     <h5 className="modal-title">
-                      Create Self Assessment Parameter
+                      Create Learner's Feedback Parameter
                     </h5>
 
                     <RxCross1
@@ -807,7 +807,7 @@ function SelfAssessmentMaster() {
               <div className="modal-content">
                 <div className="flex justify-between p-3">
                   <h5 className="modal-title">
-                    Edit Self Assessment Parameter
+                    Edit Learner's Feedback Parameter
                   </h5>
                   <RxCross1
                     className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -964,7 +964,7 @@ function SelfAssessmentMaster() {
                 ></div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to delete Self Assesssment Parameter
+                    Are you sure you want to delete Learner's Feedback Parameter
                     for {currentSection.classname} : {currentSection.parameter}{" "}
                     ?
                   </p>

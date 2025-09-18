@@ -697,11 +697,11 @@ function Index() {
         />
         {/*  */}
         <Route
-          path="/selfAssessmentMaster"
+          path="/learnerFeedbackMaster"
           element={<PrivateRoute element={<SelfAssamentMaster />} />}
         />
         <Route
-          path="/selfAssessment"
+          path="/learnerFeedback"
           element={<PrivateRoute element={<SelfAssessment />} />}
         />
         {/* SubjectForReportCard module */}

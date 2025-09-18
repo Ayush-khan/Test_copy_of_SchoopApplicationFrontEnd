@@ -275,7 +275,7 @@ const SelfAssessment = () => {
       setParameter(response.data.parameters);
 
       if (!response?.data?.students || response?.data?.students.length === 0) {
-        toast.error("Student Self Assessment not found.");
+        toast.error("Learner's Feedback not found.");
         setTimetable([]);
         setSelectedRecords([]);
       } else {
@@ -304,8 +304,8 @@ const SelfAssessment = () => {
         setSelectedRecords(preSelected);
       }
     } catch (error) {
-      console.error("Error fetching Self Assessment:", error);
-      toast.error("Error fetching Student Self Assessment. Please try again.");
+      console.error("Error fetching Learner's Feedback:", error);
+      toast.error("Error fetching Learner's Feedback. Please try again.");
     } finally {
       setIsSubmitting(false);
       setLoadingForSearch(false);
@@ -350,7 +350,7 @@ const SelfAssessment = () => {
       );
 
       if (response?.data?.status === 200) {
-        toast.success("Student self assessment saved successfully!");
+        toast.success("Learner's feedback saved successfully!");
         window.scrollTo({ top: 0, behavior: "smooth" });
 
         // If save without Browse → still mark filters as applied
@@ -363,7 +363,7 @@ const SelfAssessment = () => {
         toast.error(response?.data?.message || "Something went wrong");
       }
     } catch (error) {
-      console.error("Error saving student self assessment:", error);
+      console.error("Error saving  learner's feedback:", error);
       toast.error("Error saving data. Please try again.");
     } finally {
       setIsSaving(false);
@@ -437,14 +437,12 @@ const SelfAssessment = () => {
       );
 
       if (response?.data?.status === 200) {
-        toast.success(
-          "Student self assessment saved & published successfully!"
-        );
+        toast.success("Learner's feedback saved & published successfully!");
         window.scrollTo({ top: 0, behavior: "smooth" });
         setShowStudentReport(false);
       }
     } catch (error) {
-      console.error("Error saving student self assessment:", error);
+      console.error("Error saving  learner's feedback:", error);
       toast.error("Error saving data. Please try again.");
     } finally {
       setIsPublishing(false);
@@ -485,7 +483,7 @@ const SelfAssessment = () => {
       );
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
-        toast.success("Student self assessment unpublished successfully.");
+        toast.success("Learner's feedback unpublished successfully.");
         setShowStudentReport(false);
         setTimetable([]);
         setSelectedRecords([]);
@@ -515,8 +513,8 @@ const SelfAssessment = () => {
         setSelectedRecords(preSelected);
       }
     } catch (error) {
-      console.error("Error unpublishing Student Self Assessment:", error);
-      toast.error("Error fetching Student Self Assessment Please try again.");
+      console.error("Error unpublishing Learner's Feedback:", error);
+      toast.error("Error fetching Learner's Feedback Please try again.");
     } finally {
       setIsUnPublishing(false);
       setLoadingForSearch(false);
@@ -556,7 +554,7 @@ const SelfAssessment = () => {
             <>
               <div className=" card-header mb-4 flex justify-between items-center ">
                 <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-                  Self Assessment
+                  Learner's Feedback
                 </h5>
                 <RxCross1
                   className="  relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -709,7 +707,7 @@ const SelfAssessment = () => {
                       <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
                         <div className="w-full flex flex-row items-center justify-between ">
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
-                            Self Assessment
+                            Learner's Feedback
                           </h3>
                           {/* <div className="flex items-center w-[60%] md:mr-36"> */}
                           <div className="flex items-center flex-1 max-w-3xl mx-auto">
@@ -830,7 +828,7 @@ const SelfAssessment = () => {
                           }}
                         >
                           <table
-                            className=" table-auto  border border-gray-400"
+                            className=" table-auto border-collapse border border-gray-400"
                             // w-[1500px]
                           >
                             <thead
