@@ -309,6 +309,8 @@ import ImageCropperRC from "../componants/MastersModule/DomainModules/ImageCropp
 import PhotoUploadForReportCard from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PhotoUploadForReportCard.jsx";
 import PeerFeedback from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PeerFeedback.jsx";
 import PeerFeedbackMaster from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/ParentsFeedbackMaster.jsx";
+import ParentFeedback from "../componants/MastersModule/DomainModules/ParentFeedbackmodules/ParentFeedback.jsx";
+import ParentsFeedbackMaster from "../componants/MastersModule/DomainModules/ParentFeedbackmodules/ParentsFeedbackMaster.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -694,6 +696,15 @@ function Index() {
         <Route
           path="/peerFeedbackMaster"
           element={<PrivateRoute element={<PeerFeedbackMaster />} />}
+        />
+        {/* parent feedback */}
+        <Route
+          path="/parentFeedbackMaster"
+          element={<PrivateRoute element={<ParentsFeedbackMaster />} />}
+        />
+        <Route
+          path="/parentFeedback"
+          element={<PrivateRoute element={<ParentFeedback />} />}
         />
         {/*  */}
         <Route
