@@ -759,30 +759,39 @@ const StudentsChart = () => {
             .reduce((total, value) => total + value, 0);
           return totalStudents > 0;
         });
+        const transformedData = filteredData.map((entry) => {
+          const className = entry.class.includes(" - ")
+            ? entry.class.replace(" - ", "\n")
+            : entry.class;
 
-        const classOrder = [
-          "Nursery",
-          "LKG",
-          "UKG",
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9",
-          "10",
-          "11",
-          "12",
-        ];
+          return { ...entry, class: className };
+        });
+        setData(transformedData);
 
-        const sortedData = filteredData.sort(
-          (a, b) => classOrder.indexOf(a.class) - classOrder.indexOf(b.class)
-        );
+        // const classOrder = [
+        //   "Nursery",
+        //   "LKG",
+        //   "UKG",
+        //   "1",
+        //   "2",
+        //   "3",
+        //   "4",
+        //   "5",
+        //   "6",
+        //   "7",
+        //   "8",
+        //   "9",
+        //   "10",
+        //   "11",
+        //   "12",
+        // ];
 
-        setData(sortedData);
+        // const sortedData = filteredData.sort(
+        //   (a, b) => classOrder.indexOf(a.class) - classOrder.indexOf(b.class)
+        // );
+
+        // setData(sortedData);
+        setData(filteredData);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -792,6 +801,27 @@ const StudentsChart = () => {
 
     fetchData();
   }, []);
+  const renderCustomXAxisTick = ({ x, y, payload }) => {
+    const lines = payload.value.split(" - ");
+
+    return (
+      <g transform={`translate(${x},${y})`}>
+        {lines.map((line, index) => (
+          <text
+            key={index}
+            x={0}
+            y={index * 10}
+            dy={16}
+            textAnchor="middle"
+            fontSize={xAxisFontSize}
+            fill="#666"
+          >
+            {line}
+          </text>
+        ))}
+      </g>
+    );
+  };
 
   const renderTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -888,13 +918,21 @@ const StudentsChart = () => {
             margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
             barCategoryGap={barCategoryGap}
           >
-            <XAxis
+            {/* <XAxis
               dataKey="class"
               tick={{ fontSize: xAxisFontSize }}
               interval={0}
               tickMargin={xAxisTickMargin}
               tickSize={xAxisTickWidth}
+            /> */}
+            <XAxis
+              dataKey="class"
+              tick={renderCustomXAxisTick}
+              interval={0}
+              tickMargin={xAxisTickMargin}
+              tickSize={xAxisTickWidth}
             />
+
             <YAxis />
             <Tooltip content={renderTooltip} />
             <Legend />
