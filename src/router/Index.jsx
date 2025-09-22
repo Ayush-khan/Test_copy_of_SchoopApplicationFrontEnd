@@ -308,9 +308,11 @@ import SelfAssamentMaster from "../componants/MastersModule/DomainModules/SelfAs
 import ImageCropperRC from "../componants/MastersModule/DomainModules/ImageCropperRC.jsx";
 import PhotoUploadForReportCard from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PhotoUploadForReportCard.jsx";
 import PeerFeedback from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PeerFeedback.jsx";
-import PeerFeedbackMaster from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/ParentsFeedbackMaster.jsx";
 import ParentFeedback from "../componants/MastersModule/DomainModules/ParentFeedbackmodules/ParentFeedback.jsx";
 import ParentsFeedbackMaster from "../componants/MastersModule/DomainModules/ParentFeedbackmodules/ParentsFeedbackMaster.jsx";
+import PeerFeedbackMaster from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PeerFeedbackMaster.jsx";
+import AllAboutMe from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMe.jsx";
+import AllAboutMeMaster from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMeMaster.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -705,6 +707,15 @@ function Index() {
         <Route
           path="/parentFeedback"
           element={<PrivateRoute element={<ParentFeedback />} />}
+        />
+        {/* All about me and master modules */}
+        <Route
+          path="/allAboutMe"
+          element={<PrivateRoute element={<AllAboutMe />} />}
+        />
+        <Route
+          path="/allAboutMeMaster"
+          element={<PrivateRoute element={<AllAboutMeMaster />} />}
         />
         {/*  */}
         <Route

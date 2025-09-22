@@ -9,7 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 
 // The is the divisionlist module
-function ParentsFeedbackMaster() {
+function PeerFeedbackMaster() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,6 @@ function ParentsFeedbackMaster() {
   const [roleId, setRoleId] = useState("");
   const [classes, setClasses] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [controlType, setControlType] = useState("");
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
@@ -70,7 +69,7 @@ function ParentsFeedbackMaster() {
       }
 
       const response = await axios.get(
-        `${API_URL}/api/get_selfassessmentmaster`,
+        `${API_URL}/api/get_peerfeedbackmaster`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -79,7 +78,7 @@ function ParentsFeedbackMaster() {
         }
       );
 
-      console.log("parent's Feedback", response.data.data);
+      console.log("self assessment", response.data.data);
       setSections(response.data.data);
       setPageCount(Math.ceil(response.data.length / pageSize));
     } catch (error) {
@@ -133,6 +132,7 @@ function ParentsFeedbackMaster() {
     prevSearchTermRef.current = trimmedSearch;
   }, [searchTerm]);
 
+  // Filtering by class name or division name
   const searchLower = searchTerm.trim().toLowerCase();
   const filteredSections = sections.filter((section) => {
     const className = section?.classname?.toString().toLowerCase() || "";
@@ -153,7 +153,6 @@ function ParentsFeedbackMaster() {
     setPageCount(Math.ceil(filteredSections.length / pageSize));
   }, [filteredSections, pageSize]);
 
-  // Paginate filtered results
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -161,50 +160,20 @@ function ParentsFeedbackMaster() {
 
   console.log("displayed sections", displayedSections);
 
-  const reset = () => {
-    setNewDepartmentId("");
-    setNewSectionName("");
-    setControlType(null);
-    setSearchTerm(""); // ✅ clear search term
-  };
-
-  // const validateSectionName = (parameter, classId, control_type) => {
-  //   const errors = {};
-
-  //   console.log("parameter", parameter);
-
-  //   if (!parameter || parameter.trim() === "") {
-  //     errors.parameter = "Please enter parameter.";
-  //   } else if (parameter.length > 50) {
-  //     errors.parameter = "The name field must not exceed 50 character.";
-  //   }
-
-  //   if (!classId) {
-  //     errors.class_id = "Please select class.";
-  //   }
-
-  //   if (!control_type) {
-  //     error.control_type = "Please enter type";
-  //   }
-
-  //   return errors;
-  // };
-
-  const validateSectionName = (parameter, classId, control_type) => {
+  const validateSectionName = (parameter, classId) => {
     const errors = {};
+
+    console.log("parameter", parameter);
 
     if (!parameter || parameter.trim() === "") {
       errors.parameter = "Please enter parameter.";
-    } else if (parameter.length > 50) {
-      errors.parameter = "The name field must not exceed 50 characters.";
     }
+    // else if (parameter.length > 30) {
+    //   errors.parameter = "The name field must not exceed 30 character.";
+    // }
 
     if (!classId) {
       errors.class_id = "Please select class.";
-    }
-
-    if (!control_type || control_type.trim() === "") {
-      errors.control_type = "Please enter type.";
     }
 
     return errors;
@@ -219,7 +188,6 @@ function ParentsFeedbackMaster() {
     setNewSectionName(section.parameter);
     setClassName(section.class_id);
     setNewDepartmentId(section.class_id);
-    setControlType(section.control_type);
     setShowEditModal(true);
   };
 
@@ -233,7 +201,6 @@ function ParentsFeedbackMaster() {
     setShowDeleteModal(false);
     setNewSectionName("");
     setNewDepartmentId("");
-    setControlType("");
     setCurrentSection(null);
     setFieldErrors({});
     setNameError("");
@@ -242,13 +209,10 @@ function ParentsFeedbackMaster() {
   const handleSubmitAdd = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-
     const validationErrors = validateSectionName(
       newSectionName,
-      newDepartmentId,
-      controlType
+      newDepartmentId
     );
-
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       setIsSubmitting(false);
@@ -264,9 +228,8 @@ function ParentsFeedbackMaster() {
       const formData = new FormData();
       formData.append("parameter", newSectionName);
       formData.append("class_id", newDepartmentId);
-      formData.append("control_type", controlType);
 
-      await axios.post(`${API_URL}/api/save_selfassessmentmaster`, formData, {
+      await axios.post(`${API_URL}/api/save_peerfeedbackmaster`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -275,8 +238,7 @@ function ParentsFeedbackMaster() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Parent's Feedback Parameter added successfully!");
-      reset();
+      toast.success("Peer Feedback Parameter added successfully!");
     } catch (error) {
       console.error("Error adding parameter:", error);
       if (error.response && error.response.data && error.response.data.errors) {
@@ -291,16 +253,20 @@ function ParentsFeedbackMaster() {
     }
   };
 
+  const reset = () => {
+    setNewDepartmentId("");
+    setNewSectionName("");
+    setSearchTerm("");
+  };
+
   const handleSubmitEdit = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
 
     const validationErrors = validateSectionName(
       newSectionName,
-      newDepartmentId,
-      controlType
+      newDepartmentId
     );
-
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       setIsSubmitting(false);
@@ -309,17 +275,13 @@ function ParentsFeedbackMaster() {
 
     try {
       const token = localStorage.getItem("authToken");
-      if (!token || !currentSection || !currentSection.sam_id) {
+      if (!token || !currentSection || !currentSection.pfm_id) {
         throw new Error("No authentication token or section ID found");
       }
 
       await axios.put(
-        `${API_URL}/api/update_selfassessmentmaster/${currentSection.sam_id}`,
-        {
-          parameter: newSectionName,
-          class_id: newDepartmentId,
-          control_type: controlType,
-        },
+        `${API_URL}/api/update_peerfeedbackmaster/${currentSection.pfm_id}`,
+        { parameter: newSectionName, class_id: newDepartmentId },
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -328,9 +290,9 @@ function ParentsFeedbackMaster() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Parent's Feedback Parameter updated successfully!");
+      toast.success("Peer Feedback Parameter updated successfully!");
     } catch (error) {
-      console.error("Error editing parametr:", error);
+      console.error("Error editing parameter:", error);
       console.log("erroris", error.response);
       if (error.response && error.response.data.status === 422) {
         const errors = error.response.data.errors;
@@ -353,7 +315,7 @@ function ParentsFeedbackMaster() {
   };
 
   const handleDelete = (id) => {
-    const sectionToDelete = sections.find((sec) => sec.sam_id === id);
+    const sectionToDelete = sections.find((sec) => sec.pfm_id === id);
     setCurrentSection(sectionToDelete);
     setShowDeleteModal(true);
   };
@@ -365,12 +327,12 @@ function ParentsFeedbackMaster() {
       const token = localStorage.getItem("authToken");
       const academicYr = localStorage.getItem("academicYear");
 
-      if (!token || !currentSection || !currentSection.sam_id) {
+      if (!token || !currentSection || !currentSection.pfm_id) {
         throw new Error("Division ID is missing");
       }
 
       const response = await axios.delete(
-        `${API_URL}/api/delete_selfassessmentmaster/${currentSection.sam_id}`,
+        `${API_URL}/api/delete_peerfeedbackmaster/${currentSection.pfm_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -384,15 +346,13 @@ function ParentsFeedbackMaster() {
         fetchSections();
         setShowDeleteModal(false);
         setCurrentSection(null);
-        toast.success("Parent's Feedback Parameter deleted successfully!");
+        toast.success("Peer Feedback Parameter deleted successfully!");
       } else {
         toast.error(response.data.message || "Failed to delete parameter");
       }
     } catch (error) {
-      if (error.response && error.response.status === 409) {
-        toast.error(
-          "Cannot Delete. This parent's Feedback paramter already use in parent's Feedback."
-        );
+      if (error.response && error.response.status === 422) {
+        toast.error("This parameter is used in peer feedback");
       } else {
         toast.error("Something went wrong. Please try again.");
       }
@@ -406,11 +366,9 @@ function ParentsFeedbackMaster() {
     const { value } = e.target;
     setNameError("");
     setNewSectionName(value);
-
-    const errors = validateSectionName(value, newDepartmentId);
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
-      parameter: errors.parameter,
+      parameter: validateSectionName(value, newDepartmentId).parameter,
     }));
   };
 
@@ -418,37 +376,11 @@ function ParentsFeedbackMaster() {
     const { value } = e.target;
     setClassName(value);
     setNewDepartmentId(value);
-
-    const errors = validateSectionName(newSectionName, value);
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
-      class_id: errors.class_id,
+      class_id: validateSectionName(newSectionName, e.target.value).class_id,
     }));
   };
-
-  const handleChangeControlType = (e) => {
-    const { value } = e.target;
-    setNameError("");
-    setControlType(value);
-
-    // ✅ validate using the latest state + new control type value
-    const errors = validateSectionName(newSectionName, newDepartmentId, value);
-
-    setFieldErrors((prevErrors) => ({
-      ...prevErrors,
-      control_type: errors.control_type || "", // clear error if valid
-    }));
-  };
-
-  const controlOptions = [
-    { value: "radio", label: "Radio Button" },
-    { value: "checkbox", label: "Checkbox" },
-    { value: "text", label: "Text Box" },
-    { value: "textarea", label: "Text Area" },
-    // { value: "select", label: "Dropdown" },
-    // { value: "number", label: "Number Input" },
-    // { value: "date", label: "Date Picker" },
-  ];
 
   return (
     <>
@@ -458,7 +390,7 @@ function ParentsFeedbackMaster() {
         <div className="card mx-auto lg:w-[70%] shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Parent's Feedback Parameter
+              Peer Feedback Parameters
             </h3>{" "}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -540,7 +472,6 @@ function ParentsFeedbackMaster() {
                         )}
                       </tr>
                     </thead>
-
                     <tbody>
                       {loading ? (
                         <tr>
@@ -569,27 +500,26 @@ function ParentsFeedbackMaster() {
                                 {section?.classname}
                               </p>
                             </td>
-                            <td className="text-center px-2 border border-gray-950 text-sm">
+                            <td className="text-center px-2  border border-gray-950 text-sm">
                               <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                 {section.parameter}
                               </p>
                             </td>
-
                             {roleId !== "M" && (
                               <>
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   <button
-                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                                     onClick={() => handleEdit(section)}
                                   >
                                     <FontAwesomeIcon icon={faEdit} />
-                                  </button>
+                                  </button>{" "}
                                 </td>
 
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   <button
-                                    className="text-red-600 hover:text-red-800 hover:bg-transparent"
-                                    onClick={() => handleDelete(section.sam_id)}
+                                    className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                    onClick={() => handleDelete(section.pfm_id)}
                                   >
                                     <FontAwesomeIcon icon={faTrash} />
                                   </button>
@@ -599,14 +529,11 @@ function ParentsFeedbackMaster() {
                           </tr>
                         ))
                       ) : (
-                        <tr>
-                          <td
-                            colSpan="6"
-                            className="text-center text-xl text-red-700 py-10"
-                          >
+                        <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                          <div className=" text-center text-xl text-red-700">
                             Oops! No data found..
-                          </td>
-                        </tr>
+                          </div>
+                        </div>
                       )}
                     </tbody>
                   </table>
@@ -652,7 +579,7 @@ function ParentsFeedbackMaster() {
                 <div className="modal-content">
                   <div className="flex justify-between p-3">
                     <h5 className="modal-title">
-                      Create Parent's Feedback Parameter
+                      Create Peer Feedback Parameter
                     </h5>
 
                     <RxCross1
@@ -703,7 +630,6 @@ function ParentsFeedbackMaster() {
                         )}
                       </div>
                     </div>
-
                     <div className=" relative mb-3 flex justify-center  mx-4">
                       <label htmlFor="sectionName" className="w-1/2 mt-2">
                         Parameter <span className="text-red-500">*</span>
@@ -729,45 +655,12 @@ function ParentsFeedbackMaster() {
                         )}
                       </div>
                     </div>
-
-                    <div className=" relative mb-3 flex justify-center  mx-4">
-                      <label htmlFor="controlType" className="w-1/2 mt-2">
-                        Control Type <span className="text-red-500">*</span>
-                      </label>
-
-                      <select
-                        id="controlType"
-                        className="form-control shadow-md"
-                        value={controlType}
-                        onChange={handleChangeControlType}
-                      >
-                        <option value="">Select</option>
-                        {controlOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-
-                      <div className="absolute top-9 left-1/3">
-                        {!nameAvailable && (
-                          <span className=" block text-danger text-xs">
-                            {nameError}
-                          </span>
-                        )}
-                        {fieldErrors.control_type && (
-                          <span className="text-danger text-xs">
-                            {fieldErrors.control_type}
-                          </span>
-                        )}
-                      </div>
-                    </div>
                   </div>
 
                   <div className=" flex justify-end p-3">
                     <button
                       type="button"
-                      className="btn btn-primary px-3 mb-2 mr-2"
+                      className="btn btn-primary px-3 mb-2 mr-2 "
                       style={{}}
                       onClick={handleSubmitAdd}
                       disabled={isSubmitting}
@@ -806,9 +699,7 @@ function ParentsFeedbackMaster() {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">
-                    Edit Parent's Feedback Parameter
-                  </h5>
+                  <h5 className="modal-title">Edit Peer Feedback Parameter</h5>
                   <RxCross1
                     className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -881,39 +772,6 @@ function ParentsFeedbackMaster() {
                       )}
                     </div>
                   </div>
-
-                  <div className=" relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="controlType" className="w-1/2 mt-2">
-                      Control Type <span className="text-red-500">*</span>
-                    </label>
-
-                    <select
-                      id="controlType"
-                      className="form-control shadow-md"
-                      value={controlType} // shows saved value now
-                      onChange={handleChangeControlType}
-                    >
-                      <option value="">Select </option>
-                      {controlOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-
-                    <div className="absolute top-9 left-1/3">
-                      {!nameAvailable && (
-                        <span className=" block text-danger text-xs">
-                          {nameError}
-                        </span>
-                      )}
-                      {fieldErrors.control_type && (
-                        <span className="text-danger text-xs">
-                          {fieldErrors.control_type}
-                        </span>
-                      )}
-                    </div>
-                  </div>
                 </div>
                 <div className=" flex justify-end p-3">
                   <button
@@ -964,12 +822,12 @@ function ParentsFeedbackMaster() {
                 ></div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to delete Parent's Feedback Parameter
-                    for {currentSection.classname} : {currentSection.parameter}{" "}
-                    ?
+                    Are you sure you want to delete Peer Feedback Parameter for{" "}
+                    {currentSection.classname} : {currentSection.parameter} ?
                   </p>
                 </div>
                 <div className=" flex justify-end p-3">
+                  {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
                   <button
                     type="button"
                     className="btn btn-danger px-3 mb-2"
@@ -989,4 +847,4 @@ function ParentsFeedbackMaster() {
   );
 }
 
-export default ParentsFeedbackMaster;
+export default PeerFeedbackMaster;
