@@ -161,7 +161,7 @@ function AllAboutMeMaster() {
   const reset = () => {
     setNewDepartmentId("");
     setNewSectionName("");
-    setSearchTerm(""); // ✅ clear search term
+    setSearchTerm("");
   };
   const validateSectionName = (name, classId) => {
     const errors = {};
@@ -170,8 +170,8 @@ function AllAboutMeMaster() {
 
     if (!name || name.trim() === "") {
       errors.name = "Please enter parameter.";
-    } else if (name.length > 100) {
-      errors.name = "The name field must not exceed 30 character.";
+    } else if (name.length > 500) {
+      errors.name = "The name field must not exceed 500 character.";
     }
 
     if (!classId) {
@@ -638,7 +638,7 @@ function AllAboutMeMaster() {
                       </label>
                       <input
                         type="text"
-                        maxLength={100}
+                        maxLength={500}
                         className="form-control shadow-md mb-2"
                         id="sectionName"
                         value={newSectionName}
@@ -753,7 +753,7 @@ function AllAboutMeMaster() {
                     </label>
                     <input
                       type="text"
-                      maxLength={100}
+                      maxLength={500}
                       className="form-control shadow-md mb-2"
                       id="editSectionName"
                       value={newSectionName}

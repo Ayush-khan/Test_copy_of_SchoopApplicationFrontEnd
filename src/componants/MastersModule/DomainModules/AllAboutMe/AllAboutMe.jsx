@@ -56,7 +56,6 @@ const AllAboutMe = () => {
 
   useEffect(() => {
     fetchDataRoleId();
-    fetchtermsByClassId();
   }, []);
 
   useEffect(() => {
@@ -64,6 +63,12 @@ const AllAboutMe = () => {
     fetchClasses(roleId, regId);
   }, [roleId, regId]);
 
+  useEffect(() => {
+    if (!studentNameWithClassId || studentNameWithClassId.length === 0) return;
+
+    // ✅ auto-fetch for first class only with class_id
+    fetchtermsByClassId(studentNameWithClassId[0].class_id);
+  }, [studentNameWithClassId]);
   const fetchClasses = async (roleId, regId) => {
     const token = localStorage.getItem("authToken");
     setLoadingExams(true);
@@ -92,7 +97,7 @@ const AllAboutMe = () => {
 
         setStudentNameWithClassId(mappedData || []);
       } else {
-        const response = await axios.get(`${API_URL}/api/g`, {
+        const response = await axios.get(`${API_URL}/api/get_class_section`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -106,12 +111,15 @@ const AllAboutMe = () => {
     }
   };
 
-  const fetchtermsByClassId = async () => {
+  const fetchtermsByClassId = async (classId) => {
     const token = localStorage.getItem("authToken");
     try {
-      const response = await axios.get(`${API_URL}/api/get_allaboutmemaster`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_allaboutmemasterbyclassid?class_id=${classId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       const mappedExams =
         response?.data?.data?.map((exam) => ({
@@ -247,7 +255,7 @@ const AllAboutMe = () => {
       return;
     }
     if (!selectedTerms) {
-      setTermError("Please select Term.");
+      setTermError("Please select parameter.");
       setLoadingForSearch(false);
       return;
     }
@@ -824,10 +832,7 @@ const AllAboutMe = () => {
                             scrollbarColor: "#C03178 transparent",
                           }}
                         >
-                          <table
-                            className="min-w-full leading-normal table-auto "
-                            // w-[1500px]
-                          >
+                          <table className="min-w-full leading-normal table-auto ">
                             <thead
                               className="sticky top-0  bg-gray-200"
                               style={{ zIndex: "1px" }}
@@ -919,7 +924,7 @@ const AllAboutMe = () => {
                                               )
                                             }
                                             className="w-full p-1 border rounded text-sm"
-                                            maxLength={40}
+                                            maxLength={500}
                                           />
 
                                           {publishErrors?.[

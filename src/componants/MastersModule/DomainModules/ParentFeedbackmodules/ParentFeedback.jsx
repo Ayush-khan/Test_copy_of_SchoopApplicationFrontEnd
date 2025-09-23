@@ -93,7 +93,7 @@ const ParentFeedback = () => {
 
         setStudentNameWithClassId(mappedData || []);
       } else {
-        const response = await axios.get(`${API_URL}/api/g`, {
+        const response = await axios.get(`${API_URL}/api/get_class_section`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -826,7 +826,6 @@ const ParentFeedback = () => {
                       </div>
 
                       <div className="w-[97%] mx-auto text-center">
-                        {/* Top colored line */}
                         <div
                           className="h-1"
                           style={{ backgroundColor: "#C03078" }}
@@ -835,320 +834,164 @@ const ParentFeedback = () => {
 
                       <div className="card-body w-full">
                         <div
-                          className="h-[550px] overflow-auto"
+                          className="h-[550px] lg:h-[550px] overflow-y-scroll overflow-x-scroll"
                           style={{
+                            // maxHeight: "calc(100vh - 220px)", // adjusts automatically with screen height
                             scrollbarWidth: "thin",
                             scrollbarColor: "#C03178 transparent",
                           }}
                         >
-                          <div className="inline-block min-w-full">
-                            <table
-                              // className="min-w-full table-auto border-collapse border border-gray-400"
-                              className=" border border-gray-400"
-                              style={{
-                                tableLayout: "auto",
-                                width: "max-content",
-                              }}
-                            >
-                              <thead className="sticky top-0 bg-gray-200 z-10">
-                                <tr>
-                                  {["Sr No.", "Roll No.", "Student Name"].map(
-                                    (header, index) => (
+                          {parameter.length > 0 ? (
+                            <>
+                              <table className="min-w-full leading-normal table-auto ">
+                                <thead
+                                  className="sticky top-0  bg-gray-200"
+                                  style={{ zIndex: "1px" }}
+                                >
+                                  <tr>
+                                    {["Sr No.", "Roll No.", "Student Name"].map(
+                                      (header, index) => (
+                                        <th
+                                          key={index}
+                                          className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-2 py-2 whitespace-nowrap"
+                                        >
+                                          {header}
+                                        </th>
+                                      )
+                                    )}
+
+                                    {parameter?.map((param, pIndex) => (
                                       <th
-                                        key={index}
-                                        className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-2 py-2 whitespace-nowrap"
+                                        key={pIndex}
+                                        className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-4 py-2 whitespace-nowrap"
                                       >
-                                        {header}
+                                        {param.parameter}
                                       </th>
-                                    )
-                                  )}
+                                    ))}
+                                  </tr>
+                                </thead>
 
-                                  {parameter?.map((param, pIndex) => (
-                                    <th
-                                      key={pIndex}
-                                      className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-4 py-2 whitespace-nowrap"
-                                    >
-                                      {param.parameter}
-                                    </th>
-                                  ))}
-                                </tr>
-                              </thead>
-
-                              <tbody>
-                                {loadingForSearch ? (
-                                  <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                    <div className=" text-center text-xl text-blue-700">
-                                      Please wait while data is loading...
+                                <tbody>
+                                  {loadingForSearch ? (
+                                    <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                      <div className=" text-center text-xl text-blue-700">
+                                        Please wait while data is loading...
+                                      </div>
                                     </div>
-                                  </div>
-                                ) : timetable.length > 0 ? (
-                                  timetable.map((student, index) => (
-                                    <tr
-                                      key={student.student_id}
-                                      className="border border-gray-300"
-                                    >
-                                      <td className="px-2 py-1 text-center border border-gray-400">
-                                        {index + 1}
-                                      </td>
+                                  ) : timetable.length > 0 ? (
+                                    timetable.map((student, index) => (
+                                      <tr
+                                        key={student.student_id}
+                                        className="border border-gray-300"
+                                      >
+                                        <td className="px-2 py-1 text-center border border-gray-400">
+                                          {index + 1}
+                                        </td>
 
-                                      <td className="px-2 py-1 text-center border border-gray-400">
-                                        {student.roll_no || ""}
-                                      </td>
+                                        <td className="px-2 py-1 text-center border border-gray-400">
+                                          {student.roll_no || ""}
+                                        </td>
 
-                                      <td className="px-2 py-1 text-center border border-gray-400">
-                                        {toCamelCase(
-                                          student.student_name || ""
-                                        )}
-                                      </td>
+                                        <td className="px-2 py-1 text-center border border-gray-400">
+                                          {toCamelCase(
+                                            student.student_name || ""
+                                          )}
+                                        </td>
 
-                                      {parameter?.map((param, pIndex) => {
-                                        const assessment =
-                                          student.assessments.find(
-                                            (a) => a.pfm_id === param.pfm_id
+                                        {parameter?.map((param, pIndex) => {
+                                          const assessment =
+                                            student.assessments.find(
+                                              (a) => a.pfm_id === param.pfm_id
+                                            );
+
+                                          const record = selectedRecords.find(
+                                            (rec) =>
+                                              rec.student_id ===
+                                                student.student_id &&
+                                              rec.pfm_id === param.pfm_id
                                           );
 
-                                        const record = selectedRecords.find(
-                                          (rec) =>
-                                            rec.student_id ===
-                                              student.student_id &&
-                                            rec.pfm_id === param.pfm_id
-                                        );
+                                          const selectedValue =
+                                            record !== undefined
+                                              ? record.value
+                                              : assessment?.value || "";
 
-                                        const selectedValue =
-                                          record !== undefined
-                                            ? record.value
-                                            : assessment?.value || "";
+                                          console.log(
+                                            "Rendering:",
+                                            param.control_type,
+                                            selectedValue
+                                          );
 
-                                        console.log(
-                                          "Rendering:",
-                                          param.control_type,
-                                          selectedValue
-                                        );
-
-                                        return (
-                                          <td
-                                            key={pIndex}
-                                            className="px-2 py-1 text-center border border-gray-400"
-                                          >
-                                            {param.control_type ===
-                                              "textarea" && (
-                                              <div className="flex flex-col">
-                                                <textarea
-                                                  name={`param-${student.student_id}-${param.pfm_id}`}
-                                                  value={selectedValue}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      student.student_id,
-                                                      param.pfm_id,
-                                                      e.target.value
-                                                    )
-                                                  }
-                                                  className="w-full p-1 border rounded resize-none text-sm"
-                                                  rows={3}
-                                                  maxLength={300}
-                                                />
-                                                {publishErrors?.[
-                                                  `${student.student_id}-${param.pfm_id}`
-                                                ] && (
-                                                  <span className="text-red-500 text-xs mt-1">
-                                                    {
-                                                      publishErrors[
-                                                        `${student.student_id}-${param.pfm_id}`
-                                                      ]
+                                          return (
+                                            <td
+                                              key={pIndex}
+                                              className="px-2 py-1 text-center border border-gray-400"
+                                            >
+                                              {param.control_type ===
+                                                "textarea" && (
+                                                <div className="flex flex-col">
+                                                  <textarea
+                                                    name={`param-${student.student_id}-${param.pfm_id}`}
+                                                    value={selectedValue}
+                                                    onChange={(e) =>
+                                                      handleChange(
+                                                        student.student_id,
+                                                        param.pfm_id,
+                                                        e.target.value
+                                                      )
                                                     }
-                                                  </span>
-                                                )}
-                                              </div>
-                                            )}
-                                            {param.control_type === "text" && (
-                                              <div className="flex flex-col">
-                                                <input
-                                                  type="text"
-                                                  name={`param-${student.student_id}-${param.pfm_id}`}
-                                                  value={selectedValue}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      student.student_id,
-                                                      param.pfm_id,
-                                                      e.target.value
-                                                    )
-                                                  }
-                                                  className="w-full px-2 py-1 border rounded text-sm"
-                                                  maxLength={50}
-                                                />
-                                                {publishErrors?.[
-                                                  `${student.student_id}-${param.pfm_id}`
-                                                ] && (
-                                                  <span className="text-red-500 text-xs mt-1">
-                                                    {
-                                                      publishErrors[
-                                                        `${student.student_id}-${param.pfm_id}`
-                                                      ]
+                                                    className="w-full p-1 border rounded resize-none text-sm"
+                                                    rows={3}
+                                                    maxLength={500}
+                                                  />
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+                                              {param.control_type ===
+                                                "text" && (
+                                                <div className="flex flex-col">
+                                                  <input
+                                                    type="text"
+                                                    name={`param-${student.student_id}-${param.pfm_id}`}
+                                                    value={selectedValue}
+                                                    onChange={(e) =>
+                                                      handleChange(
+                                                        student.student_id,
+                                                        param.pfm_id,
+                                                        e.target.value
+                                                      )
                                                     }
-                                                  </span>
-                                                )}
-                                              </div>
-                                            )}
-                                            {param.control_type ===
-                                              "checkbox" && (
-                                              <div className="grid grid-cols-2 gap-2">
-                                                {" "}
-                                                {/* ✅ 2 per row */}
-                                                {(() => {
-                                                  let parsedOptions = [];
-                                                  try {
-                                                    parsedOptions =
-                                                      param.options
-                                                        ? JSON.parse(
-                                                            param.options
-                                                          )
-                                                        : [];
-                                                  } catch (err) {
-                                                    console.error(
-                                                      "Invalid options JSON:",
-                                                      param.options,
-                                                      err
-                                                    );
-                                                  }
-
-                                                  const selectedArray =
-                                                    selectedValue
-                                                      ? Array.isArray(
-                                                          selectedValue
-                                                        )
-                                                        ? selectedValue
-                                                        : selectedValue.split(
-                                                            ","
-                                                          )
-                                                      : [];
-
-                                                  return parsedOptions.map(
-                                                    (opt) => (
-                                                      <label
-                                                        key={opt.option}
-                                                        className="flex items-center gap-1 px-2 py-1"
-                                                      >
-                                                        <input
-                                                          type="checkbox"
-                                                          name={`param-${student.student_id}-${param.pfm_id}`}
-                                                          checked={selectedArray.includes(
-                                                            opt.value
-                                                          )}
-                                                          onChange={(e) => {
-                                                            let newValues = [
-                                                              ...selectedArray,
-                                                            ];
-                                                            if (
-                                                              e.target.checked
-                                                            ) {
-                                                              if (
-                                                                !newValues.includes(
-                                                                  opt.value
-                                                                )
-                                                              ) {
-                                                                newValues.push(
-                                                                  opt.value
-                                                                );
-                                                              }
-                                                            } else {
-                                                              newValues =
-                                                                newValues.filter(
-                                                                  (v) =>
-                                                                    v !==
-                                                                    opt.value
-                                                                );
-                                                            }
-                                                            handleChange(
-                                                              student.student_id,
-                                                              param.pfm_id,
-                                                              newValues.join(
-                                                                ","
-                                                              )
-                                                            );
-                                                          }}
-                                                        />
-                                                        {opt.value}
-                                                      </label>
-                                                    )
-                                                  );
-                                                })()}
-                                                {publishErrors?.[
-                                                  `${student.student_id}-${param.pfm_id}`
-                                                ] && (
-                                                  <span className="text-red-500 text-xs mt-1 col-span-2">
-                                                    {
-                                                      publishErrors[
-                                                        `${student.student_id}-${param.pfm_id}`
-                                                      ]
-                                                    }
-                                                  </span>
-                                                )}
-                                              </div>
-                                            )}
-                                            {param.control_type === "radio" && (
-                                              <div className="grid grid-cols-2 gap-2">
-                                                {" "}
-                                                {/* ✅ 2 per row */}
-                                                {(() => {
-                                                  let parsedOptions = [];
-                                                  try {
-                                                    parsedOptions =
-                                                      param.options
-                                                        ? JSON.parse(
-                                                            param.options
-                                                          )
-                                                        : [];
-                                                  } catch (err) {
-                                                    console.error(
-                                                      "Invalid options JSON:",
-                                                      param.options
-                                                    );
-                                                  }
-
-                                                  return parsedOptions.map(
-                                                    (opt, i) => (
-                                                      <label
-                                                        key={i}
-                                                        className="flex items-center gap-1 px-2 py-1"
-                                                      >
-                                                        <input
-                                                          type="radio"
-                                                          name={`param-${student.student_id}-${param.pfm_id}`}
-                                                          value={opt.value}
-                                                          checked={
-                                                            selectedValue ===
-                                                            opt.value
-                                                          }
-                                                          onChange={(e) =>
-                                                            handleChange(
-                                                              student.student_id,
-                                                              param.pfm_id,
-                                                              e.target.value
-                                                            )
-                                                          }
-                                                        />
-                                                        {opt.value}
-                                                      </label>
-                                                    )
-                                                  );
-                                                })()}
-                                                {publishErrors?.[
-                                                  `${student.student_id}-${param.pfm_id}`
-                                                ] && (
-                                                  <span className="text-red-500 text-xs mt-1 col-span-2">
-                                                    {
-                                                      publishErrors[
-                                                        `${student.student_id}-${param.pfm_id}`
-                                                      ]
-                                                    }
-                                                  </span>
-                                                )}
-                                              </div>
-                                            )}
-                                            {param.control_type ===
-                                              "rating" && (
-                                              <div className="flex flex-col">
-                                                <div className="flex justify-center gap-1">
+                                                    className="w-full px-2 py-1 border rounded text-sm"
+                                                    maxLength={500}
+                                                  />
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+                                              {param.control_type ===
+                                                "checkbox" && (
+                                                <div className="grid grid-cols-2 gap-2">
+                                                  {" "}
+                                                  {/* ✅ 2 per row */}
                                                   {(() => {
                                                     let parsedOptions = [];
                                                     try {
@@ -1166,120 +1009,283 @@ const ParentFeedback = () => {
                                                       );
                                                     }
 
-                                                    // Current rating (as number)
-                                                    const currentRating =
-                                                      parseInt(
-                                                        selectedValue || "0",
-                                                        10
-                                                      );
+                                                    const selectedArray =
+                                                      selectedValue
+                                                        ? Array.isArray(
+                                                            selectedValue
+                                                          )
+                                                          ? selectedValue
+                                                          : selectedValue.split(
+                                                              ","
+                                                            )
+                                                        : [];
 
                                                     return parsedOptions.map(
-                                                      (opt, index) => {
-                                                        const starValue =
-                                                          index + 1; // 1-based index
-                                                        return (
-                                                          <span
-                                                            key={opt.option}
-                                                            onClick={() =>
+                                                      (opt) => (
+                                                        <label
+                                                          key={opt.option}
+                                                          className="flex items-center gap-1 px-2 py-1"
+                                                        >
+                                                          <input
+                                                            type="checkbox"
+                                                            name={`param-${student.student_id}-${param.pfm_id}`}
+                                                            checked={selectedArray.includes(
+                                                              opt.value
+                                                            )}
+                                                            onChange={(e) => {
+                                                              let newValues = [
+                                                                ...selectedArray,
+                                                              ];
+                                                              if (
+                                                                e.target.checked
+                                                              ) {
+                                                                if (
+                                                                  !newValues.includes(
+                                                                    opt.value
+                                                                  )
+                                                                ) {
+                                                                  newValues.push(
+                                                                    opt.value
+                                                                  );
+                                                                }
+                                                              } else {
+                                                                newValues =
+                                                                  newValues.filter(
+                                                                    (v) =>
+                                                                      v !==
+                                                                      opt.value
+                                                                  );
+                                                              }
                                                               handleChange(
                                                                 student.student_id,
                                                                 param.pfm_id,
-                                                                String(
-                                                                  starValue
+                                                                newValues.join(
+                                                                  ","
                                                                 )
-                                                              )
-                                                            }
-                                                            name={`param-${student.student_id}-${param.pfm_id}`}
-                                                            className={`cursor-pointer text-4xl ${
-                                                              starValue <=
-                                                              currentRating
-                                                                ? "text-yellow-400"
-                                                                : "text-gray-300"
-                                                            }`}
-                                                          >
-                                                            ★
-                                                          </span>
-                                                        );
-                                                      }
+                                                              );
+                                                            }}
+                                                          />
+                                                          {opt.value}
+                                                        </label>
+                                                      )
                                                     );
                                                   })()}
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1 col-span-2">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
                                                 </div>
-
-                                                {publishErrors?.[
-                                                  `${student.student_id}-${param.pfm_id}`
-                                                ] && (
-                                                  <span className="text-red-500 text-xs mt-1">
-                                                    {
-                                                      publishErrors[
-                                                        `${student.student_id}-${param.pfm_id}`
-                                                      ]
+                                              )}
+                                              {param.control_type ===
+                                                "radio" && (
+                                                <div className="grid grid-cols-2 gap-2">
+                                                  {" "}
+                                                  {/* ✅ 2 per row */}
+                                                  {(() => {
+                                                    let parsedOptions = [];
+                                                    try {
+                                                      parsedOptions =
+                                                        param.options
+                                                          ? JSON.parse(
+                                                              param.options
+                                                            )
+                                                          : [];
+                                                    } catch (err) {
+                                                      console.error(
+                                                        "Invalid options JSON:",
+                                                        param.options
+                                                      );
                                                     }
-                                                  </span>
-                                                )}
-                                              </div>
-                                            )}
-                                          </td>
-                                        );
-                                      })}
-                                    </tr>
-                                  ))
-                                ) : (
-                                  <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                    <div className=" text-center text-xl text-red-500">
-                                      Oops! No data found..
+
+                                                    return parsedOptions.map(
+                                                      (opt, i) => (
+                                                        <label
+                                                          key={i}
+                                                          className="flex items-center gap-1 px-2 py-1"
+                                                        >
+                                                          <input
+                                                            type="radio"
+                                                            name={`param-${student.student_id}-${param.pfm_id}`}
+                                                            value={opt.value}
+                                                            checked={
+                                                              selectedValue ===
+                                                              opt.value
+                                                            }
+                                                            onChange={(e) =>
+                                                              handleChange(
+                                                                student.student_id,
+                                                                param.pfm_id,
+                                                                e.target.value
+                                                              )
+                                                            }
+                                                          />
+                                                          {opt.value}
+                                                        </label>
+                                                      )
+                                                    );
+                                                  })()}
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1 col-span-2">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+                                              {param.control_type ===
+                                                "rating" && (
+                                                <div className="flex flex-col">
+                                                  <div className="flex justify-center gap-1">
+                                                    {(() => {
+                                                      let parsedOptions = [];
+                                                      try {
+                                                        parsedOptions =
+                                                          param.options
+                                                            ? JSON.parse(
+                                                                param.options
+                                                              )
+                                                            : [];
+                                                      } catch (err) {
+                                                        console.error(
+                                                          "Invalid options JSON:",
+                                                          param.options,
+                                                          err
+                                                        );
+                                                      }
+
+                                                      // Current rating (as number)
+                                                      const currentRating =
+                                                        parseInt(
+                                                          selectedValue || "0",
+                                                          10
+                                                        );
+
+                                                      return parsedOptions.map(
+                                                        (opt, index) => {
+                                                          const starValue =
+                                                            index + 1; // 1-based index
+                                                          return (
+                                                            <span
+                                                              key={opt.option}
+                                                              onClick={() =>
+                                                                handleChange(
+                                                                  student.student_id,
+                                                                  param.pfm_id,
+                                                                  String(
+                                                                    starValue
+                                                                  )
+                                                                )
+                                                              }
+                                                              name={`param-${student.student_id}-${param.pfm_id}`}
+                                                              className={`cursor-pointer text-4xl ${
+                                                                starValue <=
+                                                                currentRating
+                                                                  ? "text-yellow-400"
+                                                                  : "text-gray-300"
+                                                              }`}
+                                                            >
+                                                              ★
+                                                            </span>
+                                                          );
+                                                        }
+                                                      );
+                                                    })()}
+                                                  </div>
+
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+                                            </td>
+                                          );
+                                        })}
+                                      </tr>
+                                    ))
+                                  ) : (
+                                    <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                      <div className=" text-center text-xl text-red-500">
+                                        Oops! No data found..
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
-                              </tbody>
-                            </table>
+                                  )}
+                                </tbody>
+                              </table>
 
-                            {loadingForSearch ? (
-                              ""
-                            ) : (
-                              <div className="flex justify-end gap-3 mt-4 mr-4">
-                                <button
-                                  type="button"
-                                  onClick={handleSubmit}
-                                  className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
-                                  disabled={isSaving}
-                                >
-                                  {isSaving ? "Saving..." : "Save"}
-                                </button>
-
-                                {checkPublish === "Y" ? (
+                              {loadingForSearch ? (
+                                ""
+                              ) : (
+                                <div className="flex justify-end gap-3 mt-4 mr-4">
                                   <button
                                     type="button"
-                                    onClick={handleSubmitUnPublish}
+                                    onClick={handleSubmit}
                                     className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
-                                    disabled={isUnPublishing}
+                                    disabled={isSaving}
                                   >
-                                    {isUnPublishing
-                                      ? "Unpublishing..."
-                                      : "Unpublish"}
+                                    {isSaving ? "Saving..." : "Save"}
                                   </button>
-                                ) : (
+
+                                  {checkPublish === "Y" ? (
+                                    <button
+                                      type="button"
+                                      onClick={handleSubmitUnPublish}
+                                      className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
+                                      disabled={isUnPublishing}
+                                    >
+                                      {isUnPublishing
+                                        ? "Unpublishing..."
+                                        : "Unpublish"}
+                                    </button>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={handleSubmitPublish}
+                                      className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
+                                      disabled={isPublishing}
+                                    >
+                                      {isPublishing
+                                        ? "Publishing..."
+                                        : "Save & Publish"}
+                                    </button>
+                                  )}
+
                                   <button
                                     type="button"
-                                    onClick={handleSubmitPublish}
-                                    className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
-                                    disabled={isPublishing}
+                                    className="bg-yellow-300 hover:bg-yellow-400 text-white font-medium px-4 py-2 rounded-lg shadow-md"
+                                    onClick={() => setShowStudentReport(false)}
                                   >
-                                    {isPublishing
-                                      ? "Publishing..."
-                                      : "Save & Publish"}
+                                    Back
                                   </button>
-                                )}
-
-                                <button
-                                  type="button"
-                                  className="bg-yellow-300 hover:bg-yellow-400 text-white font-medium px-4 py-2 rounded-lg shadow-md"
-                                  onClick={() => setShowStudentReport(false)}
-                                >
-                                  Back
-                                </button>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                              <div className=" text-center text-xl text-red-500">
+                                Oops! No Parameters found..
                               </div>
-                            )}
-                          </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

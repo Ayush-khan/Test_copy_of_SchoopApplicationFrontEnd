@@ -3,12 +3,16 @@ import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faTrash,
+  faPlus,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 
-// The is the divisionlist module
 function PeerFeedbackMaster() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [sections, setSections] = useState([]);
@@ -30,9 +34,34 @@ function PeerFeedbackMaster() {
   const [roleId, setRoleId] = useState("");
   const [classes, setClasses] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [controlType, setControlType] = useState("");
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
+
+  const [options, setOptions] = useState([""]); // start with one option
+
+  const handleOptionChange = (index, value) => {
+    const updated = [...options];
+    updated[index] = value;
+    setOptions(updated);
+
+    if (fieldErrors.options) {
+      setFieldErrors((prev) => ({ ...prev, options: undefined }));
+    }
+  };
+
+  const handleAddOption = () => {
+    setOptions((prev) => [...prev, ""]);
+    if (fieldErrors.options)
+      setFieldErrors((prev) => ({ ...prev, options: undefined }));
+  };
+
+  const handleRemoveOption = (index) => {
+    setOptions((prev) => prev.filter((_, i) => i !== index));
+    if (fieldErrors.options)
+      setFieldErrors((prev) => ({ ...prev, options: undefined }));
+  };
 
   useEffect(() => {
     const fetchClassNames = async () => {
@@ -78,7 +107,7 @@ function PeerFeedbackMaster() {
         }
       );
 
-      console.log("self assessment", response.data.data);
+      console.log("Peer Feedback", response.data.data);
       setSections(response.data.data);
       setPageCount(Math.ceil(response.data.length / pageSize));
     } catch (error) {
@@ -112,6 +141,7 @@ function PeerFeedbackMaster() {
       console.error("Error fetching data:", error);
     }
   };
+
   useEffect(() => {
     fetchSections();
     fetchDataRoleId();
@@ -132,7 +162,6 @@ function PeerFeedbackMaster() {
     prevSearchTermRef.current = trimmedSearch;
   }, [searchTerm]);
 
-  // Filtering by class name or division name
   const searchLower = searchTerm.trim().toLowerCase();
   const filteredSections = sections.filter((section) => {
     const className = section?.classname?.toString().toLowerCase() || "";
@@ -153,6 +182,7 @@ function PeerFeedbackMaster() {
     setPageCount(Math.ceil(filteredSections.length / pageSize));
   }, [filteredSections, pageSize]);
 
+  // Paginate filtered results
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
@@ -160,20 +190,42 @@ function PeerFeedbackMaster() {
 
   console.log("displayed sections", displayedSections);
 
-  const validateSectionName = (parameter, classId) => {
-    const errors = {};
+  const reset = () => {
+    setNewDepartmentId("");
+    setNewSectionName("");
+    setControlType(null);
+    setSearchTerm(""); // ✅ clear search term
+  };
 
-    console.log("parameter", parameter);
+  const validateSectionName = (
+    parameter,
+    classId,
+    control_type,
+    options = []
+  ) => {
+    const errors = {};
 
     if (!parameter || parameter.trim() === "") {
       errors.parameter = "Please enter parameter.";
+    } else if (parameter.length > 500) {
+      errors.parameter = "The name field must not exceed 500 characters.";
     }
-    // else if (parameter.length > 30) {
-    //   errors.parameter = "The name field must not exceed 30 character.";
-    // }
 
     if (!classId) {
       errors.class_id = "Please select class.";
+    }
+
+    if (!control_type || control_type.trim() === "") {
+      errors.control_type = "Please enter type.";
+    }
+
+    // ✅ Require at least one non-empty option for radio/checkbox
+    if (control_type === "radio" || control_type === "checkbox") {
+      const hasValidOption =
+        Array.isArray(options) && options.some((o) => o && o.trim() !== "");
+      if (!hasValidOption) {
+        errors.options = "Please add option.";
+      }
     }
 
     return errors;
@@ -188,6 +240,21 @@ function PeerFeedbackMaster() {
     setNewSectionName(section.parameter);
     setClassName(section.class_id);
     setNewDepartmentId(section.class_id);
+    setControlType(section.control_type);
+
+    if (section.options) {
+      try {
+        const parsedOptions = JSON.parse(section.options); // because you saved it as JSON string
+        const optionValues = parsedOptions.map((opt) => opt.value);
+        setOptions(optionValues);
+      } catch (e) {
+        console.error("Error parsing options:", e);
+        setOptions([]); // fallback
+      }
+    } else {
+      setOptions([]);
+    }
+
     setShowEditModal(true);
   };
 
@@ -201,6 +268,8 @@ function PeerFeedbackMaster() {
     setShowDeleteModal(false);
     setNewSectionName("");
     setNewDepartmentId("");
+    setControlType("");
+    setOptions([""]);
     setCurrentSection(null);
     setFieldErrors({});
     setNameError("");
@@ -209,10 +278,14 @@ function PeerFeedbackMaster() {
   const handleSubmitAdd = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+
     const validationErrors = validateSectionName(
       newSectionName,
-      newDepartmentId
+      newDepartmentId,
+      controlType,
+      options
     );
+
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       setIsSubmitting(false);
@@ -225,23 +298,40 @@ function PeerFeedbackMaster() {
         throw new Error("No authentication token found");
       }
 
-      const formData = new FormData();
-      formData.append("parameter", newSectionName);
-      formData.append("class_id", newDepartmentId);
+      // 🔹 Prepare options array in required format
+      const formattedOptions =
+        (controlType === "radio" ||
+          controlType === "checkbox" ||
+          controlType === "rating") &&
+        options.length > 0
+          ? options.map((opt, idx) => ({
+              option: opt.trim().replace(/\s+/g, ""), // short code (e.g., "1")
+              value: opt.trim(), // full text (e.g., "1" or "Sports")
+            }))
+          : [];
 
-      await axios.post(`${API_URL}/api/save_peerfeedbackmaster`, formData, {
+      // 🔹 Final payload
+      const payload = {
+        parameter: newSectionName,
+        class_id: Number(newDepartmentId),
+        control_type: controlType,
+        options: formattedOptions,
+      };
+
+      await axios.post(`${API_URL}/api/save_peerfeedbackmaster`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
         },
       });
 
       fetchSections();
       handleCloseModal();
       toast.success("Peer Feedback Parameter added successfully!");
+      reset();
     } catch (error) {
       console.error("Error adding parameter:", error);
-      if (error.response && error.response.data && error.response.data.errors) {
+      if (error.response?.data?.errors) {
         Object.values(error.response.data.errors).forEach((err) =>
           toast.error(err)
         );
@@ -249,14 +339,8 @@ function PeerFeedbackMaster() {
         toast.error("Server error. Please try again later.");
       }
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
     }
-  };
-
-  const reset = () => {
-    setNewDepartmentId("");
-    setNewSectionName("");
-    setSearchTerm("");
   };
 
   const handleSubmitEdit = async () => {
@@ -265,8 +349,11 @@ function PeerFeedbackMaster() {
 
     const validationErrors = validateSectionName(
       newSectionName,
-      newDepartmentId
+      newDepartmentId,
+      controlType,
+      options
     );
+
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       setIsSubmitting(false);
@@ -279,9 +366,25 @@ function PeerFeedbackMaster() {
         throw new Error("No authentication token or section ID found");
       }
 
+      const formattedOptions =
+        (controlType === "radio" ||
+          controlType === "checkbox" ||
+          controlType === "rating") &&
+        options.length > 0
+          ? options.map((opt, idx) => ({
+              option: opt.trim().replace(/\s+/g, ""), // short code (e.g., "1")
+              value: opt.trim(), // full text (e.g., "1" or "Sports")
+            }))
+          : [];
+
       await axios.put(
         `${API_URL}/api/update_peerfeedbackmaster/${currentSection.pfm_id}`,
-        { parameter: newSectionName, class_id: newDepartmentId },
+        {
+          parameter: newSectionName,
+          class_id: newDepartmentId,
+          control_type: controlType,
+          options: formattedOptions,
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -296,21 +399,18 @@ function PeerFeedbackMaster() {
       console.log("erroris", error.response);
       if (error.response && error.response.data.status === 422) {
         const errors = error.response.data.errors;
-        console.log("error", errors);
-        // Handle name field error
         if (errors.parameter) {
           setFieldErrors((prev) => ({
             ...prev,
-            parameter: errors.parameter, // Show the first error message for the name field
+            parameter: errors.parameter,
           }));
-          errors.parameter.forEach((err) => toast.error(err)); // Show all errors in toast
+          errors.parameter.forEach((err) => toast.error(err));
         }
       } else {
-        // Handle other errors
         toast.error("Server error. Please try again later.");
       }
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
     }
   };
 
@@ -351,8 +451,10 @@ function PeerFeedbackMaster() {
         toast.error(response.data.message || "Failed to delete parameter");
       }
     } catch (error) {
-      if (error.response && error.response.status === 422) {
-        toast.error("This parameter is used in peer feedback");
+      if (error.response && error.response.status === 409) {
+        toast.error(
+          "Cannot Delete. This peer feedback paramter already use in peer feedback."
+        );
       } else {
         toast.error("Something went wrong. Please try again.");
       }
@@ -366,9 +468,11 @@ function PeerFeedbackMaster() {
     const { value } = e.target;
     setNameError("");
     setNewSectionName(value);
+
+    const errors = validateSectionName(value, newDepartmentId);
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
-      parameter: validateSectionName(value, newDepartmentId).parameter,
+      parameter: errors.parameter,
     }));
   };
 
@@ -376,11 +480,42 @@ function PeerFeedbackMaster() {
     const { value } = e.target;
     setClassName(value);
     setNewDepartmentId(value);
+
+    const errors = validateSectionName(newSectionName, value);
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
-      class_id: validateSectionName(newSectionName, e.target.value).class_id,
+      class_id: errors.class_id,
     }));
   };
+
+  const handleChangeControlType = (e) => {
+    const { value } = e.target;
+    setNameError("");
+    setControlType(value);
+
+    // ✅ if new control type requires options, but options are empty, initialize
+    if (
+      (value === "radio" || value === "checkbox" || value === "rating") &&
+      options.length === 0
+    ) {
+      setOptions([""]); // at least one empty option
+    }
+
+    // ✅ validate using the latest state + new control type value
+    const errors = validateSectionName(newSectionName, newDepartmentId, value);
+
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      control_type: errors.control_type || "", // clear error if valid
+    }));
+  };
+  const controlOptions = [
+    { value: "radio", label: "Radio Button" },
+    { value: "checkbox", label: "Checkbox" },
+    { value: "text", label: "Text Box" },
+    { value: "textarea", label: "Text Area" },
+    { value: "rating", label: "Rating" },
+  ];
 
   return (
     <>
@@ -390,7 +525,7 @@ function PeerFeedbackMaster() {
         <div className="card mx-auto lg:w-[70%] shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Peer Feedback Parameters
+              Peer Feedback Parameter
             </h3>{" "}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -472,6 +607,7 @@ function PeerFeedbackMaster() {
                         )}
                       </tr>
                     </thead>
+
                     <tbody>
                       {loading ? (
                         <tr>
@@ -485,7 +621,7 @@ function PeerFeedbackMaster() {
                       ) : displayedSections.length ? (
                         displayedSections.map((section, index) => (
                           <tr
-                            key={section.sam_id}
+                            key={section.pfm_id}
                             className={`${
                               index % 2 === 0 ? "bg-white" : "bg-gray-100"
                             } hover:bg-gray-50`}
@@ -500,25 +636,26 @@ function PeerFeedbackMaster() {
                                 {section?.classname}
                               </p>
                             </td>
-                            <td className="text-center px-2  border border-gray-950 text-sm">
+                            <td className="text-center px-2 border border-gray-950 text-sm">
                               <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                 {section.parameter}
                               </p>
                             </td>
+
                             {roleId !== "M" && (
                               <>
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   <button
-                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
                                     onClick={() => handleEdit(section)}
                                   >
                                     <FontAwesomeIcon icon={faEdit} />
-                                  </button>{" "}
+                                  </button>
                                 </td>
 
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   <button
-                                    className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                    className="text-red-600 hover:text-red-800 hover:bg-transparent"
                                     onClick={() => handleDelete(section.pfm_id)}
                                   >
                                     <FontAwesomeIcon icon={faTrash} />
@@ -529,11 +666,14 @@ function PeerFeedbackMaster() {
                           </tr>
                         ))
                       ) : (
-                        <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                          <div className=" text-center text-xl text-red-700">
+                        <tr>
+                          <td
+                            colSpan="6"
+                            className="text-center text-xl text-red-700 py-10"
+                          >
                             Oops! No data found..
-                          </div>
-                        </div>
+                          </td>
+                        </tr>
                       )}
                     </tbody>
                   </table>
@@ -596,6 +736,7 @@ function PeerFeedbackMaster() {
                   ></div>
 
                   <div className="modal-body">
+                    {/* Class Selection */}
                     <div className=" relative mb-4 flex justify-center  mx-4">
                       <label htmlFor="departmentId" className="w-1/2 mt-2">
                         Class <span className="text-red-500">*</span>
@@ -607,16 +748,11 @@ function PeerFeedbackMaster() {
                         onChange={handleChangeDepartmentId}
                       >
                         <option value="">Select </option>
-
                         {classes.length === 0 ? (
                           <option value="">No classes available</option>
                         ) : (
                           classes.map((cls) => (
-                            <option
-                              key={cls.class_id}
-                              value={cls.class_id}
-                              className="max-h-20 overflow-y-scroll "
-                            >
+                            <option key={cls.class_id} value={cls.class_id}>
                               {cls.name}
                             </option>
                           ))
@@ -630,13 +766,15 @@ function PeerFeedbackMaster() {
                         )}
                       </div>
                     </div>
+
+                    {/* Parameter */}
                     <div className=" relative mb-3 flex justify-center  mx-4">
                       <label htmlFor="sectionName" className="w-1/2 mt-2">
                         Parameter <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        maxLength={100}
+                        maxLength={500}
                         className="form-control shadow-md mb-2"
                         id="sectionName"
                         value={newSectionName}
@@ -655,12 +793,95 @@ function PeerFeedbackMaster() {
                         )}
                       </div>
                     </div>
+
+                    {/* Control Type */}
+                    <div className=" relative mb-3 flex justify-center  mx-4">
+                      <label htmlFor="controlType" className="w-1/2 mt-2">
+                        Control Type <span className="text-red-500">*</span>
+                      </label>
+
+                      <select
+                        id="controlType"
+                        className="form-control shadow-md"
+                        value={controlType}
+                        onChange={handleChangeControlType}
+                      >
+                        <option value="">Select</option>
+                        {controlOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+
+                      <div className="absolute top-9 left-1/3">
+                        {fieldErrors.control_type && (
+                          <span className="text-danger text-xs">
+                            {fieldErrors.control_type}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {(controlType === "radio" ||
+                      controlType === "checkbox" ||
+                      controlType === "rating") && (
+                      <div className="relative mb-3 flex justify-center mx-4">
+                        <label className="w-1/2 mt-2">
+                          Options <span className="text-red-500">*</span>
+                        </label>
+
+                        <div className="flex flex-col w-full">
+                          {options.map((opt, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2 mb-2"
+                            >
+                              <input
+                                type="text"
+                                value={opt}
+                                onChange={(e) =>
+                                  handleOptionChange(index, e.target.value)
+                                }
+                                className="form-control shadow-md flex-1"
+                                placeholder={`Option ${index + 1}`}
+                              />
+
+                              <button
+                                type="button"
+                                className="text-green-600 font-bold text-lg"
+                                onClick={handleAddOption}
+                              >
+                                <FontAwesomeIcon icon={faPlus} />
+                              </button>
+
+                              {options.length > 1 && (
+                                <button
+                                  type="button"
+                                  className="text-red-600 font-bold text-lg"
+                                  onClick={() => handleRemoveOption(index)}
+                                >
+                                  <FontAwesomeIcon icon={faXmark} />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+
+                          {/* <-- show error always (even if options = []) */}
+                          {fieldErrors.options && (
+                            <span className="text-danger text-xs mt-1">
+                              {fieldErrors.options}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className=" flex justify-end p-3">
                     <button
                       type="button"
-                      className="btn btn-primary px-3 mb-2 mr-2 "
+                      className="btn btn-primary px-3 mb-2 mr-2"
                       style={{}}
                       onClick={handleSubmitAdd}
                       disabled={isSubmitting}
@@ -713,19 +934,20 @@ function PeerFeedbackMaster() {
                     backgroundColor: "#C03078",
                   }}
                 ></div>
+
                 <div className="modal-body">
+                  {/* Class Selection */}
                   <div className=" relative mb-4 flex justify-center  mx-4">
-                    <label htmlFor="editDepartmentId" className="w-1/2 mt-2">
+                    <label htmlFor="departmentId" className="w-1/2 mt-2">
                       Class <span className="text-red-500">*</span>
                     </label>
                     <select
-                      id="editDepartmentId"
+                      id="departmentId"
                       className="form-control shadow-md"
-                      value={className}
+                      value={newDepartmentId}
                       onChange={handleChangeDepartmentId}
                     >
-                      <option value="">Select</option>
-                      {console.log("the classes", classes)}
+                      <option value="">Select </option>
                       {classes.length === 0 ? (
                         <option value="">No classes available</option>
                       ) : (
@@ -745,26 +967,25 @@ function PeerFeedbackMaster() {
                     </div>
                   </div>
 
+                  {/* Parameter */}
                   <div className=" relative mb-3 flex justify-center  mx-4">
-                    <label htmlFor="editSectionName" className="w-1/2 mt-2">
+                    <label htmlFor="sectionName" className="w-1/2 mt-2">
                       Parameter <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      maxLength={100}
+                      maxLength={500}
                       className="form-control shadow-md mb-2"
-                      id="editSectionName"
+                      id="sectionName"
                       value={newSectionName}
                       onChange={handleChangeSectionName}
-                      // onBlur={handleBlur}
                     />
-                    <div className="absolute top-9 left-1/3 ">
+                    <div className="absolute top-9 left-1/3">
                       {!nameAvailable && (
-                        <span className=" block text-red-500 text-xs">
+                        <span className=" block text-danger text-xs">
                           {nameError}
                         </span>
                       )}
-
                       {fieldErrors.parameter && (
                         <span className="text-danger text-xs">
                           {fieldErrors.parameter}
@@ -772,6 +993,138 @@ function PeerFeedbackMaster() {
                       )}
                     </div>
                   </div>
+
+                  {/* Control Type */}
+                  <div className=" relative mb-3 flex justify-center  mx-4">
+                    <label htmlFor="controlType" className="w-1/2 mt-2">
+                      Control Type <span className="text-red-500">*</span>
+                    </label>
+
+                    <select
+                      id="controlType"
+                      className="form-control shadow-md"
+                      value={controlType}
+                      onChange={handleChangeControlType}
+                    >
+                      <option value="">Select</option>
+                      {controlOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    <div className="absolute top-9 left-1/3">
+                      {fieldErrors.control_type && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.control_type}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* {(controlType === "radio" || controlType === "checkbox") && (
+                    <div className="relative mb-3 flex justify-center mx-4">
+                      <label className="w-1/2 mt-2">
+                        Options <span className="text-red-500">*</span>
+                      </label>
+
+                      <div className="flex flex-col w-full">
+                        {options.map((opt, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-2 mb-2"
+                          >
+                            <input
+                              type="text"
+                              value={opt}
+                              onChange={(e) =>
+                                handleOptionChange(index, e.target.value)
+                              }
+                              className="form-control shadow-md flex-1"
+                              placeholder={`Option ${index + 1}`}
+                            />
+
+                            <button
+                              type="button"
+                              className="text-green-600 font-bold text-lg"
+                              onClick={handleAddOption}
+                            >
+                              <FontAwesomeIcon icon={faPlus} />
+                            </button>
+
+                            {options.length > 1 && (
+                              <button
+                                type="button"
+                                className="text-red-600 font-bold text-lg"
+                                onClick={() => handleRemoveOption(index)}
+                              >
+                                <FontAwesomeIcon icon={faXmark} />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+
+                        {fieldErrors.options && (
+                          <span className="text-danger text-xs mt-1">
+                            {fieldErrors.options}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )} */}
+                  {(controlType === "radio" ||
+                    controlType === "checkbox" ||
+                    controlType === "rating") && (
+                    <div className="relative mb-3 flex justify-center mx-4">
+                      <label className="w-1/2 mt-2">
+                        Options <span className="text-red-500">*</span>
+                      </label>
+
+                      <div className="flex flex-col w-full">
+                        {options.map((opt, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-2 mb-2"
+                          >
+                            <input
+                              type="text"
+                              value={opt}
+                              onChange={(e) =>
+                                handleOptionChange(index, e.target.value)
+                              }
+                              className="form-control shadow-md flex-1"
+                              placeholder={`Option ${index + 1}`}
+                            />
+
+                            <button
+                              type="button"
+                              className="text-green-600 font-bold text-lg"
+                              onClick={handleAddOption}
+                            >
+                              <FontAwesomeIcon icon={faPlus} />
+                            </button>
+
+                            {options.length > 1 && (
+                              <button
+                                type="button"
+                                className="text-red-600 font-bold text-lg"
+                                onClick={() => handleRemoveOption(index)}
+                              >
+                                <FontAwesomeIcon icon={faXmark} />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+
+                        {fieldErrors.options && (
+                          <span className="text-danger text-xs mt-1">
+                            {fieldErrors.options}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className=" flex justify-end p-3">
                   <button
@@ -827,7 +1180,6 @@ function PeerFeedbackMaster() {
                   </p>
                 </div>
                 <div className=" flex justify-end p-3">
-                  {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
                   <button
                     type="button"
                     className="btn btn-danger px-3 mb-2"
