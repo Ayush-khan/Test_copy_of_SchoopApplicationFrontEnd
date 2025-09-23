@@ -99,13 +99,16 @@ const SubjectAllotmentHSC = () => {
 
       // Fetch classes and students concurrently
       const [classResponse] = await Promise.all([
-        axios.get(`${API_URL}/api/getClassList`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        axios.get(
+          `${API_URL}/api/get_classes_of_a_department?department_name=Higher Secondary`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        ),
       ]);
 
       // Set the fetched data
-      setClassesforForm(classResponse.data || []);
+      setClassesforForm(classResponse?.data?.data || []);
       //   setStudentNameWithClassId(studentResponse?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching Class data.");
@@ -171,18 +174,28 @@ const SubjectAllotmentHSC = () => {
   // );
   const classOptions = useMemo(
     () =>
-      classesforForm
-        .filter((cls) => {
-          const classNumber = parseInt(cls.name); // Extract numeric part from "11 - Science"
-          return classNumber > 10; // Only show classes greater than 10
-        })
-        .map((cls) => ({
-          value: cls.class_id,
-          label: `${cls.name}`,
-          key: `${cls.class_id}`,
-        })),
+      classesforForm.map((cls) => ({
+        value: cls.class_id,
+        label: `${cls.name}`,
+        key: `${cls.class_id}`,
+      })),
     [classesforForm]
   );
+
+  // const classOptions = useMemo(
+  //   () =>
+  //     classesforForm
+  //       .filter((cls) => {
+  //         const classNumber = parseInt(cls.name); // Extract numeric part from "11 - Science"
+  //         return classNumber > 10; // Only show classes greater than 10
+  //       })
+  //       .map((cls) => ({
+  //         value: cls.class_id,
+  //         label: `${cls.name}`,
+  //         key: `${cls.class_id}`,
+  //       })),
+  //   [classesforForm]
+  // );
 
   console.log("classOptions", classOptions);
 
