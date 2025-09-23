@@ -218,6 +218,14 @@ import DomainDetails from "../componants/MastersModule/DomainModules/DomainDetai
 import DomainCompentencies from "../componants/MastersModule/DomainModules/DomainCompentencies.jsx";
 import SelfAssessment from "../componants/MastersModule/DomainModules/SelfAssessment/SelfAssessment.jsx";
 import SelfAssamentMaster from "../componants/MastersModule/DomainModules/SelfAssessment/SelfAssamentMaster.jsx";
+import ImageCropperRC from "../componants/MastersModule/DomainModules/ImageCropperRC.jsx";
+import PhotoUploadForReportCard from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PhotoUploadForReportCard.jsx";
+import PeerFeedback from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PeerFeedback.jsx";
+import ParentFeedback from "../componants/MastersModule/DomainModules/ParentFeedbackmodules/ParentFeedback.jsx";
+import ParentsFeedbackMaster from "../componants/MastersModule/DomainModules/ParentFeedbackmodules/ParentsFeedbackMaster.jsx";
+import PeerFeedbackMaster from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PeerFeedbackMaster.jsx";
+import AllAboutMe from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMe.jsx";
+import AllAboutMeMaster from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMeMaster.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -606,13 +614,47 @@ function Index() {
           path="/hpcSubjectAllotment"
           element={<PrivateRoute element={<HPCSubjectAllotment />} />}
         />
+        <Route
+          path="/photoUploadForRC"
+          element={<PrivateRoute element={<PhotoUploadForReportCard />} />}
+        />
+        <Route
+          path="/imageCropperRc"
+          element={<PrivateRoute element={<ImageCropperRC />} />}
+        />
+        <Route
+          path="/peerFeedback"
+          element={<PrivateRoute element={<PeerFeedback />} />}
+        />
+        <Route
+          path="/peerFeedbackMaster"
+          element={<PrivateRoute element={<PeerFeedbackMaster />} />}
+        />
+        {/* parent feedback */}
+        <Route
+          path="/parentFeedbackMaster"
+          element={<PrivateRoute element={<ParentsFeedbackMaster />} />}
+        />
+        <Route
+          path="/parentFeedback"
+          element={<PrivateRoute element={<ParentFeedback />} />}
+        />
+        {/* All about me and master modules */}
+        <Route
+          path="/allAboutMe"
+          element={<PrivateRoute element={<AllAboutMe />} />}
+        />
+        <Route
+          path="/allAboutMeMaster"
+          element={<PrivateRoute element={<AllAboutMeMaster />} />}
+        />
         {/*  */}
         <Route
-          path="/selfAssessmentMaster"
+          path="/learnerFeedbackMaster"
           element={<PrivateRoute element={<SelfAssamentMaster />} />}
         />
         <Route
-          path="/selfAssessment"
+          path="/learnerFeedback"
           element={<PrivateRoute element={<SelfAssessment />} />}
         />
         {/* SubjectForReportCard module */}

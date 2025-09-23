@@ -141,16 +141,19 @@ function DomainDetails() {
         }
       );
 
-      if (response.status === 200) {
+      if (response.status === 200 && response.data.success) {
         fetchStaffs();
         handleCloseModal();
         toast.success("Domain deleted successfully!");
       } else {
-        toast.error("Failed to delete domain");
+        toast.error(response.data.message || "Failed to delete domain");
       }
     } catch (error) {
-      console.error("Error deleting domain:", error);
-      toast.error("Failed to delete domain");
+      if (error.response && error.response.status === false) {
+        toast.error("Something went wrong. Please try again");
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false);

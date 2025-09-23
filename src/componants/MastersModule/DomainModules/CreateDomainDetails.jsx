@@ -5,7 +5,6 @@ import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
-
 import { useNavigate } from "react-router-dom";
 import "react-quill/dist/quill.snow.css";
 import Select from "react-select";

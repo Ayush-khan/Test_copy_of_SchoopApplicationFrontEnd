@@ -30,6 +30,7 @@ function SelfAssessmentMaster() {
   const [roleId, setRoleId] = useState("");
   const [classes, setClasses] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [controlType, setControlType] = useState("");
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
@@ -78,7 +79,7 @@ function SelfAssessmentMaster() {
         }
       );
 
-      console.log("self assessment", response.data.data);
+      console.log("learner's feedback", response.data.data);
       setSections(response.data.data);
       setPageCount(Math.ceil(response.data.length / pageSize));
     } catch (error) {
@@ -132,15 +133,17 @@ function SelfAssessmentMaster() {
     prevSearchTermRef.current = trimmedSearch;
   }, [searchTerm]);
 
-  // Filtering by class name or division name
   const searchLower = searchTerm.trim().toLowerCase();
   const filteredSections = sections.filter((section) => {
-    const className = section?.classname || "";
-    const parameter = section?.paramter || ""; // typo? maybe "parameter"?
+    const className = section?.classname?.toString().toLowerCase() || "";
+    const parameterName = section?.parameter?.toLowerCase() || "";
 
     return (
-      className.toLowerCase().includes(searchLower) ||
-      parameter.toLowerCase().includes(searchLower)
+      className.includes(searchLower) ||
+      parameterName.includes(searchLower) ||
+      parameterName
+        .replace(/\s+/g, "")
+        .includes(searchLower.replace(/\s+/g, ""))
     );
   });
 
@@ -158,20 +161,50 @@ function SelfAssessmentMaster() {
 
   console.log("displayed sections", displayedSections);
 
-  const validateSectionName = (parameter, classId) => {
-    const errors = {};
+  const reset = () => {
+    setNewDepartmentId("");
+    setNewSectionName("");
+    setControlType(null);
+    setSearchTerm(""); // ✅ clear search term
+  };
 
-    console.log("parameter", parameter);
+  // const validateSectionName = (parameter, classId, control_type) => {
+  //   const errors = {};
+
+  //   console.log("parameter", parameter);
+
+  //   if (!parameter || parameter.trim() === "") {
+  //     errors.parameter = "Please enter parameter.";
+  //   } else if (parameter.length > 50) {
+  //     errors.parameter = "The name field must not exceed 50 character.";
+  //   }
+
+  //   if (!classId) {
+  //     errors.class_id = "Please select class.";
+  //   }
+
+  //   if (!control_type) {
+  //     error.control_type = "Please enter type";
+  //   }
+
+  //   return errors;
+  // };
+
+  const validateSectionName = (parameter, classId, control_type) => {
+    const errors = {};
 
     if (!parameter || parameter.trim() === "") {
       errors.parameter = "Please enter parameter.";
+    } else if (parameter.length > 50) {
+      errors.parameter = "The name field must not exceed 50 characters.";
     }
-    // else if (parameter.length > 30) {
-    //   errors.parameter = "The name field must not exceed 30 character.";
-    // }
 
     if (!classId) {
       errors.class_id = "Please select class.";
+    }
+
+    if (!control_type || control_type.trim() === "") {
+      errors.control_type = "Please enter type.";
     }
 
     return errors;
@@ -186,6 +219,7 @@ function SelfAssessmentMaster() {
     setNewSectionName(section.parameter);
     setClassName(section.class_id);
     setNewDepartmentId(section.class_id);
+    setControlType(section.control_type);
     setShowEditModal(true);
   };
 
@@ -199,6 +233,7 @@ function SelfAssessmentMaster() {
     setShowDeleteModal(false);
     setNewSectionName("");
     setNewDepartmentId("");
+    setControlType("");
     setCurrentSection(null);
     setFieldErrors({});
     setNameError("");
@@ -207,10 +242,13 @@ function SelfAssessmentMaster() {
   const handleSubmitAdd = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+
     const validationErrors = validateSectionName(
       newSectionName,
-      newDepartmentId
+      newDepartmentId,
+      controlType
     );
+
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       setIsSubmitting(false);
@@ -226,6 +264,7 @@ function SelfAssessmentMaster() {
       const formData = new FormData();
       formData.append("parameter", newSectionName);
       formData.append("class_id", newDepartmentId);
+      formData.append("control_type", controlType);
 
       await axios.post(`${API_URL}/api/save_selfassessmentmaster`, formData, {
         headers: {
@@ -236,7 +275,8 @@ function SelfAssessmentMaster() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Self Assesssment Parameter added successfully!");
+      toast.success("Learner's Feedback Parameter added successfully!");
+      reset();
     } catch (error) {
       console.error("Error adding parameter:", error);
       if (error.response && error.response.data && error.response.data.errors) {
@@ -257,8 +297,10 @@ function SelfAssessmentMaster() {
 
     const validationErrors = validateSectionName(
       newSectionName,
-      newDepartmentId
+      newDepartmentId,
+      controlType
     );
+
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       setIsSubmitting(false);
@@ -273,7 +315,11 @@ function SelfAssessmentMaster() {
 
       await axios.put(
         `${API_URL}/api/update_selfassessmentmaster/${currentSection.sam_id}`,
-        { parameter: newSectionName, class_id: newDepartmentId },
+        {
+          parameter: newSectionName,
+          class_id: newDepartmentId,
+          control_type: controlType,
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -282,7 +328,7 @@ function SelfAssessmentMaster() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Self Assessment Parameter updated successfully!");
+      toast.success("Learner's Feedback Parameter updated successfully!");
     } catch (error) {
       console.error("Error editing parametr:", error);
       console.log("erroris", error.response);
@@ -338,13 +384,15 @@ function SelfAssessmentMaster() {
         fetchSections();
         setShowDeleteModal(false);
         setCurrentSection(null);
-        toast.success("Self Assessment Parameter deleted successfully!");
+        toast.success("Learner's Feedback Parameter deleted successfully!");
       } else {
         toast.error(response.data.message || "Failed to delete parameter");
       }
     } catch (error) {
-      if (error.response && error.response.status === 422) {
-        toast.error("This parameter is used in self-assessment");
+      if (error.response && error.response.status === 409) {
+        toast.error(
+          "Cannot Delete. This learner's feedback paramter already use in learner's feedback."
+        );
       } else {
         toast.error("Something went wrong. Please try again.");
       }
@@ -358,9 +406,11 @@ function SelfAssessmentMaster() {
     const { value } = e.target;
     setNameError("");
     setNewSectionName(value);
+
+    const errors = validateSectionName(value, newDepartmentId);
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
-      parameter: validateSectionName(value, newDepartmentId).parameter,
+      parameter: errors.parameter,
     }));
   };
 
@@ -368,11 +418,37 @@ function SelfAssessmentMaster() {
     const { value } = e.target;
     setClassName(value);
     setNewDepartmentId(value);
+
+    const errors = validateSectionName(newSectionName, value);
     setFieldErrors((prevErrors) => ({
       ...prevErrors,
-      class_id: validateSectionName(newSectionName, e.target.value).class_id,
+      class_id: errors.class_id,
     }));
   };
+
+  const handleChangeControlType = (e) => {
+    const { value } = e.target;
+    setNameError("");
+    setControlType(value);
+
+    // ✅ validate using the latest state + new control type value
+    const errors = validateSectionName(newSectionName, newDepartmentId, value);
+
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      control_type: errors.control_type || "", // clear error if valid
+    }));
+  };
+
+  const controlOptions = [
+    { value: "radio", label: "Radio Button" },
+    { value: "checkbox", label: "Checkbox" },
+    { value: "text", label: "Text Box" },
+    { value: "textarea", label: "Text Area" },
+    // { value: "select", label: "Dropdown" },
+    // { value: "number", label: "Number Input" },
+    // { value: "date", label: "Date Picker" },
+  ];
 
   return (
     <>
@@ -382,7 +458,7 @@ function SelfAssessmentMaster() {
         <div className="card mx-auto lg:w-[70%] shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Self Assessment Parameters
+              Learner's Feedback Parameter
             </h3>{" "}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -464,6 +540,7 @@ function SelfAssessmentMaster() {
                         )}
                       </tr>
                     </thead>
+
                     <tbody>
                       {loading ? (
                         <tr>
@@ -492,25 +569,26 @@ function SelfAssessmentMaster() {
                                 {section?.classname}
                               </p>
                             </td>
-                            <td className="text-center px-2  border border-gray-950 text-sm">
+                            <td className="text-center px-2 border border-gray-950 text-sm">
                               <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                 {section.parameter}
                               </p>
                             </td>
+
                             {roleId !== "M" && (
                               <>
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   <button
-                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
                                     onClick={() => handleEdit(section)}
                                   >
                                     <FontAwesomeIcon icon={faEdit} />
-                                  </button>{" "}
+                                  </button>
                                 </td>
 
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   <button
-                                    className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                    className="text-red-600 hover:text-red-800 hover:bg-transparent"
                                     onClick={() => handleDelete(section.sam_id)}
                                   >
                                     <FontAwesomeIcon icon={faTrash} />
@@ -521,11 +599,14 @@ function SelfAssessmentMaster() {
                           </tr>
                         ))
                       ) : (
-                        <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                          <div className=" text-center text-xl text-red-700">
+                        <tr>
+                          <td
+                            colSpan="6"
+                            className="text-center text-xl text-red-700 py-10"
+                          >
                             Oops! No data found..
-                          </div>
-                        </div>
+                          </td>
+                        </tr>
                       )}
                     </tbody>
                   </table>
@@ -571,7 +652,7 @@ function SelfAssessmentMaster() {
                 <div className="modal-content">
                   <div className="flex justify-between p-3">
                     <h5 className="modal-title">
-                      Create Self Assessment Parameter
+                      Create Learner's Feedback Parameter
                     </h5>
 
                     <RxCross1
@@ -622,6 +703,7 @@ function SelfAssessmentMaster() {
                         )}
                       </div>
                     </div>
+
                     <div className=" relative mb-3 flex justify-center  mx-4">
                       <label htmlFor="sectionName" className="w-1/2 mt-2">
                         Parameter <span className="text-red-500">*</span>
@@ -647,17 +729,66 @@ function SelfAssessmentMaster() {
                         )}
                       </div>
                     </div>
+
+                    <div className=" relative mb-3 flex justify-center  mx-4">
+                      <label htmlFor="controlType" className="w-1/2 mt-2">
+                        Control Type <span className="text-red-500">*</span>
+                      </label>
+
+                      <select
+                        id="controlType"
+                        className="form-control shadow-md"
+                        value={controlType}
+                        onChange={handleChangeControlType}
+                      >
+                        <option value="">Select</option>
+                        {controlOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+
+                      <div className="absolute top-9 left-1/3">
+                        {!nameAvailable && (
+                          <span className=" block text-danger text-xs">
+                            {nameError}
+                          </span>
+                        )}
+                        {fieldErrors.control_type && (
+                          <span className="text-danger text-xs">
+                            {fieldErrors.control_type}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   <div className=" flex justify-end p-3">
                     <button
                       type="button"
-                      className="btn btn-primary px-3 mb-2 "
+                      className="btn btn-primary px-3 mb-2 mr-2"
                       style={{}}
                       onClick={handleSubmitAdd}
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? "Saving..." : "Add"}
+                      {isSubmitting ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger px-3 mb-2 mr-2"
+                      style={{}}
+                      onClick={reset}
+                    >
+                      Reset
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-warning px-3 mb-2 text-white "
+                      style={{}}
+                      onClick={handleCloseModal}
+                    >
+                      Back
                     </button>
                   </div>
                 </div>
@@ -676,7 +807,7 @@ function SelfAssessmentMaster() {
               <div className="modal-content">
                 <div className="flex justify-between p-3">
                   <h5 className="modal-title">
-                    Edit Self Assessment Parameter
+                    Edit Learner's Feedback Parameter
                   </h5>
                   <RxCross1
                     className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -750,16 +881,57 @@ function SelfAssessmentMaster() {
                       )}
                     </div>
                   </div>
+
+                  <div className=" relative mb-3 flex justify-center  mx-4">
+                    <label htmlFor="controlType" className="w-1/2 mt-2">
+                      Control Type <span className="text-red-500">*</span>
+                    </label>
+
+                    <select
+                      id="controlType"
+                      className="form-control shadow-md"
+                      value={controlType} // shows saved value now
+                      onChange={handleChangeControlType}
+                    >
+                      <option value="">Select </option>
+                      {controlOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    <div className="absolute top-9 left-1/3">
+                      {!nameAvailable && (
+                        <span className=" block text-danger text-xs">
+                          {nameError}
+                        </span>
+                      )}
+                      {fieldErrors.control_type && (
+                        <span className="text-danger text-xs">
+                          {fieldErrors.control_type}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div className=" flex justify-end p-3">
                   <button
                     type="button"
-                    className="btn btn-primary px-3 mb-2 "
+                    className="btn btn-primary px-3 mb-2 mr-2"
                     style={{}}
                     onClick={handleSubmitEdit}
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Updating..." : "Update"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-warning px-3 mb-2 text-white "
+                    style={{}}
+                    onClick={handleCloseModal}
+                  >
+                    Back
                   </button>
                 </div>
               </div>
@@ -792,7 +964,7 @@ function SelfAssessmentMaster() {
                 ></div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to delete Self Assesssment Parameter
+                    Are you sure you want to delete Learner's Feedback Parameter
                     for {currentSection.classname} : {currentSection.parameter}{" "}
                     ?
                   </p>
