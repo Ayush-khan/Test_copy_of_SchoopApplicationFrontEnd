@@ -158,10 +158,24 @@ const SubjectAllotmentHSC = () => {
     setSelectedStudent(selectedOption);
     setSelectedStudentId(selectedOption?.value);
   };
+  // const classOptions = useMemo(
+  //   () =>
+  //     classesforForm
+  //       .filter((cls) => cls.name === "11" || cls.name === "12")
+  //       .map((cls) => ({
+  //         value: cls.class_id,
+  //         label: `${cls.name}`,
+  //         key: `${cls.class_id}`,
+  //       })),
+  //   [classesforForm]
+  // );
   const classOptions = useMemo(
     () =>
       classesforForm
-        .filter((cls) => cls.name === "11" || cls.name === "12")
+        .filter((cls) => {
+          const classNumber = parseInt(cls.name); // Extract numeric part from "11 - Science"
+          return classNumber > 10; // Only show classes greater than 10
+        })
         .map((cls) => ({
           value: cls.class_id,
           label: `${cls.name}`,

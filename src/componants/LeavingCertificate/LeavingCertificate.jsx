@@ -38,6 +38,15 @@ const LeavingCertificate = () => {
     if (!str) return "";
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   };
+  const classLevel = parseInt(classIdForSearch?.match(/\d+/)?.[0] || "0", 10);
+
+  const getCookie = (name) => {
+    const cookieValue = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="));
+    return cookieValue ? cookieValue.split("=")[1] : null;
+  };
+  const sortNameCookie = getCookie("short_name");
 
   const [formData, setFormData] = useState({
     sr_no: "",
@@ -82,6 +91,8 @@ const LeavingCertificate = () => {
     academicStudent: [],
     academic_yr: "", // Add this to track selected academic year
     part_of: "",
+    working_days: "", // ✅ Add this
+
     // games: "",
     // selectedActivities:[],
   });
@@ -346,7 +357,7 @@ const LeavingCertificate = () => {
     setSelectedClassForSubject(classNameOnly);
     setSelectedStudent(null);
     setSelectedStudentId(null);
-    setClassIdForSearch(selectedOption?.value);
+    setClassIdForSearch(selectedOption?.classNameforSearchUsingUdisepen);
     fetchStudentNameWithClassId(selectedOption?.value);
   };
 
@@ -363,6 +374,7 @@ const LeavingCertificate = () => {
         value: cls.section_id,
         label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
         key: `${cls.class_id}-${cls.section_id}`,
+        classNameforSearchUsingUdisepen: `${cls?.get_class?.name} ${cls.name}`,
       })),
     [classesforForm]
   );
@@ -433,6 +445,7 @@ const LeavingCertificate = () => {
       stud_id: "",
       udise_pen_no: "",
       apaar_id: "",
+      working_days: "", // ✅ Add this
     });
 
     try {
@@ -502,6 +515,7 @@ const LeavingCertificate = () => {
           teacher_image_name:
             fetchedData.studentinformation.father_image_name || null, // Assuming this is for a teacher image
           purpose: fetchedData.purpose || " ",
+          working_days: fetchedData.working_days || "",
         });
         console.log("setFOrmData", formData);
       } else {
@@ -524,88 +538,192 @@ const LeavingCertificate = () => {
       setLoadingForSearch(false);
     }
   };
-
   const validate = () => {
     const newErrors = {};
 
-    // Required fields validation
     const requiredFields = [
       "grn_no",
       "date",
       "first_name",
-
       "stud_id_no",
       "promoted_to",
       "last_exam",
       "father_name",
       "mother_name",
       "birth_place",
-      "state",
       "mother_tongue",
       "dob",
       "dob_words",
       "nationality",
-      "prev_school_class",
       "admission_date",
       "admission_class",
       "reason_leaving",
       "application_date",
       "leaving_date",
       "standard_studying",
-      "dob_proof",
-      "stu_aadhaar_no",
-      "attendance",
       "fee_month",
       "remark",
       "conduct",
+      "part_of",
+      "academic_yr",
     ];
 
+    // Always required fields
     requiredFields.forEach((field) => {
       if (!formData[field]) {
         newErrors[field] = "This field is required";
       }
     });
-    if (classIdForSearch > 427) {
-      if (!formData.udise_pen_no) {
-        newErrors.udise_pen_no = "This field is required";
+    if (sortNameCookie === "HSCS") {
+      if (!formData.apaar_id || formData.apaar_id.trim() === "") {
+        newErrors.apaar_id = "This field is required";
       }
     }
+    // Conditional required fields for SACS
+    if (sortNameCookie === "SACS") {
+      const sacsFields = [
+        "state",
+        "prev_school_class",
+        "dob_proof",
+        "attendance",
+      ];
+      sacsFields.forEach((field) => {
+        if (!formData[field]) {
+          newErrors[field] = "This field is required";
+        }
+      });
+
+      // Subject selection check only for SACS
+      if (
+        !formData.selectedSubjects ||
+        formData.selectedSubjects.length === 0
+      ) {
+        newErrors.selectedSubjects = "Please select at least one subject";
+      }
+    }
+
+    // Conditional required fields for HSCS
+    if (sortNameCookie === "HSCS") {
+      if (!formData.working_days) {
+        newErrors.working_days = "This field is required";
+      }
+
+      if (!formData.attendance) {
+        newErrors.attendance = "This field is required";
+      }
+    }
+
+    // Specific validation for class > 427
+    // if (classIdForSearch > 427 && !formData.udise_pen_no) {
+    //   newErrors.udise_pen_no = "This field is required";
+    // }
+    if (classLevel > 9 && !formData.udise_pen_no) {
+      newErrors.udise_pen_no = "This field is required";
+    }
+    // Field-specific validations
     if (formData.first_name && /^\d/.test(formData.first_name)) {
-      // Additional validations for specific fields
       newErrors.first_name = "Student Name should not start with a number";
     }
+
     if (formData.father_name && /^\d/.test(formData.father_name)) {
       newErrors.father_name = "Father's Name should not start with a number";
     }
+
     if (formData.mother_name && /^\d/.test(formData.mother_name)) {
       newErrors.mother_name = "Mother's Name should not start with a number";
     }
 
-    // Checkbox validation
+    // Activities required regardless of school
     if (!selectedActivities || selectedActivities.length === 0) {
       newErrors.activities =
         "Please select at least one extra-curricular activity";
     }
-    if (!formData.selectedSubjects || formData.selectedSubjects.length === 0) {
-      newErrors.selectedSubjects = "Please select at least one subject";
-    }
-
-    // Dropdown-specific validations
-    if (!formData.dob_proof) {
-      newErrors.dob_proof = "This field is required";
-    }
-    if (!formData.part_of) {
-      newErrors.part_of = "This field is required";
-    }
-    if (!formData.academic_yr) {
-      newErrors.academic_yr = "This field is required";
-    }
 
     setErrors(newErrors);
-
-    // Return true if no errors, false if errors exist
     return Object.keys(newErrors).length === 0;
   };
+
+  // const validate = () => {
+  //   const newErrors = {};
+
+  //   // Required fields validation
+  //   const requiredFields = [
+  //     "grn_no",
+  //     "date",
+  //     "first_name",
+
+  //     "stud_id_no",
+  //     "promoted_to",
+  //     "last_exam",
+  //     "father_name",
+  //     "mother_name",
+  //     "birth_place",
+  //     "state",
+  //     "mother_tongue",
+  //     "dob",
+  //     "dob_words",
+  //     "nationality",
+  //     "prev_school_class",
+  //     "admission_date",
+  //     "admission_class",
+  //     "reason_leaving",
+  //     "application_date",
+  //     "leaving_date",
+  //     "standard_studying",
+  //     "dob_proof",
+  //     "stu_aadhaar_no",
+  //     "attendance",
+  //     "fee_month",
+  //     "remark",
+  //     "conduct",
+  //   ];
+
+  //   requiredFields.forEach((field) => {
+  //     if (!formData[field]) {
+  //       newErrors[field] = "This field is required";
+  //     }
+  //   });
+  //   if (classIdForSearch > 427) {
+  //     if (!formData.udise_pen_no) {
+  //       newErrors.udise_pen_no = "This field is required";
+  //     }
+  //   }
+  //   if (formData.first_name && /^\d/.test(formData.first_name)) {
+  //     // Additional validations for specific fields
+  //     newErrors.first_name = "Student Name should not start with a number";
+  //   }
+  //   if (formData.father_name && /^\d/.test(formData.father_name)) {
+  //     newErrors.father_name = "Father's Name should not start with a number";
+  //   }
+  //   if (formData.mother_name && /^\d/.test(formData.mother_name)) {
+  //     newErrors.mother_name = "Mother's Name should not start with a number";
+  //   }
+
+  //   // Checkbox validation
+  //   if (!selectedActivities || selectedActivities.length === 0) {
+  //     newErrors.activities =
+  //       "Please select at least one extra-curricular activity";
+  //   }
+  //   if (!formData.selectedSubjects || formData.selectedSubjects.length === 0) {
+  //     newErrors.selectedSubjects = "Please select at least one subject";
+  //   }
+
+  //   // Dropdown-specific validations
+  //   if (!formData.dob_proof) {
+  //     newErrors.dob_proof = "This field is required";
+  //   }
+  //   if (!formData.part_of) {
+  //     newErrors.part_of = "This field is required";
+  //   }
+  //   if (!formData.academic_yr) {
+  //     newErrors.academic_yr = "This field is required";
+  //   }
+
+  //   setErrors(newErrors);
+
+  //   // Return true if no errors, false if errors exist
+  //   return Object.keys(newErrors).length === 0;
+  // };
 
   // Handle change for form fields
   const handleChange = async (event) => {
@@ -733,6 +851,7 @@ const LeavingCertificate = () => {
       stud_id: "",
       udise_pen_no: "",
       apaar_id: "",
+      working_days: "", // ✅ Add this
     });
 
     try {
@@ -798,6 +917,7 @@ const LeavingCertificate = () => {
           teacher_image_name:
             fetchedData.studentinformation.father_image_name || null,
           purpose: fetchedData.purpose || " ",
+          working_days: fetchedData.working_days || "",
         }));
       } else {
         toast.error("No data found for the selected academic year.");
@@ -809,88 +929,6 @@ const LeavingCertificate = () => {
       setLoadingForSearchAcy(false);
     }
   };
-
-  // const handleChange = (event) => {
-  //   const { name, value } = event.target;
-  // let newValue = value;
-
-  // if (name === "dob") {
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     dob: value,
-  //     dob_words: convertDateToWords(value),
-  //   }));
-  // } else {
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-  // }
-  // // Update formData for the field
-  // setFormData((prevData) => ({
-  //   ...prevData,
-  //   [name]: newValue,
-  // }));
-
-  //   // Field-specific validation
-  //   let fieldErrors = {};
-
-  //   // Name validation
-  //   if (name === "first_name") {
-  //     if (!newValue) fieldErrors.first_name = "Name is required";
-  //     else if (/^\d/.test(newValue))
-  //       fieldErrors.first_name = "Name should not start with a number";
-  //   }
-  //   if (name === "father_name") {
-  //     if (!newValue) fieldErrors.father_name = "Name is required";
-  //     else if (/^\d/.test(newValue))
-  //       fieldErrors.father_name = "Name should not start with a number";
-  //   }
-
-  //   // Academic Qualification validation
-  //   if (name === "class_division") {
-  //     if (!newValue)
-  //       fieldErrors.class_division = "Class and Division is required";
-  //   }
-
-  //   // Date of Birth validation
-  //   if (name === "dob") {
-  //     if (!newValue) fieldErrors.dob = "Date of Birth is required";
-  //   }
-  //   // serial number
-
-  //   if (name === "sr_no") {
-  //     if (!newValue) fieldErrors.sr_no = "Serial number is required";
-  //   }
-  //   if (name === "father_name") {
-  //     if (!newValue) fieldErrors.father_name = "Father Name is required";
-  //   }
-
-  //   // Date of Joining validation
-  //   if (name === "date") {
-  //     if (!newValue) fieldErrors.date = " Date is required";
-  //   }
-
-  //   // Employee ID validation
-  //   if (name === "purpose") {
-  //     if (!newValue) fieldErrors.purpose = "Purpose  is required";
-  //   }
-
-  //   // Address validation
-  //   if (name === "dob_words") {
-  //     if (!newValue)
-  //       fieldErrors.dob_words = "  Birth date in words is required";
-  //   }
-  //   if (name === "nationality") {
-  //     if (!newValue) fieldErrors.nationality = "Nationality is required";
-  //   }
-
-  //   // Update the errors state with the new field errors
-  //   setErrors((prevErrors) => ({
-  //     ...prevErrors,
-  //     [name]: fieldErrors[name],
-  //   }));
-  // };
 
   const formatDateString = (dateString) => {
     if (!dateString) return "";
@@ -956,6 +994,7 @@ const LeavingCertificate = () => {
       stud_id: formData.stud_id || "",
       udise_pen_no: formData.udise_pen_no || "",
       apaar_id: formData.apaar_id || "",
+      working_days: formData.working_days || "",
     };
 
     try {
@@ -1479,7 +1518,11 @@ const LeavingCertificate = () => {
                         )}
                       </div>
 
-                      {classIdForSearch > 427 && (
+                      {/* {classIdForSearch > 427 && ( */}
+                      {parseInt(
+                        classIdForSearch?.match(/\d+/)?.[0] || "0",
+                        10
+                      ) > 9 && (
                         <div className="mt-2">
                           <label
                             htmlFor="studentAadharNumber"
@@ -1531,7 +1574,7 @@ const LeavingCertificate = () => {
                           </span>
                         )}
                       </div>
-                      <div>
+                      {/* <div>
                         <label
                           htmlFor="apaar_id"
                           className="block font-bold text-xs mb-2"
@@ -1548,6 +1591,30 @@ const LeavingCertificate = () => {
                           readOnly
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                         />
+                      </div> */}
+                      <div>
+                        <label
+                          htmlFor="apaar_id"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          Appar ID
+                          {sortNameCookie === "HSCS" && (
+                            <span className="text-red-500"> *</span>
+                          )}
+                        </label>
+                        <input
+                          type="text"
+                          id="apaar_id"
+                          name="apaar_id"
+                          value={formData.apaar_id}
+                          onChange={handleChange}
+                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                        />
+                        {sortNameCookie === "HSCS" && errors.apaar_id && (
+                          <span className="text-red-500 text-xs ml-1 h-1">
+                            {errors.apaar_id}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </fieldset>
@@ -1653,71 +1720,77 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                         />
                       </div>{" "}
-                      <div className="grid   col-span-2 row-span-2 ">
-                        <label
-                          htmlFor="subjects"
-                          className="block font-bold text-xs  col-span-3"
-                        >
-                          Subjects Studied{" "}
-                          <span className="text-red-500">*</span>
-                        </label>
+                      {sortNameCookie === "SACS" && (
+                        // Purpose input field here
+                        <div className="grid   col-span-2 row-span-2 ">
+                          <label
+                            htmlFor="subjects"
+                            className="block font-bold text-xs  col-span-3"
+                          >
+                            Subjects Studied{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
 
-                        {formData.subjectsFor &&
-                        formData.subjectsFor.length > 0 ? (
-                          formData.subjectsFor.map((subject, index) => (
-                            <div key={index} className="grid-col-3 relative ">
-                              <label className="">
+                          {formData.subjectsFor &&
+                          formData.subjectsFor.length > 0 ? (
+                            formData.subjectsFor.map((subject, index) => (
+                              <div key={index} className="grid-col-3 relative ">
+                                <label className="">
+                                  <input
+                                    type="checkbox"
+                                    name="subjects"
+                                    value={subject.name}
+                                    checked={formData?.selectedSubjects?.includes(
+                                      subject.name
+                                    )}
+                                    onChange={(e) =>
+                                      handleSubjectSelection(e, subject.name)
+                                    }
+                                    className="form-checkbox h-4 w-4 text-blue-600"
+                                  />
+                                  <span className="ml-1 text-sm">
+                                    {subject.name}
+                                  </span>
+                                </label>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-sm text-gray-500 col-span-3">
+                              No subjects available
+                            </p>
+                          )}
+
+                          {selectedClassForSubject == "10" && (
+                            <div className="col-span-1 relative  ">
+                              <label className="inline-flex items-center">
                                 <input
                                   type="checkbox"
                                   name="subjects"
-                                  value={subject.name}
+                                  value="Basic Mathematics"
                                   checked={formData?.selectedSubjects?.includes(
-                                    subject.name
+                                    "Basic Mathematics"
                                   )}
                                   onChange={(e) =>
-                                    handleSubjectSelection(e, subject.name)
+                                    handleSubjectSelection(
+                                      e,
+                                      "Basic Mathematics"
+                                    )
                                   }
                                   className="form-checkbox h-4 w-4 text-blue-600"
                                 />
                                 <span className="ml-1 text-sm">
-                                  {subject.name}
+                                  Basic Mathematics
                                 </span>
                               </label>
                             </div>
-                          ))
-                        ) : (
-                          <p className="text-sm text-gray-500 col-span-3">
-                            No subjects available
-                          </p>
-                        )}
-
-                        {selectedClassForSubject == "10" && (
-                          <div className="col-span-1 relative  ">
-                            <label className="inline-flex items-center">
-                              <input
-                                type="checkbox"
-                                name="subjects"
-                                value="Basic Mathematics"
-                                checked={formData?.selectedSubjects?.includes(
-                                  "Basic Mathematics"
-                                )}
-                                onChange={(e) =>
-                                  handleSubjectSelection(e, "Basic Mathematics")
-                                }
-                                className="form-checkbox h-4 w-4 text-blue-600"
-                              />
-                              <span className="ml-1 text-sm">
-                                Basic Mathematics
-                              </span>
-                            </label>
-                          </div>
-                        )}
-                        {errors.selectedSubjects && (
-                          <span className="text-red-500 text-xs ml-1 h-1 col-span-3">
-                            {errors.selectedSubjects}
-                          </span>
-                        )}
-                      </div>
+                          )}
+                          {errors.selectedSubjects && (
+                            <span className="text-red-500 text-xs ml-1 h-1 col-span-3">
+                              {errors.selectedSubjects}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       {/* <div className="grid col-span-2 row-span-2">
                       <label
                         htmlFor="subjects"
@@ -1807,6 +1880,24 @@ const LeavingCertificate = () => {
                         >
                           Promoted to <span className="text-red-500">*</span>
                         </label>
+                        {/* <label
+                          htmlFor="PromotedTo"
+                          className="block font-bold text-xs mb-2"
+                        >
+                          {sortNameCookie === "HSCS" && (
+                            <p className="relative -top-4">
+                              Whether qualified for promotion to higher class{" "}
+                              <span className="text-red-500">*</span>
+                            </p>
+                          )}
+                          {sortNameCookie === "SACS" && (
+                            <>
+                              Promoted to{" "}
+                              <span className="text-red-500">*</span>
+                            </>
+                          )}
+                        </label> */}
+
                         <input
                           type="text"
                           id="PromotedTo"
@@ -1878,29 +1969,31 @@ const LeavingCertificate = () => {
                           </span>
                         )}
                       </div>
-                      <div>
-                        <label
-                          htmlFor="state"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          State <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="state"
-                          name="state"
-                          maxLength={50}
-                          value={formData.state}
-                          onChange={handleChange}
-                          readOnly
-                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                        />
-                        {errors.state && (
-                          <span className="text-red-500 text-xs ml-1 h-1">
-                            {errors.state}
-                          </span>
-                        )}
-                      </div>
+                      {sortNameCookie === "SACS" && (
+                        <div>
+                          <label
+                            htmlFor="state"
+                            className="block font-bold text-xs mb-2"
+                          >
+                            State <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            id="state"
+                            name="state"
+                            maxLength={50}
+                            value={formData.state}
+                            onChange={handleChange}
+                            readOnly
+                            className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                          />
+                          {errors.state && (
+                            <span className="text-red-500 text-xs ml-1 h-1">
+                              {errors.state}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <div>
                         <label
                           htmlFor="mother_tongue"
@@ -2007,29 +2100,31 @@ const LeavingCertificate = () => {
                     {/* </legend> */}
 
                     <div className="grid grid-cols-1 md:grid-cols-4  gap-4">
-                      <div>
-                        <label
-                          htmlFor="prev_school_class"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Previous School Attended{" "}
-                          <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="prev_school_class"
-                          maxLength={100}
-                          name="prev_school_class"
-                          value={formData.prev_school_class}
-                          onChange={handleChange}
-                          className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                        />
-                        {errors.prev_school_class && (
-                          <span className="text-red-500 text-xs ml-1 h-1">
-                            {errors.prev_school_class}
-                          </span>
-                        )}
-                      </div>
+                      {sortNameCookie === "SACS" && (
+                        <div>
+                          <label
+                            htmlFor="prev_school_class"
+                            className="block font-bold text-xs mb-2"
+                          >
+                            Previous School Attended{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            id="prev_school_class"
+                            maxLength={100}
+                            name="prev_school_class"
+                            value={formData.prev_school_class}
+                            onChange={handleChange}
+                            className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                          />
+                          {errors.prev_school_class && (
+                            <span className="text-red-500 text-xs ml-1 h-1">
+                              {errors.prev_school_class}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <div>
                         <label
                           htmlFor="admission_date"
@@ -2100,37 +2195,39 @@ const LeavingCertificate = () => {
                         )}
                       </div>{" "}
                       {/* Dropdown for Proof of DOB submitted */}
-                      <div className="">
-                        <label
-                          htmlFor="dob_proof"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Proof of DOB Submitted at the Time of Admission
-                          <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                          id="dob_proof"
-                          name="dob_proof"
-                          value={formData.dob_proof}
-                          onChange={handleChange}
-                          className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                        >
-                          <option value="">Select</option>
-                          <option value="Birth Certificate">
-                            Birth Certificate
-                          </option>
-                          <option value="School Leaving Certificate">
-                            School Leaving Certificate
-                          </option>
-                          <option value="Aadhar Card">Aadhar Card</option>
-                          <option value="Passport">Passport</option>
-                        </select>
-                        {errors.dob_proof && (
-                          <span className="text-red-500 text-xs ml-1 h-1">
-                            {errors.dob_proof}
-                          </span>
-                        )}
-                      </div>{" "}
+                      {sortNameCookie === "SACS" && (
+                        <div className="">
+                          <label
+                            htmlFor="dob_proof"
+                            className="block font-bold text-xs mb-2"
+                          >
+                            Proof of DOB Submitted at the Time of Admission
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            id="dob_proof"
+                            name="dob_proof"
+                            value={formData.dob_proof}
+                            onChange={handleChange}
+                            className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                          >
+                            <option value="">Select</option>
+                            <option value="Birth Certificate">
+                              Birth Certificate
+                            </option>
+                            <option value="School Leaving Certificate">
+                              School Leaving Certificate
+                            </option>
+                            <option value="Aadhar Card">Aadhar Card</option>
+                            <option value="Passport">Passport</option>
+                          </select>
+                          {errors.dob_proof && (
+                            <span className="text-red-500 text-xs ml-1 h-1">
+                              {errors.dob_proof}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <div className="">
                         <label
                           htmlFor="part_of"
@@ -2254,7 +2351,7 @@ const LeavingCertificate = () => {
                           </span>
                         )}
                       </div>
-                      <div>
+                      {/* <div>
                         <label
                           htmlFor="attendance"
                           className="block font-bold text-xs mb-2"
@@ -2275,7 +2372,83 @@ const LeavingCertificate = () => {
                             {errors.attendance}
                           </span>
                         )}
-                      </div>
+                      </div> */}
+                      {sortNameCookie === "SACS" && (
+                        <div>
+                          <label
+                            htmlFor="attendance"
+                            className="block font-bold text-xs mb-2"
+                          >
+                            Attendance <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            id="attendance"
+                            maxLength={7}
+                            name="attendance"
+                            value={formData.attendance}
+                            onChange={handleChange}
+                            className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                          />
+                          {errors.attendance && (
+                            <span className="text-red-500 text-xs ml-1 h-1">
+                              {errors.attendance}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {sortNameCookie === "HSCS" && (
+                        <>
+                          {/* New Field: Working Days */}
+                          <div>
+                            <label
+                              htmlFor="working_days"
+                              className="block font-bold text-xs mb-2"
+                            >
+                              Total Number of Working Days{" "}
+                              <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="working_days"
+                              name="working_days"
+                              value={formData.working_days}
+                              onChange={handleChange}
+                              className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                            />
+                            {errors.working_days && (
+                              <span className="text-red-500 text-xs ml-1 h-1">
+                                {errors.working_days}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Modified Field: Attendance with different label */}
+                          <div>
+                            <label
+                              htmlFor="attendance"
+                              className="block font-bold text-xs mb-2"
+                            >
+                              Total Number of Working Days Present{" "}
+                              <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="attendance"
+                              maxLength={7}
+                              name="attendance"
+                              value={formData.attendance}
+                              onChange={handleChange}
+                              className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                            />
+                            {errors.attendance && (
+                              <span className="text-red-500 text-xs ml-1 h-1">
+                                {errors.attendance}
+                              </span>
+                            )}
+                          </div>
+                        </>
+                      )}
                       <div>
                         <label
                           htmlFor="fee_month"
