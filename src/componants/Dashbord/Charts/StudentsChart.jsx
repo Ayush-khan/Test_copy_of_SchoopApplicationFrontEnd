@@ -679,7 +679,7 @@ const StudentsChart = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [data, setData] = useState([]);
   const [barCategoryGap, setBarCategoryGap] = useState("40%");
-  const [xAxisFontSize, setXAxisFontSize] = useState(7);
+  const [xAxisFontSize, setXAxisFontSize] = useState(6);
   const [xAxisTickMargin, setXAxisTickMargin] = useState(5);
   const [xAxisTickWidth, setXAxisTickWidth] = useState(1);
   const [labelFontSize, setLabelFontSize] = useState("0.6em");
@@ -689,8 +689,8 @@ const StudentsChart = () => {
     const updateBarCategoryGap = () => {
       if (window.innerWidth > 768) {
         setBarCategoryGap("20%");
-        setXAxisFontSize(14);
-        setXAxisTickMargin(10);
+        setXAxisFontSize(12);
+        setXAxisTickMargin(6);
         setXAxisTickWidth(7);
         setLabelFontSize("0.8em");
       } else {
@@ -759,30 +759,39 @@ const StudentsChart = () => {
             .reduce((total, value) => total + value, 0);
           return totalStudents > 0;
         });
+        const transformedData = filteredData.map((entry) => {
+          const className = entry.class.includes(" - ")
+            ? entry.class.replace(" - ", "\n")
+            : entry.class;
 
-        const classOrder = [
-          "Nursery",
-          "LKG",
-          "UKG",
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9",
-          "10",
-          "11",
-          "12",
-        ];
+          return { ...entry, class: className };
+        });
+        setData(transformedData);
 
-        const sortedData = filteredData.sort(
-          (a, b) => classOrder.indexOf(a.class) - classOrder.indexOf(b.class)
-        );
+        // const classOrder = [
+        //   "Nursery",
+        //   "LKG",
+        //   "UKG",
+        //   "1",
+        //   "2",
+        //   "3",
+        //   "4",
+        //   "5",
+        //   "6",
+        //   "7",
+        //   "8",
+        //   "9",
+        //   "10",
+        //   "11",
+        //   "12",
+        // ];
 
-        setData(sortedData);
+        // const sortedData = filteredData.sort(
+        //   (a, b) => classOrder.indexOf(a.class) - classOrder.indexOf(b.class)
+        // );
+
+        // setData(sortedData);
+        setData(filteredData);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -792,6 +801,97 @@ const StudentsChart = () => {
 
     fetchData();
   }, []);
+
+  const renderCustomXAxisTick = ({ x, y, payload }) => {
+    const fullClassName = payload.value;
+
+    let shortName = fullClassName;
+
+    if (fullClassName.includes(" - ")) {
+      const parts = fullClassName.split(" - ");
+      const subjectRaw = parts[1].trim().toLowerCase();
+
+      const abbreviationMap = {
+        science: "Sci",
+        commerce: "Com",
+        arts: "Art",
+        humanities: "Hum",
+        pcm: "PCM",
+        pcb: "PCB",
+        pcmb: "PCMB",
+        bio: "Bio",
+        biology: "Bio",
+        math: "Math",
+        maths: "Math",
+        cs: "CS",
+        "computer science": "CS",
+        "physical education": "PE",
+        pe: "PE",
+        economics: "Eco",
+        accounts: "Acc",
+        accounting: "Acc",
+        business: "Bus",
+        "business studies": "Bus",
+        english: "Eng",
+        hindi: "Hin",
+        history: "His",
+        geography: "Geo",
+        political: "Pol",
+        "political science": "Pol",
+        sociology: "Soc",
+        psychology: "Psy",
+      };
+
+      // Match full key or best guess
+      const matchedKey = Object.keys(abbreviationMap).find((key) =>
+        subjectRaw.includes(key)
+      );
+
+      const abbr = matchedKey
+        ? abbreviationMap[matchedKey]
+        : subjectRaw.slice(0, 3).toUpperCase();
+
+      shortName = `${parts[0]}-${abbr}`;
+    }
+
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <title>{fullClassName}</title>
+        <text
+          x={0}
+          y={0}
+          dy={16}
+          textAnchor="middle"
+          fontSize={xAxisFontSize}
+          fill="#666"
+        >
+          {shortName}
+        </text>
+      </g>
+    );
+  };
+
+  // const renderCustomXAxisTick = ({ x, y, payload }) => {
+  //   const lines = payload.value.split(" - ");
+
+  //   return (
+  //     <g transform={`translate(${x},${y})`}>
+  //       {lines.map((line, index) => (
+  //         <text
+  //           key={index}
+  //           x={0}
+  //           y={index * 10}
+  //           dy={16}
+  //           textAnchor="middle"
+  //           fontSize={xAxisFontSize}
+  //           fill="#666"
+  //         >
+  //           {line}
+  //         </text>
+  //       ))}
+  //     </g>
+  //   );
+  // };
 
   const renderTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -888,13 +988,21 @@ const StudentsChart = () => {
             margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
             barCategoryGap={barCategoryGap}
           >
-            <XAxis
+            {/* <XAxis
               dataKey="class"
               tick={{ fontSize: xAxisFontSize }}
               interval={0}
               tickMargin={xAxisTickMargin}
               tickSize={xAxisTickWidth}
+            /> */}
+            <XAxis
+              dataKey="class"
+              tick={renderCustomXAxisTick}
+              interval={0}
+              tickMargin={xAxisTickMargin}
+              tickSize={xAxisTickWidth}
             />
+
             <YAxis />
             <Tooltip content={renderTooltip} />
             <Legend />
