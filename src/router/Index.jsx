@@ -314,6 +314,7 @@ import PeerFeedbackMaster from "../componants/MastersModule/DomainModules/PeerFe
 import AllAboutMe from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMe.jsx";
 import AllAboutMeMaster from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMeMaster.jsx";
 import ClassTeacherRemark from "../componants/MastersModule/DomainModules/ClassTeacherRemark/ClassTeacherRemark.jsx";
+import PublishreportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishreportCard.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -731,6 +732,11 @@ function Index() {
         <Route
           path="/hpcRemark"
           element={<PrivateRoute element={<ClassTeacherRemark />} />}
+        />
+        {/* PublishreportCard modules */}
+        <Route
+          path="/publishreportCard"
+          element={<PrivateRoute element={<PublishreportCard />} />}
         />
         {/* SubjectForReportCard module */}
         <Route
