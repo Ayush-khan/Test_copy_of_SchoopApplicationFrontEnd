@@ -315,6 +315,7 @@ import AllAboutMe from "../componants/MastersModule/DomainModules/AllAboutMe/All
 import AllAboutMeMaster from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMeMaster.jsx";
 import ClassTeacherRemark from "../componants/MastersModule/DomainModules/ClassTeacherRemark/ClassTeacherRemark.jsx";
 import PublishreportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishreportCard.jsx";
+import UploadMarks from "../componants/MastersModule/DomainModules/UploadMarks/UploadMarks.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -737,6 +738,11 @@ function Index() {
         <Route
           path="/publishreportCard"
           element={<PrivateRoute element={<PublishreportCard />} />}
+        />
+        {/* Upload student marks modules */}
+        <Route
+          path="/uploadMarks"
+          element={<PrivateRoute element={<UploadMarks />} />}
         />
         {/* SubjectForReportCard module */}
         <Route
