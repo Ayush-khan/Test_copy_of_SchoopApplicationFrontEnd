@@ -99,12 +99,9 @@ const SubjectAllotmentHSC = () => {
 
       // Fetch classes and students concurrently
       const [classResponse] = await Promise.all([
-        axios.get(
-          `${API_URL}/api/get_classes_of_a_department?department_name=Higher Secondary`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        ),
+        axios.get(`${API_URL}/api/get_hsc_classes_of_a_department`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
       // Set the fetched data
