@@ -1189,6 +1189,40 @@ function SelfAssamentMaster() {
     setSearchTerm(""); // ✅ clear search term
   };
 
+  // const validateSectionName = (
+  //   parameter,
+  //   classId,
+  //   control_type,
+  //   options = []
+  // ) => {
+  //   const errors = {};
+
+  //   if (!parameter || parameter.trim() === "") {
+  //     errors.parameter = "Please enter parameter.";
+  //   } else if (parameter.length > 500) {
+  //     errors.parameter = "The name field must not exceed 500 characters.";
+  //   }
+
+  //   if (!classId) {
+  //     errors.class_id = "Please select class.";
+  //   }
+
+  //   if (!control_type || control_type.trim() === "") {
+  //     errors.control_type = "Please enter type.";
+  //   }
+
+  //   // ✅ Require at least one non-empty option for radio/checkbox
+  //   if (control_type === "radio" || control_type === "checkbox") {
+  //     const hasValidOption =
+  //       Array.isArray(options) && options.some((o) => o && o.trim() !== "");
+  //     if (!hasValidOption) {
+  //       errors.options = "Please add option.";
+  //     }
+  //   }
+
+  //   return errors;
+  // };
+
   const validateSectionName = (
     parameter,
     classId,
@@ -1211,18 +1245,45 @@ function SelfAssamentMaster() {
       errors.control_type = "Please enter type.";
     }
 
-    // ✅ Require at least one non-empty option for radio/checkbox
-    if (control_type === "radio" || control_type === "checkbox") {
+    if (
+      control_type === "radio" ||
+      control_type === "checkbox" ||
+      control_type === "rating"
+    ) {
       const hasValidOption =
         Array.isArray(options) && options.some((o) => o && o.trim() !== "");
       if (!hasValidOption) {
         errors.options = "Please add option.";
       }
+
+      const formattedOptions = options
+        .filter((o) => o && o.trim() !== "")
+        .map((opt) => ({
+          option: opt.trim().replace(/\s+/g, ""),
+          value: opt.trim(),
+        }));
+
+      try {
+        const jsonString = JSON.stringify(formattedOptions);
+
+        JSON.parse(jsonString);
+        console.log(
+          "✅ JSON String (Backend format):",
+          jsonString,
+          "Length:",
+          jsonString.length
+        );
+        if (jsonString.length > 300) {
+          errors.options =
+            "The maximum allowed length for options is 300 characters.";
+        }
+      } catch (e) {
+        errors.options = "Invalid options format. Please re-enter.";
+      }
     }
 
     return errors;
   };
-
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
   };

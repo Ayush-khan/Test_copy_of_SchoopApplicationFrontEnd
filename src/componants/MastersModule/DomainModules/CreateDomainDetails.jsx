@@ -444,6 +444,7 @@ const CreateDomainDetails = () => {
                                   });
                                 }
                               }}
+                              maxLength={100}
                               placeholder="Enter name"
                               required
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -483,6 +484,7 @@ const CreateDomainDetails = () => {
                                   });
                                 }
                               }}
+                              maxLength={200}
                               placeholder="Enter curriculum goal"
                               required
                               rows={3}
@@ -607,6 +609,7 @@ const CreateDomainDetails = () => {
                                                 e.target.value
                                               )
                                             }
+                                            maxLength={200}
                                             placeholder="Enter learning outcome"
                                             rows={2}
                                             className="w-full px-2 py-1 border border-gray-300 rounded-md resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"

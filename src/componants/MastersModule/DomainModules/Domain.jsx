@@ -96,7 +96,7 @@ const Domain = () => {
     try {
       if (roleId === "T") {
         const response = await axios.get(
-          `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
+          `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -176,22 +176,47 @@ const Domain = () => {
     });
   }, [studentNameWithClassId, roleId]);
 
+  // const handleStudentSelect = (selectedOption) => {
+  //   setStudentError("");
+  //   setSelectedStudent(selectedOption);
+
+  //   setSelectedStudentId(selectedOption?.value);
+  //   setSelectedSectionId(selectedOption?.section_id);
+
+  //   setSelectedSubject("");
+  //   setSubjectIdForManage("");
+  //   setSelectedDomain("");
+  //   setSelectedTerms("");
+  // };
+
   const handleStudentSelect = (selectedOption) => {
     setStudentError("");
     setSelectedStudent(selectedOption);
 
-    setSelectedStudentId(selectedOption?.value);
-    setSelectedSectionId(selectedOption?.section_id);
+    const classId = selectedOption?.value ?? null;
+    setSelectedStudentId(classId);
+    setSelectedSectionId(selectedOption?.section_id ?? null);
 
-    setSelectedSubject("");
-    setSelectedDomain("");
-    setSelectedTerms("");
+    // reset everything downstream
+    setSelectedSubject(null);
+    setSubjectIdForManage(null);
+    setSelectedDomain(null);
+    setSelectedTerms(null);
 
-    console.log("Selected class_id:", selectedOption?.value);
-    console.log("Selected section_id:", selectedOption?.section_id);
+    // clear subject options if no class
+    if (!classId) {
+      setSubject([]); // important: empty options closes the menu
+    } else {
+      fetchSubject(classId); // pass classId explicitly (don't rely on state immediately)
+    }
   };
 
   const fetchDomain = async (classId, subjectId) => {
+    if (!classId || !subjectId) {
+      setDomain([]);
+      setPageCount(0);
+      return;
+    }
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
@@ -230,6 +255,10 @@ const Domain = () => {
   };
 
   const fetchSubject = async (classId) => {
+    if (!classId) {
+      setSubject(null);
+      return;
+    }
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
@@ -252,13 +281,26 @@ const Domain = () => {
     label: dept.subject_name,
   }));
 
+  // const handleSubjectSelect = (selectedOption) => {
+  //   setSubjectError("");
+  //   setSelectedSubject(selectedOption);
+  //   setSubjectIdForManage(selectedOption ? selectedOption.value : null);
+  //   setSelectedDomain("");
+  //   setSelectedTerms("");
+  // };
+
   const handleSubjectSelect = (selectedOption) => {
     setSubjectError("");
     setSelectedSubject(selectedOption);
     setSubjectIdForManage(selectedOption ? selectedOption.value : null);
-    console.log("hpc_sm_id", selectedOption.value);
-    setSelectedTerms("");
-    setSelectedDomain("");
+
+    //  Reset Terms & Domain when subject changes/clears
+    setSelectedTerms(null);
+    // setTermsOptions([]); // clear old terms
+
+    setSelectedDomain(null);
+    setDomain([]); // clear old domains
+    setPageCount(0);
   };
 
   const fetchDataRoleId = async () => {

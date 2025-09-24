@@ -219,12 +219,40 @@ function PeerFeedbackMaster() {
       errors.control_type = "Please enter type.";
     }
 
-    // ✅ Require at least one non-empty option for radio/checkbox
-    if (control_type === "radio" || control_type === "checkbox") {
+    if (
+      control_type === "radio" ||
+      control_type === "checkbox" ||
+      control_type === "rating"
+    ) {
       const hasValidOption =
         Array.isArray(options) && options.some((o) => o && o.trim() !== "");
       if (!hasValidOption) {
         errors.options = "Please add option.";
+      }
+
+      const formattedOptions = options
+        .filter((o) => o && o.trim() !== "")
+        .map((opt) => ({
+          option: opt.trim().replace(/\s+/g, ""),
+          value: opt.trim(),
+        }));
+
+      try {
+        const jsonString = JSON.stringify(formattedOptions);
+
+        JSON.parse(jsonString);
+        console.log(
+          "✅ JSON String (Backend format):",
+          jsonString,
+          "Length:",
+          jsonString.length
+        );
+        if (jsonString.length > 300) {
+          errors.options =
+            "The maximum allowed length for options is 300 characters.";
+        }
+      } catch (e) {
+        errors.options = "Invalid options format. Please re-enter.";
       }
     }
 
@@ -1023,56 +1051,6 @@ function PeerFeedbackMaster() {
                     </div>
                   </div>
 
-                  {/* {(controlType === "radio" || controlType === "checkbox") && (
-                    <div className="relative mb-3 flex justify-center mx-4">
-                      <label className="w-1/2 mt-2">
-                        Options <span className="text-red-500">*</span>
-                      </label>
-
-                      <div className="flex flex-col w-full">
-                        {options.map((opt, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center gap-2 mb-2"
-                          >
-                            <input
-                              type="text"
-                              value={opt}
-                              onChange={(e) =>
-                                handleOptionChange(index, e.target.value)
-                              }
-                              className="form-control shadow-md flex-1"
-                              placeholder={`Option ${index + 1}`}
-                            />
-
-                            <button
-                              type="button"
-                              className="text-green-600 font-bold text-lg"
-                              onClick={handleAddOption}
-                            >
-                              <FontAwesomeIcon icon={faPlus} />
-                            </button>
-
-                            {options.length > 1 && (
-                              <button
-                                type="button"
-                                className="text-red-600 font-bold text-lg"
-                                onClick={() => handleRemoveOption(index)}
-                              >
-                                <FontAwesomeIcon icon={faXmark} />
-                              </button>
-                            )}
-                          </div>
-                        ))}
-
-                        {fieldErrors.options && (
-                          <span className="text-danger text-xs mt-1">
-                            {fieldErrors.options}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )} */}
                   {(controlType === "radio" ||
                     controlType === "checkbox" ||
                     controlType === "rating") && (

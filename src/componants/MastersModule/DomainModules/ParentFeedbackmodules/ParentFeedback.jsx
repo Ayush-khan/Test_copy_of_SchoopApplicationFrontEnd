@@ -72,7 +72,7 @@ const ParentFeedback = () => {
     try {
       if (roleId === "T") {
         const response = await axios.get(
-          `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
+          `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -989,9 +989,7 @@ const ParentFeedback = () => {
                                               )}
                                               {param.control_type ===
                                                 "checkbox" && (
-                                                <div className="grid grid-cols-2 gap-2">
-                                                  {" "}
-                                                  {/* ✅ 2 per row */}
+                                                <div className="flex flex-wrap gap-2">
                                                   {(() => {
                                                     let parsedOptions = [];
                                                     try {
@@ -1024,7 +1022,7 @@ const ParentFeedback = () => {
                                                       (opt) => (
                                                         <label
                                                           key={opt.option}
-                                                          className="flex items-center gap-1 px-2 py-1"
+                                                          className="flex items-center gap-1 px-2 py-1 text-xs" // smaller label text
                                                         >
                                                           <input
                                                             type="checkbox"
@@ -1032,6 +1030,7 @@ const ParentFeedback = () => {
                                                             checked={selectedArray.includes(
                                                               opt.value
                                                             )}
+                                                            className="w-3 h-3" // smaller checkbox
                                                             onChange={(e) => {
                                                               let newValues = [
                                                                 ...selectedArray,
@@ -1065,15 +1064,18 @@ const ParentFeedback = () => {
                                                               );
                                                             }}
                                                           />
-                                                          {opt.value}
+                                                          <span className="text-sm">
+                                                            {opt.value}
+                                                          </span>
                                                         </label>
                                                       )
                                                     );
                                                   })()}
+
                                                   {publishErrors?.[
                                                     `${student.student_id}-${param.pfm_id}`
                                                   ] && (
-                                                    <span className="text-red-500 text-xs mt-1 col-span-2">
+                                                    <span className="text-red-500 text-xs mt-1 w-full">
                                                       {
                                                         publishErrors[
                                                           `${student.student_id}-${param.pfm_id}`
@@ -1083,11 +1085,10 @@ const ParentFeedback = () => {
                                                   )}
                                                 </div>
                                               )}
+
                                               {param.control_type ===
                                                 "radio" && (
-                                                <div className="grid grid-cols-2 gap-2">
-                                                  {" "}
-                                                  {/* ✅ 2 per row */}
+                                                <div className="flex flex-wrap gap-2">
                                                   {(() => {
                                                     let parsedOptions = [];
                                                     try {
@@ -1108,7 +1109,7 @@ const ParentFeedback = () => {
                                                       (opt, i) => (
                                                         <label
                                                           key={i}
-                                                          className="flex items-center gap-1 px-2 py-1"
+                                                          className="flex items-center gap-1 px-2 py-1 text-xs" // smaller label text
                                                         >
                                                           <input
                                                             type="radio"
@@ -1118,6 +1119,7 @@ const ParentFeedback = () => {
                                                               selectedValue ===
                                                               opt.value
                                                             }
+                                                            className="w-3 h-3" // smaller radio button
                                                             onChange={(e) =>
                                                               handleChange(
                                                                 student.student_id,
@@ -1126,15 +1128,18 @@ const ParentFeedback = () => {
                                                               )
                                                             }
                                                           />
-                                                          {opt.value}
+                                                          <span className="text-sm">
+                                                            {opt.value}
+                                                          </span>
                                                         </label>
                                                       )
                                                     );
                                                   })()}
+
                                                   {publishErrors?.[
                                                     `${student.student_id}-${param.pfm_id}`
                                                   ] && (
-                                                    <span className="text-red-500 text-xs mt-1 col-span-2">
+                                                    <span className="text-red-500 text-xs mt-1 w-full">
                                                       {
                                                         publishErrors[
                                                           `${student.student_id}-${param.pfm_id}`
@@ -1144,6 +1149,7 @@ const ParentFeedback = () => {
                                                   )}
                                                 </div>
                                               )}
+
                                               {param.control_type ===
                                                 "rating" && (
                                                 <div className="flex flex-col">

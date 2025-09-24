@@ -198,13 +198,18 @@ function ParentsFeedbackMaster() {
     setSearchTerm(""); // ✅ clear search term
   };
 
-  // const validateSectionName = (parameter, classId, control_type) => {
+  // const validateSectionName = (
+  //   parameter,
+  //   classId,
+  //   control_type,
+  //   options = []
+  // ) => {
   //   const errors = {};
 
   //   if (!parameter || parameter.trim() === "") {
   //     errors.parameter = "Please enter parameter.";
-  //   } else if (parameter.length > 50) {
-  //     errors.parameter = "The name field must not exceed 50 characters.";
+  //   } else if (parameter.length > 500) {
+  //     errors.parameter = "The name field must not exceed 500 characters.";
   //   }
 
   //   if (!classId) {
@@ -213,6 +218,15 @@ function ParentsFeedbackMaster() {
 
   //   if (!control_type || control_type.trim() === "") {
   //     errors.control_type = "Please enter type.";
+  //   }
+
+  //   // ✅ Require at least one non-empty option for radio/checkbox
+  //   if (control_type === "radio" || control_type === "checkbox") {
+  //     const hasValidOption =
+  //       Array.isArray(options) && options.some((o) => o && o.trim() !== "");
+  //     if (!hasValidOption) {
+  //       errors.options = "Please add option.";
+  //     }
   //   }
 
   //   return errors;
@@ -240,18 +254,45 @@ function ParentsFeedbackMaster() {
       errors.control_type = "Please enter type.";
     }
 
-    // ✅ Require at least one non-empty option for radio/checkbox
-    if (control_type === "radio" || control_type === "checkbox") {
+    if (
+      control_type === "radio" ||
+      control_type === "checkbox" ||
+      control_type === "rating"
+    ) {
       const hasValidOption =
         Array.isArray(options) && options.some((o) => o && o.trim() !== "");
       if (!hasValidOption) {
         errors.options = "Please add option.";
       }
+
+      const formattedOptions = options
+        .filter((o) => o && o.trim() !== "")
+        .map((opt) => ({
+          option: opt.trim().replace(/\s+/g, ""),
+          value: opt.trim(),
+        }));
+
+      try {
+        const jsonString = JSON.stringify(formattedOptions);
+
+        JSON.parse(jsonString);
+        console.log(
+          "✅ JSON String (Backend format):",
+          jsonString,
+          "Length:",
+          jsonString.length
+        );
+        if (jsonString.length > 500) {
+          errors.options =
+            "The maximum allowed length for options is 500 characters.";
+        }
+      } catch (e) {
+        errors.options = "Invalid options format. Please re-enter.";
+      }
     }
 
     return errors;
   };
-
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
   };

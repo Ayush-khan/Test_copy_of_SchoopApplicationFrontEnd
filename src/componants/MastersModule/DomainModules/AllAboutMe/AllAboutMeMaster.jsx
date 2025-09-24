@@ -163,6 +163,7 @@ function AllAboutMeMaster() {
     setNewSectionName("");
     setSearchTerm("");
   };
+
   const validateSectionName = (name, classId) => {
     const errors = {};
 
