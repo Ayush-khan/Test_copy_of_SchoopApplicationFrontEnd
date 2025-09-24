@@ -313,6 +313,7 @@ import ParentsFeedbackMaster from "../componants/MastersModule/DomainModules/Par
 import PeerFeedbackMaster from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PeerFeedbackMaster.jsx";
 import AllAboutMe from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMe.jsx";
 import AllAboutMeMaster from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMeMaster.jsx";
+import ClassTeacherRemark from "../componants/MastersModule/DomainModules/ClassTeacherRemark/ClassTeacherRemark.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -725,6 +726,11 @@ function Index() {
         <Route
           path="/learnerFeedback"
           element={<PrivateRoute element={<SelfAssessment />} />}
+        />
+        {/* Class Teacher Remark Modules  */}
+        <Route
+          path="/hpcRemark"
+          element={<PrivateRoute element={<ClassTeacherRemark />} />}
         />
         {/* SubjectForReportCard module */}
         <Route
