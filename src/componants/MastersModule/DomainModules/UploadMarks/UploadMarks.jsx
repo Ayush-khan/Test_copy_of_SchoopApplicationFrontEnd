@@ -63,7 +63,6 @@ function UploadMarks() {
   const [allClasses, setAllClasses] = useState([]);
   const [selectedClasses, setSelectedClasses] = useState("");
   const [errors, setErrors] = useState({});
-  const [showUploadSection, setShowUploadSection] = useState(false);
   const [roles, setRoles] = useState([]);
   const [loadingEvent, setLoadingEvent] = useState(false);
 
@@ -93,7 +92,13 @@ function UploadMarks() {
   const [selectedSubject, setSelectedSubject] = useState(null);
 
   const [loadingForSearch, setLoadingForSearch] = useState(false);
+  const [showSearchForm, setShowSearchForm] = useState(true);
+  const [examError, setExamError] = useState("");
+  const [showUploadSection, setShowUploadSection] = useState(false);
+  const [dataUploaded, setDataUploaded] = useState(false); // new state
+  const [tableDataReady, setTableDataReady] = useState(false);
 
+  const [subjectError, setSubjectError] = useState("");
   const navigate = useNavigate();
 
   // Fetch roleId and class list on mount
@@ -287,30 +292,80 @@ function UploadMarks() {
     }
   };
 
-  // Search handler example (customize as needed)
   const handleSearch = async () => {
-    setLoadingForSearch(true);
     setStudentError("");
+    setExamError("");
+    setSubjectError("");
+    setLoadingForSearch(true);
 
-    if (!selectedStudentId) {
-      setStudentError("Please select Class.");
+    let hasError = false;
+
+    if (!selectedStudent) {
+      setStudentError("Please select a Class.");
+      hasError = true;
+    }
+    if (!selectedExam) {
+      setExamError("Please select an Exam.");
+      hasError = true;
+    }
+    // if (!selectedSubject) {
+    //   setSubjectError("Please select a Subject.");
+    //   hasError = true;
+    // }
+
+    if (hasError) {
       setLoadingForSearch(false);
       return;
     }
 
-    // You can add more validations here if needed
-
     try {
-      // Add your search API call here
-      // For example:
-      // const response = await axios.get(`${API_URL}/api/search_marks?class_id=${selectedStudentId}&exam_id=${selectedExam?.value}&term_id=${selectedTerms?.value}&subject_id=${selectedSubject?.value}`);
+      toast.info("Searching, please wait...");
 
-      toast.success("Search performed successfully.");
-      // Handle response
+      // 🌟 We want to keep the Upload button visible
+      setShowUploadSection(false); // just close modal (not hide the button)
+      setDataUploaded(false); // Reset data uploaded state
+      setTableDataReady(false); // reset for new search
+
+      setLoadingEvent(true);
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(`${API_URL}/api/get_eventlist`, {
+        params: {
+          class_id: selectedSectionId,
+          month_year: selectedMonthId,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const eventData = response.data?.data || [];
+
+      if (!eventData.length) {
+        toast.warn("No events found for the selected criteria.");
+        return;
+      }
+
+      // Set academic year and date limits if applicable
+      const academicYear = eventData[0]?.academic_yr;
+      if (academicYear) {
+        setDateLimits(getDateLimits(academicYear));
+      }
+
+      // ✅ Update UI
+      setHolidays(eventData);
+      setPageCount(Math.ceil(eventData.length / pageSize));
+      toast.success("Search successful! Events loaded.");
+
+      // 🌟 These 2 lines are most important
+      setDataUploaded(true); // ✅ show Upload Button
+      setTableDataReady(true); // ✅ show Table
     } catch (error) {
-      toast.error("Error during search.");
+      console.error("Search Error:", error);
+      toast.error("Error occurred while searching or fetching events.");
     } finally {
       setLoadingForSearch(false);
+      setLoadingEvent(false);
     }
   };
 
@@ -346,14 +401,6 @@ function UploadMarks() {
     }
   };
 
-  const handleClassChange = (classId) => {
-    if (selectedClasses.includes(classId)) {
-      setSelectedClasses(selectedClasses.filter((id) => id !== classId));
-    } else {
-      setSelectedClasses([...selectedClasses, classId]);
-    }
-  };
-
   // Fetch Class + Section + Student Count
   const fetchClassSectionList = async () => {
     try {
@@ -372,22 +419,6 @@ function UploadMarks() {
       setLoadingClassSection(false);
     }
   };
-
-  // Handle Selection from Dropdown
-  const handleClassSectionSelect = (selectedOption) => {
-    setSelectedClassSection(selectedOption);
-    setSelectedSectionId(selectedOption?.value); // Store section_id
-  };
-
-  // Convert to Dropdown Options
-  const classSectionOptions = useMemo(
-    () =>
-      classSectionList.map((item) => ({
-        value: item?.class_id,
-        label: `${item.name}`,
-      })),
-    [classSectionList]
-  );
 
   const fetchSessionData = async () => {
     const token = localStorage.getItem("authToken");
@@ -431,42 +462,6 @@ function UploadMarks() {
     }
   };
 
-  const academicYrTo = localStorage.getItem("academic_yr_to");
-  const academicYrFrom = localStorage.getItem("academic_yr_from"); // e.g. "2025-03-31"
-  const academicYear = academicYrFrom
-    ? new Date(academicYrFrom).getFullYear()
-    : new Date().getFullYear();
-
-  //Fetch Month
-  const monthMap = [
-    { value: 4, label: "April" },
-    { value: 5, label: "May" },
-    { value: 6, label: "June" },
-    { value: 7, label: "July" },
-    { value: 8, label: "August" },
-    { value: 9, label: "September" },
-    { value: 10, label: "October" },
-    { value: 11, label: "November" },
-    { value: 12, label: "December" },
-    { value: 1, label: "January" },
-    { value: 2, label: "February" },
-    { value: 3, label: "March" },
-  ];
-
-  const monthOptions = useMemo(
-    () =>
-      monthMap.map((month) => ({
-        value: `${month.value}-${academicYear}`,
-        label: month.label,
-      })),
-    []
-  );
-
-  const handleMonthSelect = (selectedOption) => {
-    setSelectedMonth(selectedOption);
-    setSelectedMonthId(selectedOption ? selectedOption?.value : null);
-  };
-
   const getDateLimits = (academicYear) => {
     if (!academicYear) return {};
 
@@ -478,44 +473,11 @@ function UploadMarks() {
     };
   };
 
-  const fetchEvents = async () => {
-    setLoadingEvent(true);
-    setLoadingForSearch(true);
-    try {
-      const token = localStorage.getItem("authToken");
-
-      const response = await axios.get(`${API_URL}/api/get_eventlist`, {
-        params: {
-          class_id: selectedSectionId,
-          month_year: selectedMonthId,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.data?.data?.length) {
-        const academicYear = response.data.data[0].academic_yr;
-        setDateLimits(getDateLimits(academicYear));
-      }
-
-      console.log("events", response.data.data);
-      setHolidays(response.data.data || []);
-      setPageCount(Math.ceil((response.data.data?.length || 0) / pageSize));
-    } catch (error) {
-      console.error("Fetch error:", error);
-      toast.error("Error fetching events data.");
-    } finally {
-      setLoadingEvent(false);
-      setLoadingForSearch(false);
-    }
-  };
-
   useEffect(() => {
     fetchSessionData();
     console.log("session.data", fetchSessionData);
 
-    fetchEvents();
+    handleSearch();
 
     // If data is posted successfully, reset the flag and refetch
     if (isDataPosted) {
@@ -776,6 +738,8 @@ function UploadMarks() {
     formData.append("file", selectedFile);
 
     try {
+      setDataUploaded(true); // ✅ Now show the table
+      setErrorMessage("");
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("No authentication token found");
@@ -795,7 +759,7 @@ function UploadMarks() {
         toast.success("Events Data posted successfully!");
         setIsDataPosted(true);
         setSelectedFile(null);
-        fetchEvents();
+        handleSearch();
       }
 
       setTimeout(() => {
@@ -840,6 +804,11 @@ function UploadMarks() {
     setErrorMessageUrl("");
     setUploadStatus("");
     setIsDataPosted(false);
+    setShowUploadSection(false);
+    setDataUploaded(false);
+    setSelectedFile(null);
+    setErrorMessage("");
+    setUploadStatus("");
   };
 
   useEffect(() => {
@@ -922,359 +891,358 @@ function UploadMarks() {
             backgroundColor: "#C03078",
           }}
         ></div>
-
-        <div className="bg-white w-full md:w-[97%] mx-auto rounded-md ">
-          <div className="w-full  mx-auto">
-            <ToastContainer />
-
+        {/* Step 1: Dropdown + Browse Button */}
+        {!showUploadSection && (!dataUploaded || !tableDataReady) && (
+          <div className="bg-white w-full md:w-[97%] mx-auto rounded-md ">
+            {/* ✅ Place your dropdowns and "Browse" button section here */}
             <div className="mb-10 ml-5">
-              <div className="w-full flex flex-col md:flex-row flex-wrap md:items-end md:gap-x-7 gap-y-3 mb-4">
-                <div className=" w-full md:w-[98%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
-                  <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                    <div className="w-full md:w-[98%]  gap-x-0 md:gap-x-6 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                      {/* Class Dropdown */}
-                      <div className="w-full  md:w-[45%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                        <label
-                          className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
-                          htmlFor="studentSelect"
-                        >
-                          Class <span className="text-red-500">*</span>
-                          {/* Staff */}
-                        </label>
-                        <div className="w-full md:w-[85%]">
-                          <Select
-                            menuPortalTarget={document.body}
-                            menuPosition="fixed"
-                            id="studentSelect"
-                            value={selectedStudent}
-                            onChange={handleClassSelect}
-                            options={studentOptions}
-                            placeholder={loadingExams ? "Loading..." : "Select"}
-                            isSearchable
-                            isClearable
-                            className="text-sm"
-                            isDisabled={loadingExams}
-                            styles={{
-                              control: (provided) => ({
-                                ...provided,
-                                fontSize: "1em", // Adjust font size for selected value
-                                minHeight: "30px", // Reduce height
-                              }),
-                              menu: (provided) => ({
-                                ...provided,
-                                fontSize: "1em", // Adjust font size for dropdown options
-                              }),
-                              option: (provided) => ({
-                                ...provided,
-                                fontSize: ".9em", // Adjust font size for each option
-                              }),
-                            }}
-                          />
-                          {studentError && (
-                            <div className="h-8 relative ml-1 text-danger text-xs">
-                              {studentError}
-                            </div>
-                          )}
-                        </div>
-                      </div>
+              <div className="w-full bg-white shadow-md rounded-xl p-6 border border-gray-200">
+                {/* Form Container */}
+                <div className="flex flex-col md:flex-row md:items-end md:gap-x-6 gap-y-6">
+                  {/* Class Dropdown */}
+                  <div className="w-full md:w-1/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Class <span className="text-red-500">*</span>
+                    </label>
+                    <Select
+                      menuPortalTarget={document.body}
+                      menuPosition="fixed"
+                      id="studentSelect"
+                      value={selectedStudent}
+                      onChange={handleClassSelect}
+                      options={studentOptions}
+                      placeholder={loadingExams ? "Loading..." : "Select"}
+                      isSearchable
+                      isClearable
+                      isDisabled={loadingExams}
+                      className="text-sm"
+                      styles={{
+                        control: (provided) => ({
+                          ...provided,
+                          fontSize: "0.9em",
+                          minHeight: "36px",
+                        }),
+                        menu: (provided) => ({
+                          ...provided,
+                          fontSize: "0.9em",
+                        }),
+                        option: (provided) => ({
+                          ...provided,
+                          fontSize: "0.85em",
+                        }),
+                      }}
+                    />
+                    {studentError && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {studentError}
+                      </p>
+                    )}
+                  </div>
 
-                      {/* Exam Dropdown */}
-                      <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                        <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
-                          Exam
-                        </label>
-                        <div className="w-full md:w-[85%]">
-                          <Select
-                            value={selectedExam}
-                            onChange={(option) => setSelectedExam(option)}
-                            options={examOptions}
-                            placeholder={
-                              loadingExamsData ? "Loading..." : "Select..."
-                            }
-                            isSearchable
-                            isClearable
-                            isDisabled={loadingExamsData}
-                            className="text-sm"
-                            styles={{
-                              control: (provided) => ({
-                                ...provided,
-                                fontSize: "1em",
-                                minHeight: "30px",
-                              }),
-                              menu: (provided) => ({
-                                ...provided,
-                                fontSize: "1em",
-                              }),
-                              option: (provided) => ({
-                                ...provided,
-                                fontSize: ".9em",
-                              }),
-                            }}
-                          />
-                        </div>
-                      </div>
+                  {/* Exam Dropdown */}
+                  <div className="w-full md:w-1/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Exam
+                    </label>
+                    <Select
+                      value={selectedExam}
+                      onChange={(option) => setSelectedExam(option)}
+                      options={examOptions}
+                      placeholder={
+                        loadingExamsData ? "Loading..." : "Select..."
+                      }
+                      isSearchable
+                      isClearable
+                      isDisabled={loadingExamsData}
+                      className="text-sm"
+                      styles={{
+                        control: (provided) => ({
+                          ...provided,
+                          fontSize: "0.9em",
+                          minHeight: "36px",
+                        }),
+                        menu: (provided) => ({
+                          ...provided,
+                          fontSize: "0.9em",
+                        }),
+                        option: (provided) => ({
+                          ...provided,
+                          fontSize: "0.85em",
+                        }),
+                      }}
+                    />
+                    {examError && (
+                      <p className="text-xs text-red-500 mt-1">{examError}</p>
+                    )}
+                  </div>
 
-                      {/* Subject Dropdown */}
-                      <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                        <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
-                          Subject
-                        </label>
-                        <div className="w-full md:w-[85%]">
-                          <Select
-                            value={selectedSubject}
-                            onChange={(option) => setSelectedSubject(option)}
-                            options={subjectOptions}
-                            placeholder={
-                              loadingSubjectsData ? "Loading..." : "Select..."
-                            }
-                            isSearchable
-                            isClearable
-                            isDisabled={loadingSubjectsData}
-                            className="text-sm"
-                            styles={{
-                              control: (provided) => ({
-                                ...provided,
-                                fontSize: "1em",
-                                minHeight: "30px",
-                              }),
-                              menu: (provided) => ({
-                                ...provided,
-                                fontSize: "1em",
-                              }),
-                              option: (provided) => ({
-                                ...provided,
-                                fontSize: ".9em",
-                              }),
-                            }}
-                          />
-                        </div>
-                      </div>
+                  {/* Subject Dropdown */}
+                  <div className="w-full md:w-1/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Subject
+                    </label>
+                    <Select
+                      value={selectedSubject}
+                      onChange={(option) => setSelectedSubject(option)}
+                      options={subjectOptions}
+                      placeholder={
+                        loadingSubjectsData ? "Loading..." : "Select..."
+                      }
+                      isSearchable
+                      isClearable
+                      isDisabled={loadingSubjectsData}
+                      className="text-sm"
+                      styles={{
+                        control: (provided) => ({
+                          ...provided,
+                          fontSize: "0.9em",
+                          minHeight: "36px",
+                        }),
+                        menu: (provided) => ({
+                          ...provided,
+                          fontSize: "0.9em",
+                        }),
+                        option: (provided) => ({
+                          ...provided,
+                          fontSize: "0.85em",
+                        }),
+                      }}
+                    />
+                    {subjectError && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {subjectError}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
-                      {/* Browse Button */}
-                      <div className="mt-1">
-                        <button
-                          type="search"
-                          //   onClick={handleSearch}
-                          onClick={fetchEvents}
-                          style={{ backgroundColor: "#2196F3" }}
-                          className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                            loadingForSearch
-                              ? "opacity-50 cursor-not-allowed"
-                              : ""
-                          }`}
-                          disabled={loadingForSearch}
+                {/* Buttons Row */}
+                <div className="flex flex-col md:flex-row justify-between items-center mt-6 gap-4">
+                  {/* Browse Button */}
+                  <button
+                    onClick={handleSearch}
+                    style={{ backgroundColor: "#2196F3" }}
+                    className={`text-white font-semibold px-6 py-2 rounded-md shadow-sm border border-blue-500 transition duration-200 hover:bg-blue-600 ${
+                      loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    disabled={loadingForSearch}
+                  >
+                    {loadingForSearch ? (
+                      <span className="flex items-center">
+                        <svg
+                          className="animate-spin h-4 w-4 mr-2 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
                         >
-                          {loadingForSearch ? (
-                            <span className="flex items-center">
-                              <svg
-                                className="animate-spin h-4 w-4 mr-2 text-white"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                ></circle>
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                ></path>
-                              </svg>
-                              Browsing...
-                            </span>
-                          ) : (
-                            "Browse"
-                          )}
-                        </button>
-                      </div>
-                      {/* Upload Button aligned to right */}
-                      <div>
-                        <button
-                          onClick={() => setShowUploadSection(true)}
-                          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
-                        >
-                          Upload Marksheet data from Excel Sheet
-                        </button>
-                      </div>
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          ></path>
+                        </svg>
+                        Browsing...
+                      </span>
+                    ) : (
+                      "Browse"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Upload Excel UI */}
+        {showUploadSection && (
+          <div className="mt-4">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white bg-opacity-90 backdrop-blur-md w-full max-w-6xl mx-4 rounded-xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200">
+                {/* Close Button */}
+                {/* Header with Title & Close Button */}
+                <div className="flex items-center justify-between  ">
+                  <h2 className="text-2xl font-bold text-blue-700 tracking-wide w-full text-center relative -top-4">
+                    📂 Upload Student Marks from Excel
+                    {/* Close Button */}
+                    <RxCross1
+                      className="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-red-500 hover:text-red-700 cursor-pointer transition"
+                      onClick={() => handleReset()}
+                    />
+                  </h2>
+                </div>
+
+                {/* Grid Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* LEFT: Download Instructions */}
+                  <div className="bg-gradient-to-br from-blue-100 via-white to-blue-50 border border-blue-200 rounded-xl p-6 shadow-sm">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                      <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">
+                        1
+                      </span>
+                      Download & Fill Marksheet
+                    </h3>
+
+                    <div className="text-sm text-gray-700 leading-relaxed space-y-3 mb-4">
+                      <p>
+                        <strong>Step 1:</strong> Please download the marksheet
+                        format by clicking on the
+                        <strong> "Download Marksheet format"</strong> button
+                        below.
+                      </p>
+                      <p>
+                        <strong>Step 2:</strong> Enter marks in the downloaded
+                        file.
+                      </p>
                     </div>
+
+                    <div className="text-sm text-blue-900 bg-blue-50 p-4 rounded-md border border-blue-200">
+                      <strong className="block mb-1 text-blue-700">PS:</strong>
+                      • Do not change the contents of first 3 columns of the
+                      downloaded Excel sheet. Please enter only marks.
+                      <br />
+                      • If a student is absent, leave the column blank in the
+                      Excel sheet. The application will mark the child absent.
+                      <br />
+                      • Do not add or delete any student.
+                      <br />• Do not change the name of the file.
+                    </div>
+
+                    <div className="flex justify-center">
+                      <button
+                        onClick={handleDownloadTemplate}
+                        className="mt-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-medium rounded-full px-6 py-2 hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center gap-2"
+                      >
+                        <i className="fas fa-download text-base"></i>
+                        Download Marksheet Format
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* RIGHT: Upload Instructions */}
+                  <div className="bg-gradient-to-br from-purple-100 via-white to-purple-50 border border-purple-200 rounded-xl p-6 shadow-sm">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                      <span className="bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">
+                        2
+                      </span>
+                      Upload & Finalize Marks
+                    </h3>
+
+                    <div className="text-sm text-gray-700 leading-relaxed space-y-3 mb-4">
+                      <p>
+                        <strong>Step 3:</strong> Please click on the{" "}
+                        <strong>"Browse"</strong> button to select the file to
+                        be uploaded.
+                      </p>
+                      <p>
+                        <strong>Step 4:</strong> Please click on the{" "}
+                        <strong>"Upload Marks"</strong> button to upload the
+                        file.
+                      </p>
+                      <p>
+                        <strong>Step 5:</strong> Marks will be saved and
+                        displayed in the text boxes below.
+                      </p>
+                    </div>
+
+                    <div className="text-sm text-purple-900 bg-purple-50 p-4 rounded-md border border-purple-200 mb-4">
+                      <strong className="block mb-1 text-purple-700">
+                        PS:
+                      </strong>
+                      • Marks in the textboxes can be edited.
+                      <br />• Click on the <strong>"Save"</strong> button to
+                      save the data.
+                      <br />• Once the marks are finalised, click on the{" "}
+                      <strong>"Publish"</strong> button to publish the data to
+                      parents.
+                    </div>
+
+                    {/* File Picker + Upload Button - Horizontal Layout */}
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
+                      {/* Choose File Button */}
+                      <label className="bg-purple-600 text-white text-sm font-medium rounded-full px-5 py-2.5 hover:bg-purple-700 cursor-pointer shadow-md flex items-center gap-2 transition whitespace-nowrap">
+                        <i className="fas fa-upload text-base"></i>
+                        {selectedFile
+                          ? selectedFile.name.length > 25
+                            ? `${selectedFile.name.substring(0, 20)}...`
+                            : selectedFile.name
+                          : "Choose File"}
+                        <input
+                          type="file"
+                          accept=".csv"
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {/* Upload Button */}
+                      <button
+                        onClick={handleUpload}
+                        className="bg-purple-700 hover:bg-purple-800 text-white text-sm font-medium rounded-full px-6 py-2.5 shadow-md transition flex items-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={loading}
+                      >
+                        <i className="fas fa-cloud-upload-alt text-base"></i>
+                        {loading ? "Uploading..." : "Upload Marks"}
+                      </button>
+                    </div>
+
+                    {/* Errors / Status */}
+                    {errorMessage && (
+                      <p className="text-red-600 text-sm text-center mt-2">
+                        {errorMessage}
+                      </p>
+                    )}
+
+                    {errorMessageUrl && errorMessageUrl !== "undefined" && (
+                      <p className="text-center mt-2">
+                        <a
+                          href="#"
+                          className="text-blue-500 underline hover:text-blue-700"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            downloadCsv(errorMessageUrl);
+                          }}
+                        >
+                          📥 Download CSV with Errors
+                        </a>
+                      </p>
+                    )}
+
+                    {uploadStatus && (
+                      <p className="text-green-600 text-sm text-center mt-2">
+                        {uploadStatus}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
+            {/* ✅ Place your upload instructions, file input, and upload button here */}
+          </div>
+        )}
 
-            {showUploadSection && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white bg-opacity-90 backdrop-blur-md w-full max-w-6xl mx-4 rounded-xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200">
-                  {/* Close Button */}
-                  {/* Header with Title & Close Button */}
-                  <div className="flex items-center justify-between  ">
-                    <h2 className="text-2xl font-bold text-blue-700 tracking-wide w-full text-center relative -top-4">
-                      📂 Upload Student Marks from Excel
-                      {/* Close Button */}
-                      <RxCross1
-                        className="absolute right-0 top-1/2 -translate-y-1/2 text-2xl text-red-500 hover:text-red-700 cursor-pointer transition"
-                        onClick={() => handleReset()}
-                      />
-                    </h2>
-                  </div>
-
-                  {/* Grid Section */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* LEFT: Download Instructions */}
-                    <div className="bg-gradient-to-br from-blue-100 via-white to-blue-50 border border-blue-200 rounded-xl p-6 shadow-sm">
-                      <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">
-                          1
-                        </span>
-                        Download & Fill Marksheet
-                      </h3>
-
-                      <div className="text-sm text-gray-700 leading-relaxed space-y-3 mb-4">
-                        <p>
-                          <strong>Step 1:</strong> Please download the marksheet
-                          format by clicking on the
-                          <strong> "Download Marksheet format"</strong> button
-                          below.
-                        </p>
-                        <p>
-                          <strong>Step 2:</strong> Enter marks in the downloaded
-                          file.
-                        </p>
-                      </div>
-
-                      <div className="text-sm text-blue-900 bg-blue-50 p-4 rounded-md border border-blue-200">
-                        <strong className="block mb-1 text-blue-700">
-                          PS:
-                        </strong>
-                        • Do not change the contents of first 3 columns of the
-                        downloaded Excel sheet. Please enter only marks.
-                        <br />
-                        • If a student is absent, leave the column blank in the
-                        Excel sheet. The application will mark the child absent.
-                        <br />
-                        • Do not add or delete any student.
-                        <br />• Do not change the name of the file.
-                      </div>
-
-                      <div className="flex justify-center">
-                        <button
-                          onClick={handleDownloadTemplate}
-                          className="mt-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-medium rounded-full px-6 py-2 hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center gap-2"
-                        >
-                          <i className="fas fa-download text-base"></i>
-                          Download Marksheet Format
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* RIGHT: Upload Instructions */}
-                    <div className="bg-gradient-to-br from-purple-100 via-white to-purple-50 border border-purple-200 rounded-xl p-6 shadow-sm">
-                      <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <span className="bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">
-                          2
-                        </span>
-                        Upload & Finalize Marks
-                      </h3>
-
-                      <div className="text-sm text-gray-700 leading-relaxed space-y-3 mb-4">
-                        <p>
-                          <strong>Step 3:</strong> Please click on the{" "}
-                          <strong>"Browse"</strong> button to select the file to
-                          be uploaded.
-                        </p>
-                        <p>
-                          <strong>Step 4:</strong> Please click on the{" "}
-                          <strong>"Upload Marks"</strong> button to upload the
-                          file.
-                        </p>
-                        <p>
-                          <strong>Step 5:</strong> Marks will be saved and
-                          displayed in the text boxes below.
-                        </p>
-                      </div>
-
-                      <div className="text-sm text-purple-900 bg-purple-50 p-4 rounded-md border border-purple-200 mb-4">
-                        <strong className="block mb-1 text-purple-700">
-                          PS:
-                        </strong>
-                        • Marks in the textboxes can be edited.
-                        <br />• Click on the <strong>"Save"</strong> button to
-                        save the data.
-                        <br />• Once the marks are finalised, click on the{" "}
-                        <strong>"Publish"</strong> button to publish the data to
-                        parents.
-                      </div>
-
-                      {/* File Picker + Upload Button - Horizontal Layout */}
-                      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
-                        {/* Choose File Button */}
-                        <label className="bg-purple-600 text-white text-sm font-medium rounded-full px-5 py-2.5 hover:bg-purple-700 cursor-pointer shadow-md flex items-center gap-2 transition whitespace-nowrap">
-                          <i className="fas fa-upload text-base"></i>
-                          {selectedFile
-                            ? selectedFile.name.length > 25
-                              ? `${selectedFile.name.substring(0, 20)}...`
-                              : selectedFile.name
-                            : "Choose File"}
-                          <input
-                            type="file"
-                            accept=".csv"
-                            onChange={handleFileChange}
-                            className="hidden"
-                          />
-                        </label>
-
-                        {/* Upload Button */}
-                        <button
-                          onClick={handleUpload}
-                          className="bg-purple-700 hover:bg-purple-800 text-white text-sm font-medium rounded-full px-6 py-2.5 shadow-md transition flex items-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={loading}
-                        >
-                          <i className="fas fa-cloud-upload-alt text-base"></i>
-                          {loading ? "Uploading..." : "Upload Marks"}
-                        </button>
-                      </div>
-
-                      {/* Errors / Status */}
-                      {errorMessage && (
-                        <p className="text-red-600 text-sm text-center mt-2">
-                          {errorMessage}
-                        </p>
-                      )}
-
-                      {errorMessageUrl && errorMessageUrl !== "undefined" && (
-                        <p className="text-center mt-2">
-                          <a
-                            href="#"
-                            className="text-blue-500 underline hover:text-blue-700"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              downloadCsv(errorMessageUrl);
-                            }}
-                          >
-                            📥 Download CSV with Errors
-                          </a>
-                        </p>
-                      )}
-
-                      {uploadStatus && (
-                        <p className="text-green-600 text-sm text-center mt-2">
-                          {uploadStatus}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+        {/* Step 3: Show table after upload */}
+        {dataUploaded && tableDataReady && (
+          <>
+            {dataUploaded && (
+              <div className="flex justify-end mb-4">
+                <button
+                  onClick={() => setShowUploadSection(true)} // ✅ Show modal on click
+                  className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-200 shadow-md"
+                >
+                  Upload Marksheet from Excel Sheet
+                </button>
               </div>
             )}
 
-            {/* {holidays.length > 0 && ( */}
-            <div className="w-full  mt-4">
+            <div className="w-full mt-4">
               <div className="card mx-auto lg:w-full shadow-lg">
                 <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                   <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
@@ -1476,6 +1444,14 @@ function UploadMarks() {
                 </div>
               </div>
             </div>
+          </>
+        )}
+        <div className="bg-white w-full md:w-[97%] mx-auto rounded-md ">
+          <div className="w-full  mx-auto">
+            <ToastContainer />
+
+            {/* {holidays.length > 0 && ( */}
+
             {/* )} */}
           </div>
         </div>
