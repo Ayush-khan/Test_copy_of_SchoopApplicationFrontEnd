@@ -303,7 +303,9 @@ const CreateDomainDetails = () => {
       console.log("Saved successfully:", response.data);
       toast.success("Domain Parameters Saved Successfully!");
       resetForm();
-      navigate("/domainDetails");
+      setTimeout(() => {
+        navigate("/domainDetails");
+      }, 2000);
     } catch (error) {
       console.error("Error saving data:", error);
       toast.error(error.message || "Failed to save data");

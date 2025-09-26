@@ -1,23 +1,26 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import React from "react";
+// import { useReactToPrint } from "react-to-print";
+import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-import bgImage from "../../../../../src/assets/HPC/SACS/STD 2 HPC COVER.jpg";
-import AllAboutMe from "../../../../../src/assets/HPC/SACS/HPC_Cover/All about me_1.jpg";
-import AboutMyself from "../../../../../src/assets/HPC/SACS/HPC_Cover/About myself_2.jpg";
-import Language from "../../../../../src/assets/HPC/SACS/HPC_Cover/Language_3.jpg";
-import MathEVS from "../../../../../src/assets/HPC/SACS/HPC_Cover/Math and EVS_4.jpg";
-import PhysicalDomain from "../../../../../src/assets/HPC/SACS/HPC_Cover/Physical domain_5.jpg";
-import Aesthetic from "../../../../../src/assets/HPC/SACS/HPC_Cover/Aesthetic domain_6.jpg";
-import LearnerPeer from "../../../../../src/assets/HPC/SACS/HPC_Cover/learner feedback and peer feedback_7.jpg";
-import TeacherParent from "../../../../../src/assets/HPC/SACS/HPC_Cover/Teacher observation Parents feed back_8.jpg";
-import HpcRemark from "../../../../../src/assets/HPC/SACS/HPC_Cover/Class teachers remarks_9.jpg";
-import BackCover from "../../../../../src/assets/HPC/SACS/HPC_Cover/BACK COVER_10.jpg";
-import BeginnerImg from "../../../../../src/assets/HPC/SACS/images/Beginner - symbol seed.png";
-import ProgressingImg from "../../../../../src/assets/HPC/SACS/images/Progressing - symbol plant.png";
-import ProficientImg from "../../../../../src/assets/HPC/SACS/images/Proficient- symbol tree.png";
+import bgImage from "../../../../assets/HPC/SACS/STD 2 HPC COVER.jpg";
+import AllAboutMe from "../../../../assets/HPC/SACS/HPC_Cover/All about me_1.jpg";
+import AboutMyself from "../../../../assets/HPC/SACS/HPC_Cover/About myself_2.jpg";
+import Language from "../../../../assets/HPC/SACS/HPC_Cover/Language_3.jpg";
+import MathEVS from "../../../../assets/HPC/SACS/HPC_Cover/Math and EVS_4.jpg";
+import PhysicalDomain from "../../../../assets/HPC/SACS/HPC_Cover/Physical domain_5.jpg";
+import Aesthetic from "../../../../assets/HPC/SACS/HPC_Cover/Aesthetic domain_6.jpg";
+import LearnerPeer from "../../../../assets/HPC/SACS/HPC_Cover/learner feedback and peer feedback_7.jpg";
+import TeacherParent from "../../../../assets/HPC/SACS/HPC_Cover/Teacher observation Parents feed back_8.jpg";
+import HpcRemark from "../../../../assets/HPC/SACS/HPC_Cover/Class teachers remarks_9.jpg";
+import BackCover from "../../../../assets/HPC/SACS/HPC_Cover/BACK COVER_10.jpg";
+import BeginnerImg from "../../../../assets/HPC/SACS/images/Beginner - symbol seed.png";
+import ProgressingImg from "../../../../assets/HPC/SACS/images/Progressing - symbol plant.png";
+import ProficientImg from "../../../../assets/HPC/SACS/images/Proficient- symbol tree.png";
 
 const HPCReportCard = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -76,52 +79,52 @@ const HPCReportCard = () => {
     fetchClassTeacherRemark();
   }, []);
 
-  useEffect(() => {
-    if (!roleId || !regId) return; // guard against empty
-    fetchClasses(roleId, regId);
-  }, [roleId, regId]);
+  // useEffect(() => {
+  //   if (!roleId || !regId) return; // guard against empty
+  //   fetchClasses(roleId, regId);
+  // }, [roleId, regId]);
 
-  const fetchClasses = async (roleId, regId) => {
-    const token = localStorage.getItem("authToken");
-    setLoadingExams(true);
+  // const fetchClasses = async (roleId, regId) => {
+  //   const token = localStorage.getItem("authToken");
+  //   setLoadingExams(true);
 
-    try {
-      if (roleId === "T") {
-        const response = await axios.get(
-          `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+  //   try {
+  //     if (roleId === "T") {
+  //       const response = await axios.get(
+  //         `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
 
-        const mappedData = (response.data.data || [])
-          .filter((item) => item.is_class_teacher === 1)
-          .map((cls) => ({
-            value: cls.class_id,
-            class_id: cls.class_id,
-            section_id: cls.section_id,
-            classname: cls.classname,
-            sectionname: cls.sectionname,
-            label: `${cls.classname} ${cls.sectionname}`,
-          }));
+  //       const mappedData = (response.data.data || [])
+  //         .filter((item) => item.is_class_teacher === 1)
+  //         .map((cls) => ({
+  //           value: cls.class_id,
+  //           class_id: cls.class_id,
+  //           section_id: cls.section_id,
+  //           classname: cls.classname,
+  //           sectionname: cls.sectionname,
+  //           label: `${cls.classname} ${cls.sectionname}`,
+  //         }));
 
-        setStudentNameWithClassId(mappedData || []);
+  //       setStudentNameWithClassId(mappedData || []);
 
-        setStudentNameWithClassId(mappedData || []);
-      } else {
-        const response = await axios.get(`${API_URL}/api/g`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  //       setStudentNameWithClassId(mappedData || []);
+  //     } else {
+  //       const response = await axios.get(`${API_URL}/api/g`, {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       });
 
-        setStudentNameWithClassId(response?.data || []);
-      }
-    } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
-    } finally {
-      setLoadingExams(false);
-    }
-  };
+  //       setStudentNameWithClassId(response?.data || []);
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error fetching Classes");
+  //     console.error("Error fetching Classes:", error);
+  //   } finally {
+  //     setLoadingExams(false);
+  //   }
+  // };
 
   const fetchAllAboutMe = async () => {
     const token = localStorage.getItem("authToken");
@@ -322,52 +325,52 @@ const HPCReportCard = () => {
   //   }
   // };
 
-  const handlePrint = () => {
-    const printContent = pdfRef.current.innerHTML;
-    const newWindow = window.open("", "", "width=800,height=600");
-    newWindow.document.write(`
-    <html>
-      <head>
-        <title>Student Portfolio</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-          }
+  // const handlePrint = () => {
+  //   const printContent = pdfRef.current.innerHTML;
+  //   const newWindow = window.open("", "", "width=800,height=600");
+  //   newWindow.document.write(`
+  //   <html>
+  //     <head>
+  //       <title>Student Portfolio</title>
+  //       <style>
+  //         body {
+  //           font-family: Arial, sans-serif;
+  //           margin: 0;
+  //           padding: 0;
+  //         }
 
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
+  //         * {
+  //           -webkit-print-color-adjust: exact !important;
+  //           print-color-adjust: exact !important;
+  //         }
 
-          .page-break {
-            page-break-before: always;
-          }
+  //         .page-break {
+  //           page-break-before: always;
+  //         }
 
-          .print-page {
-            width: 1000px;
-            aspect-ratio: 8 / 10;
-            margin: 20px auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            background-size: cover !important;
-            background-position: center !important;
-            background-repeat: no-repeat !important;
-            position: relative;
-            overflow: hidden;
-          }
-        </style>
-      </head>
-      <body>
-        ${printContent}
-      </body>
-    </html>
-  `);
-    newWindow.document.close();
-    newWindow.focus();
-    newWindow.print();
-  };
+  //         .print-page {
+  //           width: 1000px;
+  //           aspect-ratio: 8 / 10;
+  //           margin: 20px auto;
+  //           border-radius: 8px;
+  //           box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  //           background-size: cover !important;
+  //           background-position: center !important;
+  //           background-repeat: no-repeat !important;
+  //           position: relative;
+  //           overflow: hidden;
+  //         }
+  //       </style>
+  //     </head>
+  //     <body>
+  //       ${printContent}
+  //     </body>
+  //   </html>
+  // `);
+  //   newWindow.document.close();
+  //   newWindow.focus();
+  //   newWindow.print();
+  // };
 
   const filteredSections = timetable.filter((section) => {
     const searchLower = searchTerm.toLowerCase();
@@ -401,7 +404,7 @@ const HPCReportCard = () => {
                 Report Card
               </h5>
               {/* <button
-                onClick={handlePrint}
+                onClick={handlePrintWithIframe}
                 // onClick={handleDownloadPdf}
                 className="mb-4 px-4 py-2 bg-blue-600 text-white rounded"
               >
@@ -650,115 +653,11 @@ const HPCReportCard = () => {
 
             {/* Domain :- Subject Language  */}
             <div className="md:ml-7 md:mr-7 flex justify-center mb-2 print-page">
-              {/* <div
-                className="w-full md:w-[1000px] lg:w-[1000px] aspect-[8/10] rounded-md shadow-lg overflow-hidden relative"
-                style={{
-                  backgroundImage: `url(${Language})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              >
-                <div
-                  className="absolute top-[14%] left-[10%] w-[75%] ml-3"
-                  style={{ fontFamily: '"Comic Sans MS", cursive, sans-serif' }}
-                >
-                  {subject.map((subject, sIndex) => (
-                    <div
-                      key={sIndex}
-                      className={`mb-6 rounded-lg border border-gray-300 overflow-hidden ${
-                        sIndex > 0 ? "break-page" : ""
-                      }`}
-                    >
-                      <table className="w-full text-left ">
-                        <tbody>
-                          <tr>
-                            <td
-                              rowSpan={
-                                3 +
-                                subject.competencies.reduce(
-                                  (sum, comp) => sum + comp.details.length,
-                                  0
-                                )
-                              }
-                              className="border border-gray-300 p-2 text-center font-bold align-middle"
-                              style={{
-                                writingMode: "vertical-rl",
-                                transform: "rotate(180deg)",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {subject.domainname}
-                            </td>
-
-                            <td
-                              colSpan={4}
-                              className="border border-gray-300 p-3 bg-gray-200 font-bold"
-                            >
-                              {subject.subjectname}
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td
-                              colSpan={4}
-                              className="border border-gray-300 p-2 italic text-sm"
-                            >
-                              {subject.curriculum_goal}
-                            </td>
-                          </tr>
-
-                          <tr className="bg-gray-100">
-                            <td className="border border-gray-300 p-2 font-bold">
-                              Competency
-                            </td>
-                            <td className="border border-gray-300 p-2 font-bold">
-                              Learning Outcomes
-                            </td>
-                            <td className="border border-gray-300 p-2 font-bold">
-                              Term 1
-                            </td>
-                            <td className="border border-gray-300 p-2 font-bold">
-                              Term 2
-                            </td>
-                          </tr>
-
-                          {subject.competencies.map((comp, cIndex) =>
-                            comp.details.map((detail, dIndex) => (
-                              <tr key={`${cIndex}-${dIndex}`}>
-                                {dIndex === 0 && (
-                                  <td
-                                    rowSpan={comp.details.length}
-                                    className="border border-gray-300 p-2 align-top font-semibold"
-                                  >
-                                    {comp.competency || "—"}
-                                  </td>
-                                )}
-
-                                <td className="border border-gray-300 p-2">
-                                  {detail.learning_outcomes}
-                                </td>
-
-                                <td className="border border-gray-300 p-2">
-                                  {detail.parameter_value?.term1 || "—"}
-                                </td>
-
-                                <td className="border border-gray-300 p-2">
-                                  {detail.parameter_value?.term2 || "—"}
-                                </td>
-                              </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  ))}
-                </div>
-              </div> */}
               <div className="md:ml-7 md:mr-7 flex flex-col items-center gap-4">
                 {subject.map((subj, sIndex) => (
                   <div
                     key={sIndex}
-                    className={`w-full md:w-[800px] lg:w-[785px] aspect-[8/10] rounded-md shadow-lg overflow-hidden relative ${
+                    className={`w-full md:w-[900px] lg:w-[900px] aspect-[8/10] rounded-md shadow-lg overflow-hidden relative ${
                       sIndex > 0 ? "break-page" : ""
                     }`}
                     style={{
@@ -823,10 +722,10 @@ const HPCReportCard = () => {
                               <td className="border border-gray-300 p-2 font-bold">
                                 Learning Outcomes
                               </td>
-                              <td className="border border-gray-300 p-2 font-bold">
+                              <td className="border border-gray-300 p-2 font-bold whitespace-nowrap">
                                 Term 1
                               </td>
-                              <td className="border border-gray-300 p-2 font-bold">
+                              <td className="border border-gray-300 p-2 font-bold whitespace-nowrap">
                                 Term 2
                               </td>
                             </tr>
@@ -840,7 +739,7 @@ const HPCReportCard = () => {
                                       rowSpan={comp.details.length}
                                       className="border border-gray-300 p-2 align-top font-semibold"
                                     >
-                                      {comp.competency || "—"}
+                                      {comp.competency || ""}
                                     </td>
                                   )}
                                   <td className="border border-gray-300 p-2">
@@ -856,7 +755,7 @@ const HPCReportCard = () => {
                                         className="h-8 mx-auto"
                                       />
                                     ) : (
-                                      "—"
+                                      ""
                                     )}
                                   </td>
 
@@ -870,7 +769,7 @@ const HPCReportCard = () => {
                                         className="h-8 mx-auto"
                                       />
                                     ) : (
-                                      "—"
+                                      ""
                                     )}
                                   </td>
                                 </tr>
@@ -879,80 +778,6 @@ const HPCReportCard = () => {
                           </tbody>
                         </table>
                       </div>
-
-                      {/* {sIndex === subject.length - 1 && (
-                        <div className="mt-6 rounded-lg border border-gray-300 overflow-hidden">
-                          <table className="w-full text-center ">
-                            <thead>
-                              <tr className="bg-gray-100">
-                                <th className="border border-gray-300 p-2">
-                                  Performance Level
-                                </th>
-                                <th className="border border-gray-300 p-2">
-                                  Symbol
-                                </th>
-                                <th className="border border-gray-300 p-2">
-                                  Interpretation
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr>
-                                <td className="border border-gray-300 p-2">
-                                  Beginner
-                                </td>
-                                <td className="border border-gray-300 p-2">
-                                  <img
-                                    src={BeginnerImg}
-                                    alt="Beginner"
-                                    className="h-8 mx-auto"
-                                  />
-                                </td>
-                                <td className="border border-gray-300 p-2">
-                                  Tries to achieve the competency and associated
-                                  learning outcome with lot of support from
-                                  teachers.
-                                </td>
-                              </tr>
-
-                              <tr>
-                                <td className="border border-gray-300 p-2">
-                                  Progressing
-                                </td>
-                                <td className="border border-gray-300 p-2">
-                                  <img
-                                    src={ProgressingImg}
-                                    alt="Progressing"
-                                    className="h-8 mx-auto"
-                                  />
-                                </td>
-                                <td className="border border-gray-300 p-2">
-                                  Achieves the competency and associated
-                                  learning outcomes with occasional/some support
-                                  from teachers.
-                                </td>
-                              </tr>
-
-                              <tr>
-                                <td className="border border-gray-300 p-2">
-                                  Proficient
-                                </td>
-                                <td className="border border-gray-300 p-2">
-                                  <img
-                                    src={ProficientImg}
-                                    alt="Proficient"
-                                    className="h-8 mx-auto"
-                                  />
-                                </td>
-                                <td className="border border-gray-300 p-2">
-                                  Achieves the competency and associated
-                                  learning outcomes on his/her own.
-                                </td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      )} */}
                     </div>
                   </div>
                 ))}
@@ -1064,82 +889,116 @@ const HPCReportCard = () => {
                   style={{ fontFamily: '"Comic Sans MS", cursive, sans-serif' }}
                 >
                   {/* Learner's Feedback */}
-                  <div>
-                    <h2 className="text-blue-900 font-bold text-xl mb-2">
+                  <div className="">
+                    <h2 className="text-blue-900 font-bold text-xl mb-4">
                       Learner's Feedback
                     </h2>
-                    <div className="rounded-lg border border-gray-300 overflow-hidden">
-                      <table className="w-full text-center ">
-                        <thead>
-                          <tr className="bg-gray-100">
-                            <th className="border border-gray-300 p-2">
-                              Parameter
-                            </th>
-                            <th className="border border-gray-300 p-2">
-                              Term 1
-                            </th>
-                            <th className="border border-gray-300 p-2">
-                              Term 2
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {learner.map((item, index) => (
-                            <tr key={index}>
-                              <td className="border border-gray-300 p-2">
-                                {item.parameter}
-                              </td>
-                              {["1", "2"].map((term) => (
-                                <td
-                                  key={term}
-                                  className="border border-gray-300 p-2"
+
+                    {learner.map((item, index) => (
+                      <div
+                        key={index}
+                        className="border border-gray-400 rounded-lg overflow-hidden mb-6"
+                      >
+                        {/* Header Row */}
+                        <div className="border-b border-gray-400 p-2 font-semibold text-center">
+                          {item.parameter}
+                        </div>
+
+                        {/* Term Rows */}
+                        {["1", "2"].map((term, tIndex) => (
+                          <div
+                            key={term}
+                            className="flex border-b border-gray-300 last:border-b-0"
+                          >
+                            {/* Term Label */}
+                            <div className="w-1/4 border-r bg-gray-100 font-semibold border-gray-300 p-2 ">
+                              Term {term}
+                            </div>
+
+                            {/* Options */}
+                            <div className="w-3/4 flex items-center gap-4 p-2">
+                              {item.options.map((opt, i) => (
+                                <label
+                                  key={i}
+                                  className="flex items-center gap-1"
                                 >
-                                  {item.parameter_values[term] || "-"}
-                                </td>
+                                  <input
+                                    type="checkbox"
+                                    checked={
+                                      item.parameter_values[term] === opt.value
+                                    }
+                                    readOnly
+                                  />
+                                  {opt.option}
+                                </label>
                               ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
                   </div>
 
                   {/* Peer Feedback */}
                   <div>
-                    <h2 className="text-blue-900 font-bold text-xl mb-2">
+                    <h2 className="text-blue-900 font-bold text-xl mb-4">
                       Peer Feedback
                     </h2>
-                    <div className="rounded-lg border border-gray-300 overflow-hidden">
-                      <table className="w-full text-center ">
+
+                    <div className="border border-gray-400 rounded-lg overflow-hidden">
+                      <table className="w-full ">
                         <thead>
                           <tr className="bg-gray-100">
-                            <th className="border border-gray-300 p-2">
-                              Parameter
-                            </th>
-                            <th className="border border-gray-300 p-2">
+                            <th className="border border-gray-300 p-2 text-left">
                               Term 1
                             </th>
-                            <th className="border border-gray-300 p-2">
+                            <th className="border border-gray-300 p-2 text-left">
                               Term 2
                             </th>
                           </tr>
                         </thead>
                         <tbody>
-                          {peerFeedback.map((item, index) => (
-                            <tr key={index}>
-                              <td className="border border-gray-300 p-2">
-                                {toCamelCase(item.parameter)}
-                              </td>
-                              {["1", "2"].map((term) => (
-                                <td
-                                  key={term}
-                                  className="border border-gray-300 p-2"
-                                >
-                                  {item.parameter_values[term] || "-"}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
+                          {/* Term 1 Row */}
+                          <tr>
+                            <td className="border border-gray-300 p-2">
+                              <div className="grid grid-cols-2 gap-2">
+                                {peerFeedback.map((item, index) => (
+                                  <label
+                                    key={index}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={
+                                        item.parameter_values["1"] === "Yes"
+                                      }
+                                      readOnly
+                                    />
+                                    {item.parameter}
+                                  </label>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 p-2">
+                              <div className="grid grid-cols-2 gap-2">
+                                {peerFeedback.map((item, index) => (
+                                  <label
+                                    key={index}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={
+                                        item.parameter_values["2"] === "Yes"
+                                      }
+                                      readOnly
+                                    />
+                                    {item.parameter}
+                                  </label>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
                         </tbody>
                       </table>
                     </div>
@@ -1165,14 +1024,16 @@ const HPCReportCard = () => {
                   {/* Parent Feedback */}
                   <div>
                     <h2 className="text-blue-900 font-bold text-xl mb-2">
-                      Parent Feedback
+                      Parent's Observation
                     </h2>
-                    <div className="rounded-lg border border-gray-300 overflow-hidden">
+
+                    {/* Table for NON-checkbox (radio/text) */}
+                    <div className="rounded-lg border border-gray-300 overflow-hidden mb-6">
                       <table className="w-full text-center ">
                         <thead>
                           <tr className="bg-gray-100">
                             <th className="border border-gray-300 p-2">
-                              Observation
+                              Observations
                             </th>
                             <th className="border border-gray-300 p-2">
                               Term 1
@@ -1183,69 +1044,222 @@ const HPCReportCard = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {parentFeedback.map((item, index) => (
-                            <tr key={index}>
-                              <td className="border border-gray-300 p-2">
-                                {item.parameter}
-                              </td>
-                              {["1", "2"].map((term) => (
-                                <td
-                                  key={term}
-                                  className="border border-gray-300 p-2"
-                                >
-                                  {item.parameter_values[term] || "-"}
+                          {parentFeedback
+                            .filter((item) => item.control_type !== "checkbox")
+                            .map((item, index) => (
+                              <tr key={index}>
+                                <td className="border border-gray-300 p-2 text-left font-medium">
+                                  {item.parameter}
                                 </td>
-                              ))}
-                            </tr>
-                          ))}
+                                {["1", "2"].map((term) => (
+                                  <td
+                                    key={term}
+                                    className="border border-gray-300 p-2"
+                                  >
+                                    {item.parameter_values?.[term] || ""}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
                         </tbody>
                       </table>
                     </div>
+
+                    {/* Separate Table for checkbox type */}
+                    {parentFeedback.some(
+                      (item) => item.control_type === "checkbox"
+                    ) && (
+                      <div className="rounded-lg border border-gray-400 overflow-hidden">
+                        <table className="w-full ">
+                          <tbody>
+                            {parentFeedback
+                              .filter(
+                                (item) => item.control_type === "checkbox"
+                              )
+                              .map((item, i) => (
+                                <React.Fragment key={i}>
+                                  {/* Parameter Name Row */}
+                                  <tr>
+                                    <td
+                                      colSpan={2}
+                                      className="bg-gray-100 border text-left border-gray-400 p-2 font-semibold "
+                                    >
+                                      {item.parameter}
+                                    </td>
+                                  </tr>
+
+                                  {/* Term Headings Row */}
+                                  <tr className="bg-gray-50">
+                                    <td className="border border-gray-400 p-2 font-semibold text-center">
+                                      Term 1
+                                    </td>
+                                    <td className="border border-gray-400 p-2 font-semibold text-center">
+                                      Term 2
+                                    </td>
+                                  </tr>
+
+                                  {/* Term Values Row */}
+                                  <tr>
+                                    {/* Term 1 */}
+                                    <td className="align-top border border-gray-400 p-2 w-1/2">
+                                      <div className="flex flex-col gap-2 text-left">
+                                        {item.options.map((opt, j) => {
+                                          const values = Array.isArray(
+                                            item.parameter_values?.["1"]
+                                          )
+                                            ? item.parameter_values["1"]
+                                            : [item.parameter_values?.["1"]];
+
+                                          return (
+                                            <label
+                                              key={`t1-${i}-${j}`}
+                                              className="flex items-center gap-2"
+                                            >
+                                              <input
+                                                type="checkbox"
+                                                checked={values.includes(
+                                                  opt.value
+                                                )}
+                                                readOnly
+                                              />
+                                              {opt.option}
+                                            </label>
+                                          );
+                                        })}
+                                      </div>
+                                    </td>
+
+                                    {/* Term 2 */}
+                                    <td className="align-top border border-gray-400 p-2 w-1/2">
+                                      <div className="flex flex-col gap-2 text-left">
+                                        {item.options.map((opt, j) => {
+                                          const values = Array.isArray(
+                                            item.parameter_values?.["2"]
+                                          )
+                                            ? item.parameter_values["2"]
+                                            : [item.parameter_values?.["2"]];
+
+                                          return (
+                                            <label
+                                              key={`t2-${i}-${j}`}
+                                              className="flex items-center gap-2"
+                                            >
+                                              <input
+                                                type="checkbox"
+                                                checked={values.includes(
+                                                  opt.value
+                                                )}
+                                                readOnly
+                                              />
+                                              {opt.option}
+                                            </label>
+                                          );
+                                        })}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </React.Fragment>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
 
+                  {/* Class teacher remark */}
+                  {/* <div>
+                    <h2 className="text-blue-900 font-bold text-xl mb-2">
+                      Class Teacher Remark
+                    </h2>
+
+                    <div className="rounded-lg border border-gray-400 overflow-hidden">
+                      {["1", "2"].map((term) => (
+                        <div
+                          key={term}
+                          className="border-b border-gray-400 last:border-b-0"
+                        >
+                          <div className="bg-gray-100 border-b border-gray-400 p-2 font-semibold">
+                            Term {term}
+                          </div>
+
+                          <table className="w-full ">
+                            <tbody>
+                              {classTeacher.map((item, index) => (
+                                <tr
+                                  key={index}
+                                  className="border-b border-gray-300 last:border-b-0"
+                                >
+                                  <td className="border-r border-gray-400 p-2 w-1/3 font-medium">
+                                    {item.parameter}
+                                  </td>
+
+                                  <td className="p-2">
+                                    {item.parameter_values?.[term] || ""}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ))}
+                    </div>
+                  </div> */}
+                </div>
+              </div>
+            </div>
+
+            <div className="md:ml-7 md:mr-7 flex justify-center mb-2">
+              <div
+                className="w-full md:w-[1000px] lg:w-[1000px] aspect-[8/10] rounded-md shadow-lg overflow-hidden relative"
+                style={{
+                  backgroundImage: `url(${LearnerPeer})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                <div
+                  className="absolute top-[10%] left-[10%] w-[80%] p-2 space-y-8"
+                  style={{ fontFamily: '"Comic Sans MS", cursive, sans-serif' }}
+                >
                   {/* Class teacher remark */}
                   <div>
                     <h2 className="text-blue-900 font-bold text-xl mb-2">
                       Class Teacher Remark
                     </h2>
-                    <div className="rounded-lg border border-gray-300 overflow-hidden">
-                      <table className="w-full text-center ">
-                        <thead>
-                          <tr className="bg-gray-100">
-                            <th className="border border-gray-300 p-2">
-                              Parameter
-                            </th>
-                            <th className="border border-gray-300 p-2">
-                              Term 1
-                            </th>
-                            <th className="border border-gray-300 p-2">
-                              Term 2
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {classTeacher.map((item, index) => (
-                            <tr key={index}>
-                              <td className="border border-gray-300 p-2">
-                                {toCamelCase(item.parameter)}
-                              </td>
-                              {["1", "2"].map((term) => {
-                                const termData = item.parameter_values.find(
-                                  (pv) => String(pv.term) === term
-                                );
-                                return (
-                                  <td
-                                    key={term}
-                                    className="border border-gray-300 p-2"
-                                  >
-                                    {termData ? termData.value : "-"}
+
+                    <div className="rounded-lg border border-gray-400 overflow-hidden">
+                      {["1", "2"].map((term) => (
+                        <div
+                          key={term}
+                          className="border-b border-gray-400 last:border-b-0"
+                        >
+                          {/* Term Heading */}
+                          <div className="bg-gray-100 border-b border-gray-400 p-2 font-semibold">
+                            Term {term}
+                          </div>
+
+                          <table className="w-full ">
+                            <tbody>
+                              {classTeacher.map((item, index) => (
+                                <tr
+                                  key={index}
+                                  className="border-b border-gray-300 last:border-b-0"
+                                >
+                                  {/* Parameter Name from API */}
+                                  <td className="border-r border-gray-400 p-2 w-1/3 font-medium">
+                                    {toCamelCase(item.parameter)}
                                   </td>
-                                );
-                              })}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+
+                                  {/* Parameter Value for this term */}
+                                  <td className="p-2">
+                                    {item.parameter_values?.[term] || ""}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
