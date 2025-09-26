@@ -2040,7 +2040,17 @@ function ManageSubjectList() {
 
   // handle allot subject close model
   console.log("displayedSections", displayedSections);
+  const handleReportView = (subjectIsPass) => {
+    setCurrentSection(subjectIsPass);
 
+    console.log("handleCertificateView-->", subjectIsPass);
+    navigate(`/hPCReportCard/${subjectIsPass.student_id}`, {
+      state: {
+        student: subjectIsPass,
+        section_id: section_id || classIdForManage,
+      },
+    });
+  };
   return (
     <>
       {/* <ToastContainer /> */}
@@ -2231,6 +2241,9 @@ function ManageSubjectList() {
                               View
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              HPC Report Card
+                            </th>
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               RC & Certificates
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -2348,6 +2361,14 @@ function ManageSubjectList() {
                                     className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                                   >
                                     <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                                  </button>
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  <button
+                                    onClick={() => handleReportView(subject)}
+                                    className="text-green-600 hover:text-green-800 hover:bg-transparent "
+                                  >
+                                    <TbFileCertificate className="font-bold text-xl" />
                                   </button>
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">

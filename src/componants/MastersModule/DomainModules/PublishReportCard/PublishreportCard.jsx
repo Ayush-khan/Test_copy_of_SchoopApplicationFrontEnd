@@ -69,7 +69,6 @@ const PublishreportCard = () => {
   const handleSearch = async () => {
     setLoadingForSearch(false);
     if (!selectedStudentId) {
-      setStudentError("Please select Staff Name.");
       setLoadingForSearch(false);
       return;
     }
@@ -115,7 +114,7 @@ const PublishreportCard = () => {
         <div className="card p-2 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              Consolidate Leave Report
+              Publish report Card
             </h5>
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -141,7 +140,7 @@ const PublishreportCard = () => {
                       className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      Staff <span className="text-red-500">*</span>
+                      Select Class <span className="text-red-500">*</span>
                       {/* Staff */}
                     </label>
                     <div className="w-full md:w-[65%]">
@@ -178,44 +177,6 @@ const PublishreportCard = () => {
                           {studentError}
                         </div>
                       )}
-                    </div>
-                  </div>
-
-                  {/* From Date Dropdown */}
-                  <div className="w-full   md:w-[50%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
-                    <label
-                      className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
-                      htmlFor="fromDate"
-                    >
-                      From Date
-                    </label>
-                    <div className="w-full">
-                      <input
-                        type="date"
-                        id="fromDate"
-                        value={fromDate}
-                        onChange={(e) => setFromDate(e.target.value)}
-                        className="text-sm w-full border border-gray-300 rounded px-2 py-2"
-                      />
-                    </div>
-                  </div>
-
-                  {/* To Date Dropdown */}
-                  <div className="w-full  md:w-[45%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
-                    <label
-                      className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
-                      htmlFor="toDate"
-                    >
-                      To Date
-                    </label>
-                    <div className="w-full">
-                      <input
-                        type="date"
-                        id="toDate"
-                        value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
-                        className="text-sm w-full border border-gray-300 rounded px-2 py-2"
-                      />
                     </div>
                   </div>
 
