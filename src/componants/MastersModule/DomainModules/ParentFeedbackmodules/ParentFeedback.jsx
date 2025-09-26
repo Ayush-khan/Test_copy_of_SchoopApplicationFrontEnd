@@ -317,6 +317,11 @@ const ParentFeedback = () => {
     setIsSaving(true);
 
     try {
+      if (!selectedRecords || selectedRecords.length === 0) {
+        toast.error("Please select at least one record before saving.");
+        setIsSaving(false);
+        return;
+      }
       // Use applied filters if user clicked Browse, else fallback to current selections
       const filtersToUse = appliedFilters || {
         term_id: selectedTerms,
@@ -407,6 +412,7 @@ const ParentFeedback = () => {
             firstErrorElement.scrollIntoView({
               behavior: "smooth",
               block: "center",
+              inline: "center",
             });
             firstErrorElement.focus();
           }
@@ -842,7 +848,7 @@ const ParentFeedback = () => {
                           }}
                         >
                           {parameter.length > 0 ? (
-                            <>
+                            <div className="inline-block min-w-full">
                               <table className="min-w-full leading-normal table-auto ">
                                 <thead
                                   className="sticky top-0  bg-gray-200"
@@ -1241,7 +1247,7 @@ const ParentFeedback = () => {
                               {loadingForSearch ? (
                                 ""
                               ) : (
-                                <div className="flex justify-end gap-3 mt-4 mr-4">
+                                <div className="flex justify-end gap-3 mt-4 pr-6">
                                   <button
                                     type="button"
                                     onClick={handleSubmit}
@@ -1284,7 +1290,7 @@ const ParentFeedback = () => {
                                   </button>
                                 </div>
                               )}
-                            </>
+                            </div>
                           ) : (
                             <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
                               <div className=" text-center text-xl text-red-500">

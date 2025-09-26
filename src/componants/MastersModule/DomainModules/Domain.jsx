@@ -471,6 +471,12 @@ const Domain = () => {
 
       console.log("✅ Selected Records before submit:", selectedRecords);
 
+      if (!selectedRecords || selectedRecords.length === 0) {
+        toast.error("Please select at least one record before saving.");
+        setIsSaving(false);
+        return;
+      }
+
       const filtersToUse = appliedFilters || {
         term_id: selectedTerms,
         class_id: selectedStudentId,
@@ -1178,7 +1184,7 @@ const Domain = () => {
                                 <th className="px-2 lg:px-3 py-2 border-2 border-gray-400 text-center text-sm font-semibold text-gray-900 tracking-wider w-[45%]">
                                   Parameters
                                 </th>
-                                <th className="px-2 lg:px-3 py-2 border-2 border-gray-400 text-center text-sm font-semibold text-gray-900 tracking-wider w-[25%]">
+                                <th className="px-2 lg:px-3 py-2 border-2 border-gray-400 text-center text-sm font-semibold text-gray-900 tracking-wider w-[28%]">
                                   Options
                                 </th>
                               </tr>

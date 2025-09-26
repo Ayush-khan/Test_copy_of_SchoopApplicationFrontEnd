@@ -4,7 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
-import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
+import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import { useNavigate } from "react-router-dom";
 import "react-quill/dist/quill.snow.css";
 import Select from "react-select";
@@ -435,7 +435,9 @@ const EditDomainDetails = () => {
 
       console.log("Updated successfully:", response.data);
       toast.success("Domain Parameters Updated Successfully!");
-      navigate("/domainDetails");
+      setTimeout(() => {
+        navigate("/domainDetails");
+      }, 2000);
     } catch (error) {
       console.error("Error update data:", error);
       toast.error(error.message || "Failed to update data");

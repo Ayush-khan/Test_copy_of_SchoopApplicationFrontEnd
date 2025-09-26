@@ -322,6 +322,11 @@ const ClassTeacherRemark = () => {
     setIsSaving(true);
 
     try {
+      if (!selectedRecords || selectedRecords.length === 0) {
+        toast.error("Please select at least one record before saving.");
+        setIsSaving(false);
+        return;
+      }
       // Use applied filters if user clicked Browse, else fallback to current selections
       const filtersToUse = appliedFilters || {
         term_id: selectedTerms,

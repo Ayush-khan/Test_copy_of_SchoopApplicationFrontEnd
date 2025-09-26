@@ -93,7 +93,7 @@ const SelfAssessment = () => {
 
         setStudentNameWithClassId(mappedData || []);
       } else {
-        const response = await axios.get(`${API_URL}/api/g`, {
+        const response = await axios.get(`${API_URL}/api/get_class_section`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -316,6 +316,12 @@ const SelfAssessment = () => {
     if (isSaving) return;
     setIsSaving(true);
 
+    if (!selectedRecords || selectedRecords.length === 0) {
+      toast.error("Please select at least one record before saving.");
+      setIsSaving(false);
+      return;
+    }
+
     try {
       // Use applied filters if user clicked Browse, else fallback to current selections
       const filtersToUse = appliedFilters || {
@@ -407,6 +413,7 @@ const SelfAssessment = () => {
             firstErrorElement.scrollIntoView({
               behavior: "smooth",
               block: "center",
+              inline: "center",
             });
             firstErrorElement.focus();
           }
@@ -841,7 +848,7 @@ const SelfAssessment = () => {
                           }}
                         >
                           {parameter.length > 0 ? (
-                            <>
+                            <div className="inline-block min-w-full">
                               <table className="min-w-full leading-normal table-auto ">
                                 <thead
                                   className="sticky top-0  bg-gray-200"
@@ -1240,7 +1247,7 @@ const SelfAssessment = () => {
                               {loadingForSearch ? (
                                 ""
                               ) : (
-                                <div className="flex justify-end gap-3 mt-4 mr-4">
+                                <div className="flex justify-end gap-3 mt-4 pr-6">
                                   <button
                                     type="button"
                                     onClick={handleSubmit}
@@ -1283,7 +1290,7 @@ const SelfAssessment = () => {
                                   </button>
                                 </div>
                               )}
-                            </>
+                            </div>
                           ) : (
                             <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
                               <div className=" text-center text-xl text-red-500">
