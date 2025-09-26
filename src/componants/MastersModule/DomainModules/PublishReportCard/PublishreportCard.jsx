@@ -14,23 +14,34 @@ const PublishreportCard = () => {
   const [fromDate, setFromDate] = useState(null);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [selectedSectionId, setSelectedSectionId] = useState(null);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
+  const [loadingExams, setLoadingExams] = useState(false);
+  const [loading, setLoading] = useState(false); // 👈 used for class change loader
+
   const [terms, setTerms] = useState([]);
   const [termIds, setTermIds] = useState([]);
   const navigate = useNavigate();
-  const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [timetable, setTimetable] = useState([]);
   const [publishStatus, setPublishStatus] = useState({}); // { termId: "Y"/"N" }
 
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-
+  <ToastContainer
+    position="top-right"
+    autoClose={3000}
+    hideProgressBar={false}
+    newestOnTop={false}
+    closeOnClick
+    rtl={false}
+    pauseOnFocusLoss
+    draggable
+    pauseOnHover
+    theme="colored"
+  />;
   useEffect(() => {
     const init = async () => {
       await fetchTerms(); // 🟢 Fetch terms first
@@ -147,21 +158,17 @@ const PublishreportCard = () => {
   const fetchPublishStatus = async (classId, sectionId) => {
     if (!classId || !sectionId || !termIds?.length) return;
 
-    setLoading(true); // 🟢 Full-screen loader start
+    setLoading(true); // 🔥 Show term section loader
 
     try {
       const token = localStorage.getItem("authToken");
-
       const results = {};
 
-      // Loop through all terms and call API
       for (const termId of termIds) {
         const res = await axios.get(
           `${API_URL}/api/get_hpcreportcardpublishvalue`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
             params: {
               class_id: classId,
               section_id: sectionId,
@@ -169,16 +176,15 @@ const PublishreportCard = () => {
             },
           }
         );
-
         results[termId] = res?.data?.data || "N";
       }
 
-      setPublishStatus(results); // ✅ Save all term publish statuses
+      setPublishStatus(results);
     } catch (error) {
-      console.error("Error fetching publish status:", error);
       toast.error("Failed to load publish statuses");
+      console.error(error);
     } finally {
-      setLoading(false); // 🟢 Full-screen loader end
+      setLoading(false); // ✅ Hide term section loader
     }
   };
 
@@ -201,48 +207,6 @@ const PublishreportCard = () => {
     [studentNameWithClassId]
   );
 
-  // Handle search and fetch parent information
-
-  const handleSearch = async () => {
-    setLoadingForSearch(false);
-    if (!selectedClassId) {
-      setLoadingForSearch(false);
-      return;
-    }
-    setSearchTerm("");
-    try {
-      setLoadingForSearch(true); // Start loading
-      setTimetable([]);
-      const token = localStorage.getItem("authToken");
-      const params = {};
-      if (selectedClassId) params.staff_id = selectedClassId;
-      if (fromDate) params.from_date = fromDate;
-      if (toDate) params.to_date = toDate;
-      const response = await axios.get(
-        `${API_URL}/api/get_consolidatedleavereport`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params,
-        }
-      );
-
-      if (!response?.data?.data || response?.data?.data?.length === 0) {
-        toast.error("Consolidated Leave Report data not found.");
-        setTimetable([]);
-      } else {
-        setTimetable(response?.data?.data);
-        setPageCount(Math.ceil(response?.data?.data?.length / pageSize)); // Set page count based on response size
-      }
-    } catch (error) {
-      console.error("Error fetching Consolidated Leave Report:", error);
-      toast.error(
-        "Error fetching Consolidated Leave Report. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
-      setLoadingForSearch(false);
-    }
-  };
   const handlePublishToggle = async (classId, sectionId, termId) => {
     if (!classId || !sectionId || !termId) return;
 
@@ -280,9 +244,9 @@ const PublishreportCard = () => {
         }));
 
         if (newStatus === "Y") {
-          toast.success("Report card Published successfully.");
+          toast.success("Holistic report card Published successfully.");
         } else {
-          toast.success("Report card Unpublished successfully.");
+          toast.success("Holistic report card Unpublished successfully.");
         }
       } else {
         toast.error("Failed to update status.");
@@ -302,12 +266,12 @@ const PublishreportCard = () => {
 
   return (
     <>
-      <div className="w-full md:w-[100%] mx-auto p-4 ">
+      <div className="w-full md:w-[80%] mx-auto p-4 ">
         <ToastContainer />
         <div className="card p-2 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              Publish report Card
+              Publish Holistic Report Card
             </h5>
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -324,68 +288,121 @@ const PublishreportCard = () => {
           ></div>
 
           <>
-            <div className="w-full md:w-[85%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2">
-              <div className="w-full md:w-[99%] flex md:flex-col items-start mt-0 md:mt-4">
-                {/* Class Dropdown */}
-                <div className="w-full gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                  <div className="w-full md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                    <label
-                      className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
-                      htmlFor="studentSelect"
-                    >
-                      Select Class <span className="text-red-500">*</span>
-                    </label>
-                    <div className="w-full md:w-[65%]">
+            <div className="bg-white border border-blue-400 rounded-md shadow-md overflow-x-auto">
+              {/* Header Row */}
+              <div className="grid grid-cols-[220px_repeat(auto-fit,minmax(150px,1fr))] border-b border-gray-200 px-4 py-2 bg-blue-50 text-sm font-semibold text-gray-800">
+                <div className="flex justify-center items-center text-center">
+                  Select Class
+                </div>
+
+                {terms.map((term) => (
+                  <div
+                    key={term.term_id}
+                    className="flex justify-center items-center text-center"
+                  >
+                    {term.name}
+                  </div>
+                ))}
+              </div>
+
+              {/* Body Row */}
+              <div className="grid grid-cols-[220px_repeat(auto-fit,minmax(150px,1fr))] px-4 py-4 items-center bg-white text-sm">
+                {/* Select Dropdown */}
+                <div className="max-w-xs">
+                  {loadingExams ? (
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <svg
+                        className="animate-spin h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        ></path>
+                      </svg>
+                      Loading Classes...
+                    </div>
+                  ) : (
+                    <>
                       <Select
-                        menuPortalTarget={document.body}
-                        menuPosition="fixed"
-                        id="studentSelect"
                         value={selectedStudent}
                         onChange={handleStudentSelect}
                         options={studentOptions}
-                        placeholder={loadingExams ? "Loading..." : "Select"}
+                        placeholder="Select"
                         isSearchable
                         isClearable
-                        className="text-sm"
                         isDisabled={loadingExams}
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        className="text-sm"
                         styles={{
-                          control: (provided) => ({
-                            ...provided,
+                          control: (base) => ({
+                            ...base,
                             fontSize: ".9em",
-                            minHeight: "30px",
+                            minHeight: "36px",
                           }),
-                          menu: (provided) => ({
-                            ...provided,
-                            fontSize: "1em",
-                          }),
-                          option: (provided) => ({
-                            ...provided,
+                          menu: (base) => ({
+                            ...base,
+                            zIndex: 9999,
                             fontSize: ".9em",
                           }),
                         }}
                       />
                       {studentError && (
-                        <div className="h-8 relative ml-1 text-danger text-xs">
+                        <p className="text-xs text-red-500 mt-1">
                           {studentError}
-                        </div>
+                        </p>
                       )}
-                    </div>
-                  </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Term Buttons */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
-                  {terms.map((term) => {
+                {loading ? (
+                  <div className="flex justify-center items-center h-full py-6">
+                    <svg
+                      className="animate-spin h-6 w-6 text-indigo-500 mr-2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      ></path>
+                    </svg>
+                    <span className="text-gray-600 text-sm font-medium animate-pulse">
+                      Fetching report card status for selected class and
+                      section...
+                    </span>
+                  </div>
+                ) : (
+                  terms.map((term) => {
+                    const isPublished = publishStatus[term.term_id] === "Y";
                     const isLoading = publishStatus[`loading_${term.term_id}`];
 
                     return (
-                      <div
-                        key={term.term_id}
-                        className="bg-gray-100 p-4 rounded-md shadow-sm text-center"
-                      >
-                        <div className="font-semibold text-gray-700 mb-3">
-                          {term.name}
-                        </div>
+                      <div key={term.term_id} className="text-center">
                         <button
                           onClick={() =>
                             handlePublishToggle(
@@ -394,17 +411,22 @@ const PublishreportCard = () => {
                               term.term_id
                             )
                           }
-                          disabled={isLoading}
-                          className={`w-full flex justify-center items-center gap-2 px-4 py-2 rounded-md font-semibold transition ${
-                            publishStatus[term.term_id] === "Y"
-                              ? "bg-red-500 hover:bg-red-600"
-                              : "bg-green-500 hover:bg-green-600"
-                          } text-white ${
-                            isLoading ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
+                          disabled={isLoading || loadingExams}
+                          className={`w-[100px] px-3 py-1.5 rounded font-semibold text-white text-sm transition duration-200
+                  ${
+                    isPublished
+                      ? "bg-red-500 hover:bg-red-600"
+                      : "bg-green-500 hover:bg-green-600"
+                  }
+                  ${
+                    isLoading || loadingExams
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }
+                `}
                         >
                           {isLoading ? (
-                            <>
+                            <span className="flex justify-center items-center gap-1">
                               <svg
                                 className="animate-spin h-4 w-4 text-white"
                                 xmlns="http://www.w3.org/2000/svg"
@@ -425,9 +447,9 @@ const PublishreportCard = () => {
                                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                                 ></path>
                               </svg>
-                              Processing...
-                            </>
-                          ) : publishStatus[term.term_id] === "Y" ? (
+                              ...
+                            </span>
+                          ) : isPublished ? (
                             "Unpublish"
                           ) : (
                             "Publish"
@@ -435,8 +457,8 @@ const PublishreportCard = () => {
                         </button>
                       </div>
                     );
-                  })}
-                </div>
+                  })
+                )}
               </div>
             </div>
           </>
