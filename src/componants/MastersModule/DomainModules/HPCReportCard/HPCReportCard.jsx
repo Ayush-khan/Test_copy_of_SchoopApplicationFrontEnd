@@ -1,13 +1,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import React from "react";
-
-import Select from "react-select";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-import bgImage from "../../../../assets/HPC/SACS/STD 2 HPC COVER.jpg";
 import AllAboutMe from "../../../../assets/HPC/SACS/HPC_Cover/All about me_1.jpg";
 import AboutMyself from "../../../../assets/HPC/SACS/HPC_Cover/About myself_2.jpg";
 import Language from "../../../../assets/HPC/SACS/HPC_Cover/Language_3.jpg";
