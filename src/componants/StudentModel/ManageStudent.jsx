@@ -1330,8 +1330,6 @@ function ManageSubjectList() {
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   // for showing the buttons delete and edit controls
   const [roleId, setRoleId] = useState("");
-  const [roleIdValue, setRoleIdValue] = useState("");
-
   const navigate = useNavigate();
 
   const previousPageRef = useRef(0);
@@ -1369,33 +1367,14 @@ function ManageSubjectList() {
 
   // Custom styles for the close button
 
-  // const classOptions = useMemo(
-  //   () =>
-  //     classes.map((cls) => ({
-  //       value: cls.section_id,
-  //       label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
-  //     })),
-  //   [classes]
-  // );
-  const classOptions = useMemo(() => {
-    return classes.map((cls) => {
-      if (roleId === "T") {
-        return {
-          value: cls.section_id,
-          label: `${cls.classname} ${cls.sectionname}`,
-          class_id: cls.class_id,
-          section_id: cls.section_id,
-        };
-      } else {
-        return {
-          value: cls.section_id,
-          label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
-          class_id: cls.class_id,
-          section_id: cls.section_id,
-        };
-      }
-    });
-  }, [classes, roleId]);
+  const classOptions = useMemo(
+    () =>
+      classes.map((cls) => ({
+        value: cls.section_id,
+        label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+      })),
+    [classes]
+  );
 
   // useEffect(() => {
   //   if (location.state?.section_id) {
@@ -1516,52 +1495,39 @@ function ManageSubjectList() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const { roleId, roleIdValue } = await fetchDataRoleId(); // 🔁 returns both values
-      await fetchInitialDataAndStudents(roleId, roleIdValue); // ✅ pass them as args
-    };
-
-    fetchData();
+    // Fetch both classes and student names on component mount
+    fetchInitialDataAndStudents();
+    fetchDataRoleId();
   }, []);
 
-  // const fetchInitialDataAndStudents = async () => {
-  //   try {
-  //     setLoadingClasses(true);
-  //     setLoadingStudents(true);
+  const fetchInitialDataAndStudents = async () => {
+    try {
+      setLoadingClasses(true);
+      setLoadingStudents(true);
 
-  //     const token = localStorage.getItem("authToken");
-  //     const classApiUrl =
-  //       roleId === "T"
-  //         ? `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${roleIdValue}`
-  //         : `${API_URL}/api/getallClassWithStudentCount`;
+      const token = localStorage.getItem("authToken");
 
-  //     // Fetch classes and students concurrently
-  //     const [classResponse, studentResponse] = await Promise.all([
-  //       // axios.get(`${API_URL}/api/getallClassWithStudentCount`, {
-  //       //   headers: { Authorization: `Bearer ${token}` },
-  //       // }),
-  //       axios.get(classApiUrl, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }),
-  //       axios.get(`${API_URL}/api/getStudentListBySectionData`, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }),
-  //     ]);
-  //     const classData =
-  //       roleId === "T"
-  //         ? classResponse.data.data || []
-  //         : classResponse.data || [];
-  //     // Set the fetched data
-  //     setClasses(classData);
-  //     setStudentNameWithClassId(studentResponse?.data?.data || []);
-  //   } catch (error) {
-  //     toast.error("Error fetching data.");
-  //   } finally {
-  //     // Stop loading for both dropdowns
-  //     setLoadingClasses(false);
-  //     setLoadingStudents(false);
-  //   }
-  // };
+      // Fetch classes and students concurrently
+      const [classResponse, studentResponse] = await Promise.all([
+        axios.get(`${API_URL}/api/getallClassWithStudentCount`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${API_URL}/api/getStudentListBySectionData`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      // Set the fetched data
+      setClasses(classResponse.data || []);
+      setStudentNameWithClassId(studentResponse?.data?.data || []);
+    } catch (error) {
+      toast.error("Error fetching data.");
+    } finally {
+      // Stop loading for both dropdowns
+      setLoadingClasses(false);
+      setLoadingStudents(false);
+    }
+  };
 
   // const handleSearch = async (incomingSectionId = null) => {
   //   if (isSubmitting) return;
@@ -1624,41 +1590,6 @@ function ManageSubjectList() {
   //     setIsSubmitting(false);
   //   }
   // };
-  const fetchInitialDataAndStudents = async (roleId, roleIdValue) => {
-    try {
-      setLoadingClasses(true);
-      setLoadingStudents(true);
-
-      const token = localStorage.getItem("authToken");
-
-      const classApiUrl =
-        roleId === "T"
-          ? `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${roleIdValue}`
-          : `${API_URL}/api/getallClassWithStudentCount`;
-
-      const [classResponse, studentResponse] = await Promise.all([
-        axios.get(classApiUrl, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${API_URL}/api/getStudentListBySectionData`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
-
-      const classData =
-        roleId === "T"
-          ? classResponse.data.data || []
-          : classResponse.data || [];
-
-      setClasses(classData);
-      setStudentNameWithClassId(studentResponse?.data?.data || []);
-    } catch (error) {
-      toast.error("Error fetching data.");
-    } finally {
-      setLoadingClasses(false);
-      setLoadingStudents(false);
-    }
-  };
 
   const handleSearch = async (incomingSectionId = null) => {
     if (isSubmitting) return;
@@ -1724,55 +1655,27 @@ function ManageSubjectList() {
     }
   };
 
-  // const fetchDataRoleId = async () => {
-  //   const token = localStorage.getItem("authToken");
-
-  //   if (!token) {
-  //     console.error("No authentication token found");
-  //     return;
-  //   }
-
-  //   try {
-  //     // Fetch session data
-  //     const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-  //     setRoleIdValue(sessionResponse?.data?.user?.reg_id);
-  //     setRoleId(sessionResponse?.data?.user?.role_id); // Store role_id
-  //     // setRoleId("A"); // Store role_id
-  //     console.log("roleIDis:", roleId);
-  //     // Fetch academic year data
-  //   } catch (error) {
-  //     console.error("Error fetching data:", error);
-  //   }
-  // };
   const fetchDataRoleId = async () => {
     const token = localStorage.getItem("authToken");
 
     if (!token) {
       console.error("No authentication token found");
-      return {};
+      return;
     }
 
     try {
+      // Fetch session data
       const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      const roleId = sessionResponse?.data?.user?.role_id;
-      const regId = sessionResponse?.data?.user?.reg_id;
-
-      setRoleId(roleId); // optional for global use
-      setRoleIdValue(regId); // optional for global use
-
-      return { roleId, roleIdValue: regId }; // ✅ return both
+      setRoleId(sessionResponse.data.user.role_id); // Store role_id
+      // setRoleId("A"); // Store role_id
+      console.log("roleIDis:", roleId);
+      // Fetch academic year data
     } catch (error) {
-      console.error("Error fetching role data:", error);
-      return {};
+      console.error("Error fetching data:", error);
     }
   };
 
@@ -2340,16 +2243,12 @@ function ManageSubjectList() {
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               HPC Report Card
                             </th>
-                            {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               RC & Certificates
-                            </th> */}
-                            {(roleId === "A" ||
-                              roleId === "M" ||
-                              roleId === "U") && (
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Reset Password
-                              </th>
-                            )}
+                            </th>
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Reset Password
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -2472,7 +2371,7 @@ function ManageSubjectList() {
                                     <TbFileCertificate className="font-bold text-xl" />
                                   </button>
                                 </td>
-                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
                                     onClick={() =>
                                       handleCertificateView(subject)
@@ -2481,21 +2380,15 @@ function ManageSubjectList() {
                                   >
                                     <TbFileCertificate className="font-bold text-xl" />
                                   </button>
-                                </td> */}
-                                {(roleId === "A" ||
-                                  roleId === "M" ||
-                                  roleId === "U") && (
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    <button
-                                      onClick={() =>
-                                        handleResetPassword(subject)
-                                      }
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                    >
-                                      <MdLockReset className="font-bold text-xl" />
-                                    </button>
-                                  </td>
-                                )}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  <button
+                                    onClick={() => handleResetPassword(subject)}
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                  >
+                                    <MdLockReset className="font-bold text-xl" />
+                                  </button>
+                                </td>
                               </tr>
                             ))
                           ) : (
