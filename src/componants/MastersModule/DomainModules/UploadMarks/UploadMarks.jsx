@@ -111,7 +111,7 @@ function UploadMarks() {
     };
 
     init();
-    fetchtermsByClassId();
+    fetchClass();
   }, []);
 
   // Fetch roleId and regId from session
@@ -215,8 +215,8 @@ function UploadMarks() {
     setLoadingSubjectsData(true);
 
     await Promise.all([
-      fetchExamsByClassId(class_id),
-      fetchSubjectsByClassAndSection(class_id, section_id),
+      fetchSubjectsByClassId(),
+      fetchExamsByClassIdSubjectId(class_id),
     ]);
 
     setLoadingExamsData(false);
@@ -224,36 +224,51 @@ function UploadMarks() {
   };
 
   // Fetch Terms (not dependent on class)
-  const fetchtermsByClassId = async () => {
+  const fetchSubjectsByClassId = async () => {
     const token = localStorage.getItem("authToken");
     setLoadingTermsData(true);
+    const classId = selectedStudent?.valueclass;
+    const sectionId = selectedStudent?.value;
     try {
-      const response = await axios.get(`${API_URL}/api/get_Term`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await axios.get(`${API_URL}/api/get_subject_by_class`, {
+        params: {
+          class_id: classId,
+          section_id: sectionId,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      const mappedTerms =
-        response?.data?.map((term) => ({
-          label: term.name,
-          value: term?.term_id,
+      const mappedSubjects =
+        response?.data?.data?.map((subject) => ({
+          label: subject.name,
+          value: subject.sub_rc_master_id,
         })) || [];
 
-      setTermsOptions(mappedTerms);
+      setTermsOptions(mappedSubjects);
     } catch (err) {
-      console.error("Error fetching terms:", err);
+      console.error("Error fetching subjects:", err);
     } finally {
       setLoadingTermsData(false);
     }
   };
 
   // Fetch Exams by class ID
-  const fetchExamsByClassId = async (classId) => {
+  const fetchExamsByClassIdSubjectId = async (classId) => {
     const token = localStorage.getItem("authToken");
+    const subjectId = termsOptions?.value;
     try {
       const response = await axios.get(
-        `${API_URL}/api/get_exambyclassid?class_id=${classId}`,
+        `${API_URL}/api/get_exams_by_class_subject`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            class_id: classId,
+            sub_rc_master_id: subjectId,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -266,29 +281,6 @@ function UploadMarks() {
       setExamOptions(mappedExams);
     } catch (err) {
       console.error("Error fetching exams:", err);
-    }
-  };
-
-  // Fetch Subjects by class and section ID
-  const fetchSubjectsByClassAndSection = async (classId, sectionId) => {
-    const token = localStorage.getItem("authToken");
-    try {
-      const response = await axios.get(
-        `${API_URL}/api/get_reportsubjectbyclasssection?class_id=${classId}&section_id=${sectionId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const mappedSubjects =
-        response?.data?.data?.map((subject) => ({
-          label: subject.name,
-          value: subject.sub_rc_master_id,
-        })) || [];
-
-      setSubjectOptions(mappedSubjects);
-    } catch (err) {
-      console.error("Error fetching subjects:", err);
     }
   };
 
@@ -369,98 +361,8 @@ function UploadMarks() {
     }
   };
 
-  useEffect(() => {
-    fetchClassNames();
-    fetchClassSectionList();
-    fetchRoles();
-  }, []);
-
   const capitalizeWords = (str) =>
     str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-
-  const fetchClassNames = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/getClassList`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      console.log("Fetched Class List:", response.data); // 🔍 Check exact structure
-
-      //  Adjust based on the actual structure
-      if (Array.isArray(response.data.classes)) {
-        setAllClasses(response.data.classes); // if response.data.classes is the correct array
-      } else {
-        setAllClasses(response.data); // fallback if it's directly an array
-      }
-    } catch (error) {
-      toast.error("Error fetching class names");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch Class + Section + Student Count
-  const fetchClassSectionList = async () => {
-    try {
-      setLoadingClassSection(true);
-      const token = localStorage.getItem("authToken");
-
-      const response = await axios.get(`${API_URL}/api/getClassList`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Class Section List", response);
-      setClassSectionList(response?.data || []);
-    } catch (error) {
-      toast.error("Error fetching class-section list");
-      console.error("Error fetching class-section list:", error);
-    } finally {
-      setLoadingClassSection(false);
-    }
-  };
-
-  const fetchSessionData = async () => {
-    const token = localStorage.getItem("authToken");
-
-    try {
-      const response = await axios.get(`${API_URL}/api/sessionData`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
-
-      console.log("response session data", response.data);
-
-      if (response.data && response.data.user) {
-        const { name } = response.data.user;
-        setUserName(name); // Set user name in state
-      } else {
-        console.error("User data not found in the response");
-      }
-    } catch (error) {
-      console.error("Error fetching session data:", error);
-    }
-  };
-
-  const fetchRoles = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_rolesforevent`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      //  Use only the actual array
-      const rolesData = response.data?.data || [];
-      setRoles(rolesData);
-    } catch (error) {
-      toast.error("Error fetching roles");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const getDateLimits = (academicYear) => {
     if (!academicYear) return {};
@@ -472,18 +374,6 @@ function UploadMarks() {
       max: `${endYear}-03-31`, // End of academic year (March 31st)
     };
   };
-
-  useEffect(() => {
-    fetchSessionData();
-    console.log("session.data", fetchSessionData);
-
-    handleSearch();
-
-    // If data is posted successfully, reset the flag and refetch
-    if (isDataPosted) {
-      setIsDataPosted(false); // Reset the flag after refresh
-    }
-  }, [isDataPosted]);
 
   // Handle pagination
   const handlePageClick = (data) => {

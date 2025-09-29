@@ -32,12 +32,6 @@ const HPCReportCard = () => {
   const classID = student?.get_class?.class_id || null;
   const { id } = useParams();
 
-  //   console.log("class....id", classID);
-  //   console.log("Student data:", student);
-  //   console.log("Class ID:", class_id);
-  //   console.log("Section ID:", section_id);
-  //   console.log("Student ID from URL:", id);
-
   const levelImages = {
     Beginner: BeginnerImg,
     Progressing: ProgressingImg,
