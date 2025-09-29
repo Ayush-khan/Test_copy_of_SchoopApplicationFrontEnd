@@ -1273,140 +1273,163 @@ function UploadMarks() {
                           </th>
                         </tr>
                       </thead> */}
-                      <tbody>
-                        {loadingEvent ? (
+                      <table className="min-w-full border mt-4">
+                        <thead className="bg-gray-100">
                           <tr>
-                            <td
-                              colSpan={2 + marksHeadings.length}
-                              className="text-center py-6"
-                            >
-                              <span className="text-blue-700 text-xl">
-                                Please Wait While Data is Loading...
-                              </span>
-                            </td>
+                            <th className="border px-3 py-2 text-center">
+                              Roll No
+                            </th>
+                            <th className="border px-3 py-2 text-center">
+                              Student
+                            </th>
+                            {marksHeadings.map((heading) => (
+                              <th
+                                key={heading.marks_headings_id}
+                                className="border px-3 py-2 text-center"
+                              >
+                                *{heading.marks_headings_name}(
+                                {heading.highest_marks})
+                              </th>
+                            ))}
                           </tr>
-                        ) : students.length === 0 ? (
-                          <tr>
-                            <td
-                              colSpan={2 + marksHeadings.length}
-                              className="text-center py-6"
-                            >
-                              <span className="text-red-700 text-xl">
-                                Oops! No data found..
-                              </span>
-                            </td>
-                          </tr>
-                        ) : (
-                          students.map((student, studentIdx) => (
-                            <tr
-                              key={studentIdx}
-                              className={
-                                studentIdx % 2 === 1 ? "bg-gray-50" : ""
-                              }
-                            >
-                              <td className="border px-3 py-2 text-center">
-                                {student.roll_no}
+                        </thead>
+                        <tbody>
+                          {loadingEvent ? (
+                            <tr>
+                              <td
+                                colSpan={2 + marksHeadings.length}
+                                className="text-center py-6"
+                              >
+                                <span className="text-blue-700 text-xl">
+                                  Please Wait While Data is Loading...
+                                </span>
                               </td>
-                              <td className="border px-3 py-2">
-                                <div className="flex items-center justify-between gap-2">
-                                  {student.name}
-                                  <label className="flex items-center space-x-1 text-sm">
-                                    <span>Present</span>
-                                    <input
-                                      type="checkbox"
-                                      checked={student.present}
-                                      onChange={(e) => {
-                                        const updated = [...students];
-                                        updated[studentIdx].present =
-                                          e.target.checked;
-
-                                        // Clear marks if unchecked
-                                        if (!e.target.checked) {
-                                          marksHeadings.forEach((heading) => {
-                                            updated[studentIdx].marks[
-                                              heading.marks_headings_name
-                                            ] = "";
-                                            updated[studentIdx].errors[
-                                              heading.marks_headings_name
-                                            ] = "";
-                                          });
-                                        }
-
-                                        setStudents(updated);
-                                      }}
-                                    />
-                                  </label>
-                                </div>
+                            </tr>
+                          ) : students.length === 0 ? (
+                            <tr>
+                              <td
+                                colSpan={2 + marksHeadings.length}
+                                className="text-center py-6"
+                              >
+                                <span className="text-red-700 text-xl">
+                                  Oops! No data found..
+                                </span>
                               </td>
-
-                              {marksHeadings.map((heading) => {
-                                const headingName = heading.marks_headings_name;
-                                const highest = heading.highest_marks;
-                                const value = student.marks[headingName] || "";
-                                const error = student.errors?.[headingName];
-
-                                return (
-                                  <td
-                                    key={heading.marks_headings_id}
-                                    className="border px-3 py-2"
-                                  >
-                                    <div>
+                            </tr>
+                          ) : (
+                            students.map((student, studentIdx) => (
+                              <tr
+                                key={studentIdx}
+                                className={
+                                  studentIdx % 2 === 1 ? "bg-gray-50" : ""
+                                }
+                              >
+                                <td className="border px-3 py-2 text-center">
+                                  {student.roll_no}
+                                </td>
+                                <td className="border px-3 py-2">
+                                  <div className="flex items-center justify-between gap-2">
+                                    {student.name}
+                                    <label className="flex items-center space-x-1 text-sm">
+                                      <span>Present</span>
                                       <input
-                                        type="number"
-                                        value={value}
-                                        disabled={!student.present}
-                                        max={highest}
-                                        className={`w-full border px-2 py-1 rounded ${
-                                          error
-                                            ? "border-red-500"
-                                            : "border-gray-300"
-                                        }`}
+                                        type="checkbox"
+                                        checked={student.present}
                                         onChange={(e) => {
-                                          const val = e.target.value;
                                           const updated = [...students];
-                                          updated[studentIdx].marks[
-                                            headingName
-                                          ] = val;
+                                          updated[studentIdx].present =
+                                            e.target.checked;
 
-                                          if (+val <= highest) {
-                                            updated[studentIdx].errors[
-                                              headingName
-                                            ] = "";
-                                          }
-
-                                          setStudents(updated);
-                                        }}
-                                        onBlur={(e) => {
-                                          const val = e.target.value;
-                                          const updated = [...students];
-
-                                          if (val && +val > highest) {
-                                            updated[studentIdx].errors[
-                                              headingName
-                                            ] = `Please enter marks less than ${highest}`;
-                                          } else {
-                                            updated[studentIdx].errors[
-                                              headingName
-                                            ] = "";
+                                          // Clear marks if unchecked
+                                          if (!e.target.checked) {
+                                            marksHeadings.forEach((heading) => {
+                                              updated[studentIdx].marks[
+                                                heading.marks_headings_name
+                                              ] = "";
+                                              updated[studentIdx].errors[
+                                                heading.marks_headings_name
+                                              ] = "";
+                                            });
                                           }
 
                                           setStudents(updated);
                                         }}
                                       />
+                                    </label>
+                                  </div>
+                                </td>
 
-                                      {error && (
-                                        <p className="text-xs text-red-500 mt-1">
-                                          {error}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </td>
-                                );
-                              })}
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
+                                {marksHeadings.map((heading) => {
+                                  const headingName =
+                                    heading.marks_headings_name;
+                                  const highest = heading.highest_marks;
+                                  const value =
+                                    student.marks[headingName] || "";
+                                  const error = student.errors?.[headingName];
+
+                                  return (
+                                    <td
+                                      key={heading.marks_headings_id}
+                                      className="border px-3 py-2"
+                                    >
+                                      <div>
+                                        <input
+                                          type="number"
+                                          value={value}
+                                          disabled={!student.present}
+                                          max={highest}
+                                          className={`w-full border px-2 py-1 rounded ${
+                                            error
+                                              ? "border-red-500"
+                                              : "border-gray-300"
+                                          }`}
+                                          onChange={(e) => {
+                                            const val = e.target.value;
+                                            const updated = [...students];
+                                            updated[studentIdx].marks[
+                                              headingName
+                                            ] = val;
+
+                                            if (+val <= highest) {
+                                              updated[studentIdx].errors[
+                                                headingName
+                                              ] = "";
+                                            }
+
+                                            setStudents(updated);
+                                          }}
+                                          onBlur={(e) => {
+                                            const val = e.target.value;
+                                            const updated = [...students];
+
+                                            if (val && +val > highest) {
+                                              updated[studentIdx].errors[
+                                                headingName
+                                              ] = `Please enter marks less than ${highest}`;
+                                            } else {
+                                              updated[studentIdx].errors[
+                                                headingName
+                                              ] = "";
+                                            }
+
+                                            setStudents(updated);
+                                          }}
+                                        />
+
+                                        {error && (
+                                          <p className="text-xs text-red-500 mt-1">
+                                            {error}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
                     </table>
                   </div>
                   <div className=" flex justify-center pt-2 -mb-3">
