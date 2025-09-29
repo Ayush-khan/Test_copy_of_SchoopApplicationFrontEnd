@@ -849,27 +849,36 @@ const ParentFeedback = () => {
                         >
                           {parameter.length > 0 ? (
                             <div className="inline-block min-w-full">
-                              <table className="min-w-full leading-normal table-auto ">
+                              <table className="min-w-[1600px] table-fixed leading-normal">
                                 <thead
-                                  className="sticky top-0  bg-gray-200"
-                                  style={{ zIndex: "1px" }}
+                                  className="sticky top-0 bg-gray-200"
+                                  style={{ zIndex: 1 }}
                                 >
                                   <tr>
-                                    {["Sr No.", "Roll No.", "Student Name"].map(
-                                      (header, index) => (
-                                        <th
-                                          key={index}
-                                          className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-2 py-2 whitespace-nowrap"
-                                        >
-                                          {header}
-                                        </th>
-                                      )
-                                    )}
+                                    {/* Sr No. */}
+                                    <th className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-2 py-2 whitespace-nowrap w-3">
+                                      Sr No.
+                                    </th>
 
+                                    {/* Roll No. */}
+                                    <th className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-2 py-2 whitespace-nowrap w-3">
+                                      Roll No.
+                                    </th>
+
+                                    {/* Student Name */}
+                                    <th className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-2 py-2 whitespace-nowrap w-16">
+                                      Student Name
+                                    </th>
+
+                                    {/* Dynamic parameters */}
                                     {parameter?.map((param, pIndex) => (
                                       <th
                                         key={pIndex}
-                                        className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-4 py-2 whitespace-nowrap"
+                                        className={`border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-4 py-2 ${
+                                          param.control_type === "checkbox"
+                                            ? "w-96"
+                                            : "w-48"
+                                        }`}
                                       >
                                         {param.parameter}
                                       </th>
@@ -1094,7 +1103,7 @@ const ParentFeedback = () => {
 
                                               {param.control_type ===
                                                 "radio" && (
-                                                <div className="flex flex-wrap gap-2">
+                                                <div className="flex flex-wrap">
                                                   {(() => {
                                                     let parsedOptions = [];
                                                     try {

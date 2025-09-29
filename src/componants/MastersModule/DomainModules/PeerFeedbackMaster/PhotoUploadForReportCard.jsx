@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
-import ImageCropperRC from "../../../../componants/Domain/ImageCropperRC";
+import ImageCropperRC from "../ImageCropperRC";
 
 const PhotoUploadForReportCard = () => {
   const API_URL = import.meta.env.VITE_API_URL;

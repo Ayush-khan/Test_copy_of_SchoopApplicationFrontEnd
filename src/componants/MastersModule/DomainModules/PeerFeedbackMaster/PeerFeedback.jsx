@@ -869,7 +869,7 @@ const PeerFeedback = () => {
                                     {parameter?.map((param, pIndex) => (
                                       <th
                                         key={pIndex}
-                                        className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-4 py-2 whitespace-nowrap "
+                                        className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-4 py-2  "
                                       >
                                         {param.parameter}
                                       </th>
