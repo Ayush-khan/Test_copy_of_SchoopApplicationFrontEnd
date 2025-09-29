@@ -289,12 +289,10 @@ function HPCSubjectAllotment() {
         toast.error(errorMessage);
       } else {
         toast.success("HPC Subject deleted successfully!");
-        handleSearch(); // Refresh the data (this seems like the method to refetch data)
+        handleSearch();
       }
 
-      setShowDeleteModal(false); // Close the modal
-
-      setShowDeleteModal(false); // Close the modal
+      setShowDeleteModal(false);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.error) {
         toast.error(error.response.data.error);
