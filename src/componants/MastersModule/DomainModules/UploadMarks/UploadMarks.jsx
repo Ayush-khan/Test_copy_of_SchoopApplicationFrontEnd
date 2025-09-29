@@ -65,7 +65,7 @@ function UploadMarks() {
   const [errors, setErrors] = useState({});
   const [roles, setRoles] = useState([]);
   const [loadingEvent, setLoadingEvent] = useState(false);
-
+  const [marksHeadings, setMarksHeadings] = useState([]); // Dynamic headings
   const [formData, setFormData] = useState({
     title: "",
     holiday_date: "",
@@ -97,9 +97,14 @@ function UploadMarks() {
   const [showUploadSection, setShowUploadSection] = useState(false);
   const [dataUploaded, setDataUploaded] = useState(false); // new state
   const [tableDataReady, setTableDataReady] = useState(false);
-
+  const [students, setStudents] = useState([]); // Roll No, Name, Present, Marks
   const [subjectError, setSubjectError] = useState("");
   const navigate = useNavigate();
+  const mockStudentList = [
+    { rollNo: "101", name: "SKYLAR STEPHEN MENDONSA" },
+    { rollNo: "102", name: "VED VIJAY VEER" },
+    { rollNo: "103", name: "LESHA VIKRAM MAHANKALE" },
+  ];
 
   // Fetch roleId and class list on mount
   useEffect(() => {
@@ -200,71 +205,68 @@ function UploadMarks() {
     setSelectedStudent(selectedOption);
     setSelectedStudentId(selectedOption?.value);
 
-    // Reset related selects & loading states
-    setExamOptions([]);
+    // Clear previously selected subject & exam
     setSubjectOptions([]);
-    setSelectedExam(null);
     setSelectedSubject(null);
+    setExamOptions([]);
+    setSelectedExam(null);
 
     if (!selectedOption) return;
 
     const class_id = selectedOption?.valueclass;
     const section_id = selectedOption?.value;
 
-    setLoadingExamsData(true);
     setLoadingSubjectsData(true);
-
-    await Promise.all([
-      fetchSubjectsByClassId(),
-      fetchExamsByClassIdSubjectId(class_id),
-    ]);
-
-    setLoadingExamsData(false);
-    setLoadingSubjectsData(false);
-  };
-
-  // Fetch Terms (not dependent on class)
-  const fetchSubjectsByClassId = async () => {
-    const token = localStorage.getItem("authToken");
-    setLoadingTermsData(true);
-    const classId = selectedStudent?.valueclass;
-    const sectionId = selectedStudent?.value;
     try {
+      const token = localStorage.getItem("authToken");
+
       const response = await axios.get(`${API_URL}/api/get_subject_by_class`, {
         params: {
-          class_id: classId,
-          section_id: sectionId,
+          class_id,
+          section_id,
         },
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const mappedSubjects =
+      const subjects =
         response?.data?.data?.map((subject) => ({
           label: subject.name,
           value: subject.sub_rc_master_id,
         })) || [];
 
-      setTermsOptions(mappedSubjects);
-    } catch (err) {
-      console.error("Error fetching subjects:", err);
+      setSubjectOptions(subjects);
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
+      toast.error("Failed to load subjects.");
     } finally {
-      setLoadingTermsData(false);
+      setLoadingSubjectsData(false);
     }
   };
 
-  // Fetch Exams by class ID
-  const fetchExamsByClassIdSubjectId = async (classId) => {
-    const token = localStorage.getItem("authToken");
-    const subjectId = termsOptions?.value;
+  const handleSubjectChange = async (selectedOption) => {
+    setSelectedSubject(selectedOption);
+
+    // Clear previous exam selection
+    setSelectedExam(null);
+    setExamOptions([]);
+
+    if (!selectedStudent || !selectedOption) return;
+
+    const class_id = selectedStudent?.valueclass;
+    const subject_id = selectedOption?.value;
+
+    setLoadingExamsData(true);
     try {
+      const token = localStorage.getItem("authToken");
+
       const response = await axios.get(
         `${API_URL}/api/get_exams_by_class_subject`,
         {
           params: {
-            class_id: classId,
-            sub_rc_master_id: subjectId,
+            class_id,
+            sub_rc_master_id: subject_id,
           },
           headers: {
             Authorization: `Bearer ${token}`,
@@ -272,16 +274,110 @@ function UploadMarks() {
         }
       );
 
-      const mappedExams =
+      const exams =
         response?.data?.data?.map((exam) => ({
           label: exam.name,
-          value: exam?.exam_id,
+          value: exam.exam_id,
         })) || [];
 
-      setExamOptions(mappedExams);
-    } catch (err) {
-      console.error("Error fetching exams:", err);
+      setExamOptions(exams);
+    } catch (error) {
+      console.error("Error fetching exams:", error);
+      toast.error("Failed to load exams.");
+    } finally {
+      setLoadingExamsData(false);
     }
+  };
+  const fetchMarksHeadings = async () => {
+    if (!selectedStudent || !selectedSubject || !selectedExam) {
+      toast.error("Please select Class, Subject, and Exam.");
+      return;
+    }
+
+    const class_id = selectedStudent.valueclass;
+    const subject_id = selectedSubject.value;
+    const exam_id = selectedExam.value;
+
+    try {
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(
+        `https://sms.evolvu.in/arnolds_test/public/api/get_marks_heading_class`,
+        {
+          params: {
+            class_id,
+            sub_rc_master_id: subject_id,
+            exam_id,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const headings = response?.data?.data || [];
+
+      setMarksHeadings(headings);
+
+      // Sample mock students (replace with API data if needed)
+      const mockStudents = [
+        { roll_no: 1, name: "Skylar Stephen Mendonsa" },
+        { roll_no: 2, name: "Ved Vijay Veer" },
+        { roll_no: 3, name: "Lesha Vikram Mahankale" },
+      ];
+
+      const initializedStudents = mockStudents.map((student) => ({
+        ...student,
+        present: true,
+        marks: marksHeadings.reduce((acc, h) => {
+          acc[h.marks_headings_name] = "";
+          return acc;
+        }, {}),
+        errors: marksHeadings.reduce((acc, h) => {
+          acc[h.marks_headings_name] = "";
+          return acc;
+        }, {}),
+      }));
+
+      setStudents(initializedStudents);
+    } catch (error) {
+      console.error("Error fetching marks headings:", error);
+      toast.error("Failed to load marks headings.");
+    }
+  };
+
+  const handlePresentChange = (rollNo, isPresent) => {
+    setStudents((prev) =>
+      prev.map((s) =>
+        s.rollNo === rollNo
+          ? {
+              ...s,
+              present: isPresent,
+              marks: isPresent
+                ? s.marks
+                : Object.fromEntries(
+                    Object.keys(s.marks).map((key) => [key, ""])
+                  ),
+            }
+          : s
+      )
+    );
+  };
+
+  const handleMarksInputChange = (rollNo, headingName, value) => {
+    setStudents((prev) =>
+      prev.map((s) =>
+        s.rollNo === rollNo
+          ? {
+              ...s,
+              marks: {
+                ...s.marks,
+                [headingName]: value,
+              },
+            }
+          : s
+      )
+    );
   };
 
   const handleSearch = async () => {
@@ -300,19 +396,17 @@ function UploadMarks() {
       setExamError("Please select an Exam.");
       hasError = true;
     }
-    // if (!selectedSubject) {
-    //   setSubjectError("Please select a Subject.");
-    //   hasError = true;
-    // }
+    if (!selectedSubject) {
+      setSubjectError("Please select a Subject.");
+      hasError = true;
+    }
 
     if (hasError) {
       setLoadingForSearch(false);
       return;
     }
-
+    fetchMarksHeadings();
     try {
-      toast.info("Searching, please wait...");
-
       // 🌟 We want to keep the Upload button visible
       setShowUploadSection(false); // just close modal (not hide the button)
       setDataUploaded(false); // Reset data uploaded state
@@ -337,18 +431,14 @@ function UploadMarks() {
         toast.warn("No events found for the selected criteria.");
         return;
       }
-
       // Set academic year and date limits if applicable
       const academicYear = eventData[0]?.academic_yr;
       if (academicYear) {
         setDateLimits(getDateLimits(academicYear));
       }
-
       // ✅ Update UI
       setHolidays(eventData);
       setPageCount(Math.ceil(eventData.length / pageSize));
-      toast.success("Search successful! Events loaded.");
-
       // 🌟 These 2 lines are most important
       setDataUploaded(true); // ✅ show Upload Button
       setTableDataReady(true); // ✅ show Table
@@ -687,15 +777,10 @@ function UploadMarks() {
   };
 
   const handleReset = () => {
-    setShowUploadSection(false);
     setSelectedClasses([]);
-    setSelectedFile(null);
-    setErrorMessage("");
-    setErrorMessageUrl("");
-    setUploadStatus("");
     setIsDataPosted(false);
     setShowUploadSection(false);
-    setDataUploaded(false);
+    // setDataUploaded(false);
     setSelectedFile(null);
     setErrorMessage("");
     setUploadStatus("");
@@ -763,6 +848,8 @@ function UploadMarks() {
   return (
     <>
       <div className="md:mx-auto md:w-[90%] p-4 bg-white mt-4 ">
+        <ToastContainer />
+
         <div className="w-full  flex flex-row justify-between">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Enter exam marks
@@ -770,7 +857,9 @@ function UploadMarks() {
           <RxCross1
             className=" relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
-              navigate("/dashboard");
+              setLoadingEvent(false);
+              setDataUploaded(false);
+              setTableDataReady(false);
             }}
           />
         </div>
@@ -785,166 +874,148 @@ function UploadMarks() {
         {!showUploadSection && (!dataUploaded || !tableDataReady) && (
           <div className="bg-white w-full md:w-[97%] mx-auto rounded-md ">
             {/* ✅ Place your dropdowns and "Browse" button section here */}
-            <div className="mb-10 ml-5">
-              <div className="w-full bg-white shadow-md rounded-xl p-6 border border-gray-200">
-                {/* Form Container */}
-                <div className="flex flex-col md:flex-row md:items-end md:gap-x-6 gap-y-6">
+            <div className="mx-5 my-10">
+              <div className="w-full bg-white shadow-xl rounded-2xl px-8 py-8 border border-gray-100">
+                <div className="flex flex-wrap items-end gap-4 lg:gap-6 justify-between">
                   {/* Class Dropdown */}
-                  <div className="w-full md:w-1/3">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <div className="w-full sm:w-[22%] min-h-[92px] flex flex-col justify-between">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
                       Class <span className="text-red-500">*</span>
                     </label>
                     <Select
-                      menuPortalTarget={document.body}
-                      menuPosition="fixed"
                       id="studentSelect"
                       value={selectedStudent}
                       onChange={handleClassSelect}
                       options={studentOptions}
-                      placeholder={loadingExams ? "Loading..." : "Select"}
+                      placeholder={loadingExams ? "Loading..." : "Select Class"}
                       isSearchable
                       isClearable
                       isDisabled={loadingExams}
-                      className="text-sm"
                       styles={{
-                        control: (provided) => ({
-                          ...provided,
+                        control: (base) => ({
+                          ...base,
                           fontSize: "0.9em",
-                          minHeight: "36px",
-                        }),
-                        menu: (provided) => ({
-                          ...provided,
-                          fontSize: "0.9em",
-                        }),
-                        option: (provided) => ({
-                          ...provided,
-                          fontSize: "0.85em",
+                          minHeight: "42px",
+                          borderRadius: "8px",
+                          borderColor: "#d1d5db",
+                          boxShadow: "none",
+                          "&:hover": {
+                            borderColor: "#3b82f6", // Tailwind blue-500
+                          },
                         }),
                       }}
                     />
-                    {studentError && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {studentError}
-                      </p>
-                    )}
+                    <p className="text-xs text-red-500 mt-1 h-4">
+                      {studentError || "\u00A0"}
+                    </p>
+                  </div>
+
+                  {/* Subject Dropdown */}
+                  <div className="w-full sm:w-[22%] min-h-[92px] flex flex-col justify-between">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Subject <span className="text-red-500">*</span>
+                    </label>
+                    <Select
+                      value={selectedSubject}
+                      onChange={handleSubjectChange}
+                      options={subjectOptions}
+                      placeholder={
+                        loadingSubjectsData ? "Loading..." : "Select Subject"
+                      }
+                      isSearchable
+                      isClearable
+                      isDisabled={loadingSubjectsData}
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          fontSize: "0.9em",
+                          minHeight: "42px",
+                          borderRadius: "8px",
+                          borderColor: "#d1d5db",
+                          boxShadow: "none",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                          },
+                        }),
+                      }}
+                    />
+                    <p className="text-xs text-red-500 mt-1 h-4">
+                      {subjectError || "\u00A0"}
+                    </p>
                   </div>
 
                   {/* Exam Dropdown */}
-                  <div className="w-full md:w-1/3">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Exam
+                  <div className="w-full sm:w-[22%] min-h-[92px] flex flex-col justify-between">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Exam <span className="text-red-500">*</span>
                     </label>
                     <Select
                       value={selectedExam}
                       onChange={(option) => setSelectedExam(option)}
                       options={examOptions}
                       placeholder={
-                        loadingExamsData ? "Loading..." : "Select..."
+                        loadingExamsData ? "Loading..." : "Select Exam"
                       }
                       isSearchable
                       isClearable
-                      isDisabled={loadingExamsData}
-                      className="text-sm"
+                      isDisabled={!selectedSubject || loadingExamsData}
                       styles={{
-                        control: (provided) => ({
-                          ...provided,
+                        control: (base) => ({
+                          ...base,
                           fontSize: "0.9em",
-                          minHeight: "36px",
-                        }),
-                        menu: (provided) => ({
-                          ...provided,
-                          fontSize: "0.9em",
-                        }),
-                        option: (provided) => ({
-                          ...provided,
-                          fontSize: "0.85em",
+                          minHeight: "42px",
+                          borderRadius: "8px",
+                          borderColor: "#d1d5db",
+                          boxShadow: "none",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                          },
                         }),
                       }}
                     />
-                    {examError && (
-                      <p className="text-xs text-red-500 mt-1">{examError}</p>
-                    )}
+                    <p className="text-xs text-red-500 mt-1 h-4">
+                      {examError || "\u00A0"}
+                    </p>
                   </div>
 
-                  {/* Subject Dropdown */}
-                  <div className="w-full md:w-1/3">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Subject
-                    </label>
-                    <Select
-                      value={selectedSubject}
-                      onChange={(option) => setSelectedSubject(option)}
-                      options={subjectOptions}
-                      placeholder={
-                        loadingSubjectsData ? "Loading..." : "Select..."
-                      }
-                      isSearchable
-                      isClearable
-                      isDisabled={loadingSubjectsData}
-                      className="text-sm"
-                      styles={{
-                        control: (provided) => ({
-                          ...provided,
-                          fontSize: "0.9em",
-                          minHeight: "36px",
-                        }),
-                        menu: (provided) => ({
-                          ...provided,
-                          fontSize: "0.9em",
-                        }),
-                        option: (provided) => ({
-                          ...provided,
-                          fontSize: "0.85em",
-                        }),
-                      }}
-                    />
-                    {subjectError && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {subjectError}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Buttons Row */}
-                <div className="flex flex-col md:flex-row justify-between items-center mt-6 gap-4">
                   {/* Browse Button */}
-                  <button
-                    onClick={handleSearch}
-                    style={{ backgroundColor: "#2196F3" }}
-                    className={`text-white font-semibold px-6 py-2 rounded-md shadow-sm border border-blue-500 transition duration-200 hover:bg-blue-600 ${
-                      loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    disabled={loadingForSearch}
-                  >
-                    {loadingForSearch ? (
-                      <span className="flex items-center">
-                        <svg
-                          className="animate-spin h-4 w-4 mr-2 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          ></path>
-                        </svg>
-                        Browsing...
-                      </span>
-                    ) : (
-                      "Browse"
-                    )}
-                  </button>
+                  <div className="w-full sm:w-[18%] flex items-center mb-2 min-h-[92px] ">
+                    <button
+                      onClick={handleSearch}
+                      className={`w-full flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-sm ${
+                        loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                      disabled={loadingForSearch}
+                    >
+                      {loadingForSearch ? (
+                        <>
+                          <svg
+                            className="animate-spin h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            ></path>
+                          </svg>
+                          Browsing...
+                        </>
+                      ) : (
+                        "Browse"
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1121,23 +1192,19 @@ function UploadMarks() {
         {/* Step 3: Show table after upload */}
         {dataUploaded && tableDataReady && (
           <>
-            {dataUploaded && (
-              <div className="flex justify-end mb-4">
-                <button
-                  onClick={() => setShowUploadSection(true)} // ✅ Show modal on click
-                  className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-200 shadow-md"
-                >
-                  Upload Marksheet from Excel Sheet
-                </button>
-              </div>
-            )}
-
             <div className="w-full mt-4">
               <div className="card mx-auto lg:w-full shadow-lg">
                 <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                  <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                    Enter exam marks List
-                  </h3>
+                  {dataUploaded && (
+                    <div className="flex justify-end mb-4">
+                      <button
+                        onClick={() => setShowUploadSection(true)} // ✅ Show modal on click
+                        className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-200 shadow-md"
+                      >
+                        Upload Marksheet from Excel Sheet
+                      </button>
+                    </div>
+                  )}
                   <div className="box-border flex md:gap-x-2 justify-end md:h-10">
                     <div className=" w-1/2 md:w-fit mr-1">
                       <input
@@ -1168,7 +1235,7 @@ function UploadMarks() {
                 <div className="card-body w-full">
                   <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full  md:w-[100%] mx-auto">
                     <table className="min-w-full leading-normal table-fixed">
-                      <thead>
+                      {/* <thead>
                         <tr className="bg-gray-200">
                           <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                             Sr.No
@@ -1205,107 +1272,139 @@ function UploadMarks() {
                             View
                           </th>
                         </tr>
-                      </thead>
-
+                      </thead> */}
                       <tbody>
                         {loadingEvent ? (
-                          <div className="absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                            <div className=" text-center text-xl text-blue-700">
-                              Please Wait While Data is Loading...
-                            </div>
-                          </div>
-                        ) : displayedSections.length ? (
-                          displayedSections.map((holiday, index) => (
-                            <tr
-                              key={holiday.latest_event_id}
-                              className="text-sm"
+                          <tr>
+                            <td
+                              colSpan={2 + marksHeadings.length}
+                              className="text-center py-6"
                             >
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {currentPage * pageSize + index + 1}
+                              <span className="text-blue-700 text-xl">
+                                Please Wait While Data is Loading...
+                              </span>
+                            </td>
+                          </tr>
+                        ) : students.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={2 + marksHeadings.length}
+                              className="text-center py-6"
+                            >
+                              <span className="text-red-700 text-xl">
+                                Oops! No data found..
+                              </span>
+                            </td>
+                          </tr>
+                        ) : (
+                          students.map((student, studentIdx) => (
+                            <tr
+                              key={studentIdx}
+                              className={
+                                studentIdx % 2 === 1 ? "bg-gray-50" : ""
+                              }
+                            >
+                              <td className="border px-3 py-2 text-center">
+                                {student.roll_no}
                               </td>
-
-                              <td className="px-2 text-center lg:px-3 border border-gray-950 text-sm">
-                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                  {holiday.publish === "N" && (
+                              <td className="border px-3 py-2">
+                                <div className="flex items-center justify-between gap-2">
+                                  {student.name}
+                                  <label className="flex items-center space-x-1 text-sm">
+                                    <span>Present</span>
                                     <input
                                       type="checkbox"
-                                      checked={selectedHolidays.includes(
-                                        holiday.unq_id
-                                      )}
+                                      checked={student.present}
                                       onChange={(e) => {
-                                        e.stopPropagation(); // Prevents row click from triggering publish
-                                        handleCheckboxChange(holiday.unq_id);
+                                        const updated = [...students];
+                                        updated[studentIdx].present =
+                                          e.target.checked;
+
+                                        // Clear marks if unchecked
+                                        if (!e.target.checked) {
+                                          marksHeadings.forEach((heading) => {
+                                            updated[studentIdx].marks[
+                                              heading.marks_headings_name
+                                            ] = "";
+                                            updated[studentIdx].errors[
+                                              heading.marks_headings_name
+                                            ] = "";
+                                          });
+                                        }
+
+                                        setStudents(updated);
                                       }}
                                     />
-                                  )}
-                                </p>
+                                  </label>
+                                </div>
                               </td>
 
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
-                                {holiday.title}
-                              </td>
+                              {marksHeadings.map((heading) => {
+                                const headingName = heading.marks_headings_name;
+                                const highest = heading.highest_marks;
+                                const value = student.marks[headingName] || "";
+                                const error = student.errors?.[headingName];
 
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {holiday.classes && holiday.classes.length > 0
-                                  ? holiday.classes
-                                      .map((cls) => cls.class_name)
-                                      .join(", ")
-                                  : "-"}
-                              </td>
-
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {holiday.start_date === "0000-00-00"
-                                  ? " "
-                                  : formatDate(holiday.start_date)}
-                              </td>
-
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {capitalizeWords(holiday.created_by_name)}
-                              </td>
-
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {holiday.publish === "N" && (
-                                  <button
-                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                    onClick={() => handleEdit(holiday)}
+                                return (
+                                  <td
+                                    key={heading.marks_headings_id}
+                                    className="border px-3 py-2"
                                   >
-                                    <FontAwesomeIcon icon={faEdit} />
-                                  </button>
-                                )}
-                              </td>
+                                    <div>
+                                      <input
+                                        type="number"
+                                        value={value}
+                                        disabled={!student.present}
+                                        max={highest}
+                                        className={`w-full border px-2 py-1 rounded ${
+                                          error
+                                            ? "border-red-500"
+                                            : "border-gray-300"
+                                        }`}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          const updated = [...students];
+                                          updated[studentIdx].marks[
+                                            headingName
+                                          ] = val;
 
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {deletedHolidays.includes(holiday.unq_id) ? (
-                                  <span className="text-red-600 font-semibold">
-                                    Deleted
-                                  </span>
-                                ) : (
-                                  <button
-                                    onClick={() => handleDelete(holiday)}
-                                    className="text-red-600 hover:text-red-800 hover:bg-transparent"
-                                  >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                  </button>
-                                )}
-                              </td>
+                                          if (+val <= highest) {
+                                            updated[studentIdx].errors[
+                                              headingName
+                                            ] = "";
+                                          }
 
-                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                <button
-                                  type="button"
-                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                  onClick={() => handleView(holiday)}
-                                >
-                                  <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                                </button>
-                              </td>
+                                          setStudents(updated);
+                                        }}
+                                        onBlur={(e) => {
+                                          const val = e.target.value;
+                                          const updated = [...students];
+
+                                          if (val && +val > highest) {
+                                            updated[studentIdx].errors[
+                                              headingName
+                                            ] = `Please enter marks less than ${highest}`;
+                                          } else {
+                                            updated[studentIdx].errors[
+                                              headingName
+                                            ] = "";
+                                          }
+
+                                          setStudents(updated);
+                                        }}
+                                      />
+
+                                      {error && (
+                                        <p className="text-xs text-red-500 mt-1">
+                                          {error}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </td>
+                                );
+                              })}
                             </tr>
                           ))
-                        ) : (
-                          <div className="absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                            <div className=" text-center text-xl text-red-700">
-                              Oops! No data found..
-                            </div>
-                          </div>
                         )}
                       </tbody>
                     </table>
@@ -1336,15 +1435,6 @@ function UploadMarks() {
             </div>
           </>
         )}
-        <div className="bg-white w-full md:w-[97%] mx-auto rounded-md ">
-          <div className="w-full  mx-auto">
-            <ToastContainer />
-
-            {/* {holidays.length > 0 && ( */}
-
-            {/* )} */}
-          </div>
-        </div>
       </div>
     </>
   );
