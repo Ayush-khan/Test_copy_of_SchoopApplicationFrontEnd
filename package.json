@@ -11,7 +11,7 @@
     "dev:test": "vite --mode test --config vite.config.test.js",
     "dev:live": "vite --mode live --config vite.config.js",
     "build:test": "vite build --mode test --config vite.config.test.js",
-    "build:live": "vite build --mode live --config vite.config.js"
+    "build:live": "node --max-old-space-size=4096 ./node_modules/vite/bin/vite.js build --mode live --config vite.config.js"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
