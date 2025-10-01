@@ -15,7 +15,7 @@ import Select from "react-select";
 function UploadMarks() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
+  const [isDownloading, setIsDownloading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
@@ -105,6 +105,7 @@ function UploadMarks() {
     { rollNo: "102", name: "VED VIJAY VEER" },
     { rollNo: "103", name: "LESHA VIKRAM MAHANKALE" },
   ];
+  const [expectedFileName, setExpectedFileName] = useState("");
 
   // Fetch roleId and class list on mount
   useEffect(() => {
@@ -601,46 +602,57 @@ function UploadMarks() {
   };
 
   const handleDownloadTemplate = async () => {
-    if (selectedClasses.length === 0) {
-      toast.error("Please select at least one class to download the template.");
-      return; // Stop function execution
+    if (!selectedStudent || !selectedSubject || !selectedExam) {
+      toast.error("Please select Class, Subject, and Exam.");
+      return;
     }
 
     const token = localStorage.getItem("authToken");
 
+    const class_id = selectedStudent.valueclass;
+    const section_id = selectedStudent.value;
+    const subject_id = selectedSubject.value;
+    const exam_id = selectedExam.value;
+
+    const class_name = selectedStudent.class?.replace(/\s+/g, "");
+    const section_name = selectedStudent.section?.replace(/\s+/g, "");
+    const subject_name = selectedSubject.label?.replace(/\s+/g, "");
+    const exam_name = selectedExam.label?.replace(/\s+/g, "");
+
+    const filename = `${class_name}${section_name}_${subject_name}_${exam_name}.csv`;
+    setExpectedFileName(filename); // <-- this line sets the expected file name
+
     try {
-      const response = await axios.get(
-        `${API_URL}/api/get_template_csv_event`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "blob",
-        }
-      );
+      setIsDownloading(true); // 🔄 Start loader
 
-      let filename = "event_template.csv"; // Default fallback
+      const response = await axios.get(`${API_URL}/api/get_marksgeneratecsv`, {
+        params: {
+          exam_id,
+          class_id,
+          section_id,
+          subject_id,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob",
+      });
 
-      if (selectedClasses.length === allClasses.length) {
-        filename = "all_event.csv";
-      } else if (selectedClasses.length > 0) {
-        const selectedClassNames = allClasses
-          .filter((cls) => selectedClasses.includes(cls.class_id))
-          .map((cls) => cls.name.replace(/\s+/g, "_"));
-
-        filename = `${selectedClassNames.join("_")}_event.csv`;
-      }
-
+      // Trigger file download
       triggerFileDownload(response.data, filename);
     } catch (error) {
       console.error("Error downloading template:", error);
+      toast.error("Failed to download the template.");
+    } finally {
+      setIsDownloading(false); // ✅ Stop loader
     }
   };
 
-  // Helper function to trigger file download
-  const triggerFileDownload = (blobData, fileName) => {
+  const triggerFileDownload = (blobData, filename) => {
     const url = window.URL.createObjectURL(new Blob([blobData]));
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", fileName); // Set the file name
+    link.setAttribute("download", filename);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link); // Cleanup after download
@@ -659,6 +671,94 @@ function UploadMarks() {
     e.target.value = null;
   };
 
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setErrorMessage("Please select a file first.");
+      return;
+    }
+
+    setErrorMessage("");
+    setErrorMessageUrl("");
+    setUploadStatus("");
+    const fileName = selectedFile.name.trim();
+
+    console.log("Selected file name -->", fileName);
+    console.log("Expected file name -->", expectedFileName);
+
+    if (fileName !== expectedFileName) {
+      toast.warning(
+        "Invalid file selected. Please upload the same file you downloaded."
+      );
+      return;
+    }
+
+    // Accept patterns
+    // const validPattern = /_(event|rejected_template)(\s?\(\d+\))?\.csv$/i;
+    // const validPatternOne = /(event|rejected_template)(\s?\(\d+\))?\.csv$/i;
+    // console.log("FileName is-->", fileName);
+    // console.log("FileName is-->", validPattern.test(fileName));
+    // console.log("FileName is-->", validPatternOne.test(fileName));
+
+    // if (!validPattern.test(fileName) && !validPatternOne.test(fileName)) {
+    //   toast.warning("Please check if correct file is selected for upload.");
+    //   return;
+    // }
+
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/save_uploadmarkscsv`, // <-- your API endpoint
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      // Agar successful
+      if (response.status === 200) {
+        toast.success("File uploaded successfully!");
+        setUploadStatus("success");
+        setSelectedFile(null);
+        // Agar table ya list reload karna hai:
+        handleSearch?.();
+      } else {
+        // Unexpected status
+        toast.error("Upload failed. Please try again.");
+        setUploadStatus("failed");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+
+      const showErrorForUploading = error?.response?.data?.message;
+      const showErrorForUploadingUrl = error?.response?.data?.invalid_rows;
+
+      setErrorMessage(
+        showErrorForUploading
+          ? `Error: ${showErrorForUploading}`
+          : "Failed to upload file. Please try again..."
+      );
+      setErrorMessageUrl(`${showErrorForUploadingUrl ?? ""}`);
+      setUploadStatus("failed");
+
+      toast.error(
+        showErrorForUploading ? showErrorForUploading : "Error uploading file."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   const downloadCsv = async (fileUrl) => {
     try {
       const token = localStorage.getItem("authToken");
@@ -691,82 +791,6 @@ function UploadMarks() {
       toast.error("Failed to download the file.");
     }
   };
-
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      setErrorMessage("Please select a file first.");
-      return;
-    }
-
-    setErrorMessage("");
-    setErrorMessageUrl("");
-    setUploadStatus("");
-
-    const fileName = selectedFile.name.trim();
-
-    // Accept if filename ends with "_event.csv" or "_rejected_template.csv" (+ optional numbered suffix like (1), (2))
-    const validPattern = /_(event|rejected_template)(\s?\(\d+\))?\.csv$/i;
-    const validPatternone = /(event|rejected_template)(\s?\(\d+\))?\.csv$/i;
-
-    if (!validPattern.test(fileName) && !validPatternone.test(fileName)) {
-      toast.warning("Please check if correct file is selected for upload.");
-      return;
-    }
-
-    setLoading(true);
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    try {
-      setDataUploaded(true); // ✅ Now show the table
-      setErrorMessage("");
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      const response = await axios.post(
-        `${API_URL}/api/import_event_csv`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        toast.success("Events Data posted successfully!");
-        setIsDataPosted(true);
-        setSelectedFile(null);
-        handleSearch();
-      }
-
-      setTimeout(() => {
-        handleReset();
-      }, 2000);
-    } catch (error) {
-      setLoading(false);
-
-      const showErrorForUploading = error?.response?.data?.message;
-      const showErrorForUploadingUrl = error?.response?.data?.invalid_rows;
-
-      setErrorMessage(
-        !showErrorForUploading
-          ? "Failed to upload file. Please try again..."
-          : `Error: ${showErrorForUploading}.`
-      );
-
-      setErrorMessageUrl(`${showErrorForUploadingUrl}`);
-
-      toast.error(
-        !showErrorForUploading
-          ? "Error uploading file."
-          : error?.response?.data?.message
-      );
-    }
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) return " ";
     const date = new Date(dateString);
@@ -1079,10 +1103,45 @@ function UploadMarks() {
                     <div className="flex justify-center">
                       <button
                         onClick={handleDownloadTemplate}
-                        className="mt-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-medium rounded-full px-6 py-2 hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center gap-2"
+                        disabled={isDownloading}
+                        className={`mt-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-medium rounded-full px-6 py-2 transition shadow-md flex items-center gap-2
+      ${
+        isDownloading
+          ? "opacity-50 cursor-not-allowed"
+          : "hover:from-blue-700 hover:to-blue-600"
+      }
+    `}
                       >
-                        <i className="fas fa-download text-base"></i>
-                        Download Marksheet Format
+                        {isDownloading ? (
+                          <>
+                            <svg
+                              className="animate-spin h-4 w-4 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4l5-5-5-5v4a8 8 0 000 16v-4l-5 5 5 5v-4a8 8 0 01-8-8z"
+                              ></path>
+                            </svg>
+                            Downloading...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-download text-base"></i>
+                            Download Marksheet Format
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -1176,11 +1235,11 @@ function UploadMarks() {
                       </p>
                     )}
 
-                    {uploadStatus && (
+                    {/* {uploadStatus && (
                       <p className="text-green-600 text-sm text-center mt-2">
                         {uploadStatus}
                       </p>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
@@ -1196,7 +1255,7 @@ function UploadMarks() {
               <div className="card mx-auto lg:w-full shadow-lg">
                 <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                   {dataUploaded && (
-                    <div className="flex justify-end mb-4">
+                    <div className="item-center ">
                       <button
                         onClick={() => setShowUploadSection(true)} // ✅ Show modal on click
                         className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-200 shadow-md"
