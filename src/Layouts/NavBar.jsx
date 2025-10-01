@@ -426,7 +426,7 @@ function NavBar() {
                     <NavDropdown
                       key={subKey}
                       title={
-                        <span className="nav-dropdown-sub-new-Dynamic ml-2">
+                        <span className="nav-dropdown-sub-new-Dynamic px-2">
                           {subItem.name}
                         </span>
                       }
@@ -455,9 +455,9 @@ function NavBar() {
                                   style={{
                                     cursor: "pointer",
                                   }}
-                                  className="  custom-hover-styleForchildLeve  ml-2"
+                                  className="  custom-hover-styleForchildLeve   px-2"
                                 >
-                                  {childItem.name}
+                                  {childItem.name}{" "}
                                 </span>
                               }
                               // className={`dropend custom-submenuIs ${
@@ -491,7 +491,7 @@ function NavBar() {
                             <NavDropdown.Item
                               key={childKey}
                               onClick={() => navigate(childItem.url)}
-                              className="hover:bg-gray-100 hover:text-blue-600 text-sm"
+                              className="hover:bg-gray-100 hover:text-blue-600 text-sm flex flex-row gap-x-2"
                             >
                               {childItem.name}
                             </NavDropdown.Item>
