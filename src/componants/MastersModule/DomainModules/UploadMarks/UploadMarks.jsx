@@ -1229,28 +1229,35 @@ function UploadMarks() {
 
                 {/* Table */}
                 <div className="card-body px-4 py-2 w-full">
-                  <div className="overflow-auto max-h-[30rem]">
-                    <table className="min-w-full table-auto border-collapse text-sm">
-                      <thead className="bg-gray-200 text-gray-700 font-semibold sticky top-0 z-10">
+                  <div className="relative overflow-auto max-h-[30rem] rounded-lg shadow border border-gray-200">
+                    <table className="min-w-full table-auto border-collapse text-sm text-gray-800">
+                      <thead
+                        className="bg-gray-200 text-blue-900 font-semibold sticky top-0  shadow-md"
+                        style={{
+                          zIndex: 5,
+                          scrollbarWidth: "thin",
+                          scrollbarColor: "#C03178 transparent",
+                        }}
+                      >
                         <tr>
-                          <th className="border px-4 py-2 text-center">
+                          <th className="border px-4 py-3 text-center">
                             Sr No.
                           </th>
-                          <th className="border px-4 py-2 text-center">
+                          <th className="border px-4 py-3 text-center">
                             Roll No
                           </th>
-                          <th className="border px-4 py-2 text-center">
+                          <th className="border px-4 py-3 text-center">
                             Student Name
                           </th>
 
                           {marksHeadings.map((heading) => (
                             <th
                               key={heading.marks_headings_id}
-                              className="border px-4 py-2 text-center"
+                              className="border px-4 py-3 text-center"
                             >
                               {heading.marks_headings_name}
                               <br />
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-gray-600 font-normal">
                                 (Max: {heading.highest_marks})
                               </span>
                             </th>
@@ -1294,7 +1301,9 @@ function UploadMarks() {
                             return (
                               <tr
                                 key={stu.student_id}
-                                className="hover:bg-gray-50 transition"
+                                className={`transition duration-200 ${
+                                  idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                } hover:bg-blue-50 cursor-pointer`}
                               >
                                 <td className="border px-3 py-2 text-center">
                                   {idx + 1}
@@ -1305,57 +1314,6 @@ function UploadMarks() {
                                 <td className="border px-3 py-2 text-center">
                                   {fullName}
                                 </td>
-
-                                {/* Marks Inputs */}
-                                {/* {marksHeadings.map((heading) => {
-                                  const hid = heading.marks_headings_id;
-                                  const max = heading.highest_marks;
-                                  const value = stu.marksMap?.[hid] || "";
-                                  const error = stu.errors?.[hid];
-
-                                  return (
-                                    <td
-                                      key={hid}
-                                      className="border px-3 py-2 text-center align-top"
-                                    >
-                                      <input
-                                        type="number"
-                                        className={`w-20 px-2 py-1 border rounded-md text-center text-sm ${
-                                          error
-                                            ? "border-red-500"
-                                            : "border-gray-300"
-                                        }`}
-                                        value={value}
-                                        disabled={stu.present !== "Y"}
-                                        max={max}
-                                        min={0}
-                                        onChange={(e) => {
-                                          const val = e.target.value;
-                                          const updatedStudents = [...students];
-                                          updatedStudents[idx].marksMap = {
-                                            ...(updatedStudents[idx].marksMap ||
-                                              {}),
-                                            [hid]: val,
-                                          };
-
-                                          updatedStudents[idx].errors = {
-                                            ...(updatedStudents[idx].errors ||
-                                              {}),
-                                            [hid]:
-                                              val > max ? `Max ${max}` : "",
-                                          };
-
-                                          setStudents(updatedStudents);
-                                        }}
-                                      />
-                                      {error && (
-                                        <p className="text-xs text-red-500 mt-1">
-                                          {error}
-                                        </p>
-                                      )}
-                                    </td>
-                                  );
-                                })} */}
 
                                 {marksHeadings.map((heading) => {
                                   const hid = heading.marks_headings_id;
@@ -1370,64 +1328,82 @@ function UploadMarks() {
                                       key={hid}
                                       className="border px-3 py-2 text-center align-top"
                                     >
-                                      {" "}
-                                      present
-                                      <input
-                                        type="checkbox"
-                                        className="mb-1"
-                                        checked={presentValue === "Y"}
-                                        onChange={(e) => {
-                                          const updatedStudents = [...students];
-                                          const updatedStu = {
-                                            ...updatedStudents[idx],
-                                          };
-                                          updatedStu.presentMap = {
-                                            ...(updatedStu.presentMap || {}),
-                                            [hid]: e.target.checked ? "Y" : "N",
-                                          };
+                                      <div className="flex items-center justify-center gap-2">
+                                        {/* Present checkbox */}
+                                        <label className="inline-flex items-center gap-1 text-xs text-gray-700">
+                                          <input
+                                            type="checkbox"
+                                            className="accent-blue-600 cursor-pointer"
+                                            checked={presentValue === "Y"}
+                                            onChange={(e) => {
+                                              const updatedStudents = [
+                                                ...students,
+                                              ];
+                                              const updatedStu = {
+                                                ...updatedStudents[idx],
+                                              };
+                                              updatedStu.presentMap = {
+                                                ...(updatedStu.presentMap ||
+                                                  {}),
+                                                [hid]: e.target.checked
+                                                  ? "Y"
+                                                  : "N",
+                                              };
 
-                                          // Clear marks and error if absent
-                                          if (!e.target.checked) {
-                                            if (updatedStu.marksMap)
-                                              delete updatedStu.marksMap[hid];
-                                            if (updatedStu.errors)
-                                              delete updatedStu.errors[hid];
-                                          }
+                                              if (!e.target.checked) {
+                                                if (updatedStu.marksMap)
+                                                  delete updatedStu.marksMap[
+                                                    hid
+                                                  ];
+                                                if (updatedStu.errors)
+                                                  delete updatedStu.errors[hid];
+                                              }
 
-                                          updatedStudents[idx] = updatedStu;
-                                          setStudents(updatedStudents);
-                                        }}
-                                      />
-                                      <input
-                                        type="number"
-                                        className={`w-20 px-2 py-1 border rounded-md text-center text-sm ${
-                                          error
-                                            ? "border-red-500"
-                                            : "border-gray-300"
-                                        }`}
-                                        value={value}
-                                        disabled={presentValue !== "Y"}
-                                        max={max}
-                                        min={0}
-                                        onChange={(e) => {
-                                          const val = e.target.value;
-                                          const updatedStudents = [...students];
-                                          updatedStudents[idx].marksMap = {
-                                            ...(updatedStudents[idx].marksMap ||
-                                              {}),
-                                            [hid]: val,
-                                          };
+                                              updatedStudents[idx] = updatedStu;
+                                              setStudents(updatedStudents);
+                                            }}
+                                          />
+                                          <span className="select-none">
+                                            Present
+                                          </span>
+                                        </label>
 
-                                          updatedStudents[idx].errors = {
-                                            ...(updatedStudents[idx].errors ||
-                                              {}),
-                                            [hid]:
-                                              val > max ? `Max ${max}` : "",
-                                          };
+                                        {/* Marks input */}
+                                        <input
+                                          type="number"
+                                          className={`w-20 px-2 py-1 rounded-md text-center text-sm transition focus:outline-none focus:ring-2 focus:ring-blue-300 ${
+                                            error
+                                              ? "border border-red-500"
+                                              : "border border-gray-300"
+                                          } disabled:bg-gray-100`}
+                                          value={value}
+                                          disabled={presentValue !== "Y"}
+                                          max={max}
+                                          min={0}
+                                          onChange={(e) => {
+                                            const val = e.target.value;
+                                            const updatedStudents = [
+                                              ...students,
+                                            ];
+                                            updatedStudents[idx].marksMap = {
+                                              ...(updatedStudents[idx]
+                                                .marksMap || {}),
+                                              [hid]: val,
+                                            };
 
-                                          setStudents(updatedStudents);
-                                        }}
-                                      />
+                                            updatedStudents[idx].errors = {
+                                              ...(updatedStudents[idx].errors ||
+                                                {}),
+                                              [hid]:
+                                                val > max ? `Max ${max}` : "",
+                                            };
+
+                                            setStudents(updatedStudents);
+                                          }}
+                                        />
+                                      </div>
+
+                                      {/* Error Message */}
                                       {error && (
                                         <p className="text-xs text-red-500 mt-1">
                                           {error}
