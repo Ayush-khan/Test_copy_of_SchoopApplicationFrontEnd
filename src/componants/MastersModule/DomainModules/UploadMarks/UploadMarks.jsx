@@ -15,7 +15,7 @@ import Select from "react-select";
 function UploadMarks() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
+  const [isDownloading, setIsDownloading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
@@ -105,6 +105,57 @@ function UploadMarks() {
     { rollNo: "102", name: "VED VIJAY VEER" },
     { rollNo: "103", name: "LESHA VIKRAM MAHANKALE" },
   ];
+  const [expectedFileName, setExpectedFileName] = useState("");
+  const [loadingMarks, setLoadingMarks] = useState(false);
+  const processStudentMarksData = (data) => {
+    const headings = marksHeadings;
+
+    const studentsWithMarks = data.map((student) => {
+      const marksMap = {};
+      const errors = {};
+      const presentMap = {};
+
+      // ✅ Parse mark_obtained and present from JSON strings to objects
+      let markObtainedParsed = {};
+      let presentParsed = {};
+
+      try {
+        markObtainedParsed = JSON.parse(student.mark_obtained || "{}");
+      } catch (e) {
+        console.error(
+          "Failed to parse mark_obtained for student:",
+          student.student_id
+        );
+      }
+
+      try {
+        presentParsed = JSON.parse(student.present || "{}");
+      } catch (e) {
+        console.error(
+          "Failed to parse present for student:",
+          student.student_id
+        );
+      }
+
+      // ✅ Loop through all headings and map marks & present data
+      headings.forEach((h) => {
+        const hid = h.marks_headings_id;
+
+        marksMap[hid] = markObtainedParsed[hid] ?? "";
+        presentMap[hid] = presentParsed[hid] ?? "Y"; // default present = 'Y'
+        errors[hid] = "";
+      });
+
+      return {
+        ...student,
+        marksMap,
+        presentMap,
+        errors,
+      };
+    });
+
+    setStudents(studentsWithMarks);
+  };
 
   // Fetch roleId and class list on mount
   useEffect(() => {
@@ -302,7 +353,7 @@ function UploadMarks() {
       const token = localStorage.getItem("authToken");
 
       const response = await axios.get(
-        `https://sms.evolvu.in/arnolds_test/public/api/get_marks_heading_class`,
+        `${API_URL}/api/get_marks_heading_class`,
         {
           params: {
             class_id,
@@ -316,68 +367,51 @@ function UploadMarks() {
       );
 
       const headings = response?.data?.data || [];
-
       setMarksHeadings(headings);
-
-      // Sample mock students (replace with API data if needed)
-      const mockStudents = [
-        { roll_no: 1, name: "Skylar Stephen Mendonsa" },
-        { roll_no: 2, name: "Ved Vijay Veer" },
-        { roll_no: 3, name: "Lesha Vikram Mahankale" },
-      ];
-
-      const initializedStudents = mockStudents.map((student) => ({
-        ...student,
-        present: true,
-        marks: marksHeadings.reduce((acc, h) => {
-          acc[h.marks_headings_name] = "";
-          return acc;
-        }, {}),
-        errors: marksHeadings.reduce((acc, h) => {
-          acc[h.marks_headings_name] = "";
-          return acc;
-        }, {}),
-      }));
-
-      setStudents(initializedStudents);
     } catch (error) {
       console.error("Error fetching marks headings:", error);
       toast.error("Failed to load marks headings.");
     }
   };
 
-  const handlePresentChange = (rollNo, isPresent) => {
-    setStudents((prev) =>
-      prev.map((s) =>
-        s.rollNo === rollNo
-          ? {
-              ...s,
-              present: isPresent,
-              marks: isPresent
-                ? s.marks
-                : Object.fromEntries(
-                    Object.keys(s.marks).map((key) => [key, ""])
-                  ),
-            }
-          : s
-      )
-    );
-  };
+  const fetchStudentMarks = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      toast.error("No auth token");
+      return;
+    }
 
-  const handleMarksInputChange = (rollNo, headingName, value) => {
-    setStudents((prev) =>
-      prev.map((s) =>
-        s.rollNo === rollNo
-          ? {
-              ...s,
-              marks: {
-                ...s.marks,
-                [headingName]: value,
-              },
-            }
-          : s
-      )
-    );
+    try {
+      setLoadingMarks(true);
+
+      const params = {
+        class_id: selectedStudent.valueclass,
+        section_id: selectedStudent.value,
+        subject_id: selectedSubject.value,
+        exam_id: selectedExam.value,
+      };
+
+      const response = await axios.get(`${API_URL}/api/get_studentmarks`, {
+        params,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.status === 200) {
+        const data = response.data.data; // array of student mark objects
+        processStudentMarksData(data);
+      } else {
+        toast.error("No student marks found.");
+        setStudents([]);
+      }
+    } catch (err) {
+      console.error("Error fetching student marks:", err);
+      toast.error("Failed to fetch student marks");
+      setStudents([]);
+    } finally {
+      setLoadingMarks(false);
+    }
   };
 
   const handleSearch = async () => {
@@ -405,123 +439,34 @@ function UploadMarks() {
       setLoadingForSearch(false);
       return;
     }
-    fetchMarksHeadings();
+
     try {
-      // 🌟 We want to keep the Upload button visible
-      setShowUploadSection(false); // just close modal (not hide the button)
-      setDataUploaded(false); // Reset data uploaded state
-      setTableDataReady(false); // reset for new search
+      // 🌟 Reset state before fetching new data
+      setShowUploadSection(false);
+      setDataUploaded(false);
+      setTableDataReady(false);
 
-      setLoadingEvent(true);
-      const token = localStorage.getItem("authToken");
+      // 🌟 Step 1: Fetch marks headings
+      await fetchMarksHeadings();
 
-      const response = await axios.get(`${API_URL}/api/get_eventlist`, {
-        params: {
-          class_id: selectedSectionId,
-          month_year: selectedMonthId,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // 🌟 Step 2: Fetch student marks
+      await fetchStudentMarks();
 
-      const eventData = response.data?.data || [];
-
-      if (!eventData.length) {
-        toast.warn("No events found for the selected criteria.");
-        return;
-      }
-      // Set academic year and date limits if applicable
-      const academicYear = eventData[0]?.academic_yr;
-      if (academicYear) {
-        setDateLimits(getDateLimits(academicYear));
-      }
-      // ✅ Update UI
-      setHolidays(eventData);
-      setPageCount(Math.ceil(eventData.length / pageSize));
-      // 🌟 These 2 lines are most important
-      setDataUploaded(true); // ✅ show Upload Button
-      setTableDataReady(true); // ✅ show Table
+      // 🌟 Step 3: Update UI flags
+      setDataUploaded(true);
+      setTableDataReady(true);
     } catch (error) {
       console.error("Search Error:", error);
-      toast.error("Error occurred while searching or fetching events.");
+      toast.error("Error occurred while searching student marks.");
     } finally {
       setLoadingForSearch(false);
-      setLoadingEvent(false);
     }
-  };
-
-  const capitalizeWords = (str) =>
-    str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-
-  const getDateLimits = (academicYear) => {
-    if (!academicYear) return {};
-
-    const [startYear, endYear] = academicYear.split("-").map(Number);
-
-    return {
-      min: `${startYear}-04-01`, // Start of academic year (April 1st)
-      max: `${endYear}-03-31`, // End of academic year (March 31st)
-    };
   };
 
   // Handle pagination
   const handlePageClick = (data) => {
     console.log("Page clicked:", data.selected);
     setCurrentPage(data.selected);
-  };
-
-  const handleEdit = (holiday) => {
-    navigate(`/editEvent/${holiday.unq_id}`, { state: { holiday } });
-  };
-
-  const handleView = (holiday) => {
-    console.log("inside view", holiday);
-
-    setShowViewModal(true);
-    setSelectedHoliday(holiday);
-  };
-
-  const handleSelectAll = () => {
-    if (!holidays || holidays.length === 0) {
-      toast.warning("No events available to select.");
-      return;
-    }
-
-    // Find all unpublished events only
-    const unpublishedHolidayIds = holidays
-      .filter((holiday) => holiday.publish === "N")
-      .map((holiday) => holiday.unq_id);
-
-    if (unpublishedHolidayIds.length === 0) {
-      toast.warning("No unpublished events available for publish.");
-      setSelectAll(false); // ✅ make sure checkbox stays unchecked
-      setSelectedHolidays([]);
-      return;
-    }
-
-    setSelectAll((prev) => {
-      const newSelectAll = !prev;
-
-      if (newSelectAll) {
-        // ✅ Only unpublished IDs will be selected
-        setSelectedHolidays(unpublishedHolidayIds);
-        console.log("allUnpublishedEvents", unpublishedHolidayIds);
-      } else {
-        // Deselect all
-        setSelectedHolidays([]);
-      }
-
-      return newSelectAll;
-    });
-  };
-
-  const handleCheckboxChange = (holidayId) => {
-    if (selectedHolidays.includes(holidayId)) {
-      setSelectedHolidays(selectedHolidays.filter((id) => id !== holidayId));
-    } else {
-      setSelectedHolidays([...selectedHolidays, holidayId]);
-    }
   };
 
   const handlePublish = async () => {
@@ -601,46 +546,57 @@ function UploadMarks() {
   };
 
   const handleDownloadTemplate = async () => {
-    if (selectedClasses.length === 0) {
-      toast.error("Please select at least one class to download the template.");
-      return; // Stop function execution
+    if (!selectedStudent || !selectedSubject || !selectedExam) {
+      toast.error("Please select Class, Subject, and Exam.");
+      return;
     }
 
     const token = localStorage.getItem("authToken");
 
+    const class_id = selectedStudent.valueclass;
+    const section_id = selectedStudent.value;
+    const subject_id = selectedSubject.value;
+    const exam_id = selectedExam.value;
+
+    const class_name = selectedStudent.class?.replace(/\s+/g, "");
+    const section_name = selectedStudent.section?.replace(/\s+/g, "");
+    const subject_name = selectedSubject.label?.replace(/\s+/g, "");
+    const exam_name = selectedExam.label?.replace(/\s+/g, "");
+
+    const filename = `${class_name}${section_name}_${subject_name}_${exam_name}.csv`;
+    setExpectedFileName(filename); // <-- this line sets the expected file name
+
     try {
-      const response = await axios.get(
-        `${API_URL}/api/get_template_csv_event`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "blob",
-        }
-      );
+      setIsDownloading(true); // 🔄 Start loader
 
-      let filename = "event_template.csv"; // Default fallback
+      const response = await axios.get(`${API_URL}/api/get_marksgeneratecsv`, {
+        params: {
+          exam_id,
+          class_id,
+          section_id,
+          subject_id,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob",
+      });
 
-      if (selectedClasses.length === allClasses.length) {
-        filename = "all_event.csv";
-      } else if (selectedClasses.length > 0) {
-        const selectedClassNames = allClasses
-          .filter((cls) => selectedClasses.includes(cls.class_id))
-          .map((cls) => cls.name.replace(/\s+/g, "_"));
-
-        filename = `${selectedClassNames.join("_")}_event.csv`;
-      }
-
+      // Trigger file download
       triggerFileDownload(response.data, filename);
     } catch (error) {
       console.error("Error downloading template:", error);
+      toast.error("Failed to download the template.");
+    } finally {
+      setIsDownloading(false); // ✅ Stop loader
     }
   };
 
-  // Helper function to trigger file download
-  const triggerFileDownload = (blobData, fileName) => {
+  const triggerFileDownload = (blobData, filename) => {
     const url = window.URL.createObjectURL(new Blob([blobData]));
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", fileName); // Set the file name
+    link.setAttribute("download", filename);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link); // Cleanup after download
@@ -659,6 +615,94 @@ function UploadMarks() {
     e.target.value = null;
   };
 
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setErrorMessage("Please select a file first.");
+      return;
+    }
+
+    setErrorMessage("");
+    setErrorMessageUrl("");
+    setUploadStatus("");
+    const fileName = selectedFile.name.trim();
+
+    console.log("Selected file name -->", fileName);
+    console.log("Expected file name -->", expectedFileName);
+
+    if (fileName !== expectedFileName) {
+      toast.warning(
+        "Invalid file selected. Please upload the same file you downloaded."
+      );
+      return;
+    }
+
+    // Accept patterns
+    // const validPattern = /_(event|rejected_template)(\s?\(\d+\))?\.csv$/i;
+    // const validPatternOne = /(event|rejected_template)(\s?\(\d+\))?\.csv$/i;
+    // console.log("FileName is-->", fileName);
+    // console.log("FileName is-->", validPattern.test(fileName));
+    // console.log("FileName is-->", validPatternOne.test(fileName));
+
+    // if (!validPattern.test(fileName) && !validPatternOne.test(fileName)) {
+    //   toast.warning("Please check if correct file is selected for upload.");
+    //   return;
+    // }
+
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/save_uploadmarkscsv`, // <-- your API endpoint
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      // Agar successful
+      if (response.status === 200) {
+        toast.success("File uploaded successfully!");
+        setUploadStatus("success");
+        setSelectedFile(null);
+        // Agar table ya list reload karna hai:
+        handleSearch?.();
+      } else {
+        // Unexpected status
+        toast.error("Upload failed. Please try again.");
+        setUploadStatus("failed");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+
+      const showErrorForUploading = error?.response?.data?.message;
+      const showErrorForUploadingUrl = error?.response?.data?.invalid_rows;
+
+      setErrorMessage(
+        showErrorForUploading
+          ? `Error: ${showErrorForUploading}`
+          : "Failed to upload file. Please try again..."
+      );
+      setErrorMessageUrl(`${showErrorForUploadingUrl ?? ""}`);
+      setUploadStatus("failed");
+
+      toast.error(
+        showErrorForUploading ? showErrorForUploading : "Error uploading file."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   const downloadCsv = async (fileUrl) => {
     try {
       const token = localStorage.getItem("authToken");
@@ -691,82 +735,6 @@ function UploadMarks() {
       toast.error("Failed to download the file.");
     }
   };
-
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      setErrorMessage("Please select a file first.");
-      return;
-    }
-
-    setErrorMessage("");
-    setErrorMessageUrl("");
-    setUploadStatus("");
-
-    const fileName = selectedFile.name.trim();
-
-    // Accept if filename ends with "_event.csv" or "_rejected_template.csv" (+ optional numbered suffix like (1), (2))
-    const validPattern = /_(event|rejected_template)(\s?\(\d+\))?\.csv$/i;
-    const validPatternone = /(event|rejected_template)(\s?\(\d+\))?\.csv$/i;
-
-    if (!validPattern.test(fileName) && !validPatternone.test(fileName)) {
-      toast.warning("Please check if correct file is selected for upload.");
-      return;
-    }
-
-    setLoading(true);
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    try {
-      setDataUploaded(true); // ✅ Now show the table
-      setErrorMessage("");
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      const response = await axios.post(
-        `${API_URL}/api/import_event_csv`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        toast.success("Events Data posted successfully!");
-        setIsDataPosted(true);
-        setSelectedFile(null);
-        handleSearch();
-      }
-
-      setTimeout(() => {
-        handleReset();
-      }, 2000);
-    } catch (error) {
-      setLoading(false);
-
-      const showErrorForUploading = error?.response?.data?.message;
-      const showErrorForUploadingUrl = error?.response?.data?.invalid_rows;
-
-      setErrorMessage(
-        !showErrorForUploading
-          ? "Failed to upload file. Please try again..."
-          : `Error: ${showErrorForUploading}.`
-      );
-
-      setErrorMessageUrl(`${showErrorForUploadingUrl}`);
-
-      toast.error(
-        !showErrorForUploading
-          ? "Error uploading file."
-          : error?.response?.data?.message
-      );
-    }
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) return " ";
     const date = new Date(dateString);
@@ -1079,10 +1047,45 @@ function UploadMarks() {
                     <div className="flex justify-center">
                       <button
                         onClick={handleDownloadTemplate}
-                        className="mt-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-medium rounded-full px-6 py-2 hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center gap-2"
+                        disabled={isDownloading}
+                        className={`mt-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-medium rounded-full px-6 py-2 transition shadow-md flex items-center gap-2
+      ${
+        isDownloading
+          ? "opacity-50 cursor-not-allowed"
+          : "hover:from-blue-700 hover:to-blue-600"
+      }
+    `}
                       >
-                        <i className="fas fa-download text-base"></i>
-                        Download Marksheet Format
+                        {isDownloading ? (
+                          <>
+                            <svg
+                              className="animate-spin h-4 w-4 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4l5-5-5-5v4a8 8 0 000 16v-4l-5 5 5 5v-4a8 8 0 01-8-8z"
+                              ></path>
+                            </svg>
+                            Downloading...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-download text-base"></i>
+                            Download Marksheet Format
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -1176,11 +1179,11 @@ function UploadMarks() {
                       </p>
                     )}
 
-                    {uploadStatus && (
+                    {/* {uploadStatus && (
                       <p className="text-green-600 text-sm text-center mt-2">
                         {uploadStatus}
                       </p>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
@@ -1192,32 +1195,30 @@ function UploadMarks() {
         {/* Step 3: Show table after upload */}
         {dataUploaded && tableDataReady && (
           <>
-            <div className="w-full mt-4">
-              <div className="card mx-auto lg:w-full shadow-lg">
-                <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+            <div className="w-full mt-6">
+              <div className="card mx-auto w-full shadow-xl rounded-lg overflow-hidden border border-gray-200">
+                {/* Header */}
+                <div className="bg-gray-100 px-4 py-3 flex flex-col md:flex-row justify-between gap-4 items-center">
+                  {/* Upload Button */}
                   {dataUploaded && (
-                    <div className="flex justify-end mb-4">
-                      <button
-                        onClick={() => setShowUploadSection(true)} // ✅ Show modal on click
-                        className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-200 shadow-md"
-                      >
-                        Upload Marksheet from Excel Sheet
-                      </button>
-                    </div>
-                  )}
-                  <div className="box-border flex md:gap-x-2 justify-end md:h-10">
-                    <div className=" w-1/2 md:w-fit mr-1">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search"
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                    </div>
-
                     <button
-                      // type="submit"
-                      className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
+                      onClick={() => setShowUploadSection(true)}
+                      className="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md shadow transition duration-200"
+                    >
+                      Upload Marksheet from Excel Sheet
+                    </button>
+                  )}
+
+                  {/* Search + Publish */}
+                  <div className="flex gap-2 w-full md:w-auto items-center justify-end">
+                    <input
+                      type="text"
+                      className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      placeholder="Search"
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <button
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm rounded-md shadow transition duration-200"
                       onClick={handlePublish}
                       disabled={isSubmitting}
                     >
@@ -1225,233 +1226,198 @@ function UploadMarks() {
                     </button>
                   </div>
                 </div>
-                <div
-                  className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                  style={{
-                    backgroundColor: "#C03078",
-                  }}
-                ></div>
 
-                <div className="card-body w-full">
-                  <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full  md:w-[100%] mx-auto">
-                    <table className="min-w-full leading-normal table-fixed">
-                      {/* <thead>
-                        <tr className="bg-gray-200">
-                          <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Sr.No
+                {/* Table */}
+                <div className="card-body px-4 py-2 w-full">
+                  <div className="relative overflow-auto max-h-[30rem] rounded-lg shadow border border-gray-200">
+                    <table className="min-w-full table-auto  text-sm text-gray-800">
+                      <thead
+                        className="bg-gray-200 text-blue-900 font-semibold sticky top-0  shadow-md"
+                        style={{
+                          zIndex: 5,
+                          scrollbarWidth: "thin",
+                          scrollbarColor: "#C03178 transparent",
+                        }}
+                      >
+                        <tr>
+                          <th className="border px-4 py-3 text-center">
+                            Sr No.
                           </th>
-                          <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            <input
-                              type="checkbox"
-                              checked={selectAll}
-                              onChange={handleSelectAll}
-                              className="cursor-pointer"
-                            />{" "}
-                            All
+                          <th className="border px-4 py-3 text-center">
+                            Roll No
                           </th>
-                          <th className="px-2 w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Event Title
+                          <th className="border px-4 py-3 text-center">
+                            Student Name
                           </th>
 
-                          <th className="px-2 w-full md:w-[15%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Class
-                          </th>
-                          <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Start Date
-                          </th>
-                          <th className="px-2 w-full md:w-[15%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Created By
-                          </th>
-                          <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Edit
-                          </th>
-                          <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Delete
-                          </th>
-                          <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            View
-                          </th>
+                          {marksHeadings.map((heading) => (
+                            <th
+                              key={heading.marks_headings_id}
+                              className="border px-4 py-3 text-center"
+                            >
+                              {heading.marks_headings_name}
+                              <br />
+                              <span className="text-xs text-gray-600 font-normal">
+                                (Max: {heading.highest_marks})
+                              </span>
+                            </th>
+                          ))}
                         </tr>
-                      </thead> */}
-                      <table className="min-w-full border mt-4">
-                        <thead className="bg-gray-100">
+                      </thead>
+                      <tbody>
+                        {loadingEvent ? (
                           <tr>
-                            <th className="border px-3 py-2 text-center">
-                              Roll No
-                            </th>
-                            <th className="border px-3 py-2 text-center">
-                              Student
-                            </th>
-                            {marksHeadings.map((heading) => (
-                              <th
-                                key={heading.marks_headings_id}
-                                className="border px-3 py-2 text-center"
-                              >
-                                *{heading.marks_headings_name}(
-                                {heading.highest_marks})
-                              </th>
-                            ))}
+                            <td
+                              colSpan={4 + marksHeadings.length}
+                              className="text-center py-8 text-blue-700 text-lg"
+                            >
+                              Please Wait While Data is Loading...
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {loadingEvent ? (
-                            <tr>
-                              <td
-                                colSpan={2 + marksHeadings.length}
-                                className="text-center py-6"
-                              >
-                                <span className="text-blue-700 text-xl">
-                                  Please Wait While Data is Loading...
-                                </span>
-                              </td>
-                            </tr>
-                          ) : students.length === 0 ? (
-                            <tr>
-                              <td
-                                colSpan={2 + marksHeadings.length}
-                                className="text-center py-6"
-                              >
-                                <span className="text-red-700 text-xl">
-                                  Oops! No data found..
-                                </span>
-                              </td>
-                            </tr>
-                          ) : (
-                            students.map((student, studentIdx) => (
+                        ) : students.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={4 + marksHeadings.length}
+                              className="text-center py-8 text-red-600 text-lg"
+                            >
+                              Oops! No data found...
+                            </td>
+                          </tr>
+                        ) : (
+                          students.map((stu, idx) => {
+                            const fullName = [
+                              stu.first_name,
+                              stu.mid_name,
+                              stu.last_name,
+                            ]
+                              .filter(Boolean)
+                              .map(
+                                (name) =>
+                                  name.charAt(0).toUpperCase() +
+                                  name.slice(1).toLowerCase()
+                              )
+                              .join(" ");
+
+                            return (
                               <tr
-                                key={studentIdx}
-                                className={
-                                  studentIdx % 2 === 1 ? "bg-gray-50" : ""
-                                }
+                                key={stu.student_id}
+                                className={`transition duration-200 ${
+                                  idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                } hover:bg-blue-50 cursor-pointer`}
                               >
                                 <td className="border px-3 py-2 text-center">
-                                  {student.roll_no}
+                                  {idx + 1}
                                 </td>
-                                <td className="border px-3 py-2">
-                                  <div className="flex items-center justify-between gap-2">
-                                    {student.name}
-                                    <label className="flex items-center space-x-1 text-sm">
-                                      <span>Present</span>
-                                      <input
-                                        type="checkbox"
-                                        checked={student.present}
-                                        onChange={(e) => {
-                                          const updated = [...students];
-                                          updated[studentIdx].present =
-                                            e.target.checked;
-
-                                          // Clear marks if unchecked
-                                          if (!e.target.checked) {
-                                            marksHeadings.forEach((heading) => {
-                                              updated[studentIdx].marks[
-                                                heading.marks_headings_name
-                                              ] = "";
-                                              updated[studentIdx].errors[
-                                                heading.marks_headings_name
-                                              ] = "";
-                                            });
-                                          }
-
-                                          setStudents(updated);
-                                        }}
-                                      />
-                                    </label>
-                                  </div>
+                                <td className="border px-3 py-2 text-center">
+                                  {stu.roll_no ?? "-"}
+                                </td>
+                                <td className="border px-3 py-2 text-center">
+                                  {fullName}
                                 </td>
 
                                 {marksHeadings.map((heading) => {
-                                  const headingName =
-                                    heading.marks_headings_name;
-                                  const highest = heading.highest_marks;
-                                  const value =
-                                    student.marks[headingName] || "";
-                                  const error = student.errors?.[headingName];
+                                  const hid = heading.marks_headings_id;
+                                  const max = heading.highest_marks;
+                                  const value = stu.marksMap?.[hid] || "";
+                                  const error = stu.errors?.[hid];
+                                  const presentValue =
+                                    stu.presentMap?.[hid] ?? "Y";
 
                                   return (
                                     <td
-                                      key={heading.marks_headings_id}
-                                      className="border px-3 py-2"
+                                      key={hid}
+                                      className="border px-3 py-2 text-center align-top"
                                     >
-                                      <div>
+                                      <div className="flex items-center justify-center gap-2">
+                                        {/* Present checkbox */}
+                                        <label className="inline-flex items-center gap-1 text-xs text-gray-700">
+                                          <input
+                                            type="checkbox"
+                                            className="accent-blue-600 cursor-pointer"
+                                            checked={presentValue === "Y"}
+                                            onChange={(e) => {
+                                              const updatedStudents = [
+                                                ...students,
+                                              ];
+                                              const updatedStu = {
+                                                ...updatedStudents[idx],
+                                              };
+                                              updatedStu.presentMap = {
+                                                ...(updatedStu.presentMap ||
+                                                  {}),
+                                                [hid]: e.target.checked
+                                                  ? "Y"
+                                                  : "N",
+                                              };
+
+                                              if (!e.target.checked) {
+                                                if (updatedStu.marksMap)
+                                                  delete updatedStu.marksMap[
+                                                    hid
+                                                  ];
+                                                if (updatedStu.errors)
+                                                  delete updatedStu.errors[hid];
+                                              }
+
+                                              updatedStudents[idx] = updatedStu;
+                                              setStudents(updatedStudents);
+                                            }}
+                                          />
+                                          <span className="select-none">
+                                            Present
+                                          </span>
+                                        </label>
+
+                                        {/* Marks input */}
                                         <input
                                           type="number"
-                                          value={value}
-                                          disabled={!student.present}
-                                          max={highest}
-                                          className={`w-full border px-2 py-1 rounded ${
+                                          className={`w-20 px-2 py-1 rounded-md text-center text-sm transition focus:outline-none focus:ring-2 focus:ring-blue-300 ${
                                             error
-                                              ? "border-red-500"
-                                              : "border-gray-300"
-                                          }`}
+                                              ? "border border-red-500"
+                                              : "border border-gray-300"
+                                          } disabled:bg-gray-100`}
+                                          value={value}
+                                          disabled={presentValue !== "Y"}
+                                          max={max}
+                                          min={0}
                                           onChange={(e) => {
                                             const val = e.target.value;
-                                            const updated = [...students];
-                                            updated[studentIdx].marks[
-                                              headingName
-                                            ] = val;
+                                            const updatedStudents = [
+                                              ...students,
+                                            ];
+                                            updatedStudents[idx].marksMap = {
+                                              ...(updatedStudents[idx]
+                                                .marksMap || {}),
+                                              [hid]: val,
+                                            };
 
-                                            if (+val <= highest) {
-                                              updated[studentIdx].errors[
-                                                headingName
-                                              ] = "";
-                                            }
+                                            updatedStudents[idx].errors = {
+                                              ...(updatedStudents[idx].errors ||
+                                                {}),
+                                              [hid]:
+                                                val > max ? `Max ${max}` : "",
+                                            };
 
-                                            setStudents(updated);
-                                          }}
-                                          onBlur={(e) => {
-                                            const val = e.target.value;
-                                            const updated = [...students];
-
-                                            if (val && +val > highest) {
-                                              updated[studentIdx].errors[
-                                                headingName
-                                              ] = `Please enter marks less than ${highest}`;
-                                            } else {
-                                              updated[studentIdx].errors[
-                                                headingName
-                                              ] = "";
-                                            }
-
-                                            setStudents(updated);
+                                            setStudents(updatedStudents);
                                           }}
                                         />
-
-                                        {error && (
-                                          <p className="text-xs text-red-500 mt-1">
-                                            {error}
-                                          </p>
-                                        )}
                                       </div>
+
+                                      {/* Error Message */}
+                                      {error && (
+                                        <p className="text-xs text-red-500 mt-1">
+                                          {error}
+                                        </p>
+                                      )}
                                     </td>
                                   );
                                 })}
                               </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
+                            );
+                          })
+                        )}
+                      </tbody>
                     </table>
-                  </div>
-                  <div className=" flex justify-center pt-2 -mb-3">
-                    <ReactPaginate
-                      previousLabel={"Previous"}
-                      nextLabel={"Next"}
-                      breakLabel={"..."}
-                      breakClassName={"page-item"}
-                      breakLinkClassName={"page-link"}
-                      pageCount={pageCount}
-                      marginPagesDisplayed={1}
-                      pageRangeDisplayed={1}
-                      onPageChange={handlePageClick}
-                      containerClassName={"pagination"}
-                      pageClassName={"page-item"}
-                      pageLinkClassName={"page-link"}
-                      previousClassName={"page-item"}
-                      previousLinkClassName={"page-link"}
-                      nextClassName={"page-item"}
-                      nextLinkClassName={"page-link"}
-                      activeClassName={"active"}
-                    />
                   </div>
                 </div>
               </div>

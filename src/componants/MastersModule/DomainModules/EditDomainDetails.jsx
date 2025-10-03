@@ -24,9 +24,6 @@ const EditDomainDetails = () => {
   const location = useLocation();
   const domaindatadetail = location.state?.domain; // get full object if passed
 
-  // console.log("dm_id from URL:", id);
-  // console.log(" Domain Data from state:", domaindatadetail);
-
   const [allClasses, setAllClasses] = useState([]);
   const [selectedClasses, setSelectedClasses] = useState(null);
   const [loading, setLoading] = useState(false); // Loader state
@@ -266,8 +263,59 @@ const EditDomainDetails = () => {
     setDetails(details.filter((_, i) => i !== index));
   };
 
+  // useEffect(() => {
+  //   if (!domainData || hasPrefilled.current) return;
+
+  //   // Prefill class
+  //   if (classOptions.length > 0) {
+  //     const selectedClass = classOptions.find(
+  //       (opt) => opt.value === domainData.class_id
+  //     );
+  //     if (selectedClass) {
+  //       setSelectedClasses(selectedClass);
+  //       setclassIdForManage(selectedClass.value);
+  //     }
+  //   }
+
+  //   // Prefill subject
+  //   // if (subjectOptions.length > 0 && domainData.HPC_sm_id) {
+  //   //   // find the exact object from options array
+  //   //   const selectedSub = subjectOptions.find(
+  //   //     (opt) => opt.value === domainData.HPC_sm_id
+  //   //   );
+
+  //   //   if (selectedSub) {
+  //   //     setSelectedSubject(selectedSub); // must be the exact object from options
+  //   //     setSubjectIdForManage(selectedSub.value);
+  //   //   }
+  //   // }
+
+  //   // Prefill text fields
+  //   setName(domainData.name || "");
+  //   setCurriculumGoal(domainData.curriculum_goal || "");
+
+  //   hasPrefilled.current = true; // ✅ mark as done
+  // }, [domainData, classOptions]);
+
+  // useEffect(() => {
+  //   if (!domainData) return;
+  //   if (!subjectOptions || subjectOptions.length === 0) return;
+
+  //   // find the exact object from options array
+  //   const selectedSub = subjectOptions.find(
+  //     (opt) => opt.value === domainData.HPC_sm_id
+  //   );
+
+  //   if (selectedSub) {
+  //     setSelectedSubject(selectedSub); // must be exact object from options
+  //     setSubjectIdForManage(selectedSub.value);
+  //   }
+  // }, [domainData, subjectOptions]);
+
   useEffect(() => {
-    if (!domainData || hasPrefilled.current) return;
+    if (!domainData) return;
+
+    let didPrefill = false;
 
     // Prefill class
     if (classOptions.length > 0) {
@@ -277,43 +325,31 @@ const EditDomainDetails = () => {
       if (selectedClass) {
         setSelectedClasses(selectedClass);
         setclassIdForManage(selectedClass.value);
+        didPrefill = true;
       }
     }
 
     // Prefill subject
-    // if (subjectOptions.length > 0 && domainData.HPC_sm_id) {
-    //   // find the exact object from options array
-    //   const selectedSub = subjectOptions.find(
-    //     (opt) => opt.value === domainData.HPC_sm_id
-    //   );
+    if (subjectOptions.length > 0 && domainData.HPC_sm_id) {
+      const selectedSub = subjectOptions.find(
+        (opt) => opt.value === domainData.HPC_sm_id
+      );
+      if (selectedSub) {
+        setSelectedSubject(selectedSub);
+        setSubjectIdForManage(selectedSub.value);
+        didPrefill = true;
+      }
+    }
 
-    //   if (selectedSub) {
-    //     setSelectedSubject(selectedSub); // must be the exact object from options
-    //     setSubjectIdForManage(selectedSub.value);
-    //   }
-    // }
-
-    // Prefill text fields
+    // Prefill text fields (safe any time)
     setName(domainData.name || "");
     setCurriculumGoal(domainData.curriculum_goal || "");
 
-    hasPrefilled.current = true; // ✅ mark as done
-  }, [domainData, classOptions]);
-
-  useEffect(() => {
-    if (!domainData) return;
-    if (!subjectOptions || subjectOptions.length === 0) return;
-
-    // find the exact object from options array
-    const selectedSub = subjectOptions.find(
-      (opt) => opt.value === domainData.HPC_sm_id
-    );
-
-    if (selectedSub) {
-      setSelectedSubject(selectedSub); // must be exact object from options
-      setSubjectIdForManage(selectedSub.value);
+    // ✅ only lock once both options have been processed
+    if (didPrefill) {
+      hasPrefilled.current = true;
     }
-  }, [domainData, subjectOptions]);
+  }, [domainData, classOptions, subjectOptions]);
 
   useEffect(() => {
     if (roles.length > 0) {
