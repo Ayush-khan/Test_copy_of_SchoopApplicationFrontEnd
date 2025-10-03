@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import html2pdf from "html2pdf.js";
+// import html2pdf from "html2pdf.js";
 import axios from "axios";
 import React from "react";
-import { useReactToPrint } from "react-to-print";
+// import { useReactToPrint } from "react-to-print";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -355,10 +355,10 @@ const HPCReportCard = () => {
 
   const pdfRef = useRef();
 
-  const handlePrint = useReactToPrint({
-    contentRef: pdfRef,
-    documentTitle: "HPC Report Card",
-  });
+  //   const handlePrint = useReactToPrint({
+  //     contentRef: pdfRef,
+  //     documentTitle: "HPC Report Card",
+  //   });
 
   // const handleDownload = async () => {
   //   const element = document.querySelector(".print-container");
