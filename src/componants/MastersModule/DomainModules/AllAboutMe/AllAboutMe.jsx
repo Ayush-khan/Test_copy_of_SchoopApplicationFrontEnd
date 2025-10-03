@@ -245,7 +245,7 @@ const AllAboutMe = () => {
     setTermError("");
 
     if (!selectedStudentId) {
-      setStudentError("Please select Class.");
+      setStudentError("Please select class.");
       setLoadingForSearch(false);
       return;
     }

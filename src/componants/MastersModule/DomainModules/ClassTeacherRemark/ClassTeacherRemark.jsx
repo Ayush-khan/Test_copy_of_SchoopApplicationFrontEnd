@@ -241,7 +241,7 @@ const ClassTeacherRemark = () => {
     setTermError("");
 
     if (!selectedStudentId) {
-      setStudentError("Please select Class.");
+      setStudentError("Please select class.");
       setLoadingForSearch(false);
       return;
     }
@@ -251,7 +251,7 @@ const ClassTeacherRemark = () => {
       return;
     }
     if (!selectedTerms) {
-      setTermError("Please select Term.");
+      setTermError("Please select term.");
       setLoadingForSearch(false);
       return;
     }

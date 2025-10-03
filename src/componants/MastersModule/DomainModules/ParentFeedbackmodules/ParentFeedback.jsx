@@ -238,7 +238,7 @@ const ParentFeedback = () => {
     setTermError("");
 
     if (!selectedStudentId) {
-      setStudentError("Please select Class.");
+      setStudentError("Please select class.");
       setLoadingForSearch(false);
       return;
     }
@@ -248,7 +248,7 @@ const ParentFeedback = () => {
       return;
     }
     if (!selectedTerms) {
-      setTermError("Please select Term.");
+      setTermError("Please select term.");
       setLoadingForSearch(false);
       return;
     }
