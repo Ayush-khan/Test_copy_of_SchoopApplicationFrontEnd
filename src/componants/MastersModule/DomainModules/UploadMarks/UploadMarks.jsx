@@ -1230,7 +1230,7 @@ function UploadMarks() {
                 {/* Table */}
                 <div className="card-body px-4 py-2 w-full">
                   <div className="relative overflow-auto max-h-[30rem] rounded-lg shadow border border-gray-200">
-                    <table className="min-w-full table-auto border-collapse text-sm text-gray-800">
+                    <table className="min-w-full table-auto  text-sm text-gray-800">
                       <thead
                         className="bg-gray-200 text-blue-900 font-semibold sticky top-0  shadow-md"
                         style={{

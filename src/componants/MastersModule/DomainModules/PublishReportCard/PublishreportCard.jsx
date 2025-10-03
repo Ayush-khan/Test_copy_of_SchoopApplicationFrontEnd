@@ -26,6 +26,8 @@ const PublishreportCard = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timetable, setTimetable] = useState([]);
   const [publishStatus, setPublishStatus] = useState({}); // { termId: "Y"/"N" }
+  const [isReadyToRender, setIsReadyToRender] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true); // NEW
 
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
@@ -44,16 +46,34 @@ const PublishreportCard = () => {
   />;
   useEffect(() => {
     const init = async () => {
-      await fetchTerms(); // 🟢 Fetch terms first
-
-      const regId = await fetchData(); // 🟢 Then get reg_id
-      if (regId) {
-        await fetchClasses(regId); // 🟢 Finally fetch classes
+      try {
+        await fetchTerms();
+        const regId = await fetchData();
+        if (regId) {
+          await fetchClasses(regId);
+        }
+      } catch (err) {
+        console.error("Error in init:", err);
+      } finally {
+        setInitialLoading(false); // ✅ mark done when everything is fetched
       }
     };
 
     init();
   }, []);
+
+  useEffect(() => {
+    if (selectedClassId && selectedSectionId && termIds.length > 0) {
+      console.log("useEffect triggered fetchPublishStatus");
+      fetchPublishStatus(selectedClassId, selectedSectionId)
+        .then(() => {
+          setIsReadyToRender(true);
+        })
+        .catch((e) =>
+          console.error("Error in useEffect fetchPublishStatus", e)
+        );
+    }
+  }, [selectedClassId, selectedSectionId, termIds]);
 
   const fetchTerms = async () => {
     try {
@@ -136,17 +156,22 @@ const PublishreportCard = () => {
       const classes = response?.data?.data || [];
       setStudentNameWithClassId(classes);
 
-      // ✅ Auto-select first class
       if (classes.length > 0) {
         const firstClass = {
           value: classes[0].class_id,
           section_id: classes[0].section_id,
           label: `${classes[0].classname} ${classes[0].sectionname}`,
         };
+
         setSelectedStudent(firstClass);
         setSelectedClassId(firstClass.value);
         setSelectedSectionId(firstClass.section_id);
-        await fetchPublishStatus(firstClass.value, firstClass.section_id); // 🟢 Fetch publish status
+
+        // ✅ Only fetch publish status after terms are loaded
+        if (termIds.length > 0) {
+          await fetchPublishStatus(firstClass.value, firstClass.section_id);
+          setIsReadyToRender(true); // ✅ Mark ready to render
+        }
       }
     } catch (error) {
       toast.error("Error fetching Classes");
@@ -155,36 +180,56 @@ const PublishreportCard = () => {
       setLoadingExams(false);
     }
   };
+
   const fetchPublishStatus = async (classId, sectionId) => {
-    if (!classId || !sectionId || !termIds?.length) return;
-
-    setLoading(true); // 🔥 Show term section loader
-
+    console.log(
+      "fetchPublishStatus called with:",
+      classId,
+      sectionId,
+      "termIds:",
+      termIds
+    );
+    if (!classId || !sectionId || !termIds?.length) {
+      console.warn(
+        "Skipping fetchPublishStatus because missing class, section, or termIds"
+      );
+      return;
+    }
+    setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
       const results = {};
-
       for (const termId of termIds) {
-        const res = await axios.get(
-          `${API_URL}/api/get_hpcreportcardpublishvalue`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: {
-              class_id: classId,
-              section_id: sectionId,
-              term_id: termId,
-            },
-          }
+        console.log("Fetching for termId:", termId);
+        const requests = termIds.map((termId) =>
+          axios
+            .get(`${API_URL}/api/get_hpcreportcardpublishvalue`, {
+              headers: { Authorization: `Bearer ${token}` },
+              params: {
+                class_id: classId,
+                section_id: sectionId,
+                term_id: termId,
+              },
+            })
+            .then((res) => ({ termId, status: res?.data?.data || "N" }))
         );
-        results[termId] = res?.data?.data || "N";
-      }
 
-      setPublishStatus(results);
+        const responses = await Promise.all(requests);
+        const results = {};
+        responses.forEach(({ termId, status }) => {
+          results[termId] = status;
+        });
+        setPublishStatus(results);
+      }
     } catch (error) {
       toast.error("Failed to load publish statuses");
-      console.error(error);
+      console.error("Error in fetchPublishStatus:", error);
     } finally {
-      setLoading(false); // ✅ Hide term section loader
+      setLoading(false);
+      console.log(
+        "fetchPublishStatus done, loading => false, publishStatus:",
+        publishStatus
+      );
     }
   };
 
@@ -194,7 +239,18 @@ const PublishreportCard = () => {
     setSelectedClassId(selectedOption?.value);
     setSelectedSectionId(selectedOption?.section_id);
 
-    await fetchPublishStatus(selectedOption?.value, selectedOption?.section_id); // ⬅️ Fetch
+    if (
+      selectedOption?.value &&
+      selectedOption?.section_id &&
+      termIds.length > 0
+    ) {
+      await fetchPublishStatus(
+        selectedOption?.value,
+        selectedOption?.section_id
+      );
+      console.log("In handleStudentSelect, setting isReadyToRender = true");
+      setIsReadyToRender(true);
+    }
   };
 
   const studentOptions = useMemo(
@@ -309,8 +365,8 @@ const PublishreportCard = () => {
               <div className="grid grid-cols-[220px_repeat(auto-fit,minmax(150px,1fr))] px-4 py-4 items-center bg-white text-sm">
                 {/* Select Dropdown */}
                 <div className="max-w-xs">
-                  {loadingExams ? (
-                    <div className="flex items-center gap-2 text-blue-600">
+                  {initialLoading ? (
+                    <div className="text-blue-600 text-sm flex items-center gap-2 py-3 px-2">
                       <svg
                         className="animate-spin h-5 w-5"
                         xmlns="http://www.w3.org/2000/svg"
@@ -331,7 +387,7 @@ const PublishreportCard = () => {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                         ></path>
                       </svg>
-                      Loading Classes...
+                      Loading data, please wait...
                     </div>
                   ) : (
                     <>
@@ -369,7 +425,7 @@ const PublishreportCard = () => {
                 </div>
 
                 {/* Term Buttons */}
-                {loading ? (
+                {!isReadyToRender || loading ? (
                   <div className="flex justify-center items-center h-full py-6">
                     <svg
                       className="animate-spin h-6 w-6 text-indigo-500 mr-2"
