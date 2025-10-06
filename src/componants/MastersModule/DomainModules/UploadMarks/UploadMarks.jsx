@@ -81,6 +81,7 @@ function UploadMarks() {
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
   const [regId, setRegId] = useState(null);
+  const [actionInProgress, setActionInProgress] = useState(false);
 
   const [examOptions, setExamOptions] = useState([]);
   const [termsOptions, setTermsOptions] = useState([]);
@@ -465,7 +466,7 @@ function UploadMarks() {
       toast.warning("Please select Class, Subject, and Exam.");
       return;
     }
-
+    setActionInProgress(true); // ✅ Disable all buttons
     setIsSubmitting(true);
 
     const token = localStorage.getItem("authToken");
@@ -548,6 +549,7 @@ function UploadMarks() {
       toast.error("An error occurred while publishing marks.");
     } finally {
       setIsSubmitting(false);
+      setActionInProgress(false); // ✅ Disable all buttons
     }
   };
   const handlePublishMarks = async () => {
@@ -1298,7 +1300,7 @@ function UploadMarks() {
                   )}
 
                   {/* Search + Publish */}
-                  <div className="flex gap-2 w-full md:w-auto items-center justify-end">
+                  <div className="flex flex-wrap gap-2 w-full md:w-auto items-center justify-center ">
                     <input
                       type="text"
                       className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -1307,34 +1309,46 @@ function UploadMarks() {
                     />
                     {/* Save */}
                     <button
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm rounded-md shadow transition duration-200"
+                      className={`px-4 py-2 text-sm rounded-md  transition duration-200  shadow-md ${
+                        isSubmitting || hasAnyError
+                          ? "bg-blue-600 hover:bg-blue-700 cursor-not-allowed text-white"
+                          : "bg-blue-600 hover:bg-blue-700 text-white"
+                      }`}
                       onClick={handleSaveMarks}
-                      disabled={isSubmitting || hasAnyError}
+                      disabled={isSubmitting || hasAnyError || actionInProgress}
                     >
                       {isSubmitting ? "Saving..." : "Save"}
                     </button>
 
-                    {/* Publish Marks */}
+                    {/* Publish */}
                     <button
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm rounded-md shadow transition duration-200"
+                      className={`px-4 py-2 text-sm rounded-md  transition duration-200 shadow-md ${
+                        isPublishing || hasAnyError
+                          ? "bg-green-600 hover:bg-green-700 cursor-not-allowed text-white"
+                          : "bg-green-600 hover:bg-green-700 text-white"
+                      }`}
                       onClick={handlePublishMarks}
-                      disabled={isPublishing || hasAnyError}
+                      disabled={isSubmitting || hasAnyError || actionInProgress}
                     >
                       {isPublishing ? "Publishing..." : "Publish Marks"}
                     </button>
 
-                    {/* Delete Marks */}
+                    {/* Delete */}
                     <button
-                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-sm rounded-md shadow transition duration-200"
+                      className={`px-4 py-2 text-sm rounded-md  transition duration-200 shadow-md ${
+                        isDeleting
+                          ? "bg-red-600 hover:bg-red-700 text-white"
+                          : "bg-red-600 hover:bg-red-700 text-white"
+                      }`}
                       onClick={handleDeleteMarks}
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || hasAnyError || actionInProgress}
                     >
                       {isDeleting ? "Deleting..." : "Delete"}
                     </button>
 
                     {/* Back */}
                     <button
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 text-sm rounded-md shadow transition duration-200"
+                      className="px-4 py-2 text-sm rounded-md  transition duration-200 shadow-md bg-yellow-500 hover:bg-yellow-600 text-white"
                       onClick={() => {
                         setLoadingEvent(false);
                         setDataUploaded(false);
@@ -1537,6 +1551,58 @@ function UploadMarks() {
                         )}
                       </tbody>
                     </table>
+                  </div>
+                  <div className="flex flex-wrap gap-3 w-full md:w-auto items-center justify-center mt-4">
+                    {/* Save */}
+                    <button
+                      className={`px-4 py-2 text-sm rounded-md  transition duration-200  shadow-md ${
+                        isSubmitting || hasAnyError
+                          ? "bg-blue-300 cursor-not-allowed text-white"
+                          : "bg-blue-600 hover:bg-blue-700 text-white"
+                      }`}
+                      onClick={handleSaveMarks}
+                      disabled={isSubmitting || hasAnyError || actionInProgress}
+                    >
+                      {isSubmitting ? "Saving..." : "Save"}
+                    </button>
+
+                    {/* Publish */}
+                    <button
+                      className={`px-4 py-2 text-sm rounded-md  transition duration-200 shadow-md ${
+                        isPublishing || hasAnyError
+                          ? "bg-blue-300 cursor-not-allowed text-white"
+                          : "bg-green-600 hover:bg-green-700 text-white"
+                      }`}
+                      onClick={handlePublishMarks}
+                      disabled={isSubmitting || hasAnyError || actionInProgress}
+                    >
+                      {isPublishing ? "Publishing..." : "Publish Marks"}
+                    </button>
+
+                    {/* Delete */}
+                    <button
+                      className={`px-4 py-2 text-sm rounded-md  transition duration-200 shadow-md ${
+                        isDeleting
+                          ? "bg-red-300 cursor-not-allowed text-white"
+                          : "bg-red-600 hover:bg-red-700 text-white"
+                      }`}
+                      onClick={handleDeleteMarks}
+                      disabled={isSubmitting || hasAnyError || actionInProgress}
+                    >
+                      {isDeleting ? "Deleting..." : "Delete"}
+                    </button>
+
+                    {/* Back */}
+                    <button
+                      className="px-4 py-2 text-sm rounded-md  transition duration-200 shadow-md bg-yellow-500 hover:bg-yellow-600 text-white"
+                      onClick={() => {
+                        setLoadingEvent(false);
+                        setDataUploaded(false);
+                        setTableDataReady(false);
+                      }}
+                    >
+                      Back
+                    </button>
                   </div>
                 </div>
               </div>
