@@ -2,11 +2,8 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MdOutlineRemoveRedEye } from "react-icons/md";
-import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { FaSave, FaUpload, FaTrash, FaArrowLeft } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -527,7 +524,7 @@ function UploadMarks() {
 
       // ✅ Send POST request
       const response = await axios.post(
-        `${API_URL}/api/save_studentmarkss`,
+        `${API_URL}/api/save_studentmarks`,
         payload,
         {
           headers: {
@@ -575,7 +572,7 @@ function UploadMarks() {
       formData.append("subject_id", selectedSubject.value);
 
       const response = await axios.post(
-        `${API_URL}/api/update_publishstudentmarkss`,
+        `${API_URL}/api/update_publishstudentmarks`,
         formData,
         {
           headers: {
@@ -615,7 +612,7 @@ function UploadMarks() {
     }
 
     try {
-      const url = `${API_URL}/api/delete_studentmarkss?exam_id=${selectedExam.value}&class_id=${selectedStudent.valueclass}&section_id=${selectedStudent.value}&subject_id=${selectedSubject.value}`;
+      const url = `${API_URL}/api/delete_studentmarks?exam_id=${selectedExam.value}&class_id=${selectedStudent.valueclass}&section_id=${selectedStudent.value}&subject_id=${selectedSubject.value}`;
 
       const response = await axios.delete(url, {
         headers: {
@@ -914,10 +911,34 @@ function UploadMarks() {
       <div className="md:mx-auto md:w-[90%] p-4 bg-white mt-4 ">
         <ToastContainer />
 
-        <div className="w-full  flex flex-row justify-between">
+        <div className="w-full  flex flex-row item-center justify-between">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Enter exam marks
           </h3>
+          <div className="bg-blue-50  relative -left-6 border-l-2 border-r-2 px-6 text-[1em] border-pink-500 rounded-md shadow-md w-full md:w-auto">
+            <div className="flex flex-col md:flex-row md:items-center md:gap-3 mt-1 text-blue-800 font-medium space-y-1 md:space-y-0">
+              <div className="flex items-center gap-1">
+                <span className="text-lg">🏫</span>
+                <span className="text-blue-600">Class:</span>
+                <span>
+                  {selectedStudent?.class || "--"}{" "}
+                  {selectedStudent?.section || "--"}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <span className="text-lg">📖</span>
+                <span className="text-blue-600">Subject:</span>
+                <span>{selectedSubject?.label || "--"}</span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <span className="text-lg">📝</span>
+                <span className="text-blue-600">Exam:</span>
+                <span>{selectedExam?.label || "--"}</span>
+              </div>
+            </div>
+          </div>
           <RxCross1
             className=" relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
@@ -1300,63 +1321,77 @@ function UploadMarks() {
                   )}
 
                   {/* Search + Publish */}
-                  <div className="flex flex-wrap gap-2 w-full md:w-auto items-center justify-center ">
+                  <div className="flex flex-wrap gap-2.5 w-full md:w-auto items-center justify-center">
                     <input
                       type="text"
-                      className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full md:w-48 focus:outline-none focus:ring-2 focus:ring-blue-400"
                       placeholder="Search"
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    {/* Save */}
-                    <button
-                      className={`px-4 py-2 text-sm rounded-md  transition duration-200  shadow-md ${
-                        isSubmitting || hasAnyError
-                          ? "bg-blue-600 hover:bg-blue-700 cursor-not-allowed text-white"
-                          : "bg-blue-600 hover:bg-blue-700 text-white"
-                      }`}
-                      onClick={handleSaveMarks}
-                      disabled={isSubmitting || hasAnyError || actionInProgress}
-                    >
-                      {isSubmitting ? "Saving..." : "Save"}
-                    </button>
 
-                    {/* Publish */}
-                    <button
-                      className={`px-4 py-2 text-sm rounded-md  transition duration-200 shadow-md ${
-                        isPublishing || hasAnyError
-                          ? "bg-green-600 hover:bg-green-700 cursor-not-allowed text-white"
-                          : "bg-green-600 hover:bg-green-700 text-white"
-                      }`}
-                      onClick={handlePublishMarks}
-                      disabled={isSubmitting || hasAnyError || actionInProgress}
-                    >
-                      {isPublishing ? "Publishing..." : "Publish Marks"}
-                    </button>
+                    {/* Icon Button with Hover Label */}
+                    {[
+                      {
+                        Icon: FaSave,
+                        onClick: handleSaveMarks,
+                        disabled:
+                          isSubmitting || hasAnyError || actionInProgress,
+                        color: "blue",
+                        title: "Save",
+                      },
+                      {
+                        Icon: FaUpload,
+                        onClick: handlePublishMarks,
+                        disabled:
+                          isPublishing || hasAnyError || actionInProgress,
+                        color: "green",
+                        title: "Publish",
+                      },
+                      {
+                        Icon: FaTrash,
+                        onClick: handleDeleteMarks,
+                        disabled: isDeleting || hasAnyError || actionInProgress,
+                        color: "red",
+                        title: "Delete",
+                      },
+                      {
+                        Icon: FaArrowLeft,
+                        onClick: () => {
+                          setLoadingEvent(false);
+                          setDataUploaded(false);
+                          setTableDataReady(false);
+                        },
+                        disabled: false,
+                        color: "yellow",
+                        title: "Back",
+                      },
+                    ].map(
+                      ({ Icon, onClick, disabled, color, title }, index) => (
+                        <div key={index} className="relative group">
+                          <button
+                            className={`
+          p-2 text-lg rounded-full transition duration-200 shadow-md
+          ${
+            disabled
+              ? `bg-${color}-600 cursor-not-allowed`
+              : `bg-${color}-600 hover:bg-${color}-700`
+          }
+          text-white
+        `}
+                            onClick={onClick}
+                            disabled={disabled}
+                            title={title}
+                          >
+                            <Icon />
+                          </button>
 
-                    {/* Delete */}
-                    <button
-                      className={`px-4 py-2 text-sm rounded-md  transition duration-200 shadow-md ${
-                        isDeleting
-                          ? "bg-red-600 hover:bg-red-700 text-white"
-                          : "bg-red-600 hover:bg-red-700 text-white"
-                      }`}
-                      onClick={handleDeleteMarks}
-                      disabled={isSubmitting || hasAnyError || actionInProgress}
-                    >
-                      {isDeleting ? "Deleting..." : "Delete"}
-                    </button>
-
-                    {/* Back */}
-                    <button
-                      className="px-4 py-2 text-sm rounded-md  transition duration-200 shadow-md bg-yellow-500 hover:bg-yellow-600 text-white"
-                      onClick={() => {
-                        setLoadingEvent(false);
-                        setDataUploaded(false);
-                        setTableDataReady(false);
-                      }}
-                    >
-                      Back
-                    </button>
+                          {/* Hover label */}
+                          <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                            {title}
+                          </span>
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
 
@@ -1552,57 +1587,70 @@ function UploadMarks() {
                       </tbody>
                     </table>
                   </div>
-                  <div className="flex flex-wrap gap-3 w-full md:w-auto items-center justify-center mt-4">
-                    {/* Save */}
-                    <button
-                      className={`px-4 py-2 text-sm rounded-md  transition duration-200  shadow-md ${
-                        isSubmitting || hasAnyError
-                          ? "bg-blue-300 cursor-not-allowed text-white"
-                          : "bg-blue-600 hover:bg-blue-700 text-white"
-                      }`}
-                      onClick={handleSaveMarks}
-                      disabled={isSubmitting || hasAnyError || actionInProgress}
-                    >
-                      {isSubmitting ? "Saving..." : "Save"}
-                    </button>
+                  <div className="flex flex-wrap gap-2.5 w-full md:w-auto items-center justify-center my-2">
+                    {/* Icon Button with Hover Label */}
+                    {[
+                      {
+                        Icon: FaSave,
+                        onClick: handleSaveMarks,
+                        disabled:
+                          isSubmitting || hasAnyError || actionInProgress,
+                        color: "blue",
+                        title: "Save",
+                      },
+                      {
+                        Icon: FaUpload,
+                        onClick: handlePublishMarks,
+                        disabled:
+                          isPublishing || hasAnyError || actionInProgress,
+                        color: "green",
+                        title: "Publish",
+                      },
+                      {
+                        Icon: FaTrash,
+                        onClick: handleDeleteMarks,
+                        disabled: isDeleting || hasAnyError || actionInProgress,
+                        color: "red",
+                        title: "Delete",
+                      },
+                      {
+                        Icon: FaArrowLeft,
+                        onClick: () => {
+                          setLoadingEvent(false);
+                          setDataUploaded(false);
+                          setTableDataReady(false);
+                        },
+                        disabled: false,
+                        color: "yellow",
+                        title: "Back",
+                      },
+                    ].map(
+                      ({ Icon, onClick, disabled, color, title }, index) => (
+                        <div key={index} className="relative group">
+                          <button
+                            className={`
+          p-2 text-lg rounded-full transition duration-200 shadow-md
+          ${
+            disabled
+              ? `bg-${color}-600 cursor-not-allowed`
+              : `bg-${color}-600 hover:bg-${color}-700`
+          }
+          text-white
+        `}
+                            onClick={onClick}
+                            disabled={disabled}
+                            title={title}
+                          >
+                            <Icon />
+                          </button>
 
-                    {/* Publish */}
-                    <button
-                      className={`px-4 py-2 text-sm rounded-md  transition duration-200 shadow-md ${
-                        isPublishing || hasAnyError
-                          ? "bg-blue-300 cursor-not-allowed text-white"
-                          : "bg-green-600 hover:bg-green-700 text-white"
-                      }`}
-                      onClick={handlePublishMarks}
-                      disabled={isSubmitting || hasAnyError || actionInProgress}
-                    >
-                      {isPublishing ? "Publishing..." : "Publish Marks"}
-                    </button>
-
-                    {/* Delete */}
-                    <button
-                      className={`px-4 py-2 text-sm rounded-md  transition duration-200 shadow-md ${
-                        isDeleting
-                          ? "bg-red-300 cursor-not-allowed text-white"
-                          : "bg-red-600 hover:bg-red-700 text-white"
-                      }`}
-                      onClick={handleDeleteMarks}
-                      disabled={isSubmitting || hasAnyError || actionInProgress}
-                    >
-                      {isDeleting ? "Deleting..." : "Delete"}
-                    </button>
-
-                    {/* Back */}
-                    <button
-                      className="px-4 py-2 text-sm rounded-md  transition duration-200 shadow-md bg-yellow-500 hover:bg-yellow-600 text-white"
-                      onClick={() => {
-                        setLoadingEvent(false);
-                        setDataUploaded(false);
-                        setTableDataReady(false);
-                      }}
-                    >
-                      Back
-                    </button>
+                          {/* Tooltip label above the icon */}
+                          <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                            {title}
+                          </span>
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
               </div>
