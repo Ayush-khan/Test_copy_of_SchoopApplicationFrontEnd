@@ -102,7 +102,7 @@ function UploadMarks() {
   const [subjectError, setSubjectError] = useState("");
   const navigate = useNavigate();
 
-  const [expectedFileName, setExpectedFileName] = useState("");
+  const [expectedFileName, setExpectedFileName] = useState(null);
   const [loadingMarks, setLoadingMarks] = useState(false);
   const [searching, setSearching] = useState(false);
   const [filteredStudents, setFilteredStudents] = useState([]);
@@ -429,6 +429,8 @@ function UploadMarks() {
       setLoadingForSearch(false);
       return;
     }
+    setSelectedFile(null);
+    setExpectedFileName(null);
 
     try {
       setShowUploadSection(false);
@@ -438,6 +440,13 @@ function UploadMarks() {
       // Fetch headings and pass them to marks
       const headings = await fetchMarksHeadings();
       await fetchStudentMarks(headings); // pass here
+      const class_name = selectedStudent.class?.replace(/\s+/g, "");
+      const section_name = selectedStudent.section?.replace(/\s+/g, "");
+      const subject_name = selectedSubject.label?.replace(/\s+/g, "");
+      const exam_name = selectedExam.label?.replace(/\s+/g, "");
+
+      const filename = `${class_name}${section_name}_${subject_name}_${exam_name}.csv`;
+      setExpectedFileName(filename); // <-- this line sets the expected file name
 
       setDataUploaded(true);
       setTableDataReady(true);
@@ -549,10 +558,80 @@ function UploadMarks() {
       setActionInProgress(false); // ✅ Disable all buttons
     }
   };
+  // const handlePublishMarks = async () => {
+  //   if (!selectedStudent || !selectedSubject || !selectedExam) {
+  //     toast.warning("Please select Class, Subject, and Exam.");
+  //     return;
+  //   }
+
+  //   setIsPublishing(true);
+
+  //   const token = localStorage.getItem("authToken");
+  //   if (!token) {
+  //     toast.error("Authentication required. Please log in.");
+  //     setIsPublishing(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("class_id", selectedStudent.valueclass);
+  //     formData.append("section_id", selectedStudent.value);
+  //     formData.append("exam_id", selectedExam.value);
+  //     formData.append("subject_id", selectedSubject.value);
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/update_publishstudentmarks`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "multipart/form-data",
+  //         },
+  //       }
+  //     );
+
+  //     if (response?.data?.status) {
+  //       toast.success(
+  //         response?.data?.message || "Marks published successfully."
+  //       );
+  //     } else {
+  //       toast.error(response?.data?.message || "Failed to publish marks.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error publishing marks:", error);
+  //     toast.error("Something went wrong while publishing marks.");
+  //   } finally {
+  //     setIsPublishing(false);
+  //   }
+  // };
   const handlePublishMarks = async () => {
     if (!selectedStudent || !selectedSubject || !selectedExam) {
       toast.warning("Please select Class, Subject, and Exam.");
       return;
+    }
+
+    // Check for empty marks if present is Y
+    for (let student of students) {
+      const fullName = [student.first_name, student.mid_name, student.last_name]
+        .filter(Boolean)
+        .map(
+          (name) => name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+        )
+        .join(" ");
+
+      for (let heading of marksHeadings) {
+        const hid = heading.marks_headings_id;
+        const isPresent = student.presentMap?.[hid] === "Y";
+        const markValue = student.marksMap?.[hid];
+        console.log("markValues-->", markValue);
+        if (isPresent && (markValue === "" || markValue == null)) {
+          toast.warning(
+            `Please enter marks for ${fullName}. Please save the data before publishing.`
+          );
+          return; // stop the publish process
+        }
+      }
     }
 
     setIsPublishing(true);
@@ -596,6 +675,7 @@ function UploadMarks() {
       setIsPublishing(false);
     }
   };
+
   const handleDeleteMarks = async () => {
     if (!selectedStudent || !selectedSubject || !selectedExam) {
       toast.warning("Please select Class, Subject, and Exam.");
@@ -763,6 +843,7 @@ function UploadMarks() {
         toast.success("File uploaded successfully!");
         setUploadStatus("success");
         setSelectedFile(null);
+        setExpectedFileName(null);
         // Agar table ya list reload karna hai:
         handleSearch?.();
       } else {
@@ -830,6 +911,7 @@ function UploadMarks() {
     setShowUploadSection(false);
     // setDataUploaded(false);
     setSelectedFile(null);
+    // setExpectedFileName(null);
     setErrorMessage("");
     setUploadStatus("");
   };
@@ -1486,7 +1568,10 @@ function UploadMarks() {
                                 {marksHeadings.map((heading) => {
                                   const hid = heading.marks_headings_id;
                                   const max = heading.highest_marks;
-                                  const value = stu.marksMap?.[hid] || "";
+                                  const value = stu.marksMap?.[hid];
+                                  const displayValue =
+                                    value === 0 || value ? value : "";
+
                                   const error = stu.errors?.[hid];
                                   const presentValue =
                                     stu.presentMap?.[hid] ?? "Y";
@@ -1544,7 +1629,7 @@ function UploadMarks() {
                                               ? "border border-red-500"
                                               : "border border-gray-300"
                                           } disabled:bg-gray-100`}
-                                          value={value}
+                                          value={displayValue}
                                           disabled={presentValue !== "Y"}
                                           max={max}
                                           min={0}
@@ -1587,48 +1672,53 @@ function UploadMarks() {
                       </tbody>
                     </table>
                   </div>
-                  <div className="flex flex-wrap gap-2.5 w-full md:w-auto items-center justify-center my-2">
-                    {/* Icon Button with Hover Label */}
-                    {[
-                      {
-                        Icon: FaSave,
-                        onClick: handleSaveMarks,
-                        disabled:
-                          isSubmitting || hasAnyError || actionInProgress,
-                        color: "blue",
-                        title: "Save",
-                      },
-                      {
-                        Icon: FaUpload,
-                        onClick: handlePublishMarks,
-                        disabled:
-                          isPublishing || hasAnyError || actionInProgress,
-                        color: "green",
-                        title: "Publish",
-                      },
-                      {
-                        Icon: FaTrash,
-                        onClick: handleDeleteMarks,
-                        disabled: isDeleting || hasAnyError || actionInProgress,
-                        color: "red",
-                        title: "Delete",
-                      },
-                      {
-                        Icon: FaArrowLeft,
-                        onClick: () => {
-                          setLoadingEvent(false);
-                          setDataUploaded(false);
-                          setTableDataReady(false);
-                        },
-                        disabled: false,
-                        color: "yellow",
-                        title: "Back",
-                      },
-                    ].map(
-                      ({ Icon, onClick, disabled, color, title }, index) => (
-                        <div key={index} className="relative group">
-                          <button
-                            className={`
+                  <div className="w-full mt-3">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-2 shadow-sm">
+                      <div className="flex flex-wrap gap-4 justify-center items-center">
+                        {[
+                          {
+                            Icon: FaSave,
+                            onClick: handleSaveMarks,
+                            disabled:
+                              isSubmitting || hasAnyError || actionInProgress,
+                            color: "blue",
+                            title: "Save",
+                          },
+                          {
+                            Icon: FaUpload,
+                            onClick: handlePublishMarks,
+                            disabled:
+                              isPublishing || hasAnyError || actionInProgress,
+                            color: "green",
+                            title: "Publish",
+                          },
+                          {
+                            Icon: FaTrash,
+                            onClick: handleDeleteMarks,
+                            disabled:
+                              isDeleting || hasAnyError || actionInProgress,
+                            color: "red",
+                            title: "Delete",
+                          },
+                          {
+                            Icon: FaArrowLeft,
+                            onClick: () => {
+                              setLoadingEvent(false);
+                              setDataUploaded(false);
+                              setTableDataReady(false);
+                            },
+                            disabled: false,
+                            color: "yellow",
+                            title: "Back",
+                          },
+                        ].map(
+                          (
+                            { Icon, onClick, disabled, color, title },
+                            index
+                          ) => (
+                            <div key={index} className="relative group">
+                              <button
+                                className={`
           p-2 text-lg rounded-full transition duration-200 shadow-md
           ${
             disabled
@@ -1637,20 +1727,22 @@ function UploadMarks() {
           }
           text-white
         `}
-                            onClick={onClick}
-                            disabled={disabled}
-                            title={title}
-                          >
-                            <Icon />
-                          </button>
+                                onClick={onClick}
+                                disabled={disabled}
+                                title={title}
+                              >
+                                <Icon />
+                              </button>
 
-                          {/* Tooltip label above the icon */}
-                          <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
-                            {title}
-                          </span>
-                        </div>
-                      )
-                    )}
+                              {/* Tooltip label above the icon */}
+                              <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                                {title}
+                              </span>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
