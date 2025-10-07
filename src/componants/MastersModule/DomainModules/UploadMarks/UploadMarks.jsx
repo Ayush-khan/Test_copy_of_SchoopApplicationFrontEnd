@@ -527,7 +527,7 @@ function UploadMarks() {
 
       // ✅ Send POST request
       const response = await axios.post(
-        `${API_URL}/api/save_studentmarks`,
+        `${API_URL}/api/save_studentmarkss`,
         payload,
         {
           headers: {
@@ -575,7 +575,7 @@ function UploadMarks() {
       formData.append("subject_id", selectedSubject.value);
 
       const response = await axios.post(
-        `${API_URL}/api/update_publishstudentmarks`,
+        `${API_URL}/api/update_publishstudentmarkss`,
         formData,
         {
           headers: {
@@ -615,7 +615,7 @@ function UploadMarks() {
     }
 
     try {
-      const url = `${API_URL}/api/delete_studentmarks?exam_id=${selectedExam.value}&class_id=${selectedStudent.valueclass}&section_id=${selectedStudent.value}&subject_id=${selectedSubject.value}`;
+      const url = `${API_URL}/api/delete_studentmarkss?exam_id=${selectedExam.value}&class_id=${selectedStudent.valueclass}&section_id=${selectedStudent.value}&subject_id=${selectedSubject.value}`;
 
       const response = await axios.delete(url, {
         headers: {

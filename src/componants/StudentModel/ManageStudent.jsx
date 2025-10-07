@@ -59,6 +59,7 @@ function ManageSubjectList() {
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
+  const [showDownloadReportCard, setShowDownloadReportCard] = useState(false);
 
   // State for form fields and validation errors
   const [setPassword, setSetpassword] = useState("");
@@ -292,6 +293,87 @@ function ManageSubjectList() {
     }
   };
 
+  // const handleSearch = async (incomingSectionId = null) => {
+  //   if (isSubmitting) return;
+  //   setIsSubmitting(true);
+  //   setSubjects([]);
+  //   setNameError("");
+
+  //   const finalSectionId =
+  //     classIdForManage ||
+  //     incomingSectionId ||
+  //     location?.state?.section_id ||
+  //     null;
+
+  //   // 1️⃣ No field selected (all users)
+  //   if (roleId !== "T" && !selectedStudentId && !finalSectionId && !grNumber) {
+  //     setNameError("Please select at least one of them.");
+  //     // toast.error("Please select at least one of them!");
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+  //   // 2️⃣ Teacher tries to search GR No or student without selecting class
+  //   if (
+  //     roleId === "T" &&
+  //     !classIdForManage &&
+  //     (selectedStudentId || grNumber)
+  //   ) {
+  //     setNameError("Please select a class before searching!");
+  //     // toast.error("Please select a class before searching!");
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   setSearchTerm("");
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const queryParams = {};
+
+  //     if (selectedStudentId) queryParams.student_id = selectedStudentId;
+  //     if (finalSectionId) {
+  //       queryParams.section_id =
+  //         typeof finalSectionId === "object"
+  //           ? finalSectionId.id || finalSectionId.value || ""
+  //           : finalSectionId;
+  //     }
+  //     if (grNumber) queryParams.reg_no = grNumber;
+
+  //     const response = await axios.get(`${API_URL}/api/get_students`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //       params: queryParams,
+  //     });
+
+  //     const studentList =
+  //       response?.data?.students || response?.data?.student || [];
+
+  //     // 3️⃣ No students found for selected criteria
+  //     if (studentList.length === 0) {
+  //       setNameError("No student found for selected criteria.");
+  //       // toast.error("No student found for selected criteria!");
+  //     }
+
+  //     setSubjects(studentList);
+  //     setPageCount(Math.ceil(studentList.length / pageSize));
+
+  //     // HPC class check
+  //     const selectedClassId =
+  //       (typeof finalSectionId === "object"
+  //         ? finalSectionId.class_id
+  //         : selectedClass?.class_id) || null;
+  //     setIsHpcClass(selectedClassId && hpcClassIds.includes(selectedClassId));
+  //   } catch (error) {
+  //     console.log("error", error?.response?.data?.message);
+  //     setNameError(error?.response?.data?.message || "Something went wrong!");
+  //     // toast.error(error?.response?.data?.message || "Something went wrong!");
+  //   } finally {
+  //     setLoading(false);
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const handleSearch = async (incomingSectionId = null) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -307,19 +389,13 @@ function ManageSubjectList() {
     // 1️⃣ No field selected (all users)
     if (roleId !== "T" && !selectedStudentId && !finalSectionId && !grNumber) {
       setNameError("Please select at least one of them.");
-      // toast.error("Please select at least one of them!");
       setIsSubmitting(false);
       return;
     }
 
     // 2️⃣ Teacher tries to search GR No or student without selecting class
-    if (
-      roleId === "T" &&
-      !classIdForManage &&
-      (selectedStudentId || grNumber)
-    ) {
+    if (roleId === "T" && !classIdForManage && selectedStudentId) {
       setNameError("Please select a class before searching!");
-      // toast.error("Please select a class before searching!");
       setIsSubmitting(false);
       return;
     }
@@ -345,13 +421,21 @@ function ManageSubjectList() {
         params: queryParams,
       });
 
+      // 🟡 Handle specific case: API returns 402 or success=false
+      if (response.status === 402 || response?.data?.success === false) {
+        setNameError("This Gr no student not found");
+        setSubjects([]);
+        setLoading(false);
+        setIsSubmitting(false);
+        return;
+      }
+
       const studentList =
         response?.data?.students || response?.data?.student || [];
 
       // 3️⃣ No students found for selected criteria
       if (studentList.length === 0) {
         setNameError("No student found for selected criteria.");
-        // toast.error("No student found for selected criteria!");
       }
 
       setSubjects(studentList);
@@ -365,8 +449,13 @@ function ManageSubjectList() {
       setIsHpcClass(selectedClassId && hpcClassIds.includes(selectedClassId));
     } catch (error) {
       console.log("error", error?.response?.data?.message);
-      setNameError(error?.response?.data?.message || "Something went wrong!");
-      // toast.error(error?.response?.data?.message || "Something went wrong!");
+
+      // 🟥 Handle explicit 402 error here also
+      if (error?.response?.status === 402) {
+        setNameError("This Gr no student not found");
+      } else {
+        setNameError(error?.response?.data?.message || "Something went wrong!");
+      }
     } finally {
       setLoading(false);
       setIsSubmitting(false);
@@ -761,6 +850,7 @@ function ManageSubjectList() {
     setShowEditModal(false);
     setShowDeleteModal(false);
     setShowDActiveModal(false);
+    setShowDownloadReportCard(false);
   };
 
   useEffect(() => {
@@ -810,17 +900,91 @@ function ManageSubjectList() {
 
   // handle allot subject close model
   console.log("displayedSections", displayedSections);
-  const handleReportView = (subjectIsPass) => {
-    setCurrentSection(subjectIsPass);
 
-    console.log("handleCertificateView-->", subjectIsPass);
-    navigate(`/hPCReportCard/${subjectIsPass.student_id}`, {
-      state: {
-        student: subjectIsPass,
-        section_id: section_id || classIdForManage,
-      },
-    });
+  const handleReportView = (subject) => {
+    console.log("inside delete of subjectallotmenbt____", subject);
+    console.log("inside delete of subjectallotmenbt", subject.student_id);
+    const sectionId = subject.student_id;
+    const classToDelete = subjects.find((cls) => cls.student_id === sectionId);
+    // setCurrentClass(classToDelete);
+    setCurrentSection({ classToDelete });
+    console.log("the currecne t section", currentSection);
+    setCurrestSubjectNameForDelete(
+      currentSection?.CurrentSection?.student_name
+    );
+
+    setShowDownloadReportCard(true);
   };
+
+  const handleDownloadSumbit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token || !currentSection?.classToDelete?.student_id) {
+        throw new Error("Student ID is missing");
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/get_hpcreportcard?student_id=${currentSection.classToDelete.student_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Holistic Report Card downloaded successfully!");
+
+        // Extract filename from Content-Disposition header if available
+        const contentDisposition = response.headers["content-disposition"];
+        let filename = "HPC_ReportCard.pdf";
+
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="?(.+)"?/);
+          if (match && match[1]) filename = match[1];
+        }
+
+        // Create a blob URL for the PDF file
+        const pdfBlob = new Blob([response.data], { type: "application/pdf" });
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+
+        // Create a link to initiate the download
+        const link = document.createElement("a");
+        link.href = pdfUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(pdfUrl);
+
+        handleSearch();
+        handleCloseModal();
+      } else {
+        throw new Error("Failed to download the file");
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        toast.error(
+          `Error in Downloading Report Card: ${
+            error.response.data.error || error.message
+          }`
+        );
+      } else {
+        toast.error(`Error in Downloading Report Card: ${error.message}`);
+      }
+      console.error("Error in Downloading Report Card:", error);
+    } finally {
+      setIsSubmitting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
   return (
     <>
       {/* <ToastContainer /> */}
@@ -1452,6 +1616,58 @@ function ManageSubjectList() {
                       ? "Deactivate"
                       : "Activate"}
                     {/* {isSubmitting ? "Activating..." : "Active"} */}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDownloadReportCard && (
+        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">Confirm Download</h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    // className="btn-close text-red-600"
+                    onClick={handleCloseModal}
+                  />
+                  {console.log(
+                    "the currecnt section inside delete of the managesubjhect",
+                    currentSection
+                  )}
+                </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="modal-body">
+                  Are you sure you want to Download this HPC Report Card{" "}
+                  {`${[
+                    currentSection?.classToDelete?.first_name,
+                    currentSection?.classToDelete?.mid_name,
+                    currentSection?.classToDelete?.last_name,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}`}
+                  ?
+                </div>
+                <div className=" flex justify-end p-3">
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "#2196F3" }}
+                    className="btn text-white px-3 mb-2"
+                    onClick={handleDownloadSumbit}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Downloading..." : "Download"}
                   </button>
                 </div>
               </div>
