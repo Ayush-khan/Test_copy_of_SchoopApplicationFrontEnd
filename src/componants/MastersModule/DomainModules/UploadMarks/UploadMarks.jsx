@@ -20,6 +20,9 @@ function UploadMarks() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isDeleting, setIsDeleteting] = useState(false);
+  const [openDay, setOpenDay] = useState(null);
+  const [isEditLocked, setIsEditLocked] = useState(false);
+  const [editLockDateFormatted, setEditLockDateFormatted] = useState(" ");
 
   const [isSubmittingandPublishing, setIsSubmittingandPublishing] =
     useState(false);
@@ -390,6 +393,25 @@ function UploadMarks() {
 
       if (response.data.status === 200) {
         const data = response.data.data;
+        // ✅ Save open day
+        if (response.data.open_day) {
+          const openDayDate = new Date(response.data.open_day);
+          const today = new Date();
+
+          // Add 7 days
+          const openDayPlus7 = new Date(openDayDate);
+          openDayPlus7.setDate(openDayDate.getDate() + 7);
+
+          // ✅ Lock editing if today is after openDay + 7
+          if (today > openDayPlus7) {
+            setIsEditLocked(true);
+            setEditLockDateFormatted(openDayPlus7);
+          } else {
+            setIsEditLocked(false);
+          }
+
+          setOpenDay(response.data.open_day);
+        }
         processStudentMarksData(data, headings); // pass headings here
       } else {
         toast.error("No student marks found.");
@@ -409,6 +431,9 @@ function UploadMarks() {
     setExamError("");
     setSubjectError("");
     setLoadingForSearch(true);
+    setEditLockDateFormatted("");
+    setOpenDay(null);
+    setIsEditLocked(false);
 
     let hasError = false;
 
@@ -444,10 +469,8 @@ function UploadMarks() {
       const section_name = selectedStudent.section?.replace(/\s+/g, "");
       const subject_name = selectedSubject.label?.replace(/\s+/g, "");
       const exam_name = selectedExam.label?.replace(/\s+/g, "");
-
       const filename = `${class_name}${section_name}_${subject_name}_${exam_name}.csv`;
       setExpectedFileName(filename); // <-- this line sets the expected file name
-
       setDataUploaded(true);
       setTableDataReady(true);
     } catch (error) {
@@ -547,6 +570,7 @@ function UploadMarks() {
           response?.data?.message || "Student marks published successfully!"
         );
         setIsDataPosted(true); // Update flag if needed
+        handleSearch?.();
       } else {
         toast.error(response?.data?.message || "Failed to publish marks.");
       }
@@ -665,6 +689,7 @@ function UploadMarks() {
         toast.success(
           response?.data?.message || "Marks published successfully."
         );
+        handleSearch?.();
       } else {
         toast.error(response?.data?.message || "Failed to publish marks.");
       }
@@ -997,8 +1022,8 @@ function UploadMarks() {
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Enter exam marks
           </h3>
-          <div className="bg-blue-50  relative -left-6 border-l-2 border-r-2 px-6 text-[1em] border-pink-500 rounded-md shadow-md w-full md:w-auto">
-            <div className="flex flex-col md:flex-row md:items-center md:gap-3 mt-1 text-blue-800 font-medium space-y-1 md:space-y-0">
+          <div className="bg-blue-50  relative -left-6 bottom-2 border-l-2 border-r-2 px-6 text-[1em] border-pink-500 rounded-md shadow-md w-full md:w-auto">
+            <div className="flex flex-col md:flex-row md:items-center mt-1 md:gap-3 text-blue-800 font-medium space-y-1 md:space-y-0">
               <div className="flex items-center gap-1">
                 <span className="text-lg">🏫</span>
                 <span className="text-blue-600">Class:</span>
@@ -1388,6 +1413,18 @@ function UploadMarks() {
         {/* Step 3: Show table after upload */}
         {dataUploaded && tableDataReady && (
           <>
+            {isEditLocked && (
+              <div className="flex items-center gap-2 bg-yellow-50 border-l-4 border-r-4 border-yellow-500 text-yellow-800 px-4 py-2 rounded-md shadow-sm w-full text-sm font-medium">
+                <span className="text-xl">ℹ️</span>
+                <span className="truncate">
+                  Marks editing is locked. You cannot <strong>edit</strong>,{" "}
+                  <strong>delete</strong>, <strong>save</strong>, or{" "}
+                  <strong>publish</strong> after 7 days from Open Day (
+                  <strong>{openDay}</strong>).
+                </span>
+              </div>
+            )}
+
             <div className="w-full mt-6">
               <div className="card mx-auto w-full shadow-xl rounded-lg overflow-hidden border border-gray-200">
                 {/* Header */}
@@ -1588,6 +1625,7 @@ function UploadMarks() {
                                             type="checkbox"
                                             className="accent-blue-600 cursor-pointer"
                                             checked={presentValue === "Y"}
+                                            disabled={isEditLocked}
                                             onChange={(e) => {
                                               const updatedStudents = [
                                                 ...students,
@@ -1630,7 +1668,9 @@ function UploadMarks() {
                                               : "border border-gray-300"
                                           } disabled:bg-gray-100`}
                                           value={displayValue}
-                                          disabled={presentValue !== "Y"}
+                                          disabled={
+                                            isEditLocked || presentValue !== "Y"
+                                          }
                                           max={max}
                                           min={0}
                                           onChange={(e) => {
@@ -1675,72 +1715,86 @@ function UploadMarks() {
                   <div className="w-full mt-3">
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-2 shadow-sm">
                       <div className="flex flex-wrap gap-4 justify-center items-center">
-                        {[
-                          {
-                            Icon: FaSave,
-                            onClick: handleSaveMarks,
-                            disabled:
-                              isSubmitting || hasAnyError || actionInProgress,
-                            color: "blue",
-                            title: "Save",
-                          },
-                          {
-                            Icon: FaUpload,
-                            onClick: handlePublishMarks,
-                            disabled:
-                              isPublishing || hasAnyError || actionInProgress,
-                            color: "green",
-                            title: "Publish",
-                          },
-                          {
-                            Icon: FaTrash,
-                            onClick: handleDeleteMarks,
-                            disabled:
-                              isDeleting || hasAnyError || actionInProgress,
-                            color: "red",
-                            title: "Delete",
-                          },
-                          {
-                            Icon: FaArrowLeft,
-                            onClick: () => {
+                        {/* Conditionally render action buttons if not locked */}
+                        {!isEditLocked && (
+                          <>
+                            {[
+                              {
+                                Icon: FaSave,
+                                onClick: handleSaveMarks,
+                                disabled:
+                                  isSubmitting ||
+                                  hasAnyError ||
+                                  actionInProgress,
+                                color: "blue",
+                                title: "Save",
+                              },
+                              {
+                                Icon: FaUpload,
+                                onClick: handlePublishMarks,
+                                disabled:
+                                  isPublishing ||
+                                  hasAnyError ||
+                                  actionInProgress,
+                                color: "green",
+                                title: "Publish",
+                              },
+                              {
+                                Icon: FaTrash,
+                                onClick: handleDeleteMarks,
+                                disabled:
+                                  isDeleting || hasAnyError || actionInProgress,
+                                color: "red",
+                                title: "Delete",
+                              },
+                            ].map(
+                              (
+                                { Icon, onClick, disabled, color, title },
+                                index
+                              ) => (
+                                <div key={index} className="relative group">
+                                  <button
+                                    className={`
+                  p-2 text-lg rounded-full transition duration-200 shadow-md
+                  ${
+                    disabled
+                      ? `bg-${color}-600 cursor-not-allowed`
+                      : `bg-${color}-600 hover:bg-${color}-700`
+                  }
+                  text-white
+                `}
+                                    onClick={onClick}
+                                    disabled={disabled}
+                                    title={title}
+                                  >
+                                    <Icon />
+                                  </button>
+                                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                                    {title}
+                                  </span>
+                                </div>
+                              )
+                            )}
+                          </>
+                        )}
+
+                        {/* Always show Back button */}
+                        <div className="relative group">
+                          <button
+                            className="p-2 text-lg rounded-full transition duration-200 shadow-md bg-yellow-600 hover:bg-yellow-700 text-white"
+                            onClick={() => {
                               setLoadingEvent(false);
                               setDataUploaded(false);
                               setTableDataReady(false);
-                            },
-                            disabled: false,
-                            color: "yellow",
-                            title: "Back",
-                          },
-                        ].map(
-                          (
-                            { Icon, onClick, disabled, color, title },
-                            index
-                          ) => (
-                            <div key={index} className="relative group">
-                              <button
-                                className={`
-          p-2 text-lg rounded-full transition duration-200 shadow-md
-          ${
-            disabled
-              ? `bg-${color}-600 cursor-not-allowed`
-              : `bg-${color}-600 hover:bg-${color}-700`
-          }
-          text-white
-        `}
-                                onClick={onClick}
-                                disabled={disabled}
-                                title={title}
-                              >
-                                <Icon />
-                              </button>
-
-                              {/* Tooltip label above the icon */}
-                              <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
-                                {title}
-                              </span>
-                            </div>
-                          )
-                        )}
+                            }}
+                            title="Back"
+                          >
+                            <FaArrowLeft />
+                          </button>
+                          <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                            Back
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
