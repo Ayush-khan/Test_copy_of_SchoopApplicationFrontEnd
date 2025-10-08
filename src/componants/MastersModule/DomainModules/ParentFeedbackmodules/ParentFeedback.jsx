@@ -1123,13 +1123,12 @@ const ParentFeedback = () => {
 
                                                     const selectedArray =
                                                       selectedValue
-                                                        ? Array.isArray(
-                                                            selectedValue
-                                                          )
-                                                          ? selectedValue
-                                                          : selectedValue.split(
-                                                              ","
+                                                        ? selectedValue
+                                                            .split(",")
+                                                            .map((v) =>
+                                                              v.trim()
                                                             )
+                                                            .filter(Boolean)
                                                         : [];
 
                                                     return parsedOptions.map(
@@ -1143,7 +1142,7 @@ const ParentFeedback = () => {
                                                             name={`param-${student.student_id}-${param.pfm_id}`}
                                                             checked={selectedArray.includes(
                                                               opt.option
-                                                            )} // ✅ check using `option` (no spaces)
+                                                            )}
                                                             className="w-3 h-3"
                                                             onChange={(e) => {
                                                               let newValues = [
@@ -1159,7 +1158,7 @@ const ParentFeedback = () => {
                                                                 ) {
                                                                   newValues.push(
                                                                     opt.option
-                                                                  ); // ✅ send `option` (no space)
+                                                                  );
                                                                 }
                                                               } else {
                                                                 newValues =
@@ -1181,8 +1180,7 @@ const ParentFeedback = () => {
                                                           />
                                                           <span className="text-sm">
                                                             {opt.value}
-                                                          </span>{" "}
-                                                          {/* ✅ display readable label */}
+                                                          </span>
                                                         </label>
                                                       )
                                                     );
