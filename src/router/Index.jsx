@@ -317,6 +317,7 @@ import ClassTeacherRemark from "../componants/MastersModule/DomainModules/ClassT
 import PublishreportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishreportCard.jsx";
 import UploadMarks from "../componants/MastersModule/DomainModules/UploadMarks/UploadMarks.jsx";
 import HPCReportCard from "../componants/MastersModule/DomainModules/HPCReportCard/HPCReportCard.jsx";
+import ReportCardRemark from "../componants/MastersModule/DomainModules/ReportCardRemark/ReportCardRemark.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -744,6 +745,11 @@ function Index() {
         <Route
           path="/uploadMarks"
           element={<PrivateRoute element={<UploadMarks />} />}
+        />
+        {/* ReportCardRemark modules */}
+        <Route
+          path="/reportCardRemark"
+          element={<PrivateRoute element={<ReportCardRemark />} />}
         />
         {/* HPCReportCard */}
         {/* Report Card */}

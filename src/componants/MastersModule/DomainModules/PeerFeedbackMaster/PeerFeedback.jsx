@@ -238,7 +238,7 @@ const PeerFeedback = () => {
     setTermError("");
 
     if (!selectedStudentId) {
-      setStudentError("Please select Class.");
+      setStudentError("Please select class.");
       setLoadingForSearch(false);
       return;
     }
@@ -248,7 +248,7 @@ const PeerFeedback = () => {
       return;
     }
     if (!selectedTerms) {
-      setTermError("Please select Term.");
+      setTermError("Please select term.");
       setLoadingForSearch(false);
       return;
     }
@@ -963,6 +963,7 @@ const PeerFeedback = () => {
                                                   )}
                                                 </div>
                                               )}
+
                                               {param.control_type ===
                                                 "text" && (
                                                 <div className="flex flex-col">
@@ -993,7 +994,8 @@ const PeerFeedback = () => {
                                                   )}
                                                 </div>
                                               )}
-                                              {param.control_type ===
+
+                                              {/* {param.control_type ===
                                                 "checkbox" && (
                                                 <div className="flex flex-wrap gap-3">
                                                   {(() => {
@@ -1070,7 +1072,7 @@ const PeerFeedback = () => {
                                                               );
                                                             }}
                                                           />
-                                                          {/* {opt.value} */}
+
                                                           <span className="text-sm">
                                                             {opt.value}
                                                           </span>
@@ -1091,8 +1093,109 @@ const PeerFeedback = () => {
                                                     </span>
                                                   )}
                                                 </div>
-                                              )}
+                                              )} */}
 
+                                              {param.control_type ===
+                                                "checkbox" && (
+                                                <div className="flex flex-wrap gap-3">
+                                                  {(() => {
+                                                    let parsedOptions = [];
+                                                    try {
+                                                      parsedOptions =
+                                                        param.options
+                                                          ? JSON.parse(
+                                                              param.options
+                                                            )
+                                                          : [];
+                                                    } catch (err) {
+                                                      console.error(
+                                                        "Invalid options JSON:",
+                                                        param.options,
+                                                        err
+                                                      );
+                                                    }
+
+                                                    const selectedArray =
+                                                      selectedValue
+                                                        ? Array.isArray(
+                                                            selectedValue
+                                                          )
+                                                          ? selectedValue
+                                                          : selectedValue.split(
+                                                              ","
+                                                            )
+                                                        : [];
+
+                                                    return parsedOptions.map(
+                                                      (opt) => (
+                                                        <label
+                                                          key={opt.option}
+                                                          className="flex items-center gap-1 px-2 py-1"
+                                                        >
+                                                          <input
+                                                            type="checkbox"
+                                                            name={`param-${student.student_id}-${param.pfm_id}`}
+                                                            checked={selectedArray.includes(
+                                                              opt.option
+                                                            )} // ✅ match option (API key)
+                                                            className="w-3 h-3"
+                                                            onChange={(e) => {
+                                                              let newValues = [
+                                                                ...selectedArray,
+                                                              ];
+                                                              if (
+                                                                e.target.checked
+                                                              ) {
+                                                                if (
+                                                                  !newValues.includes(
+                                                                    opt.option
+                                                                  )
+                                                                ) {
+                                                                  newValues.push(
+                                                                    opt.option
+                                                                  ); // ✅ store opt.option
+                                                                }
+                                                              } else {
+                                                                newValues =
+                                                                  newValues.filter(
+                                                                    (v) =>
+                                                                      v !==
+                                                                      opt.option
+                                                                  );
+                                                              }
+
+                                                              handleChange(
+                                                                student.student_id,
+                                                                param.pfm_id,
+                                                                newValues.join(
+                                                                  ","
+                                                                ) // ✅ send comma-separated API keys
+                                                              );
+                                                            }}
+                                                          />
+                                                          <span className="text-sm">
+                                                            {opt.value}
+                                                          </span>{" "}
+                                                          {/* ✅ user-friendly label */}
+                                                        </label>
+                                                      )
+                                                    );
+                                                  })()}
+
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1 w-full">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+                                              {/* 
                                               {param.control_type ===
                                                 "radio" && (
                                                 <div className="flex flex-wrap gap-1">
@@ -1134,10 +1237,75 @@ const PeerFeedback = () => {
                                                               )
                                                             }
                                                           />
-                                                          {/* {opt.value} */}
+                                                          
                                                           <span className="text-sm">
                                                             {opt.value}
                                                           </span>
+                                                        </label>
+                                                      )
+                                                    );
+                                                  })()}
+
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1 w-full">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )} */}
+
+                                              {param.control_type ===
+                                                "radio" && (
+                                                <div className="flex flex-wrap gap-1">
+                                                  {(() => {
+                                                    let parsedOptions = [];
+                                                    try {
+                                                      parsedOptions =
+                                                        param.options
+                                                          ? JSON.parse(
+                                                              param.options
+                                                            )
+                                                          : [];
+                                                    } catch (err) {
+                                                      console.error(
+                                                        "Invalid options JSON:",
+                                                        param.options
+                                                      );
+                                                    }
+
+                                                    return parsedOptions.map(
+                                                      (opt, i) => (
+                                                        <label
+                                                          key={i}
+                                                          className="flex items-center gap-1 px-2 py-1"
+                                                        >
+                                                          <input
+                                                            type="radio"
+                                                            name={`param-${student.student_id}-${param.pfm_id}`}
+                                                            value={opt.option} // ✅ send backend key
+                                                            checked={
+                                                              selectedValue ===
+                                                              opt.option
+                                                            } // ✅ match by option key
+                                                            onChange={(e) =>
+                                                              handleChange(
+                                                                student.student_id,
+                                                                param.pfm_id,
+                                                                e.target.value // ✅ sends opt.option
+                                                              )
+                                                            }
+                                                            className="w-3 h-3"
+                                                          />
+                                                          <span className="text-sm">
+                                                            {opt.value}
+                                                          </span>{" "}
+                                                          {/* ✅ show label */}
                                                         </label>
                                                       )
                                                     );

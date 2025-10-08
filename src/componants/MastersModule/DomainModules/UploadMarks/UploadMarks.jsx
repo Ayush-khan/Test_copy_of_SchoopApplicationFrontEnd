@@ -22,6 +22,8 @@ function UploadMarks() {
   const [isDeleting, setIsDeleteting] = useState(false);
   const [openDay, setOpenDay] = useState(null);
   const [isEditLocked, setIsEditLocked] = useState(false);
+  const [showPublish, setShowPublish] = useState(true);
+  const [showDelete, setShowDelete] = useState(true);
   const [editLockDateFormatted, setEditLockDateFormatted] = useState(" ");
 
   const [isSubmittingandPublishing, setIsSubmittingandPublishing] =
@@ -425,6 +427,42 @@ function UploadMarks() {
       setLoadingMarks(false);
     }
   };
+  const fetchPublishDeleteStatus = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+
+    try {
+      const params = {
+        exam_id: selectedExam.value,
+        class_id: selectedStudent.valueclass,
+        subject_id: selectedSubject.value,
+        section_id: selectedStudent.value,
+      };
+
+      const response = await axios.get(
+        `${API_URL}/api/get_publishdeletestatusstudentmarks`,
+        {
+          params,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.status === 200 && response.data.success) {
+        setShowPublish(response.data.show_publish);
+        setShowDelete(response.data.show_delete);
+      } else {
+        setShowPublish(true);
+        setShowDelete(true);
+      }
+    } catch (err) {
+      console.error("Error fetching publish/delete status:", err);
+      // fallback to show buttons
+      setShowPublish(true);
+      setShowDelete(true);
+    }
+  };
 
   const handleSearch = async () => {
     setStudentError("");
@@ -465,6 +503,8 @@ function UploadMarks() {
       // Fetch headings and pass them to marks
       const headings = await fetchMarksHeadings();
       await fetchStudentMarks(headings); // pass here
+      await fetchPublishDeleteStatus(); // <-- add this here
+
       const class_name = selectedStudent.class?.replace(/\s+/g, "");
       const section_name = selectedStudent.section?.replace(/\s+/g, "");
       const subject_name = selectedSubject.label?.replace(/\s+/g, "");
@@ -1449,68 +1489,88 @@ function UploadMarks() {
                     />
 
                     {/* Icon Button with Hover Label */}
-                    {[
-                      {
-                        Icon: FaSave,
-                        onClick: handleSaveMarks,
-                        disabled:
-                          isSubmitting || hasAnyError || actionInProgress,
-                        color: "blue",
-                        title: "Save",
-                      },
-                      {
-                        Icon: FaUpload,
-                        onClick: handlePublishMarks,
-                        disabled:
-                          isPublishing || hasAnyError || actionInProgress,
-                        color: "green",
-                        title: "Publish",
-                      },
-                      {
-                        Icon: FaTrash,
-                        onClick: handleDeleteMarks,
-                        disabled: isDeleting || hasAnyError || actionInProgress,
-                        color: "red",
-                        title: "Delete",
-                      },
-                      {
-                        Icon: FaArrowLeft,
-                        onClick: () => {
+                    {/* Buttons: Only show when editing is not locked */}
+                    {!isEditLocked && (
+                      <>
+                        {[
+                          {
+                            Icon: FaSave,
+                            onClick: handleSaveMarks,
+                            disabled:
+                              isSubmitting || hasAnyError || actionInProgress,
+                            color: "blue",
+                            title: "Save",
+                            show: true, // Always show Save (unless edit is locked)
+                          },
+                          {
+                            Icon: FaUpload,
+                            onClick: handlePublishMarks,
+                            disabled:
+                              isPublishing || hasAnyError || actionInProgress,
+                            color: "green",
+                            title: "Publish",
+                            show: showPublish, // controlled by API
+                          },
+                          {
+                            Icon: FaTrash,
+                            onClick: handleDeleteMarks,
+                            disabled:
+                              isDeleting || hasAnyError || actionInProgress,
+                            color: "red",
+                            title: "Delete",
+                            show: showDelete, // controlled by API
+                          },
+                        ]
+                          // Only show buttons where `show` is true
+                          .filter((btn) => btn.show)
+                          .map(
+                            (
+                              { Icon, onClick, disabled, color, title },
+                              index
+                            ) => (
+                              <div key={index} className="relative group">
+                                <button
+                                  className={`
+              p-2 text-lg rounded-full transition duration-200 shadow-md
+              ${
+                disabled
+                  ? `bg-${color}-600 cursor-not-allowed`
+                  : `bg-${color}-600 hover:bg-${color}-700`
+              }
+              text-white
+            `}
+                                  onClick={onClick}
+                                  disabled={disabled}
+                                  title={title}
+                                >
+                                  <Icon />
+                                </button>
+                                <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                                  {title}
+                                </span>
+                              </div>
+                            )
+                          )}
+                      </>
+                    )}
+
+                    {/* Always show Back button */}
+                    <div className="relative group">
+                      <button
+                        className="p-2 text-lg rounded-full transition duration-200 shadow-md bg-yellow-600 hover:bg-yellow-700 text-white"
+                        onClick={() => {
                           setLoadingEvent(false);
                           setDataUploaded(false);
                           setTableDataReady(false);
-                        },
-                        disabled: false,
-                        color: "yellow",
-                        title: "Back",
-                      },
-                    ].map(
-                      ({ Icon, onClick, disabled, color, title }, index) => (
-                        <div key={index} className="relative group">
-                          <button
-                            className={`
-          p-2 text-lg rounded-full transition duration-200 shadow-md
-          ${
-            disabled
-              ? `bg-${color}-600 cursor-not-allowed`
-              : `bg-${color}-600 hover:bg-${color}-700`
-          }
-          text-white
-        `}
-                            onClick={onClick}
-                            disabled={disabled}
-                            title={title}
-                          >
-                            <Icon />
-                          </button>
-
-                          {/* Hover label */}
-                          <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
-                            {title}
-                          </span>
-                        </div>
-                      )
-                    )}
+                        }}
+                        title="Back"
+                      >
+                        <FaArrowLeft />
+                      </button>
+                      <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                        Back
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1716,6 +1776,7 @@ function UploadMarks() {
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-2 shadow-sm">
                       <div className="flex flex-wrap gap-4 justify-center items-center">
                         {/* Conditionally render action buttons if not locked */}
+                        {/* Buttons: Only show when editing is not locked */}
                         {!isEditLocked && (
                           <>
                             {[
@@ -1728,6 +1789,7 @@ function UploadMarks() {
                                   actionInProgress,
                                 color: "blue",
                                 title: "Save",
+                                show: true, // Always show Save (unless edit is locked)
                               },
                               {
                                 Icon: FaUpload,
@@ -1738,6 +1800,7 @@ function UploadMarks() {
                                   actionInProgress,
                                 color: "green",
                                 title: "Publish",
+                                show: showPublish, // controlled by API
                               },
                               {
                                 Icon: FaTrash,
@@ -1746,35 +1809,39 @@ function UploadMarks() {
                                   isDeleting || hasAnyError || actionInProgress,
                                 color: "red",
                                 title: "Delete",
+                                show: showDelete, // controlled by API
                               },
-                            ].map(
-                              (
-                                { Icon, onClick, disabled, color, title },
-                                index
-                              ) => (
-                                <div key={index} className="relative group">
-                                  <button
-                                    className={`
-                  p-2 text-lg rounded-full transition duration-200 shadow-md
-                  ${
-                    disabled
-                      ? `bg-${color}-600 cursor-not-allowed`
-                      : `bg-${color}-600 hover:bg-${color}-700`
-                  }
-                  text-white
-                `}
-                                    onClick={onClick}
-                                    disabled={disabled}
-                                    title={title}
-                                  >
-                                    <Icon />
-                                  </button>
-                                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
-                                    {title}
-                                  </span>
-                                </div>
-                              )
-                            )}
+                            ]
+                              // Only show buttons where `show` is true
+                              .filter((btn) => btn.show)
+                              .map(
+                                (
+                                  { Icon, onClick, disabled, color, title },
+                                  index
+                                ) => (
+                                  <div key={index} className="relative group">
+                                    <button
+                                      className={`
+              p-2 text-lg rounded-full transition duration-200 shadow-md
+              ${
+                disabled
+                  ? `bg-${color}-600 cursor-not-allowed`
+                  : `bg-${color}-600 hover:bg-${color}-700`
+              }
+              text-white
+            `}
+                                      onClick={onClick}
+                                      disabled={disabled}
+                                      title={title}
+                                    >
+                                      <Icon />
+                                    </button>
+                                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                                      {title}
+                                    </span>
+                                  </div>
+                                )
+                              )}
                           </>
                         )}
 

@@ -275,7 +275,7 @@ const ParentFeedback = () => {
       setParameter(response.data.parameters);
 
       if (!response?.data?.students || response?.data?.students.length === 0) {
-        toast.error("Parent's Feedback not found.");
+        toast.error("Parent's Observation not found.");
         setTimetable([]);
         setSelectedRecords([]);
       } else {
@@ -304,8 +304,8 @@ const ParentFeedback = () => {
         setSelectedRecords(preSelected);
       }
     } catch (error) {
-      console.error("Error fetching Parent's Feedback:", error);
-      toast.error("Error fetching Parent's Feedback. Please try again.");
+      console.error("Error fetching Parent's Observation:", error);
+      toast.error("Error fetching Parent's Observation. Please try again.");
     } finally {
       setIsSubmitting(false);
       setLoadingForSearch(false);
@@ -355,7 +355,7 @@ const ParentFeedback = () => {
       );
 
       if (response?.data?.status === 200) {
-        toast.success("Parent's feedback saved successfully!");
+        toast.success("Parent's Observation saved successfully!");
         window.scrollTo({ top: 0, behavior: "smooth" });
 
         // If save without Browse → still mark filters as applied
@@ -368,7 +368,7 @@ const ParentFeedback = () => {
         toast.error(response?.data?.message || "Something went wrong");
       }
     } catch (error) {
-      console.error("Error saving parent's feedback:", error);
+      console.error("Error saving parent's Observation:", error);
       toast.error("Error saving data. Please try again.");
     } finally {
       setIsSaving(false);
@@ -443,12 +443,12 @@ const ParentFeedback = () => {
       );
 
       if (response?.data?.status === 200) {
-        toast.success("Parent's feedback saved & published successfully!");
+        toast.success("Parent's Observation saved & published successfully!");
         window.scrollTo({ top: 0, behavior: "smooth" });
         setShowStudentReport(false);
       }
     } catch (error) {
-      console.error("Error saving  learner's feedback:", error);
+      console.error("Error saving  Observation:", error);
       toast.error("Error saving data. Please try again.");
     } finally {
       setIsPublishing(false);
@@ -489,7 +489,7 @@ const ParentFeedback = () => {
       );
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
-        toast.success("Parent's feedback unpublished successfully.");
+        toast.success("Parent's Observation unpublished successfully.");
         setShowStudentReport(false);
         setTimetable([]);
         setSelectedRecords([]);
@@ -519,8 +519,8 @@ const ParentFeedback = () => {
         setSelectedRecords(preSelected);
       }
     } catch (error) {
-      console.error("Error unpublishing Parent's Feedback:", error);
-      toast.error("Error fetching Parent's Feedback Please try again.");
+      console.error("Error unpublishing Parent's Observation:", error);
+      toast.error("Error fetching Parent's Observation Please try again.");
     } finally {
       setIsUnPublishing(false);
       setLoadingForSearch(false);
@@ -560,7 +560,7 @@ const ParentFeedback = () => {
             <>
               <div className=" card-header mb-4 flex justify-between items-center ">
                 <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-                  Parent's Feedback
+                  Parent's Observation
                 </h5>
                 <RxCross1
                   className="  relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -713,7 +713,7 @@ const ParentFeedback = () => {
                       <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
                         <div className="w-full flex flex-row items-center justify-between ">
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
-                            Parent's Feedback
+                            Parent's Observation
                           </h3>
                           {/* <div className="flex items-center w-[60%] md:mr-36"> */}
                           <div className="flex items-center flex-1 max-w-3xl mx-auto">
@@ -1002,7 +1002,7 @@ const ParentFeedback = () => {
                                                   )}
                                                 </div>
                                               )}
-                                              {param.control_type ===
+                                              {/* {param.control_type ===
                                                 "checkbox" && (
                                                 <div className="flex flex-wrap gap-2">
                                                   {(() => {
@@ -1099,9 +1099,110 @@ const ParentFeedback = () => {
                                                     </span>
                                                   )}
                                                 </div>
-                                              )}
+                                              )} */}
 
                                               {param.control_type ===
+                                                "checkbox" && (
+                                                <div className="flex flex-wrap gap-2">
+                                                  {(() => {
+                                                    let parsedOptions = [];
+                                                    try {
+                                                      parsedOptions =
+                                                        param.options
+                                                          ? JSON.parse(
+                                                              param.options
+                                                            )
+                                                          : [];
+                                                    } catch (err) {
+                                                      console.error(
+                                                        "Invalid options JSON:",
+                                                        param.options,
+                                                        err
+                                                      );
+                                                    }
+
+                                                    const selectedArray =
+                                                      selectedValue
+                                                        ? Array.isArray(
+                                                            selectedValue
+                                                          )
+                                                          ? selectedValue
+                                                          : selectedValue.split(
+                                                              ","
+                                                            )
+                                                        : [];
+
+                                                    return parsedOptions.map(
+                                                      (opt) => (
+                                                        <label
+                                                          key={opt.option}
+                                                          className="flex items-center gap-1 px-2 py-1 text-xs"
+                                                        >
+                                                          <input
+                                                            type="checkbox"
+                                                            name={`param-${student.student_id}-${param.pfm_id}`}
+                                                            checked={selectedArray.includes(
+                                                              opt.option
+                                                            )} // ✅ check using `option` (no spaces)
+                                                            className="w-3 h-3"
+                                                            onChange={(e) => {
+                                                              let newValues = [
+                                                                ...selectedArray,
+                                                              ];
+                                                              if (
+                                                                e.target.checked
+                                                              ) {
+                                                                if (
+                                                                  !newValues.includes(
+                                                                    opt.option
+                                                                  )
+                                                                ) {
+                                                                  newValues.push(
+                                                                    opt.option
+                                                                  ); // ✅ send `option` (no space)
+                                                                }
+                                                              } else {
+                                                                newValues =
+                                                                  newValues.filter(
+                                                                    (v) =>
+                                                                      v !==
+                                                                      opt.option
+                                                                  );
+                                                              }
+
+                                                              handleChange(
+                                                                student.student_id,
+                                                                param.pfm_id,
+                                                                newValues.join(
+                                                                  ","
+                                                                )
+                                                              );
+                                                            }}
+                                                          />
+                                                          <span className="text-sm">
+                                                            {opt.value}
+                                                          </span>{" "}
+                                                          {/* ✅ display readable label */}
+                                                        </label>
+                                                      )
+                                                    );
+                                                  })()}
+
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1 w-full">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+
+                                              {/* {param.control_type ===
                                                 "radio" && (
                                                 <div className="flex flex-wrap">
                                                   {(() => {
@@ -1146,6 +1247,72 @@ const ParentFeedback = () => {
                                                           <span className="text-sm">
                                                             {opt.value}
                                                           </span>
+                                                        </label>
+                                                      )
+                                                    );
+                                                  })()}
+
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1 w-full">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )} */}
+
+                                              {param.control_type ===
+                                                "radio" && (
+                                                <div className="flex flex-wrap">
+                                                  {(() => {
+                                                    let parsedOptions = [];
+                                                    try {
+                                                      parsedOptions =
+                                                        param.options
+                                                          ? JSON.parse(
+                                                              param.options
+                                                            )
+                                                          : [];
+                                                    } catch (err) {
+                                                      console.error(
+                                                        "Invalid options JSON:",
+                                                        param.options,
+                                                        err
+                                                      );
+                                                    }
+
+                                                    return parsedOptions.map(
+                                                      (opt, i) => (
+                                                        <label
+                                                          key={i}
+                                                          className="flex items-center gap-1 px-2 py-1 text-xs"
+                                                        >
+                                                          <input
+                                                            type="radio"
+                                                            name={`param-${student.student_id}-${param.pfm_id}`}
+                                                            value={opt.option} // ✅ send option (no spaces)
+                                                            checked={
+                                                              selectedValue ===
+                                                              opt.option
+                                                            } // ✅ match stored option
+                                                            className="w-3 h-3"
+                                                            onChange={(e) =>
+                                                              handleChange(
+                                                                student.student_id,
+                                                                param.pfm_id,
+                                                                e.target.value // ✅ this is opt.option
+                                                              )
+                                                            }
+                                                          />
+                                                          <span className="text-sm">
+                                                            {opt.value}
+                                                          </span>{" "}
+                                                          {/* ✅ display readable text */}
                                                         </label>
                                                       )
                                                     );

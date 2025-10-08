@@ -350,15 +350,16 @@ function NavBar() {
 
   const toggleDropdown = (key, level) => {
     const newBranch = [...openDropdowns.slice(0, level)];
-    if (openDropdowns[level] === key) {
-      // If same menu is clicked again → close it
+    const isAlreadyOpen = openDropdowns[level] === key;
+
+    if (isAlreadyOpen) {
+      // Close all at this level and deeper
       setOpenDropdowns(newBranch);
       setClickedDropdowns(newBranch);
     } else {
-      // Open new branch
-      const updated = [...newBranch, key];
-      setOpenDropdowns(updated);
-      setClickedDropdowns(updated);
+      const newOpen = [...newBranch, key];
+      setOpenDropdowns(newOpen);
+      setClickedDropdowns(newOpen);
     }
   };
 
@@ -398,6 +399,10 @@ function NavBar() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  const closeAllDropdowns = () => {
+    setOpenDropdowns([]);
+    setClickedDropdowns([]);
+  };
 
   const renderDynamicMenu = () => {
     const renderDropdownItems = (items, level = 0) => {
@@ -434,10 +439,24 @@ function NavBar() {
                         isSubOpen ? "show" : ""
                       } `}
                       show={isSubOpen}
+                      // onClick={(e) => {
+                      //   e.preventDefault();
+                      //   e.stopPropagation();
+                      //   closeAllDropdowns();
+
+                      //   toggleDropdown(subKey, level + 1); // click opens/closes
+                      // }}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        toggleDropdown(subKey, level + 1); // click opens/closes
+
+                        // If it's already open, close all
+                        if (isSubOpen) {
+                          closeAllDropdowns(); // close all if already open
+                        } else {
+                          // open only this one
+                          setOpenDropdowns([subKey]);
+                        }
                       }}
                       onMouseEnter={() => handleMouseEnter(subKey, level + 1)} // hover opens
                       onMouseLeave={() => handleMouseLeave(level + 1)} // hover out closes (if not clicked)
@@ -469,7 +488,21 @@ function NavBar() {
                               show={isChildOpen}
                               onClick={(e) => {
                                 e.preventDefault();
-                                toggleDropdown(childKey, level + 2);
+                                e.stopPropagation();
+
+                                if (isChildOpen) {
+                                  setOpenDropdowns([]);
+                                  setClickedDropdowns([]);
+                                } else {
+                                  setOpenDropdowns([
+                                    ...openDropdowns.slice(0, level + 2),
+                                    childKey,
+                                  ]);
+                                  setClickedDropdowns([
+                                    ...openDropdowns.slice(0, level + 2),
+                                    childKey,
+                                  ]);
+                                }
                               }}
                               onMouseEnter={() =>
                                 handleMouseEnter(childKey, level + 2)
@@ -479,7 +512,11 @@ function NavBar() {
                               {childItem.sub_menus.map((grandChildItem) => (
                                 <NavDropdown.Item
                                   key={grandChildItem.menu_id}
-                                  onClick={() => navigate(grandChildItem.url)}
+                                  onClick={() => {
+                                    setOpenDropdowns([]);
+                                    setClickedDropdowns([]);
+                                    navigate(grandChildItem.url);
+                                  }}
                                 >
                                   {grandChildItem.name}
                                 </NavDropdown.Item>
@@ -490,7 +527,11 @@ function NavBar() {
                           return (
                             <NavDropdown.Item
                               key={childKey}
-                              onClick={() => navigate(childItem.url)}
+                              onClick={() => {
+                                setOpenDropdowns([]);
+                                setClickedDropdowns([]);
+                                navigate(childItem.url);
+                              }}
                               className="hover:bg-gray-100 hover:text-blue-600 text-sm flex flex-row gap-x-2"
                             >
                               {childItem.name}
@@ -505,7 +546,12 @@ function NavBar() {
                   return (
                     <NavDropdown.Item
                       key={subKey}
-                      onClick={() => navigate(subItem.url)}
+                      onClick={() => {
+                        setOpenDropdowns([]);
+                        setClickedDropdowns([]);
+                        navigate(subItem.url);
+                      }}
+
                       // className="hover:bg-gray-100 hover:text-blue-600 text-sm"
                     >
                       {subItem.name}
@@ -519,8 +565,10 @@ function NavBar() {
           return (
             <Nav.Link
               key={dropdownKey}
-              onClick={() => item.url && navigate(item.url)}
-              className="nav-title-top"
+              onClick={() => {
+                closeAllDropdowns();
+                item.url && navigate(item.url);
+              }}
             >
               <span className="nav-title-top">{item.name}</span>
             </Nav.Link>
@@ -651,10 +699,6 @@ function NavBar() {
               expand="lg"
               className={`${styles.navBarSide} flex justify-between pl-16 w-full custom-navbar `}
             >
-              {/* kfdospafjkop */}
-              {/* joidsfj
-
-            */}
               <div className="container-fluid flex items-center bg-gray-200 sm:w-40 box-border ">
                 <Navbar.Toggle
                   aria-controls="basic-navbar-nav"

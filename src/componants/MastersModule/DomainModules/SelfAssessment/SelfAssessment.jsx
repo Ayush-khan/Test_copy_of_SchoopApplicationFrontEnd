@@ -993,7 +993,7 @@ const SelfAssessment = () => {
                                                   )}
                                                 </div>
                                               )}
-                                              {param.control_type ===
+                                              {/* {param.control_type ===
                                                 "checkbox" && (
                                                 <div className="flex flex-wrap gap-2">
                                                   {(() => {
@@ -1090,9 +1090,111 @@ const SelfAssessment = () => {
                                                     </span>
                                                   )}
                                                 </div>
-                                              )}
+                                              )} */}
 
                                               {param.control_type ===
+                                                "checkbox" && (
+                                                <div className="flex flex-wrap gap-2">
+                                                  {(() => {
+                                                    let parsedOptions = [];
+                                                    try {
+                                                      parsedOptions =
+                                                        param.options
+                                                          ? JSON.parse(
+                                                              param.options
+                                                            )
+                                                          : [];
+                                                    } catch (err) {
+                                                      console.error(
+                                                        "Invalid options JSON:",
+                                                        param.options,
+                                                        err
+                                                      );
+                                                    }
+
+                                                    const selectedArray =
+                                                      selectedValue
+                                                        ? Array.isArray(
+                                                            selectedValue
+                                                          )
+                                                          ? selectedValue
+                                                          : selectedValue.split(
+                                                              ","
+                                                            )
+                                                        : [];
+
+                                                    return parsedOptions.map(
+                                                      (opt) => (
+                                                        <label
+                                                          key={opt.option}
+                                                          className="flex items-center gap-1 px-2 py-1 text-xs"
+                                                        >
+                                                          <input
+                                                            type="checkbox"
+                                                            name={`param-${student.student_id}-${param.sam_id}`}
+                                                            checked={selectedArray.includes(
+                                                              opt.option
+                                                            )} // ✅ store & compare option (no spaces)
+                                                            className="w-3 h-3"
+                                                            onChange={(e) => {
+                                                              let newValues = [
+                                                                ...selectedArray,
+                                                              ];
+
+                                                              if (
+                                                                e.target.checked
+                                                              ) {
+                                                                if (
+                                                                  !newValues.includes(
+                                                                    opt.option
+                                                                  )
+                                                                ) {
+                                                                  newValues.push(
+                                                                    opt.option
+                                                                  ); // ✅ send opt.option
+                                                                }
+                                                              } else {
+                                                                newValues =
+                                                                  newValues.filter(
+                                                                    (v) =>
+                                                                      v !==
+                                                                      opt.option
+                                                                  );
+                                                              }
+
+                                                              handleChange(
+                                                                student.student_id,
+                                                                param.sam_id,
+                                                                newValues.join(
+                                                                  ","
+                                                                )
+                                                              );
+                                                            }}
+                                                          />
+                                                          <span className="text-sm">
+                                                            {opt.value}
+                                                          </span>{" "}
+                                                          {/* ✅ display readable value */}
+                                                        </label>
+                                                      )
+                                                    );
+                                                  })()}
+
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.sam_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1 w-full">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.sam_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+
+                                              {/* {param.control_type ===
                                                 "radio" && (
                                                 <div className="flex flex-wrap gap-1">
                                                   {(() => {
@@ -1137,6 +1239,72 @@ const SelfAssessment = () => {
                                                           <span className="text-sm">
                                                             {opt.value}
                                                           </span>
+                                                        </label>
+                                                      )
+                                                    );
+                                                  })()}
+
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.sam_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1 w-full">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.sam_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )} */}
+
+                                              {param.control_type ===
+                                                "radio" && (
+                                                <div className="flex flex-wrap gap-1">
+                                                  {(() => {
+                                                    let parsedOptions = [];
+                                                    try {
+                                                      parsedOptions =
+                                                        param.options
+                                                          ? JSON.parse(
+                                                              param.options
+                                                            )
+                                                          : [];
+                                                    } catch (err) {
+                                                      console.error(
+                                                        "Invalid options JSON:",
+                                                        param.options,
+                                                        err
+                                                      );
+                                                    }
+
+                                                    return parsedOptions.map(
+                                                      (opt, i) => (
+                                                        <label
+                                                          key={i}
+                                                          className="flex items-center gap-1 px-2 py-1 text-xs"
+                                                        >
+                                                          <input
+                                                            type="radio"
+                                                            name={`param-${student.student_id}-${param.sam_id}`}
+                                                            value={opt.option} // ✅ send opt.option (no spaces)
+                                                            checked={
+                                                              selectedValue ===
+                                                              opt.option
+                                                            } // ✅ store option
+                                                            className="w-3 h-3"
+                                                            onChange={(e) =>
+                                                              handleChange(
+                                                                student.student_id,
+                                                                param.sam_id,
+                                                                e.target.value // ✅ sends opt.option
+                                                              )
+                                                            }
+                                                          />
+                                                          <span className="text-sm">
+                                                            {opt.value}
+                                                          </span>{" "}
+                                                          {/* ✅ show label */}
                                                         </label>
                                                       )
                                                     );
