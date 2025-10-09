@@ -260,6 +260,11 @@ export default function Sidebar({ isSidebar, setIsSidebar }) {
         <RxCross2
           className="absolute right-2 top-3 text-xl text-red-500 hover:cursor-pointer"
           onClick={() => setIsSidebar(false)}
+          // onMouseEnter={() => {
+          //   setTimeout(() => {
+          //     setIsSidebar(false);
+          //   }, 300); // 1000ms = 1 second
+          // }}
         />
       </div>
     </div>

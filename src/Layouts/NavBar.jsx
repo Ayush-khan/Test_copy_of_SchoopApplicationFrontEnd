@@ -679,7 +679,10 @@ function NavBar() {
           >
             <div
               onClick={() => setIsSidebar(true)}
-              className="  hover:cursor-pointer hidden lg:block"
+              onMouseEnter={() => {
+                if (!isSidebar) setIsSidebar(true);
+              }}
+              className="hover:cursor-pointer hidden lg:block"
             >
               <RxHamburgerMenu
                 style={{

@@ -1169,12 +1169,16 @@ const ParentFeedback = () => {
                                                                   );
                                                               }
 
+                                                              // ✅ Maintain space after commas
+                                                              const formattedValue =
+                                                                newValues.join(
+                                                                  ", "
+                                                                );
+
                                                               handleChange(
                                                                 student.student_id,
                                                                 param.pfm_id,
-                                                                newValues.join(
-                                                                  ","
-                                                                )
+                                                                formattedValue
                                                               );
                                                             }}
                                                           />
