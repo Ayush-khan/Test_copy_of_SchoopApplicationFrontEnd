@@ -323,163 +323,148 @@ const LowAttendanceTab = () => {
     <div>
       <ToastContainer />
 
-      <div className="md:mx-auto md:w-[90%] p-4 bg-white mt-4 ">
-        <div className=" card-header  flex justify-between items-center  ">
-          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-            Student's Attendance Less than 75%
-          </h3>
-          <RxCross1
-            className="float-end relative -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-            onClick={() => {
-              navigate("/dashboard");
-            }}
-          />
-        </div>
-        <div
-          className=" relative  mb-8   h-1  mx-auto bg-red-700"
-          style={{
-            backgroundColor: "#C03078",
-          }}
-        ></div>
+      <div className="md:mx-auto md:w-[98%] py-2 bg-white  ">
         <div className="w-full md:container">
           {/* Search Section */}
-          <div className="w-[90%] ml-6 flex md:flex-row justify-start items-center">
-            <div className="w-full  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-              <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
-                <label
-                  className="text-md mt-1.5 mr-1 md:mr-0"
-                  htmlFor="classSelect"
-                >
-                  Section<span className="text-red-500">*</span>
-                </label>
-                <div className="w-full md:w-[57%]">
-                  <Select
-                    id="classSelect"
-                    value={selectedClass}
-                    onChange={handleClassSelect}
-                    options={classOptions}
-                    placeholder={
-                      loadingClasses ? "Loading section..." : "Select"
-                    }
-                    isSearchable
-                    isClearable
-                    className="text-sm"
-                    styles={{
-                      menu: (provided) => ({
-                        ...provided,
-                        zIndex: 1050, // Set your desired z-index value
-                      }),
-                    }}
-                    isDisabled={loadingClasses}
-                  />
-                  {nameErrorForClass && (
-                    <div className="h-8 relative ml-1 text-danger text-xs">
-                      {nameErrorForClass}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
-                <label
-                  className="text-md mt-1.5 mr-1 md:mr-0"
-                  htmlFor="installmentSelect"
-                >
-                  Less Than
-                </label>
-                <div className="w-full md:w-[57%]">
-                  <Select
-                    id="installmentSelect"
-                    value={selectedInstallment}
-                    onChange={setSelectedInstallment}
-                    options={installmentOptions}
-                    placeholder="Select"
-                    isSearchable
-                    // isClearable
-                    className="text-sm"
-                    styles={{
-                      menu: (provided) => ({
-                        ...provided,
-                        zIndex: 1050,
-                      }),
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
-                <label
-                  className="text-md mt-1.5 mr-1 md:mr-0"
-                  htmlFor="dateSelect"
-                >
-                  By Date <span className="text-red-500">*</span>
-                </label>
-                <div className="w-full md:w-[57%]">
-                  <input
-                    type="date"
-                    id="dateSelect"
-                    value={selectedDate}
-                    onChange={(e) => {
-                      setSelectedDate(e.target.value);
-                      if (e.target.value) {
-                        setNameErrorForStudent("");
+          <div className="w-full mx-auto ">
+            <div className="bg-white shadow-md rounded-lg p-4 border border-gray-300">
+              <div className="flex flex-col md:flex-row md:gap-x-6 gap-y-4">
+                <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
+                  <label
+                    className="text-md mt-1.5 mr-1 md:mr-0"
+                    htmlFor="classSelect"
+                  >
+                    Section<span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full md:w-[57%]">
+                    <Select
+                      id="classSelect"
+                      value={selectedClass}
+                      onChange={handleClassSelect}
+                      options={classOptions}
+                      placeholder={
+                        loadingClasses ? "Loading section..." : "Select"
                       }
-                    }}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    min={academicYrFrom}
-                    max={academicYrTo}
-                  />
-                  {nameErrorForStudent && (
-                    <div className="h-8 relative ml-1 text-danger text-xs">
-                      {nameErrorForStudent}
-                    </div>
-                  )}
+                      isSearchable
+                      isClearable
+                      className="text-sm"
+                      styles={{
+                        menu: (provided) => ({
+                          ...provided,
+                          zIndex: 1050, // Set your desired z-index value
+                        }),
+                      }}
+                      isDisabled={loadingClasses}
+                    />
+                    {nameErrorForClass && (
+                      <div className="h-8 relative ml-1 text-danger text-xs">
+                        {nameErrorForClass}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <button
-                type="search"
-                onClick={handleSearch}
-                style={{ backgroundColor: "#2196F3" }}
-                className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                  loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={loadingForSearch}
-              >
-                {loadingForSearch ? (
-                  <span className="flex items-center">
-                    <svg
-                      className="animate-spin h-4 w-4 mr-2 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      ></path>
-                    </svg>
-                    Loading...
-                  </span>
-                ) : (
-                  "Browse"
-                )}
-              </button>
+                <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
+                  <label
+                    className="text-md mt-1.5 mr-1 md:mr-0"
+                    htmlFor="installmentSelect"
+                  >
+                    Less Than
+                  </label>
+                  <div className="w-full md:w-[57%]">
+                    <Select
+                      id="installmentSelect"
+                      value={selectedInstallment}
+                      onChange={setSelectedInstallment}
+                      options={installmentOptions}
+                      placeholder="Select"
+                      isSearchable
+                      // isClearable
+                      className="text-sm"
+                      styles={{
+                        menu: (provided) => ({
+                          ...provided,
+                          zIndex: 1050,
+                        }),
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
+                  <label
+                    className="text-md mt-1.5 mr-1 md:mr-0"
+                    htmlFor="dateSelect"
+                  >
+                    By Date <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full md:w-[57%]">
+                    <input
+                      type="date"
+                      id="dateSelect"
+                      value={selectedDate}
+                      onChange={(e) => {
+                        setSelectedDate(e.target.value);
+                        if (e.target.value) {
+                          setNameErrorForStudent("");
+                        }
+                      }}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min={academicYrFrom}
+                      max={academicYrTo}
+                    />
+                    {nameErrorForStudent && (
+                      <div className="h-8 relative ml-1 text-danger text-xs">
+                        {nameErrorForStudent}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  type="search"
+                  onClick={handleSearch}
+                  style={{ backgroundColor: "#2196F3" }}
+                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                    loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={loadingForSearch}
+                >
+                  {loadingForSearch ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin h-4 w-4 mr-2 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        ></path>
+                      </svg>
+                      Loading...
+                    </span>
+                  ) : (
+                    "Browse"
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Form Section - Displayed when parentInformation is fetched */}
           {parentInformation && (
-            <div className="w-full md:container mx-auto py-4 px-4 ">
+            <div className="w-full md:container mx-auto py-4  ">
               <div className="card mx-auto w-full shadow-lg">
                 <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
                   <h6 className="text-gray-700 mt-1   text-nowrap">

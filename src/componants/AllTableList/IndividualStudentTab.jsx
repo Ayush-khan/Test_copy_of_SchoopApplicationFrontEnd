@@ -182,32 +182,14 @@ function IndividualStudentTab() {
   return (
     <>
       {/* <ToastContainer /> */}
-      <div className="md:mx-auto md:w-[65%] p-4 bg-white mt-4 ">
-        <div className=" card-header  flex justify-between items-center  ">
-          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-            Today's Absent Students
-          </h3>
-          <RxCross1
-            className="float-end relative -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-            onClick={() => {
-              navigate("/dashboard");
-            }}
-          />
-        </div>
-        <div
-          className=" relative  mb-8   h-1  mx-auto bg-red-700"
-          style={{
-            backgroundColor: "#C03078",
-          }}
-        ></div>
-
-        <div className="bg-white  rounded-md -mt-5">
+      <div className="md:mx-auto md:w-full p-4 bg-white  ">
+        <div className="bg-white  rounded-md ">
           {activeTab === "Manage" && (
             <div>
               <ToastContainer />
-              <div className="mb-4">
-                <div className="   md:w-[85%] relative left-[5%]  md:mt-[7%] ">
-                  <div className="form-group mt-4 w-full md:w-[80%] flex justify-start gap-x-1 md:gap-x-6">
+              <div className="">
+                <div className="   md:w-full relative left-[5%]  ] ">
+                  <div className="form-group  w-full md:w-[55%] flex justify-start gap-x-1 md:gap-x-6">
                     <label
                       htmlFor="classSection"
                       className="w-1/4 pt-2 items-center text-center"
@@ -242,7 +224,7 @@ function IndividualStudentTab() {
                 </div>
               </div>
               {subjects.length > 0 && (
-                <div className="container mt-8">
+                <div className="container mt-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">

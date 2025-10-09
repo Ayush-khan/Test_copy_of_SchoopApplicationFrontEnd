@@ -699,14 +699,9 @@ export default StudentAbsent;
 //   const handleTabChange = (tab) => {
 //     setActiveTab(tab); // Update the active tab state
 
-//     // Call handleSearch only if the tab is "Manage"
-//     //  if (tab === "Manage") {
-//     //    handleSearch();
-//     //  }
 //   };
 //   return (
-
-//     <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
+//     <div className="md:mx-auto md:w-[85%] px-3 py-2 bg-white mt-4 ">
 //       <div className=" card-header  flex justify-between items-center  ">
 //         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
 //           Student Attendance
@@ -724,14 +719,14 @@ export default StudentAbsent;
 //           backgroundColor: "#C03078",
 //         }}
 //       ></div>
-//       <ul className="grid grid-cols-2 gap-x-10 relative -left-6 md:left-0 md:flex md:flex-row relative -top-4">
+//       <ul className="grid grid-cols-2 gap-x-10 relative -left-8 md:left-3 md:flex md:flex-row  -top-4">
 //         {/* Tab Navigation */}
 //         {["Today's Absent Students", "Student's Attendance Less than 75%"].map(
 //           (tab) => (
 //             <li
 //               key={tab}
-//               className={`md:-ml-7 shadow-md ${
-//                 activeTab === tab ? "text-blue-500 font-bold" : ""
+//               className={`md:-ml-7 shadow-md bg-gray-100 border-1 border-gray-100 ${
+//                 activeTab === tab ? "  text-blue-500 font-bold" : ""
 //               }`}
 //             >
 //               <button
