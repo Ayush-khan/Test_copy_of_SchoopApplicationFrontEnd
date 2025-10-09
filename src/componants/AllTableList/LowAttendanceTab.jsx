@@ -6,7 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 
-const StudentAbsent = () => {
+const LowAttendanceTab = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -686,75 +686,4 @@ const StudentAbsent = () => {
   );
 };
 
-export default StudentAbsent;
-// Updated code according to arnolds
-// import { useState } from "react";
-// import IndividualStudentTab from "./IndividualStudentTab";
-// import LowAttendanceTab from "./LowAttendanceTab";
-// import { RxCross1 } from "react-icons/rx";
-// import { useNavigate } from "react-router-dom";
-// const StudentAbsent = () => {
-//   const navigate = useNavigate();
-//   const [activeTab, setActiveTab] = useState("Today's Absent Students");
-//   const handleTabChange = (tab) => {
-//     setActiveTab(tab); // Update the active tab state
-
-//     // Call handleSearch only if the tab is "Manage"
-//     //  if (tab === "Manage") {
-//     //    handleSearch();
-//     //  }
-//   };
-//   return (
-
-//     <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
-//       <div className=" card-header  flex justify-between items-center  ">
-//         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-//           Student Attendance
-//         </h3>
-//         <RxCross1
-//           className="float-end relative -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-//           onClick={() => {
-//             navigate("/dashboard");
-//           }}
-//         />
-//       </div>
-//       <div
-//         className=" relative  mb-8   h-1  mx-auto bg-red-700"
-//         style={{
-//           backgroundColor: "#C03078",
-//         }}
-//       ></div>
-//       <ul className="grid grid-cols-2 gap-x-10 relative -left-6 md:left-0 md:flex md:flex-row relative -top-4">
-//         {/* Tab Navigation */}
-//         {["Today's Absent Students", "Student's Attendance Less than 75%"].map(
-//           (tab) => (
-//             <li
-//               key={tab}
-//               className={`md:-ml-7 shadow-md ${
-//                 activeTab === tab ? "text-blue-500 font-bold" : ""
-//               }`}
-//             >
-//               <button
-//                 onClick={() => handleTabChange(tab)}
-//                 className="px-2 md:px-4 py-1 hover:bg-gray-200 text-[1em] md:text-sm text-nowrap"
-//               >
-//                 {tab.replace(/([A-Z])/g, " $1")}
-//               </button>
-//             </li>
-//           )
-//         )}
-//       </ul>
-
-//       <div className="bg-white  rounded-md -mt-5">
-//         {activeTab === "Today's Absent Students" && <IndividualStudentTab />}
-//         {activeTab === "Student's Attendance Less than 75%" && (
-//           <div>
-//             <LowAttendanceTab />{" "}
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default StudentAbsent;
+export default LowAttendanceTab;
