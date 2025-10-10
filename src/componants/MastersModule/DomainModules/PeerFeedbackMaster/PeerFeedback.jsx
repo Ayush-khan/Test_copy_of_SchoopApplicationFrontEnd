@@ -979,7 +979,7 @@ const PeerFeedback = () => {
                                                       )
                                                     }
                                                     className="w-full px-2 py-1 border rounded text-sm"
-                                                    maxLength={500}
+                                                    maxLength={10}
                                                   />
                                                   {publishErrors?.[
                                                     `${student.student_id}-${param.pfm_id}`

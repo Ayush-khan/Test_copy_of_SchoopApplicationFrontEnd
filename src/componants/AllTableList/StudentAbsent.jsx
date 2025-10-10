@@ -687,7 +687,7 @@ const StudentAbsent = () => {
 };
 
 export default StudentAbsent;
-// Updated code according to arnolds
+// Updated codeq according to arnolds
 // import { useState } from "react";
 // import IndividualStudentTab from "./IndividualStudentTab";
 // import LowAttendanceTab from "./LowAttendanceTab";

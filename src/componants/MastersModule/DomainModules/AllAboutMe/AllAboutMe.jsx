@@ -930,7 +930,7 @@ const AllAboutMe = () => {
                                               )
                                             }
                                             className="w-full p-1 border rounded text-sm"
-                                            maxLength={500}
+                                            maxLength={50}
                                           />
 
                                           {publishErrors?.[

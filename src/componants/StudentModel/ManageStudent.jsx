@@ -79,6 +79,9 @@ function ManageSubjectList() {
   const section_id = location.state?.section_id || null;
   // console.log("manage section id", section_id);
 
+  const [selectedClassIdHPC, setSelectedClassIdHPC] = useState(null);
+  const [selectedSectionIdHPC, setSelectedSectionIdHPC] = useState(null);
+
   useEffect(() => {
     fetchHPCClasses();
   }, []);
@@ -87,12 +90,6 @@ function ManageSubjectList() {
     if (!roleIdValue) return; // guard against empty
     fetchClassTeacherData(roleIdValue);
   }, [roleIdValue]);
-
-  // useEffect(() => {
-  //   if (section_id) {
-  //     fetchStudentNameWithClassId(section_id);
-  //   }
-  // }, [section_id]);
 
   useEffect(() => {
     fetchStudentNameWithClassId(section_id);
@@ -264,6 +261,7 @@ function ManageSubjectList() {
   const handleClassSelect = (selectedOption) => {
     setNameError("");
     setSelectedClass(selectedOption);
+    console.log("selected class", selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
 
@@ -271,13 +269,6 @@ function ManageSubjectList() {
     setclassIdForManage(sectionId);
     setSectionIdForStudentList(sectionId);
     fetchStudentNameWithClassId(sectionId);
-
-    // // ✅ check HPC match
-    // if (selectedOption && hpcClassIds.includes(selectedOption.class_id)) {
-    //   setIsHpcClass(true);
-    // } else {
-    //   setIsHpcClass(false);
-    // }
   };
 
   const handleStudentSelect = (selectedOption) => {
@@ -337,92 +328,25 @@ function ManageSubjectList() {
     }
   };
 
-  // const handleSearch = async (incomingSectionId = null) => {
-  //   if (isSubmitting) return;
-  //   setIsSubmitting(true);
-  //   setSubjects([]);
-  //   setNameError("");
-
-  //   const finalSectionId =
-  //     classIdForManage ||
-  //     incomingSectionId ||
-  //     location?.state?.section_id ||
-  //     null;
-
-  //   // 1️⃣ No field selected (all users)
-  //   if (roleId !== "T" && !selectedStudentId && !finalSectionId && !grNumber) {
-  //     setNameError("Please select at least one of them.");
-  //     // toast.error("Please select at least one of them!");
-  //     setIsSubmitting(false);
-  //     return;
-  //   }
-
-  //   // 2️⃣ Teacher tries to search GR No or student without selecting class
-  //   if (
-  //     roleId === "T" &&
-  //     !classIdForManage &&
-  //     (selectedStudentId || grNumber)
-  //   ) {
-  //     setNameError("Please select a class before searching!");
-  //     // toast.error("Please select a class before searching!");
-  //     setIsSubmitting(false);
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   setSearchTerm("");
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     const queryParams = {};
-
-  //     if (selectedStudentId) queryParams.student_id = selectedStudentId;
-  //     if (finalSectionId) {
-  //       queryParams.section_id =
-  //         typeof finalSectionId === "object"
-  //           ? finalSectionId.id || finalSectionId.value || ""
-  //           : finalSectionId;
-  //     }
-  //     if (grNumber) queryParams.reg_no = grNumber;
-
-  //     const response = await axios.get(`${API_URL}/api/get_students`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //       params: queryParams,
-  //     });
-
-  //     const studentList =
-  //       response?.data?.students || response?.data?.student || [];
-
-  //     // 3️⃣ No students found for selected criteria
-  //     if (studentList.length === 0) {
-  //       setNameError("No student found for selected criteria.");
-  //       // toast.error("No student found for selected criteria!");
-  //     }
-
-  //     setSubjects(studentList);
-  //     setPageCount(Math.ceil(studentList.length / pageSize));
-
-  //     // HPC class check
-  //     const selectedClassId =
-  //       (typeof finalSectionId === "object"
-  //         ? finalSectionId.class_id
-  //         : selectedClass?.class_id) || null;
-  //     setIsHpcClass(selectedClassId && hpcClassIds.includes(selectedClassId));
-  //   } catch (error) {
-  //     console.log("error", error?.response?.data?.message);
-  //     setNameError(error?.response?.data?.message || "Something went wrong!");
-  //     // toast.error(error?.response?.data?.message || "Something went wrong!");
-  //   } finally {
-  //     setLoading(false);
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
   const handleSearch = async (incomingSectionId = null) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     setSubjects([]);
     setNameError("");
+
+    const selectedclassid = selectedClass
+      ? selectedClass.class_id || selectedClass.id || selectedClass.value
+      : null;
+
+    const selectedsectionid = selectedClass
+      ? selectedClass.section_id || null
+      : null;
+
+    setSelectedClassIdHPC(selectedclassid);
+    setSelectedSectionIdHPC(selectedsectionid);
+    console.log("Selected class inside handleSearch:", selectedClass);
+    console.log("Selected class_id:", selectedclassid);
+    console.log("Selected section_id:", selectedsectionid);
 
     const finalSectionId =
       classIdForManage ||
@@ -494,8 +418,6 @@ function ManageSubjectList() {
 
       setHasSearched(true);
     } catch (error) {
-      // console.log("error", error?.response?.data?.message);
-
       //  Handle explicit 402 error here also
       if (error?.response?.status === 402) {
         setNameError("This Gr no student not found");
@@ -507,88 +429,6 @@ function ManageSubjectList() {
       setIsSubmitting(false);
     }
   };
-
-  // const handleSearch = async (incomingSectionId = null) => {
-  //   if (isSubmitting) return;
-  //   setIsSubmitting(true);
-  //   setSubjects([]);
-
-  //   const finalSectionId =
-  //     classIdForManage ||
-  //     incomingSectionId ||
-  //     location?.state?.section_id ||
-  //     null;
-
-  //   // ✅ For other roles: same as before
-  //   if (roleId !== "T" && !selectedStudentId && !finalSectionId && !grNumber) {
-  //     setNameError("Please select at least one of them.");
-  //     toast.error("Please select at least one of them!");
-  //     setIsSubmitting(false);
-  //     return;
-  //   }
-
-  //   if (roleId === "T" && !classIdForManage) {
-  //     setNameError("Please select a class first.");
-  //     toast.error("Please select a class before searching!");
-  //     setIsSubmitting(false);
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   setSearchTerm("");
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     const queryParams = {};
-
-  //     if (selectedStudentId) {
-  //       queryParams.student_id = selectedStudentId;
-  //     }
-
-  //     if (finalSectionId) {
-  //       if (typeof finalSectionId === "object") {
-  //         queryParams.section_id =
-  //           finalSectionId.id || finalSectionId.value || "";
-  //       } else {
-  //         queryParams.section_id = finalSectionId;
-  //       }
-  //     }
-
-  //     if (grNumber) {
-  //       queryParams.reg_no = grNumber;
-  //     }
-
-  //     const response = await axios.get(`${API_URL}/api/get_students`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //       params: queryParams,
-  //     });
-
-  //     const studentList =
-  //       response?.data?.students || response?.data?.student || [];
-
-  //     setSubjects(studentList);
-  //     setPageCount(Math.ceil(studentList.length / pageSize));
-
-  //     // ✅ HPC column check happens only after Search
-  //     const selectedClassId =
-  //       (typeof finalSectionId === "object"
-  //         ? finalSectionId.class_id
-  //         : selectedClass?.class_id) || null;
-
-  //     if (selectedClassId && hpcClassIds.includes(selectedClassId)) {
-  //       setIsHpcClass(true);
-  //     } else {
-  //       setIsHpcClass(false);
-  //     }
-  //   } catch (error) {
-  //     console.log("error", error?.response?.data?.message);
-  //     setNameError("Please select at least one of them.");
-  //     toast.error(error?.response?.data?.message || "Student not found!");
-  //   } finally {
-  //     setLoading(false);
-  //     setIsSubmitting(false);
-  //   }
-  // };
 
   const fetchDataRoleId = async () => {
     const token = localStorage.getItem("authToken");
@@ -1244,17 +1084,36 @@ function ManageSubjectList() {
                               View
                             </th>
 
-                            {hasSearched &&
+                            {/* {hasSearched &&
                               ((roleId === "T" &&
                                 classTeacher.some(
                                   (cls) =>
                                     cls.is_class_teacher === 1 &&
                                     cls.class_id === selectedClass?.class_id &&
+                                    cls.section_id ===
+                                      selectedClass?.section_id && 
                                     hpcClassIds.includes(cls.class_id)
                                 )) ||
                                 (["A", "M", "U"].includes(roleId) &&
                                   hpcClassIds.includes(
                                     selectedClass?.class_id
+                                  ))) && (
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  HPC Report Card
+                                </th>
+                              )} */}
+                            {hasSearched &&
+                              ((roleId === "T" &&
+                                classTeacher.some(
+                                  (cls) =>
+                                    cls.is_class_teacher === 1 &&
+                                    cls.class_id === selectedClassIdHPC &&
+                                    cls.section_id === selectedSectionIdHPC &&
+                                    hpcClassIds.includes(cls.class_id)
+                                )) ||
+                                (["A", "M", "U"].includes(roleId) &&
+                                  hpcClassIds.includes(
+                                    selectedClassIdHPC
                                   ))) && (
                                 <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                   HPC Report Card
@@ -1381,18 +1240,46 @@ function ManageSubjectList() {
                                   </button>
                                 </td>
 
-                                {hasSearched &&
+                                {/* {hasSearched &&
                                   ((roleId === "T" &&
                                     classTeacher.some(
                                       (cls) =>
                                         cls.is_class_teacher === 1 &&
                                         cls.class_id ===
                                           selectedClass?.class_id &&
+                                        cls.section_id ===
+                                          selectedClass?.section_id &&
                                         hpcClassIds.includes(cls.class_id)
                                     )) ||
                                     (["A", "M", "U"].includes(roleId) &&
                                       hpcClassIds.includes(
                                         selectedClass?.class_id
+                                      ))) && (
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      <button
+                                        onClick={() =>
+                                          handleReportView(subject)
+                                        }
+                                        className="text-green-600 hover:text-green-800 hover:bg-transparent"
+                                      >
+                                        <TbFileCertificate className="font-bold text-xl" />
+                                      </button>
+                                    </td>
+                                  )} */}
+
+                                {hasSearched &&
+                                  ((roleId === "T" &&
+                                    classTeacher.some(
+                                      (cls) =>
+                                        cls.is_class_teacher === 1 &&
+                                        cls.class_id === selectedClassIdHPC &&
+                                        cls.section_id ===
+                                          selectedSectionIdHPC &&
+                                        hpcClassIds.includes(cls.class_id)
+                                    )) ||
+                                    (["A", "M", "U"].includes(roleId) &&
+                                      hpcClassIds.includes(
+                                        selectedClassIdHPC
                                       ))) && (
                                     <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                       <button

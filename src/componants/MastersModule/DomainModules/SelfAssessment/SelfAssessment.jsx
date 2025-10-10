@@ -948,7 +948,8 @@ const SelfAssessment = () => {
                                                     }
                                                     className="w-full p-1 border rounded resize-none text-sm"
                                                     rows={3}
-                                                    maxLength={500}
+                                                    maxLength={100}
+                                                    // 1000
                                                   />
                                                   {publishErrors?.[
                                                     `${student.student_id}-${param.sam_id}`
@@ -978,7 +979,8 @@ const SelfAssessment = () => {
                                                       )
                                                     }
                                                     className="w-full px-2 py-1 border rounded text-sm"
-                                                    maxLength={500}
+                                                    maxLength={100}
+                                                    // 1000
                                                   />
                                                   {publishErrors?.[
                                                     `${student.student_id}-${param.sam_id}`
