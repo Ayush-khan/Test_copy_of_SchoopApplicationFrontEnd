@@ -396,24 +396,63 @@ function UploadMarks() {
       if (response.data.status === 200) {
         const data = response.data.data;
         // ✅ Save open day
+        // if (response.data.open_day) {
+        //   const openDayDate = new Date(response.data.open_day);
+        //   const today = new Date();
+
+        //   // Add 7 days
+        //   const openDayPlus7 = new Date(openDayDate);
+        //   openDayPlus7.setDate(openDayDate.getDate() + 7);
+
+        //   // ✅ Lock editing if today is after openDay + 7
+        //   if (today > openDayPlus7) {
+        //     setIsEditLocked(true);
+        //     setEditLockDateFormatted(openDayPlus7);
+        //   } else {
+        //     setIsEditLocked(false);
+        //   }
+
+        //   setOpenDay(response.data.open_day);
+        // }
         if (response.data.open_day) {
-          const openDayDate = new Date(response.data.open_day);
+          // ✅ Force correct local date without timezone shift
+          const openDayDate = new Date(`${response.data.open_day}T00:00:00`);
+
           const today = new Date();
 
-          // Add 7 days
-          const openDayPlus7 = new Date(openDayDate);
-          openDayPlus7.setDate(openDayDate.getDate() + 7);
+          // Strip time
+          const openDay = new Date(
+            openDayDate.getFullYear(),
+            openDayDate.getMonth(),
+            openDayDate.getDate()
+          );
 
-          // ✅ Lock editing if today is after openDay + 7
-          if (today > openDayPlus7) {
+          const todayDateOnly = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate()
+          );
+
+          // Add 8 days to open day to calculate lock start date
+          const lockDate = new Date(
+            openDay.getTime() + 8 * 24 * 60 * 60 * 1000
+          );
+
+          console.log("openDay        :", openDay.toDateString());
+          console.log("todayDateOnly  :", todayDateOnly.toDateString());
+          console.log("lockDate       :", lockDate.toDateString());
+
+          // ✅ Lock if today >= lockDate
+          if (todayDateOnly >= lockDate) {
             setIsEditLocked(true);
-            setEditLockDateFormatted(openDayPlus7);
+            setEditLockDateFormatted(lockDate);
           } else {
             setIsEditLocked(false);
           }
 
           setOpenDay(response.data.open_day);
         }
+
         processStudentMarksData(data, headings); // pass headings here
       } else {
         toast.error("No student marks found.");
