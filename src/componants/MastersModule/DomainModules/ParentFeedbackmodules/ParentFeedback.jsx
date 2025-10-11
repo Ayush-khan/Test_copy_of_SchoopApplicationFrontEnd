@@ -840,7 +840,8 @@ const ParentFeedback = () => {
 
                       <div className="card-body w-full">
                         <div
-                          className="h-[550px] lg:h-[550px] overflow-y-scroll overflow-x-scroll"
+                          // className="h-[550px] lg:h-[550px] overflow-y-scroll overflow-x-scroll"
+                          className="h-screen overflow-y-scroll overflow-x-scroll"
                           style={{
                             // maxHeight: "calc(100vh - 220px)", // adjusts automatically with screen height
                             scrollbarWidth: "thin",
@@ -957,8 +958,7 @@ const ParentFeedback = () => {
                                                     }
                                                     className="w-full p-1 border rounded resize-none text-sm"
                                                     rows={3}
-                                                    maxLength={100}
-                                                    // 500
+                                                    maxLength={500}
                                                   />
                                                   {publishErrors?.[
                                                     `${student.student_id}-${param.pfm_id}`
@@ -988,8 +988,7 @@ const ParentFeedback = () => {
                                                       )
                                                     }
                                                     className="w-full px-2 py-1 border rounded text-sm"
-                                                    maxLength={100}
-                                                    // 100
+                                                    maxLength={500}
                                                   />
                                                   {publishErrors?.[
                                                     `${student.student_id}-${param.pfm_id}`

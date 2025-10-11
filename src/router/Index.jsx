@@ -223,7 +223,7 @@ import ForgotPassword from "../Layouts/ForgotPassword.jsx";
 import UpdateStudentIdCards from "../componants/IDCards/UpdateStudentIdCards.jsx";
 import UploadStudentPhoto from "../componants/IDCards/UploadStudentPhoto.jsx";
 import UploadParentPhoto from "../componants/IDCards/UploadParentPhoto.jsx";
-import StudentAbsent from "../componants/AllTableList/StudentAbsent.jsx";
+// import StudentAbsent from "../componants/AllTableList/StudentCard/StudentAbsent.jsx";
 import NonTeachingStaff from "../componants/AllTableList/NonTeachingStaff.jsx";
 import ApproveLessonP from "../componants/AllTableList/ApproveLessonP.jsx";
 import ManageSubjectPrinciple from "../componants/MastersModule/SubjectAllotment/SubjectAllotmentForPrinciple/ManageSubjectPrinciple.jsx";
@@ -318,6 +318,7 @@ import PublishreportCard from "../componants/MastersModule/DomainModules/Publish
 import UploadMarks from "../componants/MastersModule/DomainModules/UploadMarks/UploadMarks.jsx";
 import HPCReportCard from "../componants/MastersModule/DomainModules/HPCReportCard/HPCReportCard.jsx";
 import ReportCardRemark from "../componants/MastersModule/DomainModules/ReportCardRemark/ReportCardRemark.jsx";
+import StudentAbsent from "../componants/AllTableList/StudentCard/StudentAbsent.jsx";
 
 // import Menus from "../c";
 function Index() {
