@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo ,useRef} from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
@@ -9,6 +9,9 @@ import { RxCross1 } from "react-icons/rx";
 const FeesOutStandingSendSms = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [smsSentDates, setSmsSentDates] = useState([]);
+
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedStudentForStudent, setSelectedStudentForStudent] =
     useState(null);
@@ -26,7 +29,9 @@ const FeesOutStandingSendSms = () => {
   const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
   const [selectedTab, setSelectedTab] = useState("installment");
-  const [message, setMessage] = useState("Your child's fees payment is due. Please make the payment at the earliest. If already paid please send details to school admin");
+  const [message, setMessage] = useState(
+    "Your child's fees payment is due. Please make the payment at the earliest. If already paid please send details to school admin"
+  );
   const messageRef = useRef(null);
 
   const maxCharacters = 900;
@@ -199,14 +204,16 @@ const FeesOutStandingSendSms = () => {
       );
       hasError = true;
     }
-    if (message.length === 0){
+    if (message.length === 0) {
       setErrors("Message is required.");
       toast.error("Message is required.");
-      messageRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      messageRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
       messageRef.current?.focus();
       hasError = true;
-    }
-    else {
+    } else {
       setErrors(""); // clear error if valid
     }
     // Exit if there are validation errors
@@ -243,7 +250,9 @@ const FeesOutStandingSendSms = () => {
         toast.success("Send message for pending fees successfully!");
         setSelectedClass(null);
         setSelectedInstallment(null);
-        setMessage("Your child's fees payment is due. Please make the payment at the earliest. If already paid please send details to school admin");
+        setMessage(
+          "Your child's fees payment is due. Please make the payment at the earliest. If already paid please send details to school admin"
+        );
 
         setSelectedStudent(null); // Reset student selection
         setSelectedStudents([]); // Clear selected students
@@ -272,6 +281,15 @@ const FeesOutStandingSendSms = () => {
     } finally {
       setLoading(false); // Stop loading
     }
+  };
+  const handleOpenSmsModal = (dates) => {
+    setSmsSentDates(dates);
+    setShowAddModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    setSmsSentDates([]);
   };
 
   //   const filteredParents = parentInformation
@@ -325,6 +343,11 @@ const FeesOutStandingSendSms = () => {
         );
       })
     : [];
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const [year, month, day] = dateString.split("-");
+    return `${day}-${month}-${year.slice(-2)}`;
+  };
 
   return (
     <div>
@@ -624,11 +647,41 @@ const FeesOutStandingSendSms = () => {
                                     {student?.paid_amount || ""}
                                   </p>
                                 </td>
-                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                     {student?.smscount || ""}
                                   </p>
+                                </td> */}
+                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                  {student?.smscount > 0 ? (
+                                    <button
+                                      title="View SMS History"
+                                      className="flex items-center gap-1 mx-auto bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-1 px-3 rounded-full shadow-md hover:shadow-lg transition-all duration-200 ease-in-out text-sm"
+                                      onClick={() =>
+                                        handleOpenSmsModal(
+                                          student?.smssentdates || []
+                                        )
+                                      }
+                                    >
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8-1.95 0-3.743-.57-5.172-1.537L3 21l1.768-4.424C4.29 15.436 4 13.758 4 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                        />
+                                      </svg>
+                                      {student?.smscount}
+                                    </button>
+                                  ) : null}
                                 </td>
+
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                     {student?.lastsmsdate || ""}
@@ -649,7 +702,7 @@ const FeesOutStandingSendSms = () => {
                         <div className="flex justify-center mt-2">
                           <div className="w-full md:w-[50%] relative">
                             <textarea
-                             ref={messageRef}
+                              ref={messageRef}
                               value={message}
                               onChange={(e) => {
                                 if (e.target.value.length <= maxCharacters) {
@@ -659,7 +712,11 @@ const FeesOutStandingSendSms = () => {
                               className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none"
                               placeholder="Enter message"
                             ></textarea>
-                            {errors && <p className="text-red-600 text-sm mt-1">{errors.message}</p>}
+                            {errors && (
+                              <p className="text-red-600 text-sm mt-1">
+                                {errors.message}
+                              </p>
+                            )}
                             <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none">
                               {message.length} / {maxCharacters}
                             </div>
@@ -721,6 +778,72 @@ const FeesOutStandingSendSms = () => {
           )}
         </div>
       </div>
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm transition-all duration-300">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 sm:mx-auto max-h-[90vh] overflow-y-auto animate-fadeIn">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-2 py-2 border-b border-gray-200">
+              <div className="flex items-center gap-2">
+                <svg
+                  className="w-6 h-6 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8-1.95 0-3.743-.57-5.172-1.537L3 21l1.768-4.424C4.29 15.436 4 13.758 4 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+                <h2 className="text-lg font-semibold text-gray-700">
+                  SMS Sent History
+                </h2>
+              </div>
+              <RxCross1
+                className="text-3xl  text-red-600 cursor-pointer hover:bg-transparent p-1 rounded-full"
+                onClick={handleCloseModal}
+              />
+            </div>
+
+            {/* Divider */}
+            <div className="w-[95%] h-[2px] mx-auto bg-gradient-to-r from-pink-500 to-pink-900 mb-2"></div>
+
+            {/* Modal Content */}
+            <div className="px-6 pb-2">
+              {smsSentDates?.length > 0 ? (
+                <div className="space-y-3">
+                  {smsSentDates.map((sms, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md px-4 py-2 shadow-sm hover:shadow-md transition"
+                    >
+                      <span className="text-sm text-gray-500">{index + 1}</span>
+                      <span className="text-gray-800 font-medium">
+                        {formatDate(sms?.date_sms_sent)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm italic text-center mt-4">
+                  No SMS records found for this student.
+                </p>
+              )}
+            </div>
+            {/* Footer Button */}
+            <div className="flex justify-end items-end mr-5 py-2 ">
+              <button
+                onClick={handleCloseModal}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-6 py-1 rounded-md shadow-md transition-all"
+              >
+                Back
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

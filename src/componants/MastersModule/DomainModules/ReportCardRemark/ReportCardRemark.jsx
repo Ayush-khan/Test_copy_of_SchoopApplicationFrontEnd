@@ -1059,11 +1059,11 @@ const ReportCardRemark = () => {
                                   </th>
                                 ))}
 
-                                {showPromotedColumn && (
+                                {/* {showPromotedColumn && (
                                   <th className="px-2 text-center lg:px-3 py-2 border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider">
                                     Promoted To
                                   </th>
-                                )}
+                                )} */}
                               </tr>
                             </thead>
 
@@ -1127,7 +1127,7 @@ const ReportCardRemark = () => {
                                         )}
                                       </td>
 
-                                      {showPromotedColumn && (
+                                      {/* {showPromotedColumn && (
                                         <td className="px-2 py-1  border-gray-400">
                                           <div className="flex justify-center">
                                             <Select
@@ -1164,7 +1164,7 @@ const ReportCardRemark = () => {
                                             />
                                           </div>
                                         </td>
-                                      )}
+                                      )} */}
                                     </tr>
                                   );
                                 })
