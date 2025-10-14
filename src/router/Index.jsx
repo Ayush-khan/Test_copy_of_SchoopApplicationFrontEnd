@@ -215,8 +215,8 @@ import CreateClassWisePeriodAllotment from "../componants/TimeTablePlanner/Commo
 import ClassWisePeriodAllotment from "../componants/TimeTablePlanner/CommonTableForAllTable/ClassWisePeriodAllotment.jsx";
 import EditTimetablePlanner from "../componants/TimeTablePlanner/EditTimeTablePlanner/EditTimetablePlanner.jsx";
 import CreateTimetablePlanner from "../componants/TimeTablePlanner/CreateExamTimeTablePlanner/CreateTimetablePlanner.jsx";
-// import TimetablePlanner from "../componants/TimeTablePlanner/TimetablePlanner.jsx";
-import TimetablePlanner from "../componants/TimeTablePlanner/TimeTablePlanner.jsx";
+// import TimetablePlanner from "../componants/TimeTablePlanner/TimeTablePlanner.jsx";
+import TimetablePlanner from "../componants/TimeTablePlanner/TimetablePlanner.jsx";
 import MonthlyAttendenceReport from "../componants/Reports/MonthlyAttendanceReport.jsx";
 import ComingSoon from "../componants/common/CommingSoon/ComingSoon.jsx";
 import ForgotPassword from "../Layouts/ForgotPassword.jsx";
