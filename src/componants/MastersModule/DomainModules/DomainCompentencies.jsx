@@ -121,7 +121,6 @@ function DomainCompentencies() {
 
   const validateSectionName = (name) => {
     const errors = {};
-    // console.log("xcfgvbhnj")
 
     if (!name || name.trim() === "") {
       errors.name = "Please enter compentencies.";
@@ -545,7 +544,7 @@ function DomainCompentencies() {
                       </label>
                       <input
                         type="text"
-                        maxLength={30}
+                        maxLength={100}
                         className="form-control shadow-md mb-2"
                         id="sectionName"
                         value={newLeaveType}
@@ -613,7 +612,7 @@ function DomainCompentencies() {
                     </label>
                     <input
                       type="text"
-                      maxLength={30}
+                      maxLength={100}
                       className="form-control shadow-md mb-2"
                       id="editSectionName"
                       value={newLeaveType}

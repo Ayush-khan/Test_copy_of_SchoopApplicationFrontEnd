@@ -24,9 +24,6 @@ const EditDomainDetails = () => {
   const location = useLocation();
   const domaindatadetail = location.state?.domain; // get full object if passed
 
-  // console.log("dm_id from URL:", id);
-  // console.log(" Domain Data from state:", domaindatadetail);
-
   const [allClasses, setAllClasses] = useState([]);
   const [selectedClasses, setSelectedClasses] = useState(null);
   const [loading, setLoading] = useState(false); // Loader state
@@ -266,8 +263,59 @@ const EditDomainDetails = () => {
     setDetails(details.filter((_, i) => i !== index));
   };
 
+  // useEffect(() => {
+  //   if (!domainData || hasPrefilled.current) return;
+
+  //   // Prefill class
+  //   if (classOptions.length > 0) {
+  //     const selectedClass = classOptions.find(
+  //       (opt) => opt.value === domainData.class_id
+  //     );
+  //     if (selectedClass) {
+  //       setSelectedClasses(selectedClass);
+  //       setclassIdForManage(selectedClass.value);
+  //     }
+  //   }
+
+  //   // Prefill subject
+  //   // if (subjectOptions.length > 0 && domainData.HPC_sm_id) {
+  //   //   // find the exact object from options array
+  //   //   const selectedSub = subjectOptions.find(
+  //   //     (opt) => opt.value === domainData.HPC_sm_id
+  //   //   );
+
+  //   //   if (selectedSub) {
+  //   //     setSelectedSubject(selectedSub); // must be the exact object from options
+  //   //     setSubjectIdForManage(selectedSub.value);
+  //   //   }
+  //   // }
+
+  //   // Prefill text fields
+  //   setName(domainData.name || "");
+  //   setCurriculumGoal(domainData.curriculum_goal || "");
+
+  //   hasPrefilled.current = true; // ✅ mark as done
+  // }, [domainData, classOptions]);
+
+  // useEffect(() => {
+  //   if (!domainData) return;
+  //   if (!subjectOptions || subjectOptions.length === 0) return;
+
+  //   // find the exact object from options array
+  //   const selectedSub = subjectOptions.find(
+  //     (opt) => opt.value === domainData.HPC_sm_id
+  //   );
+
+  //   if (selectedSub) {
+  //     setSelectedSubject(selectedSub); // must be exact object from options
+  //     setSubjectIdForManage(selectedSub.value);
+  //   }
+  // }, [domainData, subjectOptions]);
+
   useEffect(() => {
-    if (!domainData || hasPrefilled.current) return;
+    if (!domainData) return;
+
+    let didPrefill = false;
 
     // Prefill class
     if (classOptions.length > 0) {
@@ -277,43 +325,31 @@ const EditDomainDetails = () => {
       if (selectedClass) {
         setSelectedClasses(selectedClass);
         setclassIdForManage(selectedClass.value);
+        didPrefill = true;
       }
     }
 
     // Prefill subject
-    // if (subjectOptions.length > 0 && domainData.HPC_sm_id) {
-    //   // find the exact object from options array
-    //   const selectedSub = subjectOptions.find(
-    //     (opt) => opt.value === domainData.HPC_sm_id
-    //   );
+    if (subjectOptions.length > 0 && domainData.HPC_sm_id) {
+      const selectedSub = subjectOptions.find(
+        (opt) => opt.value === domainData.HPC_sm_id
+      );
+      if (selectedSub) {
+        setSelectedSubject(selectedSub);
+        setSubjectIdForManage(selectedSub.value);
+        didPrefill = true;
+      }
+    }
 
-    //   if (selectedSub) {
-    //     setSelectedSubject(selectedSub); // must be the exact object from options
-    //     setSubjectIdForManage(selectedSub.value);
-    //   }
-    // }
-
-    // Prefill text fields
+    // Prefill text fields (safe any time)
     setName(domainData.name || "");
     setCurriculumGoal(domainData.curriculum_goal || "");
 
-    hasPrefilled.current = true; // ✅ mark as done
-  }, [domainData, classOptions]);
-
-  useEffect(() => {
-    if (!domainData) return;
-    if (!subjectOptions || subjectOptions.length === 0) return;
-
-    // find the exact object from options array
-    const selectedSub = subjectOptions.find(
-      (opt) => opt.value === domainData.HPC_sm_id
-    );
-
-    if (selectedSub) {
-      setSelectedSubject(selectedSub); // must be exact object from options
-      setSubjectIdForManage(selectedSub.value);
+    // ✅ only lock once both options have been processed
+    if (didPrefill) {
+      hasPrefilled.current = true;
     }
-  }, [domainData, subjectOptions]);
+  }, [domainData, classOptions, subjectOptions]);
 
   useEffect(() => {
     if (roles.length > 0) {
@@ -435,7 +471,9 @@ const EditDomainDetails = () => {
 
       console.log("Updated successfully:", response.data);
       toast.success("Domain Parameters Updated Successfully!");
-      navigate("/domainDetails");
+      setTimeout(() => {
+        navigate("/domainDetails");
+      }, 2000);
     } catch (error) {
       console.error("Error update data:", error);
       toast.error(error.message || "Failed to update data");
@@ -576,6 +614,7 @@ const EditDomainDetails = () => {
                                   });
                                 }
                               }}
+                              maxLength={100}
                               placeholder="Enter name"
                               required
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -615,6 +654,7 @@ const EditDomainDetails = () => {
                                   });
                                 }
                               }}
+                              maxLength={200}
                               placeholder="Enter curriculum goal"
                               required
                               rows={3}
@@ -689,32 +729,6 @@ const EditDomainDetails = () => {
                                       {/* Competencies */}
                                       <td className="border border-gray-300 px-3 py-2">
                                         <div className="flex flex-col">
-                                          {/* <Select
-                                            value={
-                                              competencyOptions.find(
-                                                (opt) =>
-                                                  opt.value === row.competency
-                                              ) || null
-                                            }
-                                            onChange={(selectedOption) =>
-                                              handleCompentencySelect(
-                                                selectedOption,
-                                                index
-                                              )
-                                            }
-                                            options={competencyOptions}
-                                            placeholder="Select Competency"
-                                            isClearable
-                                            isSearchable
-                                            className="text-sm"
-                                            menuPortalTarget={document.body}
-                                            styles={{
-                                              menuPortal: (base) => ({
-                                                ...base,
-                                                zIndex: 9999,
-                                              }),
-                                            }}
-                                          /> */}
                                           <Select
                                             value={
                                               competencyOptions.find(
@@ -763,6 +777,7 @@ const EditDomainDetails = () => {
                                                 e.target.value
                                               )
                                             }
+                                            maxLength={200}
                                             placeholder="Enter learning outcome"
                                             rows={2}
                                             className="w-full px-2 py-1 border border-gray-300 rounded-md resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"

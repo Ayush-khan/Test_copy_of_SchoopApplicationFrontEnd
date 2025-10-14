@@ -37,6 +37,7 @@ const PeerFeedback = () => {
 
   const [roleId, setRoleId] = useState("");
   const [regId, setRegId] = useState("");
+  const [focusField, setFocusField] = useState(null);
 
   const [selectedSectionId, setSelectedSectionId] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
@@ -71,7 +72,7 @@ const PeerFeedback = () => {
     try {
       if (roleId === "T") {
         const response = await axios.get(
-          `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
+          `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -92,7 +93,7 @@ const PeerFeedback = () => {
 
         setStudentNameWithClassId(mappedData || []);
       } else {
-        const response = await axios.get(`${API_URL}/api/g`, {
+        const response = await axios.get(`${API_URL}/api/get_class_section`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -237,7 +238,7 @@ const PeerFeedback = () => {
     setTermError("");
 
     if (!selectedStudentId) {
-      setStudentError("Please select Class.");
+      setStudentError("Please select class.");
       setLoadingForSearch(false);
       return;
     }
@@ -247,13 +248,12 @@ const PeerFeedback = () => {
       return;
     }
     if (!selectedTerms) {
-      setTermError("Please select Term.");
+      setTermError("Please select term.");
       setLoadingForSearch(false);
       return;
     }
 
     try {
-      // ✅ Freeze current dropdown values into applied filters
       const filters = {
         class_id: selectedStudentId,
         section_id: selectedSectionId,
@@ -274,7 +274,7 @@ const PeerFeedback = () => {
       setParameter(response.data.parameters);
 
       if (!response?.data?.students || response?.data?.students.length === 0) {
-        toast.error("Student Peer Feedback not found.");
+        toast.error("Peer Feedback not found.");
         setTimetable([]);
         setSelectedRecords([]);
       } else {
@@ -285,7 +285,7 @@ const PeerFeedback = () => {
         setPageCount(Math.ceil(data.length / pageSize));
         setShowStudentReport(true);
 
-        // ✅ Pre-select existing values
+        //  Pre-select existing values
         const preSelected = [];
         data.forEach((student) => {
           if (student.assessments && Array.isArray(student.assessments)) {
@@ -304,7 +304,7 @@ const PeerFeedback = () => {
       }
     } catch (error) {
       console.error("Error fetching Peer Feedback:", error);
-      toast.error("Error fetching Student Peer Feedback. Please try again.");
+      toast.error("Error fetching Peer Feedback. Please try again.");
     } finally {
       setIsSubmitting(false);
       setLoadingForSearch(false);
@@ -316,7 +316,12 @@ const PeerFeedback = () => {
     setIsSaving(true);
 
     try {
-      // ✅ Use applied filters if user clicked Browse, else fallback to current selections
+      if (!selectedRecords || selectedRecords.length === 0) {
+        toast.error("Please select at least one record before saving.");
+        setIsSaving(false);
+        return;
+      }
+      // Use applied filters if user clicked Browse, else fallback to current selections
       const filtersToUse = appliedFilters || {
         term_id: selectedTerms,
         class_id: selectedStudentId,
@@ -349,10 +354,10 @@ const PeerFeedback = () => {
       );
 
       if (response?.data?.status === 200) {
-        toast.success("Peer Feedback  saved successfully!");
+        toast.success("Peer feedback saved successfully!");
         window.scrollTo({ top: 0, behavior: "smooth" });
 
-        // ✅ If save without Browse → still mark filters as applied
+        // If save without Browse → still mark filters as applied
         if (!appliedFilters) {
           setAppliedFilters(filtersToUse);
         }
@@ -362,7 +367,7 @@ const PeerFeedback = () => {
         toast.error(response?.data?.message || "Something went wrong");
       }
     } catch (error) {
-      console.error("Error saving student Peer Feedback", error);
+      console.error("Error saving peer feedback:", error);
       toast.error("Error saving data. Please try again.");
     } finally {
       setIsSaving(false);
@@ -382,6 +387,7 @@ const PeerFeedback = () => {
 
     let firstErrorElement = null;
     const newErrors = {};
+
     for (const student of timetable) {
       for (const param of parameter || []) {
         const record = selectedRecords.find(
@@ -394,7 +400,7 @@ const PeerFeedback = () => {
 
         if (!value.trim()) {
           const key = `${student.student_id}-${param.pfm_id}`;
-          newErrors[key] = "Please select data.";
+          newErrors[key] = "All fields required.";
 
           setPublishErrors(newErrors);
 
@@ -405,6 +411,7 @@ const PeerFeedback = () => {
             firstErrorElement.scrollIntoView({
               behavior: "smooth",
               block: "center",
+              inline: "center",
             });
             firstErrorElement.focus();
           }
@@ -435,12 +442,12 @@ const PeerFeedback = () => {
       );
 
       if (response?.data?.status === 200) {
-        toast.success("Student Peer Feedback saved & published successfully!");
+        toast.success("Peer feedback saved & published successfully!");
         window.scrollTo({ top: 0, behavior: "smooth" });
         setShowStudentReport(false);
       }
     } catch (error) {
-      console.error("Error saving student peer feedback:", error);
+      console.error("Error saving  learner's feedback:", error);
       toast.error("Error saving data. Please try again.");
     } finally {
       setIsPublishing(false);
@@ -450,7 +457,7 @@ const PeerFeedback = () => {
   const handleSubmitUnPublish = async () => {
     if (isUnPublishing) return;
 
-    // ✅ Check if user has browsed first
+    //  Check if user has browsed first
     if (!appliedFilters) {
       toast.error(
         "Please select Class, Section, and Term and click Browse first."
@@ -465,6 +472,7 @@ const PeerFeedback = () => {
       setTimetable([]);
       const token = localStorage.getItem("authToken");
 
+      // ✅ Use appliedFilters instead of live dropdowns
       const params = {
         class_id: appliedFilters.class_id,
         section_id: appliedFilters.section_id,
@@ -480,7 +488,7 @@ const PeerFeedback = () => {
       );
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
-        toast.success("Student Peer Feedback unpublished successfully.");
+        toast.success("Peer feedback unpublished successfully.");
         setShowStudentReport(false);
         setTimetable([]);
         setSelectedRecords([]);
@@ -510,8 +518,8 @@ const PeerFeedback = () => {
         setSelectedRecords(preSelected);
       }
     } catch (error) {
-      console.error("Error unpublishing Student peer feedback:", error);
-      toast.error("Error fetching Student peer feedback. Please try again.");
+      console.error("Error unpublishing Peer Feedback:", error);
+      toast.error("Error fetching Peer Feedback Please try again.");
     } finally {
       setIsUnPublishing(false);
       setLoadingForSearch(false);
@@ -571,10 +579,10 @@ const PeerFeedback = () => {
 
           <>
             {!showStudentReport && (
-              <div className=" w-full md:w-[65%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2">
+              <div className=" w-full md:w-[60%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2">
                 <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                   <div className="w-full md:w-[99%]  gap-x-0 md:gap-x-4 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                    <div className="w-full md:w-[50%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
+                    <div className="w-full md:w-[45%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                       <label
                         className="md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
                         htmlFor="studentSelect"
@@ -607,7 +615,7 @@ const PeerFeedback = () => {
                       <label className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5">
                         Terms <span className="text-sm text-red-500">*</span>
                       </label>
-                      <div className="w-full md:w-[70%]">
+                      <div className="w-full md:w-[85%]">
                         <Select
                           value={
                             termsOptions.find(
@@ -720,7 +728,14 @@ const PeerFeedback = () => {
                                 <div className="flex-1">
                                   <Select
                                     menuPortalTarget={document.body}
-                                    menuPosition="fixed"
+                                    // menuPosition="fixed"
+                                    menuPosition="absolute" // ✅ instead of "fixed"
+                                    styles={{
+                                      menuPortal: (base) => ({
+                                        ...base,
+                                        zIndex: 9999,
+                                      }), // keep above other UI
+                                    }}
                                     id="studentSelect"
                                     value={selectedStudent}
                                     onChange={handleStudentSelect}
@@ -749,7 +764,14 @@ const PeerFeedback = () => {
                                 <div className="flex-1">
                                   <Select
                                     menuPortalTarget={document.body}
-                                    menuPosition="fixed"
+                                    // menuPosition="fixed"
+                                    menuPosition="absolute"
+                                    styles={{
+                                      menuPortal: (base) => ({
+                                        ...base,
+                                        zIndex: 9999,
+                                      }), // keep above other UI
+                                    }}
                                     value={
                                       termsOptions.find(
                                         (opt) => opt.value === selectedTerms
@@ -825,187 +847,624 @@ const PeerFeedback = () => {
                             scrollbarColor: "#C03178 transparent",
                           }}
                         >
-                          <table
-                            className="min-w-full leading-normal table-auto "
-                            // w-[1500px]
-                          >
-                            <thead
-                              className="sticky top-0  bg-gray-200"
-                              style={{ zIndex: "1px" }}
-                            >
-                              <tr className="bg-gray-200">
-                                {["Sr No.", "Roll No.", "Student Name"].map(
-                                  (header, index) => (
-                                    <th
-                                      key={index}
-                                      className="px-2 text-center lg:px-3 py-2 border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider"
-                                    >
-                                      {header}
-                                    </th>
-                                  )
-                                )}
-
-                                {parameter?.map((param, pIndex) => (
-                                  <th
-                                    key={pIndex}
-                                    className="px-2 text-center lg:px-3 py-2 border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider w-[25%]"
-                                  >
-                                    {param.parameter}
-                                  </th>
-                                ))}
-                              </tr>
-                            </thead>
-
-                            <tbody>
-                              {loadingForSearch ? (
-                                <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                  <div className=" text-center text-xl text-blue-700">
-                                    Please wait while data is loading...
-                                  </div>
-                                </div>
-                              ) : timetable.length > 0 ? (
-                                timetable.map((student, index) => (
-                                  <tr
-                                    key={student.student_id}
-                                    className="border border-gray-300"
-                                  >
-                                    <td className="px-2 py-1 text-center border border-gray-400">
-                                      {index + 1}
-                                    </td>
-
-                                    <td className="px-2 py-1 text-center border border-gray-400">
-                                      {student.roll_no || ""}
-                                    </td>
-
-                                    <td className="px-2 py-1 text-center border border-gray-400">
-                                      {toCamelCase(student.student_name || "")}
-                                    </td>
-
-                                    {parameter?.map((param, pIndex) => {
-                                      const assessment =
-                                        student.assessments.find(
-                                          (a) => a.pfm_id === param.pfm_id
-                                        );
-
-                                      const record = selectedRecords.find(
-                                        (rec) =>
-                                          rec.student_id ===
-                                            student.student_id &&
-                                          rec.pfm_id === param.pfm_id
-                                      );
-
-                                      const selectedValue =
-                                        record !== undefined
-                                          ? record.value
-                                          : assessment?.value || "";
-
-                                      return (
-                                        <td
-                                          key={pIndex}
-                                          className="px-2 py-1 text-center border border-gray-400"
+                          {parameter.length > 0 ? (
+                            <div className="inline-block min-w-full">
+                              <table className="min-w-full leading-normal table-auto ">
+                                <thead
+                                  className="sticky top-0  bg-gray-200"
+                                  style={{ zIndex: "1px" }}
+                                >
+                                  <tr>
+                                    {["Sr No.", "Roll No.", "Student Name"].map(
+                                      (header, index) => (
+                                        <th
+                                          key={index}
+                                          className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-2 py-2 whitespace-nowrap"
                                         >
-                                          {/* <div className="flex flex-col items-start space-y-1"> */}
-                                          <div className="flex flex-row justify-center items-center space-x-4 py-1">
-                                            {[
-                                              "Never",
-                                              "Sometimes",
-                                              "Always",
-                                            ].map((option) => (
-                                              <label
-                                                key={option}
-                                                className="flex items-center space-x-1 text-sm"
-                                              >
-                                                <input
-                                                  type="radio"
-                                                  name={`param-${student.student_id}-${param.pfm_id}`}
-                                                  value={option}
-                                                  checked={
-                                                    selectedValue === option
-                                                  }
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      student.student_id,
-                                                      param.pfm_id,
-                                                      e.target.value
-                                                    )
-                                                  }
-                                                  className="text-blue-600"
-                                                />
-                                                <span>{option}</span>
-                                              </label>
-                                            ))}
-                                          </div>
+                                          {header}
+                                        </th>
+                                      )
+                                    )}
 
-                                          {publishErrors?.[
-                                            `${student.student_id}-${param.pfm_id}`
-                                          ] && (
-                                            <span className="text-red-500 text-xs mt-1 block">
-                                              {
-                                                publishErrors[
-                                                  `${student.student_id}-${param.pfm_id}`
-                                                ]
-                                              }
-                                            </span>
+                                    {parameter?.map((param, pIndex) => (
+                                      <th
+                                        key={pIndex}
+                                        className="border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider text-center px-4 py-2  "
+                                      >
+                                        {param.parameter}
+                                      </th>
+                                    ))}
+                                  </tr>
+                                </thead>
+
+                                <tbody>
+                                  {loadingForSearch ? (
+                                    <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                      <div className=" text-center text-xl text-blue-700">
+                                        Please wait while data is loading...
+                                      </div>
+                                    </div>
+                                  ) : timetable.length > 0 ? (
+                                    timetable.map((student, index) => (
+                                      <tr
+                                        key={student.student_id}
+                                        className="border border-gray-300"
+                                      >
+                                        <td className="px-2 py-1 text-center border border-gray-400">
+                                          {index + 1}
+                                        </td>
+
+                                        <td className="px-2 py-1 text-center border border-gray-400">
+                                          {student.roll_no || ""}
+                                        </td>
+
+                                        <td className="px-2 py-1 text-center border border-gray-400">
+                                          {toCamelCase(
+                                            student.student_name || ""
                                           )}
                                         </td>
-                                      );
-                                    })}
-                                  </tr>
-                                ))
+
+                                        {parameter?.map((param, pIndex) => {
+                                          const assessment =
+                                            student.assessments.find(
+                                              (a) => a.pfm_id === param.pfm_id
+                                            );
+
+                                          const record = selectedRecords.find(
+                                            (rec) =>
+                                              rec.student_id ===
+                                                student.student_id &&
+                                              rec.pfm_id === param.pfm_id
+                                          );
+
+                                          const selectedValue =
+                                            record !== undefined
+                                              ? record.value
+                                              : assessment?.value || "";
+
+                                          console.log(
+                                            "Rendering:",
+                                            param.control_type,
+                                            selectedValue
+                                          );
+
+                                          return (
+                                            <td
+                                              key={pIndex}
+                                              className="px-2 py-1 text-center border border-gray-400"
+                                            >
+                                              {param.control_type ===
+                                                "textarea" && (
+                                                <div className="flex flex-col">
+                                                  <textarea
+                                                    name={`param-${student.student_id}-${param.pfm_id}`}
+                                                    value={selectedValue}
+                                                    onChange={(e) =>
+                                                      handleChange(
+                                                        student.student_id,
+                                                        param.pfm_id,
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                    className="w-full p-1 border rounded resize-none text-sm"
+                                                    rows={3}
+                                                    maxLength={500}
+                                                  />
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+
+                                              {param.control_type ===
+                                                "text" && (
+                                                <div className="flex flex-col">
+                                                  <input
+                                                    type="text"
+                                                    name={`param-${student.student_id}-${param.pfm_id}`}
+                                                    value={selectedValue}
+                                                    onChange={(e) =>
+                                                      handleChange(
+                                                        student.student_id,
+                                                        param.pfm_id,
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                    className="w-full px-2 py-1 border rounded text-sm"
+                                                    maxLength={10}
+                                                  />
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+
+                                              {/* {param.control_type ===
+                                                "checkbox" && (
+                                                <div className="flex flex-wrap gap-3">
+                                                  {(() => {
+                                                    let parsedOptions = [];
+                                                    try {
+                                                      parsedOptions =
+                                                        param.options
+                                                          ? JSON.parse(
+                                                              param.options
+                                                            )
+                                                          : [];
+                                                    } catch (err) {
+                                                      console.error(
+                                                        "Invalid options JSON:",
+                                                        param.options,
+                                                        err
+                                                      );
+                                                    }
+
+                                                    const selectedArray =
+                                                      selectedValue
+                                                        ? Array.isArray(
+                                                            selectedValue
+                                                          )
+                                                          ? selectedValue
+                                                          : selectedValue.split(
+                                                              ","
+                                                            )
+                                                        : [];
+
+                                                    return parsedOptions.map(
+                                                      (opt) => (
+                                                        <label
+                                                          key={opt.option}
+                                                          className="flex items-center gap-1 px-2 py-1"
+                                                        >
+                                                          <input
+                                                            type="checkbox"
+                                                            name={`param-${student.student_id}-${param.pfm_id}`}
+                                                            checked={selectedArray.includes(
+                                                              opt.value
+                                                            )}
+                                                            className="w-3 h-3"
+                                                            onChange={(e) => {
+                                                              let newValues = [
+                                                                ...selectedArray,
+                                                              ];
+                                                              if (
+                                                                e.target.checked
+                                                              ) {
+                                                                if (
+                                                                  !newValues.includes(
+                                                                    opt.value
+                                                                  )
+                                                                ) {
+                                                                  newValues.push(
+                                                                    opt.value
+                                                                  );
+                                                                }
+                                                              } else {
+                                                                newValues =
+                                                                  newValues.filter(
+                                                                    (v) =>
+                                                                      v !==
+                                                                      opt.value
+                                                                  );
+                                                              }
+                                                              handleChange(
+                                                                student.student_id,
+                                                                param.pfm_id,
+                                                                newValues.join(
+                                                                  ","
+                                                                )
+                                                              );
+                                                            }}
+                                                          />
+
+                                                          <span className="text-sm">
+                                                            {opt.value}
+                                                          </span>
+                                                        </label>
+                                                      )
+                                                    );
+                                                  })()}
+
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1 w-full">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )} */}
+
+                                              {param.control_type ===
+                                                "checkbox" && (
+                                                <div className="flex flex-wrap gap-3">
+                                                  {(() => {
+                                                    let parsedOptions = [];
+                                                    try {
+                                                      parsedOptions =
+                                                        param.options
+                                                          ? JSON.parse(
+                                                              param.options
+                                                            )
+                                                          : [];
+                                                    } catch (err) {
+                                                      console.error(
+                                                        "Invalid options JSON:",
+                                                        param.options,
+                                                        err
+                                                      );
+                                                    }
+
+                                                    const selectedArray =
+                                                      selectedValue
+                                                        ? Array.isArray(
+                                                            selectedValue
+                                                          )
+                                                          ? selectedValue
+                                                          : selectedValue.split(
+                                                              ","
+                                                            )
+                                                        : [];
+
+                                                    return parsedOptions.map(
+                                                      (opt) => (
+                                                        <label
+                                                          key={opt.option}
+                                                          className="flex items-center gap-1 px-2 py-1"
+                                                        >
+                                                          <input
+                                                            type="checkbox"
+                                                            name={`param-${student.student_id}-${param.pfm_id}`}
+                                                            checked={selectedArray.includes(
+                                                              opt.option
+                                                            )} // ✅ match option (API key)
+                                                            className="w-3 h-3"
+                                                            onChange={(e) => {
+                                                              let newValues = [
+                                                                ...selectedArray,
+                                                              ];
+                                                              if (
+                                                                e.target.checked
+                                                              ) {
+                                                                if (
+                                                                  !newValues.includes(
+                                                                    opt.option
+                                                                  )
+                                                                ) {
+                                                                  newValues.push(
+                                                                    opt.option
+                                                                  ); // ✅ store opt.option
+                                                                }
+                                                              } else {
+                                                                newValues =
+                                                                  newValues.filter(
+                                                                    (v) =>
+                                                                      v !==
+                                                                      opt.option
+                                                                  );
+                                                              }
+
+                                                              handleChange(
+                                                                student.student_id,
+                                                                param.pfm_id,
+                                                                newValues.join(
+                                                                  ","
+                                                                ) // ✅ send comma-separated API keys
+                                                              );
+                                                            }}
+                                                          />
+                                                          <span className="text-sm">
+                                                            {opt.value}
+                                                          </span>{" "}
+                                                          {/* ✅ user-friendly label */}
+                                                        </label>
+                                                      )
+                                                    );
+                                                  })()}
+
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1 w-full">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+                                              {/* 
+                                              {param.control_type ===
+                                                "radio" && (
+                                                <div className="flex flex-wrap gap-1">
+                                                  {(() => {
+                                                    let parsedOptions = [];
+                                                    try {
+                                                      parsedOptions =
+                                                        param.options
+                                                          ? JSON.parse(
+                                                              param.options
+                                                            )
+                                                          : [];
+                                                    } catch (err) {
+                                                      console.error(
+                                                        "Invalid options JSON:",
+                                                        param.options
+                                                      );
+                                                    }
+
+                                                    return parsedOptions.map(
+                                                      (opt, i) => (
+                                                        <label
+                                                          key={i}
+                                                          className="flex items-center gap-1 px-2 py-1"
+                                                        >
+                                                          <input
+                                                            type="radio"
+                                                            name={`param-${student.student_id}-${param.pfm_id}`}
+                                                            value={opt.value}
+                                                            checked={
+                                                              selectedValue ===
+                                                              opt.value
+                                                            }
+                                                            onChange={(e) =>
+                                                              handleChange(
+                                                                student.student_id,
+                                                                param.pfm_id,
+                                                                e.target.value
+                                                              )
+                                                            }
+                                                          />
+                                                          
+                                                          <span className="text-sm">
+                                                            {opt.value}
+                                                          </span>
+                                                        </label>
+                                                      )
+                                                    );
+                                                  })()}
+
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1 w-full">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )} */}
+
+                                              {param.control_type ===
+                                                "radio" && (
+                                                <div className="flex flex-wrap gap-1">
+                                                  {(() => {
+                                                    let parsedOptions = [];
+                                                    try {
+                                                      parsedOptions =
+                                                        param.options
+                                                          ? JSON.parse(
+                                                              param.options
+                                                            )
+                                                          : [];
+                                                    } catch (err) {
+                                                      console.error(
+                                                        "Invalid options JSON:",
+                                                        param.options
+                                                      );
+                                                    }
+
+                                                    return parsedOptions.map(
+                                                      (opt, i) => (
+                                                        <label
+                                                          key={i}
+                                                          className="flex items-center gap-1 px-2 py-1"
+                                                        >
+                                                          <input
+                                                            type="radio"
+                                                            name={`param-${student.student_id}-${param.pfm_id}`}
+                                                            value={opt.option} // ✅ send backend key
+                                                            checked={
+                                                              selectedValue ===
+                                                              opt.option
+                                                            } // ✅ match by option key
+                                                            onChange={(e) =>
+                                                              handleChange(
+                                                                student.student_id,
+                                                                param.pfm_id,
+                                                                e.target.value // ✅ sends opt.option
+                                                              )
+                                                            }
+                                                            className="w-3 h-3"
+                                                          />
+                                                          <span className="text-sm">
+                                                            {opt.value}
+                                                          </span>{" "}
+                                                          {/* ✅ show label */}
+                                                        </label>
+                                                      )
+                                                    );
+                                                  })()}
+
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1 w-full">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+
+                                              {param.control_type ===
+                                                "rating" && (
+                                                <div className="flex flex-col">
+                                                  <div className="flex justify-center gap-1">
+                                                    {(() => {
+                                                      let parsedOptions = [];
+                                                      try {
+                                                        parsedOptions =
+                                                          param.options
+                                                            ? JSON.parse(
+                                                                param.options
+                                                              )
+                                                            : [];
+                                                      } catch (err) {
+                                                        console.error(
+                                                          "Invalid options JSON:",
+                                                          param.options,
+                                                          err
+                                                        );
+                                                      }
+
+                                                      // Current rating (as number)
+                                                      const currentRating =
+                                                        parseInt(
+                                                          selectedValue || "0",
+                                                          10
+                                                        );
+
+                                                      return parsedOptions.map(
+                                                        (opt, index) => {
+                                                          const starValue =
+                                                            index + 1; // 1-based index
+                                                          return (
+                                                            <span
+                                                              key={opt.option}
+                                                              onClick={() =>
+                                                                handleChange(
+                                                                  student.student_id,
+                                                                  param.pfm_id,
+                                                                  String(
+                                                                    starValue
+                                                                  )
+                                                                )
+                                                              }
+                                                              name={`param-${student.student_id}-${param.pfm_id}`}
+                                                              className={`cursor-pointer text-4xl ${
+                                                                starValue <=
+                                                                currentRating
+                                                                  ? "text-yellow-400"
+                                                                  : "text-gray-300"
+                                                              }`}
+                                                            >
+                                                              ★
+                                                            </span>
+                                                          );
+                                                        }
+                                                      );
+                                                    })()}
+                                                  </div>
+
+                                                  {publishErrors?.[
+                                                    `${student.student_id}-${param.pfm_id}`
+                                                  ] && (
+                                                    <span className="text-red-500 text-xs mt-1">
+                                                      {
+                                                        publishErrors[
+                                                          `${student.student_id}-${param.pfm_id}`
+                                                        ]
+                                                      }
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+                                            </td>
+                                          );
+                                        })}
+                                      </tr>
+                                    ))
+                                  ) : (
+                                    <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                      <div className=" text-center text-xl text-red-500">
+                                        Oops! No data found..
+                                      </div>
+                                    </div>
+                                  )}
+                                </tbody>
+                              </table>
+
+                              {loadingForSearch ? (
+                                ""
                               ) : (
-                                <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                  <div className=" text-center text-xl text-red-500">
-                                    Oops! No data found..
-                                  </div>
+                                <div className="flex justify-end gap-3 mt-4 pr-6">
+                                  <button
+                                    type="button"
+                                    onClick={handleSubmit}
+                                    className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
+                                    disabled={isSaving}
+                                  >
+                                    {isSaving ? "Saving..." : "Save"}
+                                  </button>
+
+                                  {checkPublish === "Y" ? (
+                                    <button
+                                      type="button"
+                                      onClick={handleSubmitUnPublish}
+                                      className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
+                                      disabled={isUnPublishing}
+                                    >
+                                      {isUnPublishing
+                                        ? "Unpublishing..."
+                                        : "Unpublish"}
+                                    </button>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={handleSubmitPublish}
+                                      className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
+                                      disabled={isPublishing}
+                                    >
+                                      {isPublishing
+                                        ? "Publishing..."
+                                        : "Save & Publish"}
+                                    </button>
+                                  )}
+
+                                  <button
+                                    type="button"
+                                    className="bg-yellow-300 hover:bg-yellow-400 text-white font-medium px-4 py-2 rounded-lg shadow-md"
+                                    onClick={() => setShowStudentReport(false)}
+                                  >
+                                    Back
+                                  </button>
                                 </div>
                               )}
-                            </tbody>
-                          </table>
-
-                          {loadingForSearch ? (
-                            ""
+                            </div>
                           ) : (
-                            <div className="flex justify-end gap-3 mt-4 mr-4">
-                              <button
-                                type="button"
-                                onClick={handleSubmit}
-                                className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
-                                disabled={isSaving}
-                              >
-                                {isSaving ? "Saving..." : "Save"}
-                              </button>
-
-                              {checkPublish === "Y" ? (
-                                <button
-                                  type="button"
-                                  onClick={handleSubmitUnPublish}
-                                  className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
-                                  disabled={isUnPublishing}
-                                >
-                                  {isUnPublishing
-                                    ? "Unpublishing..."
-                                    : "Unpublish"}
-                                </button>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={handleSubmitPublish}
-                                  className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
-                                  disabled={isPublishing}
-                                >
-                                  {isPublishing
-                                    ? "Publishing..."
-                                    : "Save & Publish"}
-                                </button>
-                              )}
-
-                              <button
-                                type="button"
-                                className="bg-yellow-300 hover:bg-yellow-400 text-white font-medium px-4 py-2 rounded-lg shadow-md"
-                                onClick={() => setShowStudentReport(false)}
-                              >
-                                Back
-                              </button>
+                            <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                              <div className=" text-center text-xl text-red-500">
+                                Oops! No Parameters found..
+                              </div>
                             </div>
                           )}
                         </div>

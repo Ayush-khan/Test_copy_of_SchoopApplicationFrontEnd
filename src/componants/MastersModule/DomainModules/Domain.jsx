@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
@@ -96,7 +96,7 @@ const Domain = () => {
     try {
       if (roleId === "T") {
         const response = await axios.get(
-          `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
+          `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -176,22 +176,47 @@ const Domain = () => {
     });
   }, [studentNameWithClassId, roleId]);
 
+  // const handleStudentSelect = (selectedOption) => {
+  //   setStudentError("");
+  //   setSelectedStudent(selectedOption);
+
+  //   setSelectedStudentId(selectedOption?.value);
+  //   setSelectedSectionId(selectedOption?.section_id);
+
+  //   setSelectedSubject("");
+  //   setSubjectIdForManage("");
+  //   setSelectedDomain("");
+  //   setSelectedTerms("");
+  // };
+
   const handleStudentSelect = (selectedOption) => {
     setStudentError("");
     setSelectedStudent(selectedOption);
 
-    setSelectedStudentId(selectedOption?.value);
-    setSelectedSectionId(selectedOption?.section_id);
+    const classId = selectedOption?.value ?? null;
+    setSelectedStudentId(classId);
+    setSelectedSectionId(selectedOption?.section_id ?? null);
 
-    setSelectedSubject("");
-    setSelectedDomain("");
-    setSelectedTerms("");
+    // reset everything downstream
+    setSelectedSubject(null);
+    setSubjectIdForManage(null);
+    setSelectedDomain(null);
+    setSelectedTerms(null);
 
-    console.log("Selected class_id:", selectedOption?.value);
-    console.log("Selected section_id:", selectedOption?.section_id);
+    // clear subject options if no class
+    if (!classId) {
+      setSubject([]); // important: empty options closes the menu
+    } else {
+      fetchSubject(classId); // pass classId explicitly (don't rely on state immediately)
+    }
   };
 
   const fetchDomain = async (classId, subjectId) => {
+    if (!classId || !subjectId) {
+      setDomain([]);
+      setPageCount(0);
+      return;
+    }
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
@@ -230,6 +255,10 @@ const Domain = () => {
   };
 
   const fetchSubject = async (classId) => {
+    if (!classId) {
+      setSubject(null);
+      return;
+    }
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
@@ -252,13 +281,26 @@ const Domain = () => {
     label: dept.subject_name,
   }));
 
+  // const handleSubjectSelect = (selectedOption) => {
+  //   setSubjectError("");
+  //   setSelectedSubject(selectedOption);
+  //   setSubjectIdForManage(selectedOption ? selectedOption.value : null);
+  //   setSelectedDomain("");
+  //   setSelectedTerms("");
+  // };
+
   const handleSubjectSelect = (selectedOption) => {
     setSubjectError("");
     setSelectedSubject(selectedOption);
     setSubjectIdForManage(selectedOption ? selectedOption.value : null);
-    console.log("hpc_sm_id", selectedOption.value);
-    setSelectedTerms("");
-    setSelectedDomain("");
+
+    //  Reset Terms & Domain when subject changes/clears
+    setSelectedTerms(null);
+    // setTermsOptions([]); // clear old terms
+
+    setSelectedDomain(null);
+    setDomain([]); // clear old domains
+    setPageCount(0);
   };
 
   const fetchDataRoleId = async () => {
@@ -300,7 +342,7 @@ const Domain = () => {
     setLoadingForSearch(false);
 
     if (!selectedStudentId) {
-      setStudentError("Please select Class.");
+      setStudentError("Please select class.");
       setLoadingForSearch(false);
       return;
     }
@@ -310,17 +352,17 @@ const Domain = () => {
       return;
     }
     if (!subjectIdForManage) {
-      setSubjectError("Please select Subject.");
+      setSubjectError("Please select subject.");
       setLoadingForSearch(false);
       return;
     }
     if (!selectedTerms) {
-      setTermError("Please select Term.");
+      setTermError("Please select term.");
       setLoadingForSearch(false);
       return;
     }
     if (!selectedDomainId) {
-      setDomainError("Please select Domain.");
+      setDomainError("Please select domain.");
       setLoadingForSearch(false);
       return;
     }
@@ -395,9 +437,33 @@ const Domain = () => {
     }
   };
 
+  // const handleSelectParameter = (studentId, parameterId, value) => {
+  //   setSelectedRecords((prev) => {
+  //     // Check if record already exists
+  //     const exists = prev.find(
+  //       (rec) =>
+  //         rec.student_id === studentId && rec.parameter_id === parameterId
+  //     );
+
+  //     if (exists) {
+  //       // Update existing record
+  //       return prev.map((rec) =>
+  //         rec.student_id === studentId && rec.parameter_id === parameterId
+  //           ? { ...rec, value }
+  //           : rec
+  //       );
+  //     } else {
+  //       // Add new record
+  //       return [
+  //         ...prev,
+  //         { student_id: studentId, parameter_id: parameterId, value },
+  //       ];
+  //     }
+  //   });
+  // };
+
   const handleSelectParameter = (studentId, parameterId, value) => {
     setSelectedRecords((prev) => {
-      // Check if record already exists
       const exists = prev.find(
         (rec) =>
           rec.student_id === studentId && rec.parameter_id === parameterId
@@ -418,6 +484,13 @@ const Domain = () => {
         ];
       }
     });
+
+    // ✅ Clear error for this field when user selects a value
+    setPublishErrors((prevErrors) => {
+      const newErrors = { ...prevErrors };
+      delete newErrors[`${studentId}-${parameterId}`];
+      return newErrors;
+    });
   };
 
   const handleSubmit = async () => {
@@ -428,6 +501,12 @@ const Domain = () => {
       const token = localStorage.getItem("authToken");
 
       console.log("✅ Selected Records before submit:", selectedRecords);
+
+      if (!selectedRecords || selectedRecords.length === 0) {
+        toast.error("Please select at least one record before saving.");
+        setIsSaving(false);
+        return;
+      }
 
       const filtersToUse = appliedFilters || {
         term_id: selectedTerms,
@@ -480,6 +559,7 @@ const Domain = () => {
       setIsSaving(false);
     }
   };
+  const inputRefs = useRef({});
 
   const handleSubmitPublish = async () => {
     if (isPublishing) return;
@@ -505,7 +585,7 @@ const Domain = () => {
 
         if (!selectedValue) {
           const key = `${student.student_id}-${param.parameter_id}`;
-          newErrors[key] = "Please select a level";
+          newErrors[key] = "All field is required.";
 
           // scroll to first error
           firstErrorElement = document.querySelector(
@@ -522,29 +602,38 @@ const Domain = () => {
     if (foundError) {
       setPublishErrors(newErrors);
       toast.error("Please fill all student domain values before publishing");
+
       if (firstErrorElement) {
-        firstErrorElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-        firstErrorElement.focus();
+        setTimeout(() => {
+          firstErrorElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "center",
+          });
+          firstErrorElement.focus();
+        }, 100); // small delay ensures DOM is updated
       }
       return;
     }
 
-    // ✅ No validation errors → continue API call
+    // if (foundError) {
+    //   setPublishErrors(newErrors);
+    //   toast.error("Please fill all student domain values before publishing");
+    //   if (firstErrorElement) {
+    //     firstErrorElement.scrollIntoView({
+    //       behavior: "smooth",
+    //       block: "center",
+    //       inline: "center",
+    //     });
+    //     firstErrorElement.focus();
+    //   }
+    //   return;
+    // }
+
     setIsPublishing(true);
     try {
       const token = localStorage.getItem("authToken");
 
-      // const payload = {
-      //   term_id: selectedTerms,
-      //   class_id: selectedStudentId,
-      //   section_id: selectedSectionId,
-      //   subject_id: subjectIdForManage,
-      //   dm_id: selectedDomainId,
-      //   records: selectedRecords,
-      // };
       const payload = {
         term_id: appliedFilters.term_id,
         class_id: appliedFilters.class_id,
@@ -586,7 +675,7 @@ const Domain = () => {
     }
 
     if (!selectedStudentId) {
-      setStudentError("Please select Class.");
+      setStudentError("Please select class.");
       setLoadingForSearch(false);
       return;
     }
@@ -596,12 +685,12 @@ const Domain = () => {
       return;
     }
     if (!selectedTerms) {
-      setTermError("Please select Term.");
+      setTermError("Please select term.");
       setLoadingForSearch(false);
       return;
     }
     if (!selectedDomainId) {
-      setDomainError("Please select Domain.");
+      setDomainError("Please select domain.");
       setLoadingForSearch(false);
       return;
     }
@@ -1136,7 +1225,7 @@ const Domain = () => {
                                 <th className="px-2 lg:px-3 py-2 border-2 border-gray-400 text-center text-sm font-semibold text-gray-900 tracking-wider w-[45%]">
                                   Parameters
                                 </th>
-                                <th className="px-2 lg:px-3 py-2 border-2 border-gray-400 text-center text-sm font-semibold text-gray-900 tracking-wider w-[25%]">
+                                <th className="px-2 lg:px-3 py-2 border-2 border-gray-400 text-center text-sm font-semibold text-gray-900 tracking-wider w-[28%]">
                                   Options
                                 </th>
                               </tr>
@@ -1208,6 +1297,12 @@ const Domain = () => {
                                                 >
                                                   <input
                                                     type="radio"
+                                                    // name={`param-${student.student_id}-${param.parameter_id}`}
+                                                    ref={(el) =>
+                                                      (inputRefs.current[
+                                                        `${student.student_id}-${param.parameter_id}`
+                                                      ] = el)
+                                                    }
                                                     name={`param-${student.student_id}-${param.parameter_id}`}
                                                     value={level}
                                                     checked={
@@ -1255,6 +1350,11 @@ const Domain = () => {
                                                 >
                                                   <input
                                                     type="radio"
+                                                    ref={(el) =>
+                                                      (inputRefs.current[
+                                                        `${student.student_id}-${param.parameter_id}`
+                                                      ] = el)
+                                                    }
                                                     name={`param-${student.student_id}-${param.parameter_id}`}
                                                     value={level}
                                                     checked={
@@ -1302,6 +1402,11 @@ const Domain = () => {
                                                 >
                                                   <input
                                                     type="radio"
+                                                    ref={(el) =>
+                                                      (inputRefs.current[
+                                                        `${student.student_id}-${param.parameter_id}`
+                                                      ] = el)
+                                                    }
                                                     name={`param-${student.student_id}-${param.parameter_id}`}
                                                     value={level}
                                                     checked={
@@ -1321,11 +1426,17 @@ const Domain = () => {
                                             })}
 
                                             {/* Uncomment if you want inline validation error */}
-                                            {/* {publishErrors[`${student.student_id}-${param.parameter_id}`] && (
-        <p className="text-red-500 text-xs mt-1">
-          {publishErrors[`${student.student_id}-${param.parameter_id}`]}
-        </p>
-      )} */}
+                                            {/* {publishErrors[
+                                              `${student.student_id}-${param.parameter_id}`
+                                            ] && (
+                                              <p className="text-red-500 text-xs mt-1">
+                                                {
+                                                  publishErrors[
+                                                    `${student.student_id}-${param.parameter_id}`
+                                                  ]
+                                                }
+                                              </p>
+                                            )} */}
                                           </td>
                                         </>
                                       )}

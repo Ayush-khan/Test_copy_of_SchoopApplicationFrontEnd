@@ -133,7 +133,7 @@ import ForgotPassword from "../Layouts/ForgotPassword.jsx";
 import UpdateStudentIdCards from "../componants/IDCards/UpdateStudentIdCards.jsx";
 import UploadStudentPhoto from "../componants/IDCards/UploadStudentPhoto.jsx";
 import UploadParentPhoto from "../componants/IDCards/UploadParentPhoto.jsx";
-import StudentAbsent from "../componants/AllTableList/StudentAbsent.jsx";
+// import StudentAbsent from "../componants/AllTableList/StudentCard/StudentAbsent.jsx";
 import NonTeachingStaff from "../componants/AllTableList/NonTeachingStaff.jsx";
 import ApproveLessonP from "../componants/AllTableList/ApproveLessonP.jsx";
 import ManageSubjectPrinciple from "../componants/MastersModule/SubjectAllotment/SubjectAllotmentForPrinciple/ManageSubjectPrinciple.jsx";
@@ -226,6 +226,12 @@ import ParentsFeedbackMaster from "../componants/MastersModule/DomainModules/Par
 import PeerFeedbackMaster from "../componants/MastersModule/DomainModules/PeerFeedbackMaster/PeerFeedbackMaster.jsx";
 import AllAboutMe from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMe.jsx";
 import AllAboutMeMaster from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMeMaster.jsx";
+import ClassTeacherRemark from "../componants/MastersModule/DomainModules/ClassTeacherRemark/ClassTeacherRemark.jsx";
+import PublishreportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishreportCard.jsx";
+import UploadMarks from "../componants/MastersModule/DomainModules/UploadMarks/UploadMarks.jsx";
+import HPCReportCard from "../componants/MastersModule/DomainModules/HPCReportCard/HPCReportCard.jsx";
+import ReportCardRemark from "../componants/MastersModule/DomainModules/ReportCardRemark/ReportCardRemark.jsx";
+import StudentAbsent from "../componants/AllTableList/StudentCard/StudentAbsent.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -656,6 +662,32 @@ function Index() {
         <Route
           path="/learnerFeedback"
           element={<PrivateRoute element={<SelfAssessment />} />}
+        />
+        {/* Class Teacher Remark Modules  */}
+        <Route
+          path="/hpcRemark"
+          element={<PrivateRoute element={<ClassTeacherRemark />} />}
+        />
+        {/* PublishreportCard modules */}
+        <Route
+          path="/publishreportCard"
+          element={<PrivateRoute element={<PublishreportCard />} />}
+        />
+        {/* Upload student marks modules */}
+        <Route
+          path="/uploadMarks"
+          element={<PrivateRoute element={<UploadMarks />} />}
+        />
+        {/* ReportCardRemark modules */}
+        <Route
+          path="/reportCardRemark"
+          element={<PrivateRoute element={<ReportCardRemark />} />}
+        />
+        {/* HPCReportCard */}
+        {/* Report Card */}
+        <Route
+          path="/HPCReportCard/:id"
+          element={<PrivateRoute element={<HPCReportCard />} />}
         />
         {/* SubjectForReportCard module */}
         <Route

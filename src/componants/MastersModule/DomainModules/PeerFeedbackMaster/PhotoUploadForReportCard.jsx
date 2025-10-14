@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
-// import ImageCropperRC from "../ImageCropperRC";
 import ImageCropperRC from "../ImageCropperRC";
 
 const PhotoUploadForReportCard = () => {
@@ -70,7 +69,7 @@ const PhotoUploadForReportCard = () => {
     try {
       if (roleId === "T") {
         const response = await axios.get(
-          `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
+          `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

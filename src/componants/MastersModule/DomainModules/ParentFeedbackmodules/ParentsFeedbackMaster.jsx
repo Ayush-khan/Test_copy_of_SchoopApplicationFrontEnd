@@ -108,7 +108,7 @@ function ParentsFeedbackMaster() {
         }
       );
 
-      console.log("Parent's Feedback", response.data.data);
+      console.log("Parent's Observation", response.data.data);
       setSections(response.data.data);
       setPageCount(Math.ceil(response.data.length / pageSize));
     } catch (error) {
@@ -198,13 +198,18 @@ function ParentsFeedbackMaster() {
     setSearchTerm(""); // ✅ clear search term
   };
 
-  // const validateSectionName = (parameter, classId, control_type) => {
+  // const validateSectionName = (
+  //   parameter,
+  //   classId,
+  //   control_type,
+  //   options = []
+  // ) => {
   //   const errors = {};
 
   //   if (!parameter || parameter.trim() === "") {
   //     errors.parameter = "Please enter parameter.";
-  //   } else if (parameter.length > 50) {
-  //     errors.parameter = "The name field must not exceed 50 characters.";
+  //   } else if (parameter.length > 500) {
+  //     errors.parameter = "The name field must not exceed 500 characters.";
   //   }
 
   //   if (!classId) {
@@ -213,6 +218,15 @@ function ParentsFeedbackMaster() {
 
   //   if (!control_type || control_type.trim() === "") {
   //     errors.control_type = "Please enter type.";
+  //   }
+
+  //   // ✅ Require at least one non-empty option for radio/checkbox
+  //   if (control_type === "radio" || control_type === "checkbox") {
+  //     const hasValidOption =
+  //       Array.isArray(options) && options.some((o) => o && o.trim() !== "");
+  //     if (!hasValidOption) {
+  //       errors.options = "Please add option.";
+  //     }
   //   }
 
   //   return errors;
@@ -228,8 +242,8 @@ function ParentsFeedbackMaster() {
 
     if (!parameter || parameter.trim() === "") {
       errors.parameter = "Please enter parameter.";
-    } else if (parameter.length > 50) {
-      errors.parameter = "The name field must not exceed 50 characters.";
+    } else if (parameter.length > 500) {
+      errors.parameter = "The name field must not exceed 500 characters.";
     }
 
     if (!classId) {
@@ -240,18 +254,45 @@ function ParentsFeedbackMaster() {
       errors.control_type = "Please enter type.";
     }
 
-    // ✅ Require at least one non-empty option for radio/checkbox
-    if (control_type === "radio" || control_type === "checkbox") {
+    if (
+      control_type === "radio" ||
+      control_type === "checkbox" ||
+      control_type === "rating"
+    ) {
       const hasValidOption =
         Array.isArray(options) && options.some((o) => o && o.trim() !== "");
       if (!hasValidOption) {
         errors.options = "Please add option.";
       }
+
+      const formattedOptions = options
+        .filter((o) => o && o.trim() !== "")
+        .map((opt) => ({
+          option: opt.trim().replace(/\s+/g, ""),
+          value: opt.trim(),
+        }));
+
+      try {
+        const jsonString = JSON.stringify(formattedOptions);
+
+        JSON.parse(jsonString);
+        console.log(
+          "✅ JSON String (Backend format):",
+          jsonString,
+          "Length:",
+          jsonString.length
+        );
+        if (jsonString.length > 500) {
+          errors.options =
+            "The maximum allowed length for options is 500 characters.";
+        }
+      } catch (e) {
+        errors.options = "Invalid options format. Please re-enter.";
+      }
     }
 
     return errors;
   };
-
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
   };
@@ -348,7 +389,7 @@ function ParentsFeedbackMaster() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Parent's Feedback Parameter added successfully!");
+      toast.success("Parent's Observation Parameter added successfully!");
       reset();
     } catch (error) {
       console.error("Error adding parameter:", error);
@@ -414,7 +455,7 @@ function ParentsFeedbackMaster() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Parent's Feedback Parameter updated successfully!");
+      toast.success("Parent's Observation Parameter updated successfully!");
     } catch (error) {
       console.error("Error editing parameter:", error);
       console.log("erroris", error.response);
@@ -467,14 +508,14 @@ function ParentsFeedbackMaster() {
         fetchSections();
         setShowDeleteModal(false);
         setCurrentSection(null);
-        toast.success("Parent's Feedback Parameter deleted successfully!");
+        toast.success("Parent's Observation Parameter deleted successfully!");
       } else {
         toast.error(response.data.message || "Failed to delete parameter");
       }
     } catch (error) {
       if (error.response && error.response.status === 409) {
         toast.error(
-          "Cannot Delete. This parent's feedback paramter already use in parent's feedback."
+          "Cannot Delete. This parent's Observation paramter already use in parent's Observation."
         );
       } else {
         toast.error("Something went wrong. Please try again.");
@@ -560,7 +601,7 @@ function ParentsFeedbackMaster() {
         <div className="card mx-auto lg:w-[70%] shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Parent's Feedback Parameter
+              Parent's Observation Parameter
             </h3>{" "}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -754,7 +795,7 @@ function ParentsFeedbackMaster() {
                 <div className="modal-content">
                   <div className="flex justify-between p-3">
                     <h5 className="modal-title">
-                      Create Parent's Feedback Parameter
+                      Create Parent's Observation Parameter
                     </h5>
 
                     <RxCross1
@@ -809,7 +850,7 @@ function ParentsFeedbackMaster() {
                       </label>
                       <input
                         type="text"
-                        maxLength={100}
+                        maxLength={500}
                         className="form-control shadow-md mb-2"
                         id="sectionName"
                         value={newSectionName}
@@ -956,7 +997,7 @@ function ParentsFeedbackMaster() {
               <div className="modal-content">
                 <div className="flex justify-between p-3">
                   <h5 className="modal-title">
-                    Edit Parent's Feedback Parameter
+                    Edit Parent's Observation Parameter
                   </h5>
                   <RxCross1
                     className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -1011,7 +1052,7 @@ function ParentsFeedbackMaster() {
                     </label>
                     <input
                       type="text"
-                      maxLength={100}
+                      maxLength={500}
                       className="form-control shadow-md mb-2"
                       id="sectionName"
                       value={newSectionName}
@@ -1212,9 +1253,9 @@ function ParentsFeedbackMaster() {
                 ></div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to delete Parent's Feedback Parameter
-                    for {currentSection.classname} : {currentSection.parameter}{" "}
-                    ?
+                    Are you sure you want to delete Parent's Observation
+                    Parameter for {currentSection.classname} :{" "}
+                    {currentSection.parameter} ?
                   </p>
                 </div>
                 <div className=" flex justify-end p-3">

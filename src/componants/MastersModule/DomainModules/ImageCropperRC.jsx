@@ -114,36 +114,106 @@ const ImageCropperRC = ({ onImageCropped, photoPreview }) => {
   };
 
   return (
-    <div className="container mx-auto ">
-      <label className="block font-bold  text-xs mb-2">
-        {croppedImage ? (
-          <>
-            <img
-              src={croppedImage}
-              alt="Cropped"
-              className="h-20 w-20 rounded-[50%] mx-auto border-1 border-black object-cover"
-            />
-            {/* Edit Icon */}
-            <p className="relative bottom-5">
-              <MdOutlineEdit
-                className="m-auto text-3xl md:absolute md:left-[44%] hover:cursor-pointer text-white p-1 rounded-full bg-gray-800 hover:bg-gray-700 border border-gray-600"
-                onClick={handleEditAgain}
-              />
-            </p>
-          </>
-        ) : (
-          <FaUserCircle className="mt-2 h-20 w-20 object-cover mx-auto text-gray-300" />
-        )}
+    // <div className="container mx-auto ">
+    //   <label className="block font-bold  text-xs mb-2">
+    //     {croppedImage ? (
+    //       <>
+    //         <img
+    //           src={croppedImage}
+    //           alt="Cropped"
+    //           className="h-20 w-20 rounded-[50%] mx-auto border-1 border-black object-cover"
+    //         />
+    //         {/* Edit Icon */}
+    //         <p className="relative bottom-5">
+    //           <MdOutlineEdit
+    //             className="m-auto text-3xl md:absolute md:left-[44%] hover:cursor-pointer text-white p-1 rounded-full bg-gray-800 hover:bg-gray-700 border border-gray-600"
+    //             onClick={handleEditAgain}
+    //           />
+    //         </p>
+    //       </>
+    //     ) : (
+    //       <FaUserCircle className="mt-2 h-20 w-20 object-cover mx-auto text-gray-300" />
+    //     )}
+    //   </label>
+    //   <input
+    //     type="file"
+    //     id="photo"
+    //     name="photo"
+    //     accept="image/*"
+    //     onChange={handleImageChange}
+    //     ref={fileInputRef}
+    //     className=" md:w-[50%] input-field flex-center text-xs box-border mt-2 bg-black text-white  "
+    //   />
+    //   {modalOpen && (
+    //     <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
+    //       <div className="bg-white p-4 rounded-lg shadow-lg max-w-lg w-full">
+    //         <h2 className="text-xl mb-4">Edit Image</h2>
+    //         <Cropper
+    //           src={editingImage}
+    //           style={{ height: 400, width: "100%" }}
+    //           initialAspectRatio={1}
+    //           aspectRatio={1}
+    //           guides={false}
+    //           ref={cropperRef}
+    //           crossOrigin="anonymous" // Add this prop
+    //           viewMode={1}
+    //         />
+    //         <div className="mt-4 flex justify-between">
+    //           <button
+    //             onClick={handleCancel}
+    //             className="bg-red-500 font-md text-white px-4 py-2 rounded hover:bg-red-600"
+    //           >
+    //             Cancel
+    //           </button>{" "}
+    //           <button
+    //             type="button"
+    //             onClick={handleSave}
+    //             className="bg-blue-500 font-md text-white px-4 py-2 rounded hover:bg-blue-600"
+    //           >
+    //             Save
+    //           </button>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   )}
+    // </div>
+
+    <div className="container mx-auto">
+      <label className="block font-bold text-xs mb-2">
+        <div className="flex items-center gap-4 justify-center">
+          {croppedImage ? (
+            <>
+              <div className="relative">
+                <img
+                  src={croppedImage}
+                  alt="Cropped"
+                  className="h-20 w-20 rounded-full border border-black object-cover"
+                />
+                {/* Edit Icon */}
+                <MdOutlineEdit
+                  className="absolute bottom-0 right-0 text-2xl hover:cursor-pointer text-white p-1 rounded-full bg-gray-800 hover:bg-gray-700 border border-gray-600"
+                  onClick={handleEditAgain}
+                />
+              </div>
+            </>
+          ) : (
+            <FaUserCircle className="h-20 w-20 text-gray-300" />
+          )}
+
+          {/* File input on the same line */}
+          <input
+            type="file"
+            id="photo"
+            name="photo"
+            accept="image/*"
+            onChange={handleImageChange}
+            ref={fileInputRef}
+            className="md:w-[29.5%] text-xs bg-gray-300 text-white px-2 py-1 rounded cursor-pointer"
+          />
+        </div>
       </label>
-      <input
-        type="file"
-        id="photo"
-        name="photo"
-        accept="image/*"
-        onChange={handleImageChange}
-        ref={fileInputRef}
-        className=" md:w-[50%] input-field flex-center text-xs box-border mt-2 bg-black text-white  "
-      />
+
+      {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
           <div className="bg-white p-4 rounded-lg shadow-lg max-w-lg w-full">
@@ -155,7 +225,7 @@ const ImageCropperRC = ({ onImageCropped, photoPreview }) => {
               aspectRatio={1}
               guides={false}
               ref={cropperRef}
-              crossOrigin="anonymous" // Add this prop
+              crossOrigin="anonymous"
               viewMode={1}
             />
             <div className="mt-4 flex justify-between">
@@ -164,7 +234,7 @@ const ImageCropperRC = ({ onImageCropped, photoPreview }) => {
                 className="bg-red-500 font-md text-white px-4 py-2 rounded hover:bg-red-600"
               >
                 Cancel
-              </button>{" "}
+              </button>
               <button
                 type="button"
                 onClick={handleSave}
