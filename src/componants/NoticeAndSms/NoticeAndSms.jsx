@@ -22,6 +22,7 @@ function NoticeAndSms() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [sendingSMS, setSendingSMS] = useState({});
 
   const [activeTab, setActiveTab] = useState("Manage");
   const [classes, setClasses] = useState([]);
@@ -724,6 +725,8 @@ function NoticeAndSms() {
   // };
   const handleSend = async (uniqueId) => {
     try {
+      setSendingSMS((prev) => ({ ...prev, [uniqueId]: true }));
+
       // Get auth token from localStorage
       const token = localStorage.getItem("authToken");
 
@@ -756,6 +759,8 @@ function NoticeAndSms() {
     } catch (error) {
       console.error("Error sending SMS:", error);
       toast.error("An error occurred while sending SMS. Please try again.");
+    } finally {
+      setSendingSMS((prev) => ({ ...prev, [uniqueId]: false }));
     }
   };
 
