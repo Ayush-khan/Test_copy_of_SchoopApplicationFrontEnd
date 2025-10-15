@@ -22,6 +22,7 @@ function NoticeAndSms() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [sendingSMS, setSendingSMS] = useState({});
 
   const [activeTab, setActiveTab] = useState("Manage");
   const [classes, setClasses] = useState([]);
@@ -724,6 +725,8 @@ function NoticeAndSms() {
   // };
   const handleSend = async (uniqueId) => {
     try {
+      setSendingSMS((prev) => ({ ...prev, [uniqueId]: true }));
+
       // Get auth token from localStorage
       const token = localStorage.getItem("authToken");
 
@@ -756,6 +759,8 @@ function NoticeAndSms() {
     } catch (error) {
       console.error("Error sending SMS:", error);
       toast.error("An error occurred while sending SMS. Please try again.");
+    } finally {
+      setSendingSMS((prev) => ({ ...prev, [uniqueId]: false }));
     }
   };
 
@@ -1004,7 +1009,7 @@ function NoticeAndSms() {
                                   {subject.showSendButton ? (
                                     <div className="flex flex-col gap-y-0.5">
                                       <span className="text-nowrap text-red-600 font-bold">{`${subject.count}`}</span>
-                                      <span className="text-bule-600 text-nowrap font-medium ">{`SMS Pending`}</span>
+                                      <span className="text-bule-600 text-nowrap font-medium ">{`Messages Pending`}</span>
                                       <button
                                         className=" flex felx-row items-center justify-center p-2 gap-x-1 bg-blue-500 text-nowrap hover:bg-blue-600 text-white font-medium rounded-md"
                                         //  onClick={() => handleEdit(subject)}

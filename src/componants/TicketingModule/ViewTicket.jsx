@@ -27,7 +27,7 @@ const ViewTicket = () => {
 
   const { id } = useParams();
 
-  console.log("id", id);
+  // console.log("id", id);
 
   useEffect(() => {
     fetchTicketDetails();
@@ -62,7 +62,7 @@ const ViewTicket = () => {
       if (response.data?.data) {
         const ticketData = response.data.data || [];
         setTicket(ticketData);
-        console.log("require", ticketData[0]?.RequiresAppointment);
+        // console.log("require", ticketData[0]?.RequiresAppointment);
         setRequiresAppointment(ticketData[0]?.RequiresAppointment);
 
         // Get class_id from the first ticket item (adjust if needed)
@@ -120,7 +120,37 @@ const ViewTicket = () => {
     fetchStatusOptions();
   }, []);
 
+  // const handleViewComments = async () => {
+  //   console.log("inside handleview comment");
+  //   setIsModalOpen(true);
+  //   setLoadingComments(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_commentticketlist/${id}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     if (response?.data?.data) {
+  //       console.log("comment api", response.data.data);
+  //       setCommentList(response.data.data);
+  //     } else {
+  //       setCommentList([]);
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to fetch comments:", error);
+  //     toast.error("Failed to load comments.");
+  //   } finally {
+  //     setLoadingComments(false);
+  //   }
+  // };
+
+  // 🟩 Define function OUTSIDE useEffect
   const handleViewComments = async () => {
+    console.log("inside handleview comment");
     setIsModalOpen(true);
     setLoadingComments(true);
 
@@ -134,6 +164,7 @@ const ViewTicket = () => {
       );
 
       if (response?.data?.data) {
+        console.log("comment api", response.data.data);
         setCommentList(response.data.data);
       } else {
         setCommentList([]);
@@ -146,13 +177,20 @@ const ViewTicket = () => {
     }
   };
 
+  // 🟩 Optional useEffect if you want to load comments automatically on mount
+  useEffect(() => {
+    if (id) {
+      handleViewComments();
+    }
+  }, [id]);
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
   const handleStatusChange = (e) => {
     setStatus(e.target.value);
-    console.log("Status changed to:", e.target.value);
+    // console.log("Status changed to:", e.target.value);
   };
 
   const handleRadioChange = (value) => {
@@ -228,7 +266,7 @@ const ViewTicket = () => {
         }
       );
 
-      console.log("save api response", response);
+      // console.log("save api response", response);
 
       if (response.data.status === 200) {
         toast.success("Ticked Status Update Successfully!");
@@ -255,10 +293,10 @@ const ViewTicket = () => {
         throw new Error("Missing required information for download.");
       }
 
-      console.log(token);
-      console.log(ticketId);
-      console.log(commentId);
-      console.log(fileName);
+      // console.log(token);
+      // console.log(ticketId);
+      // console.log(commentId);
+      // console.log(fileName);
 
       const response = await axios.get(
         `${API_URL}/api/downloadticketfiles/${ticketId}/${commentId}/${fileName}`,
@@ -336,7 +374,7 @@ const ViewTicket = () => {
       })
     : [];
 
-  console.log("Filtered Sections", filteredSections);
+  // console.log("Filtered Sections", filteredSections);
 
   useEffect(() => {
     if (Array.isArray(ticket) && ticket.length > 0) {
@@ -764,12 +802,12 @@ const ViewTicket = () => {
                                     <i className="fas fa-download"></i>
                                   </a> */}
 
-                                  {console.log(
+                                  {/* {console.log(
                                     "Ticket comment",
                                     comment.ticket_comment_id
                                   )}
                                   {console.log("Ticket id", comment.ticket_id)}
-                                  {console.log("name", comment.image_name)}
+                                  {console.log("name", comment.image_name)} */}
 
                                   <button
                                     onClick={() =>

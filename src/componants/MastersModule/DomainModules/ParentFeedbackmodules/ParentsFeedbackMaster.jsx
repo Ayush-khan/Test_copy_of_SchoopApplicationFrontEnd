@@ -108,7 +108,7 @@ function ParentsFeedbackMaster() {
         }
       );
 
-      console.log("Parent's Feedback", response.data.data);
+      console.log("Parent's Observation", response.data.data);
       setSections(response.data.data);
       setPageCount(Math.ceil(response.data.length / pageSize));
     } catch (error) {
@@ -389,7 +389,7 @@ function ParentsFeedbackMaster() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Parent's Feedback Parameter added successfully!");
+      toast.success("Parent's Observation Parameter added successfully!");
       reset();
     } catch (error) {
       console.error("Error adding parameter:", error);
@@ -455,7 +455,7 @@ function ParentsFeedbackMaster() {
 
       fetchSections();
       handleCloseModal();
-      toast.success("Parent's Feedback Parameter updated successfully!");
+      toast.success("Parent's Observation Parameter updated successfully!");
     } catch (error) {
       console.error("Error editing parameter:", error);
       console.log("erroris", error.response);
@@ -508,14 +508,14 @@ function ParentsFeedbackMaster() {
         fetchSections();
         setShowDeleteModal(false);
         setCurrentSection(null);
-        toast.success("Parent's Feedback Parameter deleted successfully!");
+        toast.success("Parent's Observation Parameter deleted successfully!");
       } else {
         toast.error(response.data.message || "Failed to delete parameter");
       }
     } catch (error) {
       if (error.response && error.response.status === 409) {
         toast.error(
-          "Cannot Delete. This parent's feedback paramter already use in parent's feedback."
+          "Cannot Delete. This parent's Observation paramter already use in parent's Observation."
         );
       } else {
         toast.error("Something went wrong. Please try again.");
@@ -601,7 +601,7 @@ function ParentsFeedbackMaster() {
         <div className="card mx-auto lg:w-[70%] shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Parent's Feedback Parameter
+              Parent's Observation Parameter
             </h3>{" "}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -795,7 +795,7 @@ function ParentsFeedbackMaster() {
                 <div className="modal-content">
                   <div className="flex justify-between p-3">
                     <h5 className="modal-title">
-                      Create Parent's Feedback Parameter
+                      Create Parent's Observation Parameter
                     </h5>
 
                     <RxCross1
@@ -997,7 +997,7 @@ function ParentsFeedbackMaster() {
               <div className="modal-content">
                 <div className="flex justify-between p-3">
                   <h5 className="modal-title">
-                    Edit Parent's Feedback Parameter
+                    Edit Parent's Observation Parameter
                   </h5>
                   <RxCross1
                     className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -1253,9 +1253,9 @@ function ParentsFeedbackMaster() {
                 ></div>
                 <div className="modal-body">
                   <p>
-                    Are you sure you want to delete Parent's Feedback Parameter
-                    for {currentSection.classname} : {currentSection.parameter}{" "}
-                    ?
+                    Are you sure you want to delete Parent's Observation
+                    Parameter for {currentSection.classname} :{" "}
+                    {currentSection.parameter} ?
                   </p>
                 </div>
                 <div className=" flex justify-end p-3">

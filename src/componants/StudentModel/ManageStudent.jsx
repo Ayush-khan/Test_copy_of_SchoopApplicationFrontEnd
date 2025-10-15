@@ -47,6 +47,8 @@ function ManageSubjectList() {
 
   // for react-search of manage tab teacher Edit and select class
   const [selectedClass, setSelectedClass] = useState(null);
+  const [hasSearched, setHasSearched] = useState(false);
+
   //   For students
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
@@ -59,6 +61,7 @@ function ManageSubjectList() {
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
+  const [showDownloadReportCard, setShowDownloadReportCard] = useState(false);
 
   // State for form fields and validation errors
   const [setPassword, setSetpassword] = useState("");
@@ -69,19 +72,24 @@ function ManageSubjectList() {
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [isHpcClass, setIsHpcClass] = useState(false);
 
+  const [classTeacher, setClassTeacher] = useState([]);
+  const [isClassTeacher, setIsClassTeacher] = useState("");
+
   const location = useLocation();
   const section_id = location.state?.section_id || null;
-  console.log("manage section id", section_id);
+  // console.log("manage section id", section_id);
+
+  const [selectedClassIdHPC, setSelectedClassIdHPC] = useState(null);
+  const [selectedSectionIdHPC, setSelectedSectionIdHPC] = useState(null);
 
   useEffect(() => {
     fetchHPCClasses();
   }, []);
 
-  // useEffect(() => {
-  //   if (section_id) {
-  //     fetchStudentNameWithClassId(section_id);
-  //   }
-  // }, [section_id]);
+  useEffect(() => {
+    if (!roleIdValue) return; // guard against empty
+    fetchClassTeacherData(roleIdValue);
+  }, [roleIdValue]);
 
   useEffect(() => {
     fetchStudentNameWithClassId(section_id);
@@ -138,6 +146,40 @@ function ManageSubjectList() {
     [studentNameWithClassId]
   );
 
+  const fetchClassTeacherData = async () => {
+    setLoading(true);
+    const token = localStorage.getItem("authToken");
+
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/get_classes_of_classteacher?teacher_id=${roleIdValue}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const classData = response.data.data;
+      console.log("class teacher", classData);
+
+      setClassTeacher(classData);
+
+      // Check if the teacher is a class teacher
+
+      // Check if the teacher is a class teacher
+      const isClassTeacherFlag = classData.some(
+        (cls) => cls.is_class_teacher === 1
+      )
+        ? 1
+        : 0; // store as 1 or 0
+      setIsClassTeacher(isClassTeacherFlag);
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching class teacher data:", err);
+      setLoading(false);
+    }
+  };
+
   const fetchHPCClasses = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -146,7 +188,7 @@ function ManageSubjectList() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("hpc classes", response?.data.data);
+      // console.log("hpc classes", response?.data.data);
       setHpcClasses(response?.data.data || []);
     } catch (error) {
       toast.error("Error fetching Hpc classes.");
@@ -219,6 +261,7 @@ function ManageSubjectList() {
   const handleClassSelect = (selectedOption) => {
     setNameError("");
     setSelectedClass(selectedOption);
+    console.log("selected class", selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
 
@@ -226,13 +269,6 @@ function ManageSubjectList() {
     setclassIdForManage(sectionId);
     setSectionIdForStudentList(sectionId);
     fetchStudentNameWithClassId(sectionId);
-
-    // // ✅ check HPC match
-    // if (selectedOption && hpcClassIds.includes(selectedOption.class_id)) {
-    //   setIsHpcClass(true);
-    // } else {
-    //   setIsHpcClass(false);
-    // }
   };
 
   const handleStudentSelect = (selectedOption) => {
@@ -298,28 +334,36 @@ function ManageSubjectList() {
     setSubjects([]);
     setNameError("");
 
+    const selectedclassid = selectedClass
+      ? selectedClass.class_id || selectedClass.id || selectedClass.value
+      : null;
+
+    const selectedsectionid = selectedClass
+      ? selectedClass.section_id || null
+      : null;
+
+    setSelectedClassIdHPC(selectedclassid);
+    setSelectedSectionIdHPC(selectedsectionid);
+    console.log("Selected class inside handleSearch:", selectedClass);
+    console.log("Selected class_id:", selectedclassid);
+    console.log("Selected section_id:", selectedsectionid);
+
     const finalSectionId =
       classIdForManage ||
       incomingSectionId ||
       location?.state?.section_id ||
       null;
 
-    // 1️⃣ No field selected (all users)
+    //  No field selected (all users)
     if (roleId !== "T" && !selectedStudentId && !finalSectionId && !grNumber) {
       setNameError("Please select at least one of them.");
-      // toast.error("Please select at least one of them!");
       setIsSubmitting(false);
       return;
     }
 
-    // 2️⃣ Teacher tries to search GR No or student without selecting class
-    if (
-      roleId === "T" &&
-      !classIdForManage &&
-      (selectedStudentId || grNumber)
-    ) {
+    //  Teacher tries to search GR No or student without selecting class
+    if (roleId === "T" && !classIdForManage && selectedStudentId) {
       setNameError("Please select a class before searching!");
-      // toast.error("Please select a class before searching!");
       setIsSubmitting(false);
       return;
     }
@@ -345,13 +389,21 @@ function ManageSubjectList() {
         params: queryParams,
       });
 
+      // 🟡 Handle specific case: API returns 402 or success=false
+      if (response.status === 402 || response?.data?.success === false) {
+        setNameError("This Gr no student not found for this classes.");
+        setSubjects([]);
+        setLoading(false);
+        setIsSubmitting(false);
+        return;
+      }
+
       const studentList =
         response?.data?.students || response?.data?.student || [];
 
-      // 3️⃣ No students found for selected criteria
+      //  No students found for selected criteria
       if (studentList.length === 0) {
         setNameError("No student found for selected criteria.");
-        // toast.error("No student found for selected criteria!");
       }
 
       setSubjects(studentList);
@@ -363,103 +415,26 @@ function ManageSubjectList() {
           ? finalSectionId.class_id
           : selectedClass?.class_id) || null;
       setIsHpcClass(selectedClassId && hpcClassIds.includes(selectedClassId));
+
+      setHasSearched(true);
     } catch (error) {
-      console.log("error", error?.response?.data?.message);
-      setNameError(error?.response?.data?.message || "Something went wrong!");
-      // toast.error(error?.response?.data?.message || "Something went wrong!");
+      //  Handle explicit 402 error here also
+      if (error?.response?.status === 402) {
+        setNameError("This Gr no student not found");
+      } else {
+        setNameError(error?.response?.data?.message || "Something went wrong!");
+      }
     } finally {
       setLoading(false);
       setIsSubmitting(false);
     }
   };
 
-  // const handleSearch = async (incomingSectionId = null) => {
-  //   if (isSubmitting) return;
-  //   setIsSubmitting(true);
-  //   setSubjects([]);
-
-  //   const finalSectionId =
-  //     classIdForManage ||
-  //     incomingSectionId ||
-  //     location?.state?.section_id ||
-  //     null;
-
-  //   // ✅ For other roles: same as before
-  //   if (roleId !== "T" && !selectedStudentId && !finalSectionId && !grNumber) {
-  //     setNameError("Please select at least one of them.");
-  //     toast.error("Please select at least one of them!");
-  //     setIsSubmitting(false);
-  //     return;
-  //   }
-
-  //   if (roleId === "T" && !classIdForManage) {
-  //     setNameError("Please select a class first.");
-  //     toast.error("Please select a class before searching!");
-  //     setIsSubmitting(false);
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   setSearchTerm("");
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     const queryParams = {};
-
-  //     if (selectedStudentId) {
-  //       queryParams.student_id = selectedStudentId;
-  //     }
-
-  //     if (finalSectionId) {
-  //       if (typeof finalSectionId === "object") {
-  //         queryParams.section_id =
-  //           finalSectionId.id || finalSectionId.value || "";
-  //       } else {
-  //         queryParams.section_id = finalSectionId;
-  //       }
-  //     }
-
-  //     if (grNumber) {
-  //       queryParams.reg_no = grNumber;
-  //     }
-
-  //     const response = await axios.get(`${API_URL}/api/get_students`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //       params: queryParams,
-  //     });
-
-  //     const studentList =
-  //       response?.data?.students || response?.data?.student || [];
-
-  //     setSubjects(studentList);
-  //     setPageCount(Math.ceil(studentList.length / pageSize));
-
-  //     // ✅ HPC column check happens only after Search
-  //     const selectedClassId =
-  //       (typeof finalSectionId === "object"
-  //         ? finalSectionId.class_id
-  //         : selectedClass?.class_id) || null;
-
-  //     if (selectedClassId && hpcClassIds.includes(selectedClassId)) {
-  //       setIsHpcClass(true);
-  //     } else {
-  //       setIsHpcClass(false);
-  //     }
-  //   } catch (error) {
-  //     console.log("error", error?.response?.data?.message);
-  //     setNameError("Please select at least one of them.");
-  //     toast.error(error?.response?.data?.message || "Student not found!");
-  //   } finally {
-  //     setLoading(false);
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
   const fetchDataRoleId = async () => {
     const token = localStorage.getItem("authToken");
 
     if (!token) {
-      console.error("No authentication token found");
+      // console.error("No authentication token found");
       return {};
     }
 
@@ -478,7 +453,7 @@ function ManageSubjectList() {
 
       return { roleId, roleIdValue: regId }; // ✅ return both
     } catch (error) {
-      console.error("Error fetching role data:", error);
+      // console.error("Error fetching role data:", error);
       return {};
     }
   };
@@ -498,31 +473,25 @@ function ManageSubjectList() {
   };
 
   const handleDelete = (subject) => {
-    console.log("inside delete of subjectallotmenbt____", subject);
-    console.log("inside delete of subjectallotmenbt", subject.student_id);
+    // console.log("inside delete of subjectallotmenbt____", subject);
+    // console.log("inside delete of subjectallotmenbt", subject.student_id);
     const sectionId = subject.student_id;
     const classToDelete = subjects.find((cls) => cls.student_id === sectionId);
     // setCurrentClass(classToDelete);
     setCurrentSection({ classToDelete });
-    console.log("the currecne t section", currentSection);
+    // console.log("the currecne t section", currentSection);
     setCurrestSubjectNameForDelete(
       currentSection?.CurrentSection?.student_name
     );
-    console.log(
-      "cureendtsungjeg",
-      currentSection?.CurrentSection?.student_name
-    );
-    console.log("currestSubjectNameForDelete", currestSubjectNameForDelete);
-    setShowDeleteModal(true);
   };
 
   const handleActiveAndInactive = (subjectIsPass) => {
-    console.log("handleActiveAndInactive-->", subjectIsPass.student_id);
+    // console.log("handleActiveAndInactive-->", subjectIsPass.student_id);
     const studentToActiveOrDeactive = subjects.find(
       (cls) => cls.student_id === subjectIsPass.student_id
     );
     setCurrentStudentDataForActivate({ studentToActiveOrDeactive });
-    console.log("studentToActiveOrDeactive", studentToActiveOrDeactive);
+    // console.log("studentToActiveOrDeactive", studentToActiveOrDeactive);
     setShowDActiveModal(true);
   };
 
@@ -531,11 +500,6 @@ function ManageSubjectList() {
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
-
-      console.log(
-        "the classes inside the delete",
-        currentStudentDataForActivate?.studentToActiveOrDeactive?.student_id
-      );
 
       if (
         !token ||
@@ -565,7 +529,7 @@ function ManageSubjectList() {
       } else {
         toast.error(`Error activate or deactivate Student: ${error.message}`);
       }
-      console.error("Error activate or deactivate Student:", error);
+      // console.error("Error activate or deactivate Student:", error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDActiveModal(false);
@@ -573,7 +537,7 @@ function ManageSubjectList() {
   };
 
   const handleView = (subjectIsPassForView) => {
-    console.log("HandleView -->", subjectIsPassForView);
+    // console.log("HandleView -->", subjectIsPassForView);
     setCurrentSection(subjectIsPassForView);
 
     navigate(`/student/view/${subjectIsPassForView.student_id}`, {
@@ -586,13 +550,13 @@ function ManageSubjectList() {
 
   const handleCertificateView = (subjectIsPass) => {
     navigate("/comingSoon");
-    console.log("handleCertificateView-->", subjectIsPass);
+    // console.log("handleCertificateView-->", subjectIsPass);
   };
 
   const handleResetPassword = (subjectIsPass) => {
     setUserIdset(subjectIsPass?.user_master?.user_id);
-    console.log("handleResetPassword", subjectIsPass);
-    console.log("userId", userIdset);
+    // console.log("handleResetPassword", subjectIsPass);
+    // console.log("userId", userIdset);
 
     setShowEditModal(true);
   };
@@ -657,7 +621,7 @@ function ManageSubjectList() {
         }
       );
       if (response?.data?.Status === 404) {
-        console.log("Response is fail");
+        // console.log("Response is fail");
         // toast.error("User not found");
         setErrorMessage("Invalid user ID");
         return;
@@ -668,7 +632,7 @@ function ManageSubjectList() {
       setShowEditModal(false); // Close modal after success
       setErrorMessage(""); // Clear error message on success
     } catch (error) {
-      console.error("Error resetting password:", error);
+      // console.error("Error resetting password:", error);
 
       // Capture server error message and set it below the field
       if (
@@ -709,15 +673,15 @@ function ManageSubjectList() {
     // Handle delete submission logic
     try {
       const token = localStorage.getItem("authToken");
-      console.log(
-        "the currecnt section inside the delte___",
-        currentSection?.classToDelete?.student_id
-      );
-      console.log("the classes inside the delete", classes);
-      console.log(
-        "the current section insde the handlesbmitdelete",
-        currentSection.classToDelete
-      );
+      // console.log(
+      //   "the currecnt section inside the delte___",
+      //   currentSection?.classToDelete?.student_id
+      // );
+      // console.log("the classes inside the delete", classes);
+      // console.log(
+      //   "the current section insde the handlesbmitdelete",
+      //   currentSection.classToDelete
+      // );
       if (
         !token ||
         !currentSection ||
@@ -748,7 +712,7 @@ function ManageSubjectList() {
       } else {
         toast.error(`Error deleting Student: ${error.message}`);
       }
-      console.error("Error deleting Student:", error);
+      // console.error("Error deleting Student:", error);
       // setError(error.message);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
@@ -761,6 +725,7 @@ function ManageSubjectList() {
     setShowEditModal(false);
     setShowDeleteModal(false);
     setShowDActiveModal(false);
+    setShowDownloadReportCard(false);
   };
 
   useEffect(() => {
@@ -809,18 +774,92 @@ function ManageSubjectList() {
   );
 
   // handle allot subject close model
-  console.log("displayedSections", displayedSections);
-  const handleReportView = (subjectIsPass) => {
-    setCurrentSection(subjectIsPass);
+  // console.log("displayedSections", displayedSections);
 
-    console.log("handleCertificateView-->", subjectIsPass);
-    navigate(`/hPCReportCard/${subjectIsPass.student_id}`, {
-      state: {
-        student: subjectIsPass,
-        section_id: section_id || classIdForManage,
-      },
-    });
+  const handleReportView = (subject) => {
+    // console.log("inside delete of subjectallotmenbt____", subject);
+    // console.log("inside delete of subjectallotmenbt", subject.student_id);
+    const sectionId = subject.student_id;
+    const classToDelete = subjects.find((cls) => cls.student_id === sectionId);
+    // setCurrentClass(classToDelete);
+    setCurrentSection({ classToDelete });
+    // console.log("the currecne t section", currentSection);
+    setCurrestSubjectNameForDelete(
+      currentSection?.CurrentSection?.student_name
+    );
+
+    setShowDownloadReportCard(true);
   };
+
+  const handleDownloadSumbit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token || !currentSection?.classToDelete?.student_id) {
+        throw new Error("Student ID is missing");
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/get_hpcreportcard?student_id=${currentSection.classToDelete.student_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Holistic Report Card downloaded successfully!");
+
+        // Extract filename from Content-Disposition header if available
+        const contentDisposition = response.headers["content-disposition"];
+        let filename = "HPC_ReportCard.pdf";
+
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="?(.+)"?/);
+          if (match && match[1]) filename = match[1];
+        }
+
+        // Create a blob URL for the PDF file
+        const pdfBlob = new Blob([response.data], { type: "application/pdf" });
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+
+        // Create a link to initiate the download
+        const link = document.createElement("a");
+        link.href = pdfUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(pdfUrl);
+
+        handleSearch();
+        handleCloseModal();
+      } else {
+        throw new Error("Failed to download the file");
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        toast.error(
+          `Error in Downloading Report Card: ${
+            error.response.data.error || error.message
+          }`
+        );
+      } else {
+        toast.error(`Error in Downloading Report Card: ${error.message}`);
+      }
+      // console.error("Error in Downloading Report Card:", error);
+    } finally {
+      setIsSubmitting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
   return (
     <>
       {/* <ToastContainer /> */}
@@ -1044,11 +1083,42 @@ function ManageSubjectList() {
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               View
                             </th>
-                            {isHpcClass && (
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                HPC Report Card
-                              </th>
-                            )}
+
+                            {/* {hasSearched &&
+                              ((roleId === "T" &&
+                                classTeacher.some(
+                                  (cls) =>
+                                    cls.is_class_teacher === 1 &&
+                                    cls.class_id === selectedClass?.class_id &&
+                                    cls.section_id ===
+                                      selectedClass?.section_id && 
+                                    hpcClassIds.includes(cls.class_id)
+                                )) ||
+                                (["A", "M", "U"].includes(roleId) &&
+                                  hpcClassIds.includes(
+                                    selectedClass?.class_id
+                                  ))) && (
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  HPC Report Card
+                                </th>
+                              )} */}
+                            {hasSearched &&
+                              ((roleId === "T" &&
+                                classTeacher.some(
+                                  (cls) =>
+                                    cls.is_class_teacher === 1 &&
+                                    cls.class_id === selectedClassIdHPC &&
+                                    cls.section_id === selectedSectionIdHPC &&
+                                    hpcClassIds.includes(cls.class_id)
+                                )) ||
+                                (["A", "M", "U"].includes(roleId) &&
+                                  hpcClassIds.includes(
+                                    selectedClassIdHPC
+                                  ))) && (
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  HPC Report Card
+                                </th>
+                              )}
 
                             {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               RC & Certificates
@@ -1076,11 +1146,6 @@ function ManageSubjectList() {
                                 {subject?.photo}
                               </td>{" "} */}
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
-                                  {console.log(
-                                    "the teacher image",
-                                    `${subject?.image_url}`
-                                  )}
-
                                   <img
                                     src={
                                       subject?.image_name
@@ -1175,16 +1240,58 @@ function ManageSubjectList() {
                                   </button>
                                 </td>
 
-                                {isHpcClass && (
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    <button
-                                      onClick={() => handleReportView(subject)}
-                                      className="text-green-600 hover:text-green-800 hover:bg-transparent "
-                                    >
-                                      <TbFileCertificate className="font-bold text-xl" />
-                                    </button>
-                                  </td>
-                                )}
+                                {/* {hasSearched &&
+                                  ((roleId === "T" &&
+                                    classTeacher.some(
+                                      (cls) =>
+                                        cls.is_class_teacher === 1 &&
+                                        cls.class_id ===
+                                          selectedClass?.class_id &&
+                                        cls.section_id ===
+                                          selectedClass?.section_id &&
+                                        hpcClassIds.includes(cls.class_id)
+                                    )) ||
+                                    (["A", "M", "U"].includes(roleId) &&
+                                      hpcClassIds.includes(
+                                        selectedClass?.class_id
+                                      ))) && (
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      <button
+                                        onClick={() =>
+                                          handleReportView(subject)
+                                        }
+                                        className="text-green-600 hover:text-green-800 hover:bg-transparent"
+                                      >
+                                        <TbFileCertificate className="font-bold text-xl" />
+                                      </button>
+                                    </td>
+                                  )} */}
+
+                                {hasSearched &&
+                                  ((roleId === "T" &&
+                                    classTeacher.some(
+                                      (cls) =>
+                                        cls.is_class_teacher === 1 &&
+                                        cls.class_id === selectedClassIdHPC &&
+                                        cls.section_id ===
+                                          selectedSectionIdHPC &&
+                                        hpcClassIds.includes(cls.class_id)
+                                    )) ||
+                                    (["A", "M", "U"].includes(roleId) &&
+                                      hpcClassIds.includes(
+                                        selectedClassIdHPC
+                                      ))) && (
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      <button
+                                        onClick={() =>
+                                          handleReportView(subject)
+                                        }
+                                        className="text-green-600 hover:text-green-800 hover:bg-transparent"
+                                      >
+                                        <TbFileCertificate className="font-bold text-xl" />
+                                      </button>
+                                    </td>
+                                  )}
 
                                 {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
@@ -1265,10 +1372,6 @@ function ManageSubjectList() {
                     // className="btn-close text-red-600"
                     onClick={handleCloseModal}
                   />
-                  {console.log(
-                    "the currecnt section inside delete of the managesubjhect",
-                    currentSection
-                  )}
                 </div>
                 <div
                   className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
@@ -1399,10 +1502,6 @@ function ManageSubjectList() {
                     // className="btn-close text-red-600"
                     onClick={handleCloseModal}
                   />
-                  {console.log(
-                    "the currecnt section inside activate or not of the managesubjhect",
-                    currentStudentDataForActivate
-                  )}
                 </div>
                 <div
                   className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
@@ -1452,6 +1551,54 @@ function ManageSubjectList() {
                       ? "Deactivate"
                       : "Activate"}
                     {/* {isSubmitting ? "Activating..." : "Active"} */}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDownloadReportCard && (
+        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">Confirm Download</h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    // className="btn-close text-red-600"
+                    onClick={handleCloseModal}
+                  />
+                </div>
+                <div
+                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+                <div className="modal-body">
+                  Are you sure you want to Download this HPC Report Card{" "}
+                  {`${[
+                    currentSection?.classToDelete?.first_name,
+                    currentSection?.classToDelete?.mid_name,
+                    currentSection?.classToDelete?.last_name,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}`}
+                  ?
+                </div>
+                <div className=" flex justify-end p-3">
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "#2196F3" }}
+                    className="btn text-white px-3 mb-2"
+                    onClick={handleDownloadSumbit}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Downloading..." : "Download"}
                   </button>
                 </div>
               </div>

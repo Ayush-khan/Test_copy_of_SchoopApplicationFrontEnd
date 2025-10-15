@@ -83,15 +83,15 @@ const CreateLeaveApplication = () => {
       console.log("response session data", response.data);
 
       if (response.data && response.data.user) {
-        const { name, reg_id } = response.data.user;
+        const { reg_id } = response.data.user;
         console.log("user reg id", response.data.user.reg_id);
         // Set staff name and reg_id
         setFormData((prevData) => ({
           ...prevData,
-          staff_name: name,
           reg_id: reg_id,
         }));
-
+        // ✅ Call new teacher API with reg_id
+        fetchTeacherData(reg_id); // 👈 Add this line
         fetchLeaveType(reg_id);
         console.log("user fetch reg id", reg_id);
       } else {
@@ -99,6 +99,34 @@ const CreateLeaveApplication = () => {
       }
     } catch (error) {
       console.error("Error fetching session data:", error);
+    }
+  };
+  const fetchTeacherData = async (regId) => {
+    const token = localStorage.getItem("authToken");
+
+    try {
+      const response = await axios.get(`${API_URL}/api/teachers/${regId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+
+      const teacherName = response?.data?.teacher?.name;
+
+      if (teacherName) {
+        console.log("Teacher's Name:", teacherName);
+
+        // ✅ Optional: set in form data or another state
+        setFormData((prev) => ({
+          ...prev,
+          staff_name: teacherName,
+        }));
+      } else {
+        console.warn("Teacher name not found in response.");
+      }
+    } catch (error) {
+      console.error("Error fetching teacher data:", error);
     }
   };
 

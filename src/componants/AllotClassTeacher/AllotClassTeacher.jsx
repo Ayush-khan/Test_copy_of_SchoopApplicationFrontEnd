@@ -9,7 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
 
-// The Division List component
+// The Division List component this is
 function AllotClassTeacher() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [sections, setSections] = useState([]);

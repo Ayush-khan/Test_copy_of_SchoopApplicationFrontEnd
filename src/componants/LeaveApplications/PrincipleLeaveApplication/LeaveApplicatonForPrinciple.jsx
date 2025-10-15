@@ -22,15 +22,11 @@ function LeaveApplicatonForPrinciple() {
   const [error, setError] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
-
   const [currentLeave, setCurrentLeave] = useState(null);
   const [currentLeaveName, setCurrentLeaveName] = useState(null);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
@@ -48,6 +44,7 @@ function LeaveApplicatonForPrinciple() {
   }, []);
 
   const fetchLeaves = async () => {
+    console.log("jfdsjfosfjoiefji---------->>>");
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");

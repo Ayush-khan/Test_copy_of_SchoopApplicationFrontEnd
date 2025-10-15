@@ -53,8 +53,6 @@ const TicketList = () => {
   };
 
   const handleView = async (student) => {
-    console.log("handle VIew is running on");
-    console.log("ticket_id", student.ticket_id);
     navigate(`/ticketList/view/${student.ticket_id}`, {
       state: { ticketDetails: student },
     });

@@ -139,82 +139,6 @@ function HolidayList() {
     setShowAddModal(true);
   };
 
-  // const handleSubmitAdd = async () => {
-  //   if (isSubmitting) return; // Prevent duplicate submissions
-  //   setIsSubmitting(true);
-
-  //   const { title, holiday_date, to_date } = formData;
-
-  //   console.log("data", { title, holiday_date, to_date });
-
-  //   let formHasErrors = false;
-  //   let errorMessages = {};
-
-  //   if (!title) {
-  //     formHasErrors = true;
-  //     errorMessages.title = "Title is required.";
-  //   }
-
-  //   if (!holiday_date) {
-  //     formHasErrors = true;
-  //     errorMessages.holiday_date = "Start Date is required.";
-  //   }
-
-  //   if (formHasErrors) {
-  //     setFieldErrors(errorMessages);
-  //     setIsSubmitting(false);
-  //     toast.dismiss();
-  //     toast.error("Please fill required fields.");
-  //     return;
-  //   }
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       toast.error("No authentication token found. Please log in again.");
-  //       setIsSubmitting(false);
-  //       return;
-  //     }
-
-  //     const requestData = {
-  //       title,
-  //       holiday_date,
-  //       to_date: to_date || "", // Set empty string if to_date is not provided
-  //     };
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/save_holiday`,
-  //       requestData,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-
-  //     const { data } = response;
-
-  //     if (!data.success) {
-  //       toast.error("Holiday already exists.");
-  //       setIsSubmitting(false);
-  //       return;
-  //     }
-
-  //     // Success Handling
-  //     toast.success("Holiday added successfully!");
-  //     setFormData({ title: "", holiday_date: "", to_date: "" });
-  //     setFieldErrors({}); // Reset errors
-  //     fetchHolidays(); // Refresh holiday list
-  //     handleCloseModal(); // Close modal
-  //   } catch (error) {
-  //     console.error("Error adding holiday:", error);
-
-  //     if (!error.response || error.response.status >= 500) {
-  //       toast.error("Server error. Please try again later.");
-  //     }
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
   const handleSubmitAdd = async () => {
     if (isSubmitting) return; // Prevent duplicate submissions
     setIsSubmitting(true);
@@ -488,17 +412,51 @@ function HolidayList() {
     }
   };
 
+  // const handleSelectAll = () => {
+  //   setSelectAll(!selectAll);
+  //   if (!selectAll) {
+  //     // Select all students
+  //     const allHolidayIds = holidays.map((holiday) => holiday.holiday_id);
+  //     setSelectedHolidays(allHolidayIds);
+  //     console.log("allholidays", allHolidayIds);
+  //   } else {
+  //     // Deselect all students
+  //     setSelectedHolidays([]);
+  //   }
+  // };
+
   const handleSelectAll = () => {
-    setSelectAll(!selectAll);
-    if (!selectAll) {
-      // Select all students
-      const allHolidayIds = holidays.map((holiday) => holiday.holiday_id);
-      setSelectedHolidays(allHolidayIds);
-      console.log("allholidays", allHolidayIds);
-    } else {
-      // Deselect all students
-      setSelectedHolidays([]);
+    if (!holidays || holidays.length === 0) {
+      toast.warning("No events available to select.");
+      return;
     }
+
+    // Find all unpublished events only
+    const unpublishedHolidayIds = holidays
+      .filter((holiday) => holiday.publish === "N")
+      .map((holiday) => holiday.holiday_id);
+
+    if (unpublishedHolidayIds.length === 0) {
+      toast.warning("No unpublished holidays available for publish.");
+      setSelectAll(false);
+      setSelectedHolidays([]);
+      return;
+    }
+
+    setSelectAll((prev) => {
+      const newSelectAll = !prev;
+
+      if (newSelectAll) {
+        // ✅ Only unpublished IDs will be selected
+        setSelectedHolidays(unpublishedHolidayIds);
+        console.log("allUnpublishedEvents", unpublishedHolidayIds);
+      } else {
+        // Deselect all
+        setSelectedHolidays([]);
+      }
+
+      return newSelectAll;
+    });
   };
 
   const handleCheckboxChange = (holidayId) => {
@@ -512,6 +470,17 @@ function HolidayList() {
   const handlePublish = async () => {
     if (selectedHolidays.length === 0) {
       toast.warning("Please select at least one holiday to publish.");
+      return;
+    }
+
+    if (!holidays || holidays.length === 0) {
+      toast.warning("No events available for publish.");
+      return;
+    }
+
+    // 2️⃣ Check if the user selected any events
+    if (!selectedHolidays || selectedHolidays.length === 0) {
+      toast.warning("Please select at least one event to publish.");
       return;
     }
 
@@ -735,14 +704,6 @@ function HolidayList() {
     document.body.removeChild(link); // Cleanup after download
   };
 
-  // Handle file selection
-  // const handleFileChange = (event) => {
-  //   const file = event.target.files[0];
-  //   setSelectedFile(file); // Set the selected file to state
-  //   setErrorMessage(""); // Clear any previous error
-  //   setUploadStatus(""); // Clear any previous success
-  //   setErrorMessageUrl("");
-  // };
   const handleFileChange = (event) => {
     const file = event.target.files[0];
 
@@ -1056,158 +1017,158 @@ function HolidayList() {
               </div>
             </div>
 
-            {holidays.length > 0 && (
-              <div className="w-full  mt-4">
-                <div className="card mx-auto lg:w-full shadow-lg">
-                  <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                    <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                      Holiday List
-                    </h3>
-                    <div className="box-border flex md:gap-x-2 justify-end md:h-10">
-                      <div className=" w-1/2 md:w-fit mr-1">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search"
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                      </div>
-                      <button
-                        className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                        onClick={handleAdd}
-                      >
-                        <FontAwesomeIcon
-                          icon={faPlus}
-                          style={{ marginRight: "5px" }}
-                        />
-                        Add
-                      </button>
-
-                      <button
-                        // type="submit"
-                        className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
-                        onClick={handlePublish}
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? "Publishing..." : "Publish"}
-                      </button>
+            {/* {holidays.length > 0 && ( */}
+            <div className="w-full  mt-4">
+              <div className="card mx-auto lg:w-full shadow-lg">
+                <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                  <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                    Holiday List
+                  </h3>
+                  <div className="box-border flex md:gap-x-2 justify-end md:h-10">
+                    <div className=" w-1/2 md:w-fit mr-1">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search"
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
                     </div>
-                  </div>
-                  <div
-                    className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                    style={{
-                      backgroundColor: "#C03078",
-                    }}
-                  ></div>
+                    <button
+                      className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
+                      onClick={handleAdd}
+                    >
+                      <FontAwesomeIcon
+                        icon={faPlus}
+                        style={{ marginRight: "5px" }}
+                      />
+                      Add
+                    </button>
 
-                  <div className="card-body w-full">
-                    <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full  md:w-[100%] mx-auto">
-                      <table className="min-w-full leading-normal table-auto">
-                        <thead>
-                          <tr className="bg-gray-200">
-                            <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Sr.No
-                            </th>
-                            <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              <input
-                                type="checkbox"
-                                checked={selectAll}
-                                onChange={handleSelectAll}
-                                className="cursor-pointer"
-                              />{" "}
-                              All
-                            </th>
-                            <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Title
-                            </th>
-                            <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Start Date
-                            </th>
-                            <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              End Date
-                            </th>
-                            <th className="px-2 w-full md:w-[25%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Created By
-                            </th>
-                            <th className="px-2 w-full md:w-[7%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Edit
-                            </th>
-                            <th className="px-2 w-full md:w-[7%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Delete
-                            </th>
-                            {/* <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                    <button
+                      // type="submit"
+                      className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
+                      onClick={handlePublish}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Publishing..." : "Publish"}
+                    </button>
+                  </div>
+                </div>
+                <div
+                  className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
+
+                <div className="card-body w-full">
+                  <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full  md:w-[100%] mx-auto">
+                    <table className="min-w-full leading-normal table-auto">
+                      <thead>
+                        <tr className="bg-gray-200">
+                          <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Sr.No
+                          </th>
+                          <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            <input
+                              type="checkbox"
+                              checked={selectAll}
+                              onChange={handleSelectAll}
+                              className="cursor-pointer"
+                            />{" "}
+                            All
+                          </th>
+                          <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Title
+                          </th>
+                          <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Start Date
+                          </th>
+                          <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            End Date
+                          </th>
+                          <th className="px-2 w-full md:w-[25%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Created By
+                          </th>
+                          <th className="px-2 w-full md:w-[7%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Edit
+                          </th>
+                          <th className="px-2 w-full md:w-[7%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Delete
+                          </th>
+                          {/* <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Publish
                             </th> */}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {displayedSections.length ? (
-                            displayedSections.map((holiday, index) => (
-                              <tr
-                                key={holiday.holiday_id}
-                                className=" text-sm "
-                                // onClick={() => handlePublish(holiday.holiday_id)}
-                              >
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {currentPage * pageSize + index + 1}
-                                </td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {displayedSections.length ? (
+                          displayedSections.map((holiday, index) => (
+                            <tr
+                              key={holiday.holiday_id}
+                              className=" text-sm "
+                              // onClick={() => handlePublish(holiday.holiday_id)}
+                            >
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {currentPage * pageSize + index + 1}
+                              </td>
 
-                                <td className="px-2 text-center lg:px-3 border border-gray-950 text-sm">
-                                  {" "}
-                                  {/* py-2 */}
-                                  <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                    {holiday.publish === "N" && (
-                                      <input
-                                        type="checkbox"
-                                        checked={selectedHolidays.includes(
-                                          holiday.holiday_id
-                                        )}
-                                        onChange={(e) => {
-                                          e.stopPropagation(); // Prevents row click from triggering publish
-                                          handleCheckboxChange(
-                                            holiday.holiday_id
-                                          );
-                                        }}
-                                      />
-                                    )}
-                                  </p>
-                                </td>
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
-                                  {holiday.title}
-                                </td>
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {holiday.holiday_date == "0000-00-00"
-                                    ? " "
-                                    : formatDate(holiday.holiday_date)}
-                                  {/* {holiday.holiday_date} */}
-                                </td>
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {/* {formatDate(holiday.to_date || "")} */}
-                                  {holiday.to_date == "0000-00-00"
-                                    ? " "
-                                    : formatDate(holiday.to_date)}
-                                </td>
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {/* {userName ? userName : "Loading..."} */}
-                                  {holiday.created_by_name}
-                                </td>
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              <td className="px-2 text-center lg:px-3 border border-gray-950 text-sm">
+                                {" "}
+                                {/* py-2 */}
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                   {holiday.publish === "N" && (
-                                    <button
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                      onClick={() => handleEdit(holiday)}
-                                    >
-                                      <FontAwesomeIcon icon={faEdit} />
-                                    </button>
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedHolidays.includes(
+                                        holiday.holiday_id
+                                      )}
+                                      onChange={(e) => {
+                                        e.stopPropagation(); // Prevents row click from triggering publish
+                                        handleCheckboxChange(
+                                          holiday.holiday_id
+                                        );
+                                      }}
+                                    />
                                   )}
-                                </td>
+                                </p>
+                              </td>
 
-                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
+                                {holiday.title}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {holiday.holiday_date == "0000-00-00"
+                                  ? " "
+                                  : formatDate(holiday.holiday_date)}
+                                {/* {holiday.holiday_date} */}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {/* {formatDate(holiday.to_date || "")} */}
+                                {holiday.to_date == "0000-00-00"
+                                  ? " "
+                                  : formatDate(holiday.to_date)}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {/* {userName ? userName : "Loading..."} */}
+                                {holiday.created_by_name}
+                              </td>
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {holiday.publish === "N" && (
+                                  <button
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                    onClick={() => handleEdit(holiday)}
+                                  >
+                                    <FontAwesomeIcon icon={faEdit} />
+                                  </button>
+                                )}
+                              </td>
+
+                              {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
                                     onClick={() => handleDelete(holiday)}
                                     className="text-red-600 hover:text-red-800 hover:bg-transparent "
@@ -1216,61 +1177,61 @@ function HolidayList() {
                                   </button>
                                 </td> */}
 
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {deletedHolidays.includes(
-                                    holiday.holiday_id
-                                  ) ? (
-                                    <span className="text-red-600 font-semibold">
-                                      Deleted
-                                    </span>
-                                  ) : (
-                                    <button
-                                      onClick={() => handleDelete(holiday)}
-                                      className="text-red-600 hover:text-red-800 hover:bg-transparent"
-                                    >
-                                      <FontAwesomeIcon icon={faTrash} />
-                                    </button>
-                                  )}
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <div className="absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                              <div className=" text-center text-xl text-red-700">
-                                Oops! No data found..
-                              </div>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {deletedHolidays.includes(
+                                  holiday.holiday_id
+                                ) ? (
+                                  <span className="text-red-600 font-semibold">
+                                    Deleted
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleDelete(holiday)}
+                                    className="text-red-600 hover:text-red-800 hover:bg-transparent"
+                                  >
+                                    <FontAwesomeIcon icon={faTrash} />
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <div className="absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                            <div className=" text-center text-xl text-red-700">
+                              Oops! No data found..
                             </div>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div className=" flex justify-center pt-2 -mb-3">
-                      {/* {filteredSections.length > pageSize && ( */}
-                      <ReactPaginate
-                        previousLabel={"Previous"}
-                        nextLabel={"Next"}
-                        breakLabel={"..."}
-                        breakClassName={"page-item"}
-                        breakLinkClassName={"page-link"}
-                        pageCount={pageCount}
-                        marginPagesDisplayed={1}
-                        pageRangeDisplayed={1}
-                        onPageChange={handlePageClick}
-                        containerClassName={"pagination justify-content-center"}
-                        pageClassName={"page-item"}
-                        pageLinkClassName={"page-link"}
-                        previousClassName={"page-item"}
-                        previousLinkClassName={"page-link"}
-                        nextClassName={"page-item"}
-                        nextLinkClassName={"page-link"}
-                        activeClassName={"active"}
-                      />
-                      {/* )} */}
-                    </div>
+                          </div>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className=" flex justify-center pt-2 -mb-3">
+                    {/* {filteredSections.length > pageSize && ( */}
+                    <ReactPaginate
+                      previousLabel={"Previous"}
+                      nextLabel={"Next"}
+                      breakLabel={"..."}
+                      breakClassName={"page-item"}
+                      breakLinkClassName={"page-link"}
+                      pageCount={pageCount}
+                      marginPagesDisplayed={1}
+                      pageRangeDisplayed={1}
+                      onPageChange={handlePageClick}
+                      containerClassName={"pagination justify-content-center"}
+                      pageClassName={"page-item"}
+                      pageLinkClassName={"page-link"}
+                      previousClassName={"page-item"}
+                      previousLinkClassName={"page-link"}
+                      nextClassName={"page-item"}
+                      nextLinkClassName={"page-link"}
+                      activeClassName={"active"}
+                    />
+                    {/* )} */}
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+            {/* )} */}
           </div>
         </div>
       </div>

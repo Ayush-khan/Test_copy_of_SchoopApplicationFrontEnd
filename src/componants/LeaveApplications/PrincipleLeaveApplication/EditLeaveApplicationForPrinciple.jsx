@@ -108,6 +108,7 @@ const EditLeaveApplicationForPrinciple = () => {
 
   const fetchLeaveType = async (reg_id) => {
     setLoading(true);
+    console.log("starttttt---->");
     try {
       const token = localStorage.getItem("authToken");
 

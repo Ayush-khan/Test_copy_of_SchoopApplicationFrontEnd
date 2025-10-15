@@ -215,15 +215,15 @@ import CreateClassWisePeriodAllotment from "../componants/TimeTablePlanner/Commo
 import ClassWisePeriodAllotment from "../componants/TimeTablePlanner/CommonTableForAllTable/ClassWisePeriodAllotment.jsx";
 import EditTimetablePlanner from "../componants/TimeTablePlanner/EditTimeTablePlanner/EditTimetablePlanner.jsx";
 import CreateTimetablePlanner from "../componants/TimeTablePlanner/CreateExamTimeTablePlanner/CreateTimetablePlanner.jsx";
-// import TimetablePlanner from "../componants/TimeTablePlanner/TimetablePlanner.jsx";
-import TimetablePlanner from "../componants/TimeTablePlanner/TimeTablePlanner.jsx";
+// import TimetablePlanner from "../componants/TimeTablePlanner/TimeTablePlanner.jsx";
+import TimetablePlanner from "../componants/TimeTablePlanner/TimetablePlanner.jsx";
 import MonthlyAttendenceReport from "../componants/Reports/MonthlyAttendanceReport.jsx";
 import ComingSoon from "../componants/common/CommingSoon/ComingSoon.jsx";
 import ForgotPassword from "../Layouts/ForgotPassword.jsx";
 import UpdateStudentIdCards from "../componants/IDCards/UpdateStudentIdCards.jsx";
 import UploadStudentPhoto from "../componants/IDCards/UploadStudentPhoto.jsx";
 import UploadParentPhoto from "../componants/IDCards/UploadParentPhoto.jsx";
-import StudentAbsent from "../componants/AllTableList/StudentAbsent.jsx";
+// import StudentAbsent from "../componants/AllTableList/StudentCard/StudentAbsent.jsx";
 import NonTeachingStaff from "../componants/AllTableList/NonTeachingStaff.jsx";
 import ApproveLessonP from "../componants/AllTableList/ApproveLessonP.jsx";
 import ManageSubjectPrinciple from "../componants/MastersModule/SubjectAllotment/SubjectAllotmentForPrinciple/ManageSubjectPrinciple.jsx";
@@ -317,6 +317,8 @@ import ClassTeacherRemark from "../componants/MastersModule/DomainModules/ClassT
 import PublishreportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishreportCard.jsx";
 import UploadMarks from "../componants/MastersModule/DomainModules/UploadMarks/UploadMarks.jsx";
 import HPCReportCard from "../componants/MastersModule/DomainModules/HPCReportCard/HPCReportCard.jsx";
+import ReportCardRemark from "../componants/MastersModule/DomainModules/ReportCardRemark/ReportCardRemark.jsx";
+import StudentAbsent from "../componants/AllTableList/StudentCard/StudentAbsent.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -744,6 +746,11 @@ function Index() {
         <Route
           path="/uploadMarks"
           element={<PrivateRoute element={<UploadMarks />} />}
+        />
+        {/* ReportCardRemark modules */}
+        <Route
+          path="/reportCardRemark"
+          element={<PrivateRoute element={<ReportCardRemark />} />}
         />
         {/* HPCReportCard */}
         {/* Report Card */}

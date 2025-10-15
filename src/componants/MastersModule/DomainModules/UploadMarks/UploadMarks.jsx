@@ -2,11 +2,8 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MdOutlineRemoveRedEye } from "react-icons/md";
-import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { FaSave, FaUpload, FaTrash, FaArrowLeft } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -21,6 +18,14 @@ function UploadMarks() {
   const [pageCount, setPageCount] = useState(0);
   //   variable to store the respone of the allot subject tab
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isDeleting, setIsDeleteting] = useState(false);
+  const [openDay, setOpenDay] = useState(null);
+  const [isEditLocked, setIsEditLocked] = useState(false);
+  const [showPublish, setShowPublish] = useState(true);
+  const [showDelete, setShowDelete] = useState(true);
+  const [editLockDateFormatted, setEditLockDateFormatted] = useState(" ");
+
   const [isSubmittingandPublishing, setIsSubmittingandPublishing] =
     useState(false);
 
@@ -78,6 +83,7 @@ function UploadMarks() {
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
   const [regId, setRegId] = useState(null);
+  const [actionInProgress, setActionInProgress] = useState(false);
 
   const [examOptions, setExamOptions] = useState([]);
   const [termsOptions, setTermsOptions] = useState([]);
@@ -100,49 +106,36 @@ function UploadMarks() {
   const [students, setStudents] = useState([]); // Roll No, Name, Present, Marks
   const [subjectError, setSubjectError] = useState("");
   const navigate = useNavigate();
-  const mockStudentList = [
-    { rollNo: "101", name: "SKYLAR STEPHEN MENDONSA" },
-    { rollNo: "102", name: "VED VIJAY VEER" },
-    { rollNo: "103", name: "LESHA VIKRAM MAHANKALE" },
-  ];
-  const [expectedFileName, setExpectedFileName] = useState("");
-  const [loadingMarks, setLoadingMarks] = useState(false);
-  const processStudentMarksData = (data) => {
-    const headings = marksHeadings;
 
+  const [expectedFileName, setExpectedFileName] = useState(null);
+  const [loadingMarks, setLoadingMarks] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const processStudentMarksData = (data, headings) => {
     const studentsWithMarks = data.map((student) => {
       const marksMap = {};
       const errors = {};
       const presentMap = {};
 
-      // ✅ Parse mark_obtained and present from JSON strings to objects
       let markObtainedParsed = {};
       let presentParsed = {};
 
       try {
         markObtainedParsed = JSON.parse(student.mark_obtained || "{}");
       } catch (e) {
-        console.error(
-          "Failed to parse mark_obtained for student:",
-          student.student_id
-        );
+        console.error("Failed to parse mark_obtained", student.student_id);
       }
 
       try {
         presentParsed = JSON.parse(student.present || "{}");
       } catch (e) {
-        console.error(
-          "Failed to parse present for student:",
-          student.student_id
-        );
+        console.error("Failed to parse present", student.student_id);
       }
 
-      // ✅ Loop through all headings and map marks & present data
       headings.forEach((h) => {
         const hid = h.marks_headings_id;
-
         marksMap[hid] = markObtainedParsed[hid] ?? "";
-        presentMap[hid] = presentParsed[hid] ?? "Y"; // default present = 'Y'
+        presentMap[hid] = presentParsed[hid] ?? "Y";
         errors[hid] = "";
       });
 
@@ -342,7 +335,7 @@ function UploadMarks() {
   const fetchMarksHeadings = async () => {
     if (!selectedStudent || !selectedSubject || !selectedExam) {
       toast.error("Please select Class, Subject, and Exam.");
-      return;
+      return [];
     }
 
     const class_id = selectedStudent.valueclass;
@@ -367,14 +360,16 @@ function UploadMarks() {
       );
 
       const headings = response?.data?.data || [];
-      setMarksHeadings(headings);
+      setMarksHeadings(headings); // still set it for the UI
+      return headings; // return for immediate use
     } catch (error) {
       console.error("Error fetching marks headings:", error);
       toast.error("Failed to load marks headings.");
+      return [];
     }
   };
 
-  const fetchStudentMarks = async () => {
+  const fetchStudentMarks = async (headings) => {
     const token = localStorage.getItem("authToken");
     if (!token) {
       toast.error("No auth token");
@@ -399,8 +394,66 @@ function UploadMarks() {
       });
 
       if (response.data.status === 200) {
-        const data = response.data.data; // array of student mark objects
-        processStudentMarksData(data);
+        const data = response.data.data;
+        // ✅ Save open day
+        // if (response.data.open_day) {
+        //   const openDayDate = new Date(response.data.open_day);
+        //   const today = new Date();
+
+        //   // Add 7 days
+        //   const openDayPlus7 = new Date(openDayDate);
+        //   openDayPlus7.setDate(openDayDate.getDate() + 7);
+
+        //   // ✅ Lock editing if today is after openDay + 7
+        //   if (today > openDayPlus7) {
+        //     setIsEditLocked(true);
+        //     setEditLockDateFormatted(openDayPlus7);
+        //   } else {
+        //     setIsEditLocked(false);
+        //   }
+
+        //   setOpenDay(response.data.open_day);
+        // }
+        if (response.data.open_day) {
+          // ✅ Force correct local date without timezone shift
+          const openDayDate = new Date(`${response.data.open_day}T00:00:00`);
+
+          const today = new Date();
+
+          // Strip time
+          const openDay = new Date(
+            openDayDate.getFullYear(),
+            openDayDate.getMonth(),
+            openDayDate.getDate()
+          );
+
+          const todayDateOnly = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate()
+          );
+
+          // Add 8 days to open day to calculate lock start date
+          const lockDate = new Date(
+            openDay.getTime() + 8 * 24 * 60 * 60 * 1000
+          );
+
+          console.log("openDay        :", openDay.toDateString());
+          console.log("todayDateOnly  :", todayDateOnly.toDateString());
+          console.log("lockDate       :", lockDate.toDateString());
+
+          // ✅ Lock if today >= lockDate
+          if (todayDateOnly >= lockDate) {
+            setIsEditLocked(true);
+            setEditLockDateFormatted(lockDate);
+          } else {
+            setIsEditLocked(false);
+          }
+
+          setOpenDay(response.data.open_day);
+        }
+
+        processStudentMarksData(data, headings); // pass headings here
       } else {
         toast.error("No student marks found.");
         setStudents([]);
@@ -413,12 +466,51 @@ function UploadMarks() {
       setLoadingMarks(false);
     }
   };
+  const fetchPublishDeleteStatus = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+
+    try {
+      const params = {
+        exam_id: selectedExam.value,
+        class_id: selectedStudent.valueclass,
+        subject_id: selectedSubject.value,
+        section_id: selectedStudent.value,
+      };
+
+      const response = await axios.get(
+        `${API_URL}/api/get_publishdeletestatusstudentmarks`,
+        {
+          params,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.status === 200 && response.data.success) {
+        setShowPublish(response.data.show_publish);
+        setShowDelete(response.data.show_delete);
+      } else {
+        setShowPublish(true);
+        setShowDelete(true);
+      }
+    } catch (err) {
+      console.error("Error fetching publish/delete status:", err);
+      // fallback to show buttons
+      setShowPublish(true);
+      setShowDelete(true);
+    }
+  };
 
   const handleSearch = async () => {
     setStudentError("");
     setExamError("");
     setSubjectError("");
     setLoadingForSearch(true);
+    setEditLockDateFormatted("");
+    setOpenDay(null);
+    setIsEditLocked(false);
 
     let hasError = false;
 
@@ -439,20 +531,25 @@ function UploadMarks() {
       setLoadingForSearch(false);
       return;
     }
+    setSelectedFile(null);
+    setExpectedFileName(null);
 
     try {
-      // 🌟 Reset state before fetching new data
       setShowUploadSection(false);
       setDataUploaded(false);
       setTableDataReady(false);
 
-      // 🌟 Step 1: Fetch marks headings
-      await fetchMarksHeadings();
+      // Fetch headings and pass them to marks
+      const headings = await fetchMarksHeadings();
+      await fetchStudentMarks(headings); // pass here
+      await fetchPublishDeleteStatus(); // <-- add this here
 
-      // 🌟 Step 2: Fetch student marks
-      await fetchStudentMarks();
-
-      // 🌟 Step 3: Update UI flags
+      const class_name = selectedStudent.class?.replace(/\s+/g, "");
+      const section_name = selectedStudent.section?.replace(/\s+/g, "");
+      const subject_name = selectedSubject.label?.replace(/\s+/g, "");
+      const exam_name = selectedExam.label?.replace(/\s+/g, "");
+      const filename = `${class_name}${section_name}_${subject_name}_${exam_name}.csv`;
+      setExpectedFileName(filename); // <-- this line sets the expected file name
       setDataUploaded(true);
       setTableDataReady(true);
     } catch (error) {
@@ -462,88 +559,275 @@ function UploadMarks() {
       setLoadingForSearch(false);
     }
   };
+  const hasAnyError = students.some(
+    (stu) =>
+      stu.errors && Object.values(stu.errors).some((err) => err && err !== "")
+  );
 
-  // Handle pagination
-  const handlePageClick = (data) => {
-    console.log("Page clicked:", data.selected);
-    setCurrentPage(data.selected);
-  };
-
-  const handlePublish = async () => {
-    // 1️⃣ Check if there are any events at all
-    if (!holidays || holidays.length === 0) {
-      toast.warning("No events available for publish.");
+  const handleSaveMarks = async () => {
+    if (!students || students.length === 0) {
+      toast.warning("No student data available to publish.");
       return;
     }
 
-    // 2️⃣ Check if the user selected any events
-    if (!selectedHolidays || selectedHolidays.length === 0) {
-      toast.warning("Please select at least one event to publish.");
+    if (!selectedStudent || !selectedSubject || !selectedExam) {
+      toast.warning("Please select Class, Subject, and Exam.");
       return;
     }
-
+    setActionInProgress(true); // ✅ Disable all buttons
     setIsSubmitting(true);
-    const token = localStorage.getItem("authToken");
 
+    const token = localStorage.getItem("authToken");
     if (!token) {
-      alert("Authentication required. Please log in.");
+      toast.error("Authentication required. Please log in.");
       setIsSubmitting(false);
       return;
     }
 
     try {
-      const formData = new FormData();
-      selectedHolidays.forEach((id) => formData.append("checkbxuniqid[]", id));
-      console.log("selectedHolidys", selectedHolidays);
+      const payload = {
+        exam_id: selectedExam.value,
+        class_id: selectedStudent.valueclass,
+        section_id: selectedStudent.value,
+        subject_id: selectedSubject.value,
+        student_id: [],
+        marks_id: [],
+      };
 
+      // Loop through all headings and prepare dynamic fields
+      marksHeadings.forEach((heading) => {
+        const hid = heading.marks_headings_id;
+        const highestKey = `highest_marks_${hid}`;
+        const obtainedKey = `mark_obtained_${hid}`;
+        const beforeChangeKey = `mark_before_change_${hid}`;
+
+        payload[highestKey] = [];
+        payload[obtainedKey] = [];
+        payload[beforeChangeKey] = [];
+      });
+
+      // Loop through all students to fill arrays
+      students.forEach((stu) => {
+        payload.student_id.push(stu.student_id);
+        payload.marks_id.push(stu.marks_id ?? null); // null if not available
+
+        marksHeadings.forEach((heading) => {
+          const hid = heading.marks_headings_id;
+
+          const mark = stu.marksMap?.[hid] ?? ""; // current mark
+          const present = stu.presentMap?.[hid] ?? "Y";
+          const highest = heading.highest_marks;
+
+          const highestKey = `highest_marks_${hid}`;
+          const obtainedKey = `mark_obtained_${hid}`;
+          const beforeChangeKey = `mark_before_change_${hid}`;
+          const presentKey = `present_${hid}_${stu.student_id}`;
+
+          // Ensure numeric mark or fallback to 0
+          const markVal = Number(mark || 0);
+
+          payload[highestKey].push(highest);
+          payload[obtainedKey].push(markVal);
+          payload[beforeChangeKey].push(markVal); // currently same as obtained
+          payload[presentKey] = present;
+        });
+      });
+
+      // ✅ Send POST request
       const response = await axios.post(
-        `${API_URL}/api/update_publishevent`,
-        formData,
+        `${API_URL}/api/save_studentmarks`,
+        payload,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
-      const data = response.data;
-
-      if (data.success) {
-        toast.success(data.message || "Event published successfully!");
-        setHolidays((prev) =>
-          prev.map((holiday) =>
-            selectedHolidays.includes(holiday.unq_id)
-              ? { ...holiday, publish: "Y" }
-              : holiday
-          )
+      if (response?.data?.success) {
+        toast.success(
+          response?.data?.message || "Student marks published successfully!"
         );
-        setSelectedHolidays([]);
-        setSelectAll(false);
+        setIsDataPosted(true); // Update flag if needed
+        handleSearch?.();
       } else {
-        toast.error(data.message || "Failed to publish events.");
+        toast.error(response?.data?.message || "Failed to publish marks.");
       }
     } catch (error) {
-      console.error("Error publishing events:", error);
-      toast.error("An error occurred while publishing events.");
+      console.error("Error publishing marks:", error);
+      toast.error("An error occurred while publishing marks.");
     } finally {
       setIsSubmitting(false);
+      setActionInProgress(false); // ✅ Disable all buttons
     }
   };
+  // const handlePublishMarks = async () => {
+  //   if (!selectedStudent || !selectedSubject || !selectedExam) {
+  //     toast.warning("Please select Class, Subject, and Exam.");
+  //     return;
+  //   }
+
+  //   setIsPublishing(true);
+
+  //   const token = localStorage.getItem("authToken");
+  //   if (!token) {
+  //     toast.error("Authentication required. Please log in.");
+  //     setIsPublishing(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("class_id", selectedStudent.valueclass);
+  //     formData.append("section_id", selectedStudent.value);
+  //     formData.append("exam_id", selectedExam.value);
+  //     formData.append("subject_id", selectedSubject.value);
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/update_publishstudentmarks`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "multipart/form-data",
+  //         },
+  //       }
+  //     );
+
+  //     if (response?.data?.status) {
+  //       toast.success(
+  //         response?.data?.message || "Marks published successfully."
+  //       );
+  //     } else {
+  //       toast.error(response?.data?.message || "Failed to publish marks.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error publishing marks:", error);
+  //     toast.error("Something went wrong while publishing marks.");
+  //   } finally {
+  //     setIsPublishing(false);
+  //   }
+  // };
+  const handlePublishMarks = async () => {
+    if (!selectedStudent || !selectedSubject || !selectedExam) {
+      toast.warning("Please select Class, Subject, and Exam.");
+      return;
+    }
+
+    // Check for empty marks if present is Y
+    for (let student of students) {
+      const fullName = [student.first_name, student.mid_name, student.last_name]
+        .filter(Boolean)
+        .map(
+          (name) => name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+        )
+        .join(" ");
+
+      for (let heading of marksHeadings) {
+        const hid = heading.marks_headings_id;
+        const isPresent = student.presentMap?.[hid] === "Y";
+        const markValue = student.marksMap?.[hid];
+        console.log("markValues-->", markValue);
+        if (isPresent && (markValue === "" || markValue == null)) {
+          toast.warning(
+            `Please enter marks for ${fullName}. Please save the data before publishing.`
+          );
+          return; // stop the publish process
+        }
+      }
+    }
+
+    setIsPublishing(true);
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      toast.error("Authentication required. Please log in.");
+      setIsPublishing(false);
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("class_id", selectedStudent.valueclass);
+      formData.append("section_id", selectedStudent.value);
+      formData.append("exam_id", selectedExam.value);
+      formData.append("subject_id", selectedSubject.value);
+
+      const response = await axios.post(
+        `${API_URL}/api/update_publishstudentmarks`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response?.data?.status) {
+        toast.success(
+          response?.data?.message || "Marks published successfully."
+        );
+        handleSearch?.();
+      } else {
+        toast.error(response?.data?.message || "Failed to publish marks.");
+      }
+    } catch (error) {
+      console.error("Error publishing marks:", error);
+      toast.error("Something went wrong while publishing marks.");
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handleDeleteMarks = async () => {
+    if (!selectedStudent || !selectedSubject || !selectedExam) {
+      toast.warning("Please select Class, Subject, and Exam.");
+      return;
+    }
+
+    setIsDeleteting(true);
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      toast.error("Authentication required. Please log in.");
+      setIsDeleteting(false);
+      return;
+    }
+
+    try {
+      const url = `${API_URL}/api/delete_studentmarks?exam_id=${selectedExam.value}&class_id=${selectedStudent.valueclass}&section_id=${selectedStudent.value}&subject_id=${selectedSubject.value}`;
+
+      const response = await axios.delete(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response?.data?.success) {
+        toast.success(response?.data?.message || "Marks deleted successfully.");
+        setDataUploaded(false);
+        setTableDataReady(false);
+      } else {
+        toast.error(response?.data?.message || "Failed to delete marks.");
+      }
+    } catch (error) {
+      console.error("Error deleting marks:", error);
+      toast.error("Something went wrong while deleting marks.");
+    } finally {
+      setIsDeleteting(false);
+    }
+  };
+
+  useEffect(() => {
+    setFilteredStudents(students);
+  }, [students]);
 
   useEffect(() => {
     const storedDeletedHolidays =
       JSON.parse(localStorage.getItem("deletedHolidays")) || [];
     setDeletedHolidays(storedDeletedHolidays);
   }, []);
-
-  const handleDelete = (holiday) => {
-    setCurrentHoliday(holiday.unq_id);
-    setCurrentHolidayNameForDelete(holiday.title);
-
-    console.log("Event to delete:", holiday);
-    console.log("Current Event name for delete:", holiday.title);
-
-    // Show confirmation modal for all holidays (published & unpublished)
-    setShowDeleteModal(true);
-  };
 
   const handleDownloadTemplate = async () => {
     if (!selectedStudent || !selectedSubject || !selectedExam) {
@@ -636,18 +920,6 @@ function UploadMarks() {
       return;
     }
 
-    // Accept patterns
-    // const validPattern = /_(event|rejected_template)(\s?\(\d+\))?\.csv$/i;
-    // const validPatternOne = /(event|rejected_template)(\s?\(\d+\))?\.csv$/i;
-    // console.log("FileName is-->", fileName);
-    // console.log("FileName is-->", validPattern.test(fileName));
-    // console.log("FileName is-->", validPatternOne.test(fileName));
-
-    // if (!validPattern.test(fileName) && !validPatternOne.test(fileName)) {
-    //   toast.warning("Please check if correct file is selected for upload.");
-    //   return;
-    // }
-
     setLoading(true);
 
     const formData = new FormData();
@@ -675,6 +947,7 @@ function UploadMarks() {
         toast.success("File uploaded successfully!");
         setUploadStatus("success");
         setSelectedFile(null);
+        setExpectedFileName(null);
         // Agar table ya list reload karna hai:
         handleSearch?.();
       } else {
@@ -735,14 +1008,6 @@ function UploadMarks() {
       toast.error("Failed to download the file.");
     }
   };
-  const formatDate = (dateString) => {
-    if (!dateString) return " ";
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = String(date.getFullYear()).slice(-4); // Last 2 digits of the year
-    return `${day}-${month}-${year}`;
-  };
 
   const handleReset = () => {
     setSelectedClasses([]);
@@ -750,23 +1015,37 @@ function UploadMarks() {
     setShowUploadSection(false);
     // setDataUploaded(false);
     setSelectedFile(null);
+    // setExpectedFileName(null);
     setErrorMessage("");
     setUploadStatus("");
   };
 
   useEffect(() => {
-    const trimmedSearch = searchTerm.trim().toLowerCase();
+    setSearching(true);
+    const timeout = setTimeout(() => {
+      const term = searchTerm.trim().toLowerCase();
 
-    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
-      previousPageRef.current = currentPage; // Save current page before search
-      setCurrentPage(0); // Jump to first page when searching
-    }
+      if (!term) {
+        setFilteredStudents(students); // Reset if search is cleared
+      } else {
+        const filtered = students.filter((stu) => {
+          const fullName = [stu.first_name, stu.mid_name, stu.last_name]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
 
-    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
-      setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
-    }
+          const rollNo = (stu.roll_no ?? "").toString().toLowerCase();
 
-    prevSearchTermRef.current = trimmedSearch;
+          return fullName.includes(term) || rollNo.includes(term);
+        });
+
+        setFilteredStudents(filtered);
+      }
+
+      setSearching(false);
+    }, 300); // debounce
+
+    return () => clearTimeout(timeout);
   }, [searchTerm]);
 
   useEffect(() => {
@@ -818,10 +1097,34 @@ function UploadMarks() {
       <div className="md:mx-auto md:w-[90%] p-4 bg-white mt-4 ">
         <ToastContainer />
 
-        <div className="w-full  flex flex-row justify-between">
+        <div className="w-full  flex flex-row item-center justify-between">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Enter exam marks
           </h3>
+          <div className="bg-blue-50  relative -left-6 bottom-2 border-l-2 border-r-2 px-6 text-[1em] border-pink-500 rounded-md shadow-md w-full md:w-auto">
+            <div className="flex flex-col md:flex-row md:items-center mt-1 md:gap-3 text-blue-800 font-medium space-y-1 md:space-y-0">
+              <div className="flex items-center gap-1">
+                <span className="text-lg">🏫</span>
+                <span className="text-blue-600">Class:</span>
+                <span>
+                  {selectedStudent?.class || "--"}{" "}
+                  {selectedStudent?.section || "--"}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <span className="text-lg">📖</span>
+                <span className="text-blue-600">Subject:</span>
+                <span>{selectedSubject?.label || "--"}</span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <span className="text-lg">📝</span>
+                <span className="text-blue-600">Exam:</span>
+                <span>{selectedExam?.label || "--"}</span>
+              </div>
+            </div>
+          </div>
           <RxCross1
             className=" relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
@@ -1178,12 +1481,6 @@ function UploadMarks() {
                         </a>
                       </p>
                     )}
-
-                    {/* {uploadStatus && (
-                      <p className="text-green-600 text-sm text-center mt-2">
-                        {uploadStatus}
-                      </p>
-                    )} */}
                   </div>
                 </div>
               </div>
@@ -1195,6 +1492,18 @@ function UploadMarks() {
         {/* Step 3: Show table after upload */}
         {dataUploaded && tableDataReady && (
           <>
+            {isEditLocked && (
+              <div className="flex items-center gap-2 bg-yellow-50 border-l-4 border-r-4 border-yellow-500 text-yellow-800 px-4 py-2 rounded-md shadow-sm w-full text-sm font-medium">
+                <span className="text-xl">ℹ️</span>
+                <span className="truncate">
+                  Marks editing is locked. You cannot <strong>edit</strong>,{" "}
+                  <strong>delete</strong>, <strong>save</strong>, or{" "}
+                  <strong>publish</strong> after 7 days from Open Day (
+                  <strong>{openDay}</strong>).
+                </span>
+              </div>
+            )}
+
             <div className="w-full mt-6">
               <div className="card mx-auto w-full shadow-xl rounded-lg overflow-hidden border border-gray-200">
                 {/* Header */}
@@ -1210,20 +1519,97 @@ function UploadMarks() {
                   )}
 
                   {/* Search + Publish */}
-                  <div className="flex gap-2 w-full md:w-auto items-center justify-end">
+                  <div className="flex flex-wrap gap-2.5 w-full md:w-auto items-center justify-center">
                     <input
                       type="text"
-                      className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full md:w-48 focus:outline-none focus:ring-2 focus:ring-blue-400"
                       placeholder="Search"
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <button
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm rounded-md shadow transition duration-200"
-                      onClick={handlePublish}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? "Publishing..." : "Publish"}
-                    </button>
+
+                    {/* Icon Button with Hover Label */}
+                    {/* Buttons: Only show when editing is not locked */}
+                    {!isEditLocked && (
+                      <>
+                        {[
+                          {
+                            Icon: FaSave,
+                            onClick: handleSaveMarks,
+                            disabled:
+                              isSubmitting || hasAnyError || actionInProgress,
+                            color: "blue",
+                            title: "Save",
+                            show: true, // Always show Save (unless edit is locked)
+                          },
+                          {
+                            Icon: FaUpload,
+                            onClick: handlePublishMarks,
+                            disabled:
+                              isPublishing || hasAnyError || actionInProgress,
+                            color: "green",
+                            title: "Publish",
+                            show: showPublish, // controlled by API
+                          },
+                          {
+                            Icon: FaTrash,
+                            onClick: handleDeleteMarks,
+                            disabled:
+                              isDeleting || hasAnyError || actionInProgress,
+                            color: "red",
+                            title: "Delete",
+                            show: showDelete, // controlled by API
+                          },
+                        ]
+                          // Only show buttons where `show` is true
+                          .filter((btn) => btn.show)
+                          .map(
+                            (
+                              { Icon, onClick, disabled, color, title },
+                              index
+                            ) => (
+                              <div key={index} className="relative group">
+                                <button
+                                  className={`
+              p-2 text-lg rounded-full transition duration-200 shadow-md
+              ${
+                disabled
+                  ? `bg-${color}-600 cursor-not-allowed`
+                  : `bg-${color}-600 hover:bg-${color}-700`
+              }
+              text-white
+            `}
+                                  onClick={onClick}
+                                  disabled={disabled}
+                                  title={title}
+                                >
+                                  <Icon />
+                                </button>
+                                <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                                  {title}
+                                </span>
+                              </div>
+                            )
+                          )}
+                      </>
+                    )}
+
+                    {/* Always show Back button */}
+                    <div className="relative group">
+                      <button
+                        className="p-2 text-lg rounded-full transition duration-200 shadow-md bg-yellow-600 hover:bg-yellow-700 text-white"
+                        onClick={() => {
+                          setLoadingEvent(false);
+                          setDataUploaded(false);
+                          setTableDataReady(false);
+                        }}
+                        title="Back"
+                      >
+                        <FaArrowLeft />
+                      </button>
+                      <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                        Back
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1265,26 +1651,26 @@ function UploadMarks() {
                         </tr>
                       </thead>
                       <tbody>
-                        {loadingEvent ? (
+                        {searching ? (
                           <tr>
                             <td
                               colSpan={4 + marksHeadings.length}
-                              className="text-center py-8 text-blue-700 text-lg"
+                              className="text-center py-8 text-blue-600 text-lg"
                             >
-                              Please Wait While Data is Loading...
+                              Please wait while data searching...
                             </td>
                           </tr>
-                        ) : students.length === 0 ? (
+                        ) : filteredStudents.length === 0 ? (
                           <tr>
                             <td
                               colSpan={4 + marksHeadings.length}
                               className="text-center py-8 text-red-600 text-lg"
                             >
-                              Oops! No data found...
+                              No student found.
                             </td>
                           </tr>
                         ) : (
-                          students.map((stu, idx) => {
+                          filteredStudents.map((stu, idx) => {
                             const fullName = [
                               stu.first_name,
                               stu.mid_name,
@@ -1306,7 +1692,7 @@ function UploadMarks() {
                                 } hover:bg-blue-50 cursor-pointer`}
                               >
                                 <td className="border px-3 py-2 text-center">
-                                  {idx + 1}
+                                  {currentPage * pageSize + idx + 1}
                                 </td>
                                 <td className="border px-3 py-2 text-center">
                                   {stu.roll_no ?? "-"}
@@ -1318,7 +1704,10 @@ function UploadMarks() {
                                 {marksHeadings.map((heading) => {
                                   const hid = heading.marks_headings_id;
                                   const max = heading.highest_marks;
-                                  const value = stu.marksMap?.[hid] || "";
+                                  const value = stu.marksMap?.[hid];
+                                  const displayValue =
+                                    value === 0 || value ? value : "";
+
                                   const error = stu.errors?.[hid];
                                   const presentValue =
                                     stu.presentMap?.[hid] ?? "Y";
@@ -1335,6 +1724,7 @@ function UploadMarks() {
                                             type="checkbox"
                                             className="accent-blue-600 cursor-pointer"
                                             checked={presentValue === "Y"}
+                                            disabled={isEditLocked}
                                             onChange={(e) => {
                                               const updatedStudents = [
                                                 ...students,
@@ -1376,8 +1766,10 @@ function UploadMarks() {
                                               ? "border border-red-500"
                                               : "border border-gray-300"
                                           } disabled:bg-gray-100`}
-                                          value={value}
-                                          disabled={presentValue !== "Y"}
+                                          value={displayValue}
+                                          disabled={
+                                            isEditLocked || presentValue !== "Y"
+                                          }
                                           max={max}
                                           min={0}
                                           onChange={(e) => {
@@ -1418,6 +1810,99 @@ function UploadMarks() {
                         )}
                       </tbody>
                     </table>
+                  </div>
+                  <div className="w-full mt-3">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-2 shadow-sm">
+                      <div className="flex flex-wrap gap-4 justify-center items-center">
+                        {/* Conditionally render action buttons if not locked */}
+                        {/* Buttons: Only show when editing is not locked */}
+                        {!isEditLocked && (
+                          <>
+                            {[
+                              {
+                                Icon: FaSave,
+                                onClick: handleSaveMarks,
+                                disabled:
+                                  isSubmitting ||
+                                  hasAnyError ||
+                                  actionInProgress,
+                                color: "blue",
+                                title: "Save",
+                                show: true, // Always show Save (unless edit is locked)
+                              },
+                              {
+                                Icon: FaUpload,
+                                onClick: handlePublishMarks,
+                                disabled:
+                                  isPublishing ||
+                                  hasAnyError ||
+                                  actionInProgress,
+                                color: "green",
+                                title: "Publish",
+                                show: showPublish, // controlled by API
+                              },
+                              {
+                                Icon: FaTrash,
+                                onClick: handleDeleteMarks,
+                                disabled:
+                                  isDeleting || hasAnyError || actionInProgress,
+                                color: "red",
+                                title: "Delete",
+                                show: showDelete, // controlled by API
+                              },
+                            ]
+                              // Only show buttons where `show` is true
+                              .filter((btn) => btn.show)
+                              .map(
+                                (
+                                  { Icon, onClick, disabled, color, title },
+                                  index
+                                ) => (
+                                  <div key={index} className="relative group">
+                                    <button
+                                      className={`
+              p-2 text-lg rounded-full transition duration-200 shadow-md
+              ${
+                disabled
+                  ? `bg-${color}-600 cursor-not-allowed`
+                  : `bg-${color}-600 hover:bg-${color}-700`
+              }
+              text-white
+            `}
+                                      onClick={onClick}
+                                      disabled={disabled}
+                                      title={title}
+                                    >
+                                      <Icon />
+                                    </button>
+                                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                                      {title}
+                                    </span>
+                                  </div>
+                                )
+                              )}
+                          </>
+                        )}
+
+                        {/* Always show Back button */}
+                        <div className="relative group">
+                          <button
+                            className="p-2 text-lg rounded-full transition duration-200 shadow-md bg-yellow-600 hover:bg-yellow-700 text-white"
+                            onClick={() => {
+                              setLoadingEvent(false);
+                              setDataUploaded(false);
+                              setTableDataReady(false);
+                            }}
+                            title="Back"
+                          >
+                            <FaArrowLeft />
+                          </button>
+                          <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                            Back
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
