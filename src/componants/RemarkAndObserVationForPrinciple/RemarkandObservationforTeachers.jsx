@@ -726,7 +726,7 @@ function TeacherRemarkandObservation() {
                                 </td> */}
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.publish === "Y" &&
-                                  subject?.failed_sms_count !== 0 ? (
+                                  subject?.failed_sms_count > 0 ? (
                                     <div className="flex flex-col gap-y-0.5 items-center">
                                       <span className="text-red-600 font-bold text-sm">
                                         {subject?.failed_sms_count}
@@ -777,6 +777,15 @@ function TeacherRemarkandObservation() {
                                         )}
                                       </button>
                                     </div>
+                                  ) : subject.publish === "N" ? (
+                                    <button
+                                      onClick={() => handlePublish(subject)}
+                                      // className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-xs md:text-sm font-medium"
+                                      className={`  font-bold hover:bg-none text-green-600 hover:text-green-800 hover:bg-transparent
+                                                                        }`}
+                                    >
+                                      <FaCheck className="text-lg md:text-xl" />
+                                    </button>
                                   ) : null}
                                 </td>
 

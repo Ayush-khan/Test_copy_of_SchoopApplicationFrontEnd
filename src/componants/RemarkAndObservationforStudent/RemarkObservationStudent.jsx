@@ -18,7 +18,7 @@ import CreateRemarkObservation from "./CreateRemarkObservation";
 import CreateRemarkObservationStudent from "./CreateRemarkObservationStudent";
 // import { PiCertificateBold } from "react-icons/pi";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaCheckCircle } from "react-icons/fa";
 import { ImDownload } from "react-icons/im";
 import { Navigate, useNavigate } from "react-router-dom";
 import { IoMdSend } from "react-icons/io";
@@ -145,9 +145,12 @@ function RemarkObservationStudent() {
       teacherName: subject.name || "",
       remarkSubject: subject.remark_subject || "",
       remarkDescription: subject.remark_desc || "",
-      studentName: `${subject.first_name || ""} ${subject.mid_name} ${
-        subject.last_name
-      }`,
+      studentName: [subject.first_name, subject.mid_name, subject.last_name]
+        .filter(Boolean) // removes null, undefined, ""
+        .map(
+          (name) => name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+        ) // optional: capitalize
+        .join(" "),
       classDivision: `${subject?.classname || ""} - ${
         subject?.sectionname || ""
       }`,
@@ -789,8 +792,18 @@ function RemarkObservationStudent() {
                                         )}
                                       </button>
                                     </div>
+                                  ) : subject.publish === "N" ? (
+                                    <button
+                                      onClick={() => handlePublish(subject)}
+                                      // className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-xs md:text-sm font-medium"
+                                      className={`  font-bold hover:bg-none text-green-600 hover:text-green-800 hover:bg-transparent
+                                      }`}
+                                    >
+                                      <FaCheck className="text-lg md:text-xl" />
+                                    </button>
                                   ) : null}
                                 </td>
+
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.acknowledge == "Y" && (
                                     <FontAwesomeIcon

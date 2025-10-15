@@ -14,6 +14,7 @@ import Select from "react-select";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import MarkDropdownEditor from "./MarkDropdownEditor";
 import { IoMdSend } from "react-icons/io";
+import { FaCheck } from "react-icons/fa";
 
 function Event() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -1607,6 +1608,15 @@ function Event() {
                                       )}
                                     </button>
                                   </div>
+                                ) : holiday.publish === "N" ? (
+                                  <button
+                                    onClick={() => handlePublish(holiday)}
+                                    // className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-xs md:text-sm font-medium"
+                                    className={`  font-bold hover:bg-none text-green-600 hover:text-green-800 hover:bg-transparent
+                                                                      }`}
+                                  >
+                                    <FaCheck className="text-lg md:text-xl" />
+                                  </button>
                                 ) : null}
                               </td>
 
