@@ -72,6 +72,7 @@ export default function Sidebar({ isSidebar, setIsSidebar }) {
             >
               <Link
                 to={tab}
+                onClick={() => setIsSidebar(false)} // 👈 Close sidebar on click
                 className="overflow-hidden block no-underline font-semibold text-[.9em] py-2 rounded-md bg-blue-500 text-pink-200 hover:text-pink-100 hover:bg-blue-600 shadow-md hover:drop-shadow-lg hover:font-bold transition duration-300"
               >
                 {tab

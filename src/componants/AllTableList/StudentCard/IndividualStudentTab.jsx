@@ -32,6 +32,9 @@ function IndividualStudentTab() {
   const [loading, setLoading] = useState(false);
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
+  const capitalizeFirstLetter = (str) => {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+  };
 
   const navigate = useNavigate();
   const pageSize = 10;
@@ -90,6 +93,8 @@ function IndividualStudentTab() {
     //   return;
     // }
     setSearchTerm("");
+    const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
+
     try {
       const token = localStorage.getItem("authToken");
       setLoading(true);
@@ -100,6 +105,7 @@ function IndividualStudentTab() {
           params: {
             class_id: classIdForManage,
             section_id: sectionIdForManage,
+            date: today, // 👈 sending today's date here
           },
         }
       );
@@ -298,11 +304,18 @@ function IndividualStudentTab() {
                                   </td>
                                   <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                     <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                      {classItem.first_name}{" "}
-                                      {classItem.mid_name || ""}{" "}
-                                      {classItem.last_name}
+                                      {capitalizeFirstLetter(
+                                        classItem.first_name
+                                      )}{" "}
+                                      {capitalizeFirstLetter(
+                                        classItem.mid_name
+                                      )}{" "}
+                                      {capitalizeFirstLetter(
+                                        classItem.last_name
+                                      )}
                                     </p>
                                   </td>
+
                                   <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                     <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                       {classItem.classname}

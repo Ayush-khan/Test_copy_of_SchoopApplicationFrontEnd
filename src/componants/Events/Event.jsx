@@ -13,6 +13,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import Select from "react-select";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import MarkDropdownEditor from "./MarkDropdownEditor";
+import { IoMdSend } from "react-icons/io";
 
 function Event() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -27,6 +28,7 @@ function Event() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmittingandPublishing, setIsSubmittingandPublishing] =
     useState(false);
+  const [sendingSMS, setSendingSMS] = useState({});
 
   const [filteredSections, setFilteredSections] = useState([]);
   const previousPageRef = useRef(0);
@@ -773,7 +775,49 @@ function Event() {
       );
     }
   };
+  const handleSend = async (uniqueId) => {
+    try {
+      setSendingSMS((prev) => ({ ...prev, [uniqueId]: true }));
 
+      // Get auth token from localStorage
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        toast.error("Authentication token not found. Please log in again.");
+        return;
+      }
+
+      // Construct the API URL with the unique ID as a query parameter
+      // const apiUrl = `http://103.159.85.174:8500/api/save_sendsms/${uniqueId}`;
+
+      // Make the POST request
+      const response = await axios.post(
+        `${API_URL}/api/send_pendingsmsforevent/${uniqueId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Handle success response
+      if (response.status === 200 && response.data.success) {
+        toast.success(
+          response?.data?.message ||
+            `Message sent successfully for Unique ID: ${uniqueId}`
+        );
+        fetchEvents();
+      } else {
+        toast.error("Failed to send SMS. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error sending SMS:", error);
+      toast.error("An error occurred while sending SMS. Please try again.");
+    } finally {
+      setSendingSMS((prev) => ({ ...prev, [uniqueId]: false }));
+    }
+  };
   // const handleUpload = async () => {
   //   if (!selectedFile) {
   //     setErrorMessage("Please select a file first.");
@@ -1324,6 +1368,9 @@ function Event() {
                           <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                             Delete
                           </th>
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Publish
+                          </th>
                           <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                             View
                           </th>
@@ -1506,6 +1553,61 @@ function Event() {
                                     <FontAwesomeIcon icon={faTrash} />
                                   </button>
                                 )}
+                              </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {holiday.publish === "Y" &&
+                                holiday?.failed_sms_count > 0 ? (
+                                  <div className="flex flex-col gap-y-0.5 items-center">
+                                    <span className="text-red-600 font-bold text-sm">
+                                      {holiday?.failed_sms_count}
+                                    </span>
+                                    <span className="text-blue-600 text-sm font-medium whitespace-nowrap">
+                                      Messages Pending
+                                    </span>
+
+                                    <button
+                                      disabled={sendingSMS[holiday?.unq_id]}
+                                      className={`flex flex-row items-center justify-center mt-1 px-3 py-1 gap-x-1 text-xs md:text-sm font-medium rounded-md ${
+                                        sendingSMS[holiday?.unq_id]
+                                          ? "bg-blue-300 cursor-not-allowed"
+                                          : "bg-blue-500 hover:bg-blue-600 text-white"
+                                      }`}
+                                      onClick={() =>
+                                        handleSend(holiday?.remark_id)
+                                      }
+                                    >
+                                      {sendingSMS[holiday?.unq_id] ? (
+                                        <span className="flex items-center gap-1 text-white text-xs">
+                                          <svg
+                                            className="animate-spin h-4 w-4 text-white"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <circle
+                                              className="opacity-25"
+                                              cx="12"
+                                              cy="12"
+                                              r="10"
+                                              stroke="currentColor"
+                                              strokeWidth="4"
+                                            ></circle>
+                                            <path
+                                              className="opacity-75"
+                                              fill="currentColor"
+                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                            ></path>
+                                          </svg>
+                                          Sending...
+                                        </span>
+                                      ) : (
+                                        <>
+                                          Send <IoMdSend />
+                                        </>
+                                      )}
+                                    </button>
+                                  </div>
+                                ) : null}
                               </td>
 
                               <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">

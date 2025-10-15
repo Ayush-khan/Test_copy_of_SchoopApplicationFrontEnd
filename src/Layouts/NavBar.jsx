@@ -1,3 +1,4 @@
+// work well onlick also ...
 // import { useEffect, useRef, useState } from "react";
 // import { Navbar, Nav, NavDropdown } from "react-bootstrap";
 // import { Link, useNavigate } from "react-router-dom";
@@ -14,6 +15,8 @@
 // import AdminNavBar from "./AdminNavBar";
 // import { toast } from "react-toastify";
 // import "./styles.css";
+// import Select from "react-select";
+
 // function NavBar() {
 //   const API_URL = import.meta.env.VITE_API_URL; //thsis is test url
 //   const navigate = useNavigate();
@@ -32,6 +35,9 @@
 //   const [navItems, setNavItems] = useState([]);
 //   const [roleId, setRoleId] = useState(""); // Add roleId state
 //   const childItemRef = useRef(null);
+//   const [menuOptions, setMenuOptions] = useState([]);
+//   const [selectedMenu, setSelectedMenu] = useState(null);
+
 //   function getCurrentDate() {
 //     const months = [
 //       "January",
@@ -60,6 +66,79 @@
 //   const reloadAndRedirect = () => {
 //     localStorage.setItem("shouldRedirectToDashboard", "true");
 //     window.location.reload();
+//   };
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       const token = localStorage.getItem("authToken");
+//       if (!token) {
+//         navigate("/");
+//         return;
+//       }
+//       try {
+//         const [sessionRes, acadRes, navRes, dropdownRes] = await Promise.all([
+//           axios.get(`${API_URL}/api/sessionData`, {
+//             headers: { Authorization: `Bearer ${token}` },
+//           }),
+//           axios.get(`${API_URL}/api/getAcademicYear`, {
+//             headers: { Authorization: `Bearer ${token}` },
+//           }),
+//           axios.get(`${API_URL}/api/navmenulisttest`, {
+//             headers: { Authorization: `Bearer ${token}` },
+//           }),
+//           axios.get(`${API_URL}/api/get_navleafmenus`, {
+//             headers: { Authorization: `Bearer ${token}` },
+//           }),
+//         ]);
+
+//         const sdata = sessionRes.data;
+//         const school = sdata?.custom_claims?.school_name;
+//         if (school) {
+//           setSchoolName(school);
+//           document.title = school;
+//         }
+
+//         setSessionData(sdata);
+//         setSelectedYear(sdata?.custom_claims?.academic_year);
+//         setRoleId(sdata.user.role_id);
+
+//         localStorage.setItem(
+//           "academic_yr_from",
+//           sdata?.custom_claims?.settings?.academic_yr_from
+//         );
+//         localStorage.setItem(
+//           "academic_yr_to",
+//           sdata?.custom_claims?.settings?.academic_yr_to
+//         );
+
+//         setAcademicYear(acadRes.data.academic_years);
+//         setNavItems(navRes.data);
+
+//         // NEW: Set options for dropdown from /navlistingofMenusdropdown
+//         const formattedMenuOptions = dropdownRes?.data?.data?.map((item) => ({
+//           value: item.url,
+//           label: item.name,
+//         }));
+//         setMenuOptions(formattedMenuOptions); // this state powers the Select dropdown
+//       } catch (err) {
+//         const errMsg = err.response?.data?.message;
+//         if (errMsg === "Token has expired") {
+//           localStorage.removeItem("authToken");
+//           navigate("/");
+//           return;
+//         }
+//         console.error("Error in fetchData:", err);
+//       }
+//     };
+
+//     fetchData();
+//   }, [API_URL, navigate]);
+
+//   const handleMenuSelect = (selectedOption) => {
+//     setSelectedMenu(selectedOption);
+//     if (selectedOption) {
+//       navigate(`/${selectedOption.value}`);
+//     }
 //   };
 
 //   useEffect(() => {
@@ -223,85 +302,6 @@
 //     });
 //   };
 
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       const token = localStorage.getItem("authToken");
-
-//       if (!token) {
-//         console.error("No authentication token found");
-//         // toast.error("Authentication token not found Please login again");
-//         navigate("/"); // 👈 Redirect to login
-//         return; // 👈
-//       }
-
-//       try {
-//         // Fetch session data
-//         const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//         });
-//         const name = sessionResponse?.data?.custom_claims?.school_name;
-//         if (name) {
-//           setSchoolName(name);
-//           document.title = name; // ✅ Dynamically set the HTML title
-//         }
-//         setSessionData(sessionResponse.data);
-//         setSelectedYear(sessionResponse?.data?.custom_claims?.academic_year);
-//         setRoleId(sessionResponse.data.user.role_id); // Store role_id
-//         localStorage.setItem(
-//           "academic_yr_from",
-//           sessionResponse?.data?.custom_claims?.settings?.academic_yr_from
-//         );
-//         localStorage.setItem(
-//           "academic_yr_to",
-//           sessionResponse?.data?.custom_claims?.settings?.academic_yr_to
-//         );
-//         const errorMsg = sessionResponse?.data?.message;
-//         // Handle expired token
-//         if (errorMsg === "Token has expired") {
-//           // toast.error("Session expired. Please login again.");
-//           localStorage.removeItem("authToken"); // Optional: clear old token
-//           navigate("/"); // Redirect to login
-//           return;
-//         } // setRoleId("A"); // Store role_id
-//         // Fetch academic year data
-//         const academicYearResponse = await axios.get(
-//           `${API_URL}/api/getAcademicYear`,
-//           {
-//             headers: {
-//               Authorization: `Bearer ${token}`,
-//             },
-//           }
-//         );
-//         setAcademicYear(academicYearResponse.data.academic_years);
-
-//         // Fetch navigation items
-//         // const navResponse = await axios.get(`${API_URL}/api/navmenulist`,
-//         const navResponse = await axios.get(`${API_URL}/api/navmenulisttest`, {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//         });
-//         setNavItems(navResponse.data);
-//         console.log("this is the nablis", navResponse.data);
-//         console.log("this is the array", navResponse.data.sub_menus);
-//       } catch (error) {
-//         const errorMsg = error.response?.data?.message;
-//         // Handle expired token
-//         if (errorMsg === "Token has expired") {
-//           // toast.error("Session expired. Please login again.");
-//           localStorage.removeItem("authToken"); // Optional: clear old token
-//           navigate("/"); // Redirect to login
-//           return;
-//         }
-//         console.error("Error fetching data:", error);
-//       }
-//     };
-
-//     fetchData();
-//   }, []);
-
 //   const handleLogout = async () => {
 //     try {
 //       const token = localStorage.getItem("authToken");
@@ -339,6 +339,7 @@
 //   const menuRef = useRef(null);
 //   const [openDropdowns, setOpenDropdowns] = useState([]);
 //   const [clickedDropdowns, setClickedDropdowns] = useState([]);
+//   const [isTouchDevice, setIsTouchDevice] = useState(false); // 👈 NEW
 
 //   const toggleDropdown = (key, level) => {
 //     const newBranch = [...openDropdowns.slice(0, level)];
@@ -377,6 +378,18 @@
 //       );
 //     }, 200);
 //   };
+//   useEffect(() => {
+//     const handleTouchStart = () => setIsTouchDevice(true);
+//     const handleMouseMove = () => setIsTouchDevice(false);
+
+//     window.addEventListener("touchstart", handleTouchStart, { passive: true });
+//     window.addEventListener("mousemove", handleMouseMove);
+
+//     return () => {
+//       window.removeEventListener("touchstart", handleTouchStart);
+//       window.removeEventListener("mousemove", handleMouseMove);
+//     };
+//   }, []);
 
 //   useEffect(() => {
 //     const handleClickOutside = (event) => {
@@ -413,6 +426,14 @@
 //                 e.preventDefault();
 //                 toggleDropdown(dropdownKey, level);
 //               }}
+//               onMouseEnter={
+//                 !isTouchDevice
+//                   ? () => handleMouseEnter(dropdownKey, level)
+//                   : undefined
+//               }
+//               onMouseLeave={
+//                 !isTouchDevice ? () => handleMouseLeave(level) : undefined
+//               }
 //             >
 //               {item.sub_menus.map((subItem) => {
 //                 const subKey = `${subItem.menu_id}-${level + 1}`;
@@ -424,34 +445,36 @@
 //                       key={subKey}
 //                       title={
 //                         <span className="nav-dropdown-sub-new-Dynamic px-2">
-//                           {subItem.name}
+//                           {subItem.name}ffff
 //                         </span>
 //                       }
-//                       className={`  nav-dropdown-sub-new dropend w-auto ${
+//                       className={`nav-dropdown-sub-new dropend w-auto ${
 //                         isSubOpen ? "show" : ""
-//                       } `}
+//                       }`}
 //                       show={isSubOpen}
-//                       // onClick={(e) => {
-//                       //   e.preventDefault();
-//                       //   e.stopPropagation();
-//                       //   closeAllDropdowns();
-
-//                       //   toggleDropdown(subKey, level + 1); // click opens/closes
-//                       // }}
 //                       onClick={(e) => {
 //                         e.preventDefault();
 //                         e.stopPropagation();
-
-//                         // If it's already open, close all
 //                         if (isSubOpen) {
-//                           closeAllDropdowns(); // close all if already open
+//                           closeAllDropdowns();
 //                         } else {
-//                           // open only this one
-//                           setOpenDropdowns([subKey]);
+//                           // setOpenDropdowns([subKey]);
+//                           setOpenDropdowns([
+//                             `${item.menu_id}-${level}`,
+//                             subKey,
+//                           ]);
 //                         }
 //                       }}
-//                       onMouseEnter={() => handleMouseEnter(subKey, level + 1)} // hover opens
-//                       onMouseLeave={() => handleMouseLeave(level + 1)} // hover out closes (if not clicked)
+//                       onMouseEnter={
+//                         !isTouchDevice
+//                           ? () => handleMouseEnter(subKey, level + 1)
+//                           : undefined
+//                       }
+//                       onMouseLeave={
+//                         !isTouchDevice
+//                           ? () => handleMouseLeave(level + 1)
+//                           : undefined
+//                       }
 //                     >
 //                       {subItem.sub_menus.map((childItem) => {
 //                         const childKey = `${childItem.menu_id}-${level + 2}`;
@@ -496,10 +519,16 @@
 //                                   ]);
 //                                 }
 //                               }}
-//                               onMouseEnter={() =>
-//                                 handleMouseEnter(childKey, level + 2)
+//                               onMouseEnter={
+//                                 !isTouchDevice
+//                                   ? () => handleMouseEnter(childKey, level + 2)
+//                                   : undefined
 //                               }
-//                               onMouseLeave={() => handleMouseLeave(level + 2)} // <-- pass level+2 here
+//                               onMouseLeave={
+//                                 !isTouchDevice
+//                                   ? () => handleMouseLeave(level + 2)
+//                                   : undefined
+//                               }
 //                             >
 //                               {childItem.sub_menus.map((grandChildItem) => (
 //                                 <NavDropdown.Item
@@ -725,8 +754,65 @@
 //                 </Navbar.Collapse>{" "}
 //               </div>
 //             </Navbar>
-//             <div className="flex items-center  ">
-//               {/* className="w-12 lg:w-16 outline-none border border-black px-2 rounded-md text-pink-500 mr-2" */}
+
+//             <div className="flex items-center w-full md:w-[40%] ">
+//               <div className="form-group w-full md:w-[85%] flex justify-start gap-x-1 md:gap-x-4">
+//                 <div className="w-full md:w-[90%] my-2">
+//                   <Select
+//                     value={selectedMenu}
+//                     onChange={handleMenuSelect}
+//                     options={menuOptions}
+//                     placeholder="Search Menu"
+//                     isSearchable
+//                     isClearable
+//                     className="text-sm"
+//                     styles={{
+//                       control: (base, state) => ({
+//                         ...base,
+//                         backgroundColor: "#f3f4f6",
+//                         borderColor: state.isFocused ? "#60a5fa" : "#d1d5db",
+//                         borderRadius: "0.75rem",
+//                         minHeight: "2.5rem",
+//                         fontSize: "0.875rem",
+//                         boxShadow: state.isFocused
+//                           ? "0 0 0 2px #3b82f6"
+//                           : "none",
+//                         transition:
+//                           "border-color 0.2s ease, box-shadow 0.2s ease",
+//                         "&:hover": {
+//                           borderColor: "#9ca3af",
+//                         },
+//                       }),
+//                       placeholder: (base) => ({
+//                         ...base,
+//                         color: "#6b7280",
+//                         fontSize: "0.875rem",
+//                       }),
+//                       singleValue: (base) => ({
+//                         ...base,
+//                         fontSize: "0.875rem",
+//                         color: "#111827",
+//                       }),
+//                       option: (base, { isFocused }) => ({
+//                         ...base,
+//                         fontSize: "0.875rem",
+//                         backgroundColor: isFocused ? "#bfdbfe" : "white", // Hover = blue-200
+//                         color: isFocused ? "#1e3a8a" : "#111827", // Hover text = blue-900
+//                         cursor: "pointer",
+//                         transition:
+//                           "background-color 0.2s ease, color 0.2s ease", // smooth transition
+//                       }),
+//                       menu: (base) => ({
+//                         ...base,
+//                         borderRadius: "0.5rem",
+//                         fontSize: "0.875rem",
+//                         zIndex: 50,
+//                         boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+//                       }),
+//                     }}
+//                   />
+//                 </div>
+//               </div>
 //               <div className="flex items-center">
 //                 <div>
 //                   <input
@@ -739,7 +825,7 @@
 //                     onChange={(e) => {
 //                       setInputValueGR(e.target.value);
 //                     }}
-//                     onKeyPress={handleKeyPress} // Trigger search on Enter key press
+//                     onKeyPress={handleKeyPress}
 //                     style={{
 //                       display: "inline",
 //                       position: "relative",
@@ -762,11 +848,10 @@
 //                     {selectedYear ? selectedYear : "Academic Year "}
 //                   </span>
 //                 }
-//                 // title={selectedYear ? selectedYear : "Academic Year "}
 //                 className={`${styles.dropNaveBarAcademic} academic-dropdown outline-none border-1 border-gray-400 px-1 rounded-md py-0.5 text-xs lg:text-sm   `}
 //                 style={{
 //                   boxSizing: "border-box",
-//                   width: "60%",
+//                   width: "30%",
 //                   margin: "auto",
 //                   position: "relative",
 //                   right: "10px",
@@ -796,6 +881,7 @@
 // }
 
 // export default NavBar;
+
 // try one fast way to  get data
 import { useEffect, useRef, useState } from "react";
 import { Navbar, Nav, NavDropdown } from "react-bootstrap";

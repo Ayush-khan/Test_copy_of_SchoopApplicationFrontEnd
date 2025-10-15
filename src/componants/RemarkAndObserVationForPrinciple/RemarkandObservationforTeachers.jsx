@@ -27,6 +27,7 @@ function TeacherRemarkandObservation() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sendingSMS, setSendingSMS] = useState({});
 
   const [activeTab, setActiveTab] = useState("Manage");
   const [classes, setClasses] = useState([]);
@@ -415,7 +416,49 @@ function TeacherRemarkandObservation() {
       setShowDeleteModal(false);
     }
   };
+  const handleSend = async (uniqueId) => {
+    try {
+      setSendingSMS((prev) => ({ ...prev, [uniqueId]: true }));
 
+      // Get auth token from localStorage
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        toast.error("Authentication token not found. Please log in again.");
+        return;
+      }
+
+      // Construct the API URL with the unique ID as a query parameter
+      // const apiUrl = `http://103.159.85.174:8500/api/save_sendsms/${uniqueId}`;
+
+      // Make the POST request
+      const response = await axios.post(
+        `${API_URL}/api/send_pendingsmsforteacherremark/${uniqueId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Handle success response
+      if (response.status === 200 && response.data.success) {
+        toast.success(
+          response?.data?.message ||
+            `Message sent successfully for Unique ID: ${uniqueId}`
+        );
+        handleSearch();
+      } else {
+        toast.error("Failed to send SMS. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error sending SMS:", error);
+      toast.error("An error occurred while sending SMS. Please try again.");
+    } finally {
+      setSendingSMS((prev) => ({ ...prev, [uniqueId]: false }));
+    }
+  };
   const handleCloseModal = () => {
     setSubject("");
     setNoticeDesc("");
@@ -606,101 +649,7 @@ function TeacherRemarkandObservation() {
                             </th>
                           </tr>
                         </thead>
-                        {/* <tbody>
-                          {displayedSections.length ? (
-                            displayedSections.map((subject, index) => (
-                              <tr key={subject.notice_id} className="text-sm ">
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {currentPage * pageSize + index + 1}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.name}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.remark_type}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.publish_date &&
-                                  subject.publish_date !== "0000-00-00"
-                                    ? new Date(
-                                        subject.publish_date
-                                      ).toLocaleDateString("en-GB")
-                                    : ""}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.remark_subject}
-                                </td>
-                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                  {subject.publish === "Y" ? (
-                                    <button
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                      onClick={() => handleView(subject)}
-                                    >
-                                      <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                                    </button>
-                                  ) : (
-                                    <button
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                      onClick={() => handleEdit(subject)}
-                                    >
-                                      <FontAwesomeIcon icon={faEdit} />
-                                    </button>
-                                  )}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.publish === "N" ? (
-                                    <button
-                                      onClick={() =>
-                                        handleDelete(subject?.t_remark_id)
-                                      }
-                                      className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                    >
-                                      <FontAwesomeIcon icon={faTrash} />
-                                    </button>
-                                  ) : (
-                                    " "
-                                  )}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.publish === "N" ? (
-                                    <button
-                                      onClick={() => handlePublish(subject)}
-                                      className="text-green-500 hover:text-green-700 hover:bg-transparent"
-                                    >
-                                      <FaCheck />
-                                    </button>
-                                  ) : (
-                                    ""
-                                  )}
-                                </td>
 
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.acknowledge === "Y" && (
-                                    <FontAwesomeIcon
-                                      icon={faThumbsUp}
-                                      className="text-black text-base"
-                                    />
-                                  )}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.acknowledge === "Y" && (
-                                    <FontAwesomeIcon
-                                      icon={faBookReader}
-                                      style={{ color: "#C03078" }}
-                                      className="text-base"
-                                    />
-                                  )}
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                              <div className=" text-center text-xl text-red-700">
-                                Oops! No data found..
-                              </div>
-                            </div>
-                          )}
-                        </tbody> */}
                         <tbody>
                           {loading ? (
                             <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
@@ -762,7 +711,7 @@ function TeacherRemarkandObservation() {
                                     " "
                                   )}
                                 </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.publish === "N" &&
                                   subject.remark_type !== "Observation" ? (
                                     <button
@@ -774,7 +723,63 @@ function TeacherRemarkandObservation() {
                                   ) : (
                                     ""
                                   )}
+                                </td> */}
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.publish === "Y" &&
+                                  subject?.failed_sms_count !== 0 ? (
+                                    <div className="flex flex-col gap-y-0.5 items-center">
+                                      <span className="text-red-600 font-bold text-sm">
+                                        {subject?.failed_sms_count}
+                                      </span>
+                                      <span className="text-blue-600 text-sm font-medium whitespace-nowrap">
+                                        Messages Pending
+                                      </span>
+
+                                      <button
+                                        disabled={sendingSMS[subject?.unq_id]}
+                                        className={`flex flex-row items-center justify-center mt-1 px-3 py-1 gap-x-1 text-xs md:text-sm font-medium rounded-md ${
+                                          sendingSMS[subject?.unq_id]
+                                            ? "bg-blue-300 cursor-not-allowed"
+                                            : "bg-blue-500 hover:bg-blue-600 text-white"
+                                        }`}
+                                        onClick={() =>
+                                          handleSend(subject?.t_remark_id)
+                                        }
+                                      >
+                                        {sendingSMS[subject?.unq_id] ? (
+                                          <span className="flex items-center gap-1 text-white text-xs">
+                                            <svg
+                                              className="animate-spin h-4 w-4 text-white"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              fill="none"
+                                              viewBox="0 0 24 24"
+                                            >
+                                              <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                              ></circle>
+                                              <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                              ></path>
+                                            </svg>
+                                            Sending...
+                                          </span>
+                                        ) : (
+                                          <>
+                                            Send <IoMdSend />
+                                          </>
+                                        )}
+                                      </button>
+                                    </div>
+                                  ) : null}
                                 </td>
+
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.acknowledge == "Y" && (
                                     <FontAwesomeIcon
