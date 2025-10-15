@@ -1004,7 +1004,7 @@ function NoticeAndSms() {
                                   {subject.showSendButton ? (
                                     <div className="flex flex-col gap-y-0.5">
                                       <span className="text-nowrap text-red-600 font-bold">{`${subject.count}`}</span>
-                                      <span className="text-bule-600 text-nowrap font-medium ">{`SMS Pending`}</span>
+                                      <span className="text-bule-600 text-nowrap font-medium ">{`Messages Pending`}</span>
                                       <button
                                         className=" flex felx-row items-center justify-center p-2 gap-x-1 bg-blue-500 text-nowrap hover:bg-blue-600 text-white font-medium rounded-md"
                                         //  onClick={() => handleEdit(subject)}

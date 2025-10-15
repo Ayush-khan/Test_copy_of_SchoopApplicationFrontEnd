@@ -628,7 +628,7 @@ function NoticeAndSmsforStaff() {
 
       // Make the POST request
       const response = await axios.post(
-        `${API_URL}/api/save_sendsms/${uniqueId}`,
+        `${API_URL}/api/send_pendingsmsforstaffnotice/${uniqueId}`,
         {},
         {
           headers: {
@@ -639,7 +639,10 @@ function NoticeAndSmsforStaff() {
 
       // Handle success response
       if (response.status === 200 && response.data.success) {
-        toast.success(`SMS sent successfully for Unique ID: ${uniqueId}`);
+        toast.success(
+          response?.data?.message ||
+            `Message sent successfully for Unique ID: ${uniqueId}`
+        );
         handleSearch();
       } else {
         toast.error("Failed to send SMS. Please try again.");
@@ -656,6 +659,11 @@ function NoticeAndSmsforStaff() {
     { id: "CreateShortSMS", label: "Create Short SMS" },
     { id: "CreateNotice", label: "Create Notice" },
   ];
+  const processedSections = displayedSections.map((subject) => ({
+    ...subject,
+    showSendButton: subject.publish === "Y" && subject.failed_sms_count !== 0,
+    count: subject.failed_sms_count,
+  }));
 
   return (
     <>
@@ -854,7 +862,7 @@ function NoticeAndSmsforStaff() {
                                     " "
                                   )}
                                 </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.showSendButton ? (
                                     <div className="flex flex-col gap-y-0.5">
                                       <span className="text-nowrap text-red-600 font-bold">{`${subject.count}`}</span>
@@ -883,6 +891,36 @@ function NoticeAndSmsforStaff() {
                                   ) : (
                                     " "
                                   )}
+                                </td> */}
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.publish === "Y" &&
+                                  subject.failed_sms_count !== 0 ? (
+                                    <div className="flex flex-col gap-y-0.5">
+                                      <span className="text-nowrap text-red-600 font-bold">
+                                        {subject.failed_sms_count}
+                                      </span>
+                                      <span className="text-blue-600 text-nowrap font-medium">
+                                        Messages Pending
+                                      </span>
+                                      <button
+                                        className="flex flex-row items-center justify-center p-2 gap-x-1 bg-blue-500 text-nowrap hover:bg-blue-600 text-white font-medium rounded-md"
+                                        onClick={() =>
+                                          handleSend(subject.unq_id)
+                                        }
+                                      >
+                                        Send <IoMdSend />
+                                      </button>
+                                    </div>
+                                  ) : null}
+
+                                  {subject.publish === "N" ? (
+                                    <button
+                                      onClick={() => handlePublish(subject)}
+                                      className="text-green-500 hover:text-green-700 hover:bg-transparent"
+                                    >
+                                      <FaCheck />
+                                    </button>
+                                  ) : null}
                                 </td>
                               </tr>
                             ))
