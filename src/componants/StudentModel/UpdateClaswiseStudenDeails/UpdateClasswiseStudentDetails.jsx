@@ -1425,9 +1425,9 @@ const UpdateClasswiseStudentDetails = () => {
                                                 {options.map((opt, i) => (
                                                   <option
                                                     key={i}
-                                                    value={opt.value}
+                                                    value={opt.option}
                                                   >
-                                                    {opt.option}
+                                                    {opt.value}
                                                   </option>
                                                 ))}
                                               </select>
