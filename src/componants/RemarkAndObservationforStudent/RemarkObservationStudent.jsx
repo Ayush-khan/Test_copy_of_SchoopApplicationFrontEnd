@@ -735,19 +735,7 @@ function RemarkObservationStudent() {
                                     ""
                                   )}
                                 </td>
-                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.publish === "N" &&
-                                  subject.remark_type !== "Observation" ? (
-                                    <button
-                                      onClick={() => handlePublish(subject)}
-                                      className="text-green-500 hover:text-green-700 hover:bg-transparent"
-                                    >
-                                      <FaCheck />
-                                    </button>
-                                  ) : (
-                                    ""
-                                  )}
-                                </td> */}
+
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.publish === "Y" &&
                                   subject?.failed_sms_count > 0 ? (
