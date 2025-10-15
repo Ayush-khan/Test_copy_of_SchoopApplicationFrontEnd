@@ -13,6 +13,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import Select from "react-select";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import MarkDropdownEditor from "./MarkDropdownEditor";
+import { IoMdSend } from "react-icons/io";
 
 function Event() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -773,7 +774,45 @@ function Event() {
       );
     }
   };
+  const handleSend = async (uniqueId) => {
+    try {
+      // Get auth token from localStorage
+      const token = localStorage.getItem("authToken");
 
+      if (!token) {
+        toast.error("Authentication token not found. Please log in again.");
+        return;
+      }
+
+      // Construct the API URL with the unique ID as a query parameter
+      // const apiUrl = `http://103.159.85.174:8500/api/save_sendsms/${uniqueId}`;
+
+      // Make the POST request
+      const response = await axios.post(
+        `${API_URL}/api/send_pendingsmsforevent/${uniqueId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Handle success response
+      if (response.status === 200 && response.data.success) {
+        toast.success(
+          response?.data?.message ||
+            `Message sent successfully for Unique ID: ${uniqueId}`
+        );
+        fetchEvents();
+      } else {
+        toast.error("Failed to send SMS. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error sending SMS:", error);
+      toast.error("An error occurred while sending SMS. Please try again.");
+    }
+  };
   // const handleUpload = async () => {
   //   if (!selectedFile) {
   //     setErrorMessage("Please select a file first.");
@@ -1324,6 +1363,9 @@ function Event() {
                           <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                             Delete
                           </th>
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Publish
+                          </th>
                           <th className="px-2 w-full md:w-[6%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                             View
                           </th>
@@ -1506,6 +1548,25 @@ function Event() {
                                     <FontAwesomeIcon icon={faTrash} />
                                   </button>
                                 )}
+                              </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {holiday.publish === "Y" &&
+                                holiday.failed_sms_count !== 0 ? (
+                                  <div className="flex flex-col gap-y-0.5 items-center">
+                                    <span className="text-red-600 font-bold text-sm">
+                                      {holiday.failed_sms_count}
+                                    </span>
+                                    <span className="text-blue-600 text-sm font-medium">
+                                      Messages Pending
+                                    </span>
+                                    <button
+                                      className="flex flex-row items-center justify-center mt-1 px-2 py-1 gap-x-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md"
+                                      onClick={() => handleSend(holiday.unq_id)}
+                                    >
+                                      Send <IoMdSend />
+                                    </button>
+                                  </div>
+                                ) : null}
                               </td>
 
                               <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
