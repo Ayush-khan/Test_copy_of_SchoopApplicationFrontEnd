@@ -792,7 +792,8 @@ function RemarkObservationStudent() {
                                         )}
                                       </button>
                                     </div>
-                                  ) : subject.publish === "N" ? (
+                                  ) : subject.remark_type === "Remark" &&
+                                    subject.publish === "N" ? (
                                     <button
                                       onClick={() => handlePublish(subject)}
                                       // className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-xs md:text-sm font-medium"
