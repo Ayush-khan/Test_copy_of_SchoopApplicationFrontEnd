@@ -1040,7 +1040,7 @@ function NoticeAndSms() {
                                     // Show Publish button when not published
                                     <button
                                       onClick={() => handlePublish(subject)}
-                                      className="text-green-600 hover:text-green-800 transition-colors"
+                                      className="text-green-600 hover:text-green-800 font-bold transition-colors duration-200 hover:bg-transparent"
                                       title="Publish"
                                     >
                                       <FaCheck className="text-lg" />
