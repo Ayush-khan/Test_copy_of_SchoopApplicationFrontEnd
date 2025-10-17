@@ -751,7 +751,7 @@ function NoticeAndSms() {
 
       // Handle success response
       if (response.status === 200 && response.data.success) {
-        toast.success(`SMS sent successfully for Unique ID: ${uniqueId}`);
+        toast.success(response.data.message || `SMS sent successfully!`);
         handleSearch();
       } else {
         toast.error("Failed to send SMS. Please try again.");
@@ -1005,7 +1005,50 @@ function NoticeAndSms() {
                                     " "
                                   )}
                                 </td>
+
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {/* Show Send button if published and messages pending */}
+                                  {subject.publish === "Y" &&
+                                  subject.count > 0 ? (
+                                    <div className="flex flex-col items-center gap-1">
+                                      <span className="text-red-600 font-semibold text-sm">
+                                        {subject.count}
+                                      </span>
+                                      <span className="text-blue-600 text-xs font-medium whitespace-nowrap">
+                                        Messages Pending
+                                      </span>
+                                      <button
+                                        className="flex items-center justify-center px-3 py-1 gap-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md transition duration-200"
+                                        onClick={() =>
+                                          handleSend(subject.unq_id)
+                                        }
+                                      >
+                                        Send <IoMdSend className="text-sm" />
+                                      </button>
+                                    </div>
+                                  ) : subject.publish === "Y" &&
+                                    subject.count === 0 ? (
+                                    // Show 'S' when published and no pending messages
+                                    <div className="flex flex-col items-center">
+                                      <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
+                                        Sent{" "}
+                                        <FaCheck className="text-green-600" />
+                                        {/* Tooltip */}
+                                      </div>
+                                    </div>
+                                  ) : subject.publish === "N" ? (
+                                    // Show Publish button when not published
+                                    <button
+                                      onClick={() => handlePublish(subject)}
+                                      className="text-green-600 hover:text-green-800 font-bold transition-colors duration-200 hover:bg-transparent"
+                                      title="Publish"
+                                    >
+                                      <FaCheck className="text-lg" />
+                                    </button>
+                                  ) : null}
+                                </td>
+
+                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.showSendButton ? (
                                     <div className="flex flex-col gap-y-0.5">
                                       <span className="text-nowrap text-red-600 font-bold">{`${subject.count}`}</span>
@@ -1034,7 +1077,7 @@ function NoticeAndSms() {
                                   ) : (
                                     " "
                                   )}
-                                </td>
+                                </td> */}
                               </tr>
                             ))
                           ) : (
