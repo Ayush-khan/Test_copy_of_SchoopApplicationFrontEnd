@@ -899,28 +899,28 @@ function NoticeAndSmsforStaff() {
                                 </td> */}
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.publish === "Y" &&
-                                  subject?.failed_sms_count > 0 ? (
-                                    <div className="flex flex-col gap-y-0.5 items-center">
-                                      <span className="text-red-600 font-bold text-sm">
-                                        {subject?.failed_sms_count}
+                                  subject.failed_sms_count > 0 ? (
+                                    <div className="flex flex-col items-center gap-1">
+                                      <span className="text-red-600 font-semibold text-sm">
+                                        {subject.failed_sms_count}
                                       </span>
-                                      <span className="text-blue-600 text-sm font-medium whitespace-nowrap">
+                                      <span className="text-blue-600 text-sm font-medium">
                                         Messages Pending
                                       </span>
 
                                       <button
-                                        disabled={sendingSMS[subject?.unq_id]}
-                                        className={`flex flex-row items-center justify-center mt-1 px-3 py-1 gap-x-1 text-xs md:text-sm font-medium rounded-md ${
-                                          sendingSMS[subject?.unq_id]
+                                        disabled={sendingSMS[subject.unq_id]}
+                                        onClick={() =>
+                                          handleSend(subject.unq_id)
+                                        }
+                                        className={`flex items-center justify-center px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition-all duration-200 ${
+                                          sendingSMS[subject.unq_id]
                                             ? "bg-blue-300 cursor-not-allowed"
                                             : "bg-blue-500 hover:bg-blue-600 text-white"
                                         }`}
-                                        onClick={() =>
-                                          handleSend(subject?.unq_id)
-                                        }
                                       >
-                                        {sendingSMS[subject?.unq_id] ? (
-                                          <span className="flex items-center gap-1 text-white text-xs">
+                                        {sendingSMS[subject.unq_id] ? (
+                                          <>
                                             <svg
                                               className="animate-spin h-4 w-4 text-white"
                                               xmlns="http://www.w3.org/2000/svg"
@@ -942,20 +942,29 @@ function NoticeAndSmsforStaff() {
                                               ></path>
                                             </svg>
                                             Sending...
-                                          </span>
+                                          </>
                                         ) : (
                                           <>
-                                            Send <IoMdSend />
+                                            Send{" "}
+                                            <IoMdSend className="text-lg" />
                                           </>
                                         )}
                                       </button>
                                     </div>
+                                  ) : subject.publish === "Y" &&
+                                    subject.failed_sms_count == 0 ? (
+                                    <div className="flex flex-col items-center justify-center gap-1">
+                                      <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
+                                        Sent{" "}
+                                        <FaCheck className="text-green-600" />
+                                        {/* Tooltip */}
+                                      </div>
+                                    </div>
                                   ) : subject.publish === "N" ? (
                                     <button
                                       onClick={() => handlePublish(subject)}
-                                      // className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-xs md:text-sm font-medium"
-                                      className={`  font-bold hover:bg-none text-green-600 hover:text-green-800 hover:bg-transparent
-                                      }`}
+                                      className="text-green-600 hover:text-green-800 font-bold transition-colors duration-200"
+                                      title="Publish"
                                     >
                                       <FaCheck className="text-lg md:text-xl" />
                                     </button>
