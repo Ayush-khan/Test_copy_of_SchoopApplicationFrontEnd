@@ -31,7 +31,7 @@ function ImportantLink() {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const [newDepartmentId, setNewDepartmentId] = useState("");
-  const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
+  const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors a are
   const [nameError, setNameError] = useState("");
   const [nameAvailable, setNameAvailable] = useState(true);
   const [description, setnewDescription] = useState("");
