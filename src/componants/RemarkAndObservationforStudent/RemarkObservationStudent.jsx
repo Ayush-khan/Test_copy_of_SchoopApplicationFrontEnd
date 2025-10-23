@@ -18,7 +18,7 @@ import CreateRemarkObservation from "./CreateRemarkObservation";
 import CreateRemarkObservationStudent from "./CreateRemarkObservationStudent";
 // import { PiCertificateBold } from "react-icons/pi";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaCheckCircle } from "react-icons/fa";
 import { ImDownload } from "react-icons/im";
 import { Navigate, useNavigate } from "react-router-dom";
 import { IoMdSend } from "react-icons/io";
@@ -146,9 +146,12 @@ function RemarkObservationStudent() {
       teacherName: subject.name || "",
       remarkSubject: subject.remark_subject || "",
       remarkDescription: subject.remark_desc || "",
-      studentName: `${subject.first_name || ""} ${subject.mid_name} ${
-        subject.last_name
-      }`,
+      studentName: [subject.first_name, subject.mid_name, subject.last_name]
+        .filter(Boolean) // removes null, undefined, ""
+        .map(
+          (name) => name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+        ) // optional: capitalize
+        .join(" "),
       classDivision: `${subject?.classname || ""} - ${
         subject?.sectionname || ""
       }`,
@@ -737,7 +740,7 @@ function RemarkObservationStudent() {
                                   )}
                                 </td>
 
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.publish === "Y" &&
                                   subject?.failed_sms_count > 0 ? (
                                     <div className="flex flex-col gap-y-0.5 items-center">
@@ -790,8 +793,99 @@ function RemarkObservationStudent() {
                                         )}
                                       </button>
                                     </div>
+                                  ) : subject.remark_type === "Remark" &&
+                                    subject.publish === "N" ? (
+                                    <button
+                                      onClick={() => handlePublish(subject)}
+                                      // className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-xs md:text-sm font-medium"
+                                      className={`  font-bold hover:bg-none text-green-600 hover:text-green-800 hover:bg-transparent
+                                      }`}
+                                    >
+                                      <FaCheck className="text-lg md:text-xl" />
+                                    </button>
+                                  ) : null}
+                                </td> */}
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {/* Show Send button if published and failed_sms_count > 0 */}
+                                  {subject.remark_type === "Remark" &&
+                                  subject.publish === "Y" &&
+                                  subject.failed_sms_count > 0 ? (
+                                    <div className="flex flex-col items-center gap-1">
+                                      <span className="text-red-600 font-semibold text-sm">
+                                        {subject.failed_sms_count}
+                                      </span>
+                                      <span className="text-blue-600 text-xs font-medium whitespace-nowrap">
+                                        Messages Pending
+                                      </span>
+
+                                      <button
+                                        disabled={
+                                          sendingSMS[subject?.remark_id]
+                                        }
+                                        className={`flex items-center justify-center px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition duration-200 ${
+                                          sendingSMS[subject?.remark_id]
+                                            ? "bg-blue-300 cursor-not-allowed"
+                                            : "bg-blue-500 hover:bg-blue-600 text-white"
+                                        }`}
+                                        onClick={() =>
+                                          handleSend(subject?.remark_id)
+                                        }
+                                      >
+                                        {sendingSMS[subject?.remark_id] ? (
+                                          <span className="flex items-center gap-1 text-white text-xs">
+                                            <svg
+                                              className="animate-spin h-4 w-4 text-white"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              fill="none"
+                                              viewBox="0 0 24 24"
+                                            >
+                                              <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                              ></circle>
+                                              <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                              ></path>
+                                            </svg>
+                                            Sending...
+                                          </span>
+                                        ) : (
+                                          <>
+                                            Send <IoMdSend />
+                                          </>
+                                        )}
+                                      </button>
+                                    </div>
+                                  ) : subject.remark_type === "Remark" &&
+                                    subject.publish === "Y" &&
+                                    subject.failed_sms_count === 0 ? (
+                                    // Show "✔ Sent" when publish=Y and no failed SMS
+                                    <div className="flex flex-col items-center">
+                                      <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
+                                        Sent{" "}
+                                        <FaCheck className="text-green-600" />
+                                        {/* Tooltip */}
+                                      </div>
+                                    </div>
+                                  ) : subject.remark_type === "Remark" &&
+                                    subject.publish === "N" ? (
+                                    // Show Publish button
+                                    <button
+                                      onClick={() => handlePublish(subject)}
+                                      className="text-green-600 hover:text-green-800 transition-colors"
+                                      title="Publish"
+                                    >
+                                      <FaCheck className="text-lg md:text-xl" />
+                                    </button>
                                   ) : null}
                                 </td>
+
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.acknowledge == "Y" && (
                                     <FontAwesomeIcon

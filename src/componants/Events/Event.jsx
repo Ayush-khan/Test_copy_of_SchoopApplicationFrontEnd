@@ -14,6 +14,7 @@ import Select from "react-select";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import MarkDropdownEditor from "./MarkDropdownEditor";
 import { IoMdSend } from "react-icons/io";
+import { FaCheck } from "react-icons/fa";
 
 function Event() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -458,6 +459,7 @@ function Event() {
   //     toast.error("An error occurred while publishing events.");
   //   } finally {
   //     setIsSubmitting(false);
+  // test
   //   }
   // };
 
@@ -1556,27 +1558,27 @@ function Event() {
                               </td>
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {holiday.publish === "Y" &&
-                                holiday?.failed_sms_count > 0 ? (
+                                holiday.failed_sms_count > 0 ? (
                                   <div className="flex flex-col gap-y-0.5 items-center">
                                     <span className="text-red-600 font-bold text-sm">
-                                      {holiday?.failed_sms_count}
+                                      {holiday.failed_sms_count}
                                     </span>
                                     <span className="text-blue-600 text-sm font-medium whitespace-nowrap">
                                       Messages Pending
                                     </span>
 
                                     <button
-                                      disabled={sendingSMS[holiday?.unq_id]}
+                                      disabled={sendingSMS[holiday.unq_id]}
                                       className={`flex flex-row items-center justify-center mt-1 px-3 py-1 gap-x-1 text-xs md:text-sm font-medium rounded-md ${
-                                        sendingSMS[holiday?.unq_id]
+                                        sendingSMS[holiday.unq_id]
                                           ? "bg-blue-300 cursor-not-allowed"
                                           : "bg-blue-500 hover:bg-blue-600 text-white"
                                       }`}
                                       onClick={() =>
-                                        handleSend(holiday?.remark_id)
+                                        handleSend(holiday.latest_event_id)
                                       }
                                     >
-                                      {sendingSMS[holiday?.unq_id] ? (
+                                      {sendingSMS[holiday.unq_id] ? (
                                         <span className="flex items-center gap-1 text-white text-xs">
                                           <svg
                                             className="animate-spin h-4 w-4 text-white"
@@ -1607,6 +1609,19 @@ function Event() {
                                       )}
                                     </button>
                                   </div>
+                                ) : holiday.publish === "Y" &&
+                                  holiday.failed_sms_count === 0 ? (
+                                  // ✅ Message Sent - with tooltip
+                                  <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
+                                    Sent <FaCheck className="text-green-600" />
+                                  </div>
+                                ) : holiday.publish === "N" ? (
+                                  <button
+                                    onClick={() => handlePublish(holiday)}
+                                    className="text-green-600 hover:text-green-800 font-bold transition-colors duration-200 hover:bg-transparent"
+                                  >
+                                    <FaCheck className="text-lg md:text-xl" />
+                                  </button>
                                 ) : null}
                               </td>
 
