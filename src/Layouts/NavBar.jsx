@@ -1016,7 +1016,7 @@ function NavBar() {
     };
 
     fetchData();
-  }, [API_URL, navigate]);
+  }, []);
 
   const handleMenuSelect = (selectedOption) => {
     setSelectedMenu(selectedOption);
