@@ -103,18 +103,39 @@
 // FInal working with the correct mappingn of the menu items names and url from the API of /get_navleafmenus
 import { RxCross2 } from "react-icons/rx";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 export default function Sidebar({ isSidebar, setIsSidebar }) {
   const API_URL = import.meta.env.VITE_API_URL;
   const location = useLocation();
   const navigate = useNavigate();
+  const sidebarRef = useRef(null); // 👈 Ref for sidebar
 
   const [menuItems, setMenuItems] = useState([]); // store API data
   const [tabVisits, setTabVisits] = useState([]); // store sidebar items
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // 👇 Close sidebar when clicking outside
+  // ✅ CLOSE SIDEBAR WHEN CLICK OUTSIDE
+  // ✅ CLOSE SIDEBAR WHEN CLICK OUTSIDE
+  useEffect(() => {
+    function handleClickOutside(event) {
+      // if sidebar is open AND clicked outside sidebar -> close it
+      if (
+        isSidebar &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target)
+      ) {
+        setIsSidebar(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSidebar, setIsSidebar]);
 
   useEffect(() => {
     const fetchMenuData = async () => {
@@ -206,6 +227,7 @@ export default function Sidebar({ isSidebar, setIsSidebar }) {
   return (
     <div className={`hidden md:block md:fixed ${isSidebar ? "z-30" : ""}`}>
       <div
+        ref={sidebarRef} // 👈 attach ref here
         className={`md:w-40 lg:h-[80vh] bg-gray-200 mt-0.5 shadow-lg relative right-40 transform transition-all duration-500 text-center pr-3 ${
           isSidebar
             ? "relative transform translate-x-40 transition-all duration-500"
@@ -252,21 +274,23 @@ export default function Sidebar({ isSidebar, setIsSidebar }) {
 
         {/* Render recent tabs */}
         <ul className="space-y-2 mt-2">
-          {tabVisits.map((tab, index) => (
-            <li
-              key={index}
-              className="text-sm w-[120%] relative -left-6 text-center"
-            >
-              <Link
-                to={tab.path}
-                onClick={() => setIsSidebar(false)}
-                className="block no-underline font-semibold text-[.9em] py-2 rounded-md 
-                bg-blue-500 text-white hover:bg-blue-600 transition duration-300"
+          {tabVisits
+            .filter((tab) => tab?.name && tab?.path) // ✅ show only valid items
+            .map((tab, index) => (
+              <li
+                key={index}
+                className="text-sm w-[120%] relative -left-6 text-center"
               >
-                {tab.name}
-              </Link>
-            </li>
-          ))}
+                <Link
+                  to={tab.path}
+                  onClick={() => setIsSidebar(false)}
+                  className="block no-underline font-semibold text-[.9em] py-2 rounded-md 
+          bg-blue-500 text-white hover:bg-blue-600 transition duration-300"
+                >
+                  {tab.name}
+                </Link>
+              </li>
+            ))}
         </ul>
 
         {/* Close Icon */}
