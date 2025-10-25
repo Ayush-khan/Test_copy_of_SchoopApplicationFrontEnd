@@ -319,6 +319,8 @@ import UploadMarks from "../componants/MastersModule/DomainModules/UploadMarks/U
 import HPCReportCard from "../componants/MastersModule/DomainModules/HPCReportCard/HPCReportCard.jsx";
 import ReportCardRemark from "../componants/MastersModule/DomainModules/ReportCardRemark/ReportCardRemark.jsx";
 import StudentAbsent from "../componants/AllTableList/StudentCard/StudentAbsent.jsx";
+import NoticeAndSmsForStaff from "../TeacherLoginModules/ViewsModules/NoticeAndSmsForStaff.jsx";
+import NoticeAndSmsForTheClass from "../TeacherLoginModules/ViewsModules/NoticeAndSmsForTheClass.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -1337,6 +1339,15 @@ function Index() {
         <Route
           path="/feesOutStandingSendSms"
           element={<PrivateRoute element={<FeesOutStandingSendSms />} />}
+        />
+        {/* FOr teacher modules view */}
+        <Route
+          path="/NoticeAndSmsForStaff"
+          element={<PrivateRoute element={<NoticeAndSmsForStaff />} />}
+        />
+        <Route
+          path="/NoticeAndSmsForTheClass"
+          element={<PrivateRoute element={<NoticeAndSmsForTheClass />} />}
         />
       </Route>
 
