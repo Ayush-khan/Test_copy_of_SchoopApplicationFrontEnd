@@ -9,6 +9,8 @@ import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { ImDownload } from "react-icons/im";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
+import Loader from "../../componants/common/LoaderFinal/LoaderStyle";
+import { FaThumbsUp } from "react-icons/fa";
 
 function RemarkForTeacher() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -21,7 +23,8 @@ function RemarkForTeacher() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
-
+  const [regId, setRegId] = useState(null);
+  const [roleId, setRoleId] = useState(null);
   const [newSection, setnewSectionName] = useState("");
   const [newSubject, setnewSubjectnName] = useState("");
   const [newStaffNames, setNewStaffNames] = useState("");
@@ -52,93 +55,76 @@ function RemarkForTeacher() {
   const pageSize = 10;
 
   useEffect(() => {
-    fetchClass();
-    handleSearch();
-  }, []);
+    const init = async () => {
+      try {
+        setLoading(true);
 
-  const fetchClass = async () => {
-    const token = localStorage.getItem("authToken");
-    setLoadingExams(true);
-
-    try {
-      const response = await axios.get(
-        `${API_URL}/api/get_only_classes_allotted_to_teacher`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
+        // 1️⃣ Get session data
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          toast.error("Authentication token not found. Please login again.");
+          navigate("/");
+          return;
         }
-      );
 
-      const mappedData =
-        response.data?.data?.map((item) => ({
-          value: item.class_id,
-          label: item.class_name,
-        })) || [];
-
-      setStudentNameWithClassId(mappedData);
-    } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
-    } finally {
-      setLoadingExams(false);
-    }
-  };
-  const handleClassSelect = (selectedOption) => {
-    setSelectedStudent(selectedOption);
-    setStudentError(""); // clear error when selected
-  };
-
-  const handleSearch = async () => {
-    setSearchTerm("");
-    setStudentError("");
-    let hasError = false;
-
-    if (!selectedStudent) {
-      setStudentError("Please select a Class.");
-      hasError = true;
-    }
-
-    if (hasError) {
-      return;
-    }
-    if (isSubmitting) return; // Prevent re-submitting
-    setIsSubmitting(true);
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("authToken");
-      const params = {};
-      if (selectedDate) params.notice_date = selectedDate;
-
-      const response = await axios.get(`${API_URL}/api/get_viewstaffnotices`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params,
-      });
-
-      if (response.data?.data?.length > 0) {
-        const smscount = response.data["0"]?.smscount || {};
-
-        const updatedNotices = response.data.data.map((notice) => {
-          const count = smscount[notice.unq_id] || 0;
-          return {
-            ...notice,
-            showSendButton: notice.publish === "Y" && count > 0,
-            count,
-          };
+        const sessionRes = await axios.get(`${API_URL}/api/sessionData`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        setNotices(updatedNotices); // Update the state with enriched data
-        setPageCount(Math.ceil(updatedNotices.length / pageSize));
-      } else {
-        setNotices([]);
-        toast.error("No notices found for the selected criteria.");
+        const roleId = sessionRes?.data?.user?.name;
+        const regId = sessionRes?.data?.user?.reg_id;
+
+        if (!roleId || !regId) {
+          toast.error("Invalid session data received");
+          return;
+        }
+
+        setRoleId(roleId);
+        setRegId(regId);
+
+        // 2️⃣ Fetch classes for that teacher
+        const classRes = await axios.get(
+          `${API_URL}/api/get_only_classes_allotted_to_teacher`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const classOptions =
+          classRes.data?.data?.map((cls) => ({
+            value: cls.class_id,
+            label: cls.class_name,
+          })) || [];
+
+        setStudentNameWithClassId(classOptions);
+
+        // 3️⃣ Finally, fetch teacher remarks
+        const remarkRes = await axios.get(
+          `${API_URL}/api/get_remark_of_teacher`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const data = remarkRes.data?.data || [];
+
+        if (data.length > 0) {
+          setNotices(data);
+          setPageCount(Math.ceil(data.length / pageSize));
+          setShowTable(true);
+        } else {
+          setNotices([]);
+          setShowTable(false);
+          toast.info("No remarks found for this teacher.");
+        }
+      } catch (error) {
+        console.error("Initialization error:", error);
+        toast.error("Failed to load teacher data. Please try again.");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching SMS notices:", error);
-      toast.error("Error fetching SMS notices. Please try again.");
-    } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
-      setLoading(false);
-    }
-  };
+    };
+
+    init();
+  }, []);
 
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
@@ -263,18 +249,17 @@ function RemarkForTeacher() {
   const searchLower = searchTerm.toLowerCase();
 
   const filteredSections = notices.filter((notice) => {
-    const subject = notice?.subject?.toLowerCase() || "";
-    const department = notice?.dept_name?.toLowerCase() || "";
-    const type = notice?.notice_type?.toLowerCase() || "";
-    const noticeDate = notice?.notice_date?.toLowerCase() || "";
-    const createdBy = notice?.name?.toLowerCase() || "";
+    const searchLower = searchTerm.toLowerCase();
+    const subject = notice?.remark_subject?.toLowerCase() || "";
+    const type = notice?.remark_type?.toLowerCase() || "";
+    const date = notice?.remark_date?.toLowerCase() || "";
+    const ack = notice?.acknowledge?.toLowerCase() || "";
 
     return (
       subject.includes(searchLower) ||
-      department.includes(searchLower) ||
       type.includes(searchLower) ||
-      noticeDate.includes(searchLower) ||
-      createdBy.includes(searchLower)
+      date.includes(searchLower) ||
+      ack.includes(searchLower)
     );
   });
 
@@ -328,7 +313,7 @@ function RemarkForTeacher() {
                 <input
                   id="teacherName"
                   type="text"
-                  value={selectedStudent?.label || "—"}
+                  value={roleId || "—"}
                   readOnly
                   className="flex-grow bg-gray-100 border border-gray-300 rounded-md px-3 py-2 text-gray-700 font-medium shadow-inner focus:outline-none cursor-not-allowed"
                 />
@@ -349,100 +334,116 @@ function RemarkForTeacher() {
             </div>
           </div>
 
-          <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-            <table className="min-w-full leading-normal table-auto">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                    Sr.No
-                  </th>
-                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                    ID
-                  </th>{" "}
-                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                    Date
-                  </th>{" "}
-                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                    Remark Subject
-                  </th>{" "}
-                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                    Acknowledge
-                  </th>
-                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                    View
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                    <div className=" text-center text-xl text-blue-700">
-                      Please wait while data is loading...
-                    </div>
-                  </div>
-                ) : displayedSections.length ? (
-                  displayedSections.map((subject, index) => (
-                    <tr key={subject.notice_id} className="text-sm ">
-                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                        {currentPage * pageSize + index + 1}
-                      </td>
+          {/* Loader Overlay */}
+          {loading && (
+            <div className=" flex items-center justify-center bg-gray-50  z-10 py-8">
+              <Loader /> {/* Replace this with your loader component */}
+            </div>
+          )}
 
-                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                        {subject?.subject}
-                      </td>
-                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                        {subject?.notice_type}
-                      </td>
-                      {/* CLass Column */}
-                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                        {subject?.notice_date}
-                      </td>
-
-                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                        {subject?.created_by_name}
-                      </td>
-
-                      <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                        <button
-                          className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                          onClick={() => handleView(subject)}
-                        >
-                          <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                        </button>
-                      </td>
+          {/* Show table only when data is fetched and showTable is true */}
+          {showTable && !loading && (
+            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+              <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+                <table className="min-w-full leading-normal table-auto">
+                  <thead>
+                    <tr className="bg-gray-200">
+                      <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900">
+                        Sr.No
+                      </th>
+                      <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900">
+                        ID
+                      </th>
+                      <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900">
+                        Date
+                      </th>
+                      <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900">
+                        Remark Subject
+                      </th>
+                      <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900">
+                        Acknowledge
+                      </th>
+                      <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900">
+                        View
+                      </th>
                     </tr>
-                  ))
-                ) : (
-                  <div className=" absolute left-[1%] w-[95%]  text-center flex justify-center items-center mt-14">
-                    <div className=" text-center text-xl text-red-700">
-                      Oops! No data found..
-                    </div>
-                  </div>
-                )}
-              </tbody>
-            </table>
-          </div>
-          <div className=" flex justify-center pt-2 -mb-3">
-            <ReactPaginate
-              previousLabel={"Previous"}
-              nextLabel={"Next"}
-              breakLabel={"..."}
-              pageCount={pageCount}
-              onPageChange={handlePageClick}
-              marginPagesDisplayed={1}
-              pageRangeDisplayed={1}
-              containerClassName={"pagination"}
-              pageClassName={"page-item"}
-              pageLinkClassName={"page-link"}
-              previousClassName={"page-item"}
-              previousLinkClassName={"page-link"}
-              nextClassName={"page-item"}
-              nextLinkClassName={"page-link"}
-              breakClassName={"page-item"}
-              breakLinkClassName={"page-link"}
-              activeClassName={"active"}
-            />
-          </div>
+                  </thead>
+
+                  <tbody>
+                    {displayedSections.length ? (
+                      displayedSections.map((item, index) => (
+                        <tr
+                          key={item.t_remark_id}
+                          className="text-sm hover:bg-gray-50 transition"
+                        >
+                          <td className="px-3 py-2 border border-gray-300 text-center">
+                            {currentPage * pageSize + index + 1}
+                          </td>
+                          <td className="px-3 py-2 border border-gray-300 text-center">
+                            {item.t_remark_id}
+                          </td>
+                          <td className="px-3 py-2 border border-gray-300 text-center">
+                            {item.remark_date}
+                          </td>
+                          <td className="px-3 py-2 border border-gray-300 text-center">
+                            {item.remark_subject}
+                          </td>
+                          <td className="px-3 py-2 border border-gray-300 text-center flex justify-center ">
+                            {item.acknowledge === "Y" ? (
+                              <span className="text-green-600 font-semibold text-center">
+                                <FaThumbsUp className="text-xl" />
+                              </span>
+                            ) : (
+                              <span className="text-red-600 font-semibold"></span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2 border border-gray-300 text-center">
+                            <button
+                              className="text-[#C03078] hover:text-[#a12565]"
+                              onClick={() => handleView(item)}
+                            >
+                              <MdOutlineRemoveRedEye className="text-xl" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className="text-center py-10 text-red-700"
+                        >
+                          Oops! No data found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className=" flex justify-center pt-2 -mb-3">
+                <ReactPaginate
+                  previousLabel={"Previous"}
+                  nextLabel={"Next"}
+                  breakLabel={"..."}
+                  pageCount={pageCount}
+                  onPageChange={handlePageClick}
+                  marginPagesDisplayed={1}
+                  pageRangeDisplayed={1}
+                  containerClassName={"pagination"}
+                  pageClassName={"page-item"}
+                  pageLinkClassName={"page-link"}
+                  previousClassName={"page-item"}
+                  previousLinkClassName={"page-link"}
+                  nextClassName={"page-item"}
+                  nextLinkClassName={"page-link"}
+                  breakClassName={"page-item"}
+                  breakLinkClassName={"page-link"}
+                  activeClassName={"active"}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

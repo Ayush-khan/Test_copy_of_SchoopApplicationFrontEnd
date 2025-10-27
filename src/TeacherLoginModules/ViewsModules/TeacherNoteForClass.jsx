@@ -107,7 +107,7 @@ function TeacherNoteForClass() {
       const params = {};
       if (selectedDate) params.notice_date = selectedDate;
 
-      const response = await axios.get(`${API_URL}/api/get_viewstaffnotices`, {
+      const response = await axios.get(`${API_URL}/api/get_remark_of_teacher`, {
         headers: { Authorization: `Bearer ${token}` },
         params,
       });
