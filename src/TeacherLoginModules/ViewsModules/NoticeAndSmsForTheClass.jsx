@@ -8,12 +8,12 @@ import { RxCross1 } from "react-icons/rx";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { ImDownload } from "react-icons/im";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
 
 function NoticeAndSmsForTheClass() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [classesforsubjectallot, setclassesforsubjectallot] = useState([]);
   // for allot subject tab
   const [showViewModal, setShowViewModal] = useState(false);
   const [showPublish, setShowPublishModal] = useState(false);
@@ -35,7 +35,6 @@ function NoticeAndSmsForTheClass() {
   //   for allot subject checkboxes
   const navigate = useNavigate();
   const [error, setError] = useState(null);
-
   // errors messages for allot subject tab
   const [selectedDate, setSelectedDate] = useState(""); // For date picker
   const [notices, setNotices] = useState([]); // To store fetched notices
@@ -43,40 +42,64 @@ function NoticeAndSmsForTheClass() {
   const [noticeDesc, setNoticeDesc] = useState("");
 
   const [imageUrls, setImageUrls] = useState([]);
+  const [studentOptions, setStudentNameWithClassId] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [loadingExams, setLoadingExams] = useState(false);
+  const [studentError, setStudentError] = useState("");
 
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
 
   useEffect(() => {
-    handleSearch();
-    fetchClassNamesForAllotSubject();
+    fetchClass();
   }, []);
 
-  const fetchClassNamesForAllotSubject = async () => {
+  const fetchClass = async () => {
+    const token = localStorage.getItem("authToken");
+    setLoadingExams(true);
+
     try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/getClassList`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (Array.isArray(response.data)) {
-        setclassesforsubjectallot(response.data);
-        console.log(
-          "this is the dropdown of the allot subject tab for class",
-          response.data
-        );
-      } else {
-        setError("Unexpected data format");
-      }
+      const response = await axios.get(
+        `${API_URL}/api/get_only_classes_allotted_to_teacher`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const mappedData =
+        response.data?.data?.map((item) => ({
+          value: item.class_id,
+          label: item.class_name,
+        })) || [];
+
+      setStudentNameWithClassId(mappedData);
     } catch (error) {
-      console.error("Error fetching class names:", error);
-      setError("Error fetching class names");
+      toast.error("Error fetching Classes");
+      console.error("Error fetching Classes:", error);
+    } finally {
+      setLoadingExams(false);
     }
+  };
+  const handleClassSelect = (selectedOption) => {
+    setSelectedStudent(selectedOption);
+    setStudentError(""); // clear error when selected
   };
 
   const handleSearch = async () => {
+    setSearchTerm("");
+    setStudentError("");
+    let hasError = false;
+
+    if (!selectedStudent) {
+      setStudentError("Please select a Class.");
+      hasError = true;
+    }
+
+    if (hasError) {
+      return;
+    }
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
-    setSearchTerm("");
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
@@ -272,7 +295,7 @@ function NoticeAndSmsForTheClass() {
       <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
         <div className=" card-header  flex justify-between items-center  ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-            Notice/SMS For Staff
+            Notice/SMS For The Class
           </h3>
           <RxCross1
             className="float-end relative -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -288,158 +311,175 @@ function NoticeAndSmsForTheClass() {
           }}
         ></div>
 
-        <div className="bg-white  rounded-md -mt-5">
-          <div>
-            <ToastContainer />
-            <div className="mb-4">
-              <div className="w-full  md:w-[78%] mt-8  gap-x-0 md:gap-x-12 mx-auto   flex flex-col gap-y-2 md:gap-y-0 md:flex-row  ">
-                <div className="w-full md:w-[50%] gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
-                  <label
-                    className="text-md mt-1.5 mr-1 md:mr-0 w-[40%] md:w-[29%]"
-                    htmlFor="classSelect"
-                  >
-                    Select Date
-                  </label>{" "}
-                  <div className="w-full md:w-[60%]">
-                    <input
-                      type="date"
-                      id="date"
-                      className="border border-gray-300 rounded-md py-2 px-3 w-full focus:outline-none focus:ring focus:ring-indigo-200"
-                      value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="mt-1">
-                  <button
-                    onClick={handleSearch}
-                    type="button"
-                    disabled={isSubmitting}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                  >
-                    {isSubmitting ? "Searching..." : "Search"}
-                  </button>
-                </div>
-              </div>{" "}
+        <div className="bg-white  rounded-md ">
+          <ToastContainer />
+          <div className="w-full  md:w-[78%]  gap-x-0 md:gap-x-12 mx-auto   flex flex-col gap-y-2 md:gap-y-0 md:flex-row  ">
+            <div className="w-full  md:w-[35%] gap-x-14 md:gap-x-6 md:justify-start  flex md:flex-row">
+              <label
+                className="text-md mt-1.5 mr-1 md:mr-0 w-[40%] md:w-[29%]"
+                htmlFor="classSelect"
+              >
+                {" "}
+                Class <span className="text-red-500">*</span>
+              </label>
+              <div className="w-full md:w-[70%]">
+                <Select
+                  id="studentSelect"
+                  value={selectedStudent}
+                  onChange={handleClassSelect}
+                  options={studentOptions}
+                  placeholder={loadingExams ? "Loading..." : "Select Class"}
+                  isSearchable
+                  isClearable
+                  isDisabled={loadingExams}
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      fontSize: "0.9em",
+                      minHeight: "42px",
+                      borderRadius: "8px",
+                      borderColor: "#d1d5db",
+                      boxShadow: "none",
+                      "&:hover": {
+                        borderColor: "#3b82f6", // Tailwind blue-500
+                      },
+                    }),
+                  }}
+                />
+
+                <p className="text-xs text-red-500 mt-1 h-4">
+                  {studentError || "\u00A0"}
+                </p>
+              </div>
             </div>
 
-            <div className="container mt-4">
-              <div className="card mx-auto lg:w-full shadow-lg">
-                <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                  <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                    Manage Notice/SMS{" "}
-                  </h3>
-                  <div className="w-1/2 md:w-fit mr-1 ">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search "
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
+            <div className="mt-1">
+              <button
+                onClick={handleSearch}
+                type="button"
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              >
+                {isSubmitting ? "Searching..." : "Search"}
+              </button>
+            </div>
+          </div>{" "}
+          <div className="container ">
+            <div className="card mx-auto lg:w-full shadow-lg">
+              <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                  Notice/SMS List{" "}
+                </h3>
+                <div className="w-1/2 md:w-fit mr-1 ">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search "
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
-                <div
-                  className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                  style={{
-                    backgroundColor: "#C03078",
-                  }}
-                ></div>
+              </div>
+              <div
+                className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+                style={{
+                  backgroundColor: "#C03078",
+                }}
+              ></div>
 
-                <div className="card-body w-full">
-                  <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-                    <table className="min-w-full leading-normal table-auto">
-                      <thead>
-                        <tr className="bg-gray-200">
-                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Sr.No
-                          </th>
-                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Subject
-                          </th>{" "}
-                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Type
-                          </th>{" "}
-                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Notice Date
-                          </th>{" "}
-                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            Created by
-                          </th>
-                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                            View
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {loading ? (
-                          <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                            <div className=" text-center text-xl text-blue-700">
-                              Please wait while data is loading...
-                            </div>
+              <div className="card-body w-full">
+                <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+                  <table className="min-w-full leading-normal table-auto">
+                    <thead>
+                      <tr className="bg-gray-200">
+                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Sr.No
+                        </th>
+                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Subject
+                        </th>{" "}
+                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Type
+                        </th>{" "}
+                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Notice Date
+                        </th>{" "}
+                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Created by
+                        </th>
+                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          View
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {loading ? (
+                        <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                          <div className=" text-center text-xl text-blue-700">
+                            Please wait while data is loading...
                           </div>
-                        ) : displayedSections.length ? (
-                          displayedSections.map((subject, index) => (
-                            <tr key={subject.notice_id} className="text-sm ">
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {currentPage * pageSize + index + 1}
-                              </td>
+                        </div>
+                      ) : displayedSections.length ? (
+                        displayedSections.map((subject, index) => (
+                          <tr key={subject.notice_id} className="text-sm ">
+                            <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              {currentPage * pageSize + index + 1}
+                            </td>
 
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.subject}
-                              </td>
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.notice_type}
-                              </td>
-                              {/* CLass Column */}
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.notice_date}
-                              </td>
+                            <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              {subject?.subject}
+                            </td>
+                            <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              {subject?.notice_type}
+                            </td>
+                            {/* CLass Column */}
+                            <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              {subject?.notice_date}
+                            </td>
 
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.created_by_name}
-                              </td>
+                            <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              {subject?.created_by_name}
+                            </td>
 
-                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                <button
-                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                  onClick={() => handleView(subject)}
-                                >
-                                  <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                            <div className=" text-center text-xl text-red-700">
-                              Oops! No data found..
-                            </div>
+                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                              <button
+                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                onClick={() => handleView(subject)}
+                              >
+                                <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                          <div className=" text-center text-xl text-red-700">
+                            Oops! No data found..
                           </div>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className=" flex justify-center pt-2 -mb-3">
-                    <ReactPaginate
-                      previousLabel={"Previous"}
-                      nextLabel={"Next"}
-                      breakLabel={"..."}
-                      pageCount={pageCount}
-                      onPageChange={handlePageClick}
-                      marginPagesDisplayed={1}
-                      pageRangeDisplayed={1}
-                      containerClassName={"pagination"}
-                      pageClassName={"page-item"}
-                      pageLinkClassName={"page-link"}
-                      previousClassName={"page-item"}
-                      previousLinkClassName={"page-link"}
-                      nextClassName={"page-item"}
-                      nextLinkClassName={"page-link"}
-                      breakClassName={"page-item"}
-                      breakLinkClassName={"page-link"}
-                      activeClassName={"active"}
-                    />
-                  </div>
+                        </div>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <div className=" flex justify-center pt-2 -mb-3">
+                  <ReactPaginate
+                    previousLabel={"Previous"}
+                    nextLabel={"Next"}
+                    breakLabel={"..."}
+                    pageCount={pageCount}
+                    onPageChange={handlePageClick}
+                    marginPagesDisplayed={1}
+                    pageRangeDisplayed={1}
+                    containerClassName={"pagination"}
+                    pageClassName={"page-item"}
+                    pageLinkClassName={"page-link"}
+                    previousClassName={"page-item"}
+                    previousLinkClassName={"page-link"}
+                    nextClassName={"page-item"}
+                    nextLinkClassName={"page-link"}
+                    breakClassName={"page-item"}
+                    breakLinkClassName={"page-link"}
+                    activeClassName={"active"}
+                  />
                 </div>
               </div>
             </div>
