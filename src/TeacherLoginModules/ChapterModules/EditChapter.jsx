@@ -4,7 +4,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
-import LoaderStyle from "../../../../common/LoaderFinal/LoaderStyle";
+// import LoaderStyle from "../../../../common/LoaderFinal/LoaderStyle";
+// import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle.jsx";
+import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const EditChapter = () => {

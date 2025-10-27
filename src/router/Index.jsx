@@ -332,6 +332,8 @@ import LessonPlan from "../TeacherLoginModules/LessonPlane/LessonPlan.jsx";
 import CreateLessonPlan from "../TeacherLoginModules/LessonPlane/CreateLessonPlan.jsx";
 import DailyAttendance from "../TeacherLoginModules/DailyAttendance/DailyAttendance.jsx";
 import EditLessonPlan from "../TeacherLoginModules/LessonPlane/EditLessonPlan.jsx";
+import RemarkForTeacher from "../TeacherLoginModules/ViewsModules/RemarkForTeacher.jsx";
+import TeacherNoteForClass from "../TeacherLoginModules/ViewsModules/TeacherNoteForClass.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -1358,6 +1360,14 @@ function Index() {
         <Route
           path="/NoticeAndSmsForTheClass"
           element={<PrivateRoute element={<NoticeAndSmsForTheClass />} />}
+        />
+        <Route
+          path="/RemarkForTeacher"
+          element={<PrivateRoute element={<RemarkForTeacher />} />}
+        />
+        <Route
+          path="/TeacherNoteForClass"
+          element={<PrivateRoute element={<TeacherNoteForClass />} />}
         />
         {/* Curriculum */}
         {/* Chapter */}

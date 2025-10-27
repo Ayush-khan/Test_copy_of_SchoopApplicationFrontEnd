@@ -15,6 +15,7 @@ function NoticeAndSmsForTheClass() {
   // const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   // for allot subject tab
+  const [showTable, setShowTable] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showPublish, setShowPublishModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -68,8 +69,8 @@ function NoticeAndSmsForTheClass() {
 
       const mappedData =
         response.data?.data?.map((item) => ({
-          value: item.class_id,
-          label: item.class_name,
+          value: item?.class_id,
+          label: item?.class_name,
         })) || [];
 
       setStudentNameWithClassId(mappedData);
@@ -104,12 +105,15 @@ function NoticeAndSmsForTheClass() {
       setLoading(true);
       const token = localStorage.getItem("authToken");
       const params = {};
-      if (selectedDate) params.notice_date = selectedDate;
+      if (selectedStudent) params.class_id = selectedStudent?.value;
 
-      const response = await axios.get(`${API_URL}/api/get_viewstaffnotices`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params,
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_published_notice_by_class`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params,
+        }
+      );
 
       if (response.data?.data?.length > 0) {
         const smscount = response.data["0"]?.smscount || {};
@@ -125,8 +129,10 @@ function NoticeAndSmsForTheClass() {
 
         setNotices(updatedNotices); // Update the state with enriched data
         setPageCount(Math.ceil(updatedNotices.length / pageSize));
+        setShowTable(true); // ✅ show table after successful search
       } else {
         setNotices([]);
+        setShowTable(false); // ✅ hide table if no data
         toast.error("No notices found for the selected criteria.");
       }
     } catch (error) {
@@ -364,126 +370,128 @@ function NoticeAndSmsForTheClass() {
               </button>
             </div>
           </div>{" "}
-          <div className="container ">
-            <div className="card mx-auto lg:w-full shadow-lg">
-              <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                  Notice/SMS List{" "}
-                </h3>
-                <div className="w-1/2 md:w-fit mr-1 ">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search "
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+          {showTable && (
+            <div className="container ">
+              <div className="card mx-auto lg:w-full shadow-lg">
+                <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                  <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                    Notice/SMS List{" "}
+                  </h3>
+                  <div className="w-1/2 md:w-fit mr-1 ">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search "
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div
-                className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                style={{
-                  backgroundColor: "#C03078",
-                }}
-              ></div>
+                <div
+                  className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+                  style={{
+                    backgroundColor: "#C03078",
+                  }}
+                ></div>
 
-              <div className="card-body w-full">
-                <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-                  <table className="min-w-full leading-normal table-auto">
-                    <thead>
-                      <tr className="bg-gray-200">
-                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                          Sr.No
-                        </th>
-                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                          Subject
-                        </th>{" "}
-                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                          Type
-                        </th>{" "}
-                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                          Notice Date
-                        </th>{" "}
-                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                          Created by
-                        </th>
-                        <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                          View
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {loading ? (
-                        <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                          <div className=" text-center text-xl text-blue-700">
-                            Please wait while data is loading...
+                <div className="card-body w-full">
+                  <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+                    <table className="min-w-full leading-normal table-auto">
+                      <thead>
+                        <tr className="bg-gray-200">
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Sr.No
+                          </th>
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Subject
+                          </th>{" "}
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Type
+                          </th>{" "}
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Notice Date
+                          </th>{" "}
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Created by
+                          </th>
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            View
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {loading ? (
+                          <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                            <div className=" text-center text-xl text-blue-700">
+                              Please wait while data is loading...
+                            </div>
                           </div>
-                        </div>
-                      ) : displayedSections.length ? (
-                        displayedSections.map((subject, index) => (
-                          <tr key={subject.notice_id} className="text-sm ">
-                            <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                              {currentPage * pageSize + index + 1}
-                            </td>
+                        ) : displayedSections.length ? (
+                          displayedSections.map((subject, index) => (
+                            <tr key={subject.notice_id} className="text-sm ">
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {currentPage * pageSize + index + 1}
+                              </td>
 
-                            <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                              {subject?.subject}
-                            </td>
-                            <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                              {subject?.notice_type}
-                            </td>
-                            {/* CLass Column */}
-                            <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                              {subject?.notice_date}
-                            </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {subject?.subject}
+                              </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {subject?.notice_type}
+                              </td>
+                              {/* CLass Column */}
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {subject?.notice_date}
+                              </td>
 
-                            <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                              {subject?.created_by_name}
-                            </td>
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {subject?.name}
+                              </td>
 
-                            <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                              <button
-                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                onClick={() => handleView(subject)}
-                              >
-                                <MdOutlineRemoveRedEye className="font-bold text-xl" />
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                          <div className=" text-center text-xl text-red-700">
-                            Oops! No data found..
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <button
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                  onClick={() => handleView(subject)}
+                                >
+                                  <MdOutlineRemoveRedEye className="font-bold text-xl" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                            <div className=" text-center text-xl text-red-700">
+                              Oops! No data found..
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-                <div className=" flex justify-center pt-2 -mb-3">
-                  <ReactPaginate
-                    previousLabel={"Previous"}
-                    nextLabel={"Next"}
-                    breakLabel={"..."}
-                    pageCount={pageCount}
-                    onPageChange={handlePageClick}
-                    marginPagesDisplayed={1}
-                    pageRangeDisplayed={1}
-                    containerClassName={"pagination"}
-                    pageClassName={"page-item"}
-                    pageLinkClassName={"page-link"}
-                    previousClassName={"page-item"}
-                    previousLinkClassName={"page-link"}
-                    nextClassName={"page-item"}
-                    nextLinkClassName={"page-link"}
-                    breakClassName={"page-item"}
-                    breakLinkClassName={"page-link"}
-                    activeClassName={"active"}
-                  />
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className=" flex justify-center pt-2 -mb-3">
+                    <ReactPaginate
+                      previousLabel={"Previous"}
+                      nextLabel={"Next"}
+                      breakLabel={"..."}
+                      pageCount={pageCount}
+                      onPageChange={handlePageClick}
+                      marginPagesDisplayed={1}
+                      pageRangeDisplayed={1}
+                      containerClassName={"pagination"}
+                      pageClassName={"page-item"}
+                      pageLinkClassName={"page-link"}
+                      previousClassName={"page-item"}
+                      previousLinkClassName={"page-link"}
+                      nextClassName={"page-item"}
+                      nextLinkClassName={"page-link"}
+                      breakClassName={"page-item"}
+                      breakLinkClassName={"page-link"}
+                      activeClassName={"active"}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

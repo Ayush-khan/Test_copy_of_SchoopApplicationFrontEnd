@@ -327,7 +327,7 @@ function NoticeAndSmsForStaff() {
               <div className="card mx-auto lg:w-full shadow-lg">
                 <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                   <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                    Manage Notice/SMS{" "}
+                    Notice/SMS List{" "}
                   </h3>
                   <div className="w-1/2 md:w-fit mr-1 ">
                     <input
@@ -507,7 +507,7 @@ function NoticeAndSmsForStaff() {
                     <div className="w-full  flex flex-row">
                       <label className=" px-4 mb-2 ">Attachments:</label>
 
-                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
+                      <div className="relative  left-3 mt-2 flex flex-col mx-4 gap-y-2">
                         {imageUrls.map((url, index) => {
                           // Extracting file name from the URL
                           const fileName = url.substring(
