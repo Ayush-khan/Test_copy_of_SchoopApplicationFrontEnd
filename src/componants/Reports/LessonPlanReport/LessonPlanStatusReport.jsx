@@ -469,8 +469,8 @@ const LessonPlanStatusReport = () => {
       <div
         className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
           timetable.length > 0
-            ? "w-full md:w-[98%] scale-100"
-            : "w-full md:w-[95%] scale-[0.98]"
+            ? "w-full md:w-[100%] scale-100"
+            : "w-full md:w-[100%] scale-[0.98]"
         }`}
       >
         <ToastContainer />
@@ -487,7 +487,7 @@ const LessonPlanStatusReport = () => {
             />
           </div>
           <div
-            className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
@@ -499,13 +499,13 @@ const LessonPlanStatusReport = () => {
               className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
                 timetable.length > 0
                   ? "pb-0 w-full md:w-[99%]"
-                  : "pb-4 w-full md:w-[80%]"
+                  : "pb-4 w-full md:w-[99%]"
               }`}
             >
               <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                 {/* <div className="w-full  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row"> */}
                 <div
-                  className={`  w-full gap-x-0 md:gap-x-8  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
+                  className={`  w-full gap-x-0 md:gap-x-6  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
                     timetable.length > 0
                       ? "w-full md:w-[100%]  wrelative left-0"
                       : " w-full md:w-[95%] relative left-10"
@@ -514,7 +514,7 @@ const LessonPlanStatusReport = () => {
                   {/* Staff Dropdown */}
                   <div className="w-full  md:w-[70%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
-                      className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="w-full md:w-[37%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
                       Teacher <span className="text-sm text-red-500">*</span>
@@ -675,7 +675,7 @@ const LessonPlanStatusReport = () => {
                 </div>
               </div>
               {timetable.length > 0 && (
-                <div className="p-2 px-3 w-[400px] bg-gray-100 border-none flex justify-between items-center">
+                <div className="p-2 px-3 w-[350px] bg-gray-100 border-none flex justify-between items-center">
                   <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
                     <div className="w-1/2 md:w-[95%] mr-1 ">
                       <input
@@ -712,11 +712,11 @@ const LessonPlanStatusReport = () => {
               )}
             </div>
 
-            {/* {timetable.length > 0 && ( */}
-            <>
-              <div className="w-full px-4 mb-4 mt-4">
-                <div className="card mx-auto lg:w-full shadow-lg">
-                  {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+            {timetable.length > 0 && (
+              <>
+                <div className="w-full px-4 mb-4 mt-4">
+                  <div className="card mx-auto lg:w-full shadow-lg">
+                    {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                     <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                         List of Lesson Plan Status Report
@@ -761,85 +761,85 @@ const LessonPlanStatusReport = () => {
                     }}
                   ></div> */}
 
-                  <div className="card-body w-full">
-                    <div
-                      className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
-                      style={{
-                        scrollbarWidth: "thin",
-                        scrollbarColor: "#C03178 transparent",
-                      }}
-                    >
-                      <table className="min-w-full leading-normal table-auto">
-                        <thead>
-                          <tr className="bg-gray-100">
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[7%]">
-                              Sr No.
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
-                              Class
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
-                              Subject
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[25%]">
-                              Chapter
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[20%]">
-                              Date
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[15%]">
-                              Status
-                            </th>
-                          </tr>
-                        </thead>
+                    <div className="card-body w-full">
+                      <div
+                        className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
+                        style={{
+                          scrollbarWidth: "thin",
+                          scrollbarColor: "#C03178 transparent",
+                        }}
+                      >
+                        <table className="min-w-full leading-normal table-auto">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[7%]">
+                                Sr No.
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
+                                Class
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
+                                Subject
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[25%]">
+                                Chapter
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[20%]">
+                                Date
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[15%]">
+                                Status
+                              </th>
+                            </tr>
+                          </thead>
 
-                        <tbody>
-                          {displayedSections.length ? (
-                            displayedSections?.map((student, index) => (
-                              <tr
-                                key={student.lesson_plan_id}
-                                className="border border-gray-300"
-                              >
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {index + 1}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.classname} {student?.secname}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.subname}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.chaptername}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student?.week_date}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {
-                                    statusOptions.find(
-                                      (option) =>
-                                        option.value === student?.status
-                                    )?.label
-                                  }
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                              <div className=" text-center text-xl text-red-700">
-                                Oops! No data found..
+                          <tbody>
+                            {displayedSections.length ? (
+                              displayedSections?.map((student, index) => (
+                                <tr
+                                  key={student.lesson_plan_id}
+                                  className="border border-gray-300"
+                                >
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {index + 1}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.classname} {student?.secname}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.subname}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.chaptername}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.week_date}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {
+                                      statusOptions.find(
+                                        (option) =>
+                                          option.value === student?.status
+                                      )?.label
+                                    }
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                <div className=" text-center text-xl text-red-700">
+                                  Oops! No data found..
+                                </div>
                               </div>
-                            </div>
-                          )}
-                        </tbody>
-                      </table>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </>
-            {/* )} */}
+              </>
+            )}
           </>
         </div>
       </div>
