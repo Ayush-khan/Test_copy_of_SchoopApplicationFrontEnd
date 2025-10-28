@@ -8,6 +8,7 @@ import { RxCross1 } from "react-icons/rx";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
+import { ImDownload } from "react-icons/im";
 
 function HomeWorkForClass() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -39,13 +40,16 @@ function HomeWorkForClass() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
+  const [imageUrls, setImageUrls] = useState([]);
+  const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
 
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
   const formatDate = (isoDate) => {
     if (!isoDate) return "-";
-    // isoDate is in "YYYY-MM-DD"
-    const [year, month, day] = isoDate.split("-");
+    // Extract only the date part before any space or 'T'
+    const onlyDate = isoDate.split(" ")[0].split("T")[0];
+    const [year, month, day] = onlyDate.split("-");
     return `${day}-${month}-${year}`;
   };
 
@@ -141,7 +145,7 @@ function HomeWorkForClass() {
       };
 
       const response = await axios.get(
-        `${API_URL}/api/get_daily_notes_class_teacherwise`,
+        `${API_URL}/api/get_homework_class_teacherwise`,
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
@@ -154,15 +158,15 @@ function HomeWorkForClass() {
         setNotices(data);
         setPageCount(Math.ceil(data.length / pageSize));
         setShowTable(true);
-        toast.success("Daily notes fetched successfully!");
+        toast.success("Homework fetched successfully!");
       } else {
         setNotices([]);
         setShowTable(false);
-        toast.info("No daily notes found for the selected class.");
+        toast.info("No homework found for the selected class.");
       }
     } catch (error) {
-      console.error("Error fetching daily notes:", error);
-      toast.error("Failed to fetch daily notes. Please try again.");
+      console.error("Error fetching  homework:", error);
+      toast.error("Failed to fetch  homework. Please try again.");
     } finally {
       setLoading(false);
       setIsSubmitting(false);
@@ -174,27 +178,66 @@ function HomeWorkForClass() {
     // Handle page change logic
   };
 
-  const handleView = (section) => {
-    console.log("view data", section);
-    setCurrentSection(section);
-    setNewStaffNames(section?.teacher_names);
-    setnewSectionName(section?.date);
-    setnewSubjectnName(section?.sub_name);
-    setTeacherNameIs(section?.description);
-    setteacherIdIs(section?.get_teacher?.teacher_id);
-    setShowViewModal(true);
+  // Function to fetch and display full note details when "View" is clicked
+  const fetchViewNoteDetails = async (notesId) => {
+    const token = localStorage.getItem("authToken");
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `${API_URL}/api/get_view_homework_class_teacherwise/${notesId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const data = response.data?.data || {};
+      const note = data.notesdata?.[0] || {};
+      const imageUrls = data.imageurl || [];
+
+      setnewSectionName(note.date);
+      setnewSubjectnName(note.subjectname);
+      setTeacherNameIs(note?.description);
+      setImageUrls(imageUrls);
+    } catch (error) {
+      console.error("Error fetching homework details:", error);
+      toast.error("Failed to load homework details.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleView = (section) => {
+    setCurrentSection(section);
+    setShowViewModal(true);
+    fetchViewNoteDetails(section?.homework_id);
+    setTeacherNameIs(section?.description);
+  };
+
   // Function to download files
   const handleCloseModal = () => {
     setSubject("");
     setNoticeDesc("");
     setNewStaffNames("");
+    setPreselectedFiles([]);
     setShowPublishModal(false);
     setShowViewModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
+  const downloadFile = (fileUrl, fileName) => {
+    const baseUrl = "https://sms.evolvu.in/"; // Base URL
+    const fullUrl = `${fileUrl}`; // Construct the full file URL
+    // Create an anchor element
+    const link = document.createElement("a");
+    link.href = fullUrl; // Set the file URL
+    link.target = "none"; // Open in a new tab (optional)
+    link.download = fileName || "downloaded_file.pdf"; // Use the provided file name or a default name
+    document.body.appendChild(link); // Append the link to the DOM
 
+    // Trigger the click to download the file
+    link.click();
+
+    // Clean up the DOM
+    document.body.removeChild(link); // Remove the link after the click
+  };
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
 
@@ -325,16 +368,20 @@ function HomeWorkForClass() {
                 <table className="min-w-full w-[80%]   border border-gray-300">
                   <thead className="bg-gray-200">
                     <tr>
-                      {["Sr.No", "Create Date", "Subject", "View"].map(
-                        (col) => (
-                          <th
-                            key={col}
-                            className="px-3 py-2 border border-gray-300 text-center text-sm font-semibold text-gray-900"
-                          >
-                            {col}
-                          </th>
-                        )
-                      )}
+                      {[
+                        "Sr.No",
+                        "Subject",
+                        "Assign Date",
+                        "Submission Date",
+                        "View",
+                      ].map((col) => (
+                        <th
+                          key={col}
+                          className="px-3 py-2 border border-gray-300 text-center text-sm font-semibold text-gray-900"
+                        >
+                          {col}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
@@ -355,14 +402,16 @@ function HomeWorkForClass() {
                         >
                           <td className="px-3 py-2 border border-gray-300 text-center">
                             {currentPage * pageSize + index + 1}
-                          </td>
-                          <td className="px-3 py-2 border border-gray-300 text-center">
-                            {formatDate(subject?.date)}
-                          </td>
+                          </td>{" "}
                           <td className="px-3 py-2 border border-gray-300 text-center">
                             {subject?.sub_name}
                           </td>
-
+                          <td className="px-3 py-2 border border-gray-300 text-center">
+                            {formatDate(subject?.start_date)}
+                          </td>
+                          <td className="px-3 py-2 border border-gray-300 text-center">
+                            {formatDate(subject?.end_date)}
+                          </td>
                           <td className="px-3 py-2 border border-gray-300 text-center">
                             <button
                               className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
@@ -418,9 +467,7 @@ function HomeWorkForClass() {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">
-                    View teacher's note for the class
-                  </h5>
+                  <h5 className="modal-title">View Notice/SMS</h5>
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -433,6 +480,7 @@ function HomeWorkForClass() {
                 ></div>
                 <div className="modal-body">
                   {/* Class */}
+                  {/* Notice Date */}
                   <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
                     <label htmlFor="newSectionName" className="w-1/2 mt-2">
                       Class:{" "}
@@ -441,24 +489,6 @@ function HomeWorkForClass() {
                       {selectedStudent?.label}
                     </span>
                   </div>{" "}
-                  {/* Subject */}
-                  <div className="mb-3 relative flex justify-start mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Subject:{" "}
-                    </label>
-                    <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
-                      {newSubject}
-                    </span>
-                  </div>
-                  {/* Notice Date */}
-                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
-                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Create Date:{" "}
-                    </label>
-                    <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
-                      {formatDate(newSection)}
-                    </span>
-                  </div>
                   {/* Description */}
                   <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
                     <label htmlFor="noticeDesc" className="w-1/2 mt-2">
@@ -473,6 +503,37 @@ function HomeWorkForClass() {
                       value={teacherNameIs}
                     ></textarea>
                   </div>
+                  {/* Download Links */}
+                  {/* Download Links */}
+                  {imageUrls && imageUrls.length > 0 && (
+                    <div className="w-full  flex flex-row">
+                      <label className=" px-4 mb-2 ">Attachments:</label>
+
+                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
+                        {imageUrls.map((url, index) => {
+                          // Extracting file name from the URL
+                          const fileName = url.substring(
+                            url.lastIndexOf("/") + 1
+                          );
+                          return (
+                            <div
+                              key={index}
+                              className=" font-semibold flex flex-row text-[.58em]  items-center gap-x-2"
+                            >
+                              {/* Display file name */}
+                              <span className=" ">{fileName}</span>
+                              <button
+                                className=" text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                onClick={() => downloadFile(url, fileName)}
+                              >
+                                <ImDownload className="font-2xl w-3 h-3" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
