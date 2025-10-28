@@ -6,22 +6,19 @@ import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { ImDownload } from "react-icons/im";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
+import { ImDownload } from "react-icons/im";
 
 function TeacherNoteForClass() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
-  // const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  // for allot subject tab
   const [showTable, setShowTable] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showPublish, setShowPublishModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
-
   const [newSection, setnewSectionName] = useState("");
   const [newSubject, setnewSubjectnName] = useState("");
   const [newStaffNames, setNewStaffNames] = useState("");
@@ -33,21 +30,18 @@ function TeacherNoteForClass() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
-  //   for allot subject checkboxes
   const navigate = useNavigate();
-  const [error, setError] = useState(null);
-  // errors messages for allot subject tab
-  const [selectedDate, setSelectedDate] = useState(""); // For date picker
   const [notices, setNotices] = useState([]); // To store fetched notices
   const [subject, setSubject] = useState("");
   const [noticeDesc, setNoticeDesc] = useState("");
   const [regId, setRegId] = useState(null);
   const [roleId, setRoleId] = useState(null);
-  const [imageUrls, setImageUrls] = useState([]);
   const [studentOptions, setStudentNameWithClassId] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
+  const [imageUrls, setImageUrls] = useState([]);
+  const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
 
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
@@ -114,33 +108,6 @@ function TeacherNoteForClass() {
 
     init();
   }, []);
-  //   const fetchClass = async () => {
-  //     const token = localStorage.getItem("authToken");
-  //     setLoadingExams(true);
-
-  //     try {
-  //       const response = await axios.get(
-  //         `${API_URL}/api/get_classes_of_classteacher?teacher_id=`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-
-  //       const mappedData =
-  //         response.data?.data?.map((item) => ({
-  //           value: item.class_id,
-  //           sectionId: item?.section_id,
-  //           label: item.class_name,
-  //         })) || [];
-
-  //       setStudentNameWithClassId(mappedData);
-  //     } catch (error) {
-  //       toast.error("Error fetching Classes");
-  //       console.error("Error fetching Classes:", error);
-  //     } finally {
-  //       setLoadingExams(false);
-  //     }
-  //   };
   const handleClassSelect = (selectedOption) => {
     setSelectedStudent(selectedOption);
     setStudentError(""); // clear error when selected
@@ -210,61 +177,65 @@ function TeacherNoteForClass() {
     // Handle page change logic
   };
 
-  const fetchNoticeData = async (currentSection) => {
+  // Function to fetch and display full note details when "View" is clicked
+  const fetchViewNoteDetails = async (notesId) => {
     const token = localStorage.getItem("authToken");
-
-    if (!token) throw new Error("No authentication token found");
-
     try {
+      setLoading(true);
       const response = await axios.get(
-        `${API_URL}/api/get_staffnoticedata/${currentSection?.unq_id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `${API_URL}/api/get_view_daily_notes_class_teacherwise/${notesId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      const { imageurl } = response.data.data;
-      console.log("imageURL", imageurl);
-      setImageUrls(imageurl); // Store image URLs for download links
+
+      const data = response.data?.data || {};
+      const note = data.notesdata?.[0] || {};
+      const imageUrls = data.imageurl || [];
+
+      setnewSectionName(note.date);
+      setnewSubjectnName(note.subjectname);
+      setTeacherNameIs(note.description);
+      setImageUrls(imageUrls);
     } catch (error) {
-      console.error("Error fetching notice data:", error);
+      console.error("Error fetching note details:", error);
+      toast.error("Failed to load note details.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleView = (section) => {
-    console.log("view data", section);
     setCurrentSection(section);
-    setNewStaffNames(section?.teacher_names);
-    setnewSectionName(section?.date);
-    setnewSubjectnName(section?.sub_name);
-    setTeacherNameIs(section?.description);
-    setteacherIdIs(section?.get_teacher?.teacher_id);
     setShowViewModal(true);
-
-    if (section.notice_type === "Notice") {
-      fetchNoticeData(section); // Pass the current section directly
-    } else {
-      setImageUrls([]); // Clear image URLs if not a notice
-    }
+    fetchViewNoteDetails(section.notes_id);
   };
+
   // Function to download files
-
-  const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
-
   const handleCloseModal = () => {
     setSubject("");
     setNoticeDesc("");
     setNewStaffNames("");
     setPreselectedFiles([]);
-    setUploadedFiles([]);
-    // removeUploadedFile;
     setShowPublishModal(false);
     setShowViewModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
+  const downloadFile = (fileUrl, fileName) => {
+    const baseUrl = "https://sms.evolvu.in/"; // Base URL
+    const fullUrl = `${fileUrl}`; // Construct the full file URL
+    // Create an anchor element
+    const link = document.createElement("a");
+    link.href = fullUrl; // Set the file URL
+    link.target = "none"; // Open in a new tab (optional)
+    link.download = fileName || "downloaded_file.pdf"; // Use the provided file name or a default name
+    document.body.appendChild(link); // Append the link to the DOM
 
+    // Trigger the click to download the file
+    link.click();
+
+    // Clean up the DOM
+    document.body.removeChild(link); // Remove the link after the click
+  };
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
 
@@ -279,8 +250,6 @@ function TeacherNoteForClass() {
 
     prevSearchTermRef.current = trimmedSearch;
   }, [searchTerm]);
-
-  const searchLower = searchTerm.toLowerCase();
 
   const filteredSections = notices.filter((note) => {
     const searchLower = searchTerm.toLowerCase();
@@ -303,15 +272,6 @@ function TeacherNoteForClass() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
-
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-
-  const handleFileUpload = (e) => {
-    const newFiles = Array.from(e.target.files);
-    setUploadedFiles([...uploadedFiles, ...newFiles]);
-  };
-  console.log("handleFileUpload", handleFileUpload);
-
   return (
     <>
       {/* <ToastContainer /> */}
@@ -554,6 +514,97 @@ function TeacherNoteForClass() {
                       value={teacherNameIs}
                     ></textarea>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showViewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-50">
+          <div className="modal show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">View Notice/SMS</h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    type="button"
+                    onClick={handleCloseModal}
+                  />
+                </div>
+                <div
+                  className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{ backgroundColor: "#C03078" }}
+                ></div>
+                <div className="modal-body">
+                  {/* Class */}
+
+                  {/* Notice Date */}
+                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
+                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
+                      Notice Date:{" "}
+                    </label>
+                    <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
+                      {newSection}
+                    </span>
+                  </div>
+                  {/* Subject */}
+                  <div className="mb-3 relative flex justify-start mx-4 gap-x-7">
+                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
+                      Subject:{" "}
+                    </label>
+                    <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
+                      {newSubject}
+                    </span>
+                  </div>
+                  {/* Description */}
+                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
+                    <label htmlFor="noticeDesc" className="w-1/2 mt-2">
+                      Description:
+                    </label>
+                    <textarea
+                      id="noticeDesc"
+                      rows="2"
+                      maxLength={1000}
+                      readOnly
+                      className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                      value={teacherNameIs}
+                    ></textarea>
+                  </div>
+
+                  {/* Download Links */}
+                  {/* Download Links */}
+
+                  {imageUrls && imageUrls.length > 0 && (
+                    <div className="w-full  flex flex-row">
+                      <label className=" px-4 mb-2 ">Attachments:</label>
+
+                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
+                        {imageUrls.map((url, index) => {
+                          // Extracting file name from the URL
+                          const fileName = url.substring(
+                            url.lastIndexOf("/") + 1
+                          );
+                          return (
+                            <div
+                              key={index}
+                              className=" font-semibold flex flex-row text-[.58em]  items-center gap-x-2"
+                            >
+                              {/* Display file name */}
+                              <span className=" ">{fileName}</span>
+                              <button
+                                className=" text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                onClick={() => downloadFile(url, fileName)}
+                              >
+                                <ImDownload className="font-2xl w-3 h-3" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
