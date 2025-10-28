@@ -41,7 +41,8 @@ function TeacherNoteForClass() {
   const [notices, setNotices] = useState([]); // To store fetched notices
   const [subject, setSubject] = useState("");
   const [noticeDesc, setNoticeDesc] = useState("");
-
+  const [regId, setRegId] = useState(null);
+  const [roleId, setRoleId] = useState(null);
   const [imageUrls, setImageUrls] = useState([]);
   const [studentOptions, setStudentNameWithClassId] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -50,38 +51,96 @@ function TeacherNoteForClass() {
 
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
+  const formatDate = (isoDate) => {
+    if (!isoDate) return "-";
+    // isoDate is in "YYYY-MM-DD"
+    const [year, month, day] = isoDate.split("-");
+    return `${day}-${month}-${year}`;
+  };
 
   useEffect(() => {
-    fetchClass();
-  }, []);
+    const init = async () => {
+      try {
+        setLoading(true);
 
-  const fetchClass = async () => {
-    const token = localStorage.getItem("authToken");
-    setLoadingExams(true);
-
-    try {
-      const response = await axios.get(
-        `${API_URL}/api/get_only_classes_allotted_to_teacher`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
+        // 1️⃣ Get session data
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          toast.error("Authentication token not found. Please login again.");
+          navigate("/");
+          return;
         }
-      );
 
-      const mappedData =
-        response.data?.data?.map((item) => ({
-          value: item.class_id,
-          sectionId: item?.section_id,
-          label: item.class_name,
-        })) || [];
+        const sessionRes = await axios.get(`${API_URL}/api/sessionData`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      setStudentNameWithClassId(mappedData);
-    } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
-    } finally {
-      setLoadingExams(false);
-    }
-  };
+        const roleId = sessionRes?.data?.user?.name;
+        const regId = sessionRes?.data?.user?.reg_id;
+
+        if (!roleId || !regId) {
+          toast.error("Invalid session data received");
+          return;
+        }
+
+        setRoleId(roleId);
+        setRegId(regId);
+
+        setLoadingExams(true);
+
+        const responseForClass = await axios.get(
+          `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const mappedData =
+          responseForClass.data?.data?.map((item) => ({
+            value: item.class_id,
+            sectionId: item?.section_id,
+            label: `${item?.classname} ${item?.sectionname}`,
+          })) || [];
+
+        setStudentNameWithClassId(mappedData);
+      } catch (error) {
+        console.error("Initialization error:", error);
+        toast.error("Failed to get classes. Please try again.");
+      } finally {
+        setLoadingExams(false);
+        setLoading(false);
+      }
+    };
+
+    init();
+  }, []);
+  //   const fetchClass = async () => {
+  //     const token = localStorage.getItem("authToken");
+  //     setLoadingExams(true);
+
+  //     try {
+  //       const response = await axios.get(
+  //         `${API_URL}/api/get_classes_of_classteacher?teacher_id=`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+
+  //       const mappedData =
+  //         response.data?.data?.map((item) => ({
+  //           value: item.class_id,
+  //           sectionId: item?.section_id,
+  //           label: item.class_name,
+  //         })) || [];
+
+  //       setStudentNameWithClassId(mappedData);
+  //     } catch (error) {
+  //       toast.error("Error fetching Classes");
+  //       console.error("Error fetching Classes:", error);
+  //     } finally {
+  //       setLoadingExams(false);
+  //     }
+  //   };
   const handleClassSelect = (selectedOption) => {
     setSelectedStudent(selectedOption);
     setStudentError(""); // clear error when selected
@@ -177,9 +236,9 @@ function TeacherNoteForClass() {
     console.log("view data", section);
     setCurrentSection(section);
     setNewStaffNames(section?.teacher_names);
-    setnewSectionName(section?.notice_date);
-    setnewSubjectnName(section?.subject);
-    setTeacherNameIs(section?.notice_desc);
+    setnewSectionName(section?.date);
+    setnewSubjectnName(section?.sub_name);
+    setTeacherNameIs(section?.description);
     setteacherIdIs(section?.get_teacher?.teacher_id);
     setShowViewModal(true);
 
@@ -190,51 +249,6 @@ function TeacherNoteForClass() {
     }
   };
   // Function to download files
-  {
-    imageUrls && imageUrls.length > 0 && (
-      <div className="relative mb-3 flex flex-col mx-4 gap-y-2">
-        <label className="mb-2 font-bold">Attachments:</label>
-        {imageUrls.map((url, index) => {
-          // Extract file name from the URL
-          const fileName = url.substring(url.lastIndexOf("/") + 1);
-          return (
-            <div
-              key={index}
-              className="flex flex-row text-[.6em] items-center gap-x-2"
-            >
-              {/* Display file name */}
-              <span>{fileName}</span>
-              <button
-                className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                onClick={
-                  () => downloadFile(url, fileName) // Pass both URL and fileName
-                }
-              >
-                <ImDownload />
-              </button>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
-  const downloadFile = (fileUrl, fileName) => {
-    const baseUrl = "https://sms.evolvu.in/"; // Base URL
-    const fullUrl = `${fileUrl}`; // Construct the full file URL
-    // Create an anchor element
-    const link = document.createElement("a");
-    link.href = fullUrl; // Set the file URL
-    link.target = "none"; // Open in a new tab (optional)
-    link.download = fileName || "downloaded_file.pdf"; // Use the provided file name or a default name
-    document.body.appendChild(link); // Append the link to the DOM
-
-    // Trigger the click to download the file
-    link.click();
-
-    // Clean up the DOM
-    document.body.removeChild(link); // Remove the link after the click
-  };
 
   const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
 
@@ -374,7 +388,7 @@ function TeacherNoteForClass() {
             </div>
           </div>{" "}
           {showTable && (
-            <>
+            <div className="w-full md:w-[80%] mx-auto">
               {/* Table Header with Search */}
               <div className="p-2 px-3 bg-gray-50 border-b  rounded-md flex justify-end items-center">
                 <div className="w-full md:w-1/3 flex justify-end">
@@ -389,24 +403,19 @@ function TeacherNoteForClass() {
 
               {/* Table */}
               <div className="h-96 overflow-y-auto">
-                <table className="min-w-full table-auto border-collapse border border-gray-300">
+                <table className="min-w-full w-[80%]   border border-gray-300">
                   <thead className="bg-gray-200">
                     <tr>
-                      {[
-                        "Sr.No",
-                        "ID",
-                        "Date",
-                        "Remark Subject",
-                        "Acknowledge",
-                        "View",
-                      ].map((col) => (
-                        <th
-                          key={col}
-                          className="px-3 py-2 border border-gray-300 text-center text-sm font-semibold text-gray-900"
-                        >
-                          {col}
-                        </th>
-                      ))}
+                      {["Sr.No", "Create Date", "Subject", "View"].map(
+                        (col) => (
+                          <th
+                            key={col}
+                            className="px-3 py-2 border border-gray-300 text-center text-sm font-semibold text-gray-900"
+                          >
+                            {col}
+                          </th>
+                        )
+                      )}
                     </tr>
                   </thead>
                   <tbody>
@@ -429,20 +438,15 @@ function TeacherNoteForClass() {
                             {currentPage * pageSize + index + 1}
                           </td>
                           <td className="px-3 py-2 border border-gray-300 text-center">
-                            {subject?.subject}
+                            {formatDate(subject?.date)}
                           </td>
                           <td className="px-3 py-2 border border-gray-300 text-center">
-                            {subject?.notice_type}
+                            {subject?.sub_name}
                           </td>
-                          <td className="px-3 py-2 border border-gray-300 text-center">
-                            {subject?.notice_date}
-                          </td>
-                          <td className="px-3 py-2 border border-gray-300 text-center">
-                            {subject?.created_by_name}
-                          </td>
+
                           <td className="px-3 py-2 border border-gray-300 text-center">
                             <button
-                              className="text-blue-600 hover:text-blue-800"
+                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
                               onClick={() => handleView(subject)}
                             >
                               <MdOutlineRemoveRedEye className="text-xl" />
@@ -484,7 +488,7 @@ function TeacherNoteForClass() {
                   activeClassName={"bg-blue-500 text-white"}
                 />
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -495,7 +499,9 @@ function TeacherNoteForClass() {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">View Notice/SMS</h5>
+                  <h5 className="modal-title">
+                    View teacher's note for the class
+                  </h5>
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -508,16 +514,14 @@ function TeacherNoteForClass() {
                 ></div>
                 <div className="modal-body">
                   {/* Class */}
-
-                  {/* Notice Date */}
                   <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
                     <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Notice Date:{" "}
+                      Class:{" "}
                     </label>
                     <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
-                      {newSection}
+                      {selectedStudent?.label}
                     </span>
-                  </div>
+                  </div>{" "}
                   {/* Subject */}
                   <div className="mb-3 relative flex justify-start mx-4 gap-x-7">
                     <label htmlFor="newSectionName" className="w-1/2 mt-2">
@@ -525,6 +529,15 @@ function TeacherNoteForClass() {
                     </label>
                     <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
                       {newSubject}
+                    </span>
+                  </div>
+                  {/* Notice Date */}
+                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
+                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
+                      Create Date:{" "}
+                    </label>
+                    <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
+                      {formatDate(newSection)}
                     </span>
                   </div>
                   {/* Description */}
@@ -541,39 +554,6 @@ function TeacherNoteForClass() {
                       value={teacherNameIs}
                     ></textarea>
                   </div>
-
-                  {/* Download Links */}
-                  {/* Download Links */}
-
-                  {imageUrls && imageUrls.length > 0 && (
-                    <div className="w-full  flex flex-row">
-                      <label className=" px-4 mb-2 ">Attachments:</label>
-
-                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
-                        {imageUrls.map((url, index) => {
-                          // Extracting file name from the URL
-                          const fileName = url.substring(
-                            url.lastIndexOf("/") + 1
-                          );
-                          return (
-                            <div
-                              key={index}
-                              className=" font-semibold flex flex-row text-[.58em]  items-center gap-x-2"
-                            >
-                              {/* Display file name */}
-                              <span className=" ">{fileName}</span>
-                              <button
-                                className=" text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                onClick={() => downloadFile(url, fileName)}
-                              >
-                                <ImDownload className="font-2xl w-3 h-3" />
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
