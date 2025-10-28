@@ -334,6 +334,7 @@ import DailyAttendance from "../TeacherLoginModules/DailyAttendance/DailyAttenda
 import EditLessonPlan from "../TeacherLoginModules/LessonPlane/EditLessonPlan.jsx";
 import RemarkForTeacher from "../TeacherLoginModules/ViewsModules/RemarkForTeacher.jsx";
 import TeacherNoteForClass from "../TeacherLoginModules/ViewsModules/TeacherNoteForClass.jsx";
+import FeePendingForClass from "../componants/AllTableList/FeePendingForClass.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -1225,6 +1226,10 @@ function Index() {
         <Route
           path="/feependinglist"
           element={<PrivateRoute element={<FeePendingList />} />}
+        />
+        <Route
+          path="/FeePendingForClass"
+          element={<PrivateRoute element={<FeePendingForClass />} />}
         />
         <Route
           path="/studentAbsent"

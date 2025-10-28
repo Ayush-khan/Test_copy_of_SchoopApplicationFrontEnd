@@ -10,6 +10,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import dayjs from "dayjs";
 import { FiPlus, FiX } from "react-icons/fi";
+import { FaRegCalendarAlt } from "react-icons/fa";
 
 const CheckboxOption = (props) => {
   return (
@@ -37,6 +38,8 @@ const CreateLessonPlan = () => {
   const maxDate = academicYrTo ? dayjs(academicYrTo).toDate() : null;
 
   const [loading, setLoading] = useState(null);
+  const [numPeriods, setNumPeriods] = useState("");
+  const [selectedWeek, setSelectedWeek] = useState("");
 
   const student = {
     daily_changes: [
@@ -84,7 +87,46 @@ const CreateLessonPlan = () => {
   const [studentError, setStudentError] = useState("");
   const [subjectError, setSubjectError] = useState("");
   const [chapterError, setChapterError] = useState("");
-  const [heading, setHeadings] = useState([]);
+  const [heading, setHeadings] = useState([]); // for non-daily
+  const [dailyHeading, setDailyHeadings] = useState([]);
+
+  const [weekError, setWeekError] = useState(false);
+  const [weekRange, setWeekRange] = useState("");
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(null);
+  const datePickerRef = useRef(null);
+
+  const handleDateChange = (date) => {
+    setFromDate(date);
+    setWeekError("");
+
+    if (date) {
+      const selectedDate = dayjs(date);
+
+      // Monday as start of week
+      const monday = selectedDate.startOf("week").add(1, "day");
+      const sunday = monday.add(6, "day");
+
+      // Readable week range
+      const startDateFormatted = monday.format("DD-MM-YYYY");
+      const endDateFormatted = sunday.format("DD-MM-YYYY");
+      setWeekRange(`${startDateFormatted} / ${endDateFormatted}`);
+
+      // Raw values for input[type="date"]
+      setFromDate(monday.format("YYYY-MM-DD"));
+      setToDate(sunday.format("YYYY-MM-DD"));
+    } else {
+      setWeekRange("");
+      setFromDate(null);
+      setToDate(null);
+    }
+  };
+
+  const openDatePicker = () => {
+    if (datePickerRef.current) {
+      datePickerRef.current.setOpen(true);
+    }
+  };
 
   useEffect(() => {
     fetchDataRoleId();
@@ -315,8 +357,33 @@ const CreateLessonPlan = () => {
       toast.error("Error fetching Lesson plan headings");
     }
   };
+
+  const fetchDailyHeadings = async () => {
+    console.log("jkhgf");
+    try {
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(
+        `${API_URL}/api/get_lesson_plan_heading_daily`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const data = response?.data?.data || [];
+      console.log("data daily", data);
+      data.sort((a, b) => a.sequence - b.sequence);
+      setDailyHeadings(data);
+    } catch (error) {
+      console.error("Error fetching Lesson plan headings:", error);
+      toast.error("Error fetching Lesson plan headings");
+    }
+  };
+
   useEffect(() => {
+    console.log("useEffect triggered");
     fetchHeadings();
+    fetchDailyHeadings();
   }, []);
 
   const camelCase = (str) =>
@@ -325,262 +392,6 @@ const CreateLessonPlan = () => {
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
-
-  // const handleSearch = async () => {
-  //   setStudentError("");
-  //   setSubjectError("");
-  //   setChapterError("");
-  //   setSearchTerm("");
-  //   setTimetable([]);
-  //   setStudentRemarks({});
-  //   setShowStudentReport(false);
-
-  //   if (!selectedStudent || selectedStudent.length === 0) {
-  //     setStudentError("Please select class/section(s).");
-  //     return;
-  //   }
-  //   if (!selectedSubjectId) {
-  //     setSubjectError("Please select subject.");
-  //     return;
-  //   }
-  //   if (!selectedChapterId) {
-  //     setChapterError("Please select chapter.");
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   setLoadingForSearch(true);
-  //   setIsSubmitting(true);
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       toast.error("Authentication token missing. Please login again.");
-  //       return;
-  //     }
-
-  //     // Extract class_id and section_id
-  //     const classId = selectedStudent[0].class_id;
-  //     const sectionIds = selectedStudent.map((s) => s.section_id).join(","); // NEW: comma-separated section ids
-  //     const classIdArray = selectedStudent.map(
-  //       (s) => `${s.class_id}^${s.section_id}`
-  //     );
-
-  //     const params = {
-  //       class_id: classId,
-  //       section_id: sectionIds,
-  //       sm_id: selectedSubjectId,
-  //       chapter_id: selectedChapterId,
-  //       class_id_array: classIdArray,
-  //     };
-
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_lesson_plan_details`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params,
-  //         paramsSerializer: (params) =>
-  //           Object.entries(params)
-  //             .map(([key, value]) =>
-  //               Array.isArray(value)
-  //                 ? value
-  //                     .map((v) => `${key}=${encodeURIComponent(v)}`)
-  //                     .join("&")
-  //                 : `${key}=${encodeURIComponent(value)}`
-  //             )
-  //             .join("&"),
-  //       }
-  //     );
-
-  //     const data = response?.data?.data || {};
-
-  //     // 🔹 If no existing data, show create-new lesson plan UI
-  //     if (!data.lesson_plan_info1 || data.lesson_plan_info1.length === 0) {
-  //       setTimetable([{ unq_id: "new" }]);
-  //       setPageCount(1);
-  //       setShowStudentReport(true);
-  //       return;
-  //     }
-
-  //     // 🔹 If existing data found — group by template
-  //     const grouped = {};
-  //     data.lesson_plan_info1.forEach((item) => {
-  //       const tempId = item.unq_id;
-  //       if (!grouped[tempId]) grouped[tempId] = { unq_id: tempId };
-  //       grouped[tempId][item.lesson_plan_headings_id] = item.description || "";
-  //     });
-
-  //     const timetableForDisplay = Object.values(grouped);
-
-  //     // Prefill remarks
-  //     const remarks = {};
-  //     timetableForDisplay.forEach((template) => {
-  //       Object.keys(template).forEach((key) => {
-  //         if (key !== "unq_id") remarks[key] = template[key];
-  //       });
-  //     });
-
-  //     setTimetable(timetableForDisplay);
-  //     setStudentRemarks(remarks);
-  //     setPageCount(Math.ceil(timetableForDisplay.length / pageSize));
-
-  //     // 🔹 Navigate directly to edit page if data exists
-  //     const firstTemplateId = timetableForDisplay[0]?.unq_id;
-  //     if (firstTemplateId) {
-  //       navigate(`/lessonPlan/edit/${firstTemplateId}`, {
-  //         state: {
-  //           headings: heading,
-  //           timetable: timetableForDisplay,
-  //           selectedStudent,
-  //           selectedSubject,
-  //           selectedChapter,
-  //           selectedStudentId,
-  //           selectedSubjectId,
-  //           selectedChapterId,
-  //           unq_id: firstTemplateId,
-  //         },
-  //       });
-  //       return;
-  //     }
-
-  //     setShowStudentReport(true);
-  //   } catch (error) {
-  //     console.error("❌ Error fetching Lesson Plan:", error);
-  //     toast.error("Error fetching Lesson Plan. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //     setLoadingForSearch(false);
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
-  // const handleSearch = async () => {
-  //   setStudentError("");
-  //   setSubjectError("");
-  //   setChapterError("");
-  //   setSearchTerm("");
-  //   setTimetable([]);
-  //   setStudentRemarks({});
-  //   setShowStudentReport(false);
-
-  //   if (!selectedStudent || selectedStudent.length === 0) {
-  //     setStudentError("Please select class/section(s).");
-  //     return;
-  //   }
-  //   if (!selectedSubjectId) {
-  //     setSubjectError("Please select subject.");
-  //     return;
-  //   }
-  //   if (!selectedChapterId) {
-  //     setChapterError("Please select chapter.");
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   setLoadingForSearch(true);
-  //   setIsSubmitting(true);
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       toast.error("Authentication token missing. Please login again.");
-  //       return;
-  //     }
-
-  //     // Extract class_id and section_id
-  //     const classId = selectedStudent[0].class_id;
-  //     const sectionIds = selectedStudent.map((s) => s.section_id).join(","); // comma-separated
-  //     const classIdArray = selectedStudent.map(
-  //       (s) => `${s.class_id}^${s.section_id}`
-  //     );
-
-  //     const params = {
-  //       class_id: classId,
-  //       section_id: sectionIds,
-  //       sm_id: selectedSubjectId,
-  //       chapter_id: selectedChapterId,
-  //       class_id_array: classIdArray,
-  //     };
-
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_lesson_plan_details`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params,
-  //         paramsSerializer: (params) =>
-  //           Object.entries(params)
-  //             .map(([key, value]) =>
-  //               Array.isArray(value)
-  //                 ? value
-  //                     .map((v) => `${key}=${encodeURIComponent(v)}`)
-  //                     .join("&")
-  //                 : `${key}=${encodeURIComponent(value)}`
-  //             )
-  //             .join("&"),
-  //       }
-  //     );
-
-  //     const lessonPlanData = response?.data?.data?.lesson_plan_info1 || [];
-
-  //     if (lessonPlanData.length === 0) {
-  //       // No existing lesson plan — create new
-  //       setTimetable([{ unq_id: "new" }]);
-  //       setPageCount(1);
-  //       setShowStudentReport(true);
-  //       return;
-  //     }
-
-  //     // ✅ Group by unique ID (unq_id) instead of les_pln_temp_id
-  //     const grouped = {};
-  //     lessonPlanData.forEach((item) => {
-  //       const uniqId = item.unq_id; // <-- use unq_id
-  //       if (!grouped[uniqId]) grouped[uniqId] = { unq_id: uniqId };
-  //       grouped[uniqId][item.lesson_plan_headings_id] = item.description || "";
-  //     });
-
-  //     const timetableForDisplay = Object.values(grouped);
-
-  //     const remarks = {};
-  //     timetableForDisplay.forEach((template) => {
-  //       Object.keys(template).forEach((key) => {
-  //         if (key !== "unq_id") remarks[key] = template[key];
-  //       });
-  //     });
-
-  //     setTimetable(timetableForDisplay);
-  //     setStudentRemarks(remarks);
-  //     setPageCount(Math.ceil(timetableForDisplay.length / pageSize));
-
-  //     // ✅ Navigate to edit page using unq_id
-  //     const firstUniqId = timetableForDisplay[0]?.unq_id;
-  //     if (firstUniqId) {
-  //       navigate(`/lessonPlan/edit/${firstUniqId}`, {
-  //         state: {
-  //           headings: heading,
-  //           timetable: timetableForDisplay,
-  //           selectedStudent,
-  //           selectedSubject,
-  //           selectedChapter,
-  //           selectedStudentId,
-  //           selectedSubjectId,
-  //           selectedChapterId,
-  //           unq_id: firstUniqId,
-  //         },
-  //       });
-  //       return;
-  //     }
-
-  //     // fallback — show create page
-  //     setShowStudentReport(true);
-  //   } catch (error) {
-  //     console.error("❌ Error fetching Lesson Plan:", error);
-  //     toast.error("Error fetching Lesson Plan. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //     setLoadingForSearch(false);
-  //     setIsSubmitting(false);
-  //   }
-  // };
 
   const handleSearch = async () => {
     setStudentError("");
@@ -647,8 +458,42 @@ const CreateLessonPlan = () => {
         }
       );
 
-      const lessonPlanData = response?.data?.data?.lesson_plan_info1 || [];
-      console.log("API lessonPlanData:", lessonPlanData);
+      // ✅ Check body-level response status
+      if (response?.data?.status === 400) {
+        toast.error(
+          response?.data?.message || "Lesson Plan Template is not created!!!"
+        );
+        setLoading(false);
+        setLoadingForSearch(false);
+        setIsSubmitting(false);
+        return;
+      }
+
+      const apiData = response?.data?.data || {};
+      const lessonPlanData = apiData.lesson_plan_info1 || [];
+      const isPresent = apiData.present_data === true;
+      const unqId = apiData.unq_id;
+
+      console.log("✅ present_data:", isPresent ? "true" : "false");
+      console.log("📘 handleSearch API data:", apiData);
+
+      if (isPresent && unqId) {
+        console.log("Existing lesson plan found. Navigating to Edit:", unqId);
+
+        navigate(`/lessonPlan/edit/${unqId}`, {
+          state: {
+            headings: heading,
+            selectedStudent,
+            selectedSubject,
+            selectedChapter,
+            selectedStudentId,
+            selectedSubjectId,
+            selectedChapterId,
+            unq_id: unqId,
+          },
+        });
+        return;
+      }
 
       if (lessonPlanData.length === 0) {
         setTimetable([{ unq_id: "new" }]);
@@ -657,16 +502,15 @@ const CreateLessonPlan = () => {
         return;
       }
 
-      // ✅ Derive unq_id from les_pln_temp_id if not present
       const grouped = {};
       lessonPlanData.forEach((item) => {
-        const uniqId = item.unq_id; // fallback ID
+        const uniqId = item.unq_id;
         if (!grouped[uniqId]) grouped[uniqId] = { unq_id: uniqId };
         grouped[uniqId][item.lesson_plan_headings_id] = item.description || "";
       });
 
       const timetableForDisplay = Object.values(grouped);
-      console.log("🧩 Grouped Timetable (with unq_id):", timetableForDisplay);
+      console.log("🧩 Grouped Timetable (new):", timetableForDisplay);
 
       const remarks = {};
       timetableForDisplay.forEach((template) => {
@@ -678,26 +522,6 @@ const CreateLessonPlan = () => {
       setTimetable(timetableForDisplay);
       setStudentRemarks(remarks);
       setPageCount(Math.ceil(timetableForDisplay.length / pageSize));
-
-      // ✅ Navigate using unq_id (derived if needed)
-      const firstUniqId = timetableForDisplay[0]?.unq_id;
-      if (firstUniqId && firstUniqId !== "new") {
-        navigate(`/lessonPlan/edit/${firstUniqId}`, {
-          state: {
-            headings: heading,
-            timetable: timetableForDisplay,
-            selectedStudent,
-            selectedSubject,
-            selectedChapter,
-            selectedStudentId,
-            selectedSubjectId,
-            selectedChapterId,
-            unq_id: firstUniqId,
-          },
-        });
-        return;
-      }
-
       setShowStudentReport(true);
     } catch (error) {
       console.error("❌ Error fetching Lesson Plan:", error);
@@ -708,133 +532,6 @@ const CreateLessonPlan = () => {
       setIsSubmitting(false);
     }
   };
-
-  // const handleSearch = async () => {
-  //   setStudentError("");
-  //   setSubjectError("");
-  //   setChapterError("");
-  //   setSearchTerm("");
-  //   setTimetable([]);
-  //   setStudentRemarks({});
-  //   setShowStudentReport(false);
-
-  //   if (!selectedStudent || selectedStudent.length === 0) {
-  //     setStudentError("Please select class/section(s).");
-  //     return;
-  //   }
-  //   if (!selectedSubjectId) {
-  //     setSubjectError("Please select subject.");
-  //     return;
-  //   }
-  //   if (!selectedChapterId) {
-  //     setChapterError("Please select chapter.");
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   setLoadingForSearch(true);
-  //   setIsSubmitting(true);
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       toast.error("Authentication token missing. Please login again.");
-  //       return;
-  //     }
-
-  //     // Extract class_id and section_id
-  //     const classId = selectedStudent[0].class_id;
-  //     const sectionIds = selectedStudent.map((s) => s.section_id).join(","); // comma-separated
-  //     const classIdArray = selectedStudent.map(
-  //       (s) => `${s.class_id}^${s.section_id}`
-  //     );
-
-  //     const params = {
-  //       class_id: classId,
-  //       section_id: sectionIds,
-  //       sm_id: selectedSubjectId,
-  //       chapter_id: selectedChapterId,
-  //       class_id_array: classIdArray,
-  //     };
-
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_lesson_plan_details`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params,
-  //         paramsSerializer: (params) =>
-  //           Object.entries(params)
-  //             .map(([key, value]) =>
-  //               Array.isArray(value)
-  //                 ? value
-  //                     .map((v) => `${key}=${encodeURIComponent(v)}`)
-  //                     .join("&")
-  //                 : `${key}=${encodeURIComponent(value)}`
-  //             )
-  //             .join("&"),
-  //       }
-  //     );
-
-  //     const lessonPlanData = response?.data?.data?.lesson_plan_info1 || [];
-
-  //     if (lessonPlanData.length === 0) {
-  //       // No existing lesson plan — create new
-  //       setTimetable([{ unq_id: "new" }]);
-  //       setPageCount(1);
-  //       setShowStudentReport(true);
-  //       return;
-  //     }
-
-  //     const grouped = {};
-  //     lessonPlanData.forEach((item) => {
-  //       const tempId = item.les_pln_temp_id; // ✅ use correct field
-  //       if (!grouped[tempId]) grouped[tempId] = { les_pln_temp_id: tempId };
-  //       grouped[tempId][item.lesson_plan_headings_id] = item.description || "";
-  //     });
-
-  //     const timetableForDisplay = Object.values(grouped);
-
-  //     const remarks = {};
-  //     timetableForDisplay.forEach((template) => {
-  //       Object.keys(template).forEach((key) => {
-  //         if (key !== "les_pln_temp_id") remarks[key] = template[key];
-  //       });
-  //     });
-
-  //     setTimetable(timetableForDisplay);
-  //     setStudentRemarks(remarks);
-  //     setPageCount(Math.ceil(timetableForDisplay.length / pageSize));
-
-  //     // Navigate to edit page
-  //     const firstTemplateId = timetableForDisplay[0]?.les_pln_temp_id;
-  //     if (firstTemplateId) {
-  //       navigate(`/lessonPlan/edit/${firstTemplateId}`, {
-  //         state: {
-  //           headings: heading,
-  //           timetable: timetableForDisplay,
-  //           selectedStudent,
-  //           selectedSubject,
-  //           selectedChapter,
-  //           selectedStudentId,
-  //           selectedSubjectId,
-  //           selectedChapterId,
-  //           les_pln_temp_id: firstTemplateId,
-  //         },
-  //       });
-  //       return;
-  //     }
-
-  //     // fallback — show create page
-  //     setShowStudentReport(true);
-  //   } catch (error) {
-  //     console.error("❌ Error fetching Lesson Plan:", error);
-  //     toast.error("Error fetching Lesson Plan. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //     setLoadingForSearch(false);
-  //     setIsSubmitting(false);
-  //   }
-  // };
 
   const [rows, setRows] = useState(
     student.daily_changes?.map((item) => ({
@@ -858,126 +555,163 @@ const CreateLessonPlan = () => {
     setRows(updatedRows);
   };
 
-  // const handleSubmit = async () => {
-  //   if (isSubmitting) return;
-  //   setIsSubmitting(true);
-
-  //   const token = localStorage.getItem("authToken");
-  //   if (!token) {
-  //     toast.error("Authentication token missing. Please login again.");
-  //     setIsSubmitting(false);
-  //     return;
-  //   }
-
-  //   const descriptions = heading
-  //     .map((item) => {
-  //       const userValue = studentRemarks[item.lesson_plan_headings_id]?.trim();
-  //       const existingValue =
-  //         timetable[0]?.[item.lesson_plan_headings_id]?.trim() || "";
-
-  //       if (userValue) {
-  //         return {
-  //           lesson_plan_headings_id: item.lesson_plan_headings_id,
-  //           description: userValue,
-  //         };
-  //       }
-
-  //       return null; // Skip empty ones
-  //     })
-  //     .filter((d) => d !== null);
-
-  //   if (descriptions.length === 0) {
-  //     toast.error("Please enter at least one description before saving.");
-  //     setIsSubmitting(false);
-  //     return;
-  //   }
-
-  //   try {
-  //     const response = await axios.post(
-  //       `${API_URL}/api/save_lessonplan`,
-  //       {
-  //         class_id: selectedStudent.class_id,
-  //         section_id: selectedStudent.section_id,
-  //         sm_id: selectedSubjectId,
-  //         chapter_id: selectedChapterId,
-  //         descriptions,
-  //       },
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-
-  //     if (response.data.status === 200) {
-  //       toast.success("Lesson plan template created successfully!");
-  //       navigate("/lessonPlan");
-  //       setStudentRemarks({});
-  //       setTimetable([]);
-  //     } else {
-  //       toast.error("Failed to create lesson plan template.");
-  //     }
-  //   } catch (error) {
-  //     toast.error("An error occurred while submitting the data.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
   const handleSubmit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      toast.error("Authentication token missing. Please login again.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    // collect all filled descriptions
-    const descriptions = {};
-    heading.forEach((item, index) => {
-      const value = studentRemarks[item.lesson_plan_headings_id]?.trim();
-      if (value) {
-        descriptions[`description_${index + 1}`] = value;
-      }
-    });
-
-    if (Object.keys(descriptions).length === 0) {
-      toast.error("Please enter at least one description before saving.");
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
-      // 🔹 Same logic as handleSearch
-      const classId = selectedStudent[0]?.class_id;
-      const sectionIds = selectedStudent.map((s) => s.section_id).join(",");
-      const classIdArray = selectedStudent.map(
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        toast.error("Authentication token missing. Please login again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 🔸 Validate No. of Periods
+      if (!numPeriods || parseInt(numPeriods) <= 0) {
+        toast.error("Please select number of periods before saving.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 🔸 Validate Week selection
+      if (!fromDate || !toDate || !weekRange) {
+        toast.error("Please select week before saving.");
+        setWeekError("Please select week before saving.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 🔸 Validate class/section selection
+      const studentsArray = Array.isArray(selectedStudent)
+        ? selectedStudent.map((s) => ({
+            class_id: s.class_id,
+            section_id: s.section_id || "0",
+          }))
+        : selectedStudent
+        ? [
+            {
+              class_id: selectedStudent.class_id,
+              section_id: selectedStudent.section_id || "0",
+            },
+          ]
+        : [];
+
+      if (!studentsArray.length) {
+        toast.error("Please select at least one class before saving.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const invalidStudent = studentsArray.find(
+        (s) => !s.class_id || s.section_id === undefined || s.section_id === ""
+      );
+      if (invalidStudent) {
+        toast.error("Selected class has invalid class or section.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 🔸 Prepare IDs
+      const classId = studentsArray[0].class_id?.toString() || "0";
+      const sectionIds = studentsArray
+        .map((s) => s.section_id?.toString() || "0")
+        .join(",");
+      const classIdArray = studentsArray.map(
         (s) => `${s.class_id}^${s.section_id}`
       );
 
+      // 🔸 Prepare description fields
+      const descriptions = {};
+
+      // ✅ Loop headings (normal)
+      (heading || []).forEach((item) => {
+        const headingId = item.lesson_plan_headings_id;
+        const descValue =
+          studentRemarks[headingId] || timetable?.[0]?.[headingId] || "";
+
+        const formattedValue = descValue
+          .split("\n")
+          .map((line) => {
+            const trimmed = line.trim();
+            if (trimmed === "") return "";
+            return trimmed.startsWith("• ") ? trimmed : "• " + trimmed;
+          })
+          .join("\n")
+          .trim();
+
+        descriptions[`description_${headingId}_1`] = formattedValue;
+      });
+
+      // ✅ Loop daily headings (from textarea)
+      (dailyHeading || []).forEach((item) => {
+        const headingId = item.lesson_plan_headings_id;
+        const descValue =
+          studentRemarks[`${headingId}_0`] ||
+          timetable?.[0]?.[`description_${headingId}_1`] ||
+          "";
+
+        const formattedValue = descValue
+          .split("\n")
+          .map((line) => {
+            const trimmed = line.trim();
+            if (trimmed === "") return "";
+            return trimmed.startsWith("• ") ? trimmed : "• " + trimmed;
+          })
+          .join("\n")
+          .trim();
+
+        descriptions[`description_${headingId}_1`] = formattedValue;
+      });
+
+      // 🔸 Validate if at least one description is filled
+      const hasAnyDescription = Object.values(descriptions).some(
+        (val) => val && val.trim() !== ""
+      );
+      if (!hasAnyDescription) {
+        toast.error("Please enter at least one description before saving.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 🔸 Validate teaching points (daily)
+      const hasTeachingPoints = (dailyHeading || []).some((item) => {
+        const val =
+          descriptions[`description_${item.lesson_plan_headings_id}_1`] || "";
+        return val.trim() !== "";
+      });
+      if (!hasTeachingPoints) {
+        toast.error("Please add teaching points before saving.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // ✅ Build payload
       const payload = {
-        operation: "create",
-        class_id: classId?.toString(),
+        class_id: classId,
         section_id: sectionIds,
-        sm_id: selectedSubjectId?.toString(),
-        chapter_id: selectedChapterId?.toString(),
-        class_id_array: classIdArray, // include same field if backend expects it
-        no_of_periods: timetable?.length?.toString() || "1",
+        sm_id: selectedSubjectId?.toString() || "0",
+        chapter_id: selectedChapterId?.toString() || "0",
+        class_id_array: classIdArray,
+        no_of_periods: numPeriods?.toString() || "1",
         weeklyDatePicker: new Date().toISOString().split("T")[0],
         les_pln_temp_id: timetable?.[0]?.les_pln_temp_id || "new",
         approve: "Y",
         lph_dc_row: "1",
-        start_date: [new Date().toISOString().split("T")[0]],
+        start_date: [fromDate, toDate],
         ...descriptions,
       };
+
+      if (timetable?.[0]?.lesson_plan_id)
+        payload.lesson_plan_id = timetable[0].lesson_plan_id;
+      if (timetable?.[0]?.unq_id) payload.unq_id = timetable[0].unq_id;
+
+      console.log("🚀 Final Payload:", payload);
 
       const response = await axios.post(
         `${API_URL}/api/save_lesson_plan`,
         payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.data.status === 200) {
@@ -985,6 +719,8 @@ const CreateLessonPlan = () => {
         navigate("/lessonPlan");
         setStudentRemarks({});
         setTimetable([]);
+        setWeekRange("");
+        setNumPeriods("");
       } else {
         toast.error(response.data.message || "Failed to save lesson plan.");
       }
@@ -1131,57 +867,6 @@ const CreateLessonPlan = () => {
                           }}
                         />
 
-                        {/* <Select
-                          menuPortalTarget={document.body}
-                          menuPosition="fixed"
-                          id="studentSelect"
-                          isMulti
-                          closeMenuOnSelect={false}
-                          hideSelectedOptions={false}
-                          options={studentOptions}
-                          value={selectedStudent}
-                          onChange={handleSelectChange}
-                          placeholder={loadingExams ? "Loading..." : "Select"}
-                          isSearchable
-                          isClearable
-                          isDisabled={loadingExams}
-                          className="text-sm"
-                          components={{ Option }}
-                          styles={{
-                            control: (provided) => ({
-                              ...provided,
-                              fontSize: ".9em",
-                              minHeight: "30px",
-                              display: "flex",
-                              flexWrap: "nowrap", // ✅ Prevent wrapping
-                              overflowX: "auto", // ✅ Enable horizontal scroll
-                              scrollbarWidth: "thin", // ✅ (Optional) slim scrollbar
-                            }),
-                            valueContainer: (provided) => ({
-                              ...provided,
-                              display: "flex",
-                              flexWrap: "nowrap", // ✅ Keep all chips in one line
-                              overflowX: "auto",
-                              scrollbarWidth: "thin",
-                              "::-webkit-scrollbar": {
-                                height: "4px",
-                              },
-                            }),
-                            multiValue: (provided) => ({
-                              ...provided,
-                              flex: "0 0 auto", // ✅ Prevent chip shrinking
-                            }),
-                            menu: (provided) => ({
-                              ...provided,
-                              fontSize: "1em",
-                              zIndex: 9999,
-                            }),
-                            option: (provided) => ({
-                              ...provided,
-                              fontSize: ".9em",
-                            }),
-                          }}
-                        /> */}
                         {studentError && (
                           <div className="h-8 relative ml-1 text-danger text-xs">
                             {studentError}
@@ -1278,16 +963,16 @@ const CreateLessonPlan = () => {
                           styles={{
                             control: (provided) => ({
                               ...provided,
-                              fontSize: ".9em", // Adjust font size for selected value
-                              minHeight: "30px", // Reduce height
+                              fontSize: ".9em",
+                              minHeight: "30px",
                             }),
                             menu: (provided) => ({
                               ...provided,
-                              fontSize: "1em", // Adjust font size for dropdown options
+                              fontSize: "1em",
                             }),
                             option: (provided) => ({
                               ...provided,
-                              fontSize: ".9em", // Adjust font size for each option
+                              fontSize: ".9em",
                             }),
                           }}
                         />
@@ -1605,30 +1290,75 @@ const CreateLessonPlan = () => {
                                 key={index}
                                 className="mb-10 border rounded-lg shadow-md p-1"
                               >
-                                <div className="flex items-center justify-end gap-8 mr-10 mb-2">
+                                <div className="flex items-center justify-end gap-10 mr-10 mb-2 flex-wrap md:flex-nowrap">
+                                  {/* No. of Periods */}
                                   <div className="flex items-center gap-2">
-                                    <label className="text-sm font-medium text-gray-700">
+                                    <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
                                       No. of Periods{" "}
                                       <span className="text-red-500">*</span>
                                     </label>
                                     <input
-                                      type="text"
+                                      type="number"
                                       min="1"
                                       placeholder="Enter periods"
-                                      className="w-32 p-1 border border-gray-500 rounded"
+                                      className="w-32 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                      value={numPeriods}
+                                      onChange={(e) =>
+                                        setNumPeriods(e.target.value)
+                                      }
                                       required
                                     />
                                   </div>
 
-                                  <div className="flex items-center gap-2">
-                                    <label className="text-sm font-medium text-gray-700">
+                                  {/* Date (Week Picker) */}
+                                  <div className="flex items-center gap-2 mr-10">
+                                    <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
                                       Date{" "}
                                       <span className="text-red-500">*</span>
                                     </label>
-                                    <input
-                                      type="date"
-                                      className="p-1 border border-gray-300 rounded"
-                                      required
+
+                                    {/* <div className="relative w-[230px] md:w-[280px]"> */}
+                                    <div
+                                      className="text-sm text-gray-700 border border-gray-300 p-2.5 rounded-lg 
+                   flex items-center justify-between cursor-pointer bg-white 
+                   shadow-sm hover:border-gray-400 transition"
+                                      onClick={openDatePicker}
+                                    >
+                                      <div className="flex-1 flex items-center">
+                                        {weekRange ? (
+                                          <span className="truncate text-gray-800">
+                                            {weekRange}
+                                          </span>
+                                        ) : (
+                                          <span className="flex items-center text-gray-400">
+                                            <FaRegCalendarAlt className="mr-2 text-pink-500" />
+                                            Select Week
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {weekRange && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setFromDate(null);
+                                            setWeekRange("");
+                                          }}
+                                          className="text-gray-400 hover:text-red-500 ml-2 "
+                                        >
+                                          <RxCross1 className="text-xs text-red-600" />
+                                        </button>
+                                      )}
+                                    </div>
+
+                                    <DatePicker
+                                      ref={datePickerRef}
+                                      selected={fromDate}
+                                      onChange={handleDateChange}
+                                      dateFormat="dd-MM-yyyy"
+                                      className="hidden"
+                                      maxDate={maxDate}
+                                      minDate={minDate}
                                     />
                                   </div>
                                 </div>
@@ -1718,6 +1448,150 @@ const CreateLessonPlan = () => {
                                                             })
                                                           )
                                                         }
+                                                        onKeyDown={(e) => {
+                                                          const {
+                                                            value,
+                                                            selectionStart,
+                                                            selectionEnd,
+                                                          } = e.target;
+
+                                                          // Handle Enter key for new bullets
+                                                          if (
+                                                            e.key === "Enter"
+                                                          ) {
+                                                            e.preventDefault();
+
+                                                            const lineStart =
+                                                              value.lastIndexOf(
+                                                                "\n",
+                                                                selectionStart -
+                                                                  1
+                                                              ) + 1;
+                                                            const currentLine =
+                                                              value.substring(
+                                                                lineStart,
+                                                                selectionStart
+                                                              );
+
+                                                            const before =
+                                                              value.substring(
+                                                                0,
+                                                                selectionStart
+                                                              );
+                                                            const after =
+                                                              value.substring(
+                                                                selectionEnd
+                                                              );
+
+                                                            const newBullet =
+                                                              currentLine.startsWith(
+                                                                "• "
+                                                              )
+                                                                ? "• "
+                                                                : "";
+
+                                                            const newValue =
+                                                              before +
+                                                              "\n" +
+                                                              newBullet +
+                                                              after;
+                                                            e.target.value =
+                                                              newValue;
+
+                                                            const cursorPos =
+                                                              selectionStart +
+                                                              1 +
+                                                              newBullet.length;
+                                                            setTimeout(() => {
+                                                              e.target.selectionStart =
+                                                                e.target.selectionEnd =
+                                                                  cursorPos;
+                                                            }, 0);
+                                                          }
+
+                                                          if (
+                                                            e.key ===
+                                                            "Backspace"
+                                                          ) {
+                                                            const lineStart =
+                                                              value.lastIndexOf(
+                                                                "\n",
+                                                                selectionStart -
+                                                                  1
+                                                              ) + 1;
+                                                            const currentLine =
+                                                              value.substring(
+                                                                lineStart,
+                                                                selectionStart
+                                                              );
+
+                                                            if (
+                                                              currentLine.startsWith(
+                                                                "• "
+                                                              ) &&
+                                                              selectionStart ===
+                                                                lineStart + 2
+                                                            ) {
+                                                              e.preventDefault();
+                                                              const newValue =
+                                                                value.substring(
+                                                                  0,
+                                                                  lineStart
+                                                                ) +
+                                                                value.substring(
+                                                                  lineStart + 2
+                                                                );
+                                                              e.target.value =
+                                                                newValue;
+
+                                                              setTimeout(() => {
+                                                                e.target.selectionStart =
+                                                                  e.target.selectionEnd =
+                                                                    lineStart;
+                                                              }, 0);
+                                                            }
+                                                          }
+                                                        }}
+                                                        onInput={(e) => {
+                                                          const lines =
+                                                            e.target.value.split(
+                                                              "\n"
+                                                            );
+                                                          const updatedLines =
+                                                            lines.map((line) =>
+                                                              line.trim() ===
+                                                                "" ||
+                                                              line.startsWith(
+                                                                "• "
+                                                              )
+                                                                ? line
+                                                                : "• " + line
+                                                            );
+                                                          const newValue =
+                                                            updatedLines.join(
+                                                              "\n"
+                                                            );
+                                                          if (
+                                                            newValue !==
+                                                            e.target.value
+                                                          ) {
+                                                            e.target.value =
+                                                              newValue;
+                                                            e.target.selectionStart =
+                                                              e.target.selectionEnd =
+                                                                newValue.length;
+                                                          }
+                                                        }}
+                                                        onBlur={(e) => {
+                                                          console.log(
+                                                            "Updated value:",
+                                                            e.target.value,
+                                                            "at row",
+                                                            rowIndex,
+                                                            "col",
+                                                            colIndex
+                                                          );
+                                                        }}
                                                         className="w-full h-full resize-none p-2 border border-gray-300 focus:outline-none"
                                                         style={{
                                                           minHeight: "250px",
@@ -1759,37 +1633,45 @@ const CreateLessonPlan = () => {
                                 {/* Table 3: Daily Teaching Points */}
                                 {timetable?.length > 0 && (
                                   <div className="flex flex-row gap-4 mb-4">
-                                    <div className="w-2/3 border p-3 rounded bg-gray-50">
-                                      <table className="w-full table-auto border-collapse text-sm">
+                                    <div className="w-full border p-3 rounded bg-gray-50 overflow-x-auto">
+                                      <table className="min-w-max border border-gray-400 table-fixed text-sm">
                                         <thead>
                                           <tr className="bg-gray-200 border-2 border-gray-400">
-                                            <th className="border-2 px-4 py-2 text-left w-[19%] text-sm font-semibold text-gray-800">
+                                            {/* Start Date Header */}
+                                            <th
+                                              className="border-2 px-4 py-2 text-left text-sm font-semibold text-gray-800 sticky left-0 bg-gray-200"
+                                              style={{
+                                                width: "180px",
+                                                minWidth: "180px",
+                                              }}
+                                            >
                                               Start Date
                                             </th>
-                                            <th className="border-2 px-4 py-2 text-left text-sm font-semibold text-gray-800">
-                                              {(heading || [])
-                                                .filter(
-                                                  (item) =>
-                                                    item.change_daily === "N"
-                                                )
-                                                .map((item, i) => (
-                                                  <th
-                                                    key={
-                                                      item.lesson_plan_headings_id
-                                                    }
-                                                    className={`px-6 py-2 text-sm font-semibold text-center text-gray-800 ${
-                                                      i === 0
-                                                        ? "sticky left-0 bg-gray-200"
-                                                        : ""
-                                                    }`}
-                                                    //  border-2
-                                                    style={{ width: "210px" }}
-                                                  >
-                                                    {item.name}
-                                                  </th>
-                                                ))}
-                                            </th>
-                                            <th className="border-2 px-4 py-2 w-12">
+
+                                            {/* Dynamic Headings */}
+                                            {(dailyHeading || []).map(
+                                              (item) => (
+                                                <th
+                                                  key={
+                                                    item.lesson_plan_headings_id
+                                                  }
+                                                  className="border-2 px-4 py-2 text-center text-sm font-semibold text-gray-800"
+                                                  style={{
+                                                    width: "220px",
+                                                    minWidth: "220px",
+                                                    wordWrap: "break-word",
+                                                  }}
+                                                >
+                                                  {item.name}
+                                                </th>
+                                              )
+                                            )}
+
+                                            {/* Add Button Header */}
+                                            <th
+                                              className="border-2 px-4 py-2 text-center w-12 font-semibold text-gray-800"
+                                              style={{ minWidth: "60px" }}
+                                            >
                                               <button
                                                 type="button"
                                                 onClick={handleAddRow}
@@ -1802,58 +1684,95 @@ const CreateLessonPlan = () => {
                                         </thead>
 
                                         <tbody>
-                                          {rows.map((entry, idx) => (
-                                            <tr
-                                              key={idx}
-                                              className="even:bg-white odd:bg-gray-50 border-2 border-gray-400 "
+                                          <tr className="even:bg-white odd:bg-gray-50 border-2 border-gray-400">
+                                            {/* Start Date Cell */}
+                                            <td
+                                              className="border-2 border-gray-400 px-4 py-2 sticky left-0 bg-white"
+                                              style={{
+                                                width: "180px",
+                                                minWidth: "180px",
+                                              }}
                                             >
-                                              <td className="border-2 border-gray-400 px-4 py-2">
-                                                <input
-                                                  type="date"
-                                                  value={entry.startDate}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      idx,
-                                                      "startDate",
-                                                      e.target.value
-                                                    )
-                                                  }
-                                                  className="w-full p-2 border border-gray-300 rounded"
-                                                />
-                                              </td>
+                                              <input
+                                                type="date"
+                                                value={rows[0]?.startDate || ""}
+                                                min={fromDate || ""}
+                                                max={toDate || ""}
+                                                onChange={(e) =>
+                                                  handleChange(
+                                                    0,
+                                                    "startDate",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-pink-400"
+                                              />
+                                            </td>
 
-                                              <td className="border-2 py-2 px-2">
-                                                <textarea
-                                                  value={entry.description}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      idx,
-                                                      "description",
-                                                      e.target.value
-                                                    )
+                                            {/* Daily Headings (Textareas for each heading) */}
+                                            {(dailyHeading || []).map(
+                                              (item, colIndex) => (
+                                                <td
+                                                  key={
+                                                    item.lesson_plan_headings_id
                                                   }
-                                                  className="w-full resize-none p-2 border border-gray-400 rounded focus:outline-none"
+                                                  className={`border-2 px-2 py-1 align-top ${
+                                                    colIndex === 0
+                                                      ? "sticky left-[180px] bg-white"
+                                                      : ""
+                                                  }`}
                                                   style={{
-                                                    minHeight: "60px",
-                                                    lineHeight: "1.5em",
-                                                    marginBottom: "6px",
+                                                    width: "220px",
+                                                    minWidth: "220px",
                                                   }}
-                                                  placeholder="Enter description"
-                                                />
-                                              </td>
-                                              <td className="border-2 px-2 py-2 text-center">
-                                                <button
-                                                  type="button"
-                                                  onClick={() =>
-                                                    handleRemoveRow(idx)
-                                                  }
-                                                  className="text-red-500 hover:text-red-700"
                                                 >
-                                                  ✕
-                                                </button>
-                                              </td>
-                                            </tr>
-                                          ))}
+                                                  <textarea
+                                                    value={
+                                                      studentRemarks[
+                                                        `${item.lesson_plan_headings_id}_0`
+                                                      ] ??
+                                                      timetable[0]?.[
+                                                        `description_${item.lesson_plan_headings_id}_1`
+                                                      ] ??
+                                                      ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      setStudentRemarks(
+                                                        (prev) => ({
+                                                          ...prev,
+                                                          [`${item.lesson_plan_headings_id}_0`]:
+                                                            e.target.value,
+                                                        })
+                                                      )
+                                                    }
+                                                    className="w-full resize-none p-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-pink-400 rounded"
+                                                    style={{
+                                                      minHeight: "100px",
+                                                      lineHeight: "1.5em",
+                                                      boxSizing: "border-box",
+                                                    }}
+                                                    rows={2}
+                                                  />
+                                                </td>
+                                              )
+                                            )}
+
+                                            {/* Delete Button */}
+                                            <td
+                                              className="border-2 px-2 py-2 text-center"
+                                              style={{ minWidth: "60px" }}
+                                            >
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  handleRemoveRow(0)
+                                                }
+                                                className="text-red-500 hover:text-red-700"
+                                              >
+                                                ✕
+                                              </button>
+                                            </td>
+                                          </tr>
                                         </tbody>
                                       </table>
                                     </div>

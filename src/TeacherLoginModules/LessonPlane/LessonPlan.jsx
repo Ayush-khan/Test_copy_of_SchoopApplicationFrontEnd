@@ -1055,6 +1055,7 @@ function LessonPlan() {
                                                 value: subject.chapter_id,
                                                 label: subject.name,
                                               },
+                                              section_id: subject.section_id,
                                             },
                                           }
                                         );

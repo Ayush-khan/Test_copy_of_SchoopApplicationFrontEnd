@@ -7,10 +7,12 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { FiPlus } from "react-icons/fi";
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import "react-datepicker/dist/react-datepicker.css";
 import dayjs from "dayjs";
 import { useLocation, useParams } from "react-router-dom";
+import { FaRegCalendarAlt } from "react-icons/fa";
 
 const EditLessonPlanTemplate = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -34,8 +36,47 @@ const EditLessonPlanTemplate = () => {
   const [studentRemarks, setStudentRemarks] = useState({});
   const [showStudentReport, setShowStudentReport] = useState(false);
   const [heading, setHeadings] = useState([]);
+  const [dailyHeading, setDailyHeadings] = useState([]);
 
   const [timetable, setTimetable] = useState([]);
+  const [weekError, setWeekError] = useState(false);
+  const [weekRange, setWeekRange] = useState("");
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(null);
+  const [numPeriods, setNumPeriods] = useState("");
+  const datePickerRef = useRef(null);
+
+  const handleDateChange = (date) => {
+    setFromDate(date);
+    setWeekError("");
+
+    if (date) {
+      const selectedDate = dayjs(date);
+
+      // Monday as start of week
+      const monday = selectedDate.startOf("week").add(1, "day");
+      const sunday = monday.add(6, "day");
+
+      // Readable week range
+      const startDateFormatted = monday.format("DD-MM-YYYY");
+      const endDateFormatted = sunday.format("DD-MM-YYYY");
+      setWeekRange(`${startDateFormatted} / ${endDateFormatted}`);
+
+      // Raw values for input[type="date"]
+      setFromDate(monday.format("YYYY-MM-DD"));
+      setToDate(sunday.format("YYYY-MM-DD"));
+    } else {
+      setWeekRange("");
+      setFromDate(null);
+      setToDate(null);
+    }
+  };
+
+  const openDatePicker = () => {
+    if (datePickerRef.current) {
+      datePickerRef.current.setOpen(true);
+    }
+  };
 
   const student = {
     daily_changes: [
@@ -56,6 +97,9 @@ const EditLessonPlanTemplate = () => {
   const { state } = useLocation();
   console.log("state", state);
 
+  const sectionId = state.section_id;
+  console.log("section", sectionId);
+
   const {
     headings: passedHeadings = [],
     timetable: passedTimetable = [],
@@ -66,6 +110,7 @@ const EditLessonPlanTemplate = () => {
     selectedSubject,
     selectedStudent,
     unq_id,
+    section_id,
   } = state || {};
 
   useEffect(() => {
@@ -91,62 +136,32 @@ const EditLessonPlanTemplate = () => {
     }
   };
 
-  // useEffect(() => {
-  //   const fetchTemplate = async () => {
-  //     setLoading(true);
+  const fetchDailyHeadings = async () => {
+    console.log("jkhgf");
+    try {
+      const token = localStorage.getItem("authToken");
 
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-  //       const response = await axios.get(
-  //         `${API_URL}/api/get_lesson_plan_by_unq_id/${id}`,
+      const response = await axios.get(
+        `${API_URL}/api/get_lesson_plan_heading_daily`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
+      const data = response?.data?.data || [];
+      console.log("data daily", data);
+      data.sort((a, b) => a.sequence - b.sequence);
+      setDailyHeadings(data);
+    } catch (error) {
+      console.error("Error fetching Lesson plan headings:", error);
+      toast.error("Error fetching Lesson plan headings");
+    }
+  };
 
-  //       const data = response?.data?.data || [];
-  //       const dataArray = Array.isArray(data) ? data : [data];
-
-  //       setPublish(dataArray[0].publish);
-  //       console.log("check pu", dataArray[0].publish);
-  //       // Group details by heading for each template
-  //       const timetableArray = dataArray.map((template) => {
-  //         const grouped = {};
-  //         (template.details || []).forEach((desc) => {
-  //           if (!grouped[desc.lesson_plan_headings_id])
-  //             grouped[desc.lesson_plan_headings_id] = [];
-  //           grouped[desc.lesson_plan_headings_id].push(desc);
-  //         });
-  //         return {
-  //           ...template,
-  //           groupedDetails: grouped, // rename groupedDescriptions -> groupedDetails
-  //         };
-  //       });
-
-  //       setTimetable(timetableArray);
-
-  //       // Prepare studentRemarks: pick first description for each heading as default
-  //       const remarks = {};
-  //       timetableArray.forEach((template) => {
-  //         Object.keys(template.groupedDetails).forEach((headingId) => {
-  //           remarks[headingId] =
-  //             template.groupedDetails[headingId][0].description || "";
-  //         });
-  //       });
-  //       setStudentRemarks(remarks);
-
-  //       console.log("row", timetableArray);
-  //       console.log("studentRemarks", remarks);
-  //     } catch (err) {
-  //       toast.error("Error fetching lesson plan template");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchTemplate();
-  // }, [id]);
+  useEffect(() => {
+    console.log("useEffect triggered");
+    fetchDailyHeadings();
+  }, []);
 
   useEffect(() => {
     const fetchTemplate = async () => {
@@ -159,53 +174,20 @@ const EditLessonPlanTemplate = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        const data = response?.data?.data || [];
+        const details = response?.data?.data?.details || [];
+        const lessonPlan = response?.data?.data?.lesson_plan || {};
 
-        // Handle both single and array responses
-        const dataArray = Array.isArray(data) ? data : [data];
-
-        // Group data by unq_id (each lesson plan)
-        const groupedByUnq = dataArray.reduce((acc, item) => {
-          const key = item.unq_id;
-          if (!acc[key]) acc[key] = [];
-          acc[key].push(item);
-          return acc;
-        }, {});
-
-        // Transform grouped data to timetable format
-        const timetableArray = Object.entries(groupedByUnq).map(
-          ([unq_id, items]) => {
-            const grouped = {};
-            items.forEach((desc) => {
-              if (!grouped[desc.lesson_plan_headings_id])
-                grouped[desc.lesson_plan_headings_id] = [];
-              grouped[desc.lesson_plan_headings_id].push(desc);
-            });
-            return {
-              unq_id,
-              groupedDetails: grouped,
-            };
-          }
-        );
-
-        // ✅ Store final timetable
-        setTimetable(timetableArray);
-
-        // ✅ Prepare remarks for textareas
+        // ✅ Create a mapping of heading_id → description
         const remarks = {};
-        timetableArray.forEach((template) => {
-          Object.keys(template.groupedDetails).forEach((headingId) => {
-            const descriptions = template.groupedDetails[headingId];
-            descriptions.forEach((desc, i) => {
-              remarks[`${headingId}_${i}`] = desc.description || "";
-            });
-          });
+        details.forEach((item, index) => {
+          remarks[item.lesson_plan_headings_id] = item.description || "";
         });
 
+        setTimetable([lessonPlan]); // store one plan for display reference if needed
         setStudentRemarks(remarks);
 
-        console.log("✅ Final Timetable:", timetableArray);
-        console.log("✅ Student Remarks:", remarks);
+        console.log("✅ Lesson Plan Details:", details);
+        console.log("✅ Mapped Remarks:", remarks);
       } catch (err) {
         toast.error("Error fetching lesson plan template");
       } finally {
@@ -238,10 +220,11 @@ const EditLessonPlanTemplate = () => {
     setRows(updatedRows);
   };
 
-  //   const handleUpdate = async () => {
-  //     if (isSubmitting) return;
-  //     setIsSubmitting(true);
+  // const handleUpdate = async () => {
+  //   if (isSubmitting) return;
+  //   setIsSubmitting(true);
 
+  //   try {
   //     const token = localStorage.getItem("authToken");
   //     if (!token) {
   //       toast.error("Authentication token missing. Please login again.");
@@ -249,12 +232,59 @@ const EditLessonPlanTemplate = () => {
   //       return;
   //     }
 
-  //     // collect all filled descriptions
+  //     // ✅ Correct handling for class_id and section_id
+  //     const studentsArray = Array.isArray(selectedStudent)
+  //       ? selectedStudent.map((s) => ({
+  //           class_id: s.value,
+  //           section_id: s.section_id || sectionId || "0", // ✅ uses state fallback
+  //         }))
+  //       : selectedStudent
+  //       ? [
+  //           {
+  //             class_id: selectedStudent.value,
+  //             section_id: selectedStudent.section_id || sectionId || "0", // ✅ corrected property name
+  //           },
+  //         ]
+  //       : [];
+
+  //     if (!studentsArray.length) {
+  //       toast.error("Please select at least one student/class before saving.");
+  //       setIsSubmitting(false);
+  //       return;
+  //     }
+
+  //     const invalidStudent = studentsArray.find(
+  //       (s) => !s.class_id || s.section_id === undefined || s.section_id === ""
+  //     );
+  //     if (invalidStudent) {
+  //       toast.error("Selected student has invalid class or section.");
+  //       setIsSubmitting(false);
+  //       return;
+  //     }
+
+  //     const classId = studentsArray[0].class_id?.toString() || "0";
+  //     const sectionIds = studentsArray
+  //       .map((s) => s.section_id?.toString() || "0")
+  //       .join(",");
+  //     const classIdArray = studentsArray.map(
+  //       (s) => `${s.class_id}^${s.section_id}`
+  //     );
+
   //     const descriptions = {};
-  //     heading.forEach((item, index) => {
-  //       const value = studentRemarks[item.lesson_plan_headings_id]?.trim();
-  //       if (value) {
-  //         descriptions[`description_${index + 1}`] = value;
+  //     heading.forEach((item) => {
+  //       const headingId = item.lesson_plan_headings_id;
+  //       const group = timetable?.[0]?.groupedDetails?.[headingId] || [];
+
+  //       if (group.length > 0) {
+  //         group.forEach((desc, i) => {
+  //           const keyPrefix = item.isDaily ? "dc_description" : "description";
+  //           descriptions[`${keyPrefix}_${headingId}_${i + 1}`] =
+  //             studentRemarks[`${headingId}_${i}`] || desc.description || "";
+  //         });
+  //       } else {
+  //         const keyPrefix = item.isDaily ? "dc_description" : "description";
+  //         const value = studentRemarks[headingId] || "";
+  //         if (value) descriptions[`${keyPrefix}_${headingId}_1`] = value;
   //       }
   //     });
 
@@ -264,53 +294,51 @@ const EditLessonPlanTemplate = () => {
   //       return;
   //     }
 
-  //     try {
-  //       // 🔹 Same logic as handleSearch
-  //       const classId = selectedStudent[0]?.class_id;
-  //       const sectionIds = selectedStudent.map((s) => s.section_id).join(",");
-  //       const classIdArray = selectedStudent.map(
-  //         (s) => `${s.class_id}^${s.section_id}`
-  //       );
+  //     // ✅ Build payload
+  //     const payload = {
+  //       class_id: classId,
+  //       section_id: sectionIds,
+  //       sm_id: selectedSubjectId?.toString() || "0",
+  //       chapter_id: selectedChapterId?.toString() || "0",
+  //       class_id_array: classIdArray,
+  //       no_of_periods: timetable?.length?.toString() || "1",
+  //       weeklyDatePicker: new Date().toISOString().split("T")[0],
+  //       les_pln_temp_id: timetable?.[0]?.les_pln_temp_id || "new",
+  //       approve: "Y",
+  //       lph_dc_row: "1",
+  //       start_date: [new Date().toISOString().split("T")[0]],
+  //       ...descriptions,
+  //     };
 
-  //       const payload = {
-  //         // operation: "create",
-  //         class_id: classId?.toString(),
-  //         section_id: sectionIds,
-  //         sm_id: selectedSubjectId?.toString(),
-  //         chapter_id: selectedChapterId?.toString(),
-  //         class_id_array: classIdArray, // include same field if backend expects it
-  //         no_of_periods: timetable?.length?.toString() || "1",
-  //         weeklyDatePicker: new Date().toISOString().split("T")[0],
-  //         les_pln_temp_id: timetable?.[0]?.les_pln_temp_id || "new",
-  //         approve: "Y",
-  //         lph_dc_row: "1",
-  //         start_date: [new Date().toISOString().split("T")[0]],
-  //         ...descriptions,
-  //       };
+  //     if (timetable?.[0]?.lesson_plan_id)
+  //       payload.lesson_plan_id = timetable[0].lesson_plan_id;
+  //     if (timetable?.[0]?.unq_id) payload.unq_id = timetable[0].unq_id;
 
-  //       const response = await axios.put(
-  //         `${API_URL}/api/update_lesson_plan/${id}`,
-  //         payload,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
+  //     console.log("🚀 Payload being sent to API:", payload);
 
-  //       if (response.data.status === 200) {
-  //         toast.success("Lesson plan saved successfully!");
-  //         navigate("/lessonPlan");
-  //         setStudentRemarks({});
-  //         setTimetable([]);
-  //       } else {
-  //         toast.error(response.data.message || "Failed to save lesson plan.");
+  //     const response = await axios.put(
+  //       `${API_URL}/api/update_lesson_plan/${id}`,
+  //       payload,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
   //       }
-  //     } catch (error) {
-  //       console.error("❌ Error saving lesson plan:", error);
-  //       toast.error("An error occurred while saving the lesson plan.");
-  //     } finally {
-  //       setIsSubmitting(false);
+  //     );
+
+  //     if (response.data.status === 200) {
+  //       toast.success("Lesson plan updated successfully!");
+  //       navigate("/lessonPlan");
+  //       setStudentRemarks({});
+  //       setTimetable([]);
+  //     } else {
+  //       toast.error(response.data.message || "Failed to update lesson plan.");
   //     }
-  //   };
+  //   } catch (error) {
+  //     console.error("Error saving lesson plan:", error);
+  //     toast.error("An error occurred while saving the lesson plan.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
   const handleUpdate = async () => {
     if (isSubmitting) return;
@@ -324,38 +352,51 @@ const EditLessonPlanTemplate = () => {
         return;
       }
 
-      // Normalize selectedStudent to always have class_id and section_id
+      // 🔸 Validate No. of Periods
+      if (!numPeriods || parseInt(numPeriods) <= 0) {
+        toast.error("Please select number of periods before saving.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 🔸 Validate Week selection
+      if (!fromDate || !toDate || !weekRange) {
+        toast.error("Please select week before saving.");
+        setWeekError("Please select week before saving.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 🔸 Validate class/section selection
       const studentsArray = Array.isArray(selectedStudent)
         ? selectedStudent.map((s) => ({
-            class_id: s.value, // use only value
-            section_id: s.section_id || "0",
+            class_id: s.value,
+            section_id: s.section_id || sectionId || "0", // ✅ uses state fallback
           }))
         : selectedStudent
         ? [
             {
               class_id: selectedStudent.value,
-              section_id: selectedStudent.section_id || "0",
+              section_id: selectedStudent.section_id || sectionId || "0", // ✅ corrected property name
             },
           ]
         : [];
 
       if (!studentsArray.length) {
-        toast.error("Please select at least one student/class before saving.");
+        toast.error("Please select at least one class before saving.");
         setIsSubmitting(false);
         return;
       }
 
-      // Validate class_id and section_id
       const invalidStudent = studentsArray.find(
         (s) => !s.class_id || s.section_id === undefined || s.section_id === ""
       );
       if (invalidStudent) {
-        toast.error("Selected student has invalid class or section.");
+        toast.error("Selected class has invalid class or section.");
         setIsSubmitting(false);
         return;
       }
 
-      // Prepare class_id and section_id (section_id comma-separated)
       const classId = studentsArray[0].class_id?.toString() || "0";
       const sectionIds = studentsArray
         .map((s) => s.section_id?.toString() || "0")
@@ -364,62 +405,91 @@ const EditLessonPlanTemplate = () => {
         (s) => `${s.class_id}^${s.section_id}`
       );
 
-      // Collect all filled descriptions
       const descriptions = {};
-      heading.forEach((item) => {
-        const headingId = item.lesson_plan_headings_id;
-        const group = timetable?.[0]?.groupedDetails?.[headingId] || [];
 
-        if (group.length > 0) {
-          group.forEach((desc, i) => {
-            const keyPrefix = item.isDaily ? "dc_description" : "description";
-            descriptions[`${keyPrefix}_${headingId}_${i + 1}`] =
-              studentRemarks[`${headingId}_${i}`] || desc.description || "";
-          });
-        } else {
-          const keyPrefix = item.isDaily ? "dc_description" : "description";
-          const value = studentRemarks[headingId] || "";
-          if (value) descriptions[`${keyPrefix}_${headingId}_1`] = value;
-        }
+      (heading || []).forEach((item) => {
+        const headingId = item.lesson_plan_headings_id;
+        const descValue =
+          studentRemarks[headingId] || timetable?.[0]?.[headingId] || "";
+
+        const formattedValue = descValue
+          .split("\n")
+          .map((line) => {
+            const trimmed = line.trim();
+            if (trimmed === "") return "";
+            return trimmed.startsWith("• ") ? trimmed : "• " + trimmed;
+          })
+          .join("\n")
+          .trim();
+
+        descriptions[`description_${headingId}_1`] = formattedValue;
       });
 
-      if (Object.keys(descriptions).length === 0) {
+      (dailyHeading || []).forEach((item) => {
+        const headingId = item.lesson_plan_headings_id;
+        const descValue =
+          studentRemarks[`${headingId}_0`] ||
+          timetable?.[0]?.[`description_${headingId}_1`] ||
+          "";
+
+        const formattedValue = descValue
+          .split("\n")
+          .map((line) => {
+            const trimmed = line.trim();
+            if (trimmed === "") return "";
+            return trimmed.startsWith("• ") ? trimmed : "• " + trimmed;
+          })
+          .join("\n")
+          .trim();
+
+        descriptions[`description_${headingId}_1`] = formattedValue;
+      });
+
+      const hasAnyDescription = Object.values(descriptions).some(
+        (val) => val && val.trim() !== ""
+      );
+      if (!hasAnyDescription) {
         toast.error("Please enter at least one description before saving.");
         setIsSubmitting(false);
         return;
       }
 
-      // Build payload
+      const hasTeachingPoints = (dailyHeading || []).some((item) => {
+        const val =
+          descriptions[`description_${item.lesson_plan_headings_id}_1`] || "";
+        return val.trim() !== "";
+      });
+      if (!hasTeachingPoints) {
+        toast.error("Please add teaching points before saving.");
+        setIsSubmitting(false);
+        return;
+      }
+
       const payload = {
         class_id: classId,
         section_id: sectionIds,
         sm_id: selectedSubjectId?.toString() || "0",
         chapter_id: selectedChapterId?.toString() || "0",
         class_id_array: classIdArray,
-        no_of_periods: timetable?.length?.toString() || "1",
+        no_of_periods: numPeriods?.toString() || "1",
         weeklyDatePicker: new Date().toISOString().split("T")[0],
         les_pln_temp_id: timetable?.[0]?.les_pln_temp_id || "new",
         approve: "Y",
         lph_dc_row: "1",
-        start_date: [new Date().toISOString().split("T")[0]],
+        start_date: [fromDate, toDate],
         ...descriptions,
       };
 
-      // Optional: include existing lesson_plan_id & unq_id for edit mode
       if (timetable?.[0]?.lesson_plan_id)
         payload.lesson_plan_id = timetable[0].lesson_plan_id;
       if (timetable?.[0]?.unq_id) payload.unq_id = timetable[0].unq_id;
 
-      // ✅ Log the final payload
-      console.log("🚀 Payload being sent to API:", payload);
+      console.log("🚀 Final Payload:", payload);
 
-      // Send PUT request
       const response = await axios.put(
         `${API_URL}/api/update_lesson_plan/${id}`,
         payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.data.status === 200) {
@@ -427,117 +497,19 @@ const EditLessonPlanTemplate = () => {
         navigate("/lessonPlan");
         setStudentRemarks({});
         setTimetable([]);
+        setWeekRange("");
+        setNumPeriods("");
       } else {
         toast.error(response.data.message || "Failed to update lesson plan.");
       }
     } catch (error) {
-      console.error("Error saving lesson plan:", error);
+      console.error(" Error updating lesson plan:", error);
       toast.error("An error occurred while saving the lesson plan.");
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  // const handleUpdate = async () => {
-  //   if (isSubmitting) return;
-  //   setIsSubmitting(true);
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       toast.error("Authentication token missing. Please login again.");
-  //       setIsSubmitting(false);
-  //       return;
-  //     }
-
-  //     // Ensure selectedStudent is always an array
-  //     const studentsArray = Array.isArray(selectedStudent)
-  //       ? selectedStudent
-  //       : selectedStudent
-  //       ? [selectedStudent]
-  //       : [];
-
-  //     if (!studentsArray.length) {
-  //       toast.error("Please select at least one student/class before saving.");
-  //       setIsSubmitting(false);
-  //       return;
-  //     }
-
-  //     // Validate class_id and section_id
-  //     const invalidStudent = studentsArray.find(
-  //       (s) => !s.class_id || s.section_id === undefined || s.section_id === ""
-  //     );
-  //     if (invalidStudent) {
-  //       toast.error("Selected student has invalid class or section.");
-  //       setIsSubmitting(false);
-  //       return;
-  //     }
-
-  //     // Collect all filled descriptions
-  //     const descriptions = {};
-  //     heading.forEach((item, index) => {
-  //       const value = studentRemarks[item.lesson_plan_headings_id]?.trim();
-  //       if (value) {
-  //         descriptions[`description_${index + 1}`] = value;
-  //       }
-  //     });
-
-  //     if (Object.keys(descriptions).length === 0) {
-  //       toast.error("Please enter at least one description before saving.");
-  //       setIsSubmitting(false);
-  //       return;
-  //     }
-
-  //     // Prepare payload
-  //     const classId = studentsArray[0].class_id?.toString();
-  //     const sectionIds = studentsArray
-  //       .map((s) => s.section_id?.toString())
-  //       .join(",");
-  //     const classIdArray = studentsArray.map(
-  //       (s) =>
-  //         `${s.class_id?.toString() || "0"}^${s.section_id?.toString() || "0"}`
-  //     );
-
-  //     const payload = {
-  //       class_id: classId || "0",
-  //       section_id: sectionIds || "0",
-  //       sm_id: selectedSubjectId?.toString() || "0",
-  //       chapter_id: selectedChapterId?.toString() || "0",
-  //       class_id_array: classIdArray,
-  //       no_of_periods: timetable?.length?.toString() || "1",
-  //       weeklyDatePicker: new Date().toISOString().split("T")[0],
-  //       les_pln_temp_id: timetable?.[0]?.les_pln_temp_id || "new",
-  //       approve: "Y",
-  //       lph_dc_row: "1",
-  //       start_date: [new Date().toISOString().split("T")[0]],
-  //       ...descriptions,
-  //     };
-
-  //     // Send PUT request
-  //     const response = await axios.put(
-  //       `${API_URL}/api/update_lesson_plan/${id}`,
-  //       payload,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-
-  //     if (response.data.status === 200) {
-  //       toast.success("Lesson plan saved successfully!");
-  //       navigate("/lessonPlan");
-  //       setStudentRemarks({});
-  //       setTimetable([]);
-  //     } else {
-  //       toast.error(response.data.message || "Failed to save lesson plan.");
-  //     }
-  //   } catch (error) {
-  //     console.error(" Error saving lesson plan:", error);
-  //     toast.error("An error occurred while saving the lesson plan.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
+  
   const filteredSections = timetable.filter((student) => {
     if (!searchTerm) return true; // show all when no search
     const searchLower = searchTerm.replace(/\s+/g, "").toLowerCase();
@@ -699,6 +671,78 @@ const EditLessonPlanTemplate = () => {
                                 key={index}
                                 className="mb-10 border rounded-lg shadow-md p-1"
                               >
+                                <div className="flex items-center justify-end gap-10 mr-10 mb-2 flex-wrap md:flex-nowrap">
+                                  {/* No. of Periods */}
+                                  <div className="flex items-center gap-2">
+                                    <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                                      No. of Periods{" "}
+                                      <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      placeholder="Enter periods"
+                                      className="w-32 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                      value={numPeriods}
+                                      onChange={(e) =>
+                                        setNumPeriods(e.target.value)
+                                      }
+                                      required
+                                    />
+                                  </div>
+
+                                  {/* Date (Week Picker) */}
+                                  <div className="flex items-center gap-2 mr-10">
+                                    <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                                      Date{" "}
+                                      <span className="text-red-500">*</span>
+                                    </label>
+
+                                    {/* <div className="relative w-[230px] md:w-[280px]"> */}
+                                    <div
+                                      className="text-sm text-gray-700 border border-gray-300 p-2.5 rounded-lg 
+                                                  flex items-center justify-between cursor-pointer bg-white 
+                                                  shadow-sm hover:border-gray-400 transition"
+                                      onClick={openDatePicker}
+                                    >
+                                      <div className="flex-1 flex items-center">
+                                        {weekRange ? (
+                                          <span className="truncate text-gray-800">
+                                            {weekRange}
+                                          </span>
+                                        ) : (
+                                          <span className="flex items-center text-gray-400">
+                                            <FaRegCalendarAlt className="mr-2 text-pink-500" />
+                                            Select Week
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {weekRange && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setFromDate(null);
+                                            setWeekRange("");
+                                          }}
+                                          className="text-gray-400 hover:text-red-500 ml-2 "
+                                        >
+                                          <RxCross1 className="text-xs text-red-600" />
+                                        </button>
+                                      )}
+                                    </div>
+
+                                    <DatePicker
+                                      ref={datePickerRef}
+                                      selected={fromDate}
+                                      onChange={handleDateChange}
+                                      dateFormat="dd-MM-yyyy"
+                                      className="hidden"
+                                      maxDate={maxDate}
+                                      minDate={minDate}
+                                    />
+                                  </div>
+                                </div>
                                 <div
                                   className="overflow-x-auto mb-4"
                                   style={{
@@ -735,158 +779,179 @@ const EditLessonPlanTemplate = () => {
                                       </thead>
 
                                       <tbody>
-                                        {timetable.length > 0 ? (
-                                          timetable.map(
-                                            (template, rowIndex) => (
-                                              <tr
+                                        {heading && heading.length > 0 ? (
+                                          <tr style={{ height: "250px" }}>
+                                            {heading.map((item, colIndex) => (
+                                              <td
                                                 key={
-                                                  template.les_pln_id ||
-                                                  rowIndex
+                                                  item.lesson_plan_headings_id
                                                 }
-                                                className="text-left text-sm text-gray-700"
-                                                style={{ height: "250px" }}
+                                                className={`border-2 px-2 py-1 ${
+                                                  colIndex === 0
+                                                    ? "sticky left-0 bg-white"
+                                                    : ""
+                                                }`}
+                                                style={{
+                                                  width: "210px",
+                                                  minHeight: "250px",
+                                                }}
                                               >
-                                                {(heading || []).map(
-                                                  (item, colIndex) => (
-                                                    // <td
-                                                    //   key={
-                                                    //     item.lesson_plan_headings_id
-                                                    //   }
-                                                    //   className={`border-2 px-2 py-1 ${
-                                                    //     colIndex === 0
-                                                    //       ? "sticky left-0 bg-white"
-                                                    //       : ""
-                                                    //   }`}
-                                                    //   style={{
-                                                    //     width: "210px",
-                                                    //     minHeight: "250px",
-                                                    //   }}
-                                                    // >
-                                                    //   <textarea
-                                                    //     value={
-                                                    //       studentRemarks[
-                                                    //         item
-                                                    //           .lesson_plan_headings_id
-                                                    //       ] ||
-                                                    //       template[
-                                                    //         item
-                                                    //           .lesson_plan_headings_id
-                                                    //       ] ||
-                                                    //       ""
-                                                    //     }
-                                                    //     onChange={(e) =>
-                                                    //       setStudentRemarks(
-                                                    //         (prev) => ({
-                                                    //           ...prev,
-                                                    //           [item.lesson_plan_headings_id]:
-                                                    //             e.target.value,
-                                                    //         })
-                                                    //       )
-                                                    //     }
-                                                    //     className="w-full h-full resize-none p-2 border border-gray-300 focus:outline-none"
-                                                    //     style={{
-                                                    //       minHeight: "250px",
-                                                    //       height: "100%",
-                                                    //       boxSizing:
-                                                    //         "border-box",
-                                                    //       lineHeight: "1.5em",
-                                                    //     }}
-                                                    //   />
-                                                    // </td>
+                                                <textarea
+                                                  value={
+                                                    studentRemarks[
+                                                      item
+                                                        .lesson_plan_headings_id
+                                                    ] || ""
+                                                  }
+                                                  onChange={(e) =>
+                                                    setStudentRemarks(
+                                                      (prev) => ({
+                                                        ...prev,
+                                                        [item.lesson_plan_headings_id]:
+                                                          e.target.value,
+                                                      })
+                                                    )
+                                                  }
+                                                  onKeyDown={(e) => {
+                                                    const {
+                                                      value,
+                                                      selectionStart,
+                                                      selectionEnd,
+                                                    } = e.target;
 
-                                                    <td
-                                                      key={
-                                                        item.lesson_plan_headings_id
+                                                    if (e.key === "Enter") {
+                                                      e.preventDefault();
+
+                                                      const lineStart =
+                                                        value.lastIndexOf(
+                                                          "\n",
+                                                          selectionStart - 1
+                                                        ) + 1;
+                                                      const currentLine =
+                                                        value.substring(
+                                                          lineStart,
+                                                          selectionStart
+                                                        );
+
+                                                      const before =
+                                                        value.substring(
+                                                          0,
+                                                          selectionStart
+                                                        );
+                                                      const after =
+                                                        value.substring(
+                                                          selectionEnd
+                                                        );
+
+                                                      const newBullet =
+                                                        currentLine.startsWith(
+                                                          "• "
+                                                        )
+                                                          ? "• "
+                                                          : "";
+
+                                                      const newValue =
+                                                        before +
+                                                        "\n" +
+                                                        newBullet +
+                                                        after;
+                                                      e.target.value = newValue;
+
+                                                      const cursorPos =
+                                                        selectionStart +
+                                                        1 +
+                                                        newBullet.length;
+                                                      setTimeout(() => {
+                                                        e.target.selectionStart =
+                                                          e.target.selectionEnd =
+                                                            cursorPos;
+                                                      }, 0);
+                                                    }
+
+                                                    if (e.key === "Backspace") {
+                                                      const lineStart =
+                                                        value.lastIndexOf(
+                                                          "\n",
+                                                          selectionStart - 1
+                                                        ) + 1;
+                                                      const currentLine =
+                                                        value.substring(
+                                                          lineStart,
+                                                          selectionStart
+                                                        );
+
+                                                      if (
+                                                        currentLine.startsWith(
+                                                          "• "
+                                                        ) &&
+                                                        selectionStart ===
+                                                          lineStart + 2
+                                                      ) {
+                                                        e.preventDefault();
+                                                        const newValue =
+                                                          value.substring(
+                                                            0,
+                                                            lineStart
+                                                          ) +
+                                                          value.substring(
+                                                            lineStart + 2
+                                                          );
+                                                        e.target.value =
+                                                          newValue;
+
+                                                        setTimeout(() => {
+                                                          e.target.selectionStart =
+                                                            e.target.selectionEnd =
+                                                              lineStart;
+                                                        }, 0);
                                                       }
-                                                      className={`border-2 px-2 py-1 ${
-                                                        colIndex === 0
-                                                          ? "sticky left-0 bg-white"
-                                                          : ""
-                                                      }`}
-                                                      style={{
-                                                        width: "210px",
-                                                        minHeight: "250px",
-                                                      }}
-                                                    >
-                                                      {(
-                                                        template.groupedDetails[
-                                                          item
-                                                            .lesson_plan_headings_id
-                                                        ] || []
-                                                      ).map((desc, i) => (
-                                                        <textarea
-                                                          key={i}
-                                                          value={
-                                                            studentRemarks[
-                                                              `${item.lesson_plan_headings_id}_${i}`
-                                                            ] ??
-                                                            desc.description ??
-                                                            ""
-                                                          }
-                                                          onChange={(e) =>
-                                                            setStudentRemarks(
-                                                              (prev) => ({
-                                                                ...prev,
-                                                                [`${item.lesson_plan_headings_id}_${i}`]:
-                                                                  e.target
-                                                                    .value,
-                                                              })
-                                                            )
-                                                          }
-                                                          className="w-full h-full resize-none p-2 border border-gray-300 focus:outline-none"
-                                                          style={{
-                                                            minHeight: "250px",
-                                                            height: "100%",
-                                                            boxSizing:
-                                                              "border-box",
-                                                            lineHeight: "1.5em",
-                                                          }}
-                                                        />
-                                                      ))}
-
-                                                      {/* Handle if there’s no saved data yet */}
-                                                      {(!template
-                                                        .groupedDetails[
-                                                        item
-                                                          .lesson_plan_headings_id
-                                                      ] ||
-                                                        template.groupedDetails[
-                                                          item
-                                                            .lesson_plan_headings_id
-                                                        ].length === 0) && (
-                                                        <textarea
-                                                          value={
-                                                            studentRemarks[
-                                                              item
-                                                                .lesson_plan_headings_id
-                                                            ] || ""
-                                                          }
-                                                          onChange={(e) =>
-                                                            setStudentRemarks(
-                                                              (prev) => ({
-                                                                ...prev,
-                                                                [item.lesson_plan_headings_id]:
-                                                                  e.target
-                                                                    .value,
-                                                              })
-                                                            )
-                                                          }
-                                                          className="w-full h-full resize-none p-2 border border-gray-300 focus:outline-none"
-                                                          style={{
-                                                            minHeight: "250px",
-                                                            height: "100%",
-                                                            boxSizing:
-                                                              "border-box",
-                                                            lineHeight: "1.5em",
-                                                          }}
-                                                        />
-                                                      )}
-                                                    </td>
-                                                  )
-                                                )}
-                                              </tr>
-                                            )
-                                          )
+                                                    }
+                                                  }}
+                                                  onInput={(e) => {
+                                                    const lines =
+                                                      e.target.value.split(
+                                                        "\n"
+                                                      );
+                                                    const updatedLines =
+                                                      lines.map((line) =>
+                                                        line.trim() === "" ||
+                                                        line.startsWith("• ")
+                                                          ? line
+                                                          : "• " + line
+                                                      );
+                                                    const newValue =
+                                                      updatedLines.join("\n");
+                                                    if (
+                                                      newValue !==
+                                                      e.target.value
+                                                    ) {
+                                                      e.target.value = newValue;
+                                                      e.target.selectionStart =
+                                                        e.target.selectionEnd =
+                                                          newValue.length;
+                                                    }
+                                                  }}
+                                                  onBlur={(e) => {
+                                                    console.log(
+                                                      "Updated value:",
+                                                      e.target.value,
+                                                      "at row",
+                                                      rowIndex,
+                                                      "col",
+                                                      colIndex
+                                                    );
+                                                  }}
+                                                  className="w-full h-full resize-none p-2 border border-gray-300 focus:outline-none"
+                                                  style={{
+                                                    minHeight: "250px",
+                                                    height: "100%",
+                                                    boxSizing: "border-box",
+                                                    lineHeight: "1.5em",
+                                                  }}
+                                                />
+                                              </td>
+                                            ))}
+                                          </tr>
                                         ) : (
                                           <tr>
                                             <td
@@ -910,37 +975,45 @@ const EditLessonPlanTemplate = () => {
                                 </div>
                                 {timetable?.length > 0 && (
                                   <div className="flex flex-row gap-4 mb-4">
-                                    <div className="w-2/3 border p-3 rounded bg-gray-50">
-                                      <table className="w-full table-auto border-collapse text-sm">
+                                    <div className="w-full border p-3 rounded bg-gray-50 overflow-x-auto">
+                                      <table className="min-w-max border border-gray-400 table-fixed text-sm">
                                         <thead>
                                           <tr className="bg-gray-200 border-2 border-gray-400">
-                                            <th className="border-2 px-4 py-2 text-left w-[19%] text-sm font-semibold text-gray-800">
+                                            {/* Start Date Header */}
+                                            <th
+                                              className="border-2 px-4 py-2 text-left text-sm font-semibold text-gray-800 sticky left-0 bg-gray-200"
+                                              style={{
+                                                width: "180px",
+                                                minWidth: "180px",
+                                              }}
+                                            >
                                               Start Date
                                             </th>
-                                            <th className="border-2 px-4 py-2 text-left text-sm font-semibold text-gray-800">
-                                              {(heading || [])
-                                                .filter(
-                                                  (item) =>
-                                                    item.change_daily === "N"
-                                                )
-                                                .map((item, i) => (
-                                                  <th
-                                                    key={
-                                                      item.lesson_plan_headings_id
-                                                    }
-                                                    className={`px-6 py-2 text-sm font-semibold text-center text-gray-800 ${
-                                                      i === 0
-                                                        ? "sticky left-0 bg-gray-200"
-                                                        : ""
-                                                    }`}
-                                                    //  border-2
-                                                    style={{ width: "210px" }}
-                                                  >
-                                                    {item.name}
-                                                  </th>
-                                                ))}
-                                            </th>
-                                            <th className="border-2 px-4 py-2 w-12">
+
+                                            {/* Dynamic Headings */}
+                                            {(dailyHeading || []).map(
+                                              (item) => (
+                                                <th
+                                                  key={
+                                                    item.lesson_plan_headings_id
+                                                  }
+                                                  className="border-2 px-4 py-2 text-center text-sm font-semibold text-gray-800"
+                                                  style={{
+                                                    width: "220px",
+                                                    minWidth: "220px",
+                                                    wordWrap: "break-word",
+                                                  }}
+                                                >
+                                                  {item.name}
+                                                </th>
+                                              )
+                                            )}
+
+                                            {/* Add Button Header */}
+                                            <th
+                                              className="border-2 px-4 py-2 text-center w-12 font-semibold text-gray-800"
+                                              style={{ minWidth: "60px" }}
+                                            >
                                               <button
                                                 type="button"
                                                 onClick={handleAddRow}
@@ -953,58 +1026,95 @@ const EditLessonPlanTemplate = () => {
                                         </thead>
 
                                         <tbody>
-                                          {rows.map((entry, idx) => (
-                                            <tr
-                                              key={idx}
-                                              className="even:bg-white odd:bg-gray-50 border-2 border-gray-400 "
+                                          <tr className="even:bg-white odd:bg-gray-50 border-2 border-gray-400">
+                                            {/* Start Date Cell */}
+                                            <td
+                                              className="border-2 border-gray-400 px-4 py-2 sticky left-0 bg-white"
+                                              style={{
+                                                width: "180px",
+                                                minWidth: "180px",
+                                              }}
                                             >
-                                              <td className="border-2 border-gray-400 px-4 py-2">
-                                                <input
-                                                  type="date"
-                                                  value={entry.startDate}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      idx,
-                                                      "startDate",
-                                                      e.target.value
-                                                    )
-                                                  }
-                                                  className="w-full p-2 border border-gray-300 rounded"
-                                                />
-                                              </td>
+                                              <input
+                                                type="date"
+                                                value={rows[0]?.startDate || ""}
+                                                min={fromDate || ""}
+                                                max={toDate || ""}
+                                                onChange={(e) =>
+                                                  handleChange(
+                                                    0,
+                                                    "startDate",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-pink-400"
+                                              />
+                                            </td>
 
-                                              <td className="border-2 py-2 px-2">
-                                                <textarea
-                                                  value={entry.description}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      idx,
-                                                      "description",
-                                                      e.target.value
-                                                    )
+                                            {/* Daily Headings (Textareas for each heading) */}
+                                            {(dailyHeading || []).map(
+                                              (item, colIndex) => (
+                                                <td
+                                                  key={
+                                                    item.lesson_plan_headings_id
                                                   }
-                                                  className="w-full resize-none p-2 border border-gray-400 rounded focus:outline-none"
+                                                  className={`border-2 px-2 py-1 align-top ${
+                                                    colIndex === 0
+                                                      ? "sticky left-[180px] bg-white"
+                                                      : ""
+                                                  }`}
                                                   style={{
-                                                    minHeight: "60px",
-                                                    lineHeight: "1.5em",
-                                                    marginBottom: "6px",
+                                                    width: "220px",
+                                                    minWidth: "220px",
                                                   }}
-                                                  placeholder="Enter description"
-                                                />
-                                              </td>
-                                              <td className="border-2 px-2 py-2 text-center">
-                                                <button
-                                                  type="button"
-                                                  onClick={() =>
-                                                    handleRemoveRow(idx)
-                                                  }
-                                                  className="text-red-500 hover:text-red-700"
                                                 >
-                                                  ✕
-                                                </button>
-                                              </td>
-                                            </tr>
-                                          ))}
+                                                  <textarea
+                                                    value={
+                                                      studentRemarks[
+                                                        `${item.lesson_plan_headings_id}_0`
+                                                      ] ??
+                                                      timetable[0]?.[
+                                                        `description_${item.lesson_plan_headings_id}_1`
+                                                      ] ??
+                                                      ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      setStudentRemarks(
+                                                        (prev) => ({
+                                                          ...prev,
+                                                          [`${item.lesson_plan_headings_id}_0`]:
+                                                            e.target.value,
+                                                        })
+                                                      )
+                                                    }
+                                                    className="w-full resize-none p-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-pink-400 rounded"
+                                                    style={{
+                                                      minHeight: "100px",
+                                                      lineHeight: "1.5em",
+                                                      boxSizing: "border-box",
+                                                    }}
+                                                    rows={2}
+                                                  />
+                                                </td>
+                                              )
+                                            )}
+
+                                            {/* Delete Button */}
+                                            <td
+                                              className="border-2 px-2 py-2 text-center"
+                                              style={{ minWidth: "60px" }}
+                                            >
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  handleRemoveRow(0)
+                                                }
+                                                className="text-red-500 hover:text-red-700"
+                                              >
+                                                ✕
+                                              </button>
+                                            </td>
+                                          </tr>
                                         </tbody>
                                       </table>
                                     </div>
