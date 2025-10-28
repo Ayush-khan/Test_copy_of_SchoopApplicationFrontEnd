@@ -335,6 +335,10 @@ import EditLessonPlan from "../TeacherLoginModules/LessonPlane/EditLessonPlan.js
 import RemarkForTeacher from "../TeacherLoginModules/ViewsModules/RemarkForTeacher.jsx";
 import TeacherNoteForClass from "../TeacherLoginModules/ViewsModules/TeacherNoteForClass.jsx";
 import FeePendingForClass from "../componants/AllTableList/FeePendingForClass.jsx";
+import HomeWorkForClass from "../TeacherLoginModules/ViewsModules/HomeWorkForClass.jsx";
+import TimeTableViewForTeacher from "../TeacherLoginModules/ViewsModules/TimeTableViewForTeacher.jsx";
+import StudentDetailsForTeacher from "../TeacherLoginModules/ViewsModules/StudentDetailsForTeacher.jsx";
+
 // import Menus from "../c";
 function Index() {
   return (
@@ -1373,6 +1377,18 @@ function Index() {
         <Route
           path="/TeacherNoteForClass"
           element={<PrivateRoute element={<TeacherNoteForClass />} />}
+        />
+        <Route
+          path="/homeworkClass"
+          element={<PrivateRoute element={<HomeWorkForClass />} />}
+        />
+        <Route
+          path="/studentDetailsForTeacher"
+          element={<PrivateRoute element={<StudentDetailsForTeacher />} />}
+        />
+        <Route
+          path="/timeTableViewForTeacher"
+          element={<PrivateRoute element={<TimeTableViewForTeacher />} />}
         />
         {/* Curriculum */}
         {/* Chapter */}

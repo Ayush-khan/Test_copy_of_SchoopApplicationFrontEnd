@@ -70,6 +70,7 @@ function TeacherNoteForClass() {
       const mappedData =
         response.data?.data?.map((item) => ({
           value: item.class_id,
+          sectionId: item?.section_id,
           label: item.class_name,
         })) || [];
 
@@ -87,8 +88,8 @@ function TeacherNoteForClass() {
   };
 
   const handleSearch = async () => {
-    setSearchTerm("");
     setStudentError("");
+    setSearchTerm("");
     let hasError = false;
 
     if (!selectedStudent) {
@@ -96,48 +97,52 @@ function TeacherNoteForClass() {
       hasError = true;
     }
 
-    if (hasError) {
-      return;
-    }
-    if (isSubmitting) return; // Prevent re-submitting
+    if (hasError) return;
+    if (isSubmitting) return;
+
     setIsSubmitting(true);
+    setLoading(true);
+
     try {
-      setLoading(true);
       const token = localStorage.getItem("authToken");
-      const params = {};
-      if (selectedDate) params.notice_date = selectedDate;
+      if (!token) {
+        toast.error("Authentication token not found.");
+        setLoading(false);
+        return;
+      }
 
-      const response = await axios.get(`${API_URL}/api/get_remark_of_teacher`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params,
-      });
+      // Build params for API call
+      const params = {
+        class_id: selectedStudent?.value,
+        section_id: selectedStudent?.sectionId,
+      };
 
-      if (response.data?.data?.length > 0) {
-        const smscount = response.data["0"]?.smscount || {};
+      const response = await axios.get(
+        `${API_URL}/api/get_daily_notes_class_teacherwise`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params,
+        }
+      );
 
-        const updatedNotices = response.data.data.map((notice) => {
-          const count = smscount[notice.unq_id] || 0;
-          return {
-            ...notice,
-            showSendButton: notice.publish === "Y" && count > 0,
-            count,
-          };
-        });
+      const data = response.data?.data || [];
 
-        setNotices(updatedNotices); // Update the state with enriched data
-        setPageCount(Math.ceil(updatedNotices.length / pageSize));
+      if (data.length > 0) {
+        setNotices(data);
+        setPageCount(Math.ceil(data.length / pageSize));
         setShowTable(true);
+        toast.success("Daily notes fetched successfully!");
       } else {
         setNotices([]);
         setShowTable(false);
-        toast.error("No notices found for the selected criteria.");
+        toast.info("No daily notes found for the selected class.");
       }
     } catch (error) {
-      console.error("Error fetching SMS notices:", error);
-      toast.error("Error fetching SMS notices. Please try again.");
+      console.error("Error fetching daily notes:", error);
+      toast.error("Failed to fetch daily notes. Please try again.");
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
       setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -263,19 +268,20 @@ function TeacherNoteForClass() {
 
   const searchLower = searchTerm.toLowerCase();
 
-  const filteredSections = notices.filter((notice) => {
-    const subject = notice?.subject?.toLowerCase() || "";
-    const department = notice?.dept_name?.toLowerCase() || "";
-    const type = notice?.notice_type?.toLowerCase() || "";
-    const noticeDate = notice?.notice_date?.toLowerCase() || "";
-    const createdBy = notice?.name?.toLowerCase() || "";
+  const filteredSections = notices.filter((note) => {
+    const searchLower = searchTerm.toLowerCase();
+    const className = note?.class_name?.toLowerCase() || "";
+    const section = note?.sec_name?.toLowerCase() || "";
+    const subject = note?.sub_name?.toLowerCase() || "";
+    const date = note?.date?.toLowerCase() || "";
+    const description = note?.description?.toLowerCase() || "";
 
     return (
+      className.includes(searchLower) ||
+      section.includes(searchLower) ||
       subject.includes(searchLower) ||
-      department.includes(searchLower) ||
-      type.includes(searchLower) ||
-      noticeDate.includes(searchLower) ||
-      createdBy.includes(searchLower)
+      date.includes(searchLower) ||
+      description.includes(searchLower)
     );
   });
 

@@ -158,8 +158,8 @@ function RemarkForTeacher() {
     setCurrentSection(section);
     setNewStaffNames(section?.teacher_names);
     setnewSectionName(section?.notice_date);
-    setnewSubjectnName(section?.subject);
-    setTeacherNameIs(section?.notice_desc);
+    setnewSubjectnName(section?.remark_subject);
+    setTeacherNameIs(section?.remark_desc);
     setteacherIdIs(section?.get_teacher?.teacher_id);
     setShowViewModal(true);
 
@@ -376,33 +376,37 @@ function RemarkForTeacher() {
                           key={item.t_remark_id}
                           className="text-sm hover:bg-gray-50 transition"
                         >
-                          <td className="px-3 py-2 border border-gray-300 text-center">
+                          <td className="px-3 py-2 border border-gray-300 text-center align-middle">
                             {currentPage * pageSize + index + 1}
                           </td>
-                          <td className="px-3 py-2 border border-gray-300 text-center">
+
+                          <td className="px-3 py-2 border border-gray-300 text-center align-middle">
                             {item.t_remark_id}
                           </td>
-                          <td className="px-3 py-2 border border-gray-300 text-center">
+
+                          <td className="px-3 py-2 border border-gray-300 text-center align-middle">
                             {item.remark_date}
                           </td>
-                          <td className="px-3 py-2 border border-gray-300 text-center">
+
+                          <td className="px-3 py-2 border border-gray-300 text-center align-middle">
                             {item.remark_subject}
                           </td>
-                          <td className="px-3 py-2 border border-gray-300 text-center flex justify-center ">
+
+                          {/* ✅ FIXED CELL (Thumbs column) */}
+                          <td className="px-3 py-2 border border-gray-300 text-center align-middle">
                             {item.acknowledge === "Y" ? (
-                              <span className="text-green-600 font-semibold text-center">
-                                <FaThumbsUp className="text-xl" />
-                              </span>
+                              <FaThumbsUp className="text-green-600 text-lg inline-block" />
                             ) : (
-                              <span className="text-red-600 font-semibold"></span>
+                              <span className="text-gray-400 text-sm">—</span>
                             )}
                           </td>
-                          <td className="px-3 py-2 border border-gray-300 text-center">
+
+                          <td className="px-3 py-2 border border-gray-300 text-center align-middle">
                             <button
-                              className="text-[#C03078] hover:text-[#a12565]"
+                              className="text-blue-500 hover:text-blue-600"
                               onClick={() => handleView(item)}
                             >
-                              <MdOutlineRemoveRedEye className="text-xl" />
+                              <MdOutlineRemoveRedEye className="text-xl inline-block" />
                             </button>
                           </td>
                         </tr>
@@ -453,7 +457,7 @@ function RemarkForTeacher() {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">View Notice/SMS</h5>
+                  <h5 className="modal-title">View Remark</h5>
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     type="button"
@@ -470,16 +474,16 @@ function RemarkForTeacher() {
                   {/* Notice Date */}
                   <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
                     <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Notice Date:{" "}
+                      Teacher Name:{" "}
                     </label>
                     <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
-                      {newSection}
+                      {roleId}
                     </span>
                   </div>
                   {/* Subject */}
                   <div className="mb-3 relative flex justify-start mx-4 gap-x-7">
                     <label htmlFor="newSectionName" className="w-1/2 mt-2">
-                      Subject:{" "}
+                      Remark Subject:{" "}
                     </label>
                     <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
                       {newSubject}
@@ -488,7 +492,7 @@ function RemarkForTeacher() {
                   {/* Description */}
                   <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
                     <label htmlFor="noticeDesc" className="w-1/2 mt-2">
-                      Description:
+                      Remark Description:
                     </label>
                     <textarea
                       id="noticeDesc"
