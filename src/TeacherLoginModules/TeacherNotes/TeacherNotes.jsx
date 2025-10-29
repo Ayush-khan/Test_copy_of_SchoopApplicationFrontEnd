@@ -620,16 +620,19 @@ function TeacherNotes() {
                               Sr.No
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Teacher Name
+                              Class
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Type
+                              Create Date
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Publish Date
                             </th>{" "}
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Subject of Remark
+                              Subject
+                            </th>{" "}
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Description{" "}
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Edit/View
@@ -641,10 +644,7 @@ function TeacherNotes() {
                               Publish
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Acknowledge
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Viewed
+                              Viewed By
                             </th>
                           </tr>
                         </thead>
@@ -675,6 +675,9 @@ function TeacherNotes() {
                                         subject.publish_date
                                       ).toLocaleDateString("en-GB")
                                     : ""}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.remark_subject}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.remark_subject}
@@ -710,19 +713,7 @@ function TeacherNotes() {
                                     " "
                                   )}
                                 </td>
-                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.publish === "N" &&
-                                  subject.remark_type !== "Observation" ? (
-                                    <button
-                                      onClick={() => handlePublish(subject)}
-                                      className="text-green-500 hover:text-green-700 hover:bg-transparent"
-                                    >
-                                      <FaCheck />
-                                    </button>
-                                  ) : (
-                                    ""
-                                  )}
-                                </td> */}
+
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.remark_type === "Remark" &&
                                   subject.publish === "Y" ? (
@@ -800,14 +791,6 @@ function TeacherNotes() {
                                   ) : null}
                                 </td>
 
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.acknowledge == "Y" && (
-                                    <FontAwesomeIcon
-                                      icon={faThumbsUp}
-                                      className="text-black text-base"
-                                    />
-                                  )}
-                                </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.read_status == 1 && (
                                     <FontAwesomeIcon
