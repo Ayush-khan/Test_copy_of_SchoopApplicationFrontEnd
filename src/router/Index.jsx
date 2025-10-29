@@ -338,6 +338,11 @@ import FeePendingForClass from "../componants/AllTableList/FeePendingForClass.js
 import HomeWorkForClass from "../TeacherLoginModules/ViewsModules/HomeWorkForClass.jsx";
 import TimeTableViewForTeacher from "../TeacherLoginModules/ViewsModules/TimeTableViewForTeacher.jsx";
 import StudentDetailsForTeacher from "../TeacherLoginModules/ViewsModules/StudentDetailsForTeacher.jsx";
+import BalanceleaveforTeachers from "../TeacherLoginModules/LeaveModuleForTeachers/BalanceleaveforTeachers.jsx";
+import ConsolidatedLeaveForTeachers from "../TeacherLoginModules/LeaveModuleForTeachers/ConsolidatedLeaveForTeachers.jsx";
+import TeacherNotes from "../TeacherLoginModules/TeacherNotes/TeacherNotes.jsx";
+import CreateTeacherNotes from "../TeacherLoginModules/TeacherNotes/CreateTeacherNotes.jsx";
+import EditTeacherNotes from "../TeacherLoginModules/TeacherNotes/EditTeacherNotes.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -1389,6 +1394,28 @@ function Index() {
         <Route
           path="/timeTableViewForTeacher"
           element={<PrivateRoute element={<TimeTableViewForTeacher />} />}
+        />
+        {/* Leave for teacher  modules */}
+        <Route
+          path="/BalanceleaveforTeachers"
+          element={<PrivateRoute element={<BalanceleaveforTeachers />} />}
+        />
+        <Route
+          path="/ConsolidatedLeaveForTeachers"
+          element={<PrivateRoute element={<ConsolidatedLeaveForTeachers />} />}
+        />
+        {/* Upload mai teachers notes module */}
+        <Route
+          path="/TeacherNotes"
+          element={<PrivateRoute element={<TeacherNotes />} />}
+        />
+        <Route
+          path="/EditTeacherNotes/edit/:id"
+          element={<PrivateRoute element={<EditTeacherNotes />} />}
+        />
+        <Route
+          path="CreateTeacherNotes"
+          element={<PrivateRoute element={<CreateTeacherNotes />} />}
         />
         {/* Curriculum */}
         {/* Chapter */}

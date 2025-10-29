@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import Loader from "../../componants/common/LoaderFinal/LoaderStyle";
 import { FaThumbsUp } from "react-icons/fa";
+import { faThumbsUp } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function RemarkForTeacher() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -395,7 +397,10 @@ function RemarkForTeacher() {
                           {/* ✅ FIXED CELL (Thumbs column) */}
                           <td className="px-3 py-2 border border-gray-300 text-center align-middle">
                             {item.acknowledge === "Y" ? (
-                              <FaThumbsUp className="text-green-600 text-lg inline-block" />
+                              <FontAwesomeIcon
+                                icon={faThumbsUp}
+                                className="text-black text-base"
+                              />
                             ) : (
                               <span className="text-gray-400 text-sm">—</span>
                             )}
@@ -403,7 +408,7 @@ function RemarkForTeacher() {
 
                           <td className="px-3 py-2 border border-gray-300 text-center align-middle">
                             <button
-                              className="text-blue-500 hover:text-blue-600"
+                              className="text-blue-500 hover:text-blue-600 hover:bg-transparent"
                               onClick={() => handleView(item)}
                             >
                               <MdOutlineRemoveRedEye className="text-xl inline-block" />
