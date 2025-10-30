@@ -58,8 +58,6 @@ function TeacherNotes() {
   const prevSearchTermRef = useRef("");
   //   for allot subject checkboxes
   const navigate = useNavigate();
-  const [error, setError] = useState(null);
-
   // errors messages for allot subject tab
   const [status, setStatus] = useState("All"); // For status dropdown
   const [selectedDate, setSelectedDate] = useState(""); // For date picker
@@ -68,44 +66,62 @@ function TeacherNotes() {
   const [noticeDesc, setNoticeDesc] = useState("");
   const [subjectError, setSubjectError] = useState("");
   const [noticeDescError, setNoticeDescError] = useState("");
-  const [imageUrls, setImageUrls] = useState([]);
   const [selectedFile, setSelectedFile] = useState([]);
   const [open, setOpen] = useState(false);
-  const [remarkDescription, setRemarkDescription] = useState("");
   const [remarkData, setRemarkData] = useState({
     teacherName: "",
     remarkSubject: "",
     remarkDescription: "",
   });
+  const [regId, setRegId] = useState(null);
+  const [roleId, setRoleId] = useState(null);
+  const [academicYr, setAcademicYr] = useState(null);
+  const [imageUrls, setImageUrls] = useState([]);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState(null);
 
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
-
   useEffect(() => {
-    handleSearch();
-    fetchClassNamesForAllotSubject();
-  }, []);
+    const init = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          toast.error("Authentication token not found. Please login again.");
+          navigate("/");
+          return;
+        }
 
-  const fetchClassNamesForAllotSubject = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/getClassList`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (Array.isArray(response.data)) {
-        setclassesforsubjectallot(response.data);
-        console.log(
-          "this is the dropdown of the allot subject tab for class",
-          response.data
-        );
-      } else {
-        setError("Unexpected data format");
+        const sessionRes = await axios.get(`${API_URL}/api/sessionData`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const acdYr = sessionRes?.data?.custom_claims?.academic_year;
+        const roleId = sessionRes?.data?.user?.role_id;
+        const regId = sessionRes?.data?.user?.reg_id;
+        if (!roleId || !regId || !acdYr) {
+          toast.error("Invalid session data received");
+          return;
+        }
+        setRoleId(roleId);
+        setRegId(regId);
+        setAcademicYr(acdYr);
+      } catch (error) {
+        console.error("Initialization error:", error);
+        toast.error("Failed to get session data. Please try again.");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching class names:", error);
-      setError("Error fetching class names");
+    };
+
+    init();
+  }, []);
+  useEffect(() => {
+    if (regId && academicYr) {
+      handleSearch();
     }
-  };
+  }, [regId, academicYr]);
 
   const handleSearch = async () => {
     if (isSubmitting) return;
@@ -115,35 +131,55 @@ function TeacherNotes() {
 
     try {
       const token = localStorage.getItem("authToken");
-      const params = {};
 
-      const response = await axios.get(
-        `${API_URL}/api/get_remarkforteacherlist`,
+      // ✅ Use regId & academicYr directly from state
+      const formData = {
+        reg_id: regId,
+        acd_yr: academicYr,
+      };
+
+      const response = await axios.post(
+        `${API_URL}/api/get_daily_notes`,
+        formData,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params,
         }
       );
 
-      console.log("response", response.data);
+      console.log("response", response?.data);
 
-      const remarkList = response.data?.date || []; // correct extraction
+      const dailyNotes = response?.data?.daily_notes || [];
 
-      if (remarkList.length > 0) {
-        const updatedNotices = remarkList.map((notice) => ({
-          ...notice,
-          showSendButton: notice.publish === "Y",
+      if (dailyNotes.length > 0) {
+        // ✅ Map API fields to what your table expects
+        const updatedNotices = dailyNotes.map((note) => ({
+          t_remark_id: note.notes_id, // used in delete, send, etc.
+          name: `${note.classname} ${note.sectionname}`, // shown under "Class"
+          date: note.date, // ✅ include this line
+
+          remark_type: "Daily Notes", // constant type name
+          publish_date: note.publish_date, // shown in table
+          remark_subject: note.subjectname || " ", // subject name
+          description: note.description || " ", // shown in description column
+          publish: note.publish, // used for buttons
+          read_status: note.read_status || 0, // in case you show reader status
+          failed_sms_count: note.failed_sms_count || 0, // for send status
+          academic_yr: note.academic_yr || " ",
+          class_id: note.class_id || " ",
+          section_id: note.section_id || " ",
+          subject_id: note.subject_id || " ",
+          teacher_id: note.teacher_id || " ",
         }));
 
         setNotices(updatedNotices);
         setPageCount(Math.ceil(updatedNotices.length / pageSize));
       } else {
         setNotices([]);
-        toast.error("No remarks found.");
+        toast.error("No daily notes found.");
       }
     } catch (error) {
       console.error("Error fetching remarks:", error);
-      toast.error("Error fetching remarks. Please try again.");
+      toast.error("Error fetching daily notes. Please try again.");
     } finally {
       setIsSubmitting(false);
       setLoading(false);
@@ -162,13 +198,58 @@ function TeacherNotes() {
     // Handle page change logic
   };
 
-  const handleView = (subject) => {
+  const handleView = async (subject) => {
     setRemarkData({
-      teacherName: subject.name || "",
-      remarkSubject: subject.remark_subject || "",
-      remarkDescription: subject.remark_desc || "",
+      t_remark_id: subject.notes_id,
+      name: subject.name || "",
+      date:
+        subject.date && subject.date !== "0000-00-00"
+          ? subject.date.split("-").reverse().join("-")
+          : "",
+      publish_date:
+        subject.publish_date && subject.publish_date !== "0000-00-00"
+          ? subject.publish_date.split("-").reverse().join("-")
+          : "",
+      remark_subject: subject.remark_subject || "-",
+      description: subject.description || "-",
+      publish: subject.publish,
+      academic_yr: subject.academic_yr || "",
+      class_id: subject.class_id || "",
+      section_id: subject.section_id || "",
+      subject_id: subject.subject_id || "",
+      teacher_id: subject.teacher_id || "",
     });
+
     setOpen(true);
+
+    // Now fetch images
+    try {
+      const token = localStorage.getItem("authToken");
+      const formData = new FormData();
+      console.log("----notes", subject);
+      formData.append("dailynote_date", subject.date);
+      formData.append("note_id", subject.t_remark_id);
+
+      const response = await axios.post(
+        `${API_URL}/api/get_images_daily_notes`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data?.status && Array.isArray(response.data.data)) {
+        setImageUrls(response.data.data); // assuming array of image URLs or filenames
+      } else {
+        setImageUrls([]);
+      }
+    } catch (error) {
+      console.error("Error fetching images:", error);
+      setImageUrls([]);
+    }
   };
 
   // Function to download files
@@ -219,15 +300,15 @@ function TeacherNotes() {
     document.body.removeChild(link); // Remove the link after the click
   };
 
-  const handleDelete = (sectionId) => {
-    const classToDelete = notices.find((cls) => cls.t_remark_id === sectionId);
-    console.log("classToDelete", classToDelete);
+  const handleDelete = (notesId) => {
+    console.log("delete-->", notesId, notices);
+    const classToDelete = notices.find((cls) => cls.t_remark_id === notesId);
+    console.log("classToDelete---->", classToDelete);
 
-    setCurrentSection({ classToDelete }); // set state for modal
-
-    // Set teacher name immediately from classToDelete
-    setCurrestSubjectNameForDelete(classToDelete?.name || "this remark");
-
+    setCurrentSection(classToDelete); // no need to wrap in {}
+    setCurrestSubjectNameForDelete(
+      `${classToDelete?.name || ""}` || "this note"
+    );
     setShowDeleteModal(true);
   };
 
@@ -316,20 +397,14 @@ function TeacherNotes() {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
   };
-
   const handlePublish = (section) => {
     setCurrentSection(section);
-    // console.log("the currecne t section", currentSection);
-
-    console.log("fdsfsdsd handleEdit", section);
-
-    // It's used for the dropdown of the tachers
     setShowPublishModal(true);
   };
 
   const handleSubmitPublish = async () => {
     if (!currentSection?.t_remark_id) {
-      toast.error("Invalid remark ID.");
+      toast.error("Invalid note data.");
       return;
     }
 
@@ -338,83 +413,128 @@ function TeacherNotes() {
     try {
       const token = localStorage.getItem("authToken");
 
-      const payload = {
-        remark_subject: currentSection.remark_subject,
-        remark: currentSection.remark_desc, // make sure the key is correct
-      };
+      const formData = new FormData();
+      const str_array_value = JSON.stringify([
+        `${currentSection.class_id}^${currentSection.section_id}`,
+      ]);
 
-      const response = await axios.put(
-        `${API_URL}/api/update_publishremarkforteacher/${currentSection.t_remark_id}`,
-        payload,
+      formData.append("str_array", str_array_value);
+      formData.append("login_type", roleId); // or "T"
+      formData.append("subject_id", currentSection.subject_id || "");
+      formData.append("teacher_id", currentSection.teacher_id || "");
+      formData.append("description", currentSection.description || "");
+      formData.append("dailynote_date", currentSection.date || "");
+      formData.append("academic_yr", currentSection.academic_yr || "");
+      formData.append("datafile", "");
+      formData.append("random_no", "");
+      formData.append("filename", "");
+      formData.append("operation", "publish"); // << changed here
+      formData.append("notes_id", currentSection.t_remark_id);
+      formData.append("section_id", currentSection.section_id);
+      formData.append("class_id", currentSection.class_id);
+      formData.append("deleteimagelist", ""); // or empty
+
+      const response = await axios.post(
+        `${API_URL}/api/daily_notes`,
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
-      if (response.status === 200) {
-        toast.success("Remark published successfully!");
+      if (response.data?.status) {
+        toast.success(
+          `Teacher's note for "${
+            currentSection.name || "this note"
+          }" published successfully!`
+        );
+
         setShowPublishModal(false);
         handleSearch();
       } else {
-        toast.error("Failed to publish remark.");
+        toast.error(response.data?.message || "Failed to publish note.");
       }
     } catch (error) {
-      console.error("Error publishing remark:", error);
-      toast.error("Something went wrong.");
+      toast.error(
+        `Error publishing ${currentSection.name || "note"}: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     } finally {
       setIsSubmitting(false);
+      setShowPublishModal(false);
     }
   };
 
   const handleSubmitDelete = async () => {
-    if (isSubmitting) return; // Prevent re-submitting
+    if (isSubmitting) return;
     setIsSubmitting(true);
-    // Handle delete submission logic
+
     try {
       const token = localStorage.getItem("authToken");
-      if (
-        !token ||
-        !currentSection ||
-        !currentSection?.classToDelete?.t_remark_id
-      ) {
-        throw new Error("Remark Id is missing");
+      if (!token || !currentSection?.t_remark_id) {
+        throw new Error("Invalid note data");
       }
 
-      await axios.delete(
-        `${API_URL}/api/delete_remarkforteacher/${currentSection?.classToDelete?.t_remark_id}`,
+      const formData = new FormData();
+      const str_array_value = JSON.stringify([
+        `${currentSection.class_id}^${currentSection.section_id}`,
+      ]);
+
+      // phir formData mein append karo:
+      formData.append("str_array", str_array_value);
+      formData.append("login_type", roleId);
+      formData.append("subject_id", currentSection.subject_id || "");
+      formData.append("teacher_id", currentSection.teacher_id || "");
+      formData.append("description", currentSection.description || "");
+      formData.append("dailynote_date", currentSection.date || "");
+      formData.append("academic_yr", currentSection.academic_yr || "");
+      formData.append("datafile", "");
+      formData.append("random_no", "");
+      formData.append("filename", "");
+      formData.append("operation", "delete");
+      formData.append("notes_id", currentSection.t_remark_id);
+      formData.append("section_id", currentSection.section_id);
+      formData.append("class_id", currentSection.class_id);
+      formData.append("deleteimagelist", "");
+
+      const response = await axios.post(
+        `${API_URL}/api/daily_notes`,
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
-          withCredentials: true,
         }
       );
 
-      handleSearch();
-      setShowDeleteModal(false);
+      if (response.data?.status) {
+        toast.success(
+          `Teacher's note for "${
+            currentSection.name || "this note"
+          }" deleted successfully!`
+        );
 
-      toast.success(
-        `${currestSubjectNameForDelete} Remark Deleted successfully!`
-      );
-    } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error In Deleting ${currestSubjectNameForDelete}: ${error.response.data.message}`
-        );
+        handleSearch();
       } else {
-        toast.error(
-          `Error In Deleting ${currestSubjectNameForDelete}: ${error.message}`
-        );
+        toast.error(response.data?.message || "Failed to delete note.");
       }
-      console.error("Error In Deleting:", error);
-      // setError(error.message);
+    } catch (error) {
+      toast.error(
+        `Error deleting ${currestSubjectNameForDelete}: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
       setShowDeleteModal(false);
     }
   };
+
   const handleSend = async (uniqueId) => {
     try {
       setSendingSMS((prev) => ({ ...prev, [uniqueId]: true }));
@@ -487,22 +607,14 @@ function TeacherNotes() {
     prevSearchTermRef.current = trimmedSearch;
   }, [searchTerm]);
 
-  const searchLower = searchTerm.trim().toLowerCase();
-
   const filteredSections = notices.filter((section) => {
-    const teacherName = section?.teachername?.toLowerCase() || "";
-    const subjectName = section?.remark_type?.toLowerCase() || "";
-    const noticeDesc = section?.remark_subject?.toLowerCase() || "";
-    const teacher = section?.name?.toLowerCase() || "";
-    const publishDate =
-      section?.publish_date?.toString().toLowerCase().trim() || "";
+    const searchLower = searchTerm.toLowerCase();
 
     return (
-      teacherName.toLowerCase().includes(searchLower) ||
-      subjectName.toLowerCase().includes(searchLower) ||
-      noticeDesc.toLowerCase().includes(searchLower) ||
-      teacher.toLowerCase().includes(searchLower) ||
-      publishDate.toLowerCase().includes(searchLower)
+      section.name?.toLowerCase().includes(searchLower) ||
+      section.remark_subject?.toLowerCase().includes(searchLower) ||
+      section.description?.toLowerCase().includes(searchLower) ||
+      section.publish_date?.toLowerCase().includes(searchLower)
     );
   });
 
@@ -510,13 +622,6 @@ function TeacherNotes() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
-
-  // handle allot subject close model
-  //   useEffect(() => {
-  //     if (activeTab === "Manage") {
-  //       handleSearch();
-  //     }
-  //   }, [activeTab]); // Dependency array ensures it runs when activeTab changes
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
@@ -539,7 +644,7 @@ function TeacherNotes() {
   // This is tab
   const tabs = [
     { id: "Manage", label: "Manage" },
-    { id: "CreateTeacherRemarkObservation", label: "Create for Teacher" },
+    { id: "CreateTeachersnote", label: "Create Teacher's Note" },
   ];
 
   return (
@@ -548,7 +653,7 @@ function TeacherNotes() {
       <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
         <div className=" card-header  flex justify-between items-center  ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-            Remark for Teachers
+            Teacher's Note{" "}
           </h3>
           <RxCross1
             className="float-end relative -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -593,7 +698,7 @@ function TeacherNotes() {
                 <div className="card mx-auto lg:w-full shadow-lg">
                   <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                     <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                      Manage Remark & Observation
+                      Manage Teacher's Note
                     </h3>
                     <div className="w-1/2 md:w-fit mr-1 ">
                       <input
@@ -666,21 +771,30 @@ function TeacherNotes() {
                                   {subject?.name}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.remark_type}
+                                  {subject?.date &&
+                                  subject.date !== "0000-00-00"
+                                    ? subject.date
+                                        .split("-")
+                                        .reverse()
+                                        .join("-") // → 29-10-2025
+                                    : ""}
                                 </td>
+
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.publish_date &&
                                   subject.publish_date !== "0000-00-00"
-                                    ? new Date(
-                                        subject.publish_date
-                                      ).toLocaleDateString("en-GB")
+                                    ? subject.publish_date
+                                        .split("-")
+                                        .reverse()
+                                        .join("-") // 👉 "2025-10-29" → "29/10/2025"
                                     : ""}
                                 </td>
+
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.remark_subject}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.remark_subject}
+                                  {subject?.description}
                                 </td>
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   {subject.publish === "Y" ? (
@@ -715,71 +829,7 @@ function TeacherNotes() {
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.remark_type === "Remark" &&
-                                  subject.publish === "Y" ? (
-                                    subject.failed_sms_count > 0 ? (
-                                      // Published, failed SMS exists → show resend button
-                                      <div className="flex flex-col items-center gap-1">
-                                        <span className="text-red-600 font-semibold text-sm">
-                                          {subject.failed_sms_count}
-                                        </span>
-                                        <span className="text-blue-600 text-xs font-medium whitespace-nowrap">
-                                          Messages Pending
-                                        </span>
-                                        <button
-                                          disabled={
-                                            sendingSMS[subject?.t_remark_id]
-                                          }
-                                          className={`flex items-center justify-center px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition duration-200 ${
-                                            sendingSMS[subject?.t_remark_id]
-                                              ? "bg-blue-300 cursor-not-allowed"
-                                              : "bg-blue-500 hover:bg-blue-600 text-white"
-                                          }`}
-                                          onClick={() =>
-                                            handleSend(subject?.t_remark_id)
-                                          }
-                                        >
-                                          {sendingSMS[subject?.t_remark_id] ? (
-                                            <span className="flex items-center gap-1 text-white text-xs">
-                                              <svg
-                                                className="animate-spin h-4 w-4 text-white"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                              >
-                                                <circle
-                                                  className="opacity-25"
-                                                  cx="12"
-                                                  cy="12"
-                                                  r="10"
-                                                  stroke="currentColor"
-                                                  strokeWidth="4"
-                                                ></circle>
-                                                <path
-                                                  className="opacity-75"
-                                                  fill="currentColor"
-                                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                                ></path>
-                                              </svg>
-                                              Sending...
-                                            </span>
-                                          ) : (
-                                            <>
-                                              Send <IoMdSend />
-                                            </>
-                                          )}
-                                        </button>
-                                      </div>
-                                    ) : (
-                                      // Published, no failed SMS → show "Send" text
-                                      <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
-                                        Sent{" "}
-                                        <FaCheck className="text-green-600" />
-                                        {/* Tooltip */}
-                                      </div>
-                                    )
-                                  ) : subject.remark_type === "Remark" &&
-                                    subject.publish === "N" ? (
+                                  {subject.publish === "N" ? (
                                     // Not published yet — show publish button
                                     <button
                                       onClick={() => handlePublish(subject)}
@@ -792,7 +842,7 @@ function TeacherNotes() {
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.read_status == 1 && (
+                                  {subject.publish === "Y" && (
                                     <FontAwesomeIcon
                                       icon={faBookReader}
                                       style={{ color: "#C03078" }}
@@ -844,7 +894,7 @@ function TeacherNotes() {
 
           {/* Other tabs content */}
 
-          {activeTab === "CreateTeacherRemarkObservation" && (
+          {activeTab === "CreateTeachersnote" && (
             <div>
               <CreateTeacherNotes />
             </div>
@@ -1051,7 +1101,7 @@ function TeacherNotes() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to delete remark for{" "}
+                  Are you sure you want to delete this teacher's note for{" "}
                   {currestSubjectNameForDelete}?
                 </div>
 
@@ -1097,7 +1147,7 @@ function TeacherNotes() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to publish remark for{" "}
+                  Are you sure you want to publish this teacher's note for{" "}
                   {` ${currentSection?.name} `} ?
                 </div>
                 <div className=" flex justify-end p-3">
@@ -1122,7 +1172,7 @@ function TeacherNotes() {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="flex justify-between p-3">
-                  <h5 className="modal-title">View Remark</h5>
+                  <h5 className="modal-title">View Teacher's Note</h5>
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
                     onClick={() => setOpen(false)}
@@ -1138,11 +1188,11 @@ function TeacherNotes() {
                   {/* Teacher Name */}
                   <div className="flex items-center">
                     <label className="w-[30%] text-gray-700 font-medium">
-                      Teacher Name:
+                      Class Name:
                     </label>
                     <input
                       type="text"
-                      value={remarkData.teacherName}
+                      value={remarkData.name}
                       readOnly
                       className="flex-1 px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700"
                     />
@@ -1151,28 +1201,115 @@ function TeacherNotes() {
                   {/* Remark Subject */}
                   <div className="flex items-center">
                     <label className="w-[30%] text-gray-700 font-medium">
-                      Remark Subject:
+                      Subject:
                     </label>
                     <input
                       type="text"
-                      value={remarkData.remarkSubject}
+                      value={remarkData.remark_subject}
                       readOnly
                       className="flex-1 px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700"
                     />
                   </div>
-
+                  {/* Create data */}
+                  <div className="flex items-center">
+                    <label className="w-[30%] text-gray-700 font-medium">
+                      Create Date:
+                    </label>
+                    <input
+                      type="text"
+                      value={remarkData.date}
+                      readOnly
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700"
+                    />
+                  </div>
+                  {/* Published Date: */}
+                  <div className="flex items-center">
+                    <label className="w-[30%] text-gray-700 font-medium">
+                      Published Date::
+                    </label>
+                    <input
+                      type="text"
+                      value={remarkData?.publish_date}
+                      readOnly
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700"
+                    />
+                  </div>
                   {/* Remark Description */}
                   <div className="flex items-start">
                     <label className="w-[30%] text-gray-700 font-medium pt-2">
-                      Remark Description:
+                      Description:
                     </label>
                     <textarea
-                      value={remarkData.remarkDescription}
+                      value={remarkData?.description}
                       readOnly
                       className="flex-1 px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700"
                       rows={4}
                     />
                   </div>
+                  {imageUrls && imageUrls.length > 0 && (
+                    <div className="w-full  flex flex-row">
+                      <label className=" px-4 mb-2 ">Attachments:</label>
+
+                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
+                        {imageUrls.map((url, index) => {
+                          // Extracting file name from the URL
+                          const fileName = url.substring(
+                            url.lastIndexOf("/") + 1
+                          );
+                          return (
+                            <div
+                              key={index}
+                              className=" font-semibold flex flex-row text-[.58em]  items-center gap-x-2"
+                            >
+                              {/* Display file name */}
+                              <span className=" ">{fileName}</span>
+                              <button
+                                className=" text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                onClick={() => downloadFile(url, fileName)}
+                              >
+                                <ImDownload className="font-2xl w-3 h-3" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {imageUrls && imageUrls.length > 0 && (
+                    <div className="w-full flex flex-row">
+                      <label className="px-4 mb-2">Attachments:</label>
+                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
+                        {imageUrls.map((url, index) => {
+                          const fileName = url.substring(
+                            url.lastIndexOf("/") + 1
+                          );
+                          return (
+                            <div
+                              key={index}
+                              className="font-semibold flex flex-row text-[.58em] items-center gap-x-2 cursor-pointer"
+                            >
+                              <span
+                                onClick={() => {
+                                  setSelectedImageUrl(url);
+                                  setImageModalOpen(true);
+                                }}
+                                className="text-blue-600 hover:underline"
+                              >
+                                {fileName}
+                              </span>
+                              <button
+                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                onClick={() => downloadFile(url, fileName)}
+                              >
+                                <ImDownload className="font-2xl w-3 h-3" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-end p-3">
@@ -1185,6 +1322,25 @@ function TeacherNotes() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {imageModalOpen && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-70">
+          <div className="modal-dialog modal-dialog-centered max-w-3xl max-h-[80vh]">
+            <div className="modal-content relative p-4 bg-white rounded">
+              <button
+                className="absolute top-2 right-2 text-xl font-bold text-red-600 hover:cursor-pointer"
+                onClick={() => setImageModalOpen(false)}
+              >
+                &times;
+              </button>
+              <img
+                src={selectedImageUrl}
+                alt="Attachment"
+                className="max-w-full max-h-[70vh] object-contain"
+              />
             </div>
           </div>
         </div>

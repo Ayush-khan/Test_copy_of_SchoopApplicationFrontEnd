@@ -596,6 +596,8 @@ const CreateTeacherNotes = () => {
     noticeDescError: "",
     classError: "",
   });
+  const [currentDate, setCurrentDate] = useState("");
+
   const navigate = useNavigate();
   const [classIdForSubjectAPI, setClassIdForSubjectAPI] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
@@ -618,7 +620,16 @@ const CreateTeacherNotes = () => {
   const [loadingSubjects, setLoadingSubjects] = useState(false);
   const [roleId, setRoleId] = useState(null);
   const [classes, setClasses] = useState([]); // API से आने वाले सभी classes
-
+  useEffect(() => {
+    // YYYY-MM-DD format
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    setCurrentDate(formattedDate);
+  }, []);
   useEffect(() => {
     const init = async () => {
       try {
@@ -707,7 +718,12 @@ const CreateTeacherNotes = () => {
 
     setSelectedClasses(updated);
 
-    // Fetch subjects dynamically for the currently selected classes
+    // Remove class selection error if any
+    if (updated.length > 0) {
+      setErrors((prev) => ({ ...prev, classError: "" }));
+    }
+
+    // Fetch subjects dynamically
     if (updated.length > 0) {
       fetchSubjectsForMultipleClasses(updated);
     } else {
@@ -720,9 +736,14 @@ const CreateTeacherNotes = () => {
     if (selectedClasses.length === classes.length) {
       setSelectedClasses([]);
       setSubjects([]);
+      setErrors((prev) => ({
+        ...prev,
+        classError: "Please select at least one class.",
+      }));
     } else {
       setSelectedClasses(classes);
       fetchSubjectsForMultipleClasses(classes);
+      setErrors((prev) => ({ ...prev, classError: "" }));
     }
   };
 
@@ -823,10 +844,6 @@ const CreateTeacherNotes = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!selectedClass) {
-      newErrors.classError = "Please select a Student.";
-    }
-
     if (!remarkSubject.trim()) {
       newErrors.remarkSubjectError = "Remark subject is required.";
     }
@@ -842,35 +859,34 @@ const CreateTeacherNotes = () => {
   const handleSubmit = async (e, publish = false) => {
     e.preventDefault();
 
+    // Check if any class is selected
+    if (selectedClasses.length === 0) {
+      setErrors((prev) => ({
+        ...prev,
+        classError: "Please select at least one class.",
+      }));
+      return;
+    }
+
     if (!validateForm()) return;
 
     if (publish) setIsPublishing(true);
     else setIsSubmitting(true);
 
     const formData = new FormData();
-
     formData.append("save_publish", publish ? "Y" : "N");
 
-    if (isObservation) {
-      formData.append("observation", "yes");
-    }
+    if (isObservation) formData.append("observation", "yes");
 
     formData.append("remark_desc", remarkDescription || "");
     formData.append("remark_subject", remarkSubject || "");
 
-    const selectedStudents = allClasses.find(
-      (stu) => stu.student_id === selectedClass.value
-    );
-
-    console.log("selectedClass", selectedStudents);
-    if (!selectedStudents) {
-      toast.error("Please select a valid student.");
-      return;
-    }
-
-    formData.append("student_id[]", selectedStudents.student_id);
-    formData.append("class_id", selectedStudents.class_id);
-    formData.append("section_id", selectedStudents.section_id);
+    // Append selected students/classes
+    selectedClasses.forEach((cls) => {
+      formData.append("student_id[]", cls.student_id);
+      formData.append("class_id", cls.class_id);
+      formData.append("section_id", cls.section_id);
+    });
 
     formData.append("subject_id", selectedSubject?.value || "0");
 
@@ -880,7 +896,6 @@ const CreateTeacherNotes = () => {
 
     try {
       const token = localStorage.getItem("authToken");
-
       const response = await axios.post(
         `${API_URL}/api/save_remarkobservationforstudents`,
         formData,
@@ -921,7 +936,7 @@ const CreateTeacherNotes = () => {
             <div className="card mx-auto lg:w-full shadow-lg">
               <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                 <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl">
-                  Create Remark & Observation
+                  Create Teacher's Note
                 </h3>
               </div>
               <div
@@ -937,7 +952,7 @@ const CreateTeacherNotes = () => {
                   <div className="card-body w-full ml-2">
                     <div className="space-y-4 mr-10">
                       {/* Class Selection */}
-                      {/* Class Selection */}
+
                       <div className="flex flex-col gap-3 mt-4">
                         <label className="text-[1em] text-gray-700 font-medium">
                           Select Classes
@@ -949,29 +964,6 @@ const CreateTeacherNotes = () => {
                           </div>
                         ) : (
                           <>
-                            {/* 🔹 Select All Checkbox */}
-                            {classes.length > 0 && (
-                              <label
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md cursor-pointer border transition-all duration-200 w-fit ${
-                                  selectedClasses.length === classes.length
-                                    ? "bg-pink-100 border-pink-500 text-pink-700 shadow-sm"
-                                    : "bg-white border-gray-300 text-gray-700 hover:border-pink-400"
-                                }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={
-                                    selectedClasses.length === classes.length
-                                  }
-                                  onChange={handleSelectAll}
-                                  className="accent-pink-600 w-4 h-4"
-                                />
-                                <span className="text-sm font-medium">
-                                  Select All / Deselect All
-                                </span>
-                              </label>
-                            )}
-
                             {/* 🔹 Individual Class Checkboxes */}
                             <div className="flex flex-wrap gap-3 mt-2">
                               {classes.map((cls) => {
@@ -1009,6 +1001,33 @@ const CreateTeacherNotes = () => {
                                   </label>
                                 );
                               })}
+                              {/* 🔹 Select All Checkbox */}
+                              {classes.length > 0 && (
+                                <label
+                                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md cursor-pointer border transition-all duration-200 w-fit ${
+                                    selectedClasses.length === classes.length
+                                      ? "bg-pink-100 border-pink-500 text-pink-700 shadow-sm"
+                                      : "bg-white border-gray-300 text-gray-700 hover:border-pink-400"
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={
+                                      selectedClasses.length === classes.length
+                                    }
+                                    onChange={handleSelectAll}
+                                    className="accent-pink-600 w-4 h-4"
+                                  />
+                                  <span className="text-sm font-medium">
+                                    Select All
+                                  </span>
+                                </label>
+                              )}
+                              {errors.classError && (
+                                <p className="text-red-500 text-sm mt-1">
+                                  {errors.classError}
+                                </p>
+                              )}
                             </div>
                           </>
                         )}
@@ -1038,18 +1057,13 @@ const CreateTeacherNotes = () => {
                         <div className="flex-1">
                           <input
                             type="text"
-                            className="w-[60%] px-2 py-2 border border-gray-700 rounded-md shadow-md"
-                            value={remarkSubject}
-                            onChange={handleRemarkSubjectChange}
-                            maxLength={100}
+                            className="w-[60%] px-2 py-2 border border-gray-700 rounded-md shadow-md bg-gray-200 outline-none"
+                            value={currentDate} // अब यहाँ remarkSubject की बजाय currentDate
+                            readOnly // अगर यूज़र को बदलने की अनुमति नहीं चाहिए
                           />
-                          {errors.remarkSubjectError && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.remarkSubjectError}
-                            </p>
-                          )}
                         </div>
                       </div>
+
                       {/* Remark */}
                       <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
                         <label className="w-[28%] text-[1em] text-gray-700">
@@ -1075,7 +1089,7 @@ const CreateTeacherNotes = () => {
                         <div className="flex flex-col md:flex-row items-start md:items-start gap-3">
                           {/* Label on the left */}
                           <label className="w-[28%] text-[1em] text-gray-700 pt-2">
-                            Attachment
+                            Add Notes
                           </label>
 
                           {/* Input and file list on the right */}
