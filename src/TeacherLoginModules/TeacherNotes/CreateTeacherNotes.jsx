@@ -619,9 +619,6 @@ const CreateTeacherNotes = () => {
   const [roleId, setRoleId] = useState(null);
   const [classes, setClasses] = useState([]); // API से आने वाले सभी classes
 
-  const handleObservationToggle = (e) => {
-    setIsObservation(e.target.checked);
-  };
   useEffect(() => {
     const init = async () => {
       try {
@@ -686,6 +683,7 @@ const CreateTeacherNotes = () => {
   };
 
   // 🔹 Handle single class checkbox select/deselect
+  // 🔹 Handle single class checkbox select/deselect
   const handleClassCheckboxChange = (cls) => {
     let updated;
 
@@ -709,7 +707,7 @@ const CreateTeacherNotes = () => {
 
     setSelectedClasses(updated);
 
-    // Fetch subjects again for updated selection
+    // Fetch subjects dynamically for the currently selected classes
     if (updated.length > 0) {
       fetchSubjectsForMultipleClasses(updated);
     } else {
@@ -720,11 +718,9 @@ const CreateTeacherNotes = () => {
   // 🔹 Select / Deselect All Classes
   const handleSelectAll = () => {
     if (selectedClasses.length === classes.length) {
-      // Deselect all
       setSelectedClasses([]);
       setSubjects([]);
     } else {
-      // Select all
       setSelectedClasses(classes);
       fetchSubjectsForMultipleClasses(classes);
     }
@@ -920,7 +916,7 @@ const CreateTeacherNotes = () => {
       <ToastContainer />
       <div className="container mb-4">
         <div className="card-header flex justify-between items-center"></div>
-        <div className="w-[80%] mx-auto">
+        <div className="w-[98%] mx-auto">
           <div className="container mt-4">
             <div className="card mx-auto lg:w-full shadow-lg">
               <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
@@ -941,6 +937,7 @@ const CreateTeacherNotes = () => {
                   <div className="card-body w-full ml-2">
                     <div className="space-y-4 mr-10">
                       {/* Class Selection */}
+                      {/* Class Selection */}
                       <div className="flex flex-col gap-3 mt-4">
                         <label className="text-[1em] text-gray-700 font-medium">
                           Select Classes
@@ -951,43 +948,69 @@ const CreateTeacherNotes = () => {
                             <div className="w-6 h-6 border-4 border-pink-500 border-dashed rounded-full animate-spin"></div>
                           </div>
                         ) : (
-                          <div className="flex flex-wrap gap-3">
-                            {classes.map((cls) => {
-                              const isChecked = selectedClasses.some(
-                                (selected) =>
-                                  selected.class_id === cls.class_id &&
-                                  selected.section_id === cls.section_id
-                              );
+                          <>
+                            {/* 🔹 Select All Checkbox */}
+                            {classes.length > 0 && (
+                              <label
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md cursor-pointer border transition-all duration-200 w-fit ${
+                                  selectedClasses.length === classes.length
+                                    ? "bg-pink-100 border-pink-500 text-pink-700 shadow-sm"
+                                    : "bg-white border-gray-300 text-gray-700 hover:border-pink-400"
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={
+                                    selectedClasses.length === classes.length
+                                  }
+                                  onChange={handleSelectAll}
+                                  className="accent-pink-600 w-4 h-4"
+                                />
+                                <span className="text-sm font-medium">
+                                  Select All / Deselect All
+                                </span>
+                              </label>
+                            )}
 
-                              return (
-                                <label
-                                  key={`${cls.class_id}-${cls.section_id}`}
-                                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md cursor-pointer border transition-all duration-200 ${
-                                    isChecked
-                                      ? "bg-pink-100 border-pink-500 text-pink-700 shadow-sm"
-                                      : "bg-white border-gray-300 text-gray-700 hover:border-pink-400"
-                                  }`}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={isChecked}
-                                    onChange={() =>
-                                      handleClassCheckboxChange(cls)
-                                    }
-                                    className="accent-pink-600 w-4 h-4"
-                                  />
-                                  <span className="text-sm font-medium">
-                                    Class {cls.classname} - {cls.sectionname}{" "}
-                                    {cls.is_class_teacher === 1 && (
-                                      <span className="text-[0.7em] text-pink-600 font-semibold ml-1">
-                                        (CT)
-                                      </span>
-                                    )}
-                                  </span>
-                                </label>
-                              );
-                            })}
-                          </div>
+                            {/* 🔹 Individual Class Checkboxes */}
+                            <div className="flex flex-wrap gap-3 mt-2">
+                              {classes.map((cls) => {
+                                const isChecked = selectedClasses.some(
+                                  (selected) =>
+                                    selected.class_id === cls.class_id &&
+                                    selected.section_id === cls.section_id
+                                );
+
+                                return (
+                                  <label
+                                    key={`${cls.class_id}-${cls.section_id}`}
+                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md cursor-pointer border transition-all duration-200 ${
+                                      isChecked
+                                        ? "bg-pink-100 border-pink-500 text-pink-700 shadow-sm"
+                                        : "bg-white border-gray-300 text-gray-700 hover:border-pink-400"
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={() =>
+                                        handleClassCheckboxChange(cls)
+                                      }
+                                      className="accent-pink-600 w-4 h-4"
+                                    />
+                                    <span className="text-sm font-medium">
+                                      Class {cls.classname} - {cls.sectionname}{" "}
+                                      {cls.is_class_teacher === 1 && (
+                                        <span className="text-[0.7em] text-pink-600 font-semibold ml-1">
+                                          (CT)
+                                        </span>
+                                      )}
+                                    </span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </>
                         )}
                       </div>
 
@@ -1010,8 +1033,7 @@ const CreateTeacherNotes = () => {
                       {/* Subject of Remark */}
                       <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
                         <label className="w-[28%] text-[1em] text-gray-700">
-                          Subject of Remark{" "}
-                          <span className="text-red-500">*</span>
+                          Date <span className="text-red-500">*</span>
                         </label>
                         <div className="flex-1">
                           <input
@@ -1031,7 +1053,7 @@ const CreateTeacherNotes = () => {
                       {/* Remark */}
                       <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
                         <label className="w-[28%] text-[1em] text-gray-700">
-                          Remark <span className="text-red-500">*</span>
+                          Description <span className="text-red-500">*</span>
                         </label>
                         <div className="flex-1">
                           <textarea
@@ -1046,24 +1068,6 @@ const CreateTeacherNotes = () => {
                               {errors.remarkDescriptionError}
                             </p>
                           )}
-
-                          {/* Observation just below input field */}
-                          <div className="mt-2">
-                            <label className="inline-flex flex-col text-sm text-gray-700">
-                              <span className="flex items-center">
-                                <input
-                                  type="checkbox"
-                                  className="mr-2"
-                                  checked={isObservation}
-                                  onChange={handleObservationToggle}
-                                />
-                                Observation
-                              </span>
-                              <span className="text-xs text-gray-500 ml-6">
-                                (Observation will not be shown to parents!)
-                              </span>
-                            </label>
-                          </div>
                         </div>
                       </div>
                       {/* File Upload */}
