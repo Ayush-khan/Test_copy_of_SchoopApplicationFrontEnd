@@ -17,7 +17,7 @@ import { IoMdSend } from "react-icons/io";
 
 // import { PiCertificateBold } from "react-icons/pi";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaEye } from "react-icons/fa";
 import { ImDownload } from "react-icons/im";
 import { Navigate, useNavigate } from "react-router-dom";
 import CreateTeacherNotes from "./CreateTeacherNotes";
@@ -27,7 +27,7 @@ function TeacherNotes() {
   // const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sendingSMS, setSendingSMS] = useState({});
-
+  const [previewImage, setPreviewImage] = useState(null);
   const [activeTab, setActiveTab] = useState("Manage");
   const [classes, setClasses] = useState([]);
   const [classesforsubjectallot, setclassesforsubjectallot] = useState([]);
@@ -201,15 +201,11 @@ function TeacherNotes() {
   const handleView = async (subject) => {
     setRemarkData({
       t_remark_id: subject.notes_id,
-      name: subject.name || "",
-      date:
-        subject.date && subject.date !== "0000-00-00"
-          ? subject.date.split("-").reverse().join("-")
-          : "",
-      publish_date:
-        subject.publish_date && subject.publish_date !== "0000-00-00"
-          ? subject.publish_date.split("-").reverse().join("-")
-          : "",
+      name: `${subject.name}`,
+      date: subject.date ? subject.date.split("-").reverse().join("-") : "",
+      publish_date: subject.publish_date
+        ? subject.publish_date.split("-").reverse().join("-")
+        : "",
       remark_subject: subject.remark_subject || "-",
       description: subject.description || "-",
       publish: subject.publish,
@@ -222,11 +218,9 @@ function TeacherNotes() {
 
     setOpen(true);
 
-    // Now fetch images
     try {
       const token = localStorage.getItem("authToken");
       const formData = new FormData();
-      console.log("----notes", subject);
       formData.append("dailynote_date", subject.date);
       formData.append("note_id", subject.t_remark_id);
 
@@ -236,18 +230,19 @@ function TeacherNotes() {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
           },
         }
       );
 
-      if (response.data?.status && Array.isArray(response.data.data)) {
-        setImageUrls(response.data.data); // assuming array of image URLs or filenames
+      if (response.data?.status) {
+        const { url, images } = response.data;
+        const imageList = images.map((img) => `${url}/${img.image_name}`);
+        setImageUrls(imageList); // ✅ store in state
       } else {
         setImageUrls([]);
       }
     } catch (error) {
-      console.error("Error fetching images:", error);
+      console.error("Error fetching attachments:", error);
       setImageUrls([]);
     }
   };
@@ -1247,28 +1242,42 @@ function TeacherNotes() {
                     />
                   </div>
                   {imageUrls && imageUrls.length > 0 && (
-                    <div className="w-full  flex flex-row">
-                      <label className=" px-4 mb-2 ">Attachments:</label>
+                    <div className="w-full flex flex-row">
+                      <label className=" mb-2">Attachments:</label>
 
-                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
+                      <div className="relative mt-2 left-4 flex flex-col mx-4 gap-y-2">
                         {imageUrls.map((url, index) => {
-                          // Extracting file name from the URL
                           const fileName = url.substring(
                             url.lastIndexOf("/") + 1
                           );
+                          const isImage = /\.(jpg|jpeg|png|gif)$/i.test(
+                            fileName
+                          );
+
                           return (
                             <div
                               key={index}
-                              className=" font-semibold flex flex-row text-[.58em]  items-center gap-x-2"
+                              className="font-semibold flex flex-row text-[.58em] items-center gap-x-2"
                             >
-                              {/* Display file name */}
-                              <span className=" ">{fileName}</span>
-                              <button
-                                className=" text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                onClick={() => downloadFile(url, fileName)}
-                              >
-                                <ImDownload className="font-2xl w-3 h-3" />
-                              </button>
+                              {/* File name */}
+                              <span>{fileName}</span>
+
+                              {/* 👁 View (if image) OR ⬇ Download (if not) */}
+                              {isImage ? (
+                                <button
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                  onClick={() => setPreviewImage(url)}
+                                >
+                                  <FaEye className="font-2xl w-3 h-3" />
+                                </button>
+                              ) : (
+                                <button
+                                  className="text-green-600 hover:text-green-800 hover:bg-transparent"
+                                  onClick={() => downloadFile(url, fileName)}
+                                >
+                                  <ImDownload className="font-2xl w-3 h-3" />
+                                </button>
+                              )}
                             </div>
                           );
                         })}
@@ -1276,37 +1285,21 @@ function TeacherNotes() {
                     </div>
                   )}
 
-                  {imageUrls && imageUrls.length > 0 && (
-                    <div className="w-full flex flex-row">
-                      <label className="px-4 mb-2">Attachments:</label>
-                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
-                        {imageUrls.map((url, index) => {
-                          const fileName = url.substring(
-                            url.lastIndexOf("/") + 1
-                          );
-                          return (
-                            <div
-                              key={index}
-                              className="font-semibold flex flex-row text-[.58em] items-center gap-x-2 cursor-pointer"
-                            >
-                              <span
-                                onClick={() => {
-                                  setSelectedImageUrl(url);
-                                  setImageModalOpen(true);
-                                }}
-                                className="text-blue-600 hover:underline"
-                              >
-                                {fileName}
-                              </span>
-                              <button
-                                className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                onClick={() => downloadFile(url, fileName)}
-                              >
-                                <ImDownload className="font-2xl w-3 h-3" />
-                              </button>
-                            </div>
-                          );
-                        })}
+                  {previewImage && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                      <div className="relative bg-white p-3 rounded-md shadow-lg border border-gray-300 w-[120px] animate-fadeIn">
+                        <button
+                          onClick={() => setPreviewImage(null)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                        >
+                          ✕
+                        </button>
+
+                        <img
+                          src={previewImage}
+                          alt="Preview"
+                          className="rounded max-w-full max-h-[60vh] object-contain"
+                        />
                       </div>
                     </div>
                   )}
