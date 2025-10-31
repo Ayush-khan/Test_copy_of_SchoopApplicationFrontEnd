@@ -54,11 +54,12 @@ const LessonPlanSummarisedReport = () => {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/staff_list`, {
+      const response = await axios.get(`${API_URL}/api/get_allstaff`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("Staff", response);
-      setStudentNameWithClassId(response?.data || []);
+      // setStudentNameWithClassId(response?.data || []);
+      setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching Classes");
       console.error("Error fetching Classes:", error);
@@ -521,7 +522,7 @@ const LessonPlanSummarisedReport = () => {
             />
           </div>
           <div
-            className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}

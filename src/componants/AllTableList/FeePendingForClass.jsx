@@ -10,7 +10,7 @@ import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
 
-const LessonPlanStatusReport = () => {
+const FeePendingForClass = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [toDate, setToDate] = useState(null);
@@ -40,29 +40,104 @@ const LessonPlanStatusReport = () => {
   const [classError, setClassError] = useState("");
   const [selectedStatus, setSelectedStatus] = useState(null);
 
+  const [roleId, setRoleId] = useState("");
+  const [regId, setRegId] = useState("");
+  const [classes, setClasses] = useState([]);
+  const [selectedClassName, setSelectedClassName] = useState("");
+
   useEffect(() => {
     fetchExams();
     fetchLeaveType();
   }, []);
 
-  const fetchExams = async () => {
-    try {
-      setLoadingExams(true);
-      const token = localStorage.getItem("authToken");
+  useEffect(() => {
+    fetchDataRoleId();
+  }, []);
 
-      const response = await axios.get(`${API_URL}/api/get_allstaff`, {
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Class", response);
-      setStudentNameWithClassId(response?.data?.data || []);
+
+      const role_id = sessionResponse.data.user.role_id;
+      const reg_id = sessionResponse.data.user.reg_id;
+
+      setRoleId(role_id);
+      setRegId(reg_id);
+
+      console.log("roleIDis:", role_id); // use local variable
+      console.log("reg id:", reg_id);
+
+      return { roleId, regId };
     } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!roleId || !regId) return;
+    fetchExams(roleId, regId);
+  }, [roleId, regId]);
+
+  // const fetchExams = async () => {
+  //   try {
+  //     setLoadingExams(true);
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.get(`${API_URL}/api/get_allstaff`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     console.log("Class", response);
+  //     setStudentNameWithClassId(response?.data?.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching Classes");
+  //     console.error("Error fetching Classes:", error);
+  //   } finally {
+  //     setLoadingExams(false);
+  //   }
+  // };
+
+  const fetchExams = async (roleId, roleIdValue) => {
+    try {
+      setLoadingExams(true);
+
+      const token = localStorage.getItem("authToken");
+
+      const classApiUrl =
+        roleId === "T"
+          ? `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${roleIdValue}`
+          : `${API_URL}/api/getallClassWithStudentCount`;
+
+      const [classResponse, studentResponse] = await Promise.all([
+        axios.get(classApiUrl, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${API_URL}/api/getStudentListBySectionData`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const classData =
+        roleId === "T"
+          ? classResponse.data.data || []
+          : classResponse.data || [];
+
+      setClasses(classData);
+      setStudentNameWithClassId(studentResponse?.data?.data || []);
+    } catch (error) {
+      toast.error("Error fetching data.");
     } finally {
       setLoadingExams(false);
     }
   };
-
   const fetchLeaveType = async () => {
     setLoading(true);
     try {
@@ -118,47 +193,80 @@ const LessonPlanStatusReport = () => {
     }
   };
 
+  const studentOptions = useMemo(() => {
+    return classes.map((cls) => {
+      if (roleId === "T") {
+        return {
+          value: cls.section_id,
+          label: `${cls.classname} ${cls.sectionname}`,
+          class_id: cls.class_id,
+          section_id: cls.section_id,
+          classname: cls.classname,
+        };
+      } else {
+        return {
+          value: cls.section_id,
+          label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+          class_id: cls.class_id,
+          section_id: cls.section_id,
+          classname: cls?.get_class?.name,
+        };
+      }
+    });
+  }, [classes, roleId]);
+
+  // const studentOptions = useMemo(() => {
+  //   return classes.map((cls) => {
+  //     if (roleId === "T") {
+  //       return {
+  //         value: cls.section_id,
+  //         label: `${cls.classname} ${cls.sectionname}`,
+  //         class_id: cls.class_id,
+  //         section_id: cls.section_id,
+  //         classname: cls.classname,
+  //       };
+  //     } else {
+  //       return {
+  //         value: cls.section_id,
+  //         label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+  //         class_id: cls.class_id,
+  //         section_id: cls.section_id,
+  //         classname: cls?.get_class?.name,
+  //       };
+  //     }
+  //   });
+  // }, [classes, roleId]);
+
+  const statusOptions = [
+    { value: "1", label: "Installment 1" },
+    { value: "2", label: "Installment 2" },
+    { value: "3", label: "Installment 3" },
+    { value: "4", label: "CBSE Exam Fee" },
+  ];
+
+  const filteredStatusOptions = useMemo(() => {
+    if (!selectedClassName) return statusOptions.slice(0, 3); // default first 3 only
+
+    const classNum = parseInt(selectedClassName); // try converting to number
+    if (!isNaN(classNum) && classNum > 9) {
+      return statusOptions; // show all, including CBSE Exam Fee
+    }
+
+    return statusOptions.slice(0, 3); // only first 3 installments
+  }, [selectedClassName]);
+
   const handleStudentSelect = (selectedOption) => {
     setStudentError("");
     setSelectedStudent(selectedOption);
     setSelectedStudentId(selectedOption?.value);
 
+    // Store class name for filtering CBSE option
+    setSelectedClassName(selectedOption?.classname || "");
+
     if (selectedOption?.value) {
       fetchClass(selectedOption.value); // ✅ use value directly
     }
   };
-
-  const handleClassSelect = (selectedOption) => {
-    setClassError(""); // Clear any previous error if any
-    setSelectedClass(selectedOption);
-    setSelectedClassId(selectedOption?.value); // assuming class ID is stored in `value`
-  };
-
-  const studentOptions = useMemo(
-    () =>
-      studentNameWithClassId.map((cls) => ({
-        value: cls?.teacher_id,
-        label: `${cls.name}`,
-      })),
-    [studentNameWithClassId]
-  );
-
-  const classOptions = useMemo(() => {
-    if (!Array.isArray(teacher)) return [];
-
-    return teacher.map((cls) => ({
-      value: {
-        class_id: cls?.class_id,
-        section_id: cls?.section_id,
-      },
-      label: `${cls.classname} ${cls.sectionname}`,
-    }));
-  }, [teacher]);
-
-  const statusOptions = [
-    { value: "I", label: "Incomplete" },
-    { value: "C", label: "Complete" },
-  ];
 
   const camelCase = (str) =>
     str
@@ -166,6 +274,77 @@ const LessonPlanStatusReport = () => {
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
+
+  // const handleSearch = async () => {
+  //   setSearchTerm("");
+  //   setStudentError("");
+  //   setTimetable([]);
+  //   setLeaveTypes([]);
+  //   setPageCount(0);
+  //   setIsSubmitting(true);
+  //   setLoadingForSearch(false);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       toast.error("Authentication token missing!");
+  //       setLoadingForSearch(false);
+  //       setIsSubmitting(false);
+  //       return;
+  //     }
+
+  //     if (!selectedStudentId) {
+  //       setStudentError("Please select Teacher.");
+  //       setLoadingForSearch(false);
+  //       setIsSubmitting(false);
+  //       return;
+  //     }
+
+  //     const params = {
+  //       class_id: selectedStudentId,
+  //     };
+
+  //     if (selectedStudent?.value?.section_id) {
+  //       params.section_id = selectedClass.value.section_id;
+  //     }
+
+  //     if (selectedStatus?.value) {
+  //       params.status = selectedStatus.value;
+  //     }
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_fee_pending_for_teachers_report`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         params,
+  //       }
+  //     );
+
+  //     console.log("Fee Pending for class Response:", response);
+
+  //     const resultData = response?.data?.data || [];
+  //     const leaveTypesFromApi = response?.data?.leave_types || [];
+
+  //     if (resultData.length === 0) {
+  //       toast.error("Fee Pending for class data not found.");
+  //     }
+
+  //     setTimetable(resultData);
+  //     setLeaveTypes(leaveTypesFromApi);
+  //     setPageCount(Math.ceil(resultData.length / pageSize));
+  //   } catch (error) {
+  //     console.error("Error fetching Fee Pending for class:", error);
+  //     toast.error(
+  //       error?.response?.data?.message ||
+  //         "Error fetching Fee Pending for class. Please try again."
+  //     );
+  //   } finally {
+  //     setIsSubmitting(false);
+  //     setLoadingForSearch(false);
+  //   }
+  // };
 
   const handleSearch = async () => {
     setSearchTerm("");
@@ -185,32 +364,38 @@ const LessonPlanStatusReport = () => {
         return;
       }
 
-      if (!selectedStudentId) {
-        setStudentError("Please select Teacher.");
+      if (!selectedStudent) {
+        setStudentError("Please select a class/section.");
         setLoadingForSearch(false);
         setIsSubmitting(false);
         return;
       }
 
-      // Prepare query params
+      // Extract IDs from selected student option
+      const class_id = selectedStudent?.class_id;
+      const section_id = selectedStudent?.section_id;
+      const installment = selectedStatus?.value; // Installment (status) value
+
+      if (!class_id || !section_id) {
+        toast.error("Missing class or section ID.");
+        setLoadingForSearch(false);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // ✅ Construct params correctly
       const params = {
-        teacher_id: selectedStudentId,
+        class_id,
+        section_id,
       };
 
-      if (selectedClass?.value?.class_id) {
-        params.class_id = selectedClass.value.class_id;
+      if (installment) {
+        params.installment = installment;
       }
 
-      if (selectedClass?.value?.section_id) {
-        params.section_id = selectedClass.value.section_id;
-      }
-
-      if (selectedStatus?.value) {
-        params.status = selectedStatus.value;
-      }
-
+      // ✅ API call
       const response = await axios.get(
-        `${API_URL}/api/get_lesson_plan_status_report`,
+        `${API_URL}/api/get_fee_pending_for_teachers_report`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -219,23 +404,23 @@ const LessonPlanStatusReport = () => {
         }
       );
 
-      console.log("Lesson Plan Status Report Response:", response);
+      console.log("Fee Pending for Class Response:", response);
 
       const resultData = response?.data?.data || [];
       const leaveTypesFromApi = response?.data?.leave_types || [];
 
       if (resultData.length === 0) {
-        toast.error("Lesson Plan Status Report data not found.");
+        toast.error("No fee pending data found for the selected class.");
       }
 
       setTimetable(resultData);
       setLeaveTypes(leaveTypesFromApi);
       setPageCount(Math.ceil(resultData.length / pageSize));
     } catch (error) {
-      console.error("Error fetching Lesson Plan Status Report:", error);
+      console.error("Error fetching Fee Pending for class:", error);
       toast.error(
         error?.response?.data?.message ||
-          "Error fetching Lesson Plan Status Report. Please try again."
+          "Error fetching fee pending data. Please try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -244,7 +429,7 @@ const LessonPlanStatusReport = () => {
   };
 
   const handlePrint = () => {
-    const printTitle = `Lesson Plan Status Report  ${
+    const printTitle = `Fee Pending for class  ${
       selectedStudent?.label
         ? `List of ${camelCase(selectedStudent.label)}`
         : ": Complete List of All Teacher "
@@ -257,12 +442,13 @@ const LessonPlanStatusReport = () => {
         <thead>
           <tr class="bg-gray-100">
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No.</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Name</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Subject</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Chapter</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Date</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Status</th>
-           
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Phone No.</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Installment No.</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Installment Amount</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Amount Paid</th> 
           </tr>
         </thead>
         <tbody>
@@ -273,25 +459,27 @@ const LessonPlanStatusReport = () => {
                 <td class="px-2 text-center py-2 border border-black">${
                   index + 1
                 }</td>
+                 <td class="px-2 text-center py-2 border border-black">
+                ${subject?.roll_no}
+                </td>
+                 <td class="px-2 text-center py-2 border border-black">
+                ${camelCase(subject?.student_name)}
+                </td>
                 <td class="px-2 text-center py-2 border border-black">
-                ${subject?.classname} ${subject?.secname}
+                ${subject?.class_section}
                 </td>
                  <td class="px-2 text-center py-2 border border-black">${
-                   subject?.subname
+                   subject?.phone_no
                  }</td>
                   <td class="px-2 text-center py-2 border border-black">${
-                    subject?.chaptername
+                    subject?.installment
                   }</td>
                    <td class="px-2 text-center py-2 border border-black">${
-                     subject?.week_date
+                     subject?.installment_fees
                    }</td>
-                  <td class="px-2 text-center py-2 border border-black">
-                  ${
-                    statusOptions.find(
-                      (option) => option.value === subject?.status
-                    )?.label
-                  }
-                  </td>
+                    <td class="px-2 text-center py-2 border border-black">${
+                      subject?.paid_amount
+                    }</td>
               </tr>`
             )
             .join("")}
@@ -396,17 +584,26 @@ const LessonPlanStatusReport = () => {
       toast.error("No data available to download the Excel sheet.");
       return;
     }
-    const headers = ["Sr No.", "Class", "Subject", "Chapter", "Date", "Status"];
+    const headers = [
+      "Sr No.",
+      "Roll No.",
+      "Student Name",
+      "Class",
+      "Phone No.",
+      "Installment No.",
+      "Installment Amount",
+      "Paid Fees",
+    ];
 
     const data = displayedSections.map((student, index) => [
       index + 1,
-      ` ${student?.classname} ${student?.secname}`,
-      student?.subname,
-      student?.chaptername,
-      student?.week_date,
-      ` ${
-        statusOptions.find((option) => option.value === student?.status)?.label
-      }`,
+      student?.roll_no,
+      `  ${camelCase(student?.student_name)}`,
+      ` ${student?.class_section}`,
+      student?.phone_no,
+      student?.installment,
+      student?.installment_fees,
+      student?.paid_amount,
     ]);
 
     // Create worksheet
@@ -417,14 +614,10 @@ const LessonPlanStatusReport = () => {
 
     // Create workbook
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(
-      workbook,
-      worksheet,
-      "Lesson Plan Status Report"
-    );
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Fee Pending for class");
 
     // Generate file name and trigger download
-    const fileName = `Lesson_Plan_Status_Report_${
+    const fileName = `Fees_Pending_For_Class_${
       camelCase(selectedStudent?.label) || "All_Teacher"
     }.xlsx`;
     XLSX.writeFile(workbook, fileName);
@@ -437,26 +630,27 @@ const LessonPlanStatusReport = () => {
     C: "Complete",
   };
 
+  const capitalizeFirst = (str) =>
+    str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+
   const filteredSections = timetable.filter((student) => {
     const searchLower = searchTerm.toLowerCase();
 
-    const staffName = `${student?.classname || ""} ${
-      student?.secname || ""
+    const staffName = `${student?.class_section || ""} ]
     }`.toLowerCase();
-    const subject = student?.subname?.toLowerCase() || "";
-    const chapter = student?.chaptername?.toLowerCase() || "";
-    const date = student?.week_date?.toString().toLowerCase() || "";
-
-    // Safely map status (e.g., I → Incomplete)
-    const statusLabel =
-      statusMap[student?.status?.toUpperCase()]?.toLowerCase() || "";
+    const studentName = student?.student_name?.toLowerCase().trim() || "";
+    const phoneNo = student?.phone_no?.toLowerCase().toString().trim() || "";
+    const installment = student?.installment?.toString().toLowerCase() || "";
+    const installmentAmount = student?.installment_fees?.toLowerCase() || "";
+    const paidFees = student?.paid_amount?.toLowerCase() || "";
 
     return (
       staffName.includes(searchLower) ||
-      subject.includes(searchLower) ||
-      chapter.includes(searchLower) ||
-      date.includes(searchLower) ||
-      statusLabel.includes(searchLower)
+      phoneNo.includes(searchLower) ||
+      installment.includes(searchLower) ||
+      studentName.includes(searchLower) ||
+      installmentAmount.includes(searchLower) ||
+      paidFees.includes(searchLower)
     );
   });
 
@@ -477,7 +671,7 @@ const LessonPlanStatusReport = () => {
         <div className="card rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              Lesson Plan Status Report
+              Fee Pending for Class
             </h5>
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -487,7 +681,7 @@ const LessonPlanStatusReport = () => {
             />
           </div>
           <div
-            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-full md:w-[98%]  -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
@@ -507,17 +701,17 @@ const LessonPlanStatusReport = () => {
                 <div
                   className={`  w-full gap-x-0 md:gap-x-6  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
                     timetable.length > 0
-                      ? "w-full md:w-[100%]  wrelative left-0"
-                      : " w-full md:w-[95%] relative left-10"
+                      ? "w-full md:w-[90%]  wrelative left-0"
+                      : " w-full md:w-[70%] relative left-10"
                   }`}
                 >
                   {/* Staff Dropdown */}
-                  <div className="w-full  md:w-[70%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                  <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
                       className="w-full md:w-[37%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
-                      Teacher <span className="text-sm text-red-500">*</span>
+                      Class <span className="text-sm text-red-500">*</span>
                     </label>
                     <div className="w-full md:w-[70%]">
                       <Select
@@ -557,7 +751,7 @@ const LessonPlanStatusReport = () => {
                   </div>
 
                   {/* Class Dropdown */}
-                  <div className="w-full  md:w-[70%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                  {/* <div className="w-full  md:w-[70%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
                       className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="classSelect"
@@ -594,10 +788,10 @@ const LessonPlanStatusReport = () => {
                         }}
                       />
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Status */}
-                  <div className="w-full  md:w-[70%] gap-x-2 justify-between my-1 md:my-4 flex md:flex-row">
+                  <div className="w-full  md:w-[50%] gap-x-2 justify-between my-1 md:my-4 flex md:flex-row">
                     <label
                       className="ml-0 md:ml-4 w-full md:w-[20%] text-md mt-1.5"
                       htmlFor="status"
@@ -606,7 +800,7 @@ const LessonPlanStatusReport = () => {
                     </label>
                     <div className="w-full md:w-[70%]">
                       <Select
-                        options={statusOptions}
+                        options={filteredStatusOptions}
                         value={selectedStatus}
                         onChange={setSelectedStatus}
                         placeholder="Select Status"
@@ -716,51 +910,6 @@ const LessonPlanStatusReport = () => {
               <>
                 <div className="w-full px-4 mb-4 mt-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                    <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
-                      <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                        List of Lesson Plan Status Report
-                      </h3>
-                      <div className="w-1/2 md:w-[18%] mr-1 ">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search "
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
-                      <button
-                        type="button"
-                        onClick={handleDownloadEXL}
-                        className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
-                      >
-                        <FaFileExcel />
-
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                          Exports to excel
-                        </div>
-                      </button>
-
-                      <button
-                        onClick={handlePrint}
-                        className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
-                      >
-                        <FiPrinter />
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                          Print{" "}
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-                  <div
-                    className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                    style={{
-                      backgroundColor: "#C03078",
-                    }}
-                  ></div> */}
-
                     <div className="card-body w-full">
                       <div
                         className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
@@ -769,74 +918,88 @@ const LessonPlanStatusReport = () => {
                           scrollbarColor: "#C03178 transparent",
                         }}
                       >
-                        <table className="min-w-full leading-normal table-auto">
+                        <table className="min-w-full leading-normal table-auto border-collapse">
                           <thead>
                             <tr className="bg-gray-100">
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[7%]">
                                 Sr No.
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
+                                Roll No.
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
+                                Student Name
+                              </th>
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
                                 Class
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
-                                Subject
+                                Phone No.
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[25%]">
-                                Chapter
+                                Installment No.
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[20%]">
-                                Date
+                                Installment Amount
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[15%]">
-                                Status
+                                Amount Paid
                               </th>
                             </tr>
                           </thead>
 
                           <tbody>
-                            {displayedSections.length ? (
-                              displayedSections?.map((student, index) => (
+                            {displayedSections.length > 0 ? (
+                              displayedSections.map((student, index) => (
                                 <tr
-                                  key={student.lesson_plan_id}
+                                  key={student?.lesson_plan_id || index}
                                   className="border border-gray-300"
                                 >
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {index + 1}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.classname} {student?.secname}
+                                    {student?.roll_no || "-"}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.subname}
+                                    {camelCase(student?.student_name || "")}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.chaptername}
+                                    {student?.class_section || "-"}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.week_date}
+                                    {student?.phone_no || "-"}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {
-                                      statusOptions.find(
-                                        (option) =>
-                                          option.value === student?.status
-                                      )?.label
-                                    }
+                                    {student?.installment || "-"}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.installment_fees || "-"}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {student?.paid_amount || "-"}
                                   </td>
                                 </tr>
                               ))
                             ) : (
-                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                <div className=" text-center text-xl text-red-700">
+                              <tr>
+                                <td
+                                  colSpan="8"
+                                  className="text-center py-10 text-xl text-red-700"
+                                >
                                   Oops! No data found..
-                                </div>
-                              </div>
+                                </td>
+                              </tr>
                             )}
                           </tbody>
                         </table>
                       </div>
                     </div>
                   </div>
+                </div>
+
+                <div className="text-right font-semibold px-6">
+                  Total Records: {timetable.length}
                 </div>
               </>
             )}
@@ -847,4 +1010,4 @@ const LessonPlanStatusReport = () => {
   );
 };
 
-export default LessonPlanStatusReport;
+export default FeePendingForClass;

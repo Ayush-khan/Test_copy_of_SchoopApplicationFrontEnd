@@ -1,4 +1,4 @@
-// work well onlick also ...
+// working with control + M sortcut with select menu and all thins working well just hide give a time for it.
 // import { useEffect, useRef, useState } from "react";
 // import { Navbar, Nav, NavDropdown } from "react-bootstrap";
 // import { Link, useNavigate } from "react-router-dom";
@@ -23,6 +23,7 @@
 //   const [isSidebar, setIsSidebar] = useState();
 //   const [academicYear, setAcademicYear] = useState([]);
 //   const [menuDropdownOpen, setMenuDropdownOpen] = useState({});
+//   const [isFocused, setIsFocused] = useState(false);
 //   // const [inputValueGR, setInputValueGR] = useState("");
 //   const [selectedYear, setSelectedYear] = useState("");
 //   // const [sessionData, setsessionData] = useState({});
@@ -67,6 +68,22 @@
 //     localStorage.setItem("shouldRedirectToDashboard", "true");
 //     window.location.reload();
 //   };
+
+//   useEffect(() => {
+//     const handleShortcut = (e) => {
+//       // ✅ Ctrl + M to focus "Search Menu"
+//       if (e.ctrlKey && e.key.toLowerCase() === "m") {
+//         e.preventDefault(); // stop browser default
+//         if (selectRef.current) {
+//           // Focus React-Select search input
+//           selectRef.current.focus();
+//         }
+//       }
+//     };
+
+//     window.addEventListener("keydown", handleShortcut);
+//     return () => window.removeEventListener("keydown", handleShortcut);
+//   }, []);
 
 //   useEffect(() => {
 //     const fetchData = async () => {
@@ -337,6 +354,8 @@
 //   };
 
 //   const menuRef = useRef(null);
+//   const selectRef = useRef(null);
+
 //   const [openDropdowns, setOpenDropdowns] = useState([]);
 //   const [clickedDropdowns, setClickedDropdowns] = useState([]);
 //   const [isTouchDevice, setIsTouchDevice] = useState(false); // 👈 NEW
@@ -445,7 +464,7 @@
 //                       key={subKey}
 //                       title={
 //                         <span className="nav-dropdown-sub-new-Dynamic px-2">
-//                           {subItem.name}ffff
+//                           {subItem?.name}
 //                         </span>
 //                       }
 //                       className={`nav-dropdown-sub-new dropend w-auto ${
@@ -758,59 +777,49 @@
 //             <div className="flex items-center w-full md:w-[40%] ">
 //               <div className="form-group w-full md:w-[85%] flex justify-start gap-x-1 md:gap-x-4">
 //                 <div className="w-full md:w-[90%] my-2">
-//                   <Select
-//                     value={selectedMenu}
-//                     onChange={handleMenuSelect}
-//                     options={menuOptions}
-//                     placeholder="Search Menu"
-//                     isSearchable
-//                     isClearable
-//                     className="text-sm"
-//                     styles={{
-//                       control: (base, state) => ({
-//                         ...base,
-//                         backgroundColor: "#f3f4f6",
-//                         borderColor: state.isFocused ? "#60a5fa" : "#d1d5db",
-//                         borderRadius: "0.75rem",
-//                         minHeight: "2.5rem",
-//                         fontSize: "0.875rem",
-//                         boxShadow: state.isFocused
-//                           ? "0 0 0 2px #3b82f6"
-//                           : "none",
-//                         transition:
-//                           "border-color 0.2s ease, box-shadow 0.2s ease",
-//                         "&:hover": {
-//                           borderColor: "#9ca3af",
-//                         },
-//                       }),
-//                       placeholder: (base) => ({
-//                         ...base,
-//                         color: "#6b7280",
-//                         fontSize: "0.875rem",
-//                       }),
-//                       singleValue: (base) => ({
-//                         ...base,
-//                         fontSize: "0.875rem",
-//                         color: "#111827",
-//                       }),
-//                       option: (base, { isFocused }) => ({
-//                         ...base,
-//                         fontSize: "0.875rem",
-//                         backgroundColor: isFocused ? "#bfdbfe" : "white", // Hover = blue-200
-//                         color: isFocused ? "#1e3a8a" : "#111827", // Hover text = blue-900
-//                         cursor: "pointer",
-//                         transition:
-//                           "background-color 0.2s ease, color 0.2s ease", // smooth transition
-//                       }),
-//                       menu: (base) => ({
-//                         ...base,
-//                         borderRadius: "0.5rem",
-//                         fontSize: "0.875rem",
-//                         zIndex: 50,
-//                         boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-//                       }),
-//                     }}
-//                   />
+
+//                   {/* working well with focus on contl+M but we have commented it */}
+//                   <div className="relative w-full md:w-[90%] my-2">
+//                     <Select
+//                       ref={selectRef}
+//                       value={selectedMenu}
+//                       onChange={handleMenuSelect}
+//                       options={menuOptions}
+//                       placeholder="Search Menu"
+//                       isSearchable
+//                       isClearable
+//                       onFocus={() => setIsFocused(true)}
+//                       onBlur={() => setIsFocused(false)}
+//                       className="text-sm"
+//                       styles={{
+//                         control: (base, state) => ({
+//                           ...base,
+//                           backgroundColor: "#f3f4f6",
+//                           borderColor: state.isFocused ? "#60a5fa" : "#d1d5db",
+//                           borderRadius: "0.75rem",
+//                           minHeight: "2.5rem",
+//                           fontSize: "0.875rem",
+//                           boxShadow: state.isFocused
+//                             ? "0 0 0 2px #3b82f6"
+//                             : "none",
+//                         }),
+//                       }}
+//                     />
+
+//                     {isFocused && (
+//                       <div className="absolute -left-8 bottom-full mb-2 w-max px-2  rounded-lg shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold text-sm flex items-center gap-1 z-50">
+//                         <span>Press</span>
+//                         <kbd className="px-1  bg-gray-200 text-pink-600 font-bold rounded-full border border-pink-300">
+//                           Ctrl
+//                         </kbd>
+//                         <span>+</span>
+//                         <kbd className="px-2   bg-gray-200 text-pink-600 font-bold rounded-full border border-pink-300">
+//                           M
+//                         </kbd>
+//                         <span>to search</span>
+//                       </div>
+//                     )}
+//                   </div>
 //                 </div>
 //               </div>
 //               <div className="flex items-center">
@@ -881,8 +890,7 @@
 // }
 
 // export default NavBar;
-
-// try one fast way to  get data
+// work well onlick also ...
 import { useEffect, useRef, useState } from "react";
 import { Navbar, Nav, NavDropdown } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
@@ -907,6 +915,8 @@ function NavBar() {
   const [isSidebar, setIsSidebar] = useState();
   const [academicYear, setAcademicYear] = useState([]);
   const [menuDropdownOpen, setMenuDropdownOpen] = useState({});
+  const [isFocused, setIsFocused] = useState(false);
+
   // const [inputValueGR, setInputValueGR] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   // const [sessionData, setsessionData] = useState({});
@@ -951,6 +961,22 @@ function NavBar() {
     localStorage.setItem("shouldRedirectToDashboard", "true");
     window.location.reload();
   };
+
+  // useEffect(() => {
+  //   const handleShortcut = (e) => {
+  //     // ✅ Ctrl + M to focus "Search Menu"
+  //     if (e.ctrlKey && e.key.toLowerCase() === "m") {
+  //       e.preventDefault(); // stop browser default
+  //       if (selectRef.current) {
+  //         // Focus React-Select search input
+  //         selectRef.current.focus();
+  //       }
+  //     }
+  //   };
+
+  //   window.addEventListener("keydown", handleShortcut);
+  //   return () => window.removeEventListener("keydown", handleShortcut);
+  // }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -1221,8 +1247,11 @@ function NavBar() {
   };
 
   const menuRef = useRef(null);
+  const selectRef = useRef(null);
+
   const [openDropdowns, setOpenDropdowns] = useState([]);
   const [clickedDropdowns, setClickedDropdowns] = useState([]);
+  const [isTouchDevice, setIsTouchDevice] = useState(false); // 👈 NEW
 
   const toggleDropdown = (key, level) => {
     const newBranch = [...openDropdowns.slice(0, level)];
@@ -1261,6 +1290,18 @@ function NavBar() {
       );
     }, 200);
   };
+  useEffect(() => {
+    const handleTouchStart = () => setIsTouchDevice(true);
+    const handleMouseMove = () => setIsTouchDevice(false);
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -1297,6 +1338,14 @@ function NavBar() {
                 e.preventDefault();
                 toggleDropdown(dropdownKey, level);
               }}
+              onMouseEnter={
+                !isTouchDevice
+                  ? () => handleMouseEnter(dropdownKey, level)
+                  : undefined
+              }
+              onMouseLeave={
+                !isTouchDevice ? () => handleMouseLeave(level) : undefined
+              }
             >
               {item.sub_menus.map((subItem) => {
                 const subKey = `${subItem.menu_id}-${level + 1}`;
@@ -1308,34 +1357,36 @@ function NavBar() {
                       key={subKey}
                       title={
                         <span className="nav-dropdown-sub-new-Dynamic px-2">
-                          {subItem.name}
+                          {subItem?.name}
                         </span>
                       }
-                      className={`  nav-dropdown-sub-new dropend w-auto ${
+                      className={`nav-dropdown-sub-new dropend w-auto ${
                         isSubOpen ? "show" : ""
-                      } `}
+                      }`}
                       show={isSubOpen}
-                      // onClick={(e) => {
-                      //   e.preventDefault();
-                      //   e.stopPropagation();
-                      //   closeAllDropdowns();
-
-                      //   toggleDropdown(subKey, level + 1); // click opens/closes
-                      // }}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-
-                        // If it's already open, close all
                         if (isSubOpen) {
-                          closeAllDropdowns(); // close all if already open
+                          closeAllDropdowns();
                         } else {
-                          // open only this one
-                          setOpenDropdowns([subKey]);
+                          // setOpenDropdowns([subKey]);
+                          setOpenDropdowns([
+                            `${item.menu_id}-${level}`,
+                            subKey,
+                          ]);
                         }
                       }}
-                      onMouseEnter={() => handleMouseEnter(subKey, level + 1)} // hover opens
-                      onMouseLeave={() => handleMouseLeave(level + 1)} // hover out closes (if not clicked)
+                      onMouseEnter={
+                        !isTouchDevice
+                          ? () => handleMouseEnter(subKey, level + 1)
+                          : undefined
+                      }
+                      onMouseLeave={
+                        !isTouchDevice
+                          ? () => handleMouseLeave(level + 1)
+                          : undefined
+                      }
                     >
                       {subItem.sub_menus.map((childItem) => {
                         const childKey = `${childItem.menu_id}-${level + 2}`;
@@ -1380,10 +1431,16 @@ function NavBar() {
                                   ]);
                                 }
                               }}
-                              onMouseEnter={() =>
-                                handleMouseEnter(childKey, level + 2)
+                              onMouseEnter={
+                                !isTouchDevice
+                                  ? () => handleMouseEnter(childKey, level + 2)
+                                  : undefined
                               }
-                              onMouseLeave={() => handleMouseLeave(level + 2)} // <-- pass level+2 here
+                              onMouseLeave={
+                                !isTouchDevice
+                                  ? () => handleMouseLeave(level + 2)
+                                  : undefined
+                              }
                             >
                               {childItem.sub_menus.map((grandChildItem) => (
                                 <NavDropdown.Item
@@ -1666,6 +1723,48 @@ function NavBar() {
                       }),
                     }}
                   />
+                  {/* working well with focus on contl+M but we have commented it */}
+                  {/* <div className="relative w-full md:w-[90%] my-2">
+                    <Select
+                      ref={selectRef}
+                      value={selectedMenu}
+                      onChange={handleMenuSelect}
+                      options={menuOptions}
+                      placeholder="Search Menu"
+                      isSearchable
+                      isClearable
+                      onFocus={() => setIsFocused(true)} 
+                      onBlur={() => setIsFocused(false)} 
+                      className="text-sm"
+                      styles={{
+                        control: (base, state) => ({
+                          ...base,
+                          backgroundColor: "#f3f4f6",
+                          borderColor: state.isFocused ? "#60a5fa" : "#d1d5db",
+                          borderRadius: "0.75rem",
+                          minHeight: "2.5rem",
+                          fontSize: "0.875rem",
+                          boxShadow: state.isFocused
+                            ? "0 0 0 2px #3b82f6"
+                            : "none",
+                        }),
+                      }}
+                    />
+
+                    {isFocused && (
+                      <div className="absolute -left-8 bottom-full mb-2 w-max px-2  rounded-lg shadow-lg bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold text-sm flex items-center gap-1 z-50">
+                        <span>Press</span>
+                        <kbd className="px-1  bg-gray-200 text-pink-600 font-bold rounded-full border border-pink-300">
+                          Ctrl
+                        </kbd>
+                        <span>+</span>
+                        <kbd className="px-2   bg-gray-200 text-pink-600 font-bold rounded-full border border-pink-300">
+                          M
+                        </kbd>
+                        <span>to search</span>
+                      </div>
+                    )}
+                  </div> */}
                 </div>
               </div>
               <div className="flex items-center">

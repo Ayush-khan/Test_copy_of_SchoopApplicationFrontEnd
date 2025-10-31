@@ -169,7 +169,7 @@ function ViewStudent() {
         m_emailid: student?.parents?.m_emailid || "",
         m_adhar_no: student?.parents?.m_adhar_no || "",
         udise_pen_no: student.udise_pen_no || " ",
-        apaar_id: student.apaar_id || " ",
+        apaar_id: student?.apaar_id || " ",
         user_id: student?.user_master?.user_id || " ",
         SetToReceiveSMS: student.SetToReceiveSMS || "",
         SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
@@ -613,7 +613,7 @@ function ViewStudent() {
               <input
                 type="text"
                 disabled
-                value={formData.apaar_id}
+                value={formData?.apaar_id}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}

@@ -232,6 +232,30 @@ import UploadMarks from "../componants/MastersModule/DomainModules/UploadMarks/U
 import HPCReportCard from "../componants/MastersModule/DomainModules/HPCReportCard/HPCReportCard.jsx";
 import ReportCardRemark from "../componants/MastersModule/DomainModules/ReportCardRemark/ReportCardRemark.jsx";
 import StudentAbsent from "../componants/AllTableList/StudentCard/StudentAbsent.jsx";
+import NoticeAndSmsForStaff from "../TeacherLoginModules/ViewsModules/NoticeAndSmsForStaff.jsx";
+import NoticeAndSmsForTheClass from "../TeacherLoginModules/ViewsModules/NoticeAndSmsForTheClass.jsx";
+import Chapter from "../TeacherLoginModules/ChapterModules/Chapter.jsx";
+import CreateChapter from "../TeacherLoginModules/ChapterModules/CreateChapter.jsx";
+import EditChapter from "../TeacherLoginModules/ChapterModules/EditChapter.jsx";
+import LessonPlanTemplate from "../TeacherLoginModules/LessonPlane/LessonPlanTemplate.jsx";
+import LessonPlanHeading from "../TeacherLoginModules/LessonPlane/LessonPlanHeading.jsx";
+import CreateLessonPlanTemplate from "../TeacherLoginModules/LessonPlane/CreateLessonPlanTemplate.jsx";
+import EditLessonPlanTemplate from "../TeacherLoginModules/LessonPlane/EditLessonPlan.jsx";
+import LessonPlan from "../TeacherLoginModules/LessonPlane/LessonPlan.jsx";
+import CreateLessonPlan from "../TeacherLoginModules/LessonPlane/CreateLessonPlan.jsx";
+import DailyAttendance from "../TeacherLoginModules/DailyAttendance/DailyAttendance.jsx";
+import EditLessonPlan from "../TeacherLoginModules/LessonPlane/EditLessonPlan.jsx";
+import RemarkForTeacher from "../TeacherLoginModules/ViewsModules/RemarkForTeacher.jsx";
+import TeacherNoteForClass from "../TeacherLoginModules/ViewsModules/TeacherNoteForClass.jsx";
+import FeePendingForClass from "../componants/AllTableList/FeePendingForClass.jsx";
+import HomeWorkForClass from "../TeacherLoginModules/ViewsModules/HomeWorkForClass.jsx";
+import TimeTableViewForTeacher from "../TeacherLoginModules/ViewsModules/TimeTableViewForTeacher.jsx";
+import StudentDetailsForTeacher from "../TeacherLoginModules/ViewsModules/StudentDetailsForTeacher.jsx";
+import BalanceleaveforTeachers from "../TeacherLoginModules/LeaveModuleForTeachers/BalanceleaveforTeachers.jsx";
+import ConsolidatedLeaveForTeachers from "../TeacherLoginModules/LeaveModuleForTeachers/ConsolidatedLeaveForTeachers.jsx";
+import TeacherNotes from "../TeacherLoginModules/TeacherNotes/TeacherNotes.jsx";
+import CreateTeacherNotes from "../TeacherLoginModules/TeacherNotes/CreateTeacherNotes.jsx";
+import EditTeacherNotes from "../TeacherLoginModules/TeacherNotes/EditTeacherNotes.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -1142,6 +1166,10 @@ function Index() {
           element={<PrivateRoute element={<FeePendingList />} />}
         />
         <Route
+          path="/FeePendingForClass"
+          element={<PrivateRoute element={<FeePendingForClass />} />}
+        />
+        <Route
           path="/studentAbsent"
           element={<PrivateRoute element={<StudentAbsent />} />}
         />
@@ -1266,6 +1294,107 @@ function Index() {
         <Route
           path="/feesOutStandingSendSms"
           element={<PrivateRoute element={<FeesOutStandingSendSms />} />}
+        />
+        {/* FOr teacher modules view */}
+        <Route
+          path="/NoticeAndSmsForStaff"
+          element={<PrivateRoute element={<NoticeAndSmsForStaff />} />}
+        />
+        <Route
+          path="/NoticeAndSmsForTheClass"
+          element={<PrivateRoute element={<NoticeAndSmsForTheClass />} />}
+        />
+        <Route
+          path="/RemarkForTeacher"
+          element={<PrivateRoute element={<RemarkForTeacher />} />}
+        />
+        <Route
+          path="/TeacherNoteForClass"
+          element={<PrivateRoute element={<TeacherNoteForClass />} />}
+        />
+        <Route
+          path="/homeworkClass"
+          element={<PrivateRoute element={<HomeWorkForClass />} />}
+        />
+        <Route
+          path="/studentDetailsForTeacher"
+          element={<PrivateRoute element={<StudentDetailsForTeacher />} />}
+        />
+        <Route
+          path="/timeTableViewForTeacher"
+          element={<PrivateRoute element={<TimeTableViewForTeacher />} />}
+        />
+        {/* Leave for teacher  modules */}
+        <Route
+          path="/BalanceleaveforTeachers"
+          element={<PrivateRoute element={<BalanceleaveforTeachers />} />}
+        />
+        <Route
+          path="/ConsolidatedLeaveForTeachers"
+          element={<PrivateRoute element={<ConsolidatedLeaveForTeachers />} />}
+        />
+        {/* Upload mai teachers notes module */}
+        <Route
+          path="/TeacherNotes"
+          element={<PrivateRoute element={<TeacherNotes />} />}
+        />
+        <Route
+          path="/EditTeacherNotes/edit/:id"
+          element={<PrivateRoute element={<EditTeacherNotes />} />}
+        />
+        <Route
+          path="CreateTeacherNotes"
+          element={<PrivateRoute element={<CreateTeacherNotes />} />}
+        />
+        {/* Curriculum */}
+        {/* Chapter */}
+        <Route
+          path="/chapters"
+          element={<PrivateRoute element={<Chapter />} />}
+        />
+        <Route
+          path="/createChapter"
+          element={<PrivateRoute element={<CreateChapter />} />}
+        />
+        <Route
+          path="/editChapter/:id"
+          element={<PrivateRoute element={<EditChapter />} />}
+        />
+        {/* Lesson Plan Headings */}
+        <Route
+          path="/lessonPlanHeadings"
+          element={<PrivateRoute element={<LessonPlanHeading />} />}
+        />
+        {/* Lesson Plan Template */}
+        <Route
+          path="/lessonPlanTemplate"
+          element={<PrivateRoute element={<LessonPlanTemplate />} />}
+        />
+        <Route
+          path="/createLessonPlanTemplate"
+          element={<PrivateRoute element={<CreateLessonPlanTemplate />} />}
+        />
+        <Route
+          path="/lessonPlanTemplate/edit/:id"
+          element={<PrivateRoute element={<EditLessonPlanTemplate />} />}
+        />
+        {/* Lesson Plan */}
+        <Route
+          path="/lessonPlan"
+          element={<PrivateRoute element={<LessonPlan />} />}
+        />
+        <Route
+          path="/createLessonPlan"
+          element={<PrivateRoute element={<CreateLessonPlan />} />}
+        />
+        <Route
+          path="/lessonPlan/edit/:id"
+          element={<PrivateRoute element={<EditLessonPlan />} />}
+        />
+        {/* Daily Attendance */}
+        <Route
+          path="/dailyAttendance"
+          element={<PrivateRoute element={<DailyAttendance />} />}
         />
       </Route>
 

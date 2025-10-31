@@ -39,7 +39,7 @@ function Form() {
 
   const studentData = location.state?.student || null;
   const section_id = location.state?.section_id || null;
-  console.log("Student being edited:", studentData.apaar_id);
+  console.log("Student being edited:", studentData?.apaar_id);
   console.log("Section ID passed for back navigation:", section_id);
 
   // Fetch class names
@@ -265,8 +265,8 @@ function Form() {
         m_emailid: student?.parents?.m_emailid || "",
         m_adhar_no: student?.parents?.m_adhar_no || "",
         udise_pen_no: student.udise_pen_no || " ",
-        apaar_id: student.apaar_id || " ",
-        has_specs: student.has_specs || " ",
+        apaar_id: student?.apaar_id || " ",
+        has_specs: student?.has_specs || " ",
         m_blood_group: student?.parents?.m_blood_group || " ",
         f_blood_group: student?.parents?.f_blood_group || " ",
 
@@ -2006,7 +2006,7 @@ function Form() {
                   id="Apaar_id"
                   name="apaar_id"
                   maxLength={12}
-                  value={formData.apaar_id}
+                  value={formData?.apaar_id}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={(e) => {
                     const value = e.target.value.replace(/[^a-zA-Z0-9]/g, "");
