@@ -768,29 +768,6 @@ const StudentsChart = () => {
         });
         setData(transformedData);
 
-        // const classOrder = [
-        //   "Nursery",
-        //   "LKG",
-        //   "UKG",
-        //   "1",
-        //   "2",
-        //   "3",
-        //   "4",
-        //   "5",
-        //   "6",
-        //   "7",
-        //   "8",
-        //   "9",
-        //   "10",
-        //   "11",
-        //   "12",
-        // ];
-
-        // const sortedData = filteredData.sort(
-        //   (a, b) => classOrder.indexOf(a.class) - classOrder.indexOf(b.class)
-        // );
-
-        // setData(sortedData);
         setData(filteredData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -870,28 +847,6 @@ const StudentsChart = () => {
       </g>
     );
   };
-
-  // const renderCustomXAxisTick = ({ x, y, payload }) => {
-  //   const lines = payload.value.split(" - ");
-
-  //   return (
-  //     <g transform={`translate(${x},${y})`}>
-  //       {lines.map((line, index) => (
-  //         <text
-  //           key={index}
-  //           x={0}
-  //           y={index * 10}
-  //           dy={16}
-  //           textAnchor="middle"
-  //           fontSize={xAxisFontSize}
-  //           fill="#666"
-  //         >
-  //           {line}
-  //         </text>
-  //       ))}
-  //     </g>
-  //   );
-  // };
 
   const renderTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -988,13 +943,6 @@ const StudentsChart = () => {
             margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
             barCategoryGap={barCategoryGap}
           >
-            {/* <XAxis
-              dataKey="class"
-              tick={{ fontSize: xAxisFontSize }}
-              interval={0}
-              tickMargin={xAxisTickMargin}
-              tickSize={xAxisTickWidth}
-            /> */}
             <XAxis
               dataKey="class"
               tick={renderCustomXAxisTick}
