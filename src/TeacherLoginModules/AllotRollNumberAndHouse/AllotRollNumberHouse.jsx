@@ -31,6 +31,7 @@ const AllotRollNumberHouse = () => {
   const studentRefs = useRef({});
   const [studentOptions, setStudentNameWithClassId] = useState([]);
   const [houseOptions, setHouseOptions] = useState([]);
+  const [submitTeacherNote, setSubmitTeacherNote] = useState(false);
 
   const token = localStorage.getItem("authToken");
   useEffect(() => {
@@ -173,34 +174,69 @@ const AllotRollNumberHouse = () => {
   // 🔹 Submit updated student data
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validation
-    const newErrors = {};
-    studentInformation.forEach((stu) => {
-      if (!stu.roll_no || stu.roll_no === "") {
-        newErrors[stu.student_id] = {
-          ...(newErrors[stu.student_id] || {}),
-          roll_no: "Please enter Roll Number",
-        };
-      }
-      if (!stu.house || stu.house === "") {
-        newErrors[stu.student_id] = {
-          ...(newErrors[stu.student_id] || {}),
-          house: "Please select House",
-        };
-      }
-    });
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      toast.error("Please fix validation errors before submitting.");
-      return; // stop submit
-    }
-
-    // if validation passed, clear errors
-    setErrors({});
+    setSubmitTeacherNote(true);
 
     try {
+      // 🔹 Step 1: Basic Validation
+      const newErrors = {};
+      studentInformation.forEach((stu) => {
+        if (!stu.roll_no || stu.roll_no === "") {
+          newErrors[stu.student_id] = {
+            ...(newErrors[stu.student_id] || {}),
+            roll_no: "Please enter Roll Number",
+          };
+        }
+        if (!stu.house || stu.house === "") {
+          newErrors[stu.student_id] = {
+            ...(newErrors[stu.student_id] || {}),
+            house: "Please select House",
+          };
+        }
+      });
+
+      // 🔹 Step 2: Unique Roll Number Validation
+      const rollNumbers = studentInformation
+        .map((s) => s.roll_no)
+        .filter((r) => r !== "" && r !== null);
+
+      const duplicateRolls = rollNumbers.filter(
+        (num, index) => rollNumbers.indexOf(num) !== index
+      );
+
+      if (duplicateRolls.length > 0) {
+        toast.error(
+          `Duplicate Roll Numbers found: ${[...new Set(duplicateRolls)].join(
+            ", "
+          )}`
+        );
+
+        // Highlight duplicate students
+        const duplicateErrors = {};
+        studentInformation.forEach((stu) => {
+          if (duplicateRolls.includes(stu.roll_no)) {
+            duplicateErrors[stu.student_id] = {
+              ...(duplicateErrors[stu.student_id] || {}),
+              roll_no: "Roll Number must be unique",
+            };
+          }
+        });
+        setErrors({ ...newErrors, ...duplicateErrors });
+        setSubmitTeacherNote(false);
+        return;
+      }
+
+      // 🔹 Step 3: Stop submission if there are any validation errors
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        toast.error("Please fix validation errors before submitting.");
+        setSubmitTeacherNote(false);
+        return;
+      }
+
+      // 🔹 Step 4: Clear old errors if validation passed
+      setErrors({});
+
+      // 🔹 Step 5: API Payload
       const payload = {
         students: studentInformation.map((s) => ({
           student_id: s.student_id,
@@ -212,6 +248,7 @@ const AllotRollNumberHouse = () => {
         })),
       };
 
+      // 🔹 Step 6: API Call
       const res = await axios.put(
         `${API_URL}/api/update_studentallotrollnohouse`,
         payload,
@@ -224,22 +261,35 @@ const AllotRollNumberHouse = () => {
     } catch (err) {
       console.error("Error saving students:", err.response);
       toast.error("Failed to update student details.");
+    } finally {
+      // 🔹 Step 7: Stop Loader
+      setSubmitTeacherNote(false);
     }
   };
 
   const filteredParents = useMemo(() => {
     if (!Array.isArray(studentInformation)) return [];
 
+    const searchLower = searchTerm.trim().toLowerCase();
+
+    // If search is empty, show all
+    if (searchLower === "") return studentInformation;
+
     return studentInformation.filter((student) => {
-      const searchLower = searchTerm.toLowerCase();
+      const rollNo = student.roll_no
+        ? student.roll_no.toString().toLowerCase()
+        : "";
+      const name = student.full_name ? student.full_name.toLowerCase() : "";
+      const grNo = student.reg_no
+        ? student.reg_no.toString().toLowerCase()
+        : "";
+
       return (
-        (student.roll_no !== null &&
-          student.roll_no.toString().toLowerCase().includes(searchLower)) ||
-        student.full_name.toLowerCase().includes(searchLower) ||
-        student.reg_no.toString().toLowerCase().includes(searchLower)
+        rollNo.includes(searchLower) ||
+        name.includes(searchLower) ||
+        grNo.includes(searchLower)
       );
     });
-    // .sort((a, b) => (a.roll_no || 0) - (b.roll_no || 0)); // Sort by roll_no
   }, [studentInformation, searchTerm]);
 
   const handleNavigation = () => {
@@ -250,7 +300,7 @@ const AllotRollNumberHouse = () => {
     <div>
       <ToastContainer />
 
-      <div className="md:mx-auto md:w-[90%] p-4 bg-white mt-4 ">
+      <div className="md:mx-auto md:w-[70%] p-4 bg-white mt-4 ">
         <div className=" w-full    flex justify-between items-center ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Allot Roll Number & House
@@ -270,7 +320,7 @@ const AllotRollNumberHouse = () => {
         <div className="w-full md:container mt-4">
           {/* Search Section */}
           <div className="pt-2 md:pt-4"></div>
-          <div className="pt-8 w-full md:w-[50%]  relative ml-0 md:ml-[4%]  border-1 flex justify-start flex-col md:flex-row gap-x-1  bg-white rounded-lg mt-2 md:mt-6 p-2 ">
+          <div className="pt-8 w-full md:w-[60%]  relative ml-0 md:ml-[4%]  border-1 flex justify-start flex-col md:flex-row gap-x-1  bg-white rounded-lg mt-2 md:mt-6 p-2 ">
             {/* <h6 className=" w-[20%] float-start text-nowrap text-blue-600 mt-2.5"></h6> */}
 
             <div className="w-full flex md:flex-row justify-start items-center">
@@ -341,7 +391,7 @@ const AllotRollNumberHouse = () => {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                         ></path>
                       </svg>
-                      Loading...
+                      Browsing...
                     </span>
                   ) : (
                     "Browse"
@@ -378,7 +428,7 @@ const AllotRollNumberHouse = () => {
                 <div className="card-body w-full ">
                   <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full mx-auto">
                     <div className="bg-white rounded-lg shadow-xs">
-                      <table className="min-w-full leading-normal table-auto border border-gray-800">
+                      <table className="w-full leading-normal table-auto border border-gray-800">
                         <thead className="bg-gray-200">
                           <tr>
                             <th className="border border-gray-950 p-2 text-center">
@@ -387,7 +437,7 @@ const AllotRollNumberHouse = () => {
                             <th className="border border-gray-950 p-2 text-center">
                               Student Name
                             </th>
-                            <th className="border border-gray-950 p-2 text-center">
+                            <th className="border w-full md:w-[20%] border-gray-950 p-2 text-center">
                               <span className="text-red-500">*</span> Roll No
                             </th>
                             <th className="border border-gray-950 p-2 text-center">
@@ -396,8 +446,8 @@ const AllotRollNumberHouse = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {studentInformation.length > 0 ? (
-                            studentInformation.map((stu, index) => (
+                          {filteredParents.length > 0 ? (
+                            filteredParents.map((stu, index) => (
                               <tr
                                 key={stu.student_id}
                                 className={
@@ -477,13 +527,14 @@ const AllotRollNumberHouse = () => {
                     <button
                       type="submit"
                       onClick={handleSubmit}
-                      style={{ backgroundColor: "#2196F3" }}
-                      className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                        loading ? "opacity-50 cursor-not-allowed" : ""
+                      disabled={submitTeacherNote}
+                      className={`text-white font-bold py-1 px-4 rounded ${
+                        submitTeacherNote
+                          ? "opacity-50 cursor-not-allowed bg-blue-400"
+                          : "bg-blue-600 hover:bg-blue-700"
                       }`}
-                      disabled={loading}
                     >
-                      {loading ? (
+                      {submitTeacherNote ? (
                         <span className="flex items-center">
                           <svg
                             className="animate-spin h-4 w-4 mr-2 text-white"
@@ -505,10 +556,10 @@ const AllotRollNumberHouse = () => {
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                             ></path>
                           </svg>
-                          Updating...
+                          Submitting...
                         </span>
                       ) : (
-                        "Update"
+                        "Submit"
                       )}
                     </button>
                   </div>
