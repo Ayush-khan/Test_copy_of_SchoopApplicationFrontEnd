@@ -343,6 +343,7 @@ import ConsolidatedLeaveForTeachers from "../TeacherLoginModules/LeaveModuleForT
 import TeacherNotes from "../TeacherLoginModules/TeacherNotes/TeacherNotes.jsx";
 import CreateTeacherNotes from "../TeacherLoginModules/TeacherNotes/CreateTeacherNotes.jsx";
 import EditTeacherNotes from "../TeacherLoginModules/TeacherNotes/EditTeacherNotes.jsx";
+import AllotRollNumberHouse from "../TeacherLoginModules/AllotRollNumberAndHouse/AllotRollNumberHouse.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -1405,6 +1406,10 @@ function Index() {
           element={<PrivateRoute element={<ConsolidatedLeaveForTeachers />} />}
         />
         {/* Upload mai teachers notes module */}
+        <Route
+          path="AllotRollNumberHouse"
+          element={<PrivateRoute element={<AllotRollNumberHouse />} />}
+        />
         <Route
           path="/TeacherNotes"
           element={<PrivateRoute element={<TeacherNotes />} />}
