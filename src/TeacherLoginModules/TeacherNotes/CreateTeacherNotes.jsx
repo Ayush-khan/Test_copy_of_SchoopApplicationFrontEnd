@@ -36,7 +36,7 @@ const CreateTeacherNotes = () => {
   const [loadingSubjects, setLoadingSubjects] = useState(false);
   const [roleId, setRoleId] = useState(null);
   const [classes, setClasses] = useState([]); // API से आने वाले सभी classes
-
+  const [uploading, setUploading] = useState(false);
   useEffect(() => {
     // YYYY-MM-DD format
     const today = new Date();
@@ -47,6 +47,18 @@ const CreateTeacherNotes = () => {
     });
     setCurrentDate(formattedDate);
   }, []);
+  const getBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file); // reads file as data URL (base64 encoded)
+      reader.onload = () => {
+        // Remove the "data:*/*;base64," prefix
+        const base64String = reader.result.split(",")[1];
+        resolve(base64String);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
   useEffect(() => {
     const init = async () => {
       try {
@@ -111,7 +123,6 @@ const CreateTeacherNotes = () => {
     }
   };
 
-  // 🔹 Handle single class checkbox select/deselect
   // 🔹 Handle single class checkbox select/deselect
   const handleClassCheckboxChange = (cls) => {
     let updated;
@@ -209,28 +220,6 @@ const CreateTeacherNotes = () => {
     }
   };
 
-  const subjectOptions = useMemo(() => {
-    return (subjects || []).map((subj) => ({
-      value: subj.sm_id,
-      label: subj.name,
-    }));
-  }, [subjects]);
-
-  const handleSubjectChange = (selectedOption) => {
-    setSelectedSubject(selectedOption);
-
-    if (selectedOption) {
-      setErrors((prev) => ({ ...prev, subjectError: "" }));
-    }
-  };
-
-  const handleRemarkSubjectChange = (e) => {
-    setRemarkSubject(e.target.value);
-    if (errors.remarkSubjectError) {
-      setErrors((prev) => ({ ...prev, remarkSubjectError: "" }));
-    }
-  };
-
   const handleRemarkDescriptionChange = (e) => {
     setRemarkDescription(e.target.value);
     if (errors.remarkDescriptionError) {
@@ -238,21 +227,156 @@ const CreateTeacherNotes = () => {
     }
   };
 
-  const handleFileUpload = (event) => {
+  // Handle file selection → auto upload each file
+  const handleFileUpload = async (event) => {
     const files = Array.from(event.target.files);
-    const validFiles = files.filter((file) => file.size <= 2 * 1024 * 1024); // 2MB
+    const validFiles = files.filter((file) => file.size <= 2 * 1024 * 1024); // max 2MB
 
     if (validFiles.length < files.length) {
       toast.error("Some files exceed the 2MB limit and were not added.");
     }
 
-    setAttachedFiles((prevFiles) => [...prevFiles, ...validFiles]);
+    for (const file of validFiles) {
+      await uploadFile(file);
+    }
+
+    // Reset file input so same file can be reselected
+    event.target.value = "";
   };
 
-  const handleRemoveFile = (indexToRemove) => {
-    setAttachedFiles((prevFiles) =>
-      prevFiles.filter((_, index) => index !== indexToRemove)
-    );
+  // Upload single file automatically
+  const uploadFile = async (file) => {
+    setUploading(true);
+
+    try {
+      const token = localStorage.getItem("authToken");
+
+      const random_no = Math.floor(Math.random() * 1000) + 1;
+
+      // Date in DD-MM-YYYY
+      const today = new Date();
+      const formattedDate =
+        String(today.getDate()).padStart(2, "0") +
+        "-" +
+        String(today.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        today.getFullYear();
+
+      const base64Data = await getBase64(file);
+
+      const formData = new FormData();
+      formData.append("random_no", random_no);
+      formData.append("doc_type_folder", "daily_notes");
+      formData.append("filename", file.name);
+      formData.append("datafile", base64Data);
+      formData.append("upload_date", formattedDate);
+
+      await axios.post(`${API_URL}/api/upload_files`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Add uploaded file to state list
+      setAttachedFiles((prev) => [
+        ...prev,
+        {
+          name: file.name,
+          size: file.size,
+          random_no,
+          upload_date: formattedDate,
+        },
+      ]);
+
+      toast.success(`${file.name} uploaded successfully`);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error(`Upload failed for ${file.name}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Remove file → call delete API and remove from list
+  const handleRemoveFile = async (index) => {
+    const fileToRemove = attachedFiles[index];
+    if (!fileToRemove) return;
+    const token = localStorage.getItem("authToken");
+
+    try {
+      const formData = new FormData();
+      formData.append("upload_date", fileToRemove.upload_date);
+      formData.append("filename", fileToRemove.name);
+      formData.append("doc_type_folder", "daily_notes");
+      formData.append("random_no", fileToRemove.random_no);
+
+      await axios.post(`${API_URL}/api/delete_uploaded_files`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
+      toast.info(`${fileToRemove.name} deleted successfully`);
+    } catch (error) {
+      console.error("Delete failed:", error);
+      toast.error(`Failed to delete ${fileToRemove.name}`);
+    }
+  };
+
+  // Upload all files
+  const uploadAllFiles = async () => {
+    if (attachedFiles.length === 0) {
+      toast.error("No files to upload.");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const token = localStorage.getItem("authToken");
+
+      for (const file of attachedFiles) {
+        const random_no = Math.floor(Math.random() * 1000) + 1;
+
+        const today = new Date();
+        const formattedDate =
+          String(today.getDate()).padStart(2, "0") +
+          "-" +
+          String(today.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          today.getFullYear();
+
+        // Convert file to Base64 string
+        const base64Data = await getBase64(file);
+
+        // Prepare FormData (note: datafile is Base64 string now)
+        const formData = new FormData();
+        formData.append("random_no", random_no.toString());
+        formData.append("doc_type_folder", "daily_notes");
+        formData.append("filename", file.name);
+        formData.append("datafile", base64Data);
+        formData.append("upload_date", formattedDate);
+
+        // Call API
+        await axios.post(`${API_URL}/api/upload_files`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+
+      toast.success("All files uploaded successfully!");
+      setAttachedFiles([]);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error("Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const resetForm = () => {
@@ -285,10 +409,9 @@ const CreateTeacherNotes = () => {
     return Object.keys(newErrors).length === 0; // true if no errors
   };
 
-  const handleSubmit = async (e, publish = false) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check if any class is selected
     if (selectedClasses.length === 0) {
       setErrors((prev) => ({
         ...prev,
@@ -302,52 +425,65 @@ const CreateTeacherNotes = () => {
     if (publish) setIsPublishing(true);
     else setIsSubmitting(true);
 
-    const formData = new FormData();
-    formData.append("save_publish", publish ? "Y" : "N");
-
-    if (isObservation) formData.append("observation", "yes");
-
-    formData.append("remark_desc", remarkDescription || "");
-    formData.append("remark_subject", remarkSubject || "");
-
-    // Append selected students/classes
-    selectedClasses.forEach((cls) => {
-      formData.append("student_id[]", cls.student_id);
-      formData.append("class_id", cls.class_id);
-      formData.append("section_id", cls.section_id);
-    });
-
-    formData.append("subject_id", selectedSubject?.value || "0");
-
-    attachedFiles.forEach((file) => {
-      formData.append("userfile[]", file);
-    });
-
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.post(
-        `${API_URL}/api/save_remarkobservationforstudents`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
+      const today = new Date();
+
+      // Format date as YYYY-MM-DD
+      const dailynote_date = today.toISOString().split("T")[0];
+
+      // Prepare FormData
+      const formData = new FormData();
+
+      // Static & common fields
+      formData.append("login_type", "T");
+      formData.append("teacher_id", regId); // from session
+      formData.append("academic_yr", academicYr);
+      formData.append("operation", "create");
+      formData.append("description", remarkDescription || "");
+      formData.append("subject_id", selectedSubject?.value || "0");
+      formData.append("dailynote_date", dailynote_date);
+
+      // 🧩 Prepare str_array => all selected classes in "class_id^section_id" format
+      const strArray = selectedClasses.map(
+        (cls) => `${cls.class_id}^${cls.section_id}`
       );
+      formData.append("str_array", JSON.stringify(strArray));
+
+      // 🧠 Add all uploaded Base64 files
+      for (const file of attachedFiles) {
+        formData.append("filename", file.name);
+        formData.append("random_no", file.random_no);
+
+        // Base64 conversion (if not already stored)
+        if (!file.datafile) {
+          const base64Data = await getBase64(file);
+          formData.append("datafile", base64Data);
+        } else {
+          formData.append("datafile", file.datafile);
+        }
+      }
+
+      // 🚀 API call
+      const response = await axios.post(`${API_URL}/api/dailynotes`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       if (response.data.success) {
         toast.success(
           publish
-            ? "Remark Saved & published successfully!"
-            : "Remark saved successfully!"
+            ? "Daily Note saved & published successfully!"
+            : "Daily Note saved successfully!"
         );
         resetForm();
       } else {
-        toast.error("Failed to save remark.");
+        toast.error("Failed to save Daily Note.");
       }
     } catch (error) {
-      console.error("Error submitting remark:", error);
+      console.error("Error submitting:", error);
       toast.error("Something went wrong while saving.");
     } finally {
       setIsSubmitting(false);
@@ -546,24 +682,28 @@ const CreateTeacherNotes = () => {
                       {/* File Upload */}
                       {!isObservation && (
                         <div className="flex flex-col md:flex-row items-start md:items-start gap-3">
-                          {/* Label on the left */}
                           <label className="w-[28%] text-[1em] text-gray-700 pt-2">
                             Add Notes
                           </label>
 
-                          {/* Input and file list on the right */}
-                          <div className="flex-1 space-y-2">
+                          <div className="flex-1 space-y-2 mt-2">
+                            {/* File Input */}
                             <input
                               type="file"
                               multiple
                               onChange={handleFileUpload}
                               className="text-sm"
                             />
-                            <p className="text-pink-500 text-xs">
-                              (Each file must not exceed a maximum size of 2MB)
-                            </p>
 
-                            {/* Boxed file list */}
+                            {/* Loader */}
+                            {uploading && (
+                              <div className="text-sm text-gray-500 py-2 flex items-center gap-2">
+                                <div className="w-4 h-4 border-4 border-pink-500 border-dashed rounded-full animate-spin"></div>
+                                Uploading...
+                              </div>
+                            )}
+
+                            {/* Uploaded file list */}
                             {attachedFiles.length > 0 && (
                               <div className="border border-gray-300 bg-gray-50 rounded p-3 text-sm text-gray-700">
                                 <ul className="space-y-1">
@@ -597,24 +737,16 @@ const CreateTeacherNotes = () => {
                 )}
               </div>
 
-              <form onSubmit={(e) => handleSubmit(e, false)}>
+              <form onSubmit={handleSubmit}>
                 {!loading && (
                   <div className="flex space-x-2 justify-end mb-2 mr-2">
                     <button
                       type="submit"
+                      name="publish"
                       className="btn btn-primary"
-                      disabled={isSubmitting}
+                      disabled={isPublishing}
                     >
-                      {isSubmitting ? "Saving..." : "Save"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={(e) => handleSubmit(e, true)}
-                      className="btn btn-primary"
-                      disabled={isPublishing || isObservation}
-                    >
-                      {isPublishing ? "Saving & Publishing" : "Save & Publish"}
+                      {isPublishing ? "Saving..." : "Save"}
                     </button>
 
                     <button
