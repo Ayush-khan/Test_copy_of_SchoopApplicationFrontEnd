@@ -31,7 +31,7 @@ function TeacherNotes() {
   const [activeTab, setActiveTab] = useState("Manage");
   const [classes, setClasses] = useState([]);
   const [classesforsubjectallot, setclassesforsubjectallot] = useState([]);
-
+  const [isImageLoading, setIsImageLoading] = useState(false);
   // for allot subject tab
   const [showViewModal, setShowViewModal] = useState(false);
   const [showPublish, setShowPublishModal] = useState(false);
@@ -198,7 +198,59 @@ function TeacherNotes() {
     // Handle page change logic
   };
 
+  // const handleView = async (subject) => {
+  //   setRemarkData({
+  //     t_remark_id: subject.notes_id,
+  //     name: `${subject.name}`,
+  //     date: subject.date ? subject.date.split("-").reverse().join("-") : "",
+  //     publish_date: subject.publish_date
+  //       ? subject.publish_date.split("-").reverse().join("-")
+  //       : "",
+  //     remark_subject: subject.remark_subject || "-",
+  //     description: subject.description || "-",
+  //     publish: subject.publish,
+  //     academic_yr: subject.academic_yr || "",
+  //     class_id: subject.class_id || "",
+  //     section_id: subject.section_id || "",
+  //     subject_id: subject.subject_id || "",
+  //     teacher_id: subject.teacher_id || "",
+  //   });
+
+  //   setOpen(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const formData = new FormData();
+  //     formData.append("dailynote_date", subject.date);
+  //     formData.append("note_id", subject.t_remark_id);
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/get_images_daily_notes`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.data?.status) {
+  //       const { url, images } = response.data;
+  //       const imageList = images.map((img) => `${url}/${img.image_name}`);
+  //       setImageUrls(imageList); // ✅ store in state
+  //     } else {
+  //       setImageUrls([]);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching attachments:", error);
+  //     setImageUrls([]);
+  //   }
+  // };
   const handleView = async (subject) => {
+    setIsImageLoading(true);
+    setImageUrls([]); // clear old images
+
+    // set your remarkData (same as before)
     setRemarkData({
       t_remark_id: subject.notes_id,
       name: `${subject.name}`,
@@ -221,8 +273,8 @@ function TeacherNotes() {
     try {
       const token = localStorage.getItem("authToken");
       const formData = new FormData();
-      formData.append("dailynote_date", subject.date);
-      formData.append("note_id", subject.t_remark_id);
+      formData.append("dailynote_date", subject?.date);
+      formData.append("note_id", subject?.t_remark_id);
 
       const response = await axios.post(
         `${API_URL}/api/get_images_daily_notes`,
@@ -230,20 +282,25 @@ function TeacherNotes() {
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
-      if (response.data?.status) {
-        const { url, images } = response.data;
-        const imageList = images.map((img) => `${url}/${img.image_name}`);
-        setImageUrls(imageList); // ✅ store in state
+      if (response.data?.status && response.data.images?.length > 0) {
+        const baseUrl = response.data.url;
+        const urls = response.data.images.map(
+          (img) => `${baseUrl}/${img.image_name}`
+        );
+        setImageUrls(urls);
       } else {
         setImageUrls([]);
       }
-    } catch (error) {
-      console.error("Error fetching attachments:", error);
+    } catch (err) {
+      console.error("Error fetching images:", err);
       setImageUrls([]);
+    } finally {
+      setIsImageLoading(false);
     }
   };
 
@@ -573,18 +630,35 @@ function TeacherNotes() {
       setSendingSMS((prev) => ({ ...prev, [uniqueId]: false }));
     }
   };
+  // const handleCloseModal = () => {
+  //   setSubject("");
+  //   setNoticeDesc("");
+  //   setnewclassnames("");
+  //   setPreselectedFiles([]);
+  //   setUploadedFiles([]);
+  //   // removeUploadedFile;
+  //   setShowPublishModal(false);
+  //   setShowViewModal(false);
+  //   setShowEditModal(false);
+  //   setShowDeleteModal(false);
+  //   setOpen(false);
+  // };
   const handleCloseModal = () => {
     setSubject("");
     setNoticeDesc("");
     setnewclassnames("");
     setPreselectedFiles([]);
     setUploadedFiles([]);
-    // removeUploadedFile;
     setShowPublishModal(false);
     setShowViewModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
     setOpen(false);
+
+    // 🧹 clear images and preview
+    setImageUrls([]);
+    setPreviewImage(null);
+    setIsImageLoading(false);
   };
 
   useEffect(() => {
@@ -1241,9 +1315,17 @@ function TeacherNotes() {
                       rows={4}
                     />
                   </div>
-                  {imageUrls && imageUrls.length > 0 && (
+                  {/* Attachments Section */}
+                  {isImageLoading ? (
+                    <div className="flex justify-center items-center py-4">
+                      <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-sm ml-2 text-gray-600">
+                        Loading attachments...
+                      </span>
+                    </div>
+                  ) : imageUrls.length > 0 ? (
                     <div className="w-full flex flex-row">
-                      <label className=" mb-2">Attachments:</label>
+                      <label className="mb-2">Attachments:</label>
 
                       <div className="relative mt-2 left-4 flex flex-col mx-4 gap-y-2">
                         {imageUrls.map((url, index) => {
@@ -1259,10 +1341,8 @@ function TeacherNotes() {
                               key={index}
                               className="font-semibold flex flex-row text-[.58em] items-center gap-x-2"
                             >
-                              {/* File name */}
                               <span>{fileName}</span>
 
-                              {/* 👁 View (if image) OR ⬇ Download (if not) */}
                               {isImage ? (
                                 <button
                                   className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
@@ -1283,23 +1363,32 @@ function TeacherNotes() {
                         })}
                       </div>
                     </div>
+                  ) : (
+                    <p className="text-xs text-gray-500 ml-4">
+                      No attachments available
+                    </p>
                   )}
 
                   {previewImage && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-                      <div className="relative bg-white p-3 rounded-md shadow-lg border border-gray-300 w-[120px] animate-fadeIn">
-                        <button
-                          onClick={() => setPreviewImage(null)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
-                        >
-                          ✕
-                        </button>
-
+                    <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-50">
+                      <div className="bg-white border border-gray-300 shadow-2xl rounded-lg p-3 w-[260px] flex flex-col items-center animate-fadeIn">
+                        {/* 🖼 Image */}
                         <img
                           src={previewImage}
                           alt="Preview"
-                          className="rounded max-w-full max-h-[60vh] object-contain"
+                          className="rounded-md w-[240px] h-[180px] object-contain mb-3 border border-gray-200"
                         />
+
+                        {/* ✨ Subtle divider */}
+                        <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-3" />
+
+                        {/* 🔘 Close Button */}
+                        <button
+                          onClick={() => setPreviewImage(null)}
+                          className="px-4 py-1 bg-gradient-to-r from-pink-500 to-red-600 text-white text-sm rounded-md shadow hover:scale-105 transition-transform duration-200"
+                        >
+                          Close
+                        </button>
                       </div>
                     </div>
                   )}
@@ -1320,21 +1409,22 @@ function TeacherNotes() {
         </div>
       )}
       {imageModalOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-70">
-          <div className="modal-dialog modal-dialog-centered max-w-3xl max-h-[80vh]">
-            <div className="modal-content relative p-4 bg-white rounded">
-              <button
-                className="absolute top-2 right-2 text-xl font-bold text-red-600 hover:cursor-pointer"
-                onClick={() => setImageModalOpen(false)}
-              >
-                &times;
-              </button>
-              <img
-                src={selectedImageUrl}
-                alt="Attachment"
-                className="max-w-full max-h-[70vh] object-contain"
-              />
-            </div>
+        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="relative bg-white border border-gray-300 shadow-lg rounded-md p-2 w-[140px]">
+            {/* ❌ Close button */}
+            <button
+              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+              onClick={() => setImageModalOpen(false)}
+            >
+              ✕
+            </button>
+
+            {/* 🖼 Image */}
+            <img
+              src={selectedImageUrl}
+              alt="Attachment Preview"
+              className="rounded object-contain w-[120px] h-[180px]"
+            />
           </div>
         </div>
       )}
