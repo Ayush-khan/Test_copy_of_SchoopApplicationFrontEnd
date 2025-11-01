@@ -654,7 +654,7 @@ function TeacherNotes() {
     setShowEditModal(false);
     setShowDeleteModal(false);
     setOpen(false);
-
+    setImageModalOpen(null);
     // 🧹 clear images and preview
     setImageUrls([]);
     setPreviewImage(null);
@@ -1244,7 +1244,7 @@ function TeacherNotes() {
                   <h5 className="modal-title">View Teacher's Note</h5>
                   <RxCross1
                     className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                    onClick={() => setOpen(false)}
+                    onClick={handleCloseModal}
                   />
                 </div>
 
@@ -1398,7 +1398,7 @@ function TeacherNotes() {
                   <button
                     type="button"
                     className="btn btn-danger px-3 mb-2"
-                    onClick={() => setOpen(false)}
+                    onClick={handleCloseModal}
                   >
                     Close
                   </button>
