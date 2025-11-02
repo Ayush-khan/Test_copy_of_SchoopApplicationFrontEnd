@@ -198,54 +198,6 @@ function TeacherNotes() {
     // Handle page change logic
   };
 
-  // const handleView = async (subject) => {
-  //   setRemarkData({
-  //     t_remark_id: subject.notes_id,
-  //     name: `${subject.name}`,
-  //     date: subject.date ? subject.date.split("-").reverse().join("-") : "",
-  //     publish_date: subject.publish_date
-  //       ? subject.publish_date.split("-").reverse().join("-")
-  //       : "",
-  //     remark_subject: subject.remark_subject || "-",
-  //     description: subject.description || "-",
-  //     publish: subject.publish,
-  //     academic_yr: subject.academic_yr || "",
-  //     class_id: subject.class_id || "",
-  //     section_id: subject.section_id || "",
-  //     subject_id: subject.subject_id || "",
-  //     teacher_id: subject.teacher_id || "",
-  //   });
-
-  //   setOpen(true);
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     const formData = new FormData();
-  //     formData.append("dailynote_date", subject.date);
-  //     formData.append("note_id", subject.t_remark_id);
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/get_images_daily_notes`,
-  //       formData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (response.data?.status) {
-  //       const { url, images } = response.data;
-  //       const imageList = images.map((img) => `${url}/${img.image_name}`);
-  //       setImageUrls(imageList); // ✅ store in state
-  //     } else {
-  //       setImageUrls([]);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching attachments:", error);
-  //     setImageUrls([]);
-  //   }
-  // };
   const handleView = async (subject) => {
     setIsImageLoading(true);
     setImageUrls([]); // clear old images
@@ -367,7 +319,7 @@ function TeacherNotes() {
   const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
 
   const handleEdit = (section) => {
-    navigate(`/EditTeacherNotes/edit/${section.t_remark_id}`, {
+    navigate(`/EditTeacherNotes/edit/${section?.t_remark_id}`, {
       state: section,
     });
   };
@@ -630,19 +582,7 @@ function TeacherNotes() {
       setSendingSMS((prev) => ({ ...prev, [uniqueId]: false }));
     }
   };
-  // const handleCloseModal = () => {
-  //   setSubject("");
-  //   setNoticeDesc("");
-  //   setnewclassnames("");
-  //   setPreselectedFiles([]);
-  //   setUploadedFiles([]);
-  //   // removeUploadedFile;
-  //   setShowPublishModal(false);
-  //   setShowViewModal(false);
-  //   setShowEditModal(false);
-  //   setShowDeleteModal(false);
-  //   setOpen(false);
-  // };
+
   const handleCloseModal = () => {
     setSubject("");
     setNoticeDesc("");
