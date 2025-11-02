@@ -35,6 +35,7 @@ const CreateTeacherNotes = () => {
   const [academicYr, setAcademicYr] = useState(null);
   const [loadingSubjects, setLoadingSubjects] = useState(false);
   const [roleId, setRoleId] = useState(null);
+  const [teacherRoleName, setTeacherRoleName] = useState(null);
   const [classes, setClasses] = useState([]); // API से आने वाले सभी classes
   const [uploading, setUploading] = useState(false);
   useEffect(() => {
@@ -78,13 +79,14 @@ const CreateTeacherNotes = () => {
         const acdYr = sessionRes?.data?.custom_claims?.academic_year;
         const roleId = sessionRes?.data?.user?.name;
         const regId = sessionRes?.data?.user?.reg_id;
-
+        const teacherRoleName = sessionRes?.data?.user?.role_id;
         if (!roleId || !regId || !acdYr) {
           toast.error("Invalid session data received");
           return;
         }
         setRoleId(roleId);
         setRegId(regId);
+        setTeacherRoleName(teacherRoleName);
         fetchTeacherClasses(regId);
         setAcademicYr(acdYr);
       } catch (error) {
@@ -245,12 +247,64 @@ const CreateTeacherNotes = () => {
   };
 
   // Upload single file automatically
+  //   const uploadFile = async (file) => {
+  //     setUploading(true);
+
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+
+  //       const random_no = Math.floor(Math.random() * 1000) + 1;
+
+  //       // Date in DD-MM-YYYY
+  //       const today = new Date();
+  //       const formattedDate =
+  //         String(today.getDate()).padStart(2, "0") +
+  //         "-" +
+  //         String(today.getMonth() + 1).padStart(2, "0") +
+  //         "-" +
+  //         today.getFullYear();
+
+  //       const base64Data = await getBase64(file);
+
+  //       const formData = new FormData();
+  //       formData.append("random_no", random_no);
+  //       formData.append("doc_type_folder", "daily_notes");
+  //       formData.append("filename", file.name);
+  //       formData.append("datafile", base64Data);
+  //       formData.append("upload_date", formattedDate);
+
+  //       await axios.post(`${API_URL}/api/upload_files`, formData, {
+  //         headers: {
+  //           "Content-Type": "multipart/form-data",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
+
+  //       // Add uploaded file to state list
+  //       setAttachedFiles((prev) => [
+  //         ...prev,
+  //         {
+  //           name: file.name,
+  //           size: file.size,
+  //           random_no,
+  //           upload_date: formattedDate,
+  //         },
+  //       ]);
+
+  //       toast.success(`${file.name} uploaded successfully`);
+  //     } catch (error) {
+  //       console.error("Upload failed:", error);
+  //       toast.error(`Upload failed for ${file.name}`);
+  //     } finally {
+  //       setUploading(false);
+  //     }
+  //   };
+  // Upload single file automatically
   const uploadFile = async (file) => {
     setUploading(true);
 
     try {
       const token = localStorage.getItem("authToken");
-
       const random_no = Math.floor(Math.random() * 1000) + 1;
 
       // Date in DD-MM-YYYY
@@ -262,8 +316,10 @@ const CreateTeacherNotes = () => {
         "-" +
         today.getFullYear();
 
+      // Convert file → base64
       const base64Data = await getBase64(file);
 
+      // Create FormData for upload_files API
       const formData = new FormData();
       formData.append("random_no", random_no);
       formData.append("doc_type_folder", "daily_notes");
@@ -271,6 +327,7 @@ const CreateTeacherNotes = () => {
       formData.append("datafile", base64Data);
       formData.append("upload_date", formattedDate);
 
+      // Send to API
       await axios.post(`${API_URL}/api/upload_files`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -278,7 +335,7 @@ const CreateTeacherNotes = () => {
         },
       });
 
-      // Add uploaded file to state list
+      // ✅ Save file info + base64 in state
       setAttachedFiles((prev) => [
         ...prev,
         {
@@ -286,6 +343,7 @@ const CreateTeacherNotes = () => {
           size: file.size,
           random_no,
           upload_date: formattedDate,
+          datafile: base64Data, // ✅ important: store Base64 string
         },
       ]);
 
@@ -388,96 +446,85 @@ const CreateTeacherNotes = () => {
     setAttachedFiles([]);
     setIsObservation(false);
     setErrors({});
-
+    setSelectedClasses([]); // Uncheck all classes
+    setSelectedSubject(""); // Clear selected subject
+    setRemarkDescription(""); // Clear description
+    setAttachedFiles([]); // Clear uploaded files
+    setErrors({}); // Clear error messages
+    setIsObservation(false); // Reset observation if used
     // Optional: reset classId and sectionId derived from selectedClass
     setClassIdForSubjectAPI("");
     setSectionIdForStudentList("");
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!remarkSubject.trim()) {
-      newErrors.remarkSubjectError = "Remark subject is required.";
-    }
-
-    if (!remarkDescription.trim()) {
-      newErrors.remarkDescriptionError = "Remark description is required.";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // true if no errors
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    let hasError = false;
+
+    // ✅ Validate class selection
     if (selectedClasses.length === 0) {
       setErrors((prev) => ({
         ...prev,
         classError: "Please select at least one class.",
       }));
-      return;
+      hasError = true;
     }
 
-    if (!validateForm()) return;
+    // ✅ Validate description
+    if (!remarkDescription.trim()) {
+      setErrors((prev) => ({
+        ...prev,
+        remarkDescriptionError: "Description is required.",
+      }));
+      hasError = true;
+    }
 
-    if (publish) setIsPublishing(true);
-    else setIsSubmitting(true);
+    // ❌ Stop if any validation failed
+    if (hasError) return;
+
+    setIsSubmitting(true);
 
     try {
       const token = localStorage.getItem("authToken");
       const today = new Date();
+      const dailynote_date = today.toISOString().split("T")[0]; // YYYY-MM-DD
 
-      // Format date as YYYY-MM-DD
-      const dailynote_date = today.toISOString().split("T")[0];
-
-      // Prepare FormData
       const formData = new FormData();
-
-      // Static & common fields
-      formData.append("login_type", "T");
-      formData.append("teacher_id", regId); // from session
+      formData.append("login_type", teacherRoleName);
+      formData.append("teacher_id", regId);
       formData.append("academic_yr", academicYr);
       formData.append("operation", "create");
       formData.append("description", remarkDescription || "");
-      formData.append("subject_id", selectedSubject?.value || "0");
+      formData.append("subject_id", selectedSubject || " ");
       formData.append("dailynote_date", dailynote_date);
 
-      // 🧩 Prepare str_array => all selected classes in "class_id^section_id" format
+      // 👇 prepare str_array (classes)
       const strArray = selectedClasses.map(
         (cls) => `${cls.class_id}^${cls.section_id}`
       );
       formData.append("str_array", JSON.stringify(strArray));
 
-      // 🧠 Add all uploaded Base64 files
-      for (const file of attachedFiles) {
+      // 👇 attach all uploaded base64 files
+      attachedFiles.forEach((file) => {
         formData.append("filename", file.name);
         formData.append("random_no", file.random_no);
-
-        // Base64 conversion (if not already stored)
-        if (!file.datafile) {
-          const base64Data = await getBase64(file);
-          formData.append("datafile", base64Data);
-        } else {
-          formData.append("datafile", file.datafile);
-        }
-      }
-
-      // 🚀 API call
-      const response = await axios.post(`${API_URL}/api/dailynotes`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
+        formData.append("datafile", file.datafile); // ✅ already base64
       });
 
-      if (response.data.success) {
-        toast.success(
-          publish
-            ? "Daily Note saved & published successfully!"
-            : "Daily Note saved successfully!"
-        );
+      const response = await axios.post(
+        `${API_URL}/api/daily_notes`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data.status) {
+        toast.success("Daily Note saved successfully!");
         resetForm();
       } else {
         toast.error("Failed to save Daily Note.");
@@ -487,7 +534,6 @@ const CreateTeacherNotes = () => {
       toast.error("Something went wrong while saving.");
     } finally {
       setIsSubmitting(false);
-      setIsPublishing(false);
     }
   };
 
@@ -744,9 +790,9 @@ const CreateTeacherNotes = () => {
                       type="submit"
                       name="publish"
                       className="btn btn-primary"
-                      disabled={isPublishing}
+                      disabled={isSubmitting}
                     >
-                      {isPublishing ? "Saving..." : "Save"}
+                      {isSubmitting ? "Saving..." : "Save"}
                     </button>
 
                     <button
