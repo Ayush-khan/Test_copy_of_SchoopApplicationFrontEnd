@@ -74,6 +74,9 @@ const EditTeacherNotes = () => {
     remark_desc: "",
     remark_type: "",
     remark_id: "",
+    subject_id: "",
+    class_id: "",
+    section_id: "",
     date: "",
     filenottobedeleted: [], // existing uploaded files (to preview, not delete)
     userfile: [], // new files (if any, uploaded in edit)
@@ -124,7 +127,7 @@ const EditTeacherNotes = () => {
 
       // Then set form data
       setFormData({
-        remark_id: location.state.remark_id || "",
+        remark_id: location.state.t_remark_id || "",
         name: location.state.first_name || location.state.name || "",
         remark_subject: location.state.remark_subject || "",
         remark_desc: location?.state?.description || "",
@@ -134,6 +137,9 @@ const EditTeacherNotes = () => {
         subjectname: `${location?.state?.remark_subject || ""}`.trim(),
         classname: `${location?.state?.name || ""}`.trim(),
         date: location?.state?.date || "",
+        subject_id: location.state.subject_id || "",
+        class_id: location.state.class_id || "",
+        section_id: location.state.section_id || "",
       });
 
       setSelectedClasses(location.state.selected_class_ids || []);
@@ -413,7 +419,7 @@ const EditTeacherNotes = () => {
       const data = new FormData();
 
       // --- Basic required fields ---
-      formData.append("login_type", teacherRoleName); // e.g., "T"
+      data.append("login_type", teacherRoleName); // e.g., "T"
       data.append("teacher_id", regId || ""); // Logged-in teacher id
       data.append("academic_yr", academicYr || "2025-2026");
       data.append("operation", "edit"); // always edit
@@ -421,17 +427,16 @@ const EditTeacherNotes = () => {
       data.append("subject_id", formData.subject_id || "");
       data.append("description", formData.remark_desc || "");
       data.append("dailynote_date", formData.date || "");
-      data.append("class_id", selectedClasses[0]?.class_id || "");
-      data.append("section_id", selectedClasses[0]?.section_id || "");
+      data.append("class_id", formData?.class_id || "");
+      data.append("section_id", formData?.section_id || "");
 
       // --- Class-section string array like ["135^535"] ---
-      const strArray = selectedClasses.map(
-        (cls) => `${cls.class_id}^${cls.section_id}`
-      );
+      // ✅ Build class-section array based on formData values
+      const strArray = [`${formData?.class_id}^${formData?.section_id}`];
       data.append("str_array", JSON.stringify(strArray));
 
       // --- Random number for file uniqueness ---
-      const randomNo = Math.floor(Math.random() * 1000000);
+      const randomNo = Math.floor(Math.random() * 1000);
       data.append("random_no", randomNo);
 
       // --- File upload (only one file allowed) ---
