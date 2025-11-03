@@ -345,6 +345,11 @@ import CreateTeacherNotes from "../TeacherLoginModules/TeacherNotes/CreateTeache
 import EditTeacherNotes from "../TeacherLoginModules/TeacherNotes/EditTeacherNotes.jsx";
 import AllotRollNumberHouse from "../TeacherLoginModules/AllotRollNumberAndHouse/AllotRollNumberHouse.jsx";
 import ViewedByTeacherNotes from "../TeacherLoginModules/TeacherNotes/ViewedByTeacherNotes.jsx";
+import CheckHomework from "../TeacherLoginModules/HomeworkTeacher/CheckHomework.jsx";
+import EditHomework from "../TeacherLoginModules/HomeworkTeacher/EditHomework.jsx";
+import CreateHomework from "../TeacherLoginModules/HomeworkTeacher/CreateHomework.jsx";
+import Homework from "../TeacherLoginModules/HomeworkTeacher/Homework.jsx";
+import ViewHomework from "../TeacherLoginModules/HomeworkTeacher/ViewHomework.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -1426,6 +1431,27 @@ function Index() {
         <Route
           path="CreateTeacherNotes"
           element={<PrivateRoute element={<CreateTeacherNotes />} />}
+        />
+        {/* homework */}
+        <Route
+          path="/homework"
+          element={<PrivateRoute element={<Homework />} />}
+        />
+        <Route
+          path="/createHomwork"
+          element={<PrivateRoute element={<CreateHomework />} />}
+        />
+        <Route
+          path="/homework/edit/:id"
+          element={<PrivateRoute element={<EditHomework />} />}
+        />
+        <Route
+          path="/homework/view/:id"
+          element={<PrivateRoute element={<ViewHomework />} />}
+        />
+        <Route
+          path="/homework/viewBy/:id"
+          element={<PrivateRoute element={<CheckHomework />} />}
         />
         {/* Curriculum */}
         {/* Chapter */}
