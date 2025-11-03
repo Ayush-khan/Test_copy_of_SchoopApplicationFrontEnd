@@ -344,6 +344,7 @@ import TeacherNotes from "../TeacherLoginModules/TeacherNotes/TeacherNotes.jsx";
 import CreateTeacherNotes from "../TeacherLoginModules/TeacherNotes/CreateTeacherNotes.jsx";
 import EditTeacherNotes from "../TeacherLoginModules/TeacherNotes/EditTeacherNotes.jsx";
 import AllotRollNumberHouse from "../TeacherLoginModules/AllotRollNumberAndHouse/AllotRollNumberHouse.jsx";
+import ViewedByTeacherNotes from "../TeacherLoginModules/TeacherNotes/ViewedByTeacherNotes.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -1417,6 +1418,10 @@ function Index() {
         <Route
           path="/EditTeacherNotes/edit/:id"
           element={<PrivateRoute element={<EditTeacherNotes />} />}
+        />
+        <Route
+          path="/ViewedByTeacherNotes/view/:id"
+          element={<PrivateRoute element={<ViewedByTeacherNotes />} />}
         />
         <Route
           path="CreateTeacherNotes"

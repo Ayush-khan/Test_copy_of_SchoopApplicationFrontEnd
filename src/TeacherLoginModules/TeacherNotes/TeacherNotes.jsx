@@ -198,6 +198,12 @@ function TeacherNotes() {
     // Handle page change logic
   };
 
+  const handleViewedBy = (section) => {
+    navigate(`/ViewedByTeacherNotes/view/${section?.t_remark_id}`, {
+      state: section,
+    });
+  };
+
   const handleView = async (subject) => {
     setIsImageLoading(true);
     setImageUrls([]); // clear old images
@@ -854,8 +860,8 @@ function TeacherNotes() {
                                   {subject.publish === "Y" && (
                                     <FontAwesomeIcon
                                       icon={faBookReader}
-                                      style={{ color: "#C03078" }}
-                                      className="text-base"
+                                      className="text-base hover:cursor-pointer  font-bold transition-colors duration-200 hover:bg-transparent"
+                                      onClick={() => handleViewedBy(subject)}
                                     />
                                   )}
                                 </td>
@@ -1304,7 +1310,21 @@ function TeacherNotes() {
                       </div>
                     </div>
                   ) : (
-                    <p className="text-xs text-gray-500 ml-4">
+                    <p className="text-sm relative left-[25%]  text-gray-400 italic ml-4 mt-2 flex items-center gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 9.828m0 0V5a2 2 0 00-2-2h-4.172a2 2 0 00-1.414.586l-6.828 6.828a4 4 0 105.656 5.656L18 9.828z"
+                        />
+                      </svg>
                       No attachments available
                     </p>
                   )}

@@ -293,22 +293,6 @@ const EditTeacherNotes = () => {
     toast.info(`${fileToRemove.name || "File"} marked for removal`);
   };
 
-  const validateForm = () => {
-    const errors = {};
-
-    if (!formData.remark_subject.trim()) {
-      errors.remark_subject = "Subject of Remark is required.";
-    }
-
-    if (!formData.remark_desc.trim()) {
-      errors.remark_desc = "Remark description is required.";
-    }
-
-    setErrors(errors); // assume you're tracking errors with a useState
-
-    return Object.keys(errors).length === 0;
-  };
-
   const resetForm = () => {
     setFormData({
       name: "",
@@ -417,6 +401,35 @@ const EditTeacherNotes = () => {
 
       // 🧾 Build form data
       const data = new FormData();
+      // --- Deleted files (images or PDFs) ---
+      if (removedFiles.length > 0) {
+        const deleteList = [];
+
+        removedFiles.forEach((file, index) => {
+          // Get filename (from object or URL)
+          const filename =
+            file.image_name ||
+            file.name ||
+            (typeof file === "string"
+              ? file.substring(file.lastIndexOf("/") + 1)
+              : `deleted_file_${index}`);
+
+          deleteList.push(filename);
+
+          // ✅ If it's a File object (like from input), append it too
+          if (file instanceof File) {
+            data.append("deletefile_" + index, file);
+          } else if (file.image_url) {
+            // Optionally append the image URL if your backend handles URLs
+            data.append("deletefileurl_" + index, file.image_url);
+          }
+        });
+
+        // Attach delete list as JSON
+        data.append("deleteimagelist", JSON.stringify(deleteList));
+      } else {
+        data.append("deleteimagelist", "[]");
+      }
 
       // --- Basic required fields ---
       data.append("login_type", teacherRoleName); // e.g., "T"
@@ -438,16 +451,19 @@ const EditTeacherNotes = () => {
       // --- Random number for file uniqueness ---
       const randomNo = Math.floor(Math.random() * 1000);
       data.append("random_no", randomNo);
-
-      // --- File upload (only one file allowed) ---
-      if (attachedFiles.length > 0) {
-        const file = attachedFiles[0];
+      attachedFiles.forEach((file) => {
         data.append("filename", file.name);
-        data.append("datafile", file); // direct file object
-      } else {
-        data.append("filename", "");
-        data.append("datafile", "");
-      }
+        data.append("datafile", file.datafile); // ✅ already base64
+      });
+      // --- File upload (only one file allowed) ---
+      // if (attachedFiles.length > 0) {
+      //   const file = attachedFiles[0];
+      //   data.append("filename", file.name);
+      //   data.append("datafile", file); // direct file object
+      // } else {
+      //   data.append("filename", "");
+      //   data.append("datafile", "");
+      // }
 
       // --- Deleted files (images or PDFs) ---
       if (removedFiles.length > 0) {
@@ -662,41 +678,6 @@ const EditTeacherNotes = () => {
                           <label className="mb-2">Attachments:</label>
 
                           <div className="relative mt-2 left-[15%] flex flex-col mx-4 gap-y-2">
-                            {/* {imageUrls.map((url, index) => {
-                              const fileName = url.substring(
-                                url.lastIndexOf("/") + 1
-                              );
-                              const isImage = /\.(jpg|jpeg|png|gif)$/i.test(
-                                fileName
-                              );
-
-                              return (
-                                <div
-                                  key={index}
-                                  className="font-semibold flex flex-row text-[.58em] items-center gap-x-2"
-                                >
-                                  <span>{fileName}</span>
-
-                                  {isImage ? (
-                                    <button
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
-                                      onClick={() => setPreviewImage(url)}
-                                    >
-                                      <FaEye className="font-2xl w-3 h-3" />
-                                    </button>
-                                  ) : (
-                                    <button
-                                      className="text-green-600 hover:text-green-800 hover:bg-transparent"
-                                      onClick={() =>
-                                        downloadFile(url, fileName)
-                                      }
-                                    >
-                                      <ImDownload className="font-2xl w-3 h-3" />
-                                    </button>
-                                  )}
-                                </div>
-                              );
-                            })} */}
                             {imageUrls.map((url, index) => {
                               const fileName =
                                 typeof url === "string"
@@ -753,7 +734,21 @@ const EditTeacherNotes = () => {
                           </div>
                         </div>
                       ) : (
-                        <p className="text-xs text-gray-500 ml-4">
+                        <p className="text-sm relative left-[35%]  text-gray-400 italic ml-4 mt-2 flex items-center gap-2">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 text-gray-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 9.828m0 0V5a2 2 0 00-2-2h-4.172a2 2 0 00-1.414.586l-6.828 6.828a4 4 0 105.656 5.656L18 9.828z"
+                            />
+                          </svg>
                           No attachments available
                         </p>
                       )}
