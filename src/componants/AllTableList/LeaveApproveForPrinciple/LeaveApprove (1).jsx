@@ -7,8 +7,9 @@ import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
+import LeaveApplicatonForPrincipleTab from "./LeaveApplicatonForPrincipleTab";
 
 function LeaveApprove() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -17,18 +18,25 @@ function LeaveApprove() {
   const [error, setError] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const location = useLocation();
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
 
   const [currentLeave, setCurrentLeave] = useState(null);
   const [currentLeaveName, setCurrentLeaveName] = useState(null);
-
+  const [activeTab, setActiveTab] = useState("Manage");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const pageSize = 10;
   const navigate = useNavigate();
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location.state]);
+
   useEffect(() => {
     fetchLeaves();
   }, []);
@@ -82,20 +90,6 @@ function LeaveApprove() {
   const handleSubmitEdit = (leave) => {
     console.log("this is the inside handle submit", leave.leave_app_id);
     navigate(`/leaveApprove/edit/${leave.leave_app_id}`, {
-      state: { staffleave: leave },
-    });
-  };
-
-  const handleDelete = (leaveCurrent) => {
-    console.log("this is staffUe leave", leaveCurrent.leave_app_id);
-    setCurrentLeave(leaveCurrent.leave_app_id);
-    setCurrentLeaveName(leaveCurrent.name);
-    setShowDeleteModal(true);
-  };
-
-  const handleView = async (leave) => {
-    console.log("handleview is running on");
-    navigate(`/leaveApplicationp/view/${leave.leave_app_id}`, {
       state: { staffleave: leave },
     });
   };
@@ -189,6 +183,16 @@ function LeaveApprove() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
+  const tabs = [
+    { id: "Manage", label: "Manage" },
+    { id: "CreateTeachersnote", label: "Leave Application For Staff" },
+  ];
+  const handleTabChange = (tab) => {
+    if (tab === "Manage") {
+      fetchLeaves(); // Call handleSearch only when "Manage" tab is selected
+    }
+    setActiveTab(tab); // Update active tab state
+  };
 
   return (
     <>
@@ -200,14 +204,17 @@ function LeaveApprove() {
               Leave Approve
             </h3>
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
-              <div className=" w-1/2 md:w-fit mr-1">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search"
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+              {activeTab !== "CreateTeachersnote" && (
+                <div className="w-1/2 md:w-fit mr-1">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              )}
             </div>
           </div>
           <div
@@ -216,176 +223,201 @@ function LeaveApprove() {
               backgroundColor: "#C03078",
             }}
           ></div>
-
-          <div className="card-body w-full box-border">
-            <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-              <div className="bg-white rounded-lg shadow-xs">
-                <table className="min-w-full leading-normal table-auto">
-                  <thead>
-                    <tr className="bg-gray-200">
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Sr.No
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Staff Name
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Leave Type
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Leave Start Date
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Leave End Date
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        No. of Days
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Edit
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                        <div className=" text-center text-xl text-blue-700">
-                          Please wait while data is loading...
-                        </div>
-                      </div>
-                    ) : displayedStaffs.length ? (
-                      displayedStaffs.map((leave, index) => (
-                        <tr
-                          key={leave.leave_app_id}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
-                        >
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {currentPage * pageSize + index + 1}
-                            </p>
-                          </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {leave.teachername}
-                            </p>
-                          </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {leave.leavetypename}
-                            </p>
-                          </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {formatDate(leave.leave_start_date)}
-                            </p>
-                          </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {formatDate(leave.leave_end_date)}
-                            </p>
-                          </td>
-
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {leave.no_of_days || "-"}
-                            </p>
-                          </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {statusMap.find(
-                                (item) => item.value === (leave.status || "-")
-                              )?.label || "-"}
-                            </p>
-                          </td>
-
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <button
-                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                              onClick={() => handleSubmitEdit(leave)}
-                            >
-                              <FontAwesomeIcon icon={faEdit} />
-                            </button>
-                          </td>
+          <ul className="grid grid-cols-2 gap-x-10 relative left-4 -top-2 md:flex md:flex-row ">
+            {tabs.map(({ id, label }) => (
+              <li
+                key={id}
+                className={`md:-ml-7 shadow-md ${
+                  activeTab === id ? "text-blue-500 font-bold" : ""
+                }`}
+              >
+                <button
+                  onClick={() => handleTabChange(id)}
+                  className="px-2 md:px-4 py-1 hover:bg-gray-200 text-[1em] md:text-sm text-nowrap"
+                  aria-current={activeTab === id ? "page" : undefined}
+                >
+                  {label}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="bg-white  rounded-md -mt-5">
+            {activeTab === "Manage" && (
+              <div className="card-body w-full box-border">
+                <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+                  <div className="bg-white rounded-lg shadow-xs">
+                    <table className="min-w-full leading-normal table-auto">
+                      <thead>
+                        <tr className="bg-gray-200">
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Sr.No
+                          </th>
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Staff Name
+                          </th>
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Leave Type
+                          </th>
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Leave Start Date
+                          </th>
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Leave End Date
+                          </th>
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            No. of Days
+                          </th>
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Status
+                          </th>
+                          <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                            Edit
+                          </th>
                         </tr>
-                      ))
-                    ) : (
-                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                        <div className=" text-center text-xl text-red-700">
-                          Oops! No data found..
-                        </div>
-                      </div>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div className=" flex justify-center  pt-2 -mb-3  box-border  overflow-hidden">
-              <ReactPaginate
-                previousLabel={"Previous"}
-                nextLabel={"Next"}
-                breakLabel={"..."}
-                breakClassName={"page-item"}
-                breakLinkClassName={"page-link"}
-                pageCount={pageCount}
-                marginPagesDisplayed={1}
-                pageRangeDisplayed={1}
-                onPageChange={handlePageClick}
-                containerClassName={"pagination justify-content-center"}
-                pageClassName={"page-item"}
-                pageLinkClassName={"page-link"}
-                previousClassName={"page-item"}
-                previousLinkClassName={"page-link"}
-                nextClassName={"page-item"}
-                nextLinkClassName={"page-link"}
-                activeClassName={"active"}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
-          <div className="modal show " style={{ display: "block" }}>
-            <div className="modal-dialog  modal-dialog-centered">
-              <div className="modal-content">
-                <div className="flex justify-between p-3">
-                  <h5 className="modal-title  ">Delete Staff</h5>
+                      </thead>
+                      <tbody>
+                        {loading ? (
+                          <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
+                            <div className=" text-center text-xl text-blue-700">
+                              Please wait while data is loading...
+                            </div>
+                          </div>
+                        ) : displayedStaffs.length ? (
+                          displayedStaffs.map((leave, index) => (
+                            <tr
+                              key={leave.leave_app_id}
+                              className={`${
+                                index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                              } hover:bg-gray-50`}
+                            >
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                  {currentPage * pageSize + index + 1}
+                                </p>
+                              </td>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                  {leave.teachername}
+                                </p>
+                              </td>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                  {leave.leavetypename}
+                                </p>
+                              </td>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                  {formatDate(leave.leave_start_date)}
+                                </p>
+                              </td>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                  {formatDate(leave.leave_end_date)}
+                                </p>
+                              </td>
 
-                  <RxCross1
-                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-                    onClick={handleCloseModal}
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                  {leave.no_of_days || "-"}
+                                </p>
+                              </td>
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                  {statusMap.find(
+                                    (item) =>
+                                      item.value === (leave.status || "-")
+                                  )?.label || "-"}
+                                </p>
+                              </td>
+
+                              <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                <button
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                  onClick={() => handleSubmitEdit(leave)}
+                                >
+                                  <FontAwesomeIcon icon={faEdit} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                            <div className=" text-center text-xl text-red-700">
+                              Oops! No data found..
+                            </div>
+                          </div>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div className=" flex justify-center  pt-2 -mb-3  box-border  overflow-hidden">
+                  <ReactPaginate
+                    previousLabel={"Previous"}
+                    nextLabel={"Next"}
+                    breakLabel={"..."}
+                    breakClassName={"page-item"}
+                    breakLinkClassName={"page-link"}
+                    pageCount={pageCount}
+                    marginPagesDisplayed={1}
+                    pageRangeDisplayed={1}
+                    onPageChange={handlePageClick}
+                    containerClassName={"pagination justify-content-center"}
+                    pageClassName={"page-item"}
+                    pageLinkClassName={"page-link"}
+                    previousClassName={"page-item"}
+                    previousLinkClassName={"page-link"}
+                    nextClassName={"page-item"}
+                    nextLinkClassName={"page-link"}
+                    activeClassName={"active"}
                   />
                 </div>
-                <div
-                  className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
-                  style={{
-                    backgroundColor: "#C03078",
-                  }}
-                ></div>
-                <div className="modal-body">
-                  <p>Are you sure you want to delete: {currentLeaveName}?</p>
-                  {console.log("currestStaffDelete", currentLeave)}
-                </div>
-                <div className=" flex justify-end p-3">
-                  <button
-                    type="button"
-                    className="btn btn-danger px-3 mb-2"
-                    onClick={handleSubmitDelete}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Deleting..." : "Delete"}
-                  </button>
+              </div>
+            )}
+            {activeTab === "CreateTeachersnote" && (
+              <LeaveApplicatonForPrincipleTab />
+            )}
+          </div>
+        </div>
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-50   flex items-center justify-center bg-black bg-opacity-50">
+            <div className="modal show " style={{ display: "block" }}>
+              <div className="modal-dialog  modal-dialog-centered">
+                <div className="modal-content">
+                  <div className="flex justify-between p-3">
+                    <h5 className="modal-title  ">Delete Staff</h5>
+
+                    <RxCross1
+                      className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                      onClick={handleCloseModal}
+                    />
+                  </div>
+                  <div
+                    className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                    style={{
+                      backgroundColor: "#C03078",
+                    }}
+                  ></div>
+                  <div className="modal-body">
+                    <p>Are you sure you want to delete: {currentLeaveName}?</p>
+                    {console.log("currestStaffDelete", currentLeave)}
+                  </div>
+                  <div className=" flex justify-end p-3">
+                    <button
+                      type="button"
+                      className="btn btn-danger px-3 mb-2"
+                      onClick={handleSubmitDelete}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Deleting..." : "Delete"}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}{" "}
+      </div>
     </>
   );
 }

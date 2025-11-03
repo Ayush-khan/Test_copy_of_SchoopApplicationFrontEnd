@@ -243,7 +243,7 @@ import ApproveLeave from "../componants/AllTableList/ApproveLeaveList.jsx";
 import ApproveLeaveList from "../componants/AllTableList/ApproveLeaveList.jsx";
 import LeaveApprove from "../componants/AllTableList/LeaveApproveForPrinciple/LeaveApprove (1).jsx";
 import TeacherList from "../componants/AllTableList/TeacherList.jsx";
-import EditLeaveApprove from "../componants/AllTableList/LeaveApproveForPrinciple/EditLeaveApprove (1).jsx";
+import EditLeaveApprove from "../componants/AllTableList/LeaveApproveForPrinciple/EditLeaveApproveTab.jsx";
 import ViewTimeTablePlanner from "../componants/TimeTablePlanner/ViewExamTimeTablePlanner/ViewTimeTablePlanner.jsx";
 import Stationery from "../componants/Stationery/Stationery.jsx";
 import SiblingUnmapping from "../componants/SiblingUnmapping/SiblingUnmapping.jsx";
@@ -350,6 +350,10 @@ import EditHomework from "../TeacherLoginModules/HomeworkTeacher/EditHomework.js
 import CreateHomework from "../TeacherLoginModules/HomeworkTeacher/CreateHomework.jsx";
 import Homework from "../TeacherLoginModules/HomeworkTeacher/Homework.jsx";
 import ViewHomework from "../TeacherLoginModules/HomeworkTeacher/ViewHomework.jsx";
+import LeaveApplicatonForPrincipleTab from "../componants/AllTableList/LeaveApproveForPrinciple/LeaveApplicatonForPrincipleTab.jsx";
+import CreateLeaveApplicationForPrincipleTab from "../componants/AllTableList/LeaveApproveForPrinciple/CreateLeaveApplicationForPrincipleTab.jsx";
+import EditLeaveApplicationForPrincipleTab from "../componants/AllTableList/LeaveApproveForPrinciple/EditLeaveApplicationForPrincipleTab.jsx";
+import ViewLeaveApplicationForPrincipleTab from "../componants/AllTableList/LeaveApproveForPrinciple/ViewLeaveApplicationForPrincipleTab.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -1303,6 +1307,31 @@ function Index() {
           path="/leaveApplicationP/view/:id"
           element={
             <PrivateRoute element={<ViewLeaveApplicationForPrinciple />} />
+          }
+        />
+        {/* Tab leave appplicaton for  principal dashboard  card tab approve leave ke */}
+        <Route
+          path="/LeaveApplicationTab"
+          element={
+            <PrivateRoute element={<LeaveApplicatonForPrincipleTab />} />
+          }
+        />
+        <Route
+          path="/createLeaveApplicationTab"
+          element={
+            <PrivateRoute element={<CreateLeaveApplicationForPrincipleTab />} />
+          }
+        />
+        <Route
+          path="/leaveApplicationTab/edit/:id"
+          element={
+            <PrivateRoute element={<EditLeaveApplicationForPrincipleTab />} />
+          }
+        />
+        <Route
+          path="/leaveApplicationTab/view/:id"
+          element={
+            <PrivateRoute element={<ViewLeaveApplicationForPrincipleTab />} />
           }
         />
         {/* dw pay report */}
