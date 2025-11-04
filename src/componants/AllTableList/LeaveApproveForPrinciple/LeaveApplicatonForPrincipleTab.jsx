@@ -102,7 +102,7 @@ function LeaveApplicatonForPrincipleTab() {
   };
 
   const handleCancel = (leaveCurrent) => {
-    console.log("this is staffUe leave", leaveCurrent.leave_app_id);
+    console.log("this is staffUe leave---->", leaveCurrent);
     setCurrentLeave(leaveCurrent.leave_app_id);
     setCurrentLeaveName(leaveCurrent.teachername);
     setShowCancelModal(true);
