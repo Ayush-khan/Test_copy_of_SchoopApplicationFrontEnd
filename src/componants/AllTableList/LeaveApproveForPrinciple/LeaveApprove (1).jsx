@@ -31,11 +31,11 @@ function LeaveApprove() {
   const [pageCount, setPageCount] = useState(0);
   const pageSize = 10;
   const navigate = useNavigate();
-  useEffect(() => {
-    if (location.state?.activeTab) {
-      setActiveTab(location.state.activeTab);
-    }
-  }, [location.state]);
+  // useEffect(() => {
+  //   if (location.state?.activeTab) {
+  //     setActiveTab(location.state.activeTab);
+  //   }
+  // }, [location.state]);
 
   useEffect(() => {
     fetchLeaves();
@@ -160,15 +160,26 @@ function LeaveApprove() {
     ? staffs.filter((leave) => {
         const search = String(searchTerm).trim().toLowerCase();
         return (
-          String(leave.name).toLowerCase().includes(search) || // Leave Type
-          String(formatDate(leave.leave_start_date))
+          String(leave.teachername || "")
             .toLowerCase()
-            .includes(search) || // Leave Start Date
-          String(formatDate(leave.leave_end_date))
+            .includes(search) || // ✅ Staff name
+          String(leave.leavetypename || "")
             .toLowerCase()
-            .includes(search) || // Leave End Date
-          String(leave.no_of_days).toLowerCase().includes(search) || // No. of Days
-          String(leave.status).toLowerCase().includes(search) // Status
+            .includes(search) || // ✅ Leave Type
+          String(formatDate(leave.leave_start_date) || "")
+            .toLowerCase()
+            .includes(search) || // ✅ Leave Start Date
+          String(formatDate(leave.leave_end_date) || "")
+            .toLowerCase()
+            .includes(search) || // ✅ Leave End Date
+          String(leave.no_of_days || "")
+            .toLowerCase()
+            .includes(search) || // ✅ No. of Days
+          String(
+            statusMap.find((item) => item.value === leave.status)?.label || ""
+          )
+            .toLowerCase()
+            .includes(search) // ✅ Status label (Apply, Approved, etc.)
         );
       })
     : [];

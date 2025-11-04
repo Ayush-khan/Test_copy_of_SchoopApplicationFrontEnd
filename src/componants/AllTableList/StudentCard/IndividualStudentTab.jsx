@@ -691,95 +691,125 @@ function IndividualStudentTab() {
 
                     <div className="card-body w-full">
                       <div className="h-96 overflow-y-scroll">
-                        <table className="min-w-full leading-normal table-auto">
-                          <thead>
-                            <tr className="bg-gray-200">
-                              <th className="px-2 py-2 border text-sm font-semibold text-gray-900 tracking-wider text-center">
-                                Sr.No
-                              </th>
-                              <th className="text-center border text-sm">
-                                <input
-                                  type="checkbox"
-                                  checked={selectAll}
-                                  onChange={handleSelectAll}
-                                  className="cursor-pointer"
-                                />{" "}
-                                All
-                              </th>
+                        {loading ? (
+                          <div className="flex justify-center items-center h-64">
+                            {/* <div className="spinner-border text-primary" role="status"> */}
+                            <LoaderStyle />
+                            {/* </div> */}
+                          </div>
+                        ) : (
+                          <table className="min-w-[80%] leading-normal table-auto">
+                            <thead>
+                              <tr className="bg-gray-200">
+                                <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Sr.No
+                                </th>
+                                <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectAll}
+                                    onChange={handleSelectAll}
+                                    className="cursor-pointer"
+                                  />{" "}
+                                  All
+                                </th>
 
-                              <th className="px-2 py-2 border text-sm font-semibold text-gray-900 tracking-wider text-center">
-                                Student Name
-                              </th>
-                              <th className="px-2 py-2 border text-sm font-semibold text-gray-900 tracking-wider text-center">
-                                Class
-                              </th>
-                              <th className="px-2 py-2 border text-sm font-semibold text-gray-900 tracking-wider text-center">
-                                Section
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {loading ? (
-                              <tr>
-                                <td colSpan="2" className="text-center py-6">
-                                  <LoaderStyle />
-                                </td>
+                                <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Student Name
+                                </th>
+                                <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Class
+                                </th>
+                                <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Section
+                                </th>
                               </tr>
-                            ) : displayedSections.length ? (
-                              displayedSections.map((student, index) => (
-                                <tr
-                                  key={student.student_id}
-                                  className={`${
-                                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                                  } hover:bg-gray-50`}
-                                >
-                                  <td className="text-center border text-sm">
-                                    {currentPage * pageSize + index + 1}
-                                  </td>
-                                  <td className="text-center border">
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedStudents.includes(
-                                        student.student_id
-                                      )}
-                                      onChange={() =>
-                                        handleCheckboxChange(student.student_id)
-                                      }
-                                      className="cursor-pointer"
-                                    />
-                                  </td>
+                            </thead>
+                            <tbody>
+                              {displayedSections.length ? (
+                                displayedSections.map((student, index) => (
+                                  <tr
+                                    key={student.student_id}
+                                    className={`${
+                                      index % 2 === 0
+                                        ? "bg-white"
+                                        : "bg-gray-100"
+                                    } hover:bg-gray-50`}
+                                  >
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        {currentPage * pageSize + index + 1}
+                                      </p>{" "}
+                                    </td>
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        <input
+                                          type="checkbox"
+                                          checked={selectedStudents.includes(
+                                            student.student_id
+                                          )}
+                                          onChange={() =>
+                                            handleCheckboxChange(
+                                              student.student_id
+                                            )
+                                          }
+                                          className="cursor-pointer"
+                                        />
+                                      </p>{" "}
+                                    </td>
 
-                                  <td className="text-center border text-sm">
-                                    {capitalizeFirstLetter(student.first_name)}{" "}
-                                    {capitalizeFirstLetter(student.mid_name)}{" "}
-                                    {capitalizeFirstLetter(student.last_name)}
-                                  </td>
-                                  <td className="text-center border text-sm">
-                                    {student.classname}
-                                  </td>
-                                  <td className="text-center border text-sm">
-                                    {student.sectionname}
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        {capitalizeFirstLetter(
+                                          student.first_name
+                                        )}{" "}
+                                        {capitalizeFirstLetter(
+                                          student.mid_name
+                                        )}{" "}
+                                        {capitalizeFirstLetter(
+                                          student.last_name
+                                        )}
+                                      </p>
+                                    </td>
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        {student.classname}
+                                      </p>
+                                    </td>
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        {student.sectionname}
+                                      </p>
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <tr>
+                                  <td
+                                    colSpan="5"
+                                    className="text-center py-6 text-red-700"
+                                  >
+                                    Oops! No data found...
                                   </td>
                                 </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td
-                                  colSpan="5"
-                                  className="text-center py-6 text-red-700"
-                                >
-                                  Oops! No data found...
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
+                              )}
+                            </tbody>
+                          </table>
+                        )}
                       </div>
-
+                      {/* Footer */}
+                      <div className="text-center ">
+                        <p className="text-blue-600 font-semibold">
+                          Selected Students:{" "}
+                          <span className="text-pink-600">
+                            {selectedStudents.length}
+                          </span>
+                        </p>
+                      </div>
                       {/* Message Section */}
                       {displayedSections.length > 0 && (
-                        <div className="flex flex-col items-center mt-3">
-                          <div className="w-full md:w-[50%]">
+                        <div className="flex flex-col items-center ">
+                          <div className="w-full md:w-[100%]">
                             <label className="mb-1 block text-left font-normal">
                               Message to Parents
                             </label>
@@ -800,21 +830,11 @@ function IndividualStudentTab() {
                         </div>
                       )}
 
-                      {/* Footer */}
-                      <div className="text-center mt-3">
-                        <p className="text-blue-600 font-semibold">
-                          Selected Students:{" "}
-                          <span className="text-pink-600">
-                            {selectedStudents.length}
-                          </span>
-                        </p>
-                      </div>
-
                       <div className="text-right mt-3 mb-2">
                         <button
                           onClick={handleSubmit}
                           disabled={loading}
-                          className={`text-white px-4 py-1 rounded font-bold ${
+                          className={`text-white px-4 py-1 rounded font-bold transition-colors duration-200 ${
                             loading
                               ? "bg-blue-400 cursor-not-allowed"
                               : "bg-blue-600 hover:bg-blue-700"
@@ -830,13 +850,35 @@ function IndividualStudentTab() {
                           previousLabel={"Previous"}
                           nextLabel={"Next"}
                           breakLabel={"..."}
+                          breakClassName={"page-item"}
+                          breakLinkClassName={"page-link"}
+                          pageCount={pageCount}
+                          marginPagesDisplayed={1}
+                          pageRangeDisplayed={1}
+                          onPageChange={handlePageClick}
+                          containerClassName={
+                            "pagination justify-content-center"
+                          }
+                          pageClassName={"page-item"}
+                          pageLinkClassName={"page-link"}
+                          previousClassName={"page-item"}
+                          previousLinkClassName={"page-link"}
+                          nextClassName={"page-item"}
+                          nextLinkClassName={"page-link"}
+                          activeClassName={"active"}
+                        />
+
+                        {/* <ReactPaginate
+                          previousLabel={"Previous"}
+                          nextLabel={"Next"}
+                          breakLabel={"..."}
                           pageCount={pageCount}
                           onPageChange={handlePageClick}
                           containerClassName={"pagination"}
                           pageClassName={"page-item"}
                           pageLinkClassName={"page-link"}
                           activeClassName={"active"}
-                        />
+                        /> */}
                       </div>
                     </div>
                   </div>
