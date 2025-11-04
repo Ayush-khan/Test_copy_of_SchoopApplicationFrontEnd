@@ -482,7 +482,7 @@ function IndividualStudentTab() {
         const studentsWithIds = response.data.data.absent_student.map(
           (s, index) => ({
             ...s,
-            student_id: `${s.first_name || ""}-${s.last_name || ""}-${index}`, // unique id
+            student_id: `${s?.student_id}`, // unique id
           })
         );
 
@@ -551,10 +551,10 @@ function IndividualStudentTab() {
       toast.error("Please select at least one student.");
       return;
     }
-    // if (!message.trim()) {
-    //   toast.error("Please enter a message.");
-    //   return;
-    // }
+    if (!message.trim()) {
+      toast.error("Please enter a message.");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -698,33 +698,39 @@ function IndividualStudentTab() {
                             {/* </div> */}
                           </div>
                         ) : (
-                          <table className="min-w-[80%] leading-normal table-auto">
+                          <table className="min-w-full leading-normal table-auto border-collapse rounded-lg overflow-hidden shadow-md">
                             <thead>
-                              <tr className="bg-gray-200">
-                                <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              <tr className="bg-gray-200 text-gray-900">
+                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
                                   Sr.No
                                 </th>
-                                <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
                                   <input
                                     type="checkbox"
                                     checked={selectAll}
                                     onChange={handleSelectAll}
-                                    className="cursor-pointer"
+                                    className="cursor-pointer accent-red-600"
                                   />{" "}
                                   All
                                 </th>
-
-                                <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
                                   Student Name
                                 </th>
-                                <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
                                   Class
                                 </th>
-                                <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
                                   Section
+                                </th>
+                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
+                                  Messages Sent
+                                </th>
+                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
+                                  Last Message Time
                                 </th>
                               </tr>
                             </thead>
+
                             <tbody>
                               {displayedSections.length ? (
                                 displayedSections.map((student, index) => (
@@ -733,61 +739,91 @@ function IndividualStudentTab() {
                                     className={`${
                                       index % 2 === 0
                                         ? "bg-white"
-                                        : "bg-gray-100"
-                                    } hover:bg-gray-50`}
+                                        : "bg-gray-50"
+                                    } hover:bg-red-50 transition-colors duration-150`}
                                   >
-                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                        {currentPage * pageSize + index + 1}
-                                      </p>{" "}
-                                    </td>
-                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                        <input
-                                          type="checkbox"
-                                          checked={selectedStudents.includes(
-                                            student.student_id
-                                          )}
-                                          onChange={() =>
-                                            handleCheckboxChange(
-                                              student.student_id
-                                            )
-                                          }
-                                          className="cursor-pointer"
-                                        />
-                                      </p>{" "}
+                                    {/* Sr.No */}
+                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                      {currentPage * pageSize + index + 1}
                                     </td>
 
-                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                        {capitalizeFirstLetter(
-                                          student.first_name
-                                        )}{" "}
-                                        {capitalizeFirstLetter(
-                                          student.mid_name
-                                        )}{" "}
-                                        {capitalizeFirstLetter(
-                                          student.last_name
+                                    {/* Checkbox */}
+                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedStudents.includes(
+                                          student.student_id
                                         )}
-                                      </p>
+                                        onChange={() =>
+                                          handleCheckboxChange(
+                                            student.student_id
+                                          )
+                                        }
+                                        className="cursor-pointer accent-red-600"
+                                      />
                                     </td>
-                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                        {student.classname}
-                                      </p>
+
+                                    {/* Student Name */}
+                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm font-medium text-gray-800">
+                                      {`${capitalizeFirstLetter(
+                                        student.first_name
+                                      )} ${
+                                        capitalizeFirstLetter(
+                                          student.mid_name
+                                        ) || ""
+                                      } ${capitalizeFirstLetter(
+                                        student.last_name
+                                      )}`}
                                     </td>
-                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                        {student.sectionname}
-                                      </p>
+
+                                    {/* Class */}
+                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                      {student.classname}
+                                    </td>
+
+                                    {/* Section */}
+                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                      {student.sectionname}
+                                    </td>
+
+                                    {/* Messages Sent */}
+                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                      <span
+                                        className={`px-2 py-1 rounded text-xs font-semibold ${
+                                          student.messages_sent_count > 0
+                                            ? "bg-green-100 text-green-800"
+                                            : "bg-gray-100 text-gray-600"
+                                        }`}
+                                      >
+                                        {student.messages_sent_count}
+                                      </span>
+                                    </td>
+
+                                    {/* Last Message Time */}
+                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm text-gray-700">
+                                      {student.last_message_sent_at ? (
+                                        new Date(
+                                          student.last_message_sent_at
+                                        ).toLocaleString("en-IN", {
+                                          day: "2-digit",
+                                          month: "short",
+                                          year: "2-digit",
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        })
+                                      ) : (
+                                        <span className="text-gray-400 italic">
+                                          Not Sent
+                                        </span>
+                                      )}
                                     </td>
                                   </tr>
                                 ))
                               ) : (
                                 <tr>
                                   <td
-                                    colSpan="5"
-                                    className="text-center py-6 text-red-700"
+                                    colSpan="7"
+                                    className="text-center py-6 text-red-700 font-medium bg-gray-50"
                                   >
                                     Oops! No data found...
                                   </td>
@@ -797,7 +833,40 @@ function IndividualStudentTab() {
                           </table>
                         )}
                       </div>
-                      {/* Footer */}
+
+                      {displayedSections.length > 0 && (
+                        <div className="flex flex-col items-center mt-2">
+                          <div className="w-full md:w-[50%]">
+                            <label className="mb-1 font-normal block text-left">
+                              Dear Parent ,
+                            </label>
+
+                            <div className="relative w-full">
+                              <textarea
+                                value={message}
+                                onChange={(e) => {
+                                  if (e.target.value.length <= maxCharacters) {
+                                    setMessage(e.target.value);
+                                  }
+                                }}
+                                className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm text-black font-normal"
+                                placeholder="Enter message"
+                              ></textarea>
+
+                              {message && (
+                                <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm font-normal">
+                                  {message + "  "}Login to school application
+                                  for details - Evolvu
+                                </div>
+                              )}
+
+                              <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
+                                {message.length} / {maxCharacters}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       <div className="text-center ">
                         <p className="text-blue-600 font-semibold">
                           Selected Students:{" "}
@@ -806,30 +875,6 @@ function IndividualStudentTab() {
                           </span>
                         </p>
                       </div>
-                      {/* Message Section */}
-                      {displayedSections.length > 0 && (
-                        <div className="flex flex-col items-center ">
-                          <div className="w-full md:w-[100%]">
-                            <label className="mb-1 block text-left font-normal">
-                              Message to Parents
-                            </label>
-                            <textarea
-                              value={message}
-                              onChange={(e) => {
-                                if (e.target.value.length <= maxCharacters) {
-                                  setMessage(e.target.value);
-                                }
-                              }}
-                              className="w-full h-28 p-3 border border-gray-300 rounded-md text-sm resize-none focus:outline-none"
-                              placeholder="Enter your message here..."
-                            ></textarea>
-                            <div className="text-right text-xs text-gray-500 mt-1">
-                              {message.length}/{maxCharacters}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
                       <div className="text-right mt-3 mb-2">
                         <button
                           onClick={handleSubmit}
@@ -867,18 +912,6 @@ function IndividualStudentTab() {
                           nextLinkClassName={"page-link"}
                           activeClassName={"active"}
                         />
-
-                        {/* <ReactPaginate
-                          previousLabel={"Previous"}
-                          nextLabel={"Next"}
-                          breakLabel={"..."}
-                          pageCount={pageCount}
-                          onPageChange={handlePageClick}
-                          containerClassName={"pagination"}
-                          pageClassName={"page-item"}
-                          pageLinkClassName={"page-link"}
-                          activeClassName={"active"}
-                        /> */}
                       </div>
                     </div>
                   </div>
