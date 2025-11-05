@@ -384,6 +384,8 @@ import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
 import Select from "react-select";
+import { IoMdSend } from "react-icons/io";
+import { FaCheck, FaUserAlt } from "react-icons/fa";
 
 function IndividualStudentTab() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -404,6 +406,7 @@ function IndividualStudentTab() {
   const [message, setMessage] = useState("");
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [sendingSMS, setSendingSMS] = useState({});
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
   const navigate = useNavigate();
@@ -620,6 +623,77 @@ function IndividualStudentTab() {
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
+  const handleSend = async (student_id) => {
+    try {
+      // Set loading state for that student
+      setSendingSMS((prev) => ({ ...prev, [student_id]: true }));
+
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        toast.error("Authentication token not found. Please log in again.");
+        return;
+      }
+
+      // 🔹 Step 1: First API call — get the message
+      const firstResponse = await axios.post(
+        `${API_URL}/api/send_pendingsmsfordailyattendancestudent/${student_id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (
+        firstResponse.status === 200 &&
+        firstResponse.data &&
+        firstResponse.data.success
+      ) {
+        const { message } = firstResponse.data; // ✅ message from API
+
+        // 🔹 Step 2: Prepare FormData for second API
+        const formData = new FormData();
+        formData.append("message", message);
+        formData.append("student_id[]", student_id);
+
+        // 🔹 Step 3: Second API call — send the message
+        const secondResponse = await axios.post(
+          `${API_URL}/api/send_messagefordailyattendance`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        // 🔹 Step 4: Handle success toast
+        if (secondResponse.status === 200 && secondResponse.data.success) {
+          toast.success(
+            secondResponse.data.message ||
+              `Message sent successfully to student ID: ${student_id}`
+          );
+          handleSearch(); // optional — to refresh UI data
+        } else {
+          toast.error(
+            secondResponse.data?.message || "Failed to send final message."
+          );
+        }
+      } else {
+        toast.error(
+          firstResponse.data?.message || "Failed to get message data."
+        );
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("An unexpected error occurred while sending the message.");
+    } finally {
+      // Reset loading state
+      setSendingSMS((prev) => ({ ...prev, [student_id]: false }));
+    }
+  };
 
   return (
     <>
@@ -719,14 +793,15 @@ function IndividualStudentTab() {
                                 <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
                                   Class
                                 </th>
+
                                 <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
-                                  Section
-                                </th>
-                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
-                                  Messages Sent
+                                  Messages Count
                                 </th>
                                 <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
                                   Last Message Time
+                                </th>
+                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
+                                  Message Sent
                                 </th>
                               </tr>
                             </thead>
@@ -778,15 +853,11 @@ function IndividualStudentTab() {
 
                                     {/* Class */}
                                     <td className="text-center px-2 py-2 border border-gray-200 text-sm">
-                                      {student.classname}
+                                      {student?.classname}{" "}
+                                      {student?.sectionname}
                                     </td>
 
-                                    {/* Section */}
-                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
-                                      {student.sectionname}
-                                    </td>
-
-                                    {/* Messages Sent */}
+                                    {/* Messages Sent Count */}
                                     <td className="text-center px-2 py-2 border border-gray-200 text-sm">
                                       <span
                                         className={`px-2 py-1 rounded text-xs font-semibold ${
@@ -813,16 +884,82 @@ function IndividualStudentTab() {
                                         })
                                       ) : (
                                         <span className="text-gray-400 italic">
-                                          Not Sent
+                                          {/* Not Sent */}
                                         </span>
                                       )}
+                                    </td>
+
+                                    {/* ✅ New Message Column */}
+                                    {/* ✅ New Message Column (based on sms_sent_status) */}
+                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                      {student.sms_sent_status === "Y" ? (
+                                        // ✅ Message Sent
+                                        <div className="flex flex-col items-center justify-center gap-1 text-green-600">
+                                          <span className="font-semibold text-sm flex items-center gap-1">
+                                            Sent{" "}
+                                            <FaCheck className="text-green-600 text-base" />
+                                          </span>
+                                        </div>
+                                      ) : student.sms_sent_status ===
+                                        "not_try" ? (
+                                        // ⚠️ Please Select Student
+                                        <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-l-4 border-r-4 py-1 border-yellow-400 text-yellow-700 px-1 rounded-md shadow-sm flex items-center justify-center gap-2 text-sm font-medium">
+                                          <FaUserAlt className="text-yellow-500 text-base" />
+                                          <span>Please select student </span>
+                                        </div>
+                                      ) : student.sms_sent_status === "N" ? (
+                                        <button
+                                          disabled={
+                                            sendingSMS[student?.student_id]
+                                          }
+                                          onClick={() =>
+                                            handleSend(student?.student_id)
+                                          }
+                                          className={`flex items-center justify-center mx-auto px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition-all duration-200 ${
+                                            sendingSMS[student?.student_id]
+                                              ? "bg-blue-300 cursor-not-allowed"
+                                              : "bg-blue-500 hover:bg-blue-600 text-white"
+                                          }`}
+                                        >
+                                          {sendingSMS[student?.student_id] ? (
+                                            <>
+                                              <svg
+                                                className="animate-spin h-4 w-4 text-white"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                              >
+                                                <circle
+                                                  className="opacity-25"
+                                                  cx="12"
+                                                  cy="12"
+                                                  r="10"
+                                                  stroke="currentColor"
+                                                  strokeWidth="4"
+                                                ></circle>
+                                                <path
+                                                  className="opacity-75"
+                                                  fill="currentColor"
+                                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                                ></path>
+                                              </svg>
+                                              Sending...
+                                            </>
+                                          ) : (
+                                            <>
+                                              Send{" "}
+                                              <IoMdSend className="text-lg" />
+                                            </>
+                                          )}
+                                        </button>
+                                      ) : null}
                                     </td>
                                   </tr>
                                 ))
                               ) : (
                                 <tr>
                                   <td
-                                    colSpan="7"
+                                    colSpan="8"
                                     className="text-center py-6 text-red-700 font-medium bg-gray-50"
                                   >
                                     Oops! No data found...
