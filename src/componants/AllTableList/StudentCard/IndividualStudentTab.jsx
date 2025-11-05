@@ -849,12 +849,12 @@ function IndividualStudentTab() {
                                     setMessage(e.target.value);
                                   }
                                 }}
-                                className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm text-black font-normal"
+                                className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
                                 placeholder="Enter message"
                               ></textarea>
 
                               {message && (
-                                <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm font-normal">
+                                <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
                                   {message + "  "}Login to school application
                                   for details - Evolvu
                                 </div>

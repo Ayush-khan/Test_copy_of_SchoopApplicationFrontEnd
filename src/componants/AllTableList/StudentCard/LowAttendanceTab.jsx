@@ -584,41 +584,41 @@ const LowAttendanceTab = () => {
                           )}
                         </tbody>
                       </table>
-                      {filteredParents.length > 0 && (
-                        <div className="flex flex-col items-center mt-2">
-                          <div className="w-full md:w-[50%]">
-                            <label className="mb-1 font-normal block text-left">
-                              Dear Parent ,
-                            </label>
-
-                            <div className="relative w-full">
-                              <textarea
-                                value={message}
-                                onChange={(e) => {
-                                  if (e.target.value.length <= maxCharacters) {
-                                    setMessage(e.target.value);
-                                  }
-                                }}
-                                className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
-                                placeholder="Enter message"
-                              ></textarea>
-
-                              {message && (
-                                <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
-                                  {message + "  "}Login to school application
-                                  for details - Evolvu
-                                </div>
-                              )}
-
-                              <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
-                                {message.length} / {maxCharacters}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>{" "}
+                  {filteredParents.length > 0 && (
+                    <div className="flex flex-col items-center mt-2">
+                      <div className="w-full md:w-[50%]">
+                        <label className="mb-1 font-normal block text-left">
+                          Dear Parent ,
+                        </label>
+
+                        <div className="relative w-full">
+                          <textarea
+                            value={message}
+                            onChange={(e) => {
+                              if (e.target.value.length <= maxCharacters) {
+                                setMessage(e.target.value);
+                              }
+                            }}
+                            className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
+                            placeholder="Enter message"
+                          ></textarea>
+
+                          {message && (
+                            <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
+                              {message + "  "}Login to school application for
+                              details - Evolvu
+                            </div>
+                          )}
+
+                          <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
+                            {message.length} / {maxCharacters}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div className="text-center">
                     <p className="text-blue-500 font-semibold mt-1">
                       Selected Students:{" "}

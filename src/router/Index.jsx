@@ -355,6 +355,7 @@ import CreateLeaveApplicationForPrincipleTab from "../componants/AllTableList/Le
 import EditLeaveApplicationForPrincipleTab from "../componants/AllTableList/LeaveApproveForPrinciple/EditLeaveApplicationForPrincipleTab.jsx";
 import ViewLeaveApplicationForPrincipleTab from "../componants/AllTableList/LeaveApproveForPrinciple/ViewLeaveApplicationForPrincipleTab.jsx";
 import PublishProficiencyCertificate from "../TeacherLoginModules/PublishProficiencyCertificate/PublishProficiencyCertificate.jsx";
+import StationeryRequisition from "../TeacherLoginModules/StationeryRequistion/StationeryRequistion.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -1485,8 +1486,13 @@ function Index() {
         />
         {/* PublishProficiencyCertificate module */}
         <Route
-          path="/publishProficiencyReport"
+          path="/publishProficiencyCertificate"
           element={<PrivateRoute element={<PublishProficiencyCertificate />} />}
+        />
+        {/* Stationery Requisition */}
+        <Route
+          path="/stationeryRequisition"
+          element={<PrivateRoute element={<StationeryRequisition />} />}
         />
         {/* Curriculum */}
         {/* Chapter */}

@@ -49,7 +49,7 @@ export default function Sidebar({ isSidebar, setIsSidebar }) {
       <div
         className={` md:w-36 lg:h-[80vh] bg-gray-200 mt-0.5 shadow-lg relative right-36 transform transition-all duration-500 text-center pr-3 ${
           isSidebar
-            ? "relative transform translate-x-36 transition-all duration-500"
+            ? "relative transform translate-x-36  translate-y-24 transition-all duration-500"
             : "relative transform translate-x-0 transition-all duration-500"
         }`}
       >
