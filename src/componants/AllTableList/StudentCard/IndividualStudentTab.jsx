@@ -568,7 +568,7 @@ function IndividualStudentTab() {
       };
 
       const response = await axios.post(
-        `${API_URL}/api/send_messageforattendance`,
+        `${API_URL}/api/send_messagefordailyattendance`,
         postData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -580,6 +580,7 @@ function IndividualStudentTab() {
         setMessage("");
         setSelectedStudents([]);
         setSelectAll(false);
+        handleSearch(); // optional — refresh UI
       }
     } catch (error) {
       console.error(error);
@@ -634,8 +635,8 @@ function IndividualStudentTab() {
         return;
       }
 
-      // 🔹 Step 1: First API call — get the message
-      const firstResponse = await axios.post(
+      // 🔹 API Call
+      const response = await axios.post(
         `${API_URL}/api/send_pendingsmsfordailyattendancestudent/${student_id}`,
         {},
         {
@@ -645,50 +646,24 @@ function IndividualStudentTab() {
         }
       );
 
-      if (
-        firstResponse.status === 200 &&
-        firstResponse.data &&
-        firstResponse.data.success
-      ) {
-        const { message } = firstResponse.data; // ✅ message from API
-
-        // 🔹 Step 2: Prepare FormData for second API
-        const formData = new FormData();
-        formData.append("message", message);
-        formData.append("student_id[]", student_id);
-
-        // 🔹 Step 3: Second API call — send the message
-        const secondResponse = await axios.post(
-          `${API_URL}/api/send_messagefordailyattendance`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
+      // 🔹 Handle response
+      if (response.status === 200 && response.data.success) {
+        toast.success(
+          response.data.message ||
+            `Message sent successfully to student ID: ${student_id}`
         );
-
-        // 🔹 Step 4: Handle success toast
-        if (secondResponse.status === 200 && secondResponse.data.success) {
-          toast.success(
-            secondResponse.data.message ||
-              `Message sent successfully to student ID: ${student_id}`
-          );
-          handleSearch(); // optional — to refresh UI data
-        } else {
-          toast.error(
-            secondResponse.data?.message || "Failed to send final message."
-          );
-        }
+        setMessage("");
+        setSelectedStudents([]);
+        handleSearch(); // optional — refresh UI
       } else {
-        toast.error(
-          firstResponse.data?.message || "Failed to get message data."
-        );
+        toast.error(response.data?.message || "Failed to send message.");
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      toast.error("An unexpected error occurred while sending the message.");
+      toast.error(
+        error.response?.data?.message ||
+          "An unexpected error occurred while sending the message."
+      );
     } finally {
       // Reset loading state
       setSendingSMS((prev) => ({ ...prev, [student_id]: false }));
@@ -902,18 +877,14 @@ function IndividualStudentTab() {
                                         </div>
                                       ) : student.sms_sent_status ===
                                         "not_try" ? (
-                                        // ⚠️ Please Select Student
-                                        <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-l-4 border-r-4 py-1 border-yellow-400 text-yellow-700 px-1 rounded-md shadow-sm flex items-center justify-center gap-2 text-sm font-medium">
-                                          <FaUserAlt className="text-yellow-500 text-base" />
-                                          <span>Please select student </span>
-                                        </div>
+                                        <span className="font-semibold text-sm flex items-center gap-1"></span>
                                       ) : student.sms_sent_status === "N" ? (
                                         <button
                                           disabled={
                                             sendingSMS[student?.student_id]
                                           }
                                           onClick={() =>
-                                            handleSend(student?.student_id)
+                                            handleSend(student?.webhook_id)
                                           }
                                           className={`flex items-center justify-center mx-auto px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition-all duration-200 ${
                                             sendingSMS[student?.student_id]
@@ -970,39 +941,44 @@ function IndividualStudentTab() {
                           </table>
                         )}
                       </div>
+                      {loading ? (
+                        <div className="flex justify-center items-center h-64"></div>
+                      ) : (
+                        displayedSections.length > 0 && (
+                          <div className="flex flex-col items-center mt-2">
+                            <div className="w-full md:w-[50%]">
+                              <label className="mb-1 font-normal block text-left">
+                                Dear Parent ,
+                              </label>
 
-                      {displayedSections.length > 0 && (
-                        <div className="flex flex-col items-center mt-2">
-                          <div className="w-full md:w-[50%]">
-                            <label className="mb-1 font-normal block text-left">
-                              Dear Parent ,
-                            </label>
+                              <div className="relative w-full">
+                                <textarea
+                                  value={message}
+                                  onChange={(e) => {
+                                    if (
+                                      e.target.value.length <= maxCharacters
+                                    ) {
+                                      setMessage(e.target.value);
+                                    }
+                                  }}
+                                  className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
+                                  placeholder="Enter message"
+                                ></textarea>
 
-                            <div className="relative w-full">
-                              <textarea
-                                value={message}
-                                onChange={(e) => {
-                                  if (e.target.value.length <= maxCharacters) {
-                                    setMessage(e.target.value);
-                                  }
-                                }}
-                                className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
-                                placeholder="Enter message"
-                              ></textarea>
+                                {message && (
+                                  <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
+                                    {message + "  "}Login to school application
+                                    for details - Evolvu
+                                  </div>
+                                )}
 
-                              {message && (
-                                <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
-                                  {message + "  "}Login to school application
-                                  for details - Evolvu
+                                <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
+                                  {message.length} / {maxCharacters}
                                 </div>
-                              )}
-
-                              <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
-                                {message.length} / {maxCharacters}
                               </div>
                             </div>
                           </div>
-                        </div>
+                        )
                       )}
                       <div className="text-center ">
                         <p className="text-blue-600 font-semibold">
