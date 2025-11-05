@@ -226,6 +226,11 @@ function LeaveApprove() {
                   />
                 </div>
               )}
+              <RxCross1
+                className="text-xl relative top-2 text-red-600 hover:cursor-pointer hover:bg-red-100"
+                type="button"
+                onClick={() => navigate("/dashboard")}
+              />
             </div>
           </div>
           <div
