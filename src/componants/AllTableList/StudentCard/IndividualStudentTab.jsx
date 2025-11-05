@@ -764,7 +764,7 @@ function IndividualStudentTab() {
                                     </td>
 
                                     {/* Student Name */}
-                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm font-medium text-gray-800">
+                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
                                       {`${capitalizeFirstLetter(
                                         student.first_name
                                       )} ${

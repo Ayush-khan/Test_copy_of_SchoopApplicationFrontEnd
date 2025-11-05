@@ -103,7 +103,7 @@ function LeaveApplicatonForPrincipleTab() {
 
   const handleCancel = (leaveCurrent) => {
     console.log("this is staffUe leave---->", leaveCurrent);
-    setCurrentLeave(leaveCurrent.leave_app_id);
+    setCurrentLeave(leaveCurrent);
     setCurrentLeaveName(leaveCurrent.teachername);
     setShowCancelModal(true);
   };
@@ -120,14 +120,17 @@ function LeaveApplicatonForPrincipleTab() {
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
-
-      if (!token || !currentLeave) {
+      console.log("-----> curentleave----->", currentLeave);
+      if (!token || !currentLeave?.leave_app_id) {
         throw new Error("Leave Id is missing");
       }
-
+      const payload = {
+        staff_id: currentLeave?.staff_id,
+        leave_type_id: currentLeave?.leave_type_id,
+      };
       const response = await axios.put(
-        `${API_URL}/api/update_leaveapplicationcancel/${currentLeave}`,
-        {}, // Empty body (or include body data here if needed)
+        `${API_URL}/api/update_leaveapplicationcancel/${currentLeave?.leave_app_id}`,
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
