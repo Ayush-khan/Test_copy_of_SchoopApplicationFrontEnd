@@ -1002,7 +1002,7 @@ function IndividualStudentTab() {
                         </button>
                       </div>
 
-                      {/* Pagination */}
+                      {/* Pagination is */}
                       <div className="flex justify-center pt-2 -mb-3">
                         <ReactPaginate
                           previousLabel={"Previous"}
