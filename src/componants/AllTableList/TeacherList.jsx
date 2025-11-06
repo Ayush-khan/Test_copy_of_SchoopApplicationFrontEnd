@@ -36,43 +36,6 @@ function TeacherList() {
     fetchAbsentTeacherList();
   }, []);
 
-  // const fetchAbsentTeacherList = async () => {
-  //   const today = new Date().toISOString().split("T")[0]; // e.g., "2025-06-17"
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       throw new Error("No authentication token found");
-  //     }
-
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_absentteacherfortoday`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         params: {
-  //           date: today, // passing date as query param
-  //         },
-  //       }
-  //     );
-
-  //     const absentStaff = response.data?.data?.absent_staff || [];
-  //     console.log("Absent staff", absentStaff);
-
-  //     const presentStaff = response.data?.data?.present_late || [];
-  //     console.log("Present staff", presentStaff);
-
-  //     setAbsentTeachers(absentStaff);
-  //     setPresentTeachers(presentStaff);
-  //     setPrsentCount(presentStaff.length);
-  //     setLeaveCount(absentStaff.length);
-  //   } catch (error) {
-  //     setError(error.message || "Something went wrong while fetching data.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
   useEffect(() => {
     if (presentTeachers.length > 0) {
       console.log("Updated present teachers:", presentTeachers);
@@ -104,9 +67,6 @@ function TeacherList() {
 
       const absentStaff = response.data?.data?.absent_staff || [];
       const presentStaff = response.data?.data?.present_late || [];
-
-      // console.log("Absent staff", absentStaff);
-      // console.log("Present staff", presentStaff);
 
       setAbsentTeachers(absentStaff);
       setPresentTeachers(presentStaff);
@@ -201,33 +161,15 @@ function TeacherList() {
 
   console.log("prsent teachers", displayedPresentTeachers);
 
-  // filter absentTeachers list
-  // const filteredAbsentTeachers = absentTeachers.filter((staff) => {
-  //   const searchLower = searchTerm.toLowerCase().trim();
-  //   const fullName = `${staff.name || ""}`.toLowerCase();
-  //   const mobile = `${staff.phone || ""}`.toLowerCase();
-  //   const category = `${staff.category_name || ""}`.toLowerCase();
-  //   const leaveStatus = `${staff.leave_status || ""}`.toLowerCase();
-  //   const classSection = `${staff.class_section || ""}`.toLowerCase();
-
-  //   return (
-  //     fullName.includes(searchLower) ||
-  //     mobile.includes(searchLower) ||
-  //     category.includes(searchLower) ||
-  //     leaveStatus.includes(searchLower) ||
-  //     classSection.includes(searchLower)
-  //   );
-  // });
-
   const filteredAbsentTeachers = absentTeachers
     .map((group) => ({
       category_name: group.category_name,
-      teachers: group.teachers.filter((staff) => {
+      teachers: (group.teachers || []).filter((staff) => {
         const searchLower = searchTerm.toLowerCase().trim();
 
         const fullName = `${staff.name || ""}`.toLowerCase();
         const mobile = `${staff.phone || ""}`.toLowerCase();
-        const category = `${group.category_name || ""}`.toLowerCase(); // ✅ from parent
+        const category = `${group.category_name || ""}`.toLowerCase();
         const leaveStatus = `${staff.leave_status || ""}`.toLowerCase();
         const classSection = `${staff.class_section || ""}`.toLowerCase();
 
@@ -240,7 +182,6 @@ function TeacherList() {
         );
       }),
     }))
-    // remove groups with no matching teachers
     .filter((group) => group.teachers.length > 0);
 
   const displayedAbsentTeachers = filteredAbsentTeachers.slice(
