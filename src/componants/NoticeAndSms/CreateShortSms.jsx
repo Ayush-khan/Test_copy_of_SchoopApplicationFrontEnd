@@ -281,7 +281,7 @@ import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 
-const CreateShortSMS = () => {
+const CreateShortSMS = ({ onSaveSuccess }) => {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
 
   const [loading, setLoading] = useState(false); // Loader state
@@ -406,6 +406,9 @@ const CreateShortSMS = () => {
         );
 
         resetForm();
+        if (onSaveSuccess) {
+          onSaveSuccess();
+        }
       } else {
         toast.error("Unexpected server response.");
       }

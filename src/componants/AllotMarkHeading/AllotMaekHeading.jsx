@@ -196,21 +196,6 @@ function AllotMarksHeading() {
     // Handle invalid input (non-numeric)
   };
 
-  // const handleDelete = (sectionId) => {
-  //   const classToDelete = subjects.find(
-  //     (cls) => cls.allot_markheadings_id === sectionId
-  //   );
-  //   console.log("classsToDelete", classToDelete);
-  //   // Set the current section and subject name for deletion
-  //   if (classToDelete) {
-  //     setCurrentSection(classToDelete); // Set the current section directly
-  //     setCurrestSubjectNameForDelete(classToDelete.get_marksheading?.name); // Set subject name for display
-  //     setShowDeleteModal(true); // Show the delete modal
-  //   } else {
-  //     console.error("Section not found for deletion");
-  //   }
-  // };
-
   const handleSubmitEdit = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
@@ -603,7 +588,7 @@ function AllotMarksHeading() {
           )}
           {activeTab === "AllotMarksHeadings" && (
             <div>
-              <AllotSubjectTab />
+              <AllotSubjectTab onSaveSuccess={() => setActiveTab("Manage")} />
             </div>
           )}
         </div>

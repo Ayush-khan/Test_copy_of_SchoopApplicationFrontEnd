@@ -152,20 +152,18 @@ function DivisionList() {
     const errors = {};
 
     // Regular expression to match only alphabets
-    // const alphabetRegex = /^[A-Za-z]+$/;
+    const alphabetRegex = /^[A-Za-z]+$/;
 
     if (!name || name.trim() === "") {
       errors.name = "Please enter division name.";
-    }
-    // else if (!alphabetRegex.test(name)) {
-    //   errors.name = "The name field only contain alphabets.";
-    // }
-    else if (name.length > 30) {
+    } else if (!alphabetRegex.test(name)) {
+      errors.name = "The name field only contain alphabets.";
+    } else if (name.length > 30) {
       errors.name = "The name field must not exceed 30 character.";
     }
 
     if (!departmentId) {
-      errors.department_id = "Please Select class.";
+      errors.department_id = "Please select class.";
     }
 
     return errors;
@@ -423,7 +421,7 @@ function DivisionList() {
         toast.error("Server error. Please try again later.");
       }
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
       setShowDeleteModal(false);
     }
   };
@@ -671,15 +669,13 @@ function DivisionList() {
                       </label>
                       <input
                         type="text"
-                        maxLength={30}
+                        maxLength={1}
                         className="form-control shadow-md mb-2"
                         // style={{ background: "#F8F8F8" }}
                         id="sectionName"
                         value={newSectionName}
-                        // placeholder="e.g A, B, C, D"
+                        placeholder="e.g A, B"
                         onChange={handleChangeSectionName}
-                        // onChange={}
-                        // onBlur={handleBlur}
                       />
                       <div className="absolute top-9 left-1/3">
                         {!nameAvailable && (
@@ -784,12 +780,12 @@ function DivisionList() {
                     </label>
                     <input
                       type="text"
-                      maxLength={30}
+                      maxLength={1}
                       className="form-control shadow-md mb-2"
                       id="editSectionName"
                       value={newSectionName}
                       onChange={handleChangeSectionName}
-                      // onBlur={handleBlur}
+                      placeholder="e.g A, B"
                     />
                     <div className="absolute top-9 left-1/3 ">
                       {!nameAvailable && (
