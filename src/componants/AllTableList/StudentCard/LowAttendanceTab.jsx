@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
+import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
 
 const LowAttendanceTab = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -495,130 +496,144 @@ const LowAttendanceTab = () => {
                 <div className="card-body w-full ">
                   <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full mx-auto">
                     <div className="bg-white rounded-lg shadow-xs">
-                      <table className="min-w-full leading-normal table-auto">
-                        <thead className=" ">
-                          <tr className="bg-gray-200 ">
-                            <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Sr. No
-                            </th>
-                            <th className="px-2 text-center w-full md:w-[4%]  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              <input
-                                type="checkbox"
-                                checked={selectAll}
-                                onChange={handleSelectAll}
-                                className="cursor-pointer"
-                              />{" "}
-                              All
-                            </th>
-
-                            <th className="px-2 w-full md:w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Student Name
-                            </th>
-                            <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Class
-                            </th>
-                            <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Attendance
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredParents.length ? (
-                            filteredParents.map((student, index) => (
-                              <tr
-                                key={student.student_id}
-                                className={`${
-                                  index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                                } hover:bg-gray-50`}
-                              >
-                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                  <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                    {index + 1}
-                                  </p>
-                                </td>
-                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                  <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedStudents.includes(
-                                        student.student_id
-                                      )}
-                                      onChange={() =>
-                                        handleCheckboxChange(student.student_id)
-                                      }
-                                      className="cursor-pointer"
-                                    />
-                                  </p>
-                                </td>
-
-                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                  <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                    {toTitleCase(
-                                      `${student.first_name || ""} ${
-                                        student.mid_name || ""
-                                      } ${student.last_name || ""}`
-                                    )}
-                                  </p>
-                                </td>
-
-                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                  <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                    {student.classname} {student.sectionname}
-                                  </p>
-                                </td>
-
-                                <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                  <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                    {student?.attendance_percentage || ""}
-                                    {" %"}
-                                  </p>
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                              <div className=" text-center text-xl text-red-700">
-                                Oops! No data found..
-                              </div>
-                            </div>
-                          )}
-                        </tbody>
-                      </table>
-                      {filteredParents.length > 0 && (
-                        <div className="flex flex-col items-center mt-2">
-                          <div className="w-full md:w-[50%]">
-                            <label className="mb-1 font-normal block text-left">
-                              Dear Parent ,
-                            </label>
-
-                            <div className="relative w-full">
-                              <textarea
-                                value={message}
-                                onChange={(e) => {
-                                  if (e.target.value.length <= maxCharacters) {
-                                    setMessage(e.target.value);
-                                  }
-                                }}
-                                className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
-                                placeholder="Enter message"
-                              ></textarea>
-
-                              {message && (
-                                <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
-                                  {message + "  "}Login to school application
-                                  for details - Evolvu
-                                </div>
-                              )}
-
-                              <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
-                                {message.length} / {maxCharacters}
-                              </div>
-                            </div>
-                          </div>
+                      {loading ? (
+                        <div className="flex justify-center items-center h-64">
+                          {/* <div className="spinner-border text-primary" role="status"> */}
+                          <LoaderStyle />
+                          {/* </div> */}
                         </div>
+                      ) : (
+                        <table className="min-w-full leading-normal table-auto">
+                          <thead className=" ">
+                            <tr className="bg-gray-200 ">
+                              <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Sr. No
+                              </th>
+                              <th className="px-2 text-center w-full md:w-[4%]  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                <input
+                                  type="checkbox"
+                                  checked={selectAll}
+                                  onChange={handleSelectAll}
+                                  className="cursor-pointer"
+                                />{" "}
+                                All
+                              </th>
+
+                              <th className="px-2 w-full md:w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Student Name
+                              </th>
+                              <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Class
+                              </th>
+                              <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Attendance
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredParents.length ? (
+                              filteredParents.map((student, index) => (
+                                <tr
+                                  key={student.student_id}
+                                  className={`${
+                                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                                  } hover:bg-gray-50`}
+                                >
+                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                      {index + 1}
+                                    </p>
+                                  </td>
+                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedStudents.includes(
+                                          student.student_id
+                                        )}
+                                        onChange={() =>
+                                          handleCheckboxChange(
+                                            student.student_id
+                                          )
+                                        }
+                                        className="cursor-pointer"
+                                      />
+                                    </p>
+                                  </td>
+
+                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                      {toTitleCase(
+                                        `${student.first_name || ""} ${
+                                          student.mid_name || ""
+                                        } ${student.last_name || ""}`
+                                      )}
+                                    </p>
+                                  </td>
+
+                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                      {student.classname} {student.sectionname}
+                                    </p>
+                                  </td>
+
+                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                      {student?.attendance_percentage || ""}
+                                      {" %"}
+                                    </p>
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                <div className=" text-center text-xl text-red-700">
+                                  Oops! No data found..
+                                </div>
+                              </div>
+                            )}
+                          </tbody>
+                        </table>
                       )}
                     </div>
                   </div>{" "}
+                  {loading ? (
+                    <span>{""}</span>
+                  ) : (
+                    filteredParents.length > 0 && (
+                      <div className="flex flex-col items-center mt-2">
+                        <div className="w-full md:w-[50%]">
+                          <label className="mb-1 font-normal block text-left">
+                            Dear Parent ,
+                          </label>
+
+                          <div className="relative w-full">
+                            <textarea
+                              value={message}
+                              onChange={(e) => {
+                                if (e.target.value.length <= maxCharacters) {
+                                  setMessage(e.target.value);
+                                }
+                              }}
+                              className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
+                              placeholder="Enter message"
+                            ></textarea>
+
+                            {message && (
+                              <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
+                                {message + "  "}Login to school application for
+                                details - Evolvu
+                              </div>
+                            )}
+
+                            <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
+                              {message.length} / {maxCharacters}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  )}
                   <div className="text-center">
                     <p className="text-blue-500 font-semibold mt-1">
                       Selected Students:{" "}

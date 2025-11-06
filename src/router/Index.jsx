@@ -153,7 +153,7 @@ import ApproveLeave from "../componants/AllTableList/ApproveLeaveList.jsx";
 import ApproveLeaveList from "../componants/AllTableList/ApproveLeaveList.jsx";
 import LeaveApprove from "../componants/AllTableList/LeaveApproveForPrinciple/LeaveApprove (1).jsx";
 import TeacherList from "../componants/AllTableList/TeacherList.jsx";
-import EditLeaveApprove from "../componants/AllTableList/LeaveApproveForPrinciple/EditLeaveApprove (1).jsx";
+import EditLeaveApprove from "../componants/AllTableList/LeaveApproveForPrinciple/EditLeaveApproveTab.jsx";
 import ViewTimeTablePlanner from "../componants/TimeTablePlanner/ViewExamTimeTablePlanner/ViewTimeTablePlanner.jsx";
 import Stationery from "../componants/Stationery/Stationery.jsx";
 import SiblingUnmapping from "../componants/SiblingUnmapping/SiblingUnmapping.jsx";
@@ -256,6 +256,19 @@ import ConsolidatedLeaveForTeachers from "../TeacherLoginModules/LeaveModuleForT
 import TeacherNotes from "../TeacherLoginModules/TeacherNotes/TeacherNotes.jsx";
 import CreateTeacherNotes from "../TeacherLoginModules/TeacherNotes/CreateTeacherNotes.jsx";
 import EditTeacherNotes from "../TeacherLoginModules/TeacherNotes/EditTeacherNotes.jsx";
+import AllotRollNumberHouse from "../TeacherLoginModules/AllotRollNumberAndHouse/AllotRollNumberHouse.jsx";
+import ViewedByTeacherNotes from "../TeacherLoginModules/TeacherNotes/ViewedByTeacherNotes.jsx";
+import CheckHomework from "../TeacherLoginModules/HomeworkTeacher/CheckHomework.jsx";
+import EditHomework from "../TeacherLoginModules/HomeworkTeacher/EditHomework.jsx";
+import CreateHomework from "../TeacherLoginModules/HomeworkTeacher/CreateHomework.jsx";
+import Homework from "../TeacherLoginModules/HomeworkTeacher/Homework.jsx";
+import ViewHomework from "../TeacherLoginModules/HomeworkTeacher/ViewHomework.jsx";
+import LeaveApplicatonForPrincipleTab from "../componants/AllTableList/LeaveApproveForPrinciple/LeaveApplicatonForPrincipleTab.jsx";
+import CreateLeaveApplicationForPrincipleTab from "../componants/AllTableList/LeaveApproveForPrinciple/CreateLeaveApplicationForPrincipleTab.jsx";
+import EditLeaveApplicationForPrincipleTab from "../componants/AllTableList/LeaveApproveForPrinciple/EditLeaveApplicationForPrincipleTab.jsx";
+import ViewLeaveApplicationForPrincipleTab from "../componants/AllTableList/LeaveApproveForPrinciple/ViewLeaveApplicationForPrincipleTab.jsx";
+import PublishProficiencyCertificate from "../TeacherLoginModules/PublishProficiencyCertificate/PublishProficiencyCertificate.jsx";
+import StationeryRequisition from "../TeacherLoginModules/StationeryRequistion/StationeryRequistion.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -1227,6 +1240,31 @@ function Index() {
             <PrivateRoute element={<ViewLeaveApplicationForPrinciple />} />
           }
         />
+        {/* Tab leave appplicaton for  principal dashboard  card tab approve leave ke */}
+        <Route
+          path="/LeaveApplicationTab"
+          element={
+            <PrivateRoute element={<LeaveApplicatonForPrincipleTab />} />
+          }
+        />
+        <Route
+          path="/createLeaveApplicationTab"
+          element={
+            <PrivateRoute element={<CreateLeaveApplicationForPrincipleTab />} />
+          }
+        />
+        <Route
+          path="/leaveApplicationTab/edit/:id"
+          element={
+            <PrivateRoute element={<EditLeaveApplicationForPrincipleTab />} />
+          }
+        />
+        <Route
+          path="/leaveApplicationTab/view/:id"
+          element={
+            <PrivateRoute element={<ViewLeaveApplicationForPrincipleTab />} />
+          }
+        />
         {/* dw pay report */}
         <Route
           path="/dwPaymentReport"
@@ -1335,6 +1373,10 @@ function Index() {
         />
         {/* Upload mai teachers notes module */}
         <Route
+          path="AllotRollNumberHouse"
+          element={<PrivateRoute element={<AllotRollNumberHouse />} />}
+        />
+        <Route
           path="/TeacherNotes"
           element={<PrivateRoute element={<TeacherNotes />} />}
         />
@@ -1343,8 +1385,43 @@ function Index() {
           element={<PrivateRoute element={<EditTeacherNotes />} />}
         />
         <Route
+          path="/ViewedByTeacherNotes/view/:id"
+          element={<PrivateRoute element={<ViewedByTeacherNotes />} />}
+        />
+        <Route
           path="CreateTeacherNotes"
           element={<PrivateRoute element={<CreateTeacherNotes />} />}
+        />
+        {/* homework */}
+        <Route
+          path="/homework"
+          element={<PrivateRoute element={<Homework />} />}
+        />
+        <Route
+          path="/createHomwork"
+          element={<PrivateRoute element={<CreateHomework />} />}
+        />
+        <Route
+          path="/homework/edit/:id"
+          element={<PrivateRoute element={<EditHomework />} />}
+        />
+        <Route
+          path="/homework/view/:id"
+          element={<PrivateRoute element={<ViewHomework />} />}
+        />
+        <Route
+          path="/homework/viewBy/:id"
+          element={<PrivateRoute element={<CheckHomework />} />}
+        />
+        {/* PublishProficiencyCertificate module */}
+        <Route
+          path="/publishProficiencyCertificate"
+          element={<PrivateRoute element={<PublishProficiencyCertificate />} />}
+        />
+        {/* Stationery Requisition */}
+        <Route
+          path="/stationeryRequisition"
+          element={<PrivateRoute element={<StationeryRequisition />} />}
         />
         {/* Curriculum */}
         {/* Chapter */}
