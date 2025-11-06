@@ -303,7 +303,7 @@ import { RxCross1 } from "react-icons/rx";
 // import Loader from "../components/Loader"; // Add a Loader component or use an existing one.
 import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 
-const CreateNotice = () => {
+const CreateNotice = ({ onSaveSuccess }) => {
   const API_URL = import.meta.env.VITE_API_URL;
 
   const [allClasses, setAllClasses] = useState([]);
@@ -424,6 +424,9 @@ const CreateNotice = () => {
             : "Notice saved successfully!"
         );
         resetForm();
+        if (onSaveSuccess) {
+          onSaveSuccess();
+        }
       } else {
         toast.error("Unexpected server response whilte saving the Notice.");
       }
@@ -476,7 +479,7 @@ const CreateNotice = () => {
                         <h5 className="px-2 lg:px-3 py-2 text-[1em] text-gray-700">
                           Select Class <span className="text-red-500">*</span>
                         </h5>
-                        <div className="  w-full md:w-[66%] relative left-0 md:left-7 mt-2 grid grid-cols-4 sm:grid-cols-3 lg:grid-cols-6 gap-2  ">
+                        <div className="  w-full md:w-[75%] relative left-0 md:left-7 mt-2 grid grid-cols-4 sm:grid-cols-3 lg:grid-cols-6 gap-2  ">
                           {allClasses.map((cls) => (
                             <div
                               key={cls.class_id}
@@ -490,7 +493,7 @@ const CreateNotice = () => {
                                 className="cursor-pointer"
                               />
                               <label className="cursor-pointer">
-                                {cls.name}
+                                {cls?.name}
                               </label>
                             </div>
                           ))}
