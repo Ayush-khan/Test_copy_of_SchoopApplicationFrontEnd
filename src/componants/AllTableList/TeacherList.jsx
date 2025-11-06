@@ -36,6 +36,43 @@ function TeacherList() {
     fetchAbsentTeacherList();
   }, []);
 
+  // const fetchAbsentTeacherList = async () => {
+  //   const today = new Date().toISOString().split("T")[0]; // e.g., "2025-06-17"
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token found");
+  //     }
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_absentteacherfortoday`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         params: {
+  //           date: today, // passing date as query param
+  //         },
+  //       }
+  //     );
+
+  //     const absentStaff = response.data?.data?.absent_staff || [];
+  //     console.log("Absent staff", absentStaff);
+
+  //     const presentStaff = response.data?.data?.present_late || [];
+  //     console.log("Present staff", presentStaff);
+
+  //     setAbsentTeachers(absentStaff);
+  //     setPresentTeachers(presentStaff);
+  //     setPrsentCount(presentStaff.length);
+  //     setLeaveCount(absentStaff.length);
+  //   } catch (error) {
+  //     setError(error.message || "Something went wrong while fetching data.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   useEffect(() => {
     if (presentTeachers.length > 0) {
       console.log("Updated present teachers:", presentTeachers);
@@ -68,6 +105,9 @@ function TeacherList() {
       const absentStaff = response.data?.data?.absent_staff || [];
       const presentStaff = response.data?.data?.present_late || [];
 
+      // console.log("Absent staff", absentStaff);
+      // console.log("Present staff", presentStaff);
+
       setAbsentTeachers(absentStaff);
       setPresentTeachers(presentStaff);
       setPrsentCount(presentStaff.length);
@@ -95,14 +135,11 @@ function TeacherList() {
     try {
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(
-        `${API_URL}/api/get_teachercategory_teaching`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.data?.data) {
         setCategories(response.data.data);
@@ -161,17 +198,40 @@ function TeacherList() {
 
   console.log("prsent teachers", displayedPresentTeachers);
 
-  const filteredAbsentTeachers = absentTeachers
-    .map((group) => ({
-      category_name: group.category_name,
-      teachers: (group.teachers || []).filter((staff) => {
-        const searchLower = searchTerm.toLowerCase().trim();
+  // const filteredAbsentTeachers = absentTeachers
+  //   .map((group) => ({
+  //     category_name: group.category_name,
+  //     teachers: group.teachers.filter((staff) => {
+  //       const searchLower = searchTerm.toLowerCase().trim();
 
-        const fullName = `${staff.name || ""}`.toLowerCase();
-        const mobile = `${staff.phone || ""}`.toLowerCase();
-        const category = `${group.category_name || ""}`.toLowerCase();
-        const leaveStatus = `${staff.leave_status || ""}`.toLowerCase();
-        const classSection = `${staff.class_section || ""}`.toLowerCase();
+  //       const fullName = `${staff.name || ""}`.toLowerCase();
+  //       const mobile = `${staff.phone || ""}`.toLowerCase();
+  //       const category = `${group.category_name || ""}`.toLowerCase(); // ✅ from parent
+  //       const leaveStatus = `${staff.leave_status || ""}`.toLowerCase();
+  //       const classSection = `${staff.class_section || ""}`.toLowerCase();
+
+  //       return (
+  //         fullName.includes(searchLower) ||
+  //         mobile.includes(searchLower) ||
+  //         category.includes(searchLower) ||
+  //         leaveStatus.includes(searchLower) ||
+  //         classSection.includes(searchLower)
+  //       );
+  //     }),
+  //   }))
+
+  //   .filter((group) => group.teachers.length > 0);
+  const filteredAbsentTeachers = (absentTeachers || [])
+    .map((group) => {
+      const teachers = Array.isArray(group.teachers) ? group.teachers : [];
+      const searchLower = searchTerm.toLowerCase().trim();
+
+      const filteredTeachers = teachers.filter((staff) => {
+        const fullName = `${staff?.name || ""}`.toLowerCase();
+        const mobile = `${staff?.phone || ""}`.toLowerCase();
+        const category = `${group?.category_name || ""}`.toLowerCase();
+        const leaveStatus = `${staff?.leave_status || ""}`.toLowerCase();
+        const classSection = `${staff?.class_section || ""}`.toLowerCase();
 
         return (
           fullName.includes(searchLower) ||
@@ -180,8 +240,13 @@ function TeacherList() {
           leaveStatus.includes(searchLower) ||
           classSection.includes(searchLower)
         );
-      }),
-    }))
+      });
+
+      return {
+        category_name: group?.category_name || "Unknown",
+        teachers: filteredTeachers,
+      };
+    })
     .filter((group) => group.teachers.length > 0);
 
   const displayedAbsentTeachers = filteredAbsentTeachers.slice(
@@ -623,7 +688,7 @@ function TeacherList() {
                         >
                           {group.category_name}
                         </h2>
-                        <table className="min-w-full leading-normal table-auto  border border-gray-950">
+                        <table className="min-w-full leading-normal table-auto border-collapse border border-gray-950">
                           <thead>
                             <tr className="bg-gray-100">
                               <th className="px-1 w-[7%]  mx-auto lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900 tracking-wider">
