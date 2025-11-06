@@ -28,6 +28,7 @@ const UnmapDetails = () => {
   const [confirmedOption, setConfirmedOption] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [userIdOptionError, setUserIdOptionError] = useState("");
+  const [error, setError] = useState("");
 
   const { id } = useParams();
   console.log("selected student is", id);
@@ -505,7 +506,7 @@ const UnmapDetails = () => {
                   </p>
 
                   {/* Radio buttons + Go button in same row */}
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
+                  {/* <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
                     <label className="flex items-center gap-2 text-gray-700">
                       <input
                         type="radio"
@@ -544,7 +545,62 @@ const UnmapDetails = () => {
                     >
                       Go
                     </button>
+                  </div> */}
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
+                    {/* Option 1 */}
+                    <label className="flex items-center gap-2 text-gray-700">
+                      <input
+                        type="radio"
+                        name="unmapOption"
+                        value="mapWithOther"
+                        checked={selectedOption === "mapWithOther"}
+                        onChange={(e) => {
+                          setSelectedOption(e.target.value);
+                          setConfirmedOption("");
+                          setError(""); // clear error when selecting
+                        }}
+                        className="accent-blue-600"
+                      />
+                      Map with other student
+                    </label>
+
+                    {/* Option 2 */}
+                    <label className="flex items-center gap-2 text-gray-700">
+                      <input
+                        type="radio"
+                        name="unmapOption"
+                        value="newParent"
+                        checked={selectedOption === "newParent"}
+                        onChange={(e) => {
+                          setSelectedOption(e.target.value);
+                          setConfirmedOption("");
+                          setError(""); // clear error when selecting
+                        }}
+                        className="accent-blue-600"
+                      />
+                      Add new parent details
+                    </label>
+
+                    {/* Go Button */}
+                    <button
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded"
+                      onClick={() => {
+                        if (!selectedOption) {
+                          setError("Please select at least one option.");
+                          return;
+                        }
+                        setError("");
+                        setConfirmedOption(selectedOption);
+                      }}
+                    >
+                      Go
+                    </button>
                   </div>
+
+                  {/* Error Message */}
+                  {error && (
+                    <p className="text-red-500 text-sm mt-1 ml-1">{error}</p>
+                  )}
                 </div>
               </div>
 
