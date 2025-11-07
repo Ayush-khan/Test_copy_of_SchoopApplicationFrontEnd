@@ -475,48 +475,54 @@ const CreateNotice = ({ onSaveSuccess }) => {
                   <div className="card-body w-full ml-2">
                     <div className="lg:overflow-x-hidden">
                       {/* Class Selection */}
-                      <div className="mb-6 flex flex-col md:flex-row gap-x-4">
-                        <h5 className="px-2 lg:px-3 py-2 text-[1em] text-gray-700">
-                          Select Class <span className="text-red-500">*</span>
-                        </h5>
-                        <div className="  w-full md:w-[75%] relative left-0 md:left-7 mt-2 grid grid-cols-4 sm:grid-cols-3 lg:grid-cols-6 gap-2  ">
+                      <div className="w-full   mb-4 flex flex-row gap-x-2 ">
+                        <div className="flex items-start md:items-center mb-2">
+                          <h5 className="px-2 lg:px-3 py-2 text-[1em] text-gray-700 whitespace-nowrap">
+                            Select Class <span className="text-red-500">*</span>
+                          </h5>
+                        </div>
+
+                        <div className="  w-full  relative left-0 md:left-7 top-3 mt-2 grid grid-cols-4 sm:grid-cols-3 lg:grid-cols-6 gap-2  ">
                           {allClasses.map((cls) => (
-                            <div
+                            <label
                               key={cls.class_id}
-                              className="flex items-center space-x-2 hover:cursor-pointer"
-                              onClick={() => handleClassChange(cls.class_id)}
+                              className="flex items-center gap-2 cursor-pointer whitespace-nowrap truncate"
+                              title={cls?.name}
                             >
                               <input
                                 type="checkbox"
                                 checked={selectedClasses.includes(cls.class_id)}
                                 onChange={() => handleClassChange(cls.class_id)}
-                                className="cursor-pointer"
+                                className="cursor-pointer accent-blue-600 flex-shrink-0"
                               />
-                              <label className="cursor-pointer">
+                              <span className="text-sm leading-tight">
                                 {cls?.name}
-                              </label>
-                            </div>
-                          ))}
-                          <div className="flex items-center space-x-2">
-                            <label className="cursor-pointer flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                checked={
-                                  selectedClasses.length === allClasses.length
-                                }
-                                onChange={handleSelectAllClasses}
-                                className="cursor-pointer"
-                              />
-                              <span>Select All</span>
+                              </span>
                             </label>
-                          </div>{" "}
+                          ))}
+
+                          {/* Select All */}
+                          <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={
+                                selectedClasses.length === allClasses.length
+                              }
+                              onChange={handleSelectAllClasses}
+                              className="cursor-pointer accent-blue-600 flex-shrink-0"
+                            />
+                            <span className="text-sm">Select All</span>
+                          </label>
+
+                          {/* Error message */}
                           {errors.classError && (
-                            <p className="relative top-2 col-span-3 text-red-500">
+                            <p className="col-span-full text-red-500 text-sm mt-1">
                               {errors.classError}
                             </p>
                           )}
                         </div>
-                      </div>{" "}
+                      </div>
+                      {/* <div className="mb-6"> */}
                       {/* Subject */}
                       <div className="w-full  md:w-[58%]  mb-4 flex flex-row justify-between gap-x-2 ">
                         <h5 className="px-2 lg:px-3 py-2 text-[1em] text-gray-700">
