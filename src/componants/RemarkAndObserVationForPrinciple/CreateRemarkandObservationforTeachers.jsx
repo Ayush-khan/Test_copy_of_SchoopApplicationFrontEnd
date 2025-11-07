@@ -7,7 +7,7 @@ import { RxCross1 } from "react-icons/rx";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import Select from "react-select";
 
-const CreateRemarkandObservationTeacher = () => {
+const CreateRemarkandObservationTeacher = ({ onSaveSuccess }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [loading, setLoading] = useState(false); // Loader state
@@ -132,6 +132,9 @@ const CreateRemarkandObservationTeacher = () => {
       if (response.status === 200) {
         toast.success("Remark Saved successfully!");
         resetForm?.();
+        if (onSaveSuccess) {
+          onSaveSuccess();
+        }
       } else {
         toast.error("Unexpected server response.");
       }
@@ -178,6 +181,9 @@ const CreateRemarkandObservationTeacher = () => {
       if (response.status === 200) {
         toast.success("Remark Saved and Published successfully!");
         resetForm?.(); // Optional: clear form fields if this is defined
+        if (onSaveSuccess) {
+          onSaveSuccess();
+        }
       } else {
         toast.error("Unexpected server response.");
       }

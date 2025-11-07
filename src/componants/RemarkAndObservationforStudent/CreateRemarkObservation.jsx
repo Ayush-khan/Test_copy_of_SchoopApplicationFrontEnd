@@ -7,7 +7,7 @@ import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 
 import Select from "react-select";
 
-const CreateRemarkObservation = () => {
+const CreateRemarkObservation = ({ onSaveSuccess }) => {
   const API_URL = import.meta.env.VITE_API_URL;
 
   const [allClasses, setAllClasses] = useState([]);
@@ -335,6 +335,9 @@ const CreateRemarkObservation = () => {
             : "Remark saved successfully!"
         );
         resetForm();
+        if (onSaveSuccess) {
+          onSaveSuccess();
+        }
       } else {
         toast.error("Failed to save remark.");
       }

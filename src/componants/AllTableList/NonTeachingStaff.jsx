@@ -133,14 +133,11 @@ function NonTeachingStaff() {
     try {
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(
-        `${API_URL}/api/get_teachercategory_nonteaching`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.data?.data) {
         setCategories(response.data.data);
@@ -216,12 +213,12 @@ function NonTeachingStaff() {
   const filteredAbsentTeachers = absentTeachers
     .map((group) => ({
       category_name: group.category_name,
-      teachers: group.teachers.filter((staff) => {
+      teachers: (group.teachers || []).filter((staff) => {
         const searchLower = searchTerm.toLowerCase().trim();
 
         const fullName = `${staff.name || ""}`.toLowerCase();
         const mobile = `${staff.phone || ""}`.toLowerCase();
-        const category = `${group.category_name || ""}`.toLowerCase(); // ✅ from parent
+        const category = `${group.category_name || ""}`.toLowerCase();
         const leaveStatus = `${staff.leave_status || ""}`.toLowerCase();
         const classSection = `${staff.class_section || ""}`.toLowerCase();
 
@@ -234,8 +231,8 @@ function NonTeachingStaff() {
         );
       }),
     }))
-    // remove groups with no matching teachers
     .filter((group) => group.teachers.length > 0);
+
   console.log(filteredAbsentTeachers);
 
   const [selectedIds, setSelectedIds] = useState([]);
@@ -657,7 +654,7 @@ function NonTeachingStaff() {
                           {group.category_name}
                         </h2>
 
-                        <table className="min-w-full leading-normal table-auto  border border-gray-950">
+                        <table className="min-w-full leading-normal table-auto border-collapse border border-gray-950">
                           <thead>
                             <tr className="bg-gray-100">
                               <th className="px-1 w-[7%] mx-auto lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">

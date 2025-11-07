@@ -878,7 +878,7 @@ function RemarkObservationStudent() {
                                     // Show Publish button
                                     <button
                                       onClick={() => handlePublish(subject)}
-                                      className="text-green-600 hover:text-green-800 transition-colors"
+                                      className="text-green-600 hover:text-green-800 font-bold transition-colors duration-200 hover:bg-transparent"
                                       title="Publish"
                                     >
                                       <FaCheck className="text-lg md:text-xl" />
@@ -948,11 +948,19 @@ function RemarkObservationStudent() {
           {/* Other tabs content */}
 
           {activeTab === "CreateRemarkObservation" && (
-            <div>{<CreateRemarkObservation />}</div>
+            <div>
+              {
+                <CreateRemarkObservation
+                  onSaveSuccess={() => setActiveTab("Manage")}
+                />
+              }
+            </div>
           )}
           {activeTab === "CreateRemarkObservationStudent" && (
             <div>
-              <CreateRemarkObservationStudent />{" "}
+              <CreateRemarkObservationStudent
+                onSaveSuccess={() => setActiveTab("Manage")}
+              />{" "}
             </div>
           )}
         </div>

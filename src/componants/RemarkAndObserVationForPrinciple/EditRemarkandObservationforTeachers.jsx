@@ -273,7 +273,7 @@ import { RxCross1 } from "react-icons/rx";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-const EditTeacherRemarkandObservation = () => {
+const EditTeacherRemarkandObservation = ({ onSaveSuccess }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const { id } = useParams(); // if you pass teacher remark id in route
   const location = useLocation();
@@ -352,51 +352,50 @@ const EditTeacherRemarkandObservation = () => {
     setIsObservation(false);
   };
 
- const handleSubmitEdit = async (e) => {
-   e?.preventDefault?.();
+  const handleSubmitEdit = async (e) => {
+    e?.preventDefault?.();
 
-   if (isSubmitting) return;
-   if (!validateForm()) return;
+    if (isSubmitting) return;
+    if (!validateForm()) return;
 
-   setIsSubmitting(true);
-   setLoading(true);
+    setIsSubmitting(true);
+    setLoading(true);
 
-   try {
-     const token = localStorage.getItem("authToken");
+    try {
+      const token = localStorage.getItem("authToken");
 
-     const payload = {
-       t_remark_id: formData.t_remark_id,
-       remarksubject: formData.remark_subject,
-       remark: formData.remark_desc,
-       remark_type: isObservation ? "Observation" : "Remark",
-     };
+      const payload = {
+        t_remark_id: formData.t_remark_id,
+        remarksubject: formData.remark_subject,
+        remark: formData.remark_desc,
+        remark_type: isObservation ? "Observation" : "Remark",
+      };
 
-     const response = await axios.put(
-       `${API_URL}/api/update_updateremarkforteacher/${formData.t_remark_id}`,
-       payload,
-       {
-         headers: {
-           Authorization: `Bearer ${token}`,
-           "Content-Type": "application/json",
-         },
-       }
-     );
+      const response = await axios.put(
+        `${API_URL}/api/update_updateremarkforteacher/${formData.t_remark_id}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-     if (response.status === 200 || response.data.success) {
-       toast.success(response.data.message || "Remark updated successfully!");
-       navigate("/remObsTeacher");
-     } else {
-       toast.error(response.data.message || "Failed to update remark.");
-     }
-   } catch (err) {
-     console.error("Error updating remark:", err);
-     toast.error("Something went wrong. Please try again.");
-   } finally {
-     setIsSubmitting(false);
-     setLoading(false);
-   }
- };
-
+      if (response.status === 200 || response.data.success) {
+        toast.success(response.data.message || "Remark updated successfully!");
+        navigate("/remObsTeacher");
+      } else {
+        toast.error(response.data.message || "Failed to update remark.");
+      }
+    } catch (err) {
+      console.error("Error updating remark:", err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+      setLoading(false);
+    }
+  };
 
   return (
     <div>

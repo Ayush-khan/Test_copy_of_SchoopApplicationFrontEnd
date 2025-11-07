@@ -864,7 +864,9 @@ function TeacherRemarkandObservation() {
 
           {activeTab === "CreateTeacherRemarkObservation" && (
             <div>
-              <CreateRemarkandObservationforTeachers />
+              <CreateRemarkandObservationforTeachers
+                onSaveSuccess={() => setActiveTab("Manage")}
+              />
             </div>
           )}
         </div>
