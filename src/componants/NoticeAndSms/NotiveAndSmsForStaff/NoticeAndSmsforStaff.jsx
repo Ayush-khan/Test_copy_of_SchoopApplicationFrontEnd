@@ -1013,13 +1013,13 @@ function NoticeAndSmsforStaff() {
 
           {activeTab === "CreateShortSMS" && (
             <div>
-              <CreateShortSMS />
+              <CreateShortSMS onSaveSuccess={() => setActiveTab("Manage")} />
             </div>
           )}
 
           {activeTab === "CreateNotice" && (
             <div>
-              <CreateNotice />{" "}
+              <CreateNotice onSaveSuccess={() => setActiveTab("Manage")} />
             </div>
           )}
           {/* {activeTab === "AllotTeachers" && (

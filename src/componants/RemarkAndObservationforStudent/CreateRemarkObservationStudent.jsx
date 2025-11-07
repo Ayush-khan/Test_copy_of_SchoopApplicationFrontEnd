@@ -7,7 +7,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import Select from "react-select";
 
-const CreateRemarkObservationStudent = () => {
+const CreateRemarkObservationStudent = ({ onSaveSuccess }) => {
   const API_URL = import.meta.env.VITE_API_URL;
 
   const [allClasses, setAllClasses] = useState([]);
@@ -269,6 +269,9 @@ const CreateRemarkObservationStudent = () => {
             : "Remark saved successfully!"
         );
         resetForm();
+        if (onSaveSuccess) {
+          onSaveSuccess();
+        }
       } else {
         toast.error("Failed to save remark.");
       }

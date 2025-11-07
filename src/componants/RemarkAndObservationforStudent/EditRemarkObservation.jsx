@@ -1,14 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
-// import Loader from "../components/Loader"; // Add a Loader component or use an existing one.
-// import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
-
-// import Select from "react-select";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const EditRemarkandObservation = () => {
@@ -27,20 +23,10 @@ const EditRemarkandObservation = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { id } = useParams();
   console.log("id", id);
-
   const location = useLocation();
-  const selectedRemark = location.state;
-  console.log("selectedRemark", selectedRemark);
-
   const [isObservation, setIsObservation] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [classIdForManage, setclassIdForManage] = useState("");
-  const [selectedClass, setSelectedClass] = useState(null);
-  const [sectionIdForStudentList, setSectionIdForStudentList] = useState("");
-  const [nameError, setNameError] = useState(null);
   const [loadingClasses, setLoadingClasses] = useState(false);
   const navigate = useNavigate();
 
@@ -87,13 +73,6 @@ const EditRemarkandObservation = () => {
     fetchInitialDataAndStudents();
   }, []);
 
-  const classOptions = useMemo(() => {
-    return allClasses.map((cls) => ({
-      value: cls.section_id, // This is the section ID used for fetching students
-      label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
-    }));
-  }, [allClasses]);
-
   const fetchInitialDataAndStudents = async () => {
     try {
       setLoadingClasses(true);
@@ -123,30 +102,6 @@ const EditRemarkandObservation = () => {
       setLoadingStudents(false);
     }
   };
-
-  const handleClassSelect = (selectedOption) => {
-    setNameError("");
-    setSelectedClass(selectedOption);
-    setSelectedStudent(null);
-    setSelectedStudentId(null);
-
-    const sectionId = selectedOption?.value || null;
-
-    setclassIdForManage(sectionId);
-    setSectionIdForStudentList(sectionId);
-
-    if (sectionId) {
-      fetchStudentNameWithClassId(sectionId);
-    }
-  };
-
-  // const handleFileUpload = (e) => {
-  //   const files = Array.from(e.target.files);
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     userfile: files,
-  //   }));
-  // };
 
   const handleFileUpload = (e) => {
     const newFiles = Array.from(e.target.files);
@@ -195,66 +150,6 @@ const EditRemarkandObservation = () => {
 
     setIsObservation(false);
   };
-
-  // const handleSubmitEdit = async (e) => {
-  //   e.preventDefault();
-
-  //   setIsSubmitting(true);
-
-  //   if (!validateForm()) return;
-  //   const formDataToSend = new FormData();
-
-  //   // 1. Add basic text fields
-  //   formDataToSend.append("remark_id", formData.remark_id);
-  //   formDataToSend.append("remark_subject", formData.remark_subject);
-  //   formDataToSend.append("remark_desc", formData.remark_desc);
-  //   formDataToSend.append("remark_type", isObservation ? "Y" : "N");
-
-  //   // 2. Append new files (userfile[])
-  //   formData.userfile.forEach((file) => {
-  //     formDataToSend.append("userfile[]", file);
-  //   });
-
-  //   // 3. Append old files (filenottobedeleted[])
-
-  //   formData.filenottobedeleted.forEach((file, index) => {
-  //     formDataToSend.append(
-  //       `filenottobedeleted[${index}][file_url]`,
-  //       file.file_url
-  //     );
-  //     formDataToSend.append(
-  //       `filenottobedeleted[${index}][image_name]`,
-  //       file.image_name
-  //     );
-  //   });
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/update_remarkforstudent/${id}`,
-  //       formDataToSend,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "multipart/form-data",
-  //         },
-  //       }
-  //     );
-
-  //     if (response.data.success) {
-  //       toast.success("Remark updated successfully!");
-  //       navigate("/remObsStudent");
-  //     } else {
-  //       toast.error(response.data.message || "Something went wrong");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error updating remark:", error);
-  //     toast.error("Error updating remark");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
 
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
