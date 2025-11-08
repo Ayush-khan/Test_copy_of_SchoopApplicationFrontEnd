@@ -177,12 +177,19 @@ const ViewTicket = () => {
     }
   };
 
-  // 🟩 Optional useEffect if you want to load comments automatically on mount
-  useEffect(() => {
-    if (id) {
-      handleViewComments();
-    }
-  }, [id]);
+  // // 🟩 Optional useEffect if you want to load comments automatically on mount
+  // useEffect(() => {
+  //   if (id) {
+  //     handleViewComments();
+  //   }
+  // }, [id]);
+
+  const camelCase = (str) =>
+    str
+      ?.toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -428,7 +435,12 @@ const ViewTicket = () => {
                     </span>
                   </div>
                   <span className="text-gray-800 font-semibold">
-                    {ticket.first_name} {ticket.mid_name} {ticket.last_name}
+                    {/* {ticket.first_name} {ticket.mid_name} {ticket.last_name} */}
+                    {camelCase(
+                      `${ticket?.first_name || ""} ${ticket?.mid_name || ""} ${
+                        ticket?.last_name || ""
+                      }`
+                    )}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
