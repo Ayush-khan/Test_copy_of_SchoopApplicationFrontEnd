@@ -427,7 +427,7 @@ function HolidayList() {
 
   const handleSelectAll = () => {
     if (!holidays || holidays.length === 0) {
-      toast.warning("No events available to select.");
+      toast.warning("No holidays available to select.");
       return;
     }
 
@@ -474,13 +474,13 @@ function HolidayList() {
     }
 
     if (!holidays || holidays.length === 0) {
-      toast.warning("No events available for publish.");
+      toast.warning("No holidays available for publish.");
       return;
     }
 
     // 2️⃣ Check if the user selected any events
     if (!selectedHolidays || selectedHolidays.length === 0) {
-      toast.warning("Please select at least one event to publish.");
+      toast.warning("Please select at least one holidays to publish.");
       return;
     }
 
