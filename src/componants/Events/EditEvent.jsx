@@ -19,6 +19,9 @@ const EditEvent = () => {
   const { id } = useParams(); // get event ID from URL
   console.log("id", id);
 
+  const academicYrTo = localStorage.getItem("academic_yr_to");
+  const academicYrFrom = localStorage.getItem("academic_yr_from");
+
   const [allClasses, setAllClasses] = useState([]);
 
   const [noticeDesc, setNoticeDesc] = useState("");
@@ -154,7 +157,68 @@ const EditEvent = () => {
     setErrors({});
   };
 
+  // const handleUpdate = async () => {
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     const payload = {
+  //       title: subject,
+  //       description: description,
+  //       start_date: startDate,
+  //       end_date: endDate || "0000-00-00",
+  //       start_time: startTime,
+  //       end_time: endTime,
+  //       competition: competition ? "Y" : "N",
+  //       notify: notify ? "Y" : "N",
+  //       classes: selectedClasses,
+  //       login_type: selectedRoles.join(","),
+  //     };
+
+  //     console.log("Sending update payload:", payload);
+
+  //     const response = await axios.put(
+  //       `${API_URL}/api/update_eventbyunqid/${id}`,
+  //       payload,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.data.status) {
+  //       toast.success("Event updated successfully");
+  //       navigate("/event");
+  //     } else {
+  //       toast.error("Update failed");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating event:", error);
+  //     toast.error("An error occurred while updating");
+  //   }
+  // };
+
   const handleUpdate = async () => {
+    let newErrors = {};
+
+    // ✅ Validate Start Date (required)
+    if (!startDate) {
+      newErrors.startDate = "Please select Start Date.";
+    }
+
+    // ✅ Validate End Date only if provided
+    if (endDate && !startDate) {
+      newErrors.endDate = "Please select Start Date first.";
+    } else if (endDate && new Date(endDate) < new Date(startDate)) {
+      newErrors.endDate = "End Date cannot be before Start Date.";
+    }
+
+    // ✅ Stop execution if errors exist
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("authToken");
 
@@ -162,7 +226,7 @@ const EditEvent = () => {
         title: subject,
         description: description,
         start_date: startDate,
-        end_date: endDate,
+        end_date: endDate || "0000-00-00",
         start_time: startTime,
         end_time: endTime,
         competition: competition ? "Y" : "N",
@@ -310,30 +374,119 @@ const EditEvent = () => {
                         {/* Dates and Times */}
 
                         <div className="grid grid-cols-2 gap-4">
-                          <div className="flex items-center">
-                            <label className="w-[144px] font-semibold">
-                              Start Date
-                              <span className="text-sm text-red-500">*</span>
-                            </label>
-                            <input
-                              type="date"
-                              className="w-[50%] border px-2 py-1 rounded max-w-sm"
-                              value={startDate}
-                              onChange={(e) => setStartDate(e.target.value)}
-                            />
+                          <div className="flex flex-col">
+                            <div className="flex items-center">
+                              <label className="w-[144px] font-semibold">
+                                Start Date
+                                <span className="text-sm text-red-500">*</span>
+                              </label>
+                              {/* <input
+                                type="date"
+                                className="w-[50%] border px-2 py-1 rounded max-w-sm"
+                                value={startDate}
+                                // onChange={(e) => setStartDate(e.target.value)}
+                                onChange={(e) => {
+                                  setStartDate(e.target.value);
+                                  setErrors((prev) => ({
+                                    ...prev,
+                                    startDate: "",
+                                    endDate: "",
+                                  }));
+                                }}
+                                min={academicYrFrom}
+                                max={academicYrTo}
+                              /> */}
+
+                              <input
+                                type="date"
+                                className="w-[50%] border px-2 py-1 rounded max-w-sm"
+                                value={startDate}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+
+                                  if (!value) {
+                                    setStartDate("");
+                                    setEndDate(""); // clear end date if start date is cleared
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      startDate: "Please select Start Date.",
+                                      endDate: "",
+                                    }));
+                                  } else {
+                                    setStartDate(value);
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      startDate: "",
+                                      endDate: "",
+                                    }));
+                                  }
+                                }}
+                                min={academicYrFrom}
+                                max={academicYrTo}
+                              />
+                            </div>
+                            <div className="min-h-[22px] lg:ml-[150px] mt-1">
+                              {errors.startDate && (
+                                <p className="text-red-500 text-sm">
+                                  {errors.startDate}
+                                </p>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center ">
-                            <label className="w-[100px] font-semibold">
-                              End Date
-                              {/* <span className="text-sm text-red-500">*</span> */}
-                            </label>
-                            <input
-                              type="date"
-                              className="w-[50%] border px-2 py-1 rounded max-w-sm"
-                              value={endDate}
-                              onChange={(e) => setEndDate(e.target.value)}
-                            />
+
+                          <div className="flex flex-col">
+                            <div className="flex items-center ">
+                              <label className="w-[100px] font-semibold">
+                                End Date
+                                {/* <span className="text-sm text-red-500">*</span> */}
+                              </label>
+                              <input
+                                type="date"
+                                className="w-[50%] border px-2 py-1 rounded max-w-sm"
+                                value={endDate}
+                                // onChange={(e) => setEndDate(e.target.value)}
+                                onChange={(e) => {
+                                  const selectedDate = e.target.value;
+
+                                  if (!startDate) {
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      endDate: "",
+                                    }));
+                                    return; // ❌ Prevent selecting end date
+                                  }
+
+                                  // ✅ Validate that end date is not before start date
+                                  if (
+                                    new Date(selectedDate) < new Date(startDate)
+                                  ) {
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      endDate:
+                                        "End Date cannot be before Start Date.",
+                                    }));
+                                  } else {
+                                    setEndDate(selectedDate);
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      endDate: "",
+                                    }));
+                                  }
+                                }}
+                                min={academicYrFrom}
+                                max={academicYrTo}
+                                disabled={!startDate}
+                              />
+                            </div>
+                            <div className="min-h-[22px] lg:ml-[100px] mt-1">
+                              {errors.endDate && (
+                                <p className="text-red-500 text-sm">
+                                  {errors.endDate}
+                                </p>
+                              )}
+                            </div>
                           </div>
+
                           <div className="flex items-center">
                             <label className="w-[144px] font-semibold">
                               Start Time

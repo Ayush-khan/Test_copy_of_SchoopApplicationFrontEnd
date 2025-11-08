@@ -615,7 +615,7 @@ const CreateEvent = () => {
                                 Start Date{" "}
                                 <span className="text-sm text-red-500">*</span>
                               </label>
-                              <input
+                              {/* <input
                                 type="date"
                                 className="w-full lg:w-[55%] border px-2 py-1 rounded max-w-sm"
                                 value={startDate}
@@ -624,7 +624,36 @@ const CreateEvent = () => {
                                   setErrors((prev) => ({
                                     ...prev,
                                     startDate: "",
+                                    endDate: "",
                                   }));
+                                }}
+                                min={academicYrFrom}
+                                max={academicYrTo}
+                              /> */}
+
+                              <input
+                                type="date"
+                                className="w-[50%] border px-2 py-1 rounded max-w-sm"
+                                value={startDate}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+
+                                  if (!value) {
+                                    setStartDate("");
+                                    setEndDate(""); // clear end date if start date is cleared
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      startDate: "Please select Start Date.",
+                                      endDate: "",
+                                    }));
+                                  } else {
+                                    setStartDate(value);
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      startDate: "",
+                                      endDate: "",
+                                    }));
+                                  }
                                 }}
                                 min={academicYrFrom}
                                 max={academicYrTo}
@@ -645,14 +674,58 @@ const CreateEvent = () => {
                               <label className="lg:w-[100px] font-semibold">
                                 End Date
                               </label>
-                              <input
+                              {/* <input
                                 type="date"
                                 className="w-full lg:w-[55%] border px-2 py-1 rounded max-w-sm"
                                 value={endDate}
                                 onChange={(e) => setEndDate(e.target.value)}
                                 min={academicYrFrom}
                                 max={academicYrTo}
+                              /> */}
+                              <input
+                                type="date"
+                                className="w-full lg:w-[55%] border px-2 py-1 rounded max-w-sm"
+                                value={endDate}
+                                onChange={(e) => {
+                                  const selectedDate = e.target.value;
+
+                                  if (!startDate) {
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      endDate:
+                                        "Please select Start Date first.",
+                                    }));
+                                    return; // ❌ Prevent selecting end date
+                                  }
+
+                                  // ✅ Validate that end date is not before start date
+                                  if (
+                                    new Date(selectedDate) < new Date(startDate)
+                                  ) {
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      endDate:
+                                        "End Date cannot be before Start Date.",
+                                    }));
+                                  } else {
+                                    setEndDate(selectedDate);
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      endDate: "",
+                                    }));
+                                  }
+                                }}
+                                min={academicYrFrom}
+                                max={academicYrTo}
+                                disabled={!startDate} // disable until start date is selected
                               />
+                            </div>
+                            <div className="min-h-[22px] lg:ml-[100px] mt-1">
+                              {errors.endDate && (
+                                <p className="text-red-500 text-sm">
+                                  {errors.endDate}
+                                </p>
+                              )}
                             </div>
                           </div>
 
@@ -712,8 +785,10 @@ const CreateEvent = () => {
                               }}
                               maxlength={255}
                             />
+                          </div>
+                          <div className="min-h-[22px] lg:ml-[30px] mt-2">
                             {errors.description && (
-                              <p className="text-red-500 text-sm mt-1">
+                              <p className="text-red-500 text-sm">
                                 {errors.description}
                               </p>
                             )}
