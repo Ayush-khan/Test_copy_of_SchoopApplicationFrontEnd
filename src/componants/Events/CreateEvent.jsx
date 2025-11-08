@@ -6,11 +6,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import { useNavigate } from "react-router-dom";
-import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { Editor } from "@tinymce/tinymce-react";
 import MarkDropdownEditor from "./MarkDropdownEditor";
-
+import SafeEditor from "..//SafeEditor"; // adjust path
 const CreateEvent = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
@@ -422,50 +420,6 @@ const CreateEvent = () => {
                   ) : (
                     <div className="card-body w-full ml-2">
                       <form className="space-y-6">
-                        {/* Event Title */}
-                        {/* <div className="flex flex-col gap-1">
-                          <div className="flex flex-col lg:flex-row lg:items-center gap-2">
-                            <label className="lg:w-[130px] font-semibold">
-                              Event Title{" "}
-                              <span className="text-sm text-red-500">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              className="w-full lg:max-w-md px-2 py-1 border border-gray-400 rounded"
-                              value={subject}
-                              onChange={(e) => {
-                                setSubject(e.target.value);
-                                setErrors((prev) => ({ ...prev, title: "" }));
-                              }}
-                            />
-                            <div className="flex items-center gap-3">
-                              <label className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={competition}
-                                  onChange={(e) =>
-                                    setCompetition(e.target.checked)
-                                  }
-                                />
-                                <span>Competition</span>
-                              </label>
-                              <label className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={notify}
-                                  onChange={(e) => setNotify(e.target.checked)}
-                                />
-                                <span>Notify</span>
-                              </label>
-                            </div>
-                          </div>
-                          {errors.title && (
-                            <p className="text-red-500 text-sm lg:ml-[147px]">
-                              {errors.title}
-                            </p>
-                          )}
-                        </div> */}
-
                         <div className="flex flex-col gap-1">
                           <div className="flex flex-col lg:flex-row lg:items-center gap-2">
                             <label className="lg:w-[130px] font-semibold">
@@ -615,21 +569,6 @@ const CreateEvent = () => {
                                 Start Date{" "}
                                 <span className="text-sm text-red-500">*</span>
                               </label>
-                              {/* <input
-                                type="date"
-                                className="w-full lg:w-[55%] border px-2 py-1 rounded max-w-sm"
-                                value={startDate}
-                                onChange={(e) => {
-                                  setStartDate(e.target.value);
-                                  setErrors((prev) => ({
-                                    ...prev,
-                                    startDate: "",
-                                    endDate: "",
-                                  }));
-                                }}
-                                min={academicYrFrom}
-                                max={academicYrTo}
-                              /> */}
 
                               <input
                                 type="date"
@@ -674,14 +613,7 @@ const CreateEvent = () => {
                               <label className="lg:w-[100px] font-semibold">
                                 End Date
                               </label>
-                              {/* <input
-                                type="date"
-                                className="w-full lg:w-[55%] border px-2 py-1 rounded max-w-sm"
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                                min={academicYrFrom}
-                                max={academicYrTo}
-                              /> */}
+
                               <input
                                 type="date"
                                 className="w-full lg:w-[55%] border px-2 py-1 rounded max-w-sm"

@@ -1,3 +1,4 @@
+// // second try work correct only for link also
 // import React, { useRef } from "react";
 // import ReactQuill from "react-quill";
 // import "react-quill/dist/quill.snow.css";
@@ -27,27 +28,47 @@
 //   };
 // }
 
-// const MarkDropdownEditor = ({ value, onChange}) => {
+// function linkHandler() {
+//   const url = prompt("Enter the URL:");
+
+//   if (url) {
+//     const range = this.quill.getSelection();
+//     if (range) {
+//       // insert link text if nothing is selected
+//       if (range.length === 0) {
+//         this.quill.insertText(range.index, url, "link", url);
+//       } else {
+//         // apply link format on selected text
+//         this.quill.format("link", url);
+//       }
+//     }
+//   }
+// }
+
+// const MarkDropdownEditor = ({ value, onChange, readOnly = false }) => {
 //   const quillRef = useRef(null);
 
-//   const modules = {
-//     toolbar: {
-//       container: [
-//         [{ font: [] }, { size: [] }],
-//         ["bold", "italic", "underline", "strike"],
-//         [{ color: [] }, { background: [] }],
-//         [{ list: "ordered" }, { list: "bullet" }],
-//         [{ align: [] }],
-//         ["link", "image", "video"],
-//         ["code-block"],
-//         ["clean"],
-//         ["fullscreen"],
-//       ],
-//       handlers: {
-//         image: imageHandler,
-//       },
-//     },
-//   };
+//   const modules = readOnly
+//     ? { toolbar: false } // hide toolbar in read-only mode
+//     : {
+//         toolbar: {
+//           container: [
+//             [{ font: [] }, { size: [] }],
+//             ["bold", "italic", "underline", "strike"],
+//             [{ color: [] }, { background: [] }],
+//             [{ list: "ordered" }, { list: "bullet" }],
+//             [{ align: [] }],
+//             ["link", "image", "video"],
+//             ["code-block"],
+//             ["clean"],
+//             ["fullscreen"],
+//           ],
+//           handlers: {
+//             image: imageHandler,
+//             link: linkHandler,
+//           },
+//         },
+//       };
 
 //   const formats = [
 //     "font",
@@ -74,87 +95,98 @@
 //         theme="snow"
 //         value={value}
 //         onChange={onChange}
+//         readOnly={readOnly}
 //         modules={modules}
 //         formats={formats}
-//         style={{ height: "100px", marginBottom: "50px" }}
+//         style={{
+//           height: readOnly ? "auto" : "100px",
+//           marginBottom: readOnly ? "0" : "50px",
+//           backgroundColor: readOnly ? "#f3f4f6" : "white", // light gray background for view mode
+//         }}
 //       />
 //     </div>
 //   );
 // };
 
 // export default MarkDropdownEditor;
-
-// second try work correct only for link also
-import React, { useRef } from "react";
+import React, { useRef, useMemo } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-
-// Custom handler for image upload
-function imageHandler() {
-  const input = document.createElement("input");
-  input.setAttribute("type", "file");
-  input.setAttribute("accept", "image/*");
-  input.click();
-
-  input.onchange = async () => {
-    const file = input.files[0];
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const res = await fetch(
-      "https://api.imgbb.com/1/upload?key=8984397975a3738e6ebd1ecbece42617",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-    const data = await res.json();
-    const range = this.quill.getSelection();
-    this.quill.insertEmbed(range.index, "image", data.data.url);
-  };
-}
-
-function linkHandler() {
-  const url = prompt("Enter the URL:");
-
-  if (url) {
-    const range = this.quill.getSelection();
-    if (range) {
-      // insert link text if nothing is selected
-      if (range.length === 0) {
-        this.quill.insertText(range.index, url, "link", url);
-      } else {
-        // apply link format on selected text
-        this.quill.format("link", url);
-      }
-    }
-  }
-}
 
 const MarkDropdownEditor = ({ value, onChange, readOnly = false }) => {
   const quillRef = useRef(null);
 
-  const modules = readOnly
-    ? { toolbar: false } // hide toolbar in read-only mode
-    : {
-        toolbar: {
-          container: [
-            [{ font: [] }, { size: [] }],
-            ["bold", "italic", "underline", "strike"],
-            [{ color: [] }, { background: [] }],
-            [{ list: "ordered" }, { list: "bullet" }],
-            [{ align: [] }],
-            ["link", "image", "video"],
-            ["code-block"],
-            ["clean"],
-            ["fullscreen"],
-          ],
-          handlers: {
-            image: imageHandler,
-            link: linkHandler,
-          },
+  // 🖼️ Custom image upload handler (ReactQuill v2 compatible)
+  const imageHandler = async () => {
+    const input = document.createElement("input");
+    input.setAttribute("type", "file");
+    input.setAttribute("accept", "image/*");
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        const res = await fetch(
+          "https://api.imgbb.com/1/upload?key=8984397975a3738e6ebd1ecbece42617",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+        const data = await res.json();
+
+        const quill = quillRef.current?.getEditor();
+        const range = quill.getSelection(true);
+        quill.insertEmbed(range.index, "image", data.data.url);
+      } catch (err) {
+        console.error("Image upload failed:", err);
+      }
+    };
+  };
+
+  // 🔗 Custom link handler
+  const linkHandler = () => {
+    const quill = quillRef.current?.getEditor();
+    const range = quill.getSelection(true);
+    const url = prompt("Enter the URL:");
+
+    if (url) {
+      if (range && range.length === 0) {
+        quill.insertText(range.index, url, "link", url);
+      } else {
+        quill.format("link", url);
+      }
+    }
+  };
+
+  // 🧩 Quill toolbar config
+  const modules = useMemo(() => {
+    if (readOnly) return { toolbar: false };
+
+    return {
+      toolbar: {
+        container: [
+          [{ font: [] }, { size: [] }],
+          ["bold", "italic", "underline", "strike"],
+          [{ color: [] }, { background: [] }],
+          [{ list: "ordered" }, { list: "bullet" }],
+          [{ align: [] }],
+          ["link", "image", "video"],
+          ["code-block"],
+          ["clean"],
+        ],
+        handlers: {
+          image: imageHandler,
+          link: linkHandler,
         },
-      };
+      },
+    };
+  }, [readOnly]);
 
   const formats = [
     "font",
@@ -185,9 +217,9 @@ const MarkDropdownEditor = ({ value, onChange, readOnly = false }) => {
         modules={modules}
         formats={formats}
         style={{
-          height: readOnly ? "auto" : "100px",
+          height: readOnly ? "auto" : "120px",
           marginBottom: readOnly ? "0" : "50px",
-          backgroundColor: readOnly ? "#f3f4f6" : "white", // light gray background for view mode
+          backgroundColor: readOnly ? "#f3f4f6" : "white",
         }}
       />
     </div>
