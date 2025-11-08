@@ -8,7 +8,7 @@ import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import { useNavigate } from "react-router-dom";
 import "react-quill/dist/quill.snow.css";
 import MarkDropdownEditor from "./MarkDropdownEditor";
-import SafeEditor from "..//SafeEditor"; // adjust path
+// import SafeEditor from "./SafeEditor"; // adjust path
 const CreateEvent = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
