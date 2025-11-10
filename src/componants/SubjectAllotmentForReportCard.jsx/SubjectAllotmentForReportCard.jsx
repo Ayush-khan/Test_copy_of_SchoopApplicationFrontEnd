@@ -87,7 +87,12 @@ function SubjectAllotmentForReportCard() {
   }));
 
   //   Sorting logic state
-
+  useEffect(() => {
+    // Whenever activeTab changes to "Manage", call handleSearch()
+    if (activeTab === "Manage") {
+      handleSearch();
+    }
+  }, [activeTab]);
   const pageSize = 10;
 
   const fetchClassNames = async () => {

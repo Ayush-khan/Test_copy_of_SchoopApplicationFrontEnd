@@ -85,7 +85,8 @@ function TeacherRemarkandObservation() {
   useEffect(() => {
     fetchClassNamesForAllotSubject();
   }, []);
- useEffect(() => {
+
+  useEffect(() => {
     // Whenever activeTab changes to "Manage", call handleSearch()
     if (activeTab === "Manage") {
       handleSearch();

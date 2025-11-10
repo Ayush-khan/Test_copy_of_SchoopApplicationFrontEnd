@@ -85,51 +85,51 @@
 // export default MarkDropdownEditor;
 
 // second try work correct only version 18
-// import React, { useRef } from "react";
-// import ReactQuill from "react-quill";
-// import "react-quill/dist/quill.snow.css";
+import React, { useRef } from "react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 // Custom handler for image upload
-// function imageHandler() {
-//   const input = document.createElement("input");
-//   input.setAttribute("type", "file");
-//   input.setAttribute("accept", "image/*");
-//   input.click();
+function imageHandler() {
+  const input = document.createElement("input");
+  input.setAttribute("type", "file");
+  input.setAttribute("accept", "image/*");
+  input.click();
 
-//   input.onchange = async () => {
-//     const file = input.files[0];
-//     const formData = new FormData();
-//     formData.append("image", file);
+  input.onchange = async () => {
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append("image", file);
 
-//     const res = await fetch(
-//       "https://api.imgbb.com/1/upload?key=8984397975a3738e6ebd1ecbece42617",
-//       {
-//         method: "POST",
-//         body: formData,
-//       }
-//     );
-//     const data = await res.json();
-//     const range = this.quill.getSelection();
-//     this.quill.insertEmbed(range.index, "image", data.data.url);
-//   };
-// }
+    const res = await fetch(
+      "https://api.imgbb.com/1/upload?key=8984397975a3738e6ebd1ecbece42617",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+    const data = await res.json();
+    const range = this.quill.getSelection();
+    this.quill.insertEmbed(range.index, "image", data.data.url);
+  };
+}
 
-// function linkHandler() {
-//   const url = prompt("Enter the URL:");
+function linkHandler() {
+  const url = prompt("Enter the URL:");
 
-//   if (url) {
-//     const range = this.quill.getSelection();
-//     if (range) {
-//       // insert link text if nothing is selected
-//       if (range.length === 0) {
-//         this.quill.insertText(range.index, url, "link", url);
-//       } else {
-//         // apply link format on selected text
-//         this.quill.format("link", url);
-//       }
-//     }
-//   }
-// }
+  if (url) {
+    const range = this.quill.getSelection();
+    if (range) {
+      // insert link text if nothing is selected
+      if (range.length === 0) {
+        this.quill.insertText(range.index, url, "link", url);
+      } else {
+        // apply link format on selected text
+        this.quill.format("link", url);
+      }
+    }
+  }
+}
 
 const MarkDropdownEditor = ({ value, onChange, readOnly = false }) => {
   const quillRef = useRef(null);
