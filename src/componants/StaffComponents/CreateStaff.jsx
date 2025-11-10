@@ -757,7 +757,6 @@ function CreateStaff() {
                   value={formData.tc_id}
                   onChange={handleChange}
                   className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-                  required
                 >
                   <option className="bg-gray-300" value="">
                     Select
