@@ -71,10 +71,14 @@ function NoticeAndSms() {
   const pageSize = 10;
 
   useEffect(() => {
-    handleSearch();
     fetchClassNamesForAllotSubject();
   }, []);
-
+  useEffect(() => {
+    // Whenever activeTab changes to "Manage", call handleSearch()
+    if (activeTab === "Manage") {
+      handleSearch();
+    }
+  }, [activeTab]);
   const fetchClassNamesForAllotSubject = async () => {
     try {
       const token = localStorage.getItem("authToken");
