@@ -52,6 +52,17 @@ function SubjectAllotmentForReportCard() {
   // for react-search of manage tab teacher Edit and select class
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
+  useEffect(() => {
+    fetchClassNames();
+    fetchDepartments();
+    // fetchClassNamesForAllotSubject();
+  }, []);
+  useEffect(() => {
+    // Whenever activeTab changes to "Manage", call handleSearch()
+    if (activeTab == "Manage") {
+      handleSearch();
+    }
+  }, [activeTab]);
   const handleTeacherSelect = (selectedOption) => {
     setSelectedTeacher(selectedOption);
     console.log("selectedTeacher", selectedTeacher);
@@ -143,11 +154,6 @@ function SubjectAllotmentForReportCard() {
     }
   };
 
-  useEffect(() => {
-    fetchClassNames();
-    fetchDepartments();
-    // fetchClassNamesForAllotSubject();
-  }, []);
   // Listing tabs data for diffrente tabs
   const handleSearch = async () => {
     if (isSubmittingForSearch) return; // Prevent re-submitting

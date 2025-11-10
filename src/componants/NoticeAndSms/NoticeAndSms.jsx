@@ -71,10 +71,14 @@ function NoticeAndSms() {
   const pageSize = 10;
 
   useEffect(() => {
-    handleSearch();
     fetchClassNamesForAllotSubject();
   }, []);
-
+  useEffect(() => {
+    // Whenever activeTab changes to "Manage", call handleSearch()
+    if (activeTab === "Manage") {
+      handleSearch();
+    }
+  }, [activeTab]);
   const fetchClassNamesForAllotSubject = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -95,37 +99,6 @@ function NoticeAndSms() {
       setError("Error fetching class names");
     }
   };
-
-  // Listing tabs data for diffrente tabs
-  // const handleSearch = async () => {
-  //   try {
-  //     // Get token from local storage
-  //     const token = localStorage.getItem("authToken");
-
-  //     // Prepare query parameters
-  //     const params = {};
-  //     if (status) params.status = status; // Include status if selected
-  //     if (selectedDate) params.notice_date = selectedDate; // Include date if selected
-
-  //     // Make API request
-  //     const response = await axios.get(`${API_URL}/api/get_smsnoticelist`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //       params,
-  //     });
-
-  //     // Handle response data
-  //     if (response.data?.data?.length > 0) {
-  //       setNotices(response.data.data); // Update notice list with response data
-  //       setPageCount(Math.ceil(response.data.data.length / pageSize));
-  //     } else {
-  //       setNotices([]); // Clear notices if no data
-  //       toast.error("No notices found for the selected criteria.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching SMS notices:", error);
-  //     toast.error("Error fetching SMS notices. Please try again.");
-  //   }
-  // };
   const handleSearch = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);

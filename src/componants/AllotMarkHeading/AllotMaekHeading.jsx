@@ -49,8 +49,13 @@ function AllotMarksHeading() {
   const pageSize = 10;
   useEffect(() => {
     fetchClassNames();
-    fetchDepartments();
   }, []);
+  useEffect(() => {
+    // Whenever activeTab changes to "Manage", call handleSearch()
+    if (activeTab === "Manage") {
+      handleSearch();
+    }
+  }, [activeTab]);
   const handleClassSelect = (selectedOption) => {
     setNameError("");
     setSelectedClass(selectedOption);
