@@ -274,7 +274,7 @@ function ApproveStatoinery() {
                           </td>
                           <td className="text-center px-2 lg:px-3 py-1 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {leave.approved_date === "0000-00-00"
+                              {leave.date === "0000-00-00"
                                 ? " "
                                 : formatDate(leave.date)}
                             </p>
