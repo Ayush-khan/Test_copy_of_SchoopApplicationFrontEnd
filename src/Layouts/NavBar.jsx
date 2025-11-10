@@ -1,4 +1,4 @@
-// working with control + M sortcut with select menu and all thins working well just hide give a time for it.
+// working well with backend 5 modules comes from top with control + M sortcut with select menu and all thins working well just hide give a time for it.
 // import { useEffect, useRef, useState } from "react";
 // import { Navbar, Nav, NavDropdown } from "react-bootstrap";
 // import { Link, useNavigate } from "react-router-dom";
@@ -20,7 +20,6 @@
 // function NavBar() {
 //   const API_URL = import.meta.env.VITE_API_URL; //thsis is test url
 //   const navigate = useNavigate();
-//   const [isSidebar, setIsSidebar] = useState();
 //   const [academicYear, setAcademicYear] = useState([]);
 //   const [menuDropdownOpen, setMenuDropdownOpen] = useState({});
 //   const [isFocused, setIsFocused] = useState(false);
@@ -38,6 +37,8 @@
 //   const childItemRef = useRef(null);
 //   const [menuOptions, setMenuOptions] = useState([]);
 //   const [selectedMenu, setSelectedMenu] = useState(null);
+//   const [isSidebar, setIsSidebar] = useState(false);
+//   const [sidebarRefreshTrigger, setSidebarRefreshTrigger] = useState(0);
 
 //   function getCurrentDate() {
 //     const months = [
@@ -149,12 +150,37 @@
 //     };
 
 //     fetchData();
-//   }, [API_URL, navigate]);
+//   }, []);
 
 //   const handleMenuSelect = (selectedOption) => {
 //     setSelectedMenu(selectedOption);
 //     if (selectedOption) {
 //       navigate(`/${selectedOption.value}`);
+//     }
+//   };
+//   const updateFrequentTabs = async (menu) => {
+//     try {
+//       const token = localStorage.getItem("authToken");
+//       if (!token) return;
+
+//       await axios.put(
+//         `${API_URL}/api/update_frequenttabs`,
+//         {
+//           menu_id: menu.menu_id,
+//           name: menu.name,
+//           url: menu.url,
+//         },
+//         {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }
+//       );
+
+//       console.log("Frequent tab updated:", menu.name);
+
+//       // Trigger sidebar refresh by updating a state
+//       setSidebarRefreshTrigger((prev) => prev + 1);
+//     } catch (error) {
+//       console.error("Error updating frequent tab:", error);
 //     }
 //   };
 
@@ -555,6 +581,7 @@
 //                                   onClick={() => {
 //                                     setOpenDropdowns([]);
 //                                     setClickedDropdowns([]);
+//                                     updateFrequentTabs(grandChildItem); // Call API
 //                                     navigate(grandChildItem.url);
 //                                   }}
 //                                 >
@@ -570,6 +597,8 @@
 //                               onClick={() => {
 //                                 setOpenDropdowns([]);
 //                                 setClickedDropdowns([]);
+//                                 updateFrequentTabs(childItem);
+
 //                                 navigate(childItem.url);
 //                               }}
 //                               className="hover:bg-gray-100 hover:text-blue-600 text-sm flex flex-row gap-x-2"
@@ -589,6 +618,7 @@
 //                       onClick={() => {
 //                         setOpenDropdowns([]);
 //                         setClickedDropdowns([]);
+//                         updateFrequentTabs(subItem); // Call API
 //                         navigate(subItem.url);
 //                       }}
 
@@ -603,15 +633,30 @@
 //           );
 //         } else {
 //           return (
-//             <Nav.Link
-//               key={dropdownKey}
-//               onClick={() => {
-//                 closeAllDropdowns();
-//                 item.url && navigate(item.url);
-//               }}
-//             >
-//               <span className="nav-title-top">{item.name}</span>
-//             </Nav.Link>
+//             <>
+//               {/* // <Nav.Link
+//             //   key={dropdownKey}
+//             //   onClick={() => {
+//             //     closeAllDropdowns();
+//             //     item.url && navigate(item.url);
+//             //   }}
+//             // >
+//             //   <span className="nav-title-top">{item.name}</span>
+//             // </Nav.Link> */}
+//               <Nav.Link
+//                 key={dropdownKey}
+//                 onClick={() => {
+//                   closeAllDropdowns();
+
+//                   // Call API
+//                   updateFrequentTabs(item);
+
+//                   if (item.url) navigate(item.url);
+//                 }}
+//               >
+//                 <span className="nav-title-top">{item.name}</span>
+//               </Nav.Link>
+//             </>
 //           );
 //         }
 //       });
@@ -777,7 +822,6 @@
 //             <div className="flex items-center w-full md:w-[40%] ">
 //               <div className="form-group w-full md:w-[85%] flex justify-start gap-x-1 md:gap-x-4">
 //                 <div className="w-full md:w-[90%] my-2">
-
 //                   {/* working well with focus on contl+M but we have commented it */}
 //                   <div className="relative w-full md:w-[90%] my-2">
 //                     <Select
@@ -884,7 +928,12 @@
 //           </div>
 //         </div>
 //       </div>
-//       <Sidebar isSidebar={isSidebar} setIsSidebar={setIsSidebar} />
+//       <Sidebar
+//         isSidebar={isSidebar}
+//         setIsSidebar={setIsSidebar}
+//         refreshTrigger={sidebarRefreshTrigger} // ✅ pass refresh trigger
+//       />
+//       {/* <Sidebar isSidebar={isSidebar} setIsSidebar={setIsSidebar} /> */}
 //     </>
 //   );
 // }
@@ -1733,8 +1782,8 @@ function NavBar() {
                       placeholder="Search Menu"
                       isSearchable
                       isClearable
-                      onFocus={() => setIsFocused(true)} 
-                      onBlur={() => setIsFocused(false)} 
+                      onFocus={() => setIsFocused(true)}
+                      onBlur={() => setIsFocused(false)}
                       className="text-sm"
                       styles={{
                         control: (base, state) => ({

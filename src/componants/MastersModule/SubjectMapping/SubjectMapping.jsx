@@ -159,8 +159,8 @@ function SubjectMapping() {
 
   const handleEdit = (classItem) => {
     setCurrentClass(classItem);
+    console.log("inside handleEdit", classItem);
 
-    // Match from correct options (by value, not label)
     const matchedSubject = subjects.find(
       (opt) =>
         opt.label.trim().toLowerCase() ===
@@ -183,6 +183,7 @@ function SubjectMapping() {
   };
 
   const handleCloseModal = () => {
+    resetForm({});
     setShowAddModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
@@ -343,6 +344,7 @@ function SubjectMapping() {
 
   const handleDelete = (id) => {
     const classToDelete = classes.find((cls) => cls.sub_mapping === id);
+    console.log("subject mapping id", classToDelete);
     console.log("the subject mapping delete", classToDelete);
     setCurrentClass(classToDelete);
     setShowDeleteModal(true);
@@ -499,7 +501,6 @@ function SubjectMapping() {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* {console.log("classLIst module api", displayedClasses)} */}
                     {loading ? (
                       <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
                         <div className=" text-center text-xl text-blue-700">
