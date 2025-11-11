@@ -471,6 +471,13 @@ const UnmapDetails = () => {
     navigate("/siblingUnmapping");
   };
 
+  const camelCase = (str) =>
+    str
+      ?.toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+
   return (
     <div>
       <ToastContainer />
@@ -502,7 +509,7 @@ const UnmapDetails = () => {
                 <div className="border rounded-md p-4 m-6 bg-white shadow-md w-full max-w-[78%]">
                   <p className="text-lg font-semibold mb-4">
                     Student Name:{" "}
-                    <span className="font-bold">{studentName}</span>
+                    <span className="font-bold">{camelCase(studentName)}</span>
                   </p>
 
                   {/* Radio buttons + Go button in same row */}

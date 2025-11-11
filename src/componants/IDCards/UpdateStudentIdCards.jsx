@@ -38,6 +38,7 @@ const UpdateStudentIdCards = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const inputRefs = useRef({});
   const topRef = useRef(null);
+  const [houses, setHouses] = useState([]);
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
@@ -86,6 +87,26 @@ const UpdateStudentIdCards = () => {
       handleSearch(); // or your data-fetching logic
     }
   }, [sectionID]);
+
+  useEffect(() => {
+    const fetchHouses = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(`${API_URL}/api/get_houses`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log("Fetched Houses:", response.data.data);
+        setHouses(response.data.data || response.data.data);
+      } catch (err) {
+        console.error("Error fetching houses:", err);
+      }
+    };
+
+    fetchHouses();
+  }, []);
 
   const handleSearch = async () => {
     if (isSubmitting) return; // Prevent multiple submissions
@@ -926,7 +947,7 @@ const UpdateStudentIdCards = () => {
                                   </div>
                                 </td>
 
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <div className="flex flex-col items-center">
                                     <select
                                       value={pendingstudent.house || ""}
@@ -947,6 +968,43 @@ const UpdateStudentIdCards = () => {
                                       <option value="R">Ruby</option>
                                       <option value="E">Emerald</option>
                                       <option value="S">Sapphire</option>
+                                    </select>
+                                  </div>
+                                </td> */}
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  <div className="flex flex-col items-center">
+                                    <select
+                                      value={pendingstudent.house || ""}
+                                      onChange={(e) =>
+                                        handleInputChange(e, "house", index)
+                                      }
+                                      ref={(el) =>
+                                        (inputRefs.current[
+                                          `house_${pendingstudent.parent_id}`
+                                        ] = el)
+                                      }
+                                      data-parent-id={pendingstudent?.parent_id}
+                                      className="w-full border border-gray-400 rounded-md py-2 px-3 bg-white text-base"
+                                      required
+                                    >
+                                      <option value="">Select</option>
+
+                                      {loading ? (
+                                        <option disabled>Loading...</option>
+                                      ) : houses.length > 0 ? (
+                                        houses.map((house, idx) => (
+                                          <option
+                                            key={idx}
+                                            value={house.house_id}
+                                          >
+                                            {house.house_name}
+                                          </option>
+                                        ))
+                                      ) : (
+                                        <option disabled>
+                                          No houses found
+                                        </option>
+                                      )}
                                     </select>
                                   </div>
                                 </td>

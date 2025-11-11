@@ -16,6 +16,7 @@ const IDCardDetails = () => {
   const [loadingForSubmit, setLoadingForSubmit] = useState(false);
   const [students, setStudents] = useState([]);
   const [formErrors, setFormErrors] = useState([]);
+  const [houses, setHouses] = useState([]);
   const { staff } = location.state || {};
   const { id: student_id } = useParams(); // Aliased to student_id
 
@@ -88,9 +89,25 @@ const IDCardDetails = () => {
     fetchStudentData();
   }, [student_id, staff?.student_id]);
 
-  // useEffect(() => {
-  //   fetchStudentData();
-  // }, []);
+  useEffect(() => {
+    const fetchHouses = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(`${API_URL}/api/get_houses`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log("Fetched Houses:", response.data.data);
+        setHouses(response.data.data || response.data.data);
+      } catch (err) {
+        console.error("Error fetching houses:", err);
+      }
+    };
+
+    fetchHouses();
+  }, []);
 
   const handleStudentChange = (e, index) => {
     const { name, value } = e.target;
@@ -185,13 +202,6 @@ const IDCardDetails = () => {
       setLoadingForSubmit(false);
     }
   };
-
-  // if (loading || !students.length)
-  //   return (
-  //     <div className="flex w-1/2 mx-auto bg-white justify-center items-center h-64">
-  //       <Loader />
-  //     </div>
-  //   );
 
   if (loading) {
     return (
@@ -325,7 +335,7 @@ const IDCardDetails = () => {
                     )}
                   </div>
 
-                  <div className="flex flex-col">
+                  {/* <div className="flex flex-col">
                     <label className="font-bold text-sm">House</label>
                     <select
                       name="house"
@@ -338,6 +348,29 @@ const IDCardDetails = () => {
                       <option value="R">Ruby</option>
                       <option value="S">Sapphire</option>
                       <option value="D">Diamond</option>
+                    </select>
+                  </div> */}
+                  <div className="flex flex-col">
+                    <label className="font-bold text-sm">House</label>
+                    <select
+                      name="house"
+                      value={student.house}
+                      onChange={(e) => handleStudentChange(e, index)}
+                      className="w-full border rounded-md p-2 shadow-inner"
+                    >
+                      <option value="">Select</option>
+
+                      {loading ? (
+                        <option disabled>Loading...</option>
+                      ) : houses.length > 0 ? (
+                        houses.map((house, idx) => (
+                          <option key={idx} value={house.house_id}>
+                            {house.house_name}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>No houses found</option>
+                      )}
                     </select>
                   </div>
 
