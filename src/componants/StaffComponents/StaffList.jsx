@@ -398,7 +398,7 @@ function StaffList() {
                                     `${staffItem?.teacher_image_name}`
                                   : "https://via.placeholder.com/50"
                               }
-                              alt={staffItem?.name}
+                              // alt={staffItem?.name}
                               className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
                             />
                           </td>

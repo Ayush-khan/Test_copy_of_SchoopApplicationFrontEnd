@@ -527,7 +527,7 @@ function DeleteStudent() {
                                           ? `${subject?.image_name}`
                                           : "https://via.placeholder.com/50"
                                       }
-                                      alt={subject?.name}
+                                      // alt={subject?.name}
                                       className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
                                     />
                                   </td>
