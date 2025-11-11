@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -81,26 +81,17 @@ function RemarkObservationStudent() {
 
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
-
-  useEffect(() => {
-    handleSearch();
-  }, []);
-
-  const handleSearch = async () => {
-    if (isSubmitting) return;
+  const handleSearch = useCallback(async () => {
     setIsSubmitting(true);
     setSearchTerm("");
     setLoading(true);
 
     try {
       const token = localStorage.getItem("authToken");
-      const params = {};
-
       const response = await axios.get(
         `${API_URL}/api/get_remarklistforstudents`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params,
         }
       );
 
@@ -111,8 +102,6 @@ function RemarkObservationStudent() {
           ...notice,
           showSendButton: notice.publish === "Y",
         }));
-
-        console.log("remark list", updatedNotices);
 
         setNotices(updatedNotices);
         setPageCount(Math.ceil(updatedNotices.length / pageSize));
@@ -127,14 +116,25 @@ function RemarkObservationStudent() {
       setIsSubmitting(false);
       setLoading(false);
     }
-  };
+  }, [API_URL, pageSize]); // ❌ do NOT include isSubmitting
 
-  const handleTabChange = (tab) => {
-    if (tab === "Manage") {
-      handleSearch();
-    }
-    setActiveTab(tab);
-  };
+useEffect(() => {
+  if (activeTab === "Manage") {
+    handleSearch();
+  }
+}, [activeTab, handleSearch]);
+
+
+  // const handleTabChange = (tab) => {
+  //   if (tab === "Manage") {
+  //     handleSearch();
+  //   }
+  //   setActiveTab(tab);
+  // };
+ const handleTabChange = (tab) => {
+   setActiveTab(tab); // only change the tab
+ };
+
 
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);

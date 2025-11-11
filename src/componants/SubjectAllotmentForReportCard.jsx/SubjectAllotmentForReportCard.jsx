@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 // import { IoSettingsSharp } from "react-icons/io5";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -58,11 +58,18 @@ function SubjectAllotmentForReportCard() {
     // fetchClassNamesForAllotSubject();
   }, []);
   useEffect(() => {
-    // Whenever activeTab changes to "Manage", call handleSearch()
     if (activeTab == "Manage") {
       handleSearch();
     }
   }, [activeTab]);
+
+  // AND later
+  useEffect(() => {
+    if (activeTab === "Manage") {
+      handleSearch();
+    }
+  }, [activeTab]);
+
   const handleTeacherSelect = (selectedOption) => {
     setSelectedTeacher(selectedOption);
     console.log("selectedTeacher", selectedTeacher);
@@ -86,13 +93,6 @@ function SubjectAllotmentForReportCard() {
     label: `${cls?.name}  `,
   }));
 
-  //   Sorting logic state
-  useEffect(() => {
-    // Whenever activeTab changes to "Manage", call handleSearch()
-    if (activeTab === "Manage") {
-      handleSearch();
-    }
-  }, [activeTab]);
   const pageSize = 10;
 
   const fetchClassNames = async () => {
@@ -159,49 +159,85 @@ function SubjectAllotmentForReportCard() {
     }
   };
 
-  // Listing tabs data for diffrente tabs
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     if (isSubmittingForSearch) return; // Prevent re-submitting
     setIsSubmittingForSearch(true);
+
     if (!classIdForManage) {
       setIsSubmittingForSearch(false);
       setNameError("Please select the class.");
-
       return;
     }
-    setSearchTerm("");
+
+    setSearchTerm(""); // Reset search term if needed
+
     try {
-      console.log(
-        "for this sectiong id in seaching inside subjectallotment",
-        classIdForManage
-      );
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
         `${API_URL}/api/get_subject_Alloted_for_report_card/${classIdForManage}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          // params: { section_id: classSection },
-          //   params: { class_id: classIdForManage },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log(
-        "the response of the subjectallotment is *******",
-        response.data?.subjectAllotments
-      );
-      if (response?.data?.subjectAllotments.length > 0) {
-        setSubjects(response.data?.subjectAllotments);
-        setPageCount(Math.ceil(response?.data?.subjectAllotments.length / 10)); // Example pagination logic
+
+      if (response?.data?.subjectAllotments?.length > 0) {
+        setSubjects(response.data.subjectAllotments);
+        setPageCount(
+          Math.ceil(response.data.subjectAllotments.length / pageSize)
+        );
       } else {
         setSubjects([]);
         toast.error("No subjects found for the selected class.");
       }
     } catch (error) {
       console.error("Error fetching subjects:", error);
-      setError("Error fetching subjects");
+      toast.error("Error fetching subjects. Please try again.");
     } finally {
-      setIsSubmittingForSearch(false); // Re-enable the button after the operation
+      setIsSubmittingForSearch(false);
     }
-  };
+  }, [API_URL, classIdForManage, pageSize]);
+
+  // Listing tabs data for diffrente tabs
+  // const handleSearch = async () => {
+  //   if (isSubmittingForSearch) return; // Prevent re-submitting
+  //   setIsSubmittingForSearch(true);
+  //   if (!classIdForManage) {
+  //     setIsSubmittingForSearch(false);
+  //     setNameError("Please select the class.");
+
+  //     return;
+  //   }
+  //   setSearchTerm("");
+  //   try {
+  //     console.log(
+  //       "for this sectiong id in seaching inside subjectallotment",
+  //       classIdForManage
+  //     );
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_subject_Alloted_for_report_card/${classIdForManage}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         // params: { section_id: classSection },
+  //         //   params: { class_id: classIdForManage },
+  //       }
+  //     );
+  //     console.log(
+  //       "the response of the subjectallotment is *******",
+  //       response.data?.subjectAllotments
+  //     );
+  //     if (response?.data?.subjectAllotments.length > 0) {
+  //       setSubjects(response.data?.subjectAllotments);
+  //       setPageCount(Math.ceil(response?.data?.subjectAllotments.length / 10)); // Example pagination logic
+  //     } else {
+  //       setSubjects([]);
+  //       toast.error("No subjects found for the selected class.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching subjects:", error);
+  //     setError("Error fetching subjects");
+  //   } finally {
+  //     setIsSubmittingForSearch(false); // Re-enable the button after the operation
+  //   }
+  // };
 
   // Handle division checkbox change
 
@@ -236,28 +272,6 @@ function SubjectAllotmentForReportCard() {
       console.error("Section not found for deletion");
     }
   };
-
-  //   const handleDelete = (sectionId) => {
-  //     // const sectionId = section.sub_reportcard_id;
-  //     console.log("currest section", sectionId);
-  //     console.log("inside delete of subjectallotmenbt____", sectionId);
-  //     // console.log("inside delete of subjectallotmenbt", classes);
-  //     const classToDelete = subjects.find(
-  //       (cls) => cls.sub_reportcard_id === sectionId
-  //     );
-  //     // setCurrentClass(classToDelete);
-  //     setCurrentSection({ classToDelete });
-  //     console.log("the currecnet section", currentSection);
-  //     setCurrestSubjectNameForDelete(
-  //       currentSection?.classToDelete?.get_subjects_for_report_card?.name
-  //     );
-  //     console.log(
-  //       "cureendtsungjeg",
-  //       currentSection?.classToDelete?.get_subjects_for_report_card?.name
-  //     );
-  //     console.log("currestSubjectNameForDelete", currestSubjectNameForDelete);
-  //     setShowDeleteModal(true);
-  //   };
 
   const handleSubmitEdit = async () => {
     if (isSubmitting) return; // Prevent re-submitting
@@ -358,55 +372,6 @@ function SubjectAllotmentForReportCard() {
     }
   };
 
-  //   const handleSubmitDelete = async () => {
-  //     // Handle delete submission logic
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-  //       console.log(
-  //         "the currecnt section inside the delte___",
-  //         currentSection?.classToDelete?.subject_id
-  //       );
-  //       console.log("the classes inside the delete", classes);
-  //       console.log(
-  //         "the current section insde the handlesbmitdelete",
-  //         currentSection.classToDelete
-  //       );
-  //       if (
-  //         !token ||
-  //         !currentSection ||
-  //         !currentSection?.classToDelete?.sub_reportcard_id
-  //       ) {
-  //         throw new Error("Subject ID is missing");
-  //       }
-
-  //       await axios.delete(
-  //         `${API_URL}/api/get_sub_report_allotted/${currentSection?.classToDelete?.sub_reportcard_id}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //           withCredentials: true,
-  //         }
-  //       );
-
-  //       // fetchClassNames();
-  //       handleSearch();
-
-  //       setShowDeleteModal(false);
-  //       // setSubjects([]);
-  //       toast.success("subject deleted successfully!");
-  //     } catch (error) {
-  //       if (error.response && error.response.data) {
-  //         toast.error(`Error deleting subject: ${error.response.data.message}`);
-  //       } else {
-  //         toast.error(`Error deleting subject: ${error.message}`);
-  //       }
-  //       console.error("Error deleting subject:", error);
-  //       // setError(error.message);
-  //     }
-  //     setShowDeleteModal(false);
-  //   };
-
   const handleCloseModal = () => {
     setShowEditModal(false);
     setShowDeleteModal(false);
@@ -453,12 +418,7 @@ function SubjectAllotmentForReportCard() {
   );
 
   const handleTabChange = (tab) => {
-    setActiveTab(tab); // Update the active tab state
-
-    // Call handleSearch only if the tab is "Manage"
-    if (tab === "Manage") {
-      handleSearch();
-    }
+    setActiveTab(tab); // useEffect will call handleSearch automatically
   };
 
   return (
@@ -668,7 +628,7 @@ function SubjectAllotmentForReportCard() {
           )}
           {activeTab === "AllotSubject" && (
             <div>
-              <AllotSubjectTab />
+              <AllotSubjectTab onSaveSuccess={() => setActiveTab("Manage")} />
             </div>
           )}
         </div>

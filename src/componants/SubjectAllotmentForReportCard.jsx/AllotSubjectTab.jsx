@@ -354,7 +354,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 import Loader from "../common/LoaderFinal/LoaderStyle";
 
-const AllotSubjectTab = () => {
+const AllotSubjectTab = ({ onSaveSuccess }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
@@ -520,6 +520,7 @@ const AllotSubjectTab = () => {
       // Handle the response from the backend
       if (response.status === 200) {
         toast.success("Subjects allotted successfully");
+
         setLoading(false);
         console.log("API Response:", response.data); // Log the response for debugging
 
@@ -527,6 +528,9 @@ const AllotSubjectTab = () => {
         setSelectedClass(null);
         setSelectedSubjectType("");
         setPreCheckedSubjects([]);
+        if (onSaveSuccess) {
+          onSaveSuccess();
+        }
       } else {
         toast.error("Unexpected response status from the server.");
         console.error("Response status:", response.status);
