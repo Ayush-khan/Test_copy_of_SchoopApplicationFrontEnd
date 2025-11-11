@@ -83,8 +83,10 @@
     width: 80vw;
   }
 } */
-.loginContainer {
+/* .loginContainer {
   background: url("../../public/sch.jpg") center center/cover no-repeat fixed;
+  
+
   height: 100vh;
   width: 100vw;
   overflow-y: auto;
@@ -92,6 +94,44 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+} */
+.loginContainer {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow-y: auto;
+  overflow-x: hidden; /* 🔥 hides horizontal scroll */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Blurred background layer */
+.loginContainer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("../../public/sch.jpg") center center/cover no-repeat fixed;
+  filter: blur(8px);
+  transform: scale(1.1); /* keeps edges blurred smoothly */
+  z-index: -2;
+  overflow: hidden; /* extra safety */
+}
+
+/* Optional dark overlay for better contrast */
+.loginContainer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: -1;
 }
 
 .loginContainerChild {
