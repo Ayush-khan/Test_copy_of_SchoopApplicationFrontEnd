@@ -220,15 +220,68 @@ function BookRequisition() {
     setNameError("");
   };
 
+  // const handleSubmitAdd = async () => {
+  //   if (isSubmitting) return;
+  //   setIsSubmitting(true);
+  //   const validationErrors = validateSectionName(newSectionName);
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setFieldErrors(validationErrors);
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     if (!token) {
+  //       throw new Error("No authentication token or academic year found");
+  //     }
+
+  //     await axios.post(
+  //       `${API_URL}/api/save_bookrequistion`,
+  //       {
+  //         title: newSectionName,
+  //         author: newDepartmentId,
+  //         publisher: description,
+  //         status: "A",
+  //         req_date: new Date().toISOString().split("T")[0],
+  //         member_id: session.custom_claims.reg_id,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         withCredentials: true,
+  //       }
+  //     );
+
+  //     fetchSections();
+  //     handleCloseModal();
+  //     toast.success("New Book Requistion made!");
+  //   } catch (error) {
+  //     console.error("Error adding book:", error);
+  //     if (error.response && error.response.data && error.response.data.errors) {
+  //       Object.values(error.response.data.errors).forEach((err) =>
+  //         toast.error(err)
+  //       );
+  //     } else {
+  //       toast.error("Server error. Please try again later.");
+  //     }
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const handleSubmitAdd = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+
     const validationErrors = validateSectionName(newSectionName);
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
       setIsSubmitting(false);
       return;
     }
+
     try {
       const token = localStorage.getItem("authToken");
 
@@ -236,7 +289,7 @@ function BookRequisition() {
         throw new Error("No authentication token or academic year found");
       }
 
-      await axios.post(
+      const response = await axios.post(
         `${API_URL}/api/save_bookrequistion`,
         {
           title: newSectionName,
@@ -254,17 +307,36 @@ function BookRequisition() {
         }
       );
 
-      fetchSections();
-      handleCloseModal();
-      toast.success("New Book Requistion made!");
-    } catch (error) {
-      console.error("Error adding book:", error);
-      if (error.response && error.response.data && error.response.data.errors) {
-        Object.values(error.response.data.errors).forEach((err) =>
-          toast.error(err)
+      // ✅ Check for success (status 200 and success true)
+      if (response.status === 200 && response.data.success !== false) {
+        fetchSections();
+        handleCloseModal();
+        toast.success(
+          response.data.message || "New Book Requisition made successfully!"
         );
       } else {
-        toast.error("Server error. Please try again later.");
+        toast.error(
+          response.data.message || "Unexpected response from server."
+        );
+      }
+    } catch (error) {
+      console.error("Error adding book:", error);
+
+      // ✅ Handle API error message
+      if (error.response) {
+        const { status, data } = error.response;
+
+        if (data && data.message) {
+          toast.error(data.message); // 👉 e.g. "This user is not a library member!"
+        } else if (data && data.errors) {
+          Object.values(data.errors).forEach((err) => toast.error(err));
+        } else {
+          toast.error(
+            `Error ${status}: ${error.response.statusText || "Server error"}`
+          );
+        }
+      } else {
+        toast.error("Network or server error. Please try again later.");
       }
     } finally {
       setIsSubmitting(false);
