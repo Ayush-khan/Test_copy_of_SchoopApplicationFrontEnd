@@ -629,7 +629,7 @@ function NonTeachingStaff() {
                             colSpan="9"
                             className="text-center text-xl py-5 text-red-700 border border-gray-950"
                           >
-                            No Staff are Late Today.
+                            No staff is on leave today.
                           </td>
                         </tr>
                       )}
@@ -735,7 +735,7 @@ function NonTeachingStaff() {
                             ) : (
                               <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                                 <div className=" text-center text-xl text-red-700">
-                                  No Staff are Leave Today..
+                                  No staff is on leave today.{" "}
                                 </div>
                               </div>
                             )}
