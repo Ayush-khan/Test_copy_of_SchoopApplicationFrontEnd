@@ -660,7 +660,7 @@ function TeacherList() {
                             colSpan="9"
                             className="text-center py-6 text-red-700 text-xl"
                           >
-                            No Teachers are Late Today..
+                            No staff is on leave today.
                           </td>
                         </tr>
                       )}
@@ -778,7 +778,7 @@ function TeacherList() {
                     ))
                   ) : (
                     <div className="text-center py-6 text-red-700 text-xl">
-                      No Teachers are Leave Today..
+                      No staff is on leave today.
                     </div>
                   )}
                 </div>
