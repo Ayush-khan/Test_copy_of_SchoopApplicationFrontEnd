@@ -191,8 +191,8 @@ function DeleteStudent() {
       const token = localStorage.getItem("authToken");
 
       // Priority: classIdForManage > location.state.section_id
-      const sectionIdToUse = classIdForManage || location.state?.section_id;
-
+      // const sectionIdToUse = classIdForManage || location.state?.section_id;
+      const sectionIdToUse = classIdForManage || null;
       const params = sectionIdToUse ? { section_id: sectionIdToUse } : {};
 
       const response = await axios.get(

@@ -139,7 +139,7 @@ const EditLCforDeleteStudent = () => {
             reg_no: fetchedData.reg_no || "",
             academicStudent: DataStudentAc.academicStudent || [],
             issue_date: fetchedData.issue_date || "",
-            stud_id_no: fetchedData.stud_id_no || "",
+            stud_id_no: fetchedData?.studentinformation?.stud_id_no || "",
             stu_aadhaar_no:
               fetchedData.stu_aadhaar_no || fetchedData.stu_aadhaar_no || "",
             first_name: fetchedData.first_name || fetchedData.stud_name || "",
@@ -655,10 +655,9 @@ const EditLCforDeleteStudent = () => {
     }
 
     console.log("Validation passed, proceeding with submission");
-
     const formattedFormData = {
-      grn_no: formData.reg_no || "",
-      issue_date: formatDateString(formData.issue_date),
+      grn_no: formData.grn_no || "",
+      issue_date: formatDateString(formData.date),
       stud_id_no: formData.stud_id_no || "",
       stu_aadhaar_no: formData.stu_aadhaar_no || "",
       first_name: formData.first_name || "",
@@ -668,7 +667,6 @@ const EditLCforDeleteStudent = () => {
       mother_name: formData.mother_name || "",
       nationality: formData.nationality || "",
       mother_tongue: formData.mother_tongue || "",
-      state: formData.state || "",
       religion: formData.religion || "",
       caste: formData.caste || "",
       subcaste: formData.subcaste || "",
@@ -682,12 +680,13 @@ const EditLCforDeleteStudent = () => {
       leaving_date: formatDateString(formData.leaving_date),
       standard_studying: formData.standard_studying || "",
       last_exam: formData.last_exam || "",
-      subjects: formData.selectedSubjects || [],
+      state: formData.state || "",
+      subjects: formData.selectedSubjects || [], // Ensure it's an array of subject names
       promoted_to: formData.promoted_to || "",
       attendance: formData.attendance || "",
       fee_month: formData.fee_month || "",
       part_of: formData.part_of || "",
-      games: formData?.selectedActivities || [],
+      games: selectedActivities || [], // Ensure it's an array of game names
       application_date: formatDateString(formData.application_date),
       conduct: formData.conduct || "",
       reason_leaving: formData.reason_leaving || "",
@@ -695,7 +694,49 @@ const EditLCforDeleteStudent = () => {
       academic_yr: formData.academic_yr || "",
       stud_id: formData.stud_id || "",
       udise_pen_no: formData.udise_pen_no || "",
+      apaar_id: formData.apaar_id || "",
+      working_days: formData.working_days || "",
     };
+    // const formattedFormData = {
+    //   grn_no: formData.reg_no || "",
+    //   issue_date: formatDateString(formData.issue_date),
+    //   stud_id_no: formData.stud_id_no || "",
+    //   stu_aadhaar_no: formData.stu_aadhaar_no || "",
+    //   first_name: formData.first_name || "",
+    //   mid_name: formData.mid_name || "",
+    //   last_name: formData.last_name || "",
+    //   father_name: formData.father_name || "",
+    //   mother_name: formData.mother_name || "",
+    //   nationality: formData.nationality || "",
+    //   mother_tongue: formData.mother_tongue || "",
+    //   state: formData.state || "",
+    //   religion: formData.religion || "",
+    //   caste: formData.caste || "",
+    //   subcaste: formData.subcaste || "",
+    //   birth_place: formData.birth_place || "",
+    //   dob: formatDateString(formData.dob),
+    //   dob_words: formData.dob_words || "",
+    //   dob_proof: formData.dob_proof || "",
+    //   previous_school_attended: formData.prev_school_class || "",
+    //   admission_date: formatDateString(formData.admission_date),
+    //   admission_class: formData.admission_class || "",
+    //   leaving_date: formatDateString(formData.leaving_date),
+    //   standard_studying: formData.standard_studying || "",
+    //   last_exam: formData.last_exam || "",
+    //   subjects: formData.selectedSubjects || [],
+    //   promoted_to: formData.promoted_to || "",
+    //   attendance: formData.attendance || "",
+    //   fee_month: formData.fee_month || "",
+    //   part_of: formData.part_of || "",
+    //   games: formData?.selectedActivities || [],
+    //   application_date: formatDateString(formData.application_date),
+    //   conduct: formData.conduct || "",
+    //   reason_leaving: formData.reason_leaving || "",
+    //   remark: formData.remark || "",
+    //   academic_yr: formData.academic_yr || "",
+    //   stud_id: formData.stud_id || "",
+    //   udise_pen_no: formData.udise_pen_no || "",
+    // };
 
     try {
       setLoading(true);
@@ -1034,7 +1075,6 @@ const EditLCforDeleteStudent = () => {
                   </span>
                 )}
               </div>
-
               {formData?.class_id > 109 && (
                 <div className="mt-2">
                   <label
@@ -1085,30 +1125,34 @@ const EditLCforDeleteStudent = () => {
                     {errors.stu_aadhaar_no}
                   </span>
                 )}
+              </div>{" "}
+              <div>
+                <label
+                  htmlFor="apaar_id"
+                  className="block font-bold text-xs mb-2"
+                >
+                  Appar ID
+                  {sortNameCookie === "HSCS" && (
+                    <span className="text-red-500"> *</span>
+                  )}
+                </label>
+                <input
+                  type="text"
+                  id="apaar_id"
+                  name="apaar_id"
+                  value={formData.apaar_id}
+                  onChange={handleChange}
+                  className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                />
+                {sortNameCookie === "HSCS" && errors.apaar_id && (
+                  <span className="text-red-500 text-xs ml-1 h-1">
+                    {errors.apaar_id}
+                  </span>
+                )}
               </div>
             </div>
           </fieldset>
-          <div>
-            <label htmlFor="apaar_id" className="block font-bold text-xs mb-2">
-              Appar ID
-              {sortNameCookie === "HSCS" && (
-                <span className="text-red-500"> *</span>
-              )}
-            </label>
-            <input
-              type="text"
-              id="apaar_id"
-              name="apaar_id"
-              value={formData.apaar_id}
-              onChange={handleChange}
-              className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-            />
-            {sortNameCookie === "HSCS" && errors.apaar_id && (
-              <span className="text-red-500 text-xs ml-1 h-1">
-                {errors.apaar_id}
-              </span>
-            )}
-          </div>
+
           {/* Parent Details */}
           <fieldset className="mb-4">
             {/* <legend className="font-bold"> */}
@@ -1344,28 +1388,6 @@ const EditLCforDeleteStudent = () => {
                   onChange={handleChange}
                   className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
                 />
-              </div>
-              <div>
-                <label
-                  htmlFor="PromotedTo"
-                  className="block font-bold text-xs mb-2"
-                >
-                  Promoted to <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="PromotedTo"
-                  name="promoted_to"
-                  maxLength={100}
-                  value={formData.promoted_to}
-                  onChange={handleChange}
-                  className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
-                />
-                {errors.promoted_to && (
-                  <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.promoted_to}
-                  </span>
-                )}
               </div>
               <div
                 className={`
