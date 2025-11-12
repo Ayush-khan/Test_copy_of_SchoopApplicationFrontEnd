@@ -2719,7 +2719,7 @@ const FullTermMarksClass = () => {
   return (
     <>
       <div
-        className={` transition-all duration-500 w-[90%]  mx-auto p-4 ${
+        className={` transition-all duration-500 w-[98%]  mx-auto p-4 ${
           showStudentReport ? "w-full " : "w-[90%] "
         }`}
         // className="w-full md:w-[85%]  mx-auto p-4 "
@@ -2754,11 +2754,11 @@ const FullTermMarksClass = () => {
               <>
                 <div className=" w-full md:w-[98%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
                   <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                    <div className="w-full md:w-[98%]  gap-x-0 md:gap-x-6 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                    <div className="w-full md:w-[99%]  gap-x-0 md:gap-x-6 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                       {/* Class Dropdown */}
                       <div className="w-full  md:w-[45%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                         <label
-                          className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
+                          className="w-full md:w-[40%] text-md pl-0 md:pl-5 mt-1.5"
                           htmlFor="studentSelect"
                         >
                           Class <span className="text-red-500">*</span>

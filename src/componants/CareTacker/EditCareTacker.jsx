@@ -107,6 +107,7 @@ function EditCareTacker() {
 
   const validateAadhar = (aadhar) => {
     // if (!aadhar) return "Aadhar card number is required";
+    if (!aadhar) return "Aadhar card number is required";
     if (!/^\d{12}$/.test(aadhar.replace(/\s+/g, "")))
       return "Aadhar card number must be 12 digits";
     return null;
@@ -138,8 +139,8 @@ function EditCareTacker() {
     // Validate birthday
     if (!formData.birthday) newErrors.birthday = "Date of Birth is required";
     // Validate teacher category
-    if (!formData.teacher_id)
-      newErrors.teacher_id = "Teacher Category is required";
+    // if (!formData.teacher_id)
+    //   newErrors.teacher_id = "Teacher Category is required";
 
     // Validate date of joining
     if (!formData.date_of_joining)
@@ -217,9 +218,9 @@ function EditCareTacker() {
     }
 
     // Teacher Category validation
-    if (name === "teacher_id") {
-      if (!newValue) fieldErrors.teacher_id = "Teacher Category is required";
-    }
+    // if (name === "teacher_id") {
+    //   if (!newValue) fieldErrors.teacher_id = "Teacher Category is required";
+    // }
 
     // Date of Joining validation
     if (name === "date_of_joining") {
@@ -364,7 +365,7 @@ function EditCareTacker() {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <p className="  md:absolute md:right-7  md:top-[12%] text-gray-500 ">
+        <p className="  md:absolute md:right-7  md:top-[12%]s text-gray-500 ">
           <span className="text-red-500">*</span>indicates mandatory information
         </p>
         <form
@@ -686,7 +687,7 @@ function EditCareTacker() {
                   htmlFor="teacher_id"
                   className="block font-bold text-xs mb-2"
                 >
-                  Teacher Category <span className="text-red-500">*</span>
+                  Teacher Category
                 </label>
                 <select
                   id="teacher_id"
@@ -704,11 +705,11 @@ function EditCareTacker() {
                     </option>
                   ))}
                 </select>
-                {errors.teacher_id && (
+                {/* {errors.teacher_id && (
                   <span className="text-red-500 text-xs ml-2">
                     {errors.teacher_id}
                   </span>
-                )}
+                )} */}
               </div>
 
               <div className="col-span-3 space-x-2 text-right">
