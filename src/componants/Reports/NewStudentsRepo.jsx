@@ -5,7 +5,6 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
@@ -29,11 +28,40 @@ const NewStudentsRepo = () => {
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  // const [shortName, setShortName] = useState("");
 
   useEffect(() => {
     fetchExams();
     handleSearch();
+    fetchsessionData();
   }, []);
+
+  const fetchsessionData = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const shortname = sessionResponse.data.custom_claims.settings.short_name;
+      setShortName(shortname);
+
+      console.log("short name:", shortname);
+
+      return { shortName };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const shortName = "HSCS";
+  // const shortName = "SACS";
 
   const fetchExams = async () => {
     try {
@@ -128,6 +156,11 @@ const NewStudentsRepo = () => {
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Division</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Date of Admission</th>
+             ${
+               shortName === "HSCS"
+                 ? `<th class="px-2 text-center py-2 border border-black text-sm font-semibold">Deleted</th>`
+                 : ``
+             }
           </tr>
         </thead>
         <tbody>
@@ -171,6 +204,14 @@ const NewStudentsRepo = () => {
                       : ""
                   }
                    </td>
+                   ${
+                     shortName === "HSCS"
+                       ? `<td class="px-2 text-center py-2 border border-black">${
+                           subject?.IsDelete === "N" ? "" : "Deleted"
+                         }</td>`
+                       : ""
+                   }
+                  
               </tr>`
             )
             .join("")}
@@ -331,52 +372,113 @@ const NewStudentsRepo = () => {
     };
   };
 
+  // const handleDownloadEXL = () => {
+  //   if (!displayedSections || displayedSections.length === 0) {
+  //     toast.error("No data available to download the Excel sheet.");
+  //     return;
+  //   }
+
+  //   // Define headers matching the print table
+  //   const headers = [
+  //     "Sr No.",
+  //     "Roll No",
+  //     "Registartion No.",
+  //     "Student Name",
+  //     "Class",
+  //     "Division",
+  //     "Date of Admission",
+  //   ];
+
+  //   // Convert displayedSections data to array format for Excel
+  //   const data = displayedSections.map((student, index) => [
+  //     index + 1,
+  //     student?.roll_no == null ? " " : student?.roll_no,
+  //     student?.reg_no || " ",
+  //     `${capitalize(student?.first_name || "")} ${capitalize(
+  //       student?.mid_name || ""
+  //     )} ${capitalize(student?.last_name || "")}`.trim(), // Correct string interpolation
+  //     student?.class_name || " ",
+  //     student?.sec_name || " ",
+  //     ` ${
+  //       student?.admission_date &&
+  //       !isNaN(new Date(student.admission_date).getTime())
+  //         ? new Date(student.admission_date).toLocaleDateString("en-GB")
+  //         : ""
+  //     }`,
+  //   ]);
+  //   // Create a worksheet
+  //   const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+  //   const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
+  //   worksheet["!cols"] = columnWidths;
+
+  //   // Create a workbook and append the worksheet
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
+
+  //   // Generate and download the Excel file
+  //   const fileName = `New_Students_Report_${
+  //     selectedStudent?.label || "For ALL Students"
+  //   }.xlsx`;
+  //   XLSX.writeFile(workbook, fileName);
+  // };
+
   const handleDownloadEXL = () => {
     if (!displayedSections || displayedSections.length === 0) {
       toast.error("No data available to download the Excel sheet.");
       return;
     }
 
-    // Define headers matching the print table
-    const headers = [
+    // ✅ Define headers
+    let headers = [
       "Sr No.",
       "Roll No",
-      "Registartion No.",
+      "Registration No.",
       "Student Name",
       "Class",
       "Division",
       "Date of Admission",
     ];
 
-    // Convert displayedSections data to array format for Excel
-    const data = displayedSections.map((student, index) => [
-      index + 1,
-      student?.roll_no == null ? " " : student?.roll_no,
-      student?.reg_no || " ",
-      `${capitalize(student?.first_name || "")} ${capitalize(
-        student?.mid_name || ""
-      )} ${capitalize(student?.last_name || "")}`.trim(), // Correct string interpolation
-      student?.class_name || " ",
-      student?.sec_name || " ",
-      ` ${
+    // ✅ Add extra column for HSCS
+    if (shortName === "HSCS") {
+      headers = headers.concat(["Deleted"]);
+    }
+
+    // ✅ Prepare data rows
+    const data = displayedSections.map((student, index) => {
+      const row = [
+        index + 1,
+        student?.roll_no == null ? " " : student?.roll_no,
+        student?.reg_no || " ",
+        `${capitalize(student?.first_name || "")} ${capitalize(
+          student?.mid_name || ""
+        )} ${capitalize(student?.last_name || "")}`.trim(),
+        student?.class_name || " ",
+        student?.sec_name || " ",
         student?.admission_date &&
         !isNaN(new Date(student.admission_date).getTime())
           ? new Date(student.admission_date).toLocaleDateString("en-GB")
-          : ""
-      }`,
-    ]);
-    // Create a worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
-    const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
-    worksheet["!cols"] = columnWidths;
+          : "",
+      ];
 
-    // Create a workbook and append the worksheet
+      // ✅ Add Trnx Ref. No. only if shortName === "HSCS"
+      if (shortName === "HSCS") {
+        row.push(student?.IsDelete === "N" ? "" : "Deleted");
+      }
+
+      return row;
+    });
+
+    // ✅ Create Excel sheet
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+    worksheet["!cols"] = headers.map(() => ({ wch: 20 }));
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
 
-    // Generate and download the Excel file
+    // ✅ Download file
     const fileName = `New_Students_Report_${
-      selectedStudent?.label || "For ALL Students"
+      selectedStudent?.label || "For_ALL_Students"
     }.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
@@ -421,7 +523,7 @@ const NewStudentsRepo = () => {
   const displayedSections = filteredSections.slice(currentPage * pageSize);
   return (
     <>
-      <div className="w-full md:w-[80%] mx-auto p-4 ">
+      <div className="w-full md:w-[90%] mx-auto p-4 ">
         <ToastContainer />
         <div className="card p-2 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
@@ -586,28 +688,33 @@ const NewStudentsRepo = () => {
                                 "Class",
                                 "Division",
                                 "Date of Admission (dd/mm/yyyy)",
-                              ].map((header, index) => {
-                                const isAdmissionDate =
-                                  header === "Date of Admission (dd/mm/yyyy)";
-                                return (
-                                  <th
-                                    key={index}
-                                    className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
-                                  >
-                                    {isAdmissionDate ? (
-                                      <>
-                                        Date of Admission
-                                        <br />
-                                        <span className="px-2 text-center lg:px-3 py-2  text-sm font-semibold text-gray-900 tracking-wider">
-                                          (dd/mm/yyyy)
-                                        </span>
-                                      </>
-                                    ) : (
-                                      header
-                                    )}
-                                  </th>
-                                );
-                              })}
+                              ]
+                                .concat(
+                                  // shortName === "HSCS" ? ["Trnx Ref. No."] : []
+                                  shortName === "HSCS" ? ["Deleted"] : []
+                                )
+                                .map((header, index) => {
+                                  const isAdmissionDate =
+                                    header === "Date of Admission (dd/mm/yyyy)";
+                                  return (
+                                    <th
+                                      key={index}
+                                      className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider"
+                                    >
+                                      {isAdmissionDate ? (
+                                        <>
+                                          Date of Admission
+                                          <br />
+                                          <span className="px-2 text-center lg:px-3 py-2  text-sm font-semibold text-gray-900 tracking-wider">
+                                            (dd/mm/yyyy)
+                                          </span>
+                                        </>
+                                      ) : (
+                                        header
+                                      )}
+                                    </th>
+                                  );
+                                })}
                             </tr>
                           </thead>
 
@@ -658,6 +765,13 @@ const NewStudentsRepo = () => {
                                         ).toLocaleDateString("en-GB")
                                       : ""}
                                   </td>
+                                  {shortName === "HSCS" && (
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {student.IsDelete === "N"
+                                        ? ""
+                                        : "Deleted"}
+                                    </td>
+                                  )}
                                 </tr>
                               ))
                             ) : (

@@ -32,10 +32,40 @@ const ListAdmFrmRep = () => {
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [shortName, setShortName] = useState("");
+
   useEffect(() => {
     fetchExams();
     handleSearch();
+    fetchsessionData();
   }, []);
+
+  const fetchsessionData = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const shortname = sessionResponse.data.custom_claims.settings.short_name;
+      setShortName(shortname);
+
+      console.log("short name:", shortname);
+
+      return { shortName };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  // const shortName = "HSCS";
+  // const shortName = "SACS";
 
   const fetchExams = async () => {
     try {
@@ -61,6 +91,7 @@ const ListAdmFrmRep = () => {
   const handleStudentSelect = (selectedOption) => {
     setStudentError(""); // Reset error if student is select.
     setSelectedStudent(selectedOption);
+    console.log("selected class", selectedOption);
     setSelectedStudentId(selectedOption?.value);
   };
 
@@ -175,7 +206,19 @@ const ListAdmFrmRep = () => {
       "Qualification",
       "Areas of Interest",
       "Order Id",
-    ];
+    ].concat(
+      shortName === "HSCS"
+        ? ["Trnx Ref. No."]
+        : shortName === "SACS"
+        ? [
+            "Subject Group",
+            "Subjects Selected",
+            "Class 9 Marks",
+            "Class 10 Preboard Marks",
+            "Class 10 Final Marks",
+          ]
+        : []
+    );
 
     // Convert displayedSections data to array format for Excel
     const data = displayedSections.map((student, index) => [
@@ -228,6 +271,17 @@ const ListAdmFrmRep = () => {
       student?.m_qualification || " ",
       student?.area_in_which_parent_can_contribute || " ",
       student?.OrderId || " ",
+      ...(shortName === "HSCS"
+        ? [student?.Trnx_ref_no || ""]
+        : shortName === "SACS"
+        ? [
+            student?.subject_group || "",
+            student?.subject_selected || "",
+            student?.class_9_marks || "",
+            student?.class_10_preboard_marks || "",
+            student?.class_10_final_marks || "",
+          ]
+        : []),
     ]);
 
     // Create a worksheet
@@ -670,7 +724,7 @@ const ListAdmFrmRep = () => {
                       >
                         <table className="min-w-full leading-normal table-auto">
                           <thead>
-                            <tr className="bg-gray-100">
+                            {/* <tr className="bg-gray-100">
                               {[
                                 "Sr No.",
                                 "Form Id.",
@@ -708,7 +762,7 @@ const ListAdmFrmRep = () => {
                                 "Areas of Interest",
                                 "Order Id",
                               ].map((header, index) => {
-                                let columnWidth = "min-w-[150px] px-2"; // default width
+                                let columnWidth = "min-w-[150px] px-2";
 
                                 if (header === "Sr No.")
                                   columnWidth = "min-w-[50px]";
@@ -724,6 +778,78 @@ const ListAdmFrmRep = () => {
                                   </th>
                                 );
                               })}
+                            </tr> */}
+                            <tr className="bg-gray-100">
+                              {[
+                                "Sr No.",
+                                "Form Id.",
+                                "Student Name",
+                                "Class",
+                                "Application Date",
+                                "Status",
+                                "DOB",
+                                "Birth Place",
+                                "Present Address",
+                                "City, State, Pincode",
+                                "Permanent Address",
+                                "Gender",
+                                "Religion",
+                                "Caste",
+                                "Subcaste",
+                                "Nationality",
+                                "Mother Tongue",
+                                "Category",
+                                "Blood Group",
+                                "Aadhaar No.",
+                                "Sibling",
+                                "Father Name",
+                                "Occupation",
+                                "Mobile No.",
+                                "Email Id",
+                                "Father Aadhaar No.",
+                                "Qualification",
+                                "Mother Name",
+                                "Occupation",
+                                "Mobile No.",
+                                "Email Id",
+                                "Mother Aadhaar No.",
+                                "Qualification",
+                                "Areas of Interest",
+                                "Order Id",
+                              ]
+                                // Add extra column only if shortName === "HSCS"
+                                .concat(
+                                  shortName === "HSCS"
+                                    ? ["Trnx Ref. No."]
+                                    : shortName === "SACS" &&
+                                      Number(selectedStudent?.label) > 9
+                                    ? [
+                                        "Subject Group",
+                                        "Subjects Selected",
+                                        "Class 9 Marks",
+                                        "Class 10 Preboard Marks",
+                                        "Class 10 Final Marks",
+                                      ]
+                                    : []
+                                )
+
+                                .map((header, index) => {
+                                  let columnWidth = "min-w-[150px] px-2";
+
+                                  if (header === "Sr No.")
+                                    columnWidth = "min-w-[50px]";
+                                  else if (header === "Present Address")
+                                    columnWidth = "min-w-[200px]";
+
+                                  return (
+                                    <th
+                                      key={index}
+                                      className={`text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${columnWidth}`}
+                                    >
+                                      {header}
+                                    </th>
+                                  );
+                                })}
                             </tr>
                           </thead>
 
@@ -856,6 +982,41 @@ const ListAdmFrmRep = () => {
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.OrderId}
                                   </td>
+                                  {shortName === "HSCS" && (
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {student.Trnx_ref_no}
+                                    </td>
+                                  )}
+                                  {shortName === "SACS" &&
+                                    Number(selectedStudent?.label) > 9 && (
+                                      <>
+                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                          {
+                                            student.academic_details
+                                              .sub_group_name
+                                          }
+                                        </td>
+                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                          {
+                                            student.academic_details
+                                              .selected_subjects
+                                          }
+                                        </td>
+                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                          {student.academic_details["9marks"]}
+                                        </td>
+                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                          {
+                                            student.academic_details[
+                                              "10preboard"
+                                            ]
+                                          }
+                                        </td>
+                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                          {student.academic_details["10final"]}
+                                        </td>
+                                      </>
+                                    )}
                                 </tr>
                               ))
                             ) : (

@@ -48,22 +48,28 @@ const HomeworkNotAssignReport = () => {
   const [selectedClassId, setSelectedClassId] = useState(null);
   const [classError, setClassError] = useState("");
 
-  const [weekRange, setWeekRange] = useState("");
-  const datePickerRef = useRef(null);
+  // const [weekRange, setWeekRange] = useState("");
+  // const datePickerRef = useRef(null);
 
-  const today = new Date();
-  const formattedToday = format(today, "yyyy-MM-dd");
+  // const today = new Date();
+  // const formattedToday = format(today, "yyyy-MM-dd");
 
-  const [fromDate, setFromDate] = useState(formattedToday);
-  const [toDate, setToDate] = useState(formattedToday);
+  // const [fromDate, setFromDate] = useState(formattedToday);
+  // const [toDate, setToDate] = useState(formattedToday);
 
-  const [showPicker, setShowPicker] = useState(false);
-  const [dateRange, setDateRange] = useState([
-    { startDate: today, endDate: today, key: "selection" },
-  ]);
-  const [tempDateRange, setTempDateRange] = useState(dateRange);
+  // const [showPicker, setShowPicker] = useState(false);
+  // const [dateRange, setDateRange] = useState([
+  //   { startDate: today, endDate: today, key: "selection" },
+  // ]);
+  // const [tempDateRange, setTempDateRange] = useState(dateRange);
 
-  const formatDate = (date) => format(date, "MMMM d, yyyy");
+  // const formatDate = (date) => format(date, "MMMM d, yyyy");
+
+  // useEffect(() => {
+  //   if (weekRange && weekRange.includes("/")) {
+  //     handleSearch();
+  //   }
+  // }, [weekRange]);
 
   // const handleApply = () => {
   //   const from = format(tempDateRange[0].startDate, "yyyy-MM-dd");
@@ -72,14 +78,31 @@ const HomeworkNotAssignReport = () => {
   //   setDateRange(tempDateRange);
   //   setFromDate(from);
   //   setToDate(to);
-  //   setWeekRange(`${from} to ${to}`); // update the weekRange to be used in API
-
+  //   setWeekRange(`${from} / ${to}`);
   //   setShowPicker(false);
 
-  //   setTimeout(() => {
-  //     handleSearch(); // Manually trigger search with new date range
-  //   }, 0);
+  //   // Pass the date directly to avoid stale state
+  //   handleSearch(`${from} / ${to}`);
   // };
+
+  const datePickerRef = useRef(null);
+
+  const today = new Date();
+  const formattedToday = format(today, "yyyy-MM-dd");
+
+  const [fromDate, setFromDate] = useState(formattedToday);
+  const [toDate, setToDate] = useState(formattedToday);
+  const [weekRange, setWeekRange] = useState(
+    `${formattedToday} / ${formattedToday}`
+  );
+
+  const [dateRange, setDateRange] = useState([
+    { startDate: today, endDate: today, key: "selection" },
+  ]);
+  const [tempDateRange, setTempDateRange] = useState(dateRange);
+  const [showPicker, setShowPicker] = useState(false);
+
+  const formatDate = (date) => format(date, "MMMM d, yyyy");
 
   const handleApply = () => {
     const from = format(tempDateRange[0].startDate, "yyyy-MM-dd");
@@ -89,13 +112,146 @@ const HomeworkNotAssignReport = () => {
     setFromDate(from);
     setToDate(to);
     setWeekRange(`${from} / ${to}`);
-
     setShowPicker(false);
 
-    setTimeout(() => {
-      handleSearch();
-    }, 0);
+    // Call search with the new range
+    handleSearch(`${from} / ${to}`);
   };
+
+  const handleSearch = async (manualRange = null) => {
+    setLoadingForSearch(true);
+    setStudentError("");
+
+    if (!selectedStudentId) {
+      setStudentError("Please select Class.");
+      setLoadingForSearch(false);
+      return;
+    }
+
+    const selectedOption = studentOptions.find(
+      (option) => option.value === selectedStudentId
+    );
+
+    const section_id = selectedOption?.section_id || selectedOption?.value;
+    const class_id = selectedOption?.class_id;
+
+    // Use the manualRange if provided (Apply click)
+    // Otherwise, use weekRange (default today)
+    const rangeToUse = manualRange || weekRange;
+
+    // ✅ Special case: if today is selected, do NOT show error
+    const rangeStr = typeof rangeToUse === "string" ? rangeToUse : "";
+    const isTodayRange = rangeStr === `${formattedToday} / ${formattedToday}`;
+
+    if (!rangeStr.includes("/") && !isTodayRange) {
+      toast.error("Please select a valid date range.");
+      setLoadingForSearch(false);
+      return;
+    }
+
+    try {
+      setTimetable([]);
+      const token = localStorage.getItem("authToken");
+
+      const params = {
+        class_id,
+        section_id,
+        teacher_id: selectedClassId || "",
+        daterange: rangeStr,
+      };
+
+      const response = await axios.get(
+        `${API_URL}/api/get_homeworknotassignedreport`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params,
+        }
+      );
+
+      const data = response?.data?.data || [];
+      if (data.length === 0) {
+        toast.error("Homework Not Assign Report not found.");
+        setTimetable([]);
+        setPageCount(0);
+      } else {
+        setTimetable(data);
+        setPageCount(Math.ceil(data.length / pageSize));
+      }
+    } catch (error) {
+      console.error("Error fetching Homework Not Assign Report:", error);
+      toast.error(
+        "Error fetching Homework Not Assign Report. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+      setLoadingForSearch(false);
+    }
+  };
+
+  // const handleSearch = async () => {
+  //   setLoadingForSearch(true);
+  //   setStudentError("");
+
+  //   if (!selectedStudentId) {
+  //     setStudentError("Please select Class.");
+  //     setLoadingForSearch(false);
+  //     return;
+  //   }
+
+  //   const selectedOption = studentOptions.find(
+  //     (option) => option.value === selectedStudentId
+  //   );
+
+  //   const section_id = selectedOption?.section_id || selectedOption?.value;
+  //   const class_id = selectedOption?.class_id;
+
+  //   const rangeToUse =  weekRange;
+
+  //   // ✅ Validate date range only if truly missing
+  //   if (!rangeToUse || !rangeToUse.includes("/")) {
+  //     toast.error("Please select a valid date range.");
+  //     setLoadingForSearch(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     setTimetable([]);
+
+  //     const token = localStorage.getItem("authToken");
+  //     const params = {
+  //       class_id,
+  //       section_id,
+  //       teacher_id: selectedClassId || "",
+  //       daterange: rangeToUse,
+  //     };
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_homeworknotassignedreport`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         params,
+  //       }
+  //     );
+
+  //     const data = response?.data?.data || [];
+  //     if (data.length === 0) {
+  //       toast.error("Homework Not Assign Report not found.");
+  //       setTimetable([]);
+  //       setPageCount(0);
+  //     } else {
+  //       setTimetable(data);
+  //       setPageCount(Math.ceil(data.length / pageSize));
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching Homework Not Assign Report:", error);
+  //     toast.error(
+  //       "Error fetching Homework Not Assign Report. Please try again."
+  //     );
+  //   } finally {
+  //     setIsSubmitting(false);
+  //     setLoadingForSearch(false);
+  //   }
+  // };
 
   useEffect(() => {
     fetchExams();
@@ -193,64 +349,71 @@ const HomeworkNotAssignReport = () => {
     }));
   }, [teacher]);
 
-  const handleSearch = async () => {
-    setLoadingForSearch(false);
+  // const handleSearch = async () => {
+  //   setLoadingForSearch(false);
 
-    if (!selectedStudentId) {
-      setStudentError("Please select Class.");
-      return;
-    }
+  //   if (!selectedStudentId) {
+  //     setStudentError("Please select Class.");
+  //     return;
+  //   }
 
-    const selectedOption = studentOptions.find(
-      (option) => option.value === selectedStudentId
-    );
+  //   const selectedOption = studentOptions.find(
+  //     (option) => option.value === selectedStudentId
+  //   );
 
-    const section_id = selectedOption?.value;
-    const class_id = selectedOption?.class_id;
+  //   const section_id = selectedOption?.value;
+  //   const class_id = selectedOption?.class_id;
 
-    if (!weekRange || !weekRange.includes("/")) {
-      toast.error("Please select a valid date range.");
-      return;
-    }
+  //   // if (!weekRange || !weekRange.includes("/")) {
+  //   //   toast.error("Please select a valid date range.");
+  //   //   return;
+  //   // }
+  //   const rangeToUse = weekRange;
 
-    try {
-      setLoadingForSearch(true);
-      setTimetable([]);
+  //   if (!rangeToUse || !rangeToUse.includes("/")) {
+  //     toast.error("Please select a valid date range.");
+  //     return;
+  //   }
 
-      const token = localStorage.getItem("authToken");
+  //   try {
+  //     setLoadingForSearch(true);
+  //     setTimetable([]);
 
-      const params = {
-        class_id,
-        section_id,
-        teacher_id: selectedClassId || "",
-        daterange: weekRange,
-      };
+  //     const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(
-        `${API_URL}/api/get_homeworknotassignedreport`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params,
-        }
-      );
+  //     const params = {
+  //       class_id,
+  //       section_id,
+  //       teacher_id: selectedClassId || "",
+  //       // daterange: weekRange,
+  //       daterange: rangeToUse,
+  //     };
 
-      if (!response?.data?.data || response?.data?.data?.length === 0) {
-        toast.error("Homework Not Assign Report not found.");
-        setTimetable([]);
-      } else {
-        setTimetable(response.data.data);
-        setPageCount(Math.ceil(response.data.data.length / pageSize));
-      }
-    } catch (error) {
-      console.error("Error fetching Homework Not Assign Report:", error);
-      toast.error(
-        "Error fetching Homework Not Assign Report. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-      setLoadingForSearch(false);
-    }
-  };
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_homeworknotassignedreport`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         params,
+  //       }
+  //     );
+
+  //     if (!response?.data?.data || response?.data?.data?.length === 0) {
+  //       toast.error("Homework Not Assign Report not found.");
+  //       setTimetable([]);
+  //     } else {
+  //       setTimetable(response.data.data);
+  //       setPageCount(Math.ceil(response.data.data.length / pageSize));
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching Homework Not Assign Report:", error);
+  //     toast.error(
+  //       "Error fetching Homework Not Assign Report. Please try again."
+  //     );
+  //   } finally {
+  //     setIsSubmitting(false);
+  //     setLoadingForSearch(false);
+  //   }
+  // };
 
   const handlePrint = () => {
     const printTitle = `Homework Not Assign Report  ${
@@ -266,7 +429,7 @@ const HomeworkNotAssignReport = () => {
         <thead>
           <tr class="bg-gray-100">
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Subject</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Dates</th>
           </tr>
         </thead>
@@ -365,7 +528,7 @@ const HomeworkNotAssignReport = () => {
 
     printWindow.document.close();
 
-    // Ensure content is fully loaded before printing is
+    // Ensure content is fully loaded before printing
     printWindow.onload = function () {
       printWindow.focus();
       printWindow.print();
@@ -379,10 +542,9 @@ const HomeworkNotAssignReport = () => {
       return;
     }
 
-    const headers = ["Sr No.", "Class", "Subject", "Dates"];
+    const headers = ["Sr No.", "Subject", "Dates"];
     const data = displayedSections.map((student, index) => [
       index + 1,
-      `${student?.classname}`,
       student?.subject || " ",
       Array.isArray(student?.dates) ? student.dates.join(", ") : " ",
     ]);
@@ -444,7 +606,7 @@ const HomeworkNotAssignReport = () => {
             />
           </div>
           <div
-            className=" relative w-[98%]  -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
@@ -458,10 +620,10 @@ const HomeworkNotAssignReport = () => {
               <div className="w-full flex flex-col md:flex-row items-center gap-4">
                 {/* Class Select */}
                 <div className="flex items-center gap-2 w-full md:w-auto">
-                  <label className="text-md w-[70px]">
-                    Class <span className="text-red-500">*</span>
+                  <label className="text-md w-[50px]">
+                    Class<span className="text-red-500">*</span>
                   </label>
-                  <div className="w-40">
+                  <div className="w-36">
                     <Select
                       menuPortalTarget={document.body}
                       menuPosition="fixed"
@@ -500,7 +662,7 @@ const HomeworkNotAssignReport = () => {
                 {/* Teacher Select */}
                 <div className="flex items-center gap-2 w-full md:w-auto">
                   <label className="text-md w-[70px]">Teacher</label>
-                  <div className="w-40">
+                  <div className="w-48">
                     <Select
                       menuPortalTarget={document.body}
                       menuPosition="fixed"
@@ -532,7 +694,7 @@ const HomeworkNotAssignReport = () => {
                 {/* Date Range Picker */}
                 <div className="flex items-center gap-2 w-full md:w-auto">
                   <label className="text-md w-[130px]">
-                    Date Range <span className="text-red-500">*</span>
+                    Date Range<span className="text-red-500">*</span>
                   </label>
                   <div className="relative ">
                     <div
