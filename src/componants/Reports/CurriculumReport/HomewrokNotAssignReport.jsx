@@ -48,43 +48,6 @@ const HomeworkNotAssignReport = () => {
   const [selectedClassId, setSelectedClassId] = useState(null);
   const [classError, setClassError] = useState("");
 
-  // const [weekRange, setWeekRange] = useState("");
-  // const datePickerRef = useRef(null);
-
-  // const today = new Date();
-  // const formattedToday = format(today, "yyyy-MM-dd");
-
-  // const [fromDate, setFromDate] = useState(formattedToday);
-  // const [toDate, setToDate] = useState(formattedToday);
-
-  // const [showPicker, setShowPicker] = useState(false);
-  // const [dateRange, setDateRange] = useState([
-  //   { startDate: today, endDate: today, key: "selection" },
-  // ]);
-  // const [tempDateRange, setTempDateRange] = useState(dateRange);
-
-  // const formatDate = (date) => format(date, "MMMM d, yyyy");
-
-  // useEffect(() => {
-  //   if (weekRange && weekRange.includes("/")) {
-  //     handleSearch();
-  //   }
-  // }, [weekRange]);
-
-  // const handleApply = () => {
-  //   const from = format(tempDateRange[0].startDate, "yyyy-MM-dd");
-  //   const to = format(tempDateRange[0].endDate, "yyyy-MM-dd");
-
-  //   setDateRange(tempDateRange);
-  //   setFromDate(from);
-  //   setToDate(to);
-  //   setWeekRange(`${from} / ${to}`);
-  //   setShowPicker(false);
-
-  //   // Pass the date directly to avoid stale state
-  //   handleSearch(`${from} / ${to}`);
-  // };
-
   const datePickerRef = useRef(null);
 
   const today = new Date();
@@ -96,6 +59,95 @@ const HomeworkNotAssignReport = () => {
     `${formattedToday} / ${formattedToday}`
   );
 
+  // const [dateRange, setDateRange] = useState([
+  //   { startDate: today, endDate: today, key: "selection" },
+  // ]);
+  // const [tempDateRange, setTempDateRange] = useState(dateRange);
+  // const [showPicker, setShowPicker] = useState(false);
+
+  // const formatDate = (date) => format(date, "MMMM d, yyyy");
+
+  // const handleApply = () => {
+  //   const from = format(tempDateRange[0].startDate, "yyyy-MM-dd");
+  //   const to = format(tempDateRange[0].endDate, "yyyy-MM-dd");
+
+  //   setDateRange(tempDateRange);
+  //   setFromDate(from);
+  //   setToDate(to);
+  //   setWeekRange(`${from} / ${to}`);
+  //   setShowPicker(false);
+
+  //   // Call search with the new range
+  //   handleSearch(`${from} / ${to}`);
+  // };
+
+  // const handleSearch = async (manualRange = null) => {
+  //   setLoadingForSearch(true);
+  //   setStudentError("");
+
+  //   if (!selectedStudentId) {
+  //     setStudentError("Please select Class.");
+  //     setLoadingForSearch(false);
+  //     return;
+  //   }
+
+  //   const selectedOption = studentOptions.find(
+  //     (option) => option.value === selectedStudentId
+  //   );
+
+  //   const section_id = selectedOption?.section_id || selectedOption?.value;
+  //   const class_id = selectedOption?.class_id;
+
+  //   const rangeToUse = manualRange || weekRange;
+
+  //   const rangeStr = typeof rangeToUse === "string" ? rangeToUse : "";
+  //   const isTodayRange = rangeStr === `${formattedToday} / ${formattedToday}`;
+
+  //   if (!rangeStr.includes("/") && !isTodayRange) {
+  //     toast.error("Please select a valid date range.");
+  //     setLoadingForSearch(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     setTimetable([]);
+  //     const token = localStorage.getItem("authToken");
+
+  //     const params = {
+  //       class_id,
+  //       section_id,
+  //       teacher_id: selectedClassId || "",
+  //       daterange: rangeStr,
+  //     };
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_homeworknotassignedreport`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         params,
+  //       }
+  //     );
+
+  //     const data = response?.data?.data || [];
+  //     if (data.length === 0) {
+  //       toast.error("Homework Not Assign Report not found.");
+  //       setTimetable([]);
+  //       setPageCount(0);
+  //     } else {
+  //       setTimetable(data);
+  //       setPageCount(Math.ceil(data.length / pageSize));
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching Homework Not Assign Report:", error);
+  //     toast.error(
+  //       "Error fetching Homework Not Assign Report. Please try again."
+  //     );
+  //   } finally {
+  //     setIsSubmitting(false);
+  //     setLoadingForSearch(false);
+  //   }
+  // };
+
   const [dateRange, setDateRange] = useState([
     { startDate: today, endDate: today, key: "selection" },
   ]);
@@ -104,23 +156,12 @@ const HomeworkNotAssignReport = () => {
 
   const formatDate = (date) => format(date, "MMMM d, yyyy");
 
-  const handleApply = () => {
-    const from = format(tempDateRange[0].startDate, "yyyy-MM-dd");
-    const to = format(tempDateRange[0].endDate, "yyyy-MM-dd");
+  // ✅ Removed handleApply — not needed anymore
 
-    setDateRange(tempDateRange);
-    setFromDate(from);
-    setToDate(to);
-    setWeekRange(`${from} / ${to}`);
-    setShowPicker(false);
-
-    // Call search with the new range
-    handleSearch(`${from} / ${to}`);
-  };
-
-  const handleSearch = async (manualRange = null) => {
+  const handleSearch = async () => {
     setLoadingForSearch(true);
     setStudentError("");
+    setShowPicker(false);
 
     if (!selectedStudentId) {
       setStudentError("Please select Class.");
@@ -128,26 +169,26 @@ const HomeworkNotAssignReport = () => {
       return;
     }
 
+    // Extract the actual start and end dates from state
+    const from = format(tempDateRange[0].startDate, "yyyy-MM-dd");
+    const to = format(tempDateRange[0].endDate, "yyyy-MM-dd");
+
+    // Basic validation — if invalid or missing
+    if (!from || !to) {
+      toast.error("Please select a valid date range.");
+      setLoadingForSearch(false);
+      return;
+    }
+
+    // Combine for API param
+    const rangeStr = `${from} / ${to}`;
+
     const selectedOption = studentOptions.find(
       (option) => option.value === selectedStudentId
     );
 
     const section_id = selectedOption?.section_id || selectedOption?.value;
     const class_id = selectedOption?.class_id;
-
-    // Use the manualRange if provided (Apply click)
-    // Otherwise, use weekRange (default today)
-    const rangeToUse = manualRange || weekRange;
-
-    // ✅ Special case: if today is selected, do NOT show error
-    const rangeStr = typeof rangeToUse === "string" ? rangeToUse : "";
-    const isTodayRange = rangeStr === `${formattedToday} / ${formattedToday}`;
-
-    if (!rangeStr.includes("/") && !isTodayRange) {
-      toast.error("Please select a valid date range.");
-      setLoadingForSearch(false);
-      return;
-    }
 
     try {
       setTimetable([]);
@@ -187,71 +228,6 @@ const HomeworkNotAssignReport = () => {
       setLoadingForSearch(false);
     }
   };
-
-  // const handleSearch = async () => {
-  //   setLoadingForSearch(true);
-  //   setStudentError("");
-
-  //   if (!selectedStudentId) {
-  //     setStudentError("Please select Class.");
-  //     setLoadingForSearch(false);
-  //     return;
-  //   }
-
-  //   const selectedOption = studentOptions.find(
-  //     (option) => option.value === selectedStudentId
-  //   );
-
-  //   const section_id = selectedOption?.section_id || selectedOption?.value;
-  //   const class_id = selectedOption?.class_id;
-
-  //   const rangeToUse =  weekRange;
-
-  //   // ✅ Validate date range only if truly missing
-  //   if (!rangeToUse || !rangeToUse.includes("/")) {
-  //     toast.error("Please select a valid date range.");
-  //     setLoadingForSearch(false);
-  //     return;
-  //   }
-
-  //   try {
-  //     setTimetable([]);
-
-  //     const token = localStorage.getItem("authToken");
-  //     const params = {
-  //       class_id,
-  //       section_id,
-  //       teacher_id: selectedClassId || "",
-  //       daterange: rangeToUse,
-  //     };
-
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_homeworknotassignedreport`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params,
-  //       }
-  //     );
-
-  //     const data = response?.data?.data || [];
-  //     if (data.length === 0) {
-  //       toast.error("Homework Not Assign Report not found.");
-  //       setTimetable([]);
-  //       setPageCount(0);
-  //     } else {
-  //       setTimetable(data);
-  //       setPageCount(Math.ceil(data.length / pageSize));
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching Homework Not Assign Report:", error);
-  //     toast.error(
-  //       "Error fetching Homework Not Assign Report. Please try again."
-  //     );
-  //   } finally {
-  //     setIsSubmitting(false);
-  //     setLoadingForSearch(false);
-  //   }
-  // };
 
   useEffect(() => {
     fetchExams();
@@ -311,10 +287,23 @@ const HomeworkNotAssignReport = () => {
     }
   };
 
+  const handleClassSelect = (selectedOption) => {
+    setClassError("");
+    setSelectedClass(selectedOption);
+    setSelectedClassId(selectedOption?.value);
+  };
+
   const handleStudentSelect = (selectedOption) => {
     setStudentError("");
     setSelectedStudent(selectedOption);
-    setSelectedStudentId(selectedOption?.value); // section_id
+    setSelectedStudentId(selectedOption?.value || null);
+
+    // If cleared
+    if (!selectedOption) {
+      setSelectedClass(null); // Clear dropdown visually
+      setSelectedClassId(null);
+      return;
+    }
 
     const section_id = selectedOption?.value;
     const class_id = selectedOption?.class_id;
@@ -322,12 +311,6 @@ const HomeworkNotAssignReport = () => {
     if (section_id && class_id) {
       fetchClass(class_id, section_id);
     }
-  };
-
-  const handleClassSelect = (selectedOption) => {
-    setClassError(""); // Clear any previous error if any
-    setSelectedClass(selectedOption);
-    setSelectedClassId(selectedOption?.value); // assuming class ID is stored in `value`
   };
 
   const studentOptions = useMemo(
@@ -636,6 +619,7 @@ const HomeworkNotAssignReport = () => {
                       isClearable
                       className="text-sm"
                       isDisabled={loadingExams}
+                      inputProps={{ autoComplete: "off" }}
                       styles={{
                         control: (provided) => ({
                           ...provided,
@@ -674,7 +658,8 @@ const HomeworkNotAssignReport = () => {
                       isSearchable
                       isClearable
                       className="text-sm"
-                      isDisabled={loadingExams}
+                      // isDisabled={loadingExams}
+                      isDisabled={!selectedStudent || loadingExams}
                       styles={{
                         control: (provided) => ({
                           ...provided,
@@ -713,9 +698,13 @@ const HomeworkNotAssignReport = () => {
                       <div className="absolute z-10 top-12 left-0 bg-white border border-gray-200 rounded-xl shadow-xl max-w-sm">
                         <div className="p-2">
                           <DateRange
-                            onChange={(item) =>
-                              setTempDateRange([item.selection])
-                            }
+                            // onChange={(item) =>
+                            //   setTempDateRange([item.selection])
+                            // }
+                            onChange={(item) => {
+                              setTempDateRange([item.selection]);
+                              setDateRange([item.selection]); // ✅ update immediately in UI
+                            }}
                             ranges={tempDateRange}
                             moveRangeOnFirstSelection={false}
                             editableDateInputs={false}
@@ -730,7 +719,7 @@ const HomeworkNotAssignReport = () => {
                           />
                         </div>
 
-                        <div className="flex justify-between p-3 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+                        {/* <div className="flex justify-between p-3 border-t border-gray-100 bg-gray-50 rounded-b-xl">
                           <button
                             className="bg-blue-500 text-white px-3 py-1.5 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
                             onClick={handleApply}
@@ -743,7 +732,7 @@ const HomeworkNotAssignReport = () => {
                           >
                             Cancel
                           </button>
-                        </div>
+                        </div> */}
                       </div>
                     )}
                   </div>

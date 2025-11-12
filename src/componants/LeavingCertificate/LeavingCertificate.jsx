@@ -523,9 +523,15 @@ const LeavingCertificate = () => {
           toast.error(
             "Leaving Certificate Already Generated. Please go to manage to download the Leaving Certificate."
           );
+          console.log("reppp---->", response.data);
         } else if (response.data && response.data.status === 409) {
           await fetchPendingBookCount(); // Wait for the function to complete
           setBooksPending(true); // Then set the flag
+        } else if (response.data && response.data.status == 422) {
+          toast.error(
+            response.data.message ||
+              "Date of birth not available for this student."
+          );
         } else {
           // Show a generic error message if the error is not a 403
           toast.error("No data found for the selected student.");
@@ -1873,19 +1879,28 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
                         />
                       </div>
-                      <div>
-                        <label
-                          htmlFor="PromotedTo"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Promoted to <span className="text-red-500">*</span>
-                        </label>
+                      <div
+                        className={`
+        ${
+          sortNameCookie === "HSCS"
+            ? "relative -top-6"
+            : sortNameCookie === "SACS"
+            ? "relative top-0"
+            : "relative top-0"
+        }`}
+                      >
                         {/* <label
                           htmlFor="PromotedTo"
                           className="block font-bold text-xs mb-2"
                         >
+                          Promoted to <span className="text-red-500">*</span>
+                        </label> */}
+                        <label
+                          htmlFor="PromotedTo"
+                          className="block font-bold text-xs mb-2"
+                        >
                           {sortNameCookie === "HSCS" && (
-                            <p className="relative -top-4">
+                            <p className="">
                               Whether qualified for promotion to higher class{" "}
                               <span className="text-red-500">*</span>
                             </p>
@@ -1896,7 +1911,7 @@ const LeavingCertificate = () => {
                               <span className="text-red-500">*</span>
                             </>
                           )}
-                        </label> */}
+                        </label>
 
                         <input
                           type="text"

@@ -219,6 +219,11 @@ function ManageLC() {
       if (response?.data?.data?.length > 0) {
         setSubjects(response.data.data);
         setPageCount(Math.ceil(response.data.data.length / 10));
+      } else if (response.data && response.data.status == 422) {
+        toast.error(
+          response.data.message ||
+            "Date of birth not available for this student."
+        );
       } else {
         setSubjects([]);
         toast.error("No Leaving Certificate records found.");

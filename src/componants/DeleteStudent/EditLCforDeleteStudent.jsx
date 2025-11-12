@@ -19,12 +19,13 @@ const EditLCforDeleteStudent = () => {
   const location = useLocation();
   const { student } = location.state || {};
   console.log("Student -->", student);
-
+  const [selectedClassForSubject, setSelectedClassForSubject] = useState("");
   const section_id = location.state?.section_id || null;
   console.log("view student for back navigation:", section_id);
 
   const [formData, setFormData] = useState({
     sr_no: "",
+    apaar_id: "",
     class_id: "",
     reg_no: "",
     date: "",
@@ -67,6 +68,7 @@ const EditLCforDeleteStudent = () => {
     part_of: "",
     games: "",
     selectedActivities: [],
+    working_days: "", // ✅ Add this
   });
 
   // Fetch initial data on component load
@@ -104,7 +106,10 @@ const EditLCforDeleteStudent = () => {
           let fetchedData;
           const DataStudentAc = response.data.data;
           const classsubject = DataStudentAc.classsubject || [];
-
+          setSelectedClassForSubject(
+            response.data.data.studentinformation.classname || ""
+          );
+          console.log("classes for the class-->", selectedClassForSubject);
           // API structure check
           if (DataStudentAc.leavingcertificatesingle) {
             fetchedData = DataStudentAc.leavingcertificatesingle;
@@ -138,6 +143,7 @@ const EditLCforDeleteStudent = () => {
             stu_aadhaar_no:
               fetchedData.stu_aadhaar_no || fetchedData.stu_aadhaar_no || "",
             first_name: fetchedData.first_name || fetchedData.stud_name || "",
+            // apaar_id: fetchedData.studentinformation.apaar_id || "",
             mid_name: fetchedData.mid_name || "",
             last_name: fetchedData.last_name || "",
             father_name: fetchedData.father_name || "",
@@ -152,6 +158,7 @@ const EditLCforDeleteStudent = () => {
             dob: fetchedData.dob || "",
             dob_words: fetchedData.dob_words || "",
             prev_school_class: fetchedData.last_school_attended_standard || "",
+
             admission_date:
               fetchedData.admission_date || fetchedData.admission_date || "",
             admission_class: fetchedData.admission_class || "",
@@ -164,6 +171,7 @@ const EditLCforDeleteStudent = () => {
             promoted_to: fetchedData.promoted_to || "",
             last_exam: fetchedData.last_exam || "",
             udise_pen_no: fetchedData.udise_pen_no || "",
+            apaar_id: fetchedData.apaar_id || "",
             part_of: fetchedData.part_of || "",
             remark: fetchedData.remark || "",
             academic_yr: fetchedData.academic_yr || "",
@@ -189,93 +197,6 @@ const EditLCforDeleteStudent = () => {
 
     fetchInitialData();
   }, []);
-
-  // useEffect(() => {
-  //   const fetchInitialData = async () => {
-  //     try {
-  //       setLoading(true); // Start loading
-  //       const token = localStorage.getItem("authToken");
-
-  //       if (!token) throw new Error("No authentication token found");
-
-  //       const response = await axios.get(
-  //         //   `${API_URL}/api/get_getleavingcertificatedata/${student?.student_id}`,
-  //         `${API_URL}/api/get_getleavingcertificatedata/${student?.slc_no}`,
-
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-
-  //       if (response.data.success && response.data.data) {
-  //         const fetchedData = response.data.data.leavingcertificatesingle;
-  //         const DataStudentAc = response.data.data;
-  //         const { subjects_studied, games } =
-  //           response.data.data.leavingcertificatesingle;
-  //         const classsubject = response.data.data.classsubject;
-  //         const selectedSubjects = subjects_studied
-  //           ? subjects_studied.split(",")
-  //           : [];
-  //         const selectedActivities = games ? games.split(",") : [];
-  //         setFormData({
-  //           sr_no: fetchedData.sr_no || "",
-  //           student_id: fetchedData.student_id || "",
-  //           reg_no: fetchedData.reg_no || "",
-  //           academicStudent: DataStudentAc.academicStudent || [],
-  //           issue_date: fetchedData.issue_date || "",
-  //           stud_id_no: fetchedData.stud_id_no || "",
-  //           stu_aadhaar_no: fetchedData.stu_aadhaar_no || "",
-  //           first_name: fetchedData.stud_name || "",
-  //           mid_name: fetchedData.mid_name || "",
-  //           last_name: fetchedData.last_name || "",
-  //           father_name: fetchedData.father_name || "",
-  //           mother_name: fetchedData.mother_name || "",
-  //           nationality: fetchedData.nationality || "",
-  //           mother_tongue: fetchedData.mother_tongue || "",
-  //           religion: fetchedData.religion || "",
-  //           caste: fetchedData.caste || "",
-  //           subcaste: fetchedData.subcaste || "",
-  //           birth_place: fetchedData.birth_place || "",
-  //           state: fetchedData.state || "",
-  //           dob: fetchedData.dob || "",
-  //           dob_words: fetchedData.dob_words || "",
-  //           prev_school_class: fetchedData.last_school_attended_standard || "",
-  //           admission_date: fetchedData.admission_date || "",
-  //           admission_class: fetchedData.admission_class || "",
-  //           attendance: fetchedData.attendance || "",
-  //           reason_leaving: fetchedData.reason_leaving || "",
-  //           application_date: fetchedData.application_date || "",
-  //           leaving_date: fetchedData.leaving_date || "",
-  //           standard_studying: fetchedData.standard_studying || "",
-  //           dob_proof: fetchedData.dob_proof || "",
-  //           promoted_to: fetchedData.promoted_to || "",
-  //           last_exam: fetchedData.last_exam || "",
-  //           udise_pen_no: fetchedData.udise_pen_no || "",
-  //           part_of: fetchedData.part_of || "",
-  //           remark: fetchedData.remark || "",
-  //           academic_yr: fetchedData.academic_yr || "",
-  //           conduct: fetchedData.conduct || "",
-  //           fee_month: fetchedData.fee_month || "",
-  //           subjects: DataStudentAc.classsubject || [],
-  //           // selectedActivities: (fetchedData.games || "").split(","),
-  //           subjectsFor: classsubject, // All subjects to display
-  //           selectedSubjects: selectedSubjects, // Only selected subjects checked
-  //           selectedActivities: selectedActivities, // Only selected activities checked
-  //         });
-  //         toast.success("Data loaded successfully");
-  //       } else {
-  //         toast.error("Failed to load data");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching initial data:", error);
-  //       toast.error("Error fetching initial data");
-  //     } finally {
-  //       setLoading(false); // Stop loading
-  //     }
-  //   };
-
-  //   fetchInitialData();
-  // }, []);
 
   const getYearInWords = (year) => {
     if (year < 1000 || year > 9999) return "Year Out of Range"; // Optional range limit
@@ -413,6 +334,13 @@ const EditLCforDeleteStudent = () => {
   // for form
   const [errors, setErrors] = useState({});
   const [backendErrors, setBackendErrors] = useState({});
+  const getCookie = (name) => {
+    const cookieValue = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="));
+    return cookieValue ? cookieValue.split("=")[1] : null;
+  };
+  const sortNameCookie = getCookie("short_name");
 
   // Maximum date for date_of_birth
   const MAX_DATE = "2030-12-31";
@@ -424,36 +352,31 @@ const EditLCforDeleteStudent = () => {
   const validate = () => {
     const newErrors = {};
 
-    // Required fields validation
     const requiredFields = [
       "reg_no",
       "issue_date",
       "first_name",
-
       "stud_id_no",
       "promoted_to",
       "last_exam",
       "father_name",
       "mother_name",
       "birth_place",
-      "state",
       "mother_tongue",
       "dob",
       "dob_words",
       "nationality",
-      "prev_school_class",
-      "admission_date",
+      "date_of_admission",
       "admission_class",
       "reason_leaving",
       "application_date",
       "leaving_date",
       "standard_studying",
-      "dob_proof",
-      "stu_aadhaar_no",
-      "attendance",
       "fee_month",
       "remark",
       "conduct",
+      "part_of",
+      "academic_yr",
     ];
 
     requiredFields.forEach((field) => {
@@ -461,23 +384,61 @@ const EditLCforDeleteStudent = () => {
         newErrors[field] = "This field is required";
       }
     });
-    if (formData.class_id > 109) {
-      if (!formData.udise_pen_no) {
-        newErrors.udise_pen_no = "This field is required";
+
+    if (sortNameCookie === "HSCS") {
+      if (!formData?.apaar_id || String(formData.apaar_id).trim() === "") {
+        newErrors.apaar_id = "This field is required";
       }
     }
-    // Additional validations for specific fields
+
+    if (sortNameCookie === "SACS") {
+      const sacsFields = [
+        "state",
+        "prev_school_class",
+        "dob_proof",
+        "attendance",
+      ];
+      sacsFields.forEach((field) => {
+        if (!formData[field]) {
+          newErrors[field] = "This field is required";
+        }
+      });
+
+      // Incorrectly nested condition — this block should be outside SACS
+      if (
+        !formData.selectedSubjects ||
+        formData.selectedSubjects.length === 0
+      ) {
+        newErrors.selectedSubjects = "Please select at least one subject";
+      }
+    }
+
+    if (sortNameCookie === "HSCS") {
+      if (!formData.working_days) {
+        newErrors.working_days = "This field is required";
+      }
+
+      if (!formData.attendance) {
+        newErrors.attendance = "This field is required";
+      }
+    }
+
+    if (selectedClassForSubject > 9 && !formData.udise_pen_no) {
+      newErrors.udise_pen_no = "This field is required";
+    }
+
     if (formData.first_name && /^\d/.test(formData.first_name)) {
       newErrors.first_name = "Student Name should not start with a number";
     }
+
     if (formData.father_name && /^\d/.test(formData.father_name)) {
       newErrors.father_name = "Father's Name should not start with a number";
     }
+
     if (formData.mother_name && /^\d/.test(formData.mother_name)) {
       newErrors.mother_name = "Mother's Name should not start with a number";
     }
 
-    // Checkbox validation
     if (
       !formData.selectedActivities ||
       formData.selectedActivities.length === 0
@@ -485,19 +446,18 @@ const EditLCforDeleteStudent = () => {
       newErrors.activities =
         "Please select at least one extra-curricular activity";
     }
+
     if (!formData.selectedSubjects || formData.selectedSubjects.length === 0) {
       newErrors.selectedSubjects = "Please select at least one subject";
     }
 
-    // Dropdown-specific validations
-    if (!formData.dob_proof) {
-      newErrors.dob_proof = "This field is required";
-    }
-    if (!formData.part_of) {
-      newErrors.part_of = "This field is required";
-    }
-    if (!formData.academic_yr) {
-      newErrors.academic_yr = "This field is required";
+    if (Object.keys(newErrors).length > 0) {
+      console.log("❌ Validation Errors Found:");
+      Object.entries(newErrors).forEach(([field, message]) => {
+        console.log(`➡️ Field: ${field} | Error: ${message}`);
+      });
+    } else {
+      console.log("✅ Validation Passed — no missing fields!");
     }
 
     setErrors(newErrors);
@@ -505,8 +465,6 @@ const EditLCforDeleteStudent = () => {
     // Return true if no errors, false if errors exist
     return Object.keys(newErrors).length === 0;
   };
-
-  // Handle change for form fields
   const handleChange = async (event) => {
     const { name, value, type, checked } = event.target;
 
@@ -839,187 +797,6 @@ const EditLCforDeleteStudent = () => {
     }
   };
 
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   console.log("Submit process started");
-
-  //   // Clear previous errors
-  //   setErrors({});
-  //   setBackendErrors({});
-
-  //   // Check validation
-  //   if (!validate()) {
-  //     console.log("Validation failed, stopping submission");
-  //     return;
-  //   }
-
-  //   console.log("Validation passed, proceeding with submission");
-
-  //   // Format the form data before submission
-  //   const formattedFormData = {
-  //     reg_no: formData.reg_no || "",
-  //     issue_date: formatDateString(formData.issue_date),
-  //     stud_id_no: formData.stud_id_no || "",
-  //     stu_aadhaar_no: formData.stu_aadhaar_no || "",
-  //     first_name: formData.first_name || "",
-  //     mid_name: formData.mid_name || "",
-  //     last_name: formData.last_name || "",
-  //     father_name: formData.father_name || "",
-  //     mother_name: formData.mother_name || "",
-  //     nationality: formData.nationality || "",
-  //     mother_tongue: formData.mother_tongue || "",
-  //     state: formData.state || "",
-  //     religion: formData.religion || "",
-  //     caste: formData.caste || "",
-  //     subcaste: formData.subcaste || "",
-  //     birth_place: formData.birth_place || "",
-  //     dob: formatDateString(formData.dob),
-  //     dob_words: formData.dob_words || "",
-  //     dob_proof: formData.dob_proof || "",
-  //     previous_school_attended: formData.prev_school_class || "",
-  //     admission_date: formatDateString(formData.admission_date),
-  //     admission_class: formData.admission_class || "",
-  //     leaving_date: formatDateString(formData.leaving_date),
-  //     standard_studying: formData.standard_studying || "",
-  //     last_exam: formData.last_exam || "",
-  //     subjects: formData.selectedSubjects || [], // Ensure it's an array of subject names
-  //     promoted_to: formData.promoted_to || "",
-  //     attendance: formData.attendance || "",
-  //     fee_month: formData.fee_month || "",
-  //     part_of: formData.part_of || "",
-  //     games: selectedActivities || [], // Ensure it's an array of game names
-  //     application_date: formatDateString(formData.application_date),
-  //     conduct: formData.conduct || "",
-  //     reason_leaving: formData.reason_leaving || "",
-  //     remark: formData.remark || "",
-  //     academic_yr: formData.academic_yr || "",
-  //     stud_id: formData.stud_id || "",
-  //     udise_pen_no: formData.udise_pen_no || "",
-  //   };
-
-  //   try {
-  //     setLoading(true);
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) throw new Error("No authentication token found");
-
-  //     // response= await axios.put(
-  //     //   `${API_URL}/api/update_leavingcertificate/${student?.sr_no}`,
-  //     //   formattedFormData,
-  //     //   {
-  //     //     headers: { Authorization: `Bearer ${token}` },
-  //     //     responseType: "blob", // For PDF response
-  //     //   }
-  //     // );
-  //     // 1️⃣ Save First If slc_no is Present
-  //     if (student?.slc_no) {
-  //       var response = await axios.post(
-  //         `${API_URL}/api/save_pdfleavingcertificate`,
-  //         formattedFormData,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-  //     }
-
-  //     // 2️⃣ Then Update and Download
-  //     // const response = await axios.put(
-  //     //   `${API_URL}/api/update_leavingcertificate/${student?.sr_no}`,
-  //     //   formattedFormData,
-  //     //   {
-  //     //     headers: { Authorization: `Bearer ${token}` },
-  //     //     responseType: "blob",
-  //     //   }
-  //     // );
-
-  //     if (response.status === 200) {
-  //       toast.success("LC Certificate Updated successfully!");
-  //       // Extract filename from Content-Disposition header
-  //       const contentDisposition = response.headers["content-disposition"];
-  //       let filename = "DownloadedFile.pdf"; // Fallback name
-
-  //       if (contentDisposition) {
-  //         const match = contentDisposition.match(/filename="(.+?)"/);
-  //         if (match && match[1]) {
-  //           filename = match[1];
-  //         }
-  //       }
-  //       // Download PDF
-  //       const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-  //       const pdfUrl = URL.createObjectURL(pdfBlob);
-  //       const link = document.createElement("a");
-  //       link.href = pdfUrl;
-  //       link.download = filename;
-  //       document.body.appendChild(link);
-  //       link.click();
-  //       document.body.removeChild(link);
-
-  //       // Reset form data
-  //       setFormData({
-  //         sr_no: "",
-  //         reg_no: "",
-  //         date: "",
-  //         first_name: "",
-  //         mid_name: "",
-  //         last_name: "",
-  //         udise_pen_no: "",
-  //         stud_id_no: "",
-  //         promoted_to: " ",
-  //         last_exam: "",
-  //         stud_id: "",
-  //         // student_UID: "",
-  //         father_name: "",
-  //         mother_name: "",
-  //         religion: "",
-  //         caste: "",
-  //         subcaste: "",
-  //         birth_place: "",
-  //         state: "",
-  //         mother_tongue: "",
-  //         dob: "",
-  //         dob_words: "",
-  //         nationality: "",
-  //         prev_school_class: "",
-  //         admission_date: "",
-  //         admission_class: "",
-  //         attendance: "",
-  //         subjectsFor: [],
-  //         subjects: [],
-  //         selectedActivities: [],
-
-  //         reason_leaving: "",
-  //         application_date: "",
-  //         leaving_date: "",
-  //         standard_studying: "",
-  //         dob_proof: "",
-  //         class_id_for_subj: "",
-  //         stu_aadhaar_no: "",
-  //         teacher_image_name: null,
-  //         academicStudent: [],
-  //         academic_yr: "", // Add this to track selected academic year
-  //         part_of: "",
-  //       });
-  //       setSelectedClass(null);
-  //       setSelectedStudent(null);
-
-  //       setTimeout(() => setParentInformation(null), 3000);
-
-  //       // Navigate to the desired route after successful update
-  //       navigate("/leavingCertificate");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error.response?.data || error.message);
-  //     toast.error("An error occurred while Updated the LC Certificate.");
-
-  //     if (error.response && error.response.data) {
-  //       setBackendErrors(error.response.data);
-  //     } else {
-  //       toast.error("Unknown error occurred.");
-  //     }
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
     setFormData((prevData) => {
@@ -1311,6 +1088,27 @@ const EditLCforDeleteStudent = () => {
               </div>
             </div>
           </fieldset>
+          <div>
+            <label htmlFor="apaar_id" className="block font-bold text-xs mb-2">
+              Appar ID
+              {sortNameCookie === "HSCS" && (
+                <span className="text-red-500"> *</span>
+              )}
+            </label>
+            <input
+              type="text"
+              id="apaar_id"
+              name="apaar_id"
+              value={formData.apaar_id}
+              onChange={handleChange}
+              className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+            />
+            {sortNameCookie === "HSCS" && errors.apaar_id && (
+              <span className="text-red-500 text-xs ml-1 h-1">
+                {errors.apaar_id}
+              </span>
+            )}
+          </div>
           {/* Parent Details */}
           <fieldset className="mb-4">
             {/* <legend className="font-bold"> */}
@@ -1468,6 +1266,68 @@ const EditLCforDeleteStudent = () => {
                   </span>
                 )}
               </div>
+              {sortNameCookie === "SACS" && (
+                // Purpose input field here
+                <div className="grid   col-span-2 row-span-2 ">
+                  <label
+                    htmlFor="subjects"
+                    className="block font-bold text-xs  col-span-3"
+                  >
+                    Subjects Studied <span className="text-red-500">*</span>
+                  </label>
+
+                  {formData.subjectsFor && formData.subjectsFor.length > 0 ? (
+                    formData.subjectsFor.map((subject, index) => (
+                      <div key={index} className="grid-col-3 relative ">
+                        <label className="">
+                          <input
+                            type="checkbox"
+                            name="subjects"
+                            value={subject.name}
+                            checked={formData?.selectedSubjects?.includes(
+                              subject.name
+                            )}
+                            onChange={(e) =>
+                              handleSubjectSelection(e, subject.name)
+                            }
+                            className="form-checkbox h-4 w-4 text-blue-600"
+                          />
+                          <span className="ml-1 text-sm">{subject.name}</span>
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 col-span-3">
+                      No subjects available
+                    </p>
+                  )}
+
+                  {selectedClassForSubject == "10" && (
+                    <div className="col-span-1 relative  ">
+                      <label className="inline-flex items-center">
+                        <input
+                          type="checkbox"
+                          name="subjects"
+                          value="Basic Mathematics"
+                          checked={formData?.selectedSubjects?.includes(
+                            "Basic Mathematics"
+                          )}
+                          onChange={(e) =>
+                            handleSubjectSelection(e, "Basic Mathematics")
+                          }
+                          className="form-checkbox h-4 w-4 text-blue-600"
+                        />
+                        <span className="ml-1 text-sm">Basic Mathematics</span>
+                      </label>
+                    </div>
+                  )}
+                  {errors.selectedSubjects && (
+                    <span className="text-red-500 text-xs ml-1 h-1 col-span-3">
+                      {errors.selectedSubjects}
+                    </span>
+                  )}
+                </div>
+              )}
               <div>
                 <label
                   htmlFor="subcaste"
@@ -1491,6 +1351,48 @@ const EditLCforDeleteStudent = () => {
                   className="block font-bold text-xs mb-2"
                 >
                   Promoted to <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="PromotedTo"
+                  name="promoted_to"
+                  maxLength={100}
+                  value={formData.promoted_to}
+                  onChange={handleChange}
+                  className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
+                />
+                {errors.promoted_to && (
+                  <span className="text-red-500 text-xs ml-1 h-1">
+                    {errors.promoted_to}
+                  </span>
+                )}
+              </div>
+              <div
+                className={`
+        ${
+          sortNameCookie === "HSCS"
+            ? "relative -top-6"
+            : sortNameCookie === "SACS"
+            ? "relative top-0"
+            : "relative top-0"
+        }`}
+              >
+                {" "}
+                <label
+                  htmlFor="PromotedTo"
+                  className="block font-bold text-xs mb-2"
+                >
+                  {sortNameCookie === "HSCS" && (
+                    <p className="">
+                      Whether qualified for promotion to higher class{" "}
+                      <span className="text-red-500">*</span>
+                    </p>
+                  )}
+                  {sortNameCookie === "SACS" && (
+                    <>
+                      Promoted to <span className="text-red-500">*</span>
+                    </>
+                  )}
                 </label>
                 <input
                   type="text"
@@ -1563,26 +1465,31 @@ const EditLCforDeleteStudent = () => {
                   </span>
                 )}
               </div>
-              <div>
-                <label htmlFor="state" className="block font-bold text-xs mb-2">
-                  State <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="state"
-                  name="state"
-                  maxLength={50}
-                  value={formData.state}
-                  onChange={handleChange}
-                  readOnly
-                  className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                />
-                {errors.state && (
-                  <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.state}
-                  </span>
-                )}
-              </div>
+              {sortNameCookie === "SACS" && (
+                <div>
+                  <label
+                    htmlFor="state"
+                    className="block font-bold text-xs mb-2"
+                  >
+                    State <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="state"
+                    name="state"
+                    maxLength={50}
+                    value={formData.state}
+                    onChange={handleChange}
+                    readOnly
+                    className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                  />
+                  {errors.state && (
+                    <span className="text-red-500 text-xs ml-1 h-1">
+                      {errors.state}
+                    </span>
+                  )}
+                </div>
+              )}
               <div>
                 <label
                   htmlFor="mother_tongue"
@@ -1683,48 +1590,50 @@ const EditLCforDeleteStudent = () => {
             {/* </legend> */}
 
             <div className="grid grid-cols-1 md:grid-cols-4  gap-4">
+              {sortNameCookie === "SACS" && (
+                <div>
+                  <label
+                    htmlFor="prev_school_class"
+                    className="block font-bold text-xs mb-2"
+                  >
+                    Previous School Attended{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="prev_school_class"
+                    maxLength={100}
+                    name="prev_school_class"
+                    value={formData.prev_school_class}
+                    onChange={handleChange}
+                    className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  />
+                  {errors.prev_school_class && (
+                    <span className="text-red-500 text-xs ml-1 h-1">
+                      {errors.prev_school_class}
+                    </span>
+                  )}
+                </div>
+              )}
               <div>
                 <label
-                  htmlFor="prev_school_class"
-                  className="block font-bold text-xs mb-2"
-                >
-                  Previous School Attended{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="prev_school_class"
-                  maxLength={100}
-                  name="prev_school_class"
-                  value={formData.prev_school_class}
-                  onChange={handleChange}
-                  className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
-                />
-                {errors.prev_school_class && (
-                  <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.prev_school_class}
-                  </span>
-                )}
-              </div>
-              <div>
-                <label
-                  htmlFor="admission_date"
+                  htmlFor="date_of_admission"
                   className="block font-bold text-xs mb-2"
                 >
                   Date of Admission <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
-                  id="admission_date"
-                  name="admission_date"
-                  value={formData.admission_date}
+                  id="date_of_admission"
+                  name="date_of_admission"
+                  value={formData.date_of_admission}
                   onChange={handleChange}
-                  readOnly
+                  // readOnly
                   className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                 />
-                {errors.admission_date && (
+                {errors.date_of_admission && (
                   <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.admission_date}
+                    {errors.date_of_admission}
                   </span>
                 )}
               </div>
@@ -1774,36 +1683,37 @@ const EditLCforDeleteStudent = () => {
                   </span>
                 )}
               </div>{" "}
-              {/* Dropdown for Proof of DOB submitted */}
-              <div className="">
-                <label
-                  htmlFor="dob_proof"
-                  className="block font-bold text-xs mb-2"
-                >
-                  Proof of DOB Submitted at the Time of Admission
-                  <span className="text-red-500">*</span>
-                </label>
-                <select
-                  id="dob_proof"
-                  name="dob_proof"
-                  value={formData.dob_proof}
-                  onChange={handleChange}
-                  className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                >
-                  <option value="">Select</option>
-                  <option value="Birth Certificate">Birth Certificate</option>
-                  <option value="School Leaving Certificate">
-                    School Leaving Certificate
-                  </option>
-                  <option value="Aadhar Card">Aadhar Card</option>
-                  <option value="Passport">Passport</option>
-                </select>
-                {errors.dob_proof && (
-                  <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.dob_proof}
-                  </span>
-                )}
-              </div>{" "}
+              {sortNameCookie === "SACS" && (
+                <div className="">
+                  <label
+                    htmlFor="dob_proof"
+                    className="block font-bold text-xs mb-2"
+                  >
+                    Proof of DOB Submitted at the Time of Admission
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="dob_proof"
+                    name="dob_proof"
+                    value={formData.dob_proof}
+                    onChange={handleChange}
+                    className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  >
+                    <option value="">Select</option>
+                    <option value="Birth Certificate">Birth Certificate</option>
+                    <option value="School Leaving Certificate">
+                      School Leaving Certificate
+                    </option>
+                    <option value="Aadhar Card">Aadhar Card</option>
+                    <option value="Passport">Passport</option>
+                  </select>
+                  {errors.dob_proof && (
+                    <span className="text-red-500 text-xs ml-1 h-1">
+                      {errors.dob_proof}
+                    </span>
+                  )}
+                </div>
+              )}
               <div className="">
                 <label
                   htmlFor="part_of"
@@ -1886,19 +1796,19 @@ const EditLCforDeleteStudent = () => {
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
                   {[
-                    "Football",
-                    "Basketball",
-                    "Volleyball",
+                    "Foot ball",
+                    "Basket Ball",
+                    "Volley Ball",
                     "Tennis",
                     "Kho Kho",
                     "Table Tennis",
-                    "Kabaddi",
+                    "Kabadi",
                     "Cricket",
                     "Athletics",
                     "Dodgeball",
                     "Throwball",
                     "Handball",
-                    "Tug of War",
+                    "Tug of war",
                     "Gymnastics",
                     "Skating",
                     "Martial Arts",
@@ -1928,28 +1838,82 @@ const EditLCforDeleteStudent = () => {
                   </span>
                 )}
               </div>
-              <div>
-                <label
-                  htmlFor="attendance"
-                  className="block font-bold text-xs mb-2"
-                >
-                  Attendance <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="attendance"
-                  maxLength={7}
-                  name="attendance"
-                  value={formData.attendance}
-                  onChange={handleChange}
-                  className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
-                />
-                {errors.attendance && (
-                  <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.attendance}
-                  </span>
-                )}
-              </div>
+              {sortNameCookie === "SACS" && (
+                <div>
+                  <label
+                    htmlFor="attendance"
+                    className="block font-bold text-xs mb-2"
+                  >
+                    Attendance <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="attendance"
+                    maxLength={7}
+                    name="attendance"
+                    value={formData.attendance}
+                    onChange={handleChange}
+                    className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                  />
+                  {errors.attendance && (
+                    <span className="text-red-500 text-xs ml-1 h-1">
+                      {errors.attendance}
+                    </span>
+                  )}
+                </div>
+              )}
+              {sortNameCookie === "HSCS" && (
+                <>
+                  {/* New Field: Working Days */}
+                  <div>
+                    <label
+                      htmlFor="working_days"
+                      className="block font-bold text-xs mb-2"
+                    >
+                      Total Number of Working Days{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="working_days"
+                      name="working_days"
+                      value={formData.working_days}
+                      onChange={handleChange}
+                      className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                    />
+                    {errors.working_days && (
+                      <span className="text-red-500 text-xs ml-1 h-1">
+                        {errors.working_days}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Modified Field: Attendance with different label */}
+                  <div>
+                    <label
+                      htmlFor="attendance"
+                      className="block font-bold text-xs mb-2"
+                    >
+                      Total Number of Working Days Present{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="attendance"
+                      maxLength={7}
+                      name="attendance"
+                      value={formData.attendance}
+                      onChange={handleChange}
+                      className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                    />
+                    {errors.attendance && (
+                      <span className="text-red-500 text-xs ml-1 h-1">
+                        {errors.attendance}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
               <div>
                 <label
                   htmlFor="fee_month"
@@ -1961,8 +1925,8 @@ const EditLCforDeleteStudent = () => {
                 <input
                   type="text"
                   id="fee_month"
+                  // maxLength={50}
                   name="fee_month"
-                  maxLength={50}
                   value={formData.fee_month}
                   onChange={handleChange}
                   className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -1984,8 +1948,8 @@ const EditLCforDeleteStudent = () => {
                 <input
                   type="text"
                   id="standard_studying"
-                  maxLength={20}
                   name="standard_studying"
+                  maxLength={20}
                   value={formData.standard_studying}
                   onChange={handleChange}
                   className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
@@ -2073,27 +2037,6 @@ const EditLCforDeleteStudent = () => {
                 )}
               </div>
 
-              {/* <div>
-                        <label
-                          htmlFor="academic_year"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Academic Year <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="academic_year"
-                          name="academic_year"
-                          value={formData.academic_year}
-                          onChange={handleChange}
-                          className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
-                        />
-                        {errors.academic_year && (
-                          <span className="text-red-500 text-xs ml-1 h-1">
-                            {errors.academic_year}
-                          </span>
-                        )}
-                      </div> */}
               {/* Dropdown for Academic Year */}
               <div className="mb-4">
                 <label

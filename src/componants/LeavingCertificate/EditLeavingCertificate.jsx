@@ -17,15 +17,17 @@ const EditLeavingCertificate = () => {
   const [parentInformation, setParentInformation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingForSearchAcy, setLoadingForSearchAcy] = useState(false);
-
   const navigate = useNavigate();
   const location = useLocation();
   const { student } = location.state || {};
+  const [selectedClassForSubject, setSelectedClassForSubject] = useState(
+    location?.state?.classname || ""
+  );
 
   const srNo = location.state?.sr_no || location.state?.student?.sr_no || null;
   const classId =
     location.state?.class_id || location.state?.student?.class_id || null;
-
+  console.log("dataaa---", location.state);
   console.log("edit page LC - srNo:", srNo, "classId:", classId);
   const getCookie = (name) => {
     const cookieValue = document.cookie
@@ -92,7 +94,7 @@ const EditLeavingCertificate = () => {
       try {
         setLoading(true); // Start loading
         const token = localStorage.getItem("authToken");
-
+        setSelectedClassForSubject(location?.state?.classname || "");
         if (!token) throw new Error("No authentication token found");
 
         const response = await axios.get(
@@ -1392,12 +1394,32 @@ const EditLeavingCertificate = () => {
                   className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
                 />
               </div>
-              <div>
+              <div
+                className={`
+        ${
+          sortNameCookie === "HSCS"
+            ? "relative -top-6"
+            : sortNameCookie === "SACS"
+            ? "relative top-0"
+            : "relative top-0"
+        }`}
+              >
+                {" "}
                 <label
                   htmlFor="PromotedTo"
                   className="block font-bold text-xs mb-2"
                 >
-                  Promoted to <span className="text-red-500">*</span>
+                  {sortNameCookie === "HSCS" && (
+                    <p className="">
+                      Whether qualified for promotion to higher class{" "}
+                      <span className="text-red-500">*</span>
+                    </p>
+                  )}
+                  {sortNameCookie === "SACS" && (
+                    <>
+                      Promoted to <span className="text-red-500">*</span>
+                    </>
+                  )}
                 </label>
                 <input
                   type="text"
@@ -1470,26 +1492,7 @@ const EditLeavingCertificate = () => {
                   </span>
                 )}
               </div>
-              {/* <div>
-                <label htmlFor="state" className="block font-bold text-xs mb-2">
-                  State <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="state"
-                  name="state"
-                  maxLength={50}
-                  value={formData.state}
-                  onChange={handleChange}
-                  readOnly
-                  className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
-                />
-                {errors.state && (
-                  <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.state}
-                  </span>
-                )}
-              </div> */}
+
               {sortNameCookie === "SACS" && (
                 <div>
                   <label
@@ -1615,29 +1618,6 @@ const EditLeavingCertificate = () => {
             {/* </legend> */}
 
             <div className="grid grid-cols-1 md:grid-cols-4  gap-4">
-              {/* <div>
-                <label
-                  htmlFor="prev_school_class"
-                  className="block font-bold text-xs mb-2"
-                >
-                  Previous School Attended{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="prev_school_class"
-                  maxLength={100}
-                  name="prev_school_class"
-                  value={formData.prev_school_class}
-                  onChange={handleChange}
-                  className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
-                />
-                {errors.prev_school_class && (
-                  <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.prev_school_class}
-                  </span>
-                )}
-              </div> */}
               {sortNameCookie === "SACS" && (
                 <div>
                   <label
@@ -1731,36 +1711,6 @@ const EditLeavingCertificate = () => {
                   </span>
                 )}
               </div>{" "}
-              {/* Dropdown for Proof of DOB submitted */}
-              {/* <div className="">
-                <label
-                  htmlFor="dob_proof"
-                  className="block font-bold text-xs mb-2"
-                >
-                  Proof of DOB Submitted at the Time of Admission
-                  <span className="text-red-500">*</span>
-                </label>
-                <select
-                  id="dob_proof"
-                  name="dob_proof"
-                  value={formData.dob_proof}
-                  onChange={handleChange}
-                  className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
-                >
-                  <option value="">Select</option>
-                  <option value="Birth Certificate">Birth Certificate</option>
-                  <option value="School Leaving Certificate">
-                    School Leaving Certificate
-                  </option>
-                  <option value="Aadhar Card">Aadhar Card</option>
-                  <option value="Passport">Passport</option>
-                </select>
-                {errors.dob_proof && (
-                  <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.dob_proof}
-                  </span>
-                )}
-              </div>{" "} */}
               {sortNameCookie === "SACS" && (
                 <div className="">
                   <label
@@ -1916,28 +1866,6 @@ const EditLeavingCertificate = () => {
                   </span>
                 )}
               </div>
-              {/* <div>
-                <label
-                  htmlFor="attendance"
-                  className="block font-bold text-xs mb-2"
-                >
-                  Attendance <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="attendance"
-                  maxLength={7}
-                  name="attendance"
-                  value={formData.attendance}
-                  onChange={handleChange}
-                  className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
-                />
-                {errors.attendance && (
-                  <span className="text-red-500 text-xs ml-1 h-1">
-                    {errors.attendance}
-                  </span>
-                )}
-              </div> */}
               {sortNameCookie === "SACS" && (
                 <div>
                   <label
@@ -2137,28 +2065,6 @@ const EditLeavingCertificate = () => {
                 )}
               </div>
 
-              {/* <div>
-                        <label
-                          htmlFor="academic_year"
-                          className="block font-bold text-xs mb-2"
-                        >
-                          Academic Year <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="academic_year"
-                          name="academic_year"
-                          value={formData.academic_year}
-                          onChange={handleChange}
-                          className="input-field block border w-full border-1 border-gray-950 rounded-md py-1 px-3 bg-white shadow-inner"
-                        />
-                        {errors.academic_year && (
-                          <span className="text-red-500 text-xs ml-1 h-1">
-                            {errors.academic_year}
-                          </span>
-                        )}
-                      </div> */}
-              {/* Dropdown for Academic Year */}
               <div className="mb-4">
                 <label
                   htmlFor="academic_yr"
