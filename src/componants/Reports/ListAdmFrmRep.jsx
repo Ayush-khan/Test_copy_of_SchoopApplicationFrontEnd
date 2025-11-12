@@ -820,8 +820,7 @@ const ListAdmFrmRep = () => {
                                 .concat(
                                   shortName === "HSCS"
                                     ? ["Trnx Ref. No."]
-                                    : shortName === "SACS" &&
-                                      Number(selectedStudent?.label) > 9
+                                    : shortName === "SACS"
                                     ? [
                                         "Subject Group",
                                         "Subjects Selected",
@@ -986,36 +985,31 @@ const ListAdmFrmRep = () => {
                                       {student.Trnx_ref_no}
                                     </td>
                                   )}
-                                  {shortName === "SACS" &&
-                                    Number(selectedStudent?.label) > 9 && (
-                                      <>
-                                        <td className="px-2 py-2 text-center border border-gray-300">
-                                          {
-                                            student.academic_details
-                                              .sub_group_name
-                                          }
-                                        </td>
-                                        <td className="px-2 py-2 text-center border border-gray-300">
-                                          {
-                                            student.academic_details
-                                              .selected_subjects
-                                          }
-                                        </td>
-                                        <td className="px-2 py-2 text-center border border-gray-300">
-                                          {student.academic_details["9marks"]}
-                                        </td>
-                                        <td className="px-2 py-2 text-center border border-gray-300">
-                                          {
-                                            student.academic_details[
-                                              "10preboard"
-                                            ]
-                                          }
-                                        </td>
-                                        <td className="px-2 py-2 text-center border border-gray-300">
-                                          {student.academic_details["10final"]}
-                                        </td>
-                                      </>
-                                    )}
+                                  {shortName === "SACS" && (
+                                    <>
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {
+                                          student.academic_details
+                                            .sub_group_name
+                                        }
+                                      </td>
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {
+                                          student.academic_details
+                                            .selected_subjects
+                                        }
+                                      </td>
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {student.academic_details["9marks"]}
+                                      </td>
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {student.academic_details["10preboard"]}
+                                      </td>
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {student.academic_details["10final"]}
+                                      </td>
+                                    </>
+                                  )}
                                 </tr>
                               ))
                             ) : (
