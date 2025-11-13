@@ -5,7 +5,6 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
@@ -53,7 +52,7 @@ const ListAdmFrmRep = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const shortname = sessionResponse.data.custom_claims.settings.short_name;
+      const shortname = sessionResponse?.data?.custom_claims?.short_name;
       setShortName(shortname);
 
       console.log("short name:", shortname);

@@ -627,7 +627,7 @@ function ManageSubjectList() {
         return;
       }
       toast.success(
-        `Password for user id "${userIdset}" is reset to arnolds successfully!`
+        response?.data?.Message || `Your password has been reset successfully.`
       );
       setShowEditModal(false); // Close modal after success
       setErrorMessage(""); // Clear error message on success

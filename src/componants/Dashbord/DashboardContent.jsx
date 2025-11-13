@@ -33,7 +33,7 @@ const DashboardContent = () => {
     total: 0,
     present: 0,
   });
-
+  const [sortNameCookie, setSortNameCookie] = useState("");
   const [staffData, setStaffData] = useState({
     teachingStaff: "",
     nonTeachingStaff: "",
@@ -68,7 +68,7 @@ const DashboardContent = () => {
       });
 
       const roleId = response?.data?.user?.role_id;
-
+      setSortNameCookie(response?.data?.custom_claims?.short_name);
       if (roleId) {
         setRoleId(roleId); // ✅ Save only roleId to state
       } else {

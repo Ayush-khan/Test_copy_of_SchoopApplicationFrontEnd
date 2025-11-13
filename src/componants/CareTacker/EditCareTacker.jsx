@@ -105,13 +105,13 @@ function EditCareTacker() {
     return null;
   };
 
-  const validateAadhar = (aadhar) => {
-    // if (!aadhar) return "Aadhar card number is required";
-    if (!aadhar) return "Aadhar card number is required";
-    if (!/^\d{12}$/.test(aadhar.replace(/\s+/g, "")))
-      return "Aadhar card number must be 12 digits";
-    return null;
-  };
+  // const validateAadhar = (aadhar) => {
+  //   // if (!aadhar) return "Aadhar card number is required";
+  //   if (!aadhar) return "Aadhar card number is required";
+  //   if (!/^\d{12}$/.test(aadhar.replace(/\s+/g, "")))
+  //     return "Aadhar card number must be 12 digits";
+  //   return null;
+  // };
 
   //   const validateEmail = (email) => {
   //     if (!email) return "Email is required";
@@ -168,8 +168,8 @@ function EditCareTacker() {
     // if (experienceError) newErrors.experience = experienceError;
 
     // Validate aadhar card number
-    const aadharError = validateAadhar(formData.aadhar_card_no);
-    if (aadharError) newErrors.aadhar_card_no = aadharError;
+    // const aadharError = validateAadhar(formData.aadhar_card_no);
+    // if (aadharError) newErrors.aadhar_card_no = aadharError;
 
     setErrors(newErrors);
     return newErrors;
@@ -249,9 +249,9 @@ function EditCareTacker() {
     }
 
     // Aadhaar card validation
-    if (name === "aadhar_card_no") {
-      fieldErrors.aadhar_card_no = validateAadhar(newValue);
-    }
+    // if (name === "aadhar_card_no") {
+    //   fieldErrors.aadhar_card_no = validateAadhar(newValue);
+    // }
 
     // Update the errors state with the new field errors
     setErrors((prevErrors) => ({
