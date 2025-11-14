@@ -95,7 +95,7 @@ function TeacherList() {
     try {
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+      const response = await axios.get(`${API_URL}/api/get_teachercategory_teaching`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
