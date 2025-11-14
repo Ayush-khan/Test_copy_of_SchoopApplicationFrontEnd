@@ -171,7 +171,9 @@ const LandingPage = () => {
 
     // Step 1: validate_staff_user
     const staffResponse = await axios.post(
-      "https://api.aceventura.in/demo/evolvuUserService/validate_staff_user",
+      "https://api.aceventura.in/evolvuUserService/validate_staff_user",
+      // "https://api.aceventura.in/demo/evolvuUserService/vaidate_staff_user"
+
       formData
     );
 
@@ -184,7 +186,9 @@ const LandingPage = () => {
     } else {
       // Step 2: fallback to validate_user
       const userResponse = await axios.post(
-        "https://api.aceventura.in/demo/evolvuUserService/validate_user",
+        // "https://api.aceventura.in/demo/evolvuUserService/validate_user",
+                "https://api.aceventura.in/evolvuUserService/validate_user",
+
         formData
       );
 
