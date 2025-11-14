@@ -212,6 +212,13 @@ const SiblingUnmapping = () => {
     [studentNameWithClassId]
   );
 
+  const camelCase = (str) =>
+    str
+      ?.toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+
   const handleSearch = async (selectedStudent1) => {
     // Reset error messages
     setNameError("");
@@ -508,7 +515,7 @@ const SiblingUnmapping = () => {
                           }}
                         ></div>
 
-                        {[
+                        {/* {[
                           ["Student Name", formData.stud_name],
                           ["Father's Name", formData.father_name],
                           ["Mother's Name", formData.mother_name],
@@ -529,7 +536,39 @@ const SiblingUnmapping = () => {
                               {value || ""}
                             </p>
                           </div>
-                        ))}
+                        ))} */}
+                        {[
+                          ["Student Name", formData.stud_name],
+                          ["Father's Name", formData.father_name],
+                          ["Mother's Name", formData.mother_name],
+                          ["Father's Email", formData.father_email],
+                          ["Father's Phone", formData.father_phone],
+                          ["Mother's Email", formData.mother_email],
+                          ["Mother's Phone", formData.mother_phone],
+                          ["User ID", formData.user_id],
+                        ].map(([label, value], i) => {
+                          // Apply camelCase only to name fields
+                          const formattedValue =
+                            label === "Student Name" ||
+                            label === "Father's Name" ||
+                            label === "Mother's Name"
+                              ? camelCase(value)
+                              : value;
+
+                          return (
+                            <div
+                              key={i}
+                              className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8 mb-2"
+                            >
+                              <label className="block font-semibold text-[1em] md:w-1/3 text-gray-700">
+                                {label} :
+                              </label>
+                              <p className="text-gray-700 relative top-2 md:w-[60%]">
+                                {formattedValue || ""}
+                              </p>
+                            </div>
+                          );
+                        })}
                       </form>
 
                       {/* Sibling Information */}
@@ -555,10 +594,11 @@ const SiblingUnmapping = () => {
                               {/* Left: Sibling Label + Info */}
                               <div className="flex flex-col">
                                 <span className="text-gray-700">
-                                  {`${sibling.first_name || ""} ${
-                                    sibling.mid_name || ""
-                                  } ${sibling.last_name || ""}`.trim() ||
-                                    "Name not available"}{" "}
+                                  {camelCase(
+                                    `${sibling.first_name || ""} ${
+                                      sibling.mid_name || ""
+                                    } ${sibling.last_name || ""}`.trim()
+                                  ) || "Name not available"}
                                   (
                                   {sibling.get_class?.name ||
                                     "Class not available"}{" "}

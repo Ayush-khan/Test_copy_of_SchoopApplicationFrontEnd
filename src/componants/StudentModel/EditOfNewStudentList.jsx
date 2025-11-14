@@ -265,7 +265,7 @@ function EditOfNewStudentList() {
         m_emailid: student?.parents?.m_emailid || "",
         m_adhar_no: student?.parents?.m_adhar_no || "",
         udise_pen_no: student.udise_pen_no || " ",
-        apaar_id: student.apaar_id || " ",
+        apaar_id: student?.apaar_id || " ",
         // Preferences
         SetToReceiveSMS: "",
         SetEmailIDAsUsername: "",
@@ -437,52 +437,6 @@ function EditOfNewStudentList() {
     }
   };
 
-  // useEffect(() => {
-  //   if (parentInformation) {
-  //     setFormData((prevFormData) => ({
-  //       ...prevFormData, // Spread the existing formData to retain other values
-  //       // Now update only the parent-related fields
-  //       parent_id: parentInformation.parent_id || " ",
-  //       father_name: parentInformation.father_name || "",
-  //       father_occupation: parentInformation.father_occupation || "",
-  //       f_office_add: parentInformation.f_office_add || "",
-  //       f_office_tel: parentInformation.f_office_tel || "",
-  //       f_mobile: parentInformation.f_mobile || "",
-  //       f_email: parentInformation.f_email || "",
-  //       parent_adhar_no: parentInformation.parent_adhar_no || "",
-  //       mother_name: parentInformation.mother_name || "",
-  //       mother_occupation: parentInformation.mother_occupation || "",
-  //       m_office_add: parentInformation.m_office_add || "",
-  //       m_office_tel: parentInformation.m_office_tel || "",
-  //       m_mobile: parentInformation.m_mobile || "",
-  //       m_emailid: parentInformation.m_emailid || "",
-  //       m_adhar_no: parentInformation.m_adhar_no || "",
-  //       f_dob: parentInformation.f_dob || "",
-  //       m_dob: parentInformation.m_dob || "",
-  //       f_blood_group: parentInformation.f_blood_group || "",
-  //       m_blood_group: parentInformation.m_blood_group || "",
-  //     }));
-
-  //     // Set additional preferences for mobile or email-based login or SMS settings
-  //     setFatherMobileSelected({
-  //       setUsername: parentInformation.SetEmailIDAsUsername === "FatherMob",
-  //       receiveSms: parentInformation.SetToReceiveSMS === "FatherMob",
-  //     });
-  //     setMotherMobileSelected({
-  //       setUsername: parentInformation.SetEmailIDAsUsername === "MotherMob",
-  //       receiveSms: parentInformation.SetToReceiveSMS === "MotherMob",
-  //     });
-  //     setFatherEmailSelected({
-  //       setUsername: parentInformation.SetEmailIDAsUsername === "Father",
-  //     });
-  //     setMotherEmailSelected({
-  //       setUsername: parentInformation.SetEmailIDAsUsername === "Mother",
-  //     });
-  //   }
-  // }, [parentInformation]);
-
-  // Fetch classes with student count
-
   //  newLogic
 
   useEffect(() => {
@@ -572,22 +526,6 @@ function EditOfNewStudentList() {
         SetEmailIDAsUsername: parentInformation?.SetEmailIDAsUsername || "",
       }));
 
-      // Initializing selectedUsername based on conditions
-      // const userId = student.user_master?.user_id;
-      // console.log("master user_id", userId);
-      // if (userId === student.parents?.f_mobile) {
-      //   setSelectedUsername("FatherMob");
-      // } else if (userId === student.parents?.m_mobile) {
-      //   setSelectedUsername("MotherMob");
-      // } else if (userId === student.parents?.f_email) {
-      //   setSelectedUsername("Father");
-      // } else if (userId === student.parents?.m_emailid) {
-      //   setSelectedUsername("Mother");
-      // } else if (userId === undefined) {
-      //   setSelectedUsername("");
-      //   console.log("run conditon when userid is undefined");
-      // }
-      // const userId = student.user_master?.user_id;
       const userId = parentInformation?.SetEmailIDAsUsername
         ? parentInformation?.SetEmailIDAsUsername
         : null;
@@ -1283,78 +1221,6 @@ function EditOfNewStudentList() {
     }));
   };
 
-  // const validatePhone = (phone) => {
-  //   if (!phone) return "Phone number is required";
-  //   if (!/^\d{10}$/.test(phone)) return "Phone number must be 10 digits";
-  //   return null;
-  // };
-
-  // const validateAadhar = (aadhar) => {
-  //   if (!aadhar) return "Aadhar card number is required";
-  //   if (!/^\d{12}$/.test(aadhar.replace(/\s+/g, "")))
-  //     return "Aadhar card number must be 12 digits";
-  //   return null;
-  // };
-
-  // const validateEmail = (email) => {
-  //   if (!email) return "Email is required";
-  //   if (!/\S+@\S+\.\S+/.test(email)) return "Email address is invalid";
-  //   return null;
-  // };
-
-  // const validate = () => {
-  //   const newErrors = {};
-  //   if (!formData.first_name) newErrors.first_name = "First name is required";
-  //   // Add other field validations
-  //   const phoneError = validatePhone(formData.phone);
-  //   if (phoneError) newErrors.phone = phoneError;
-  //   const aadharError = validateAadhar(formData.aadhar_card_no);
-  //   if (aadharError) newErrors.aadhar_card_no = aadharError;
-  //   const emailError = validateEmail(formData.email);
-  //   if (emailError) newErrors.email = emailError;
-  //   return newErrors;
-  // };
-
-  // const handleChange = (event) => {
-  //   const { name, value, checked, type } = event.target;
-  //   let newValue = value;
-
-  //   if (type === "checkbox") {
-  //     newValue = checked;
-  //   }
-
-  //   setFormData((prevData) => ({
-  //     ...prevData,
-  //     [name]: newValue,
-  //   }));
-
-  //   // Validate field on change
-  //   let fieldErrors = {};
-  //   if (name === "phone") {
-  //     fieldErrors.phone = validatePhone(newValue);
-  //   } else if (name === "aadhar_card_no") {
-  //     fieldErrors.aadhar_card_no = validateAadhar(newValue);
-  //   } else if (name === "email") {
-  //     fieldErrors.email = validateEmail(newValue);
-  //   }
-
-  //   setErrors((prevErrors) => ({
-  //     ...prevErrors,
-  //     ...fieldErrors,
-  //   }));
-  // };
-
-  // const handleFileChange = (event) => {
-  //   const file = event.target.files[0];
-  //   if (file) {
-  //     setFormData((prevState) => ({
-  //       ...prevState,
-  //       student_image: file,
-  //     }));
-  //     setPhotoPreview(URL.createObjectURL(file));
-  //   }
-  // };
-
   const handleImageCropped = (croppedImageData) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -1376,101 +1242,6 @@ function EditOfNewStudentList() {
         return { value: "", key: "general" };
     }
   };
-
-  // const handleSubmit = async (event) => {
-  //   console.log("Submit triggered");
-  //   event.preventDefault();
-
-  //   setErrors({});
-  //   setUsernameErrors({});
-  //   const validationErrors = validate();
-
-  //   if (Object.keys(validationErrors).length > 0) {
-  //     setErrors(validationErrors);
-  //     console.log("Validation Errors:", validationErrors);
-  //     return;
-  //   }
-
-  //   // ✅ Derive user ID and related error key
-  //   const { value: userIdForCheck, key: errorKey } = getUserIdDetails(
-  //     formData,
-  //     selectedUsername
-  //   );
-
-  //   // ✅ Check for username presence
-  //   if (!userIdForCheck) {
-  //     setUsernameErrors((prev) => ({
-  //       ...prev,
-  //       [errorKey]: "Username is empty or invalid.",
-  //     }));
-  //     toast.error("Please provide a valid username.");
-  //     return;
-  //   }
-
-  //   // ✅ Check uniqueness
-  //   const usernameExists = await checkUserId(
-  //     student.student_id,
-  //     userIdForCheck
-  //   );
-  //   if (usernameExists) {
-  //     setUsernameErrors((prevErrors) => ({
-  //       ...prevErrors,
-  //       [errorKey]: "Username is already taken.",
-  //     }));
-  //     toast.error("Username is already taken. Please choose another.");
-  //     return;
-  //   }
-
-  //   // ✅ Continue if no errors
-  //   if (parentExist === "no") {
-  //     formData.parent_id = 0;
-  //     console.log("No existing parent, parent_id set to 0");
-  //   } else {
-  //     console.log("Parent exists, parent_id is:", formData.parent_id);
-  //   }
-
-  //   try {
-  //     setBackendErrors({});
-  //     setLoading(true);
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) throw new Error("No authentication token found");
-
-  //     const updatedFormData = {
-  //       ...formData,
-  //       SetEmailIDAsUsername: selectedUsername || "",
-  //     };
-
-  //     const response = await axios.put(
-  //       `${API_URL}/api/updateNewStudent/${student.student_id}/${formData?.parent_id}`,
-  //       updatedFormData,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success("Student updated successfully!");
-  //       setTimeout(() => {
-  //         navigate("/newStudentList");
-  //       }, 3000);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error.response?.data || error.message);
-  //     if (error.response?.data?.errors) {
-  //       setBackendErrors(error.response.data.errors);
-  //       toast.error(
-  //         "Some fields contain duplicate data. Please ensure all values are unique."
-  //       );
-  //     } else {
-  //       toast.error(
-  //         error.message || "Backend error occurred while updating data."
-  //       );
-  //     }
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-  // above code working well but one condtions for sibling user id miss because api for unique name is run
   const handleSubmit = async (event) => {
     console.log("Submit triggered");
     event.preventDefault();
@@ -2189,7 +1960,7 @@ function EditOfNewStudentList() {
                   id="Apaar_no"
                   name="apaar_id"
                   maxLength={12}
-                  value={formData.apaar_id}
+                  value={formData?.apaar_id}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={(e) => {
                     const value = e.target.value.replace(/[^a-zA-Z0-9]/g, "");

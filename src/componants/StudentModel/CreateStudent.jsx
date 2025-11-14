@@ -209,74 +209,77 @@ function Form() {
   console.log("student", student);
   useEffect(() => {
     if (student) {
-      setFormData({
-        first_name: student.first_name || " ",
-        mid_name: student.mid_name || "",
-        last_name: student.last_name || "",
-        house: student.house || "",
-        student_name: student.student_name || "",
-        dob: student.dob || "",
-        admission_date: student.admission_date || "",
-        stud_id_no: student.stud_id_no || "",
-        stu_aadhaar_no: student.stu_aadhaar_no || "",
-        gender: student.gender || "",
-        permant_add: student.permant_add || " ",
-        mother_tongue: student.mother_tongue || "",
-        birth_place: student.birth_place || "",
-        admission_class: student.admission_class || " ",
-        city: student.city || " ",
-        state: student.state || "",
-        roll_no: student.roll_no || "",
-        // student_id: student.student_id || " ",
-        reg_no: student.reg_no || " ",
-        blood_group: student.blood_group || " ",
-        category: student.category || " ",
-        class_id: student.class_id || "",
-        section_id: student.section_id || "",
-        religion: student.religion || "",
-        caste: student.caste || "",
-        subcaste: student.subcaste || "",
-        transport_mode: student.transport_mode || " ",
-        vehicle_no: student.vehicle_no || "",
-        emergency_name: student.emergency_name || " ",
-        emergency_contact: student.emergency_contact || "",
-        emergency_add: student.emergency_add || "",
-        height: student.height || "",
-        weight: student.weight || "",
-        allergies: student.allergies || "",
-        nationality: student.nationality || "",
-        pincode: student.pincode || "",
-        image_name: student.image_name || null,
-        // Parent information
-        f_dob: student?.parents?.f_dob || " ",
-        m_dob: student?.parents?.m_dob || " ",
-        father_name: student?.parents?.father_name || " ",
-        father_occupation: student?.parents?.father_occupation || "",
-        f_office_add: student?.parents?.f_office_add || "  ",
-        f_office_tel: student?.parents?.f_office_tel || "",
-        f_mobile: student?.parents?.f_mobile || "",
-        f_email: student?.parents?.f_email || "",
-        parent_adhar_no: student?.parents?.parent_adhar_no || "",
-        mother_name: student?.parents?.mother_name || " ",
-        mother_occupation: student?.parents?.mother_occupation || "",
-        m_office_add: student?.parents?.m_office_add || " ",
-        m_office_tel: student?.parents?.m_office_tel || "",
-        m_mobile: student?.parents?.m_mobile || "",
-        m_emailid: student?.parents?.m_emailid || "",
-        m_adhar_no: student?.parents?.m_adhar_no || "",
-        udise_pen_no: student.udise_pen_no || " ",
-        apaar_id: student?.apaar_id || " ",
-        has_specs: student?.has_specs || " ",
-        m_blood_group: student?.parents?.m_blood_group || " ",
-        f_blood_group: student?.parents?.f_blood_group || " ",
+      setFormData(
+        {
+          first_name: student.first_name || " ",
+          mid_name: student.mid_name || "",
+          last_name: student.last_name || "",
+          house: student.house || "",
+          student_name: student.student_name || "",
+          dob: student.dob || "",
+          admission_date: student.admission_date || "",
+          stud_id_no: student.stud_id_no || "",
+          stu_aadhaar_no: student.stu_aadhaar_no || "",
+          gender: student.gender || "",
+          permant_add: student.permant_add || " ",
+          mother_tongue: student.mother_tongue || "",
+          birth_place: student.birth_place || "",
+          admission_class: student.admission_class || " ",
+          city: student.city || " ",
+          state: student.state || "",
+          roll_no: student.roll_no || "",
+          // student_id: student.student_id || " ",
+          reg_no: student.reg_no || " ",
+          blood_group: student.blood_group || " ",
+          category: student.category || " ",
+          class_id: student.class_id || "",
+          section_id: student.section_id || "",
+          religion: student.religion || "",
+          caste: student.caste || "",
+          subcaste: student.subcaste || "",
+          transport_mode: student.transport_mode || " ",
+          vehicle_no: student.vehicle_no || "",
+          emergency_name: student.emergency_name || " ",
+          emergency_contact: student.emergency_contact || "",
+          emergency_add: student.emergency_add || "",
+          height: student.height || "",
+          weight: student.weight || "",
+          allergies: student.allergies || "",
+          nationality: student.nationality || "",
+          pincode: student.pincode || "",
+          image_name: student.image_name || null,
+          // Parent information
+          f_dob: student?.parents?.f_dob || " ",
+          m_dob: student?.parents?.m_dob || " ",
+          father_name: student?.parents?.father_name || " ",
+          father_occupation: student?.parents?.father_occupation || "",
+          f_office_add: student?.parents?.f_office_add || "  ",
+          f_office_tel: student?.parents?.f_office_tel || "",
+          f_mobile: student?.parents?.f_mobile || "",
+          f_email: student?.parents?.f_email || "",
+          parent_adhar_no: student?.parents?.parent_adhar_no || "",
+          mother_name: student?.parents?.mother_name || " ",
+          mother_occupation: student?.parents?.mother_occupation || "",
+          m_office_add: student?.parents?.m_office_add || " ",
+          m_office_tel: student?.parents?.m_office_tel || "",
+          m_mobile: student?.parents?.m_mobile || "",
+          m_emailid: student?.parents?.m_emailid || "",
+          m_adhar_no: student?.parents?.m_adhar_no || "",
+          udise_pen_no: student.udise_pen_no || " ",
+          apaar_id: student?.apaar_id || " ",
+          has_specs: student?.has_specs || " ",
+          m_blood_group: student?.parents?.m_blood_group || " ",
+          f_blood_group: student?.parents?.f_blood_group || " ",
 
-        // Preferences
-        SetToReceiveSMS: student.SetToReceiveSMS || "",
-        SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
+          // Preferences
+          SetToReceiveSMS: student.SetToReceiveSMS || "",
+          SetEmailIDAsUsername: student.SetEmailIDAsUsername || "",
 
-        // Base64 Image (optional)
-        // student_image: student.student_image || "",
-      });
+          // Base64 Image (optional)
+          // student_image: student.student_image || "",
+        },
+        setSelectedClass(student?.get_class?.name)
+      );
 
       // Set the initial state for father's and mother's mobile preferences based on prefilled data
       // Update the state for username and SMS based on the prefilled data
@@ -1969,31 +1972,29 @@ function Form() {
                   </p>
                 )}
               </div>{" "}
-              {selectedClass > 99 && (
-                <div className="mt-2">
-                  <label
-                    htmlFor="studentAadharNumber"
-                    className="block font-bold text-xs mb-0.5"
-                  >
-                    Udise Pen No.
-                  </label>
-                  <input
-                    type="text"
-                    id="Udise_no"
-                    name="udise_pen_no"
-                    maxLength={11}
-                    value={formData.udise_pen_no}
-                    className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
-                    onChange={handleChange}
-                    // onBlur={handleBlur}
-                  />
-                  {backendErrors.udise_pen_no && (
-                    <p className="text-[12px] text-red-500 mb-1">
-                      {backendErrors.udise_pen_no}
-                    </p>
-                  )}
-                </div>
-              )}
+              <div className="mt-2">
+                <label
+                  htmlFor="studentAadharNumber"
+                  className="block font-bold text-xs mb-0.5"
+                >
+                  Udise Pen No.
+                </label>
+                <input
+                  type="text"
+                  id="Udise_no"
+                  name="udise_pen_no"
+                  maxLength={11}
+                  value={formData.udise_pen_no}
+                  className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
+                  onChange={handleChange}
+                  // onBlur={handleBlur}
+                />
+                {backendErrors.udise_pen_no && (
+                  <p className="text-[12px] text-red-500 mb-1">
+                    {backendErrors.udise_pen_no}
+                  </p>
+                )}
+              </div>
               <div className="mt-2">
                 <label
                   htmlFor="Apaar_id"

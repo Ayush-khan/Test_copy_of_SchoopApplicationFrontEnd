@@ -28,7 +28,7 @@ const NewStudentsRepo = () => {
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  // const [shortName, setShortName] = useState("");
+  const [shortName, setShortName] = useState("");
 
   useEffect(() => {
     fetchExams();
@@ -49,7 +49,7 @@ const NewStudentsRepo = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const shortname = sessionResponse.data.custom_claims.settings.short_name;
+      const shortname = sessionResponse?.data?.custom_claims?.short_name;
       setShortName(shortname);
 
       console.log("short name:", shortname);
@@ -59,9 +59,6 @@ const NewStudentsRepo = () => {
       console.error("Error fetching data:", error);
     }
   };
-
-  const shortName = "HSCS";
-  // const shortName = "SACS";
 
   const fetchExams = async () => {
     try {
@@ -689,10 +686,7 @@ const NewStudentsRepo = () => {
                                 "Division",
                                 "Date of Admission (dd/mm/yyyy)",
                               ]
-                                .concat(
-                                  // shortName === "HSCS" ? ["Trnx Ref. No."] : []
-                                  shortName === "HSCS" ? ["Deleted"] : []
-                                )
+                                .concat(shortName === "HSCS" ? ["Deleted"] : [])
                                 .map((header, index) => {
                                   const isAdmissionDate =
                                     header === "Date of Admission (dd/mm/yyyy)";

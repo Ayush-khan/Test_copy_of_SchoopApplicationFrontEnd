@@ -31,12 +31,12 @@ const UnmapDetails = () => {
   const [error, setError] = useState("");
 
   const { id } = useParams();
-  console.log("selected student is", id);
+  // console.log("selected student is", id);
 
   const location = useLocation();
 
   const studentName = location.state?.studentName || "Name not provided";
-  console.log("Student Nmme", studentName);
+  // console.log("Student Nmme", studentName);
 
   const navigate = useNavigate();
 
@@ -205,6 +205,7 @@ const UnmapDetails = () => {
 
   const handleClassSelect = (selectedOption) => {
     setSelectedClass(selectedOption);
+    console.log("selected class", selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
     setClassIdForSearch(selectedOption?.value);
@@ -212,8 +213,9 @@ const UnmapDetails = () => {
   };
 
   const handleStudentSelect = (selectedOption) => {
-    setNameError(""); // Reset student error on selection
+    // setNameError(""); // Reset student error on selection
     setSelectedStudent(selectedOption);
+    console.log("selected student", selectedOption);
     setSelectedStudentId(selectedOption?.value);
     handleSearch(selectedOption?.value);
   };
@@ -251,10 +253,13 @@ const UnmapDetails = () => {
     setErrors({}); // Clears all field-specific errors
 
     if (!selectedStudent1) {
+      console.log("selectedStudentid");
       setNameError("Please select Student Name.");
       toast.error("Please select Student Name.!");
       return;
     }
+
+    console.log("selectedStudentid", selectedStudent1);
 
     // Reset form data and selected values after successful submission
     setParentInformation(null);
@@ -282,7 +287,7 @@ const UnmapDetails = () => {
         }
       );
 
-      console.log("Students data", response?.data?.students);
+      // console.log("Students data", response?.data?.students);
 
       if (response?.data?.students) {
         const fetchedData = response?.data?.students;
@@ -309,7 +314,7 @@ const UnmapDetails = () => {
             siblings: student?.siblings || [], //Add siblings to formData
           });
 
-          console.log("fetchedData", fetchedData);
+          // console.log("fetchedData", fetchedData);
         } else {
           console.error("No students found in the response.");
         }
@@ -352,9 +357,18 @@ const UnmapDetails = () => {
 
       if (selectedOption === "mapWithOther") {
         const parentId = formData?.parent_id;
+        console.log("parent id", parentId);
+
+        if (!selectedStudentId) {
+          toast.error("Please select Class and Student");
+          // setNameError("Please select Student Name.");
+          // toast.error("Please add parent details to map with sibling.");
+          return;
+        }
 
         if (!parentId) {
-          toast.error("Please select Class and Student");
+          // toast.error("Please select Class and Student");
+          toast.error("Please add parent details to map with sibling.");
           return;
         }
 
@@ -482,7 +496,7 @@ const UnmapDetails = () => {
     <div>
       <ToastContainer />
 
-      <div className=" w-full md:w-[65%] mt-4 mx-auto">
+      <div className=" w-full md:w-[70%] mt-4 mx-auto">
         <div className="card mx-auto lg:w-[100%] shadow-lg">
           <div className=" w-full  p-2 px-3 bg-gray-100 flex justify-between items-center ">
             <h3 className=" w-full text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
@@ -643,6 +657,7 @@ const UnmapDetails = () => {
                         htmlFor="studentSelect"
                       >
                         Student Name
+                        {/* <span className="text-red-500">*</span> */}
                       </label>
                       <div className="w-full md:w-[80%]">
                         <Select
@@ -687,7 +702,7 @@ const UnmapDetails = () => {
                         style={{ backgroundColor: "#C03078" }}
                       ></div>
 
-                      {[
+                      {/* {[
                         ["Student Name", formData.stud_name],
                         ["Father's Name", formData.father_name],
                         ["Mother's Name", formData.mother_name],
@@ -708,7 +723,39 @@ const UnmapDetails = () => {
                             {value || "-"}
                           </p>
                         </div>
-                      ))}
+                      ))} */}
+                      {[
+                        ["Student Name", formData.stud_name],
+                        ["Father's Name", formData.father_name],
+                        ["Mother's Name", formData.mother_name],
+                        ["Father's Email", formData.father_email],
+                        ["Father's Phone", formData.father_phone],
+                        ["Mother's Email", formData.mother_email],
+                        ["Mother's Phone", formData.mother_phone],
+                        ["User ID", formData.user_id],
+                      ].map(([label, value], i) => {
+                        // Apply camelCase only to specific name fields
+                        const formattedValue =
+                          label === "Student Name" ||
+                          label === "Father's Name" ||
+                          label === "Mother's Name"
+                            ? camelCase(value)
+                            : value;
+
+                        return (
+                          <div
+                            key={i}
+                            className="flex flex-col md:flex-row md:items-center gap-y-2 gap-x-8 mb-2"
+                          >
+                            <label className="block font-semibold text-[1em] md:w-1/3 text-gray-700">
+                              {label} :
+                            </label>
+                            <p className="text-gray-700 relative top-2 md:w-[60%]">
+                              {formattedValue || "-"}
+                            </p>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
