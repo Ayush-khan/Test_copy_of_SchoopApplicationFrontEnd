@@ -339,7 +339,7 @@ const SubstituteTeacherMonthlyReport = () => {
                 <div className="w-full md:w-[75%] gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                   <div className="w-full md:w-[50%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                     <label
-                      className="md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="md:w-[40%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
                       Month <span className="text-sm text-red-500">*</span>

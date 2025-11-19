@@ -118,12 +118,11 @@ function RemarkObservationStudent() {
     }
   }, [API_URL, pageSize]); // ❌ do NOT include isSubmitting
 
-useEffect(() => {
-  if (activeTab === "Manage") {
-    handleSearch();
-  }
-}, [activeTab, handleSearch]);
-
+  useEffect(() => {
+    if (activeTab === "Manage") {
+      handleSearch();
+    }
+  }, [activeTab, handleSearch]);
 
   // const handleTabChange = (tab) => {
   //   if (tab === "Manage") {
@@ -131,10 +130,9 @@ useEffect(() => {
   //   }
   //   setActiveTab(tab);
   // };
- const handleTabChange = (tab) => {
-   setActiveTab(tab); // only change the tab
- };
-
+  const handleTabChange = (tab) => {
+    setActiveTab(tab); // only change the tab
+  };
 
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
@@ -869,7 +867,7 @@ useEffect(() => {
                                     <div className="flex flex-col items-center">
                                       <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
                                         Sent{" "}
-                                        <FaCheck className="text-green-600" />
+                                        {/* <FaCheck className="text-green-600" /> */}
                                         {/* Tooltip */}
                                       </div>
                                     </div>

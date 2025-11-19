@@ -338,19 +338,54 @@ const CreateNotice = ({ onSaveSuccess }) => {
     }
   };
 
+  // const handleClassChange = (classId) => {
+  //   if (selectedClasses.includes(classId)) {
+  //     setSelectedClasses(selectedClasses.filter((id) => id !== classId));
+  //   } else {
+  //     setSelectedClasses([...selectedClasses, classId]);
+  //   }
+
+  // };
+
+  // const handleSelectAllClasses = () => {
+  //   if (selectedClasses.length === allClasses.length) {
+  //     setSelectedClasses([]);
+  //   } else {
+  //     setSelectedClasses(allClasses.map((cls) => cls.class_id));
+  //   }
+  // };
+
   const handleClassChange = (classId) => {
+    let updatedClasses;
+
     if (selectedClasses.includes(classId)) {
-      setSelectedClasses(selectedClasses.filter((id) => id !== classId));
+      updatedClasses = selectedClasses.filter((id) => id !== classId);
     } else {
-      setSelectedClasses([...selectedClasses, classId]);
+      updatedClasses = [...selectedClasses, classId];
+    }
+
+    setSelectedClasses(updatedClasses);
+
+    // Remove error if at least one class is selected
+    if (updatedClasses.length > 0) {
+      setErrors((prev) => ({ ...prev, classError: "" }));
     }
   };
 
   const handleSelectAllClasses = () => {
+    let updatedClasses;
+
     if (selectedClasses.length === allClasses.length) {
-      setSelectedClasses([]);
+      updatedClasses = [];
     } else {
-      setSelectedClasses(allClasses.map((cls) => cls.class_id));
+      updatedClasses = allClasses.map((cls) => cls.class_id);
+    }
+
+    setSelectedClasses(updatedClasses);
+
+    // Remove error if at least one class is selected
+    if (updatedClasses.length > 0) {
+      setErrors((prev) => ({ ...prev, classError: "" }));
     }
   };
 
@@ -533,7 +568,18 @@ const CreateNotice = ({ onSaveSuccess }) => {
                             type="text"
                             className=" px-2 py-1 border border-gray-700 rounded-md shadow-md  "
                             value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
+                            // onChange={(e) => setSubject(e.target.value)}
+                            onChange={(e) => {
+                              setSubject(e.target.value);
+
+                              // Remove error when user enters something
+                              if (e.target.value.trim() !== "") {
+                                setErrors((prev) => ({
+                                  ...prev,
+                                  subjectError: "",
+                                }));
+                              }
+                            }}
                           />
                           {errors.subjectError && (
                             <p className="text-red-500">
@@ -553,7 +599,18 @@ const CreateNotice = ({ onSaveSuccess }) => {
                             className="  px-2 py-1 border border-gray-700 rounded-md shadow-md  "
                             rows="2"
                             value={noticeDesc}
-                            onChange={(e) => setNoticeDesc(e.target.value)}
+                            // onChange={(e) => setNoticeDesc(e.target.value)}
+                            onChange={(e) => {
+                              setNoticeDesc(e.target.value);
+
+                              // Remove error when user enters something
+                              if (e.target.value.trim() !== "") {
+                                setErrors((prev) => ({
+                                  ...prev,
+                                  noticeDescError: "",
+                                }));
+                              }
+                            }}
                             onKeyDown={(e) => {
                               if (e.key === "Enter") {
                                 e.preventDefault(); // Prevent the default behavior of Enter key

@@ -122,7 +122,7 @@ const getCookie = (name) => {
 export default function NotificationsPanel() {
   const [instructions, setInstructions] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const API_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     const fetchInstructions = async () => {
       const shortName = getCookie("short_name");
@@ -136,7 +136,7 @@ export default function NotificationsPanel() {
 
       try {
         const response = await fetch(
-          `https://sms.evolvu.in/arnolds_test/public/api/get_generalinstructions?short_name=${shortName}`
+          `${API_URL}/api/get_generalinstructions?short_name=${shortName}`
         );
 
         if (!response.ok) {

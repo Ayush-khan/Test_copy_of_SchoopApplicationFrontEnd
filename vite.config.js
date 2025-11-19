@@ -13,6 +13,7 @@ export default defineConfig({
   build: {
     target: "es2015", // Change this if needed, try "es2015" if esnext doesn't work
     minify: "terser", // Helps avoid modern syntax issues
-    sourcemap: true, // <-- ADD THIS
+    // sourcemap: true, // <-- ADD THIS
+    sourcemap: false, // 🚀 Production में sourcemap OFF
   },
 });

@@ -57,7 +57,7 @@ const UserVerification = () => {
 
     try {
       const response = await axios.post(
-        `https://api.aceventura.in/demo/evolvuUserService/validate_user`,
+        `https://api.aceventura.in/evolvuUserService/validate_user`,
         {
           user_id: userId,
         }

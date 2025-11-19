@@ -872,7 +872,7 @@ function IndividualStudentTab() {
                                         <div className="flex flex-col items-center justify-center gap-1 text-green-600">
                                           <span className="font-semibold text-sm flex items-center gap-1">
                                             Sent{" "}
-                                            <FaCheck className="text-green-600 text-base" />
+                                            {/* <FaCheck className="text-green-600 text-base" /> */}
                                           </span>
                                         </div>
                                       ) : student.sms_sent_status ===

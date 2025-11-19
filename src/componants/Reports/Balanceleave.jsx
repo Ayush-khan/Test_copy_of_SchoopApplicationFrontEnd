@@ -648,28 +648,25 @@ const Balanceleave = () => {
                           <table className="min-w-[80%] leading-normal table-auto border border-gray-300">
                             <thead>
                               <tr className="bg-gray-100">
-                                {[
-                                  "Sr No.",
-                                  "Staff Name",
-                                  "Leave Type",
-                                  "Balance Leave",
-                                ].map((header, index) => {
-                                  let columnWidth = "min-w-[120px] px-2"; // default width
+                                {["Sr No.", "Leave Type", "Balance Leave"].map(
+                                  (header, index) => {
+                                    let columnWidth = "min-w-[120px] px-2"; // default width
 
-                                  if (header === "Sr No.")
-                                    columnWidth = "min-w-[50px]";
-                                  else if (header === "Balance Leave")
-                                    columnWidth = "min-w-[50px]";
+                                    if (header === "Sr No.")
+                                      columnWidth = "min-w-[50px]";
+                                    else if (header === "Balance Leave")
+                                      columnWidth = "min-w-[50px]";
 
-                                  return (
-                                    <th
-                                      key={index}
-                                      className={`text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${columnWidth}`}
-                                    >
-                                      {header}
-                                    </th>
-                                  );
-                                })}
+                                    return (
+                                      <th
+                                        key={index}
+                                        className={`text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${columnWidth}`}
+                                      >
+                                        {header}
+                                      </th>
+                                    );
+                                  }
+                                )}
                               </tr>
                             </thead>
 
@@ -683,9 +680,9 @@ const Balanceleave = () => {
                                     <td className="px-2 py-2 text-center border border-gray-300">
                                       {index + 1}
                                     </td>
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    {/* <td className="px-2 py-2 text-center border border-gray-300">
                                       {student?.staffname || " "}
-                                    </td>
+                                    </td> */}
                                     <td className="px-2 py-2 text-center border border-gray-300">
                                       {student?.name || " "}
                                     </td>

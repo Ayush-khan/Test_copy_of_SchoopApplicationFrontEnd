@@ -418,9 +418,9 @@ const HomeworkStatusReport = () => {
                       : " w-full md:w-[95%] relative left-10"
                   }`}
                 >
-                  <div className="w-full md:w-[40%] gap-x-1 justify-around  my-1 md:my-4 flex md:flex-row ">
+                  <div className="w-full md:w-[50%] gap-x-1 justify-around  my-1 md:my-4 flex md:flex-row ">
                     <label
-                      className="md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
+                      className="md:w-[40%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
                       Class <span className="text-red-500">*</span>

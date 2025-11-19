@@ -789,7 +789,7 @@ function TeacherRemarkandObservation() {
                                       // Published, no failed SMS → show "Send" text
                                       <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
                                         Sent{" "}
-                                        <FaCheck className="text-green-600" />
+                                        {/* <FaCheck className="text-green-600" /> */}
                                         {/* Tooltip */}
                                       </div>
                                     )

@@ -326,6 +326,7 @@ const CreateShortSMS = ({ onSaveSuccess }) => {
     } else {
       setSelectedClasses([...selectedClasses, classId]);
     }
+    setClassError("");
   };
 
   // Select/Deselect all classes
@@ -335,6 +336,7 @@ const CreateShortSMS = ({ onSaveSuccess }) => {
     } else {
       setSelectedClasses(allClasses.map((cls) => cls.class_id)); // Select all
     }
+    setClassError("");
   };
 
   // Reset form
@@ -507,7 +509,7 @@ const CreateShortSMS = ({ onSaveSuccess }) => {
                             </h5>
                           </div>
 
-                          <div className="w-full relative left-0 md:left-7 top-3 mt-2 grid grid-cols-4 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                          <div className="w-full relative left-0 md:left-7 top-3  grid grid-cols-4 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                             {allClasses.map((cls) => (
                               <label
                                 key={cls.class_id}
@@ -552,11 +554,6 @@ const CreateShortSMS = ({ onSaveSuccess }) => {
                           </div>
                         </div>
 
-                        {/* {classError && (
-                    <p className="relative left-[15%] text-red-500 text-sm mt-2 block border-3">
-                      {classError}
-                    </p>
-                  )} */}
                         <div className="w-full  md:w-[58%]  mb-4 flex flex-row justify-between gap-x-2 ">
                           <h5 className="px-2 lg:px-3 py-2 text-[1em] text-gray-700">
                             Subject <span className="text-red-500">*</span>
@@ -566,7 +563,11 @@ const CreateShortSMS = ({ onSaveSuccess }) => {
                               type="text"
                               className=" px-2 py-1 border border-gray-700 rounded-md shadow-md  "
                               value={subject}
-                              onChange={(e) => setSubject(e.target.value)}
+                              // onChange={(e) => setSubject(e.target.value)}
+                              onChange={(e) => {
+                                setSubject(e.target.value);
+                                setSubjectError(""); // 🔥 remove error when user types
+                              }}
                             />
                             {subjectError && (
                               <p className="text-red-500 text-sm h-3">
@@ -585,20 +586,24 @@ const CreateShortSMS = ({ onSaveSuccess }) => {
                               className="relative -top-4 px-2 py-1 border border-gray-700 rounded-md shadow-md"
                               rows="2"
                               value={noticeDesc}
-                              onChange={(e) => setNoticeDesc(e.target.value)}
+                              // onChange={(e) => setNoticeDesc(e.target.value)}
+                              onChange={(e) => {
+                                setNoticeDesc(e.target.value);
+                                setNoticeDescError(""); // 🔥 remove error when user types
+                              }}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
-                                  e.preventDefault(); // Prevent the default behavior of Enter key
-                                  const cursorPos = e.target.selectionStart; // Current cursor position
+                                  e.preventDefault();
+                                  const cursorPos = e.target.selectionStart;
                                   const textBeforeCursor = noticeDesc.slice(
                                     0,
                                     cursorPos
-                                  ); // Text before the cursor
+                                  );
                                   const textAfterCursor =
-                                    noticeDesc.slice(cursorPos); // Text after the cursor
+                                    noticeDesc.slice(cursorPos);
                                   const updatedText = `${textBeforeCursor}\n• ${textAfterCursor}`;
                                   setNoticeDesc(updatedText);
-                                  // Move the cursor to the position after the bullet point
+
                                   setTimeout(() => {
                                     e.target.selectionStart =
                                       e.target.selectionEnd = cursorPos + 3;
@@ -612,21 +617,6 @@ const CreateShortSMS = ({ onSaveSuccess }) => {
                               </p>
                             )}
                           </div>
-
-                          {/* <div className="w-full md:w-[70%] flex flex-col gap-0 ">
-                            <p className="font-light">Dear Parent,</p>
-                            <textarea
-                              className="relative -top-4 px-2 py-1 border border-gray-700 rounded-md shadow-md  "
-                              rows="2"
-                              value={noticeDesc}
-                              onChange={(e) => setNoticeDesc(e.target.value)}
-                            />
-                            {noticeDescError && (
-                              <p className="h-3 relative -top-3 text-red-500 text-sm mt-2">
-                                {noticeDescError}
-                              </p>
-                            )}
-                          </div> */}
                         </div>
                       </div>
                     </div>

@@ -181,6 +181,7 @@ function DeleteStudent() {
   //     setIsSubmitting(false); // Re-enable the button after the operation
   //   }
   // };
+
   const handleSearch = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
@@ -340,11 +341,19 @@ function DeleteStudent() {
       setShowEditModal(true);
     }
   };
+
   const handleCloseModal = () => {
     setShowDownloadModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
+
+  const camelCase = (str) =>
+    str
+      ?.toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
 
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
@@ -532,11 +541,11 @@ function DeleteStudent() {
                                     />
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    {`${subject?.first_name || ""} ${
-                                      subject?.mid_name || ""
-                                    } ${subject?.last_name || ""}`
-                                      .trim()
-                                      .replace(/\s+/g, " ")}
+                                    {camelCase(
+                                      `${subject?.first_name || ""} ${
+                                        subject?.mid_name || ""
+                                      } ${subject?.last_name || ""}`
+                                    )}
                                   </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {`${subject?.classname} ${subject?.sectionname}`}

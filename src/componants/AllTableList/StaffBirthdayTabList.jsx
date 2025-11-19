@@ -166,7 +166,7 @@ function StaffBirthdayTabList() {
                         colSpan="5"
                         className="text-center text-xl py-5 text-red-700"
                       >
-                        Oops! No student birthdays today.
+                        No student birthday today.
                       </td>
                     </tr>
                   )}
@@ -239,7 +239,7 @@ function StaffBirthdayTabList() {
                         colSpan="5"
                         className="text-center text-xl py-5 text-red-700"
                       >
-                        Oops! No staff birthdays today.
+                        No staff birthday today.
                       </td>
                     </tr>
                   )}

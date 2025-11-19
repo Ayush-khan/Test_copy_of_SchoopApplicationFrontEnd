@@ -110,13 +110,27 @@ const HSCStudentsSubjectsReport = () => {
   //     [classNameWithClassId]
   //   );
 
+  // const classOptions = useMemo(
+  //   () =>
+  //     classNameWithClassId
+  //       .filter((cls) => cls?.name === "11" || cls?.name === "12") // Filter only classes 11 and 12
+  //       .map((cls) => ({
+  //         value: cls?.class_id,
+  //         label: cls.name,
+  //       })),
+  //   [classNameWithClassId]
+  // );
   const classOptions = useMemo(
     () =>
       classNameWithClassId
-        .filter((cls) => cls?.name === "11" || cls?.name === "12") // Filter only classes 11 and 12
+        .filter((cls) => {
+          const classNumber = parseInt(cls.name); // Extract numeric part from "11 - Science"
+          return classNumber > 10; // Only show classes greater than 10
+        })
         .map((cls) => ({
-          value: cls?.class_id,
-          label: cls.name,
+          value: cls.class_id,
+          label: `${cls.name}`,
+          key: `${cls.class_id}`,
         })),
     [classNameWithClassId]
   );
@@ -178,125 +192,6 @@ const HSCStudentsSubjectsReport = () => {
   const capitalize = (str) =>
     str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-  // const handlePrint = () => {
-  //     const printTitle = `HSC Students Subjects Report for ${
-  //       selectedClass?.label
-  //     } Class`;
-  //     const printContent = `
-  //   <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
-  //          <h5 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
-  //  <div id="tableHeading" class="text-center w-3/4">
-  //       <table class="min-w-full leading-normal table-auto border border-black mx-auto mt-2">
-  //         <thead>
-  //           <tr class="bg-gray-100">
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No.</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Name</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Stream</th>
-  //             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Subjects</th>
-  //           </tr>
-  //         </thead>
-  //         <tbody>
-  //           ${displayedSections
-  //             .map(
-  //               (subject, index) => `
-  //               <tr class="text-sm">
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   index + 1
-  //                 }</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.roll_no || " "
-  //                 }</td>
-  //                  <td className="px-2 text-center py-2 border border-black">
-  //                  ${subject?.first_name ? capitalize(subject.first_name) : " "}
-  //                  ${subject?.mid_name ? " " + capitalize(subject.mid_name) : " "}
-  //                  ${subject?.last_name ? " " + capitalize(subject.last_name) : " "}
-  //                 </td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.stream_name || " "
-  //                 }</td>
-  //                 <td class="px-2 text-center py-2 border border-black">${
-  //                   subject?.subjects?.map((sub) => sub.subject_name).join(", ") || " "
-  //                 }
-  //                 </td>
-  //               </tr>`
-  //             )
-  //             .join("")}
-  //         </tbody>
-  //       </table>
-  //     </div>
-  //   </div>`;
-
-  //     const printWindow = window.open("", "", "height=900,width=2000");
-  //     printWindow.document.write(`
-  //   <html>
-  //   <head>
-  //     <title>${printTitle}</title>
-  //     <style>
-  //       @page { margin: 0; padding:0; box-sizing:border-box;   ;
-  // }
-  //       body { margin: 0; padding: 0; box-sizing:border-box; font-family: Arial, sans-serif; }
-  //       #tableHeading {
-  //   width: 100%;
-  //   margin: auto; /* Centers the div horizontally */
-  //   display: flex;
-  //   justify-content: center;
-  // }
-
-  // #tableHeading table {
-  //   width: 100%; /* Ensures the table fills its container */
-  //   margin:auto;
-  //   padding:0 10em 0 10em;
-  // }
-
-  // #tableContainer {
-  //   display: flex;
-  //   justify-content: center; /* Centers the table horizontally */
-  //   width: 80%;
-  // }
-
-  // h5 {
-  //   width: 100%;
-  //   text-align: center;
-  //   margin: 0;  /* Remove any default margins */
-  //   padding: 5px 0;  /* Adjust padding if needed */
-  // }
-
-  // #tableMain {
-  // width:100%;
-  // margin:auto;
-  // box-sizing:border-box;
-  //   display: flex;
-  //   flex-direction: column;
-  //   align-items: center;
-  //   justify-content: flex-start; /* Prevent unnecessary space */
-  // padding:0 10em 0 10em;
-  // }
-
-  // h5 + * { /* Targets the element after h5 */
-  //   margin-top: 0; /* Ensures no extra space after h5 */
-  // }
-
-  //       table { border-spacing: 0; width: 70%; margin: auto;   }
-  //       th { font-size: 0.8em; background-color: #f9f9f9; }
-  //       td { font-size: 12px; }
-  //       th, td { border: 1px solid gray; padding: 8px; text-align: center; }
-  //       .student-photo {
-  //         width: 30px !important;
-  //         height: 30px !important;
-  //         object-fit: cover;
-  //         border-radius: 50%;
-  //       }
-  //     </style>
-  //   </head>
-  //   <body>
-  //     ${printContent}
-  //   </body>
-  //   </html>`);
-  //     printWindow.document.close();
-  //     printWindow.print();
-  //   };
-
   const handlePrint = () => {
     const printTitle = `HSC Students Subjects Report for ${selectedClass?.label}-${selectedDivision?.label} Class`;
     const printContent = `
@@ -346,63 +241,6 @@ const HSCStudentsSubjectsReport = () => {
         </table>
       </div>
     </div>`;
-
-    // const printWindow = window.open("", "", "height=900,width=1500");
-    // printWindow.document.write(`
-    // <html>
-    // <head>
-    //   <title>${printTitle}</title>
-    //   <style>
-    //     @page { margin: 0; }
-    //     body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-
-    //     /* Increase width */
-    //     #tableMain {
-    //       width: 100%;
-    //       display: flex;
-    //       flex-direction: column;
-    //       align-items: center;
-    //     }
-
-    //     h5 {
-    //       width: 100%;
-    //       text-align: center;
-    //       font-size: 1.5em;
-    //       font-weight: bold;
-    //       margin-bottom: 10px;
-    //     }
-
-    //     #tableContainer {
-    //       width: 100%;
-    //       display: flex;
-    //       justify-content: center;
-    //     }
-
-    //     table {
-    //       width: 80%; /* Increase table width */
-    //       border-spacing: 0;
-    //        margin: auto;
-    //     }
-
-    //     th, td {
-    //       border: 1px solid gray;
-    //       padding: 12px;
-    //       text-align: center;
-    //       font-size: 16px; /* Increase font size */
-    //     }
-
-    //     th {
-    //       background-color: #f9f9f9;
-    //       font-size: 1.1em;
-    //     }
-    //   </style>
-    // </head>
-    // <body>
-    //   ${printContent}
-    // </body>
-    // </html>`);
-    // printWindow.document.close();
-    // printWindow.print();
 
     const printWindow = window.open("", "_blank", "width=1000,height=800");
 

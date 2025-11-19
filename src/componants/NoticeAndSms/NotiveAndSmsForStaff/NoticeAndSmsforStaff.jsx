@@ -260,8 +260,10 @@ function NoticeAndSmsforStaff() {
   //   setCurrentSection(section);
   //   setSubject(section?.subject || "");
   //   setNoticeDesc(section?.notice_desc || "");
-  //   setNewStaffNames(section?.name || "");
+  //   setNewStaffNames(section?.teacher_names || ""); // Changed from section?.name
+
   //   console.log("enter notice", section);
+
   //   if (section?.notice_type === "Notice") {
   //     console.log("enter notice-->start");
 
@@ -270,21 +272,24 @@ function NoticeAndSmsforStaff() {
   //       if (!token) {
   //         throw new Error("No authentication token found");
   //       }
+
   //       const response = await axios.get(
   //         `${API_URL}/api/get_staffnoticedata/${section.unq_id}`,
   //         {
   //           headers: { Authorization: `Bearer ${token}` },
   //         }
   //       );
+
   //       console.log("responsedata of notice edit", response);
+
   //       if (response.data.success) {
-  //         const noticedata = response.data.data.noticedata[0];
+  //         const noticedata = response.data.data.noticedata; // ✅ No [0]
   //         const imageUrls = response.data.data.imageurl || [];
 
   //         setSubject(noticedata.subject || "");
   //         setNoticeDesc(noticedata.notice_desc || "");
-  //         setNewStaffNames(noticedata.name || "");
-  //         setPreselectedFiles(imageUrls); // Set preselected files
+  //         setNewStaffNames(noticedata.teacher_names || ""); // Updated key
+  //         setPreselectedFiles(imageUrls); // Set preselected file URLs
   //       }
   //     } catch (error) {
   //       console.error("Error fetching notice data:", error);
@@ -296,50 +301,53 @@ function NoticeAndSmsforStaff() {
 
   //   setShowEditModal(true);
   // };
+
   const handleEdit = async (section) => {
+    // Reset previous errors
+    setSubjectError("");
+    setNoticeDescError("");
+    setUploadedFiles([]);
+
     setCurrentSection(section);
+
+    // Prefill fields from table row (before API call)
     setSubject(section?.subject || "");
     setNoticeDesc(section?.notice_desc || "");
-    setNewStaffNames(section?.teacher_names || ""); // Changed from section?.name
+    setNewStaffNames(section?.teacher_names || "");
 
-    console.log("enter notice", section);
+    console.log("Editing Notice:", section);
 
     if (section?.notice_type === "Notice") {
-      console.log("enter notice-->start");
-
       try {
         const token = localStorage.getItem("authToken");
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
+        if (!token) throw new Error("No authentication token found");
 
         const response = await axios.get(
           `${API_URL}/api/get_staffnoticedata/${section.unq_id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        console.log("responsedata of notice edit", response);
+        console.log("Notice Edit API Response:", response);
 
         if (response.data.success) {
-          const noticedata = response.data.data.noticedata; // ✅ No [0]
+          const noticedata = response.data.data.noticedata; // It's an object
           const imageUrls = response.data.data.imageurl || [];
 
+          // Prefill values from API
           setSubject(noticedata.subject || "");
           setNoticeDesc(noticedata.notice_desc || "");
-          setNewStaffNames(noticedata.teacher_names || ""); // Updated key
-          setPreselectedFiles(imageUrls); // Set preselected file URLs
+          setNewStaffNames(noticedata.teacher_names || "");
+          setPreselectedFiles(imageUrls);
         }
       } catch (error) {
         console.error("Error fetching notice data:", error);
         toast.error("Failed to fetch notice data.");
       }
     } else {
-      setPreselectedFiles([]); // Clear preselected files for non-NOTICE types
+      setPreselectedFiles([]); // Clear if not NOTICE
     }
 
-    setShowEditModal(true);
+    setShowEditModal(true); // finally open modal
   };
 
   const handleSubmitEdit = async () => {
@@ -960,7 +968,7 @@ function NoticeAndSmsforStaff() {
                                     <div className="flex flex-col items-center justify-center gap-1">
                                       <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
                                         Sent{" "}
-                                        <FaCheck className="text-green-600" />
+                                        {/* <FaCheck className="text-green-600" /> */}
                                         {/* Tooltip */}
                                       </div>
                                     </div>
@@ -1069,7 +1077,7 @@ function NoticeAndSmsforStaff() {
                     </div>
                   </div>
 
-                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
+                  {/* <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
                     <label htmlFor="subject" className="w-1/2 mt-2">
                       Subject:
                     </label>
@@ -1122,6 +1130,77 @@ function NoticeAndSmsforStaff() {
                         {noticeDescError}
                       </p>
                     )}
+                  </div> */}
+
+                  <div className="relative mb-3 mx-4">
+                    <div className="flex justify-center gap-x-7">
+                      <label htmlFor="subject" className="w-1/2 mt-2">
+                        Subject:
+                      </label>
+
+                      <div className="w-full">
+                        <input
+                          id="subject"
+                          type="text"
+                          maxLength={100}
+                          className="form-control shadow-md mb-1 w-full"
+                          value={subject}
+                          onChange={(e) => {
+                            setSubject(e.target.value);
+                            if (e.target.value.trim() !== "")
+                              setSubjectError("");
+                          }}
+                        />
+
+                        {subjectError && (
+                          <p className="text-red-500 text-sm">{subjectError}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative mb-3 mx-4">
+                    <div className="flex justify-center gap-x-7">
+                      <label htmlFor="noticeDesc" className="w-1/2 mt-2">
+                        Description:
+                      </label>
+
+                      <div className="w-full">
+                        <textarea
+                          id="noticeDesc"
+                          rows="2"
+                          maxLength={1000}
+                          className="form-control shadow-md mb-1 w-full"
+                          value={noticeDesc}
+                          onChange={(e) => {
+                            setNoticeDesc(e.target.value);
+                            if (e.target.value.trim() !== "")
+                              setNoticeDescError("");
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              const cursorPos = e.target.selectionStart;
+                              const before = noticeDesc.slice(0, cursorPos);
+                              const after = noticeDesc.slice(cursorPos);
+                              const updated = `${before}\n• ${after}`;
+                              setNoticeDesc(updated);
+
+                              setTimeout(() => {
+                                e.target.selectionStart =
+                                  e.target.selectionEnd = cursorPos + 3;
+                              }, 0);
+                            }
+                          }}
+                        ></textarea>
+
+                        {noticeDescError && (
+                          <p className="text-red-500 text-sm">
+                            {noticeDescError}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   {currentSection?.notice_type === "Notice" && (

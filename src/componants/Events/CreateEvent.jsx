@@ -472,7 +472,7 @@ const CreateEvent = () => {
                             Select Classes{" "}
                             <span className="text-sm text-red-500">*</span>
                           </label>
-                          <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                          <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2">
                             {allClasses.map((cls) => (
                               <div
                                 key={cls.class_id}
@@ -521,7 +521,7 @@ const CreateEvent = () => {
                             Login Type{" "}
                             <span className="text-sm text-red-500">*</span>
                           </label>
-                          <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                          <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-2">
                             {roles.map((cls) => (
                               <div
                                 key={cls.role_id}

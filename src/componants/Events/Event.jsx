@@ -1613,7 +1613,8 @@ function Event() {
                                   holiday.failed_sms_count === 0 ? (
                                   // ✅ Message Sent - with tooltip
                                   <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
-                                    Sent <FaCheck className="text-green-600" />
+                                    Sent
+                                    {/* <FaCheck className="text-green-600" /> */}
                                   </div>
                                 ) : holiday.publish === "N" ? (
                                   <button

@@ -68,9 +68,11 @@ const DashboardContent = () => {
       });
 
       const roleId = response?.data?.user?.role_id;
+      console.log("role id", response?.data?.user?.role_id);
       setSortNameCookie(response?.data?.custom_claims?.short_name);
+      console.log("short name..", response?.data?.custom_claims?.short_name);
       if (roleId) {
-        setRoleId(roleId); // ✅ Save only roleId to state
+        setRoleId(roleId);
       } else {
         console.warn("role_id not found in sessionData response");
       }
@@ -243,25 +245,65 @@ const DashboardContent = () => {
             </Link>
           ) : (
             // Ticketing Module card for all other roles
-            <Link to="/teacherList" className="no-underline">
-              <CardStuStaf
-                title="Teachers"
-                TotalValue={staffData.teachingStaff}
-                // presentValue={staffData.teachingStaff}
-                presentValue={staffData?.attendanceteachingstaff}
-                color="#2196F3"
-                icon={
-                  <FaUserGroup
-                    style={{
-                      color: "#00FFFF",
-                      backgroundColor: "white",
-                      padding: "10px",
-                      borderRadius: "50%",
-                    }}
+            // <Link to="/teacherList" className="no-underline">
+            //   <CardStuStaf
+            //     title="Teachers"
+            //     TotalValue={staffData.teachingStaff}
+            //     // presentValue={staffData.teachingStaff}
+            //     presentValue={staffData?.attendanceteachingstaff}
+            //     color="#2196F3"
+            //     icon={
+            //       <FaUserGroup
+            //         style={{
+            //           color: "#00FFFF",
+            //           backgroundColor: "white",
+            //           padding: "10px",
+            //           borderRadius: "50%",
+            //         }}
+            //       />
+            //     }
+            //   />
+            // </Link>
+            <>
+              <button
+                disabled={sortNameCookie === "HSCS"}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  padding: 0,
+                  width: "100%",
+                  cursor: sortNameCookie === "HSCS" ? "not-allowed" : "pointer",
+                }}
+              >
+                <Link
+                  to={sortNameCookie === "HSCS" ? "#" : "/teacherList"}
+                  className="no-underline"
+                  style={
+                    sortNameCookie === "HSCS"
+                      ? { pointerEvents: "none" } // No opacity (as you requested)
+                      : {}
+                  }
+                >
+                  <CardStuStaf
+                    title="Teachers"
+                    TotalValue={staffData.teachingStaff}
+                    presentValue={staffData?.attendanceteachingstaff}
+                    color="#2196F3"
+                    icon={
+                      <FaUserGroup
+                        style={{
+                          color: "#00FFFF",
+                          backgroundColor: "white",
+                          padding: "10px",
+                          borderRadius: "50%",
+                        }}
+                      />
+                    }
+                    disableLoader={sortNameCookie === "HSCS"} // 👈 ADD THIS
                   />
-                }
-              />
-            </Link>
+                </Link>
+              </button>
+            </>
           )}
           {/* for non teaching staff and home work */}
           {roleId === null ? (
@@ -290,26 +332,65 @@ const DashboardContent = () => {
             </Link>
           ) : (
             // Ticketing Module card for all other roles
-            <Link to="/nonTeachingStaff" className="no-underline">
-              <CardStuStaf
-                title="Non-Teaching Staff"
-                TotalValue={staffData.nonTeachingStaff}
-                // presentValue={staffData.nonTeachingStaff}
-                presentValue={staffData?.attendancenonteachingstaff}
-                color="#2196F3"
-                icon={
-                  <FaUserGroup
-                    style={{
-                      color: "#A287F3",
-                      backgroundColor: "white",
-                      padding: "10px",
-                      borderRadius: "50%",
-                    }}
+            // <Link to="/nonTeachingStaff" className="no-underline">
+            //   <CardStuStaf
+            //     title="Non-Teaching Staff"
+            //     TotalValue={staffData.nonTeachingStaff}
+            //     // presentValue={staffData.nonTeachingStaff}
+            //     presentValue={staffData?.attendancenonteachingstaff}
+            //     color="#2196F3"
+            //     icon={
+            //       <FaUserGroup
+            //         style={{
+            //           color: "#A287F3",
+            //           backgroundColor: "white",
+            //           padding: "10px",
+            //           borderRadius: "50%",
+            //         }}
+            //       />
+            //     }
+            //   />
+            // </Link>
+            <>
+              <button
+                disabled={sortNameCookie === "HSCS"}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  padding: 0,
+                  width: "100%",
+                  cursor: sortNameCookie === "HSCS" ? "not-allowed" : "pointer",
+                }}
+              >
+                <Link
+                  to={sortNameCookie === "HSCS" ? "#" : "/nonTeachingStaff"}
+                  className="no-underline"
+                  style={
+                    sortNameCookie === "HSCS" ? { pointerEvents: "none" } : {}
+                  }
+                >
+                  <CardStuStaf
+                    title="Non-Teaching Staff"
+                    TotalValue={staffData.nonTeachingStaff}
+                    presentValue={staffData?.attendancenonteachingstaff}
+                    color="#2196F3"
+                    icon={
+                      <FaUserGroup
+                        style={{
+                          color: "#A287F3",
+                          backgroundColor: "white",
+                          padding: "10px",
+                          borderRadius: "50%",
+                        }}
+                      />
+                    }
+                    disableLoader={sortNameCookie === "HSCS"} // 👈 ADD THIS
                   />
-                }
-              />
-            </Link>
+                </Link>
+              </button>
+            </>
           )}
+
           {/* For fee pending */}
           {roleId === null ? (
             // Skeleton card
