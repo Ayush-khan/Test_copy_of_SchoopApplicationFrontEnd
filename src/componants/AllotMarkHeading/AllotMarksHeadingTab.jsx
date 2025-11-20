@@ -9,6 +9,8 @@ import LoadingSpinner from "../common/LoadingSpinner";
 
 const AllotMarksHeadingTab = ({ onSaveSuccess }) => {
   const API_URL = import.meta.env.VITE_API_URL;
+  const [autoFillActive, setAutoFillActive] = useState({});
+  const [isMarksLoading, setIsMarksLoading] = useState(false);
   const [classes, setClasses] = useState([]);
   const [exams, setExams] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -66,6 +68,7 @@ const AllotMarksHeadingTab = ({ onSaveSuccess }) => {
         marks_headings_id: heading.marks_headings_id,
         name: heading.name,
         highest_marks: "",
+        reportcard_marks: "",
         selected: false,
       }));
       setMarksHeadingsData(formattedData);
@@ -91,6 +94,7 @@ const AllotMarksHeadingTab = ({ onSaveSuccess }) => {
 
   const fetchHighestMarks = async (classId, examId, subjectId) => {
     try {
+      setIsMarksLoading(true); // Start loader
       const token = localStorage.getItem("authToken");
 
       // Directly include classId, examId, and subjectId in the URL
@@ -111,7 +115,10 @@ const AllotMarksHeadingTab = ({ onSaveSuccess }) => {
         );
         return {
           ...heading,
-          highest_marks: matchedHeading ? matchedHeading.highest_marks : "",
+          highest_marks: matchedHeading ? matchedHeading?.highest_marks : "",
+          reportcard_marks: matchedHeading
+            ? matchedHeading?.reportcard_highest_marks
+            : "",
           selected: !!matchedHeading, // Pre-check the checkbox if it exists in the response
         };
       });
@@ -122,7 +129,42 @@ const AllotMarksHeadingTab = ({ onSaveSuccess }) => {
       }
     } catch (error) {
       toast.error("Error fetching highest marks");
+    } finally {
+      setIsMarksLoading(false); // Stop loader
     }
+  };
+  // const handleReportCardMarksChange = (index, newMarks, marks_headings_id) => {
+  //   const updated = [...marksHeadingsData];
+  //   updated[index].reportcard_marks = newMarks;
+  //   setMarksHeadingsData(updated);
+
+  //   const updatedErrors = { ...highestMarksError };
+  //   updatedErrors["rc_" + marks_headings_id] = "";
+  //   setHighestMarksError(updatedErrors);
+  // };
+  // for  detect the report card marks manual change by user along with highest marks
+  const handleReportCardMarksChange = (index, newMarks, id) => {
+    const updated = [...marksHeadingsData];
+    updated[index].reportcard_marks = newMarks;
+    setMarksHeadingsData(updated);
+
+    // Turn off auto-fill for this heading
+    setAutoFillActive({
+      ...autoFillActive,
+      [id]: false,
+    });
+
+    // Update validation errors
+    const updatedErrors = { ...highestMarksError };
+
+    // Show error if report card marks is empty
+    if (!newMarks) {
+      updatedErrors["rc_" + id] = "Report Card Marks is required.";
+    } else {
+      updatedErrors["rc_" + id] = "";
+    }
+
+    setHighestMarksError(updatedErrors);
   };
 
   const handleClassChange = (selectedOption) => {
@@ -132,9 +174,25 @@ const AllotMarksHeadingTab = ({ onSaveSuccess }) => {
     fetchSubjects(selectedOption.value);
   };
 
+  // const handleExamChange = (selectedOption) => {
+  //   setSelectedExam(selectedOption);
+  //   setExamError("");
+  // if (selectedClass && selectedSubject && selectedOption) {
+  //   fetchHighestMarks(
+  //     selectedClass.value,
+  //     selectedSubject.value,
+  //     selectedOption.value
+  //   );
+  // }
+  // };
+  // Also remove  error valudaiotnn messgaes along with our report cards marks
   const handleExamChange = (selectedOption) => {
     setSelectedExam(selectedOption);
     setExamError("");
+
+    // Clear all per-heading validation errors since exam change resets values
+    setHighestMarksError({});
+
     if (selectedClass && selectedSubject && selectedOption) {
       fetchHighestMarks(
         selectedClass.value,
@@ -156,53 +214,125 @@ const AllotMarksHeadingTab = ({ onSaveSuccess }) => {
     }
   };
 
+  // const handleMarksHeadingChange = (index) => {
+  //   const updatedMarksHeadings = [...marksHeadingsData];
+  //   updatedMarksHeadings[index].selected =
+  //     !updatedMarksHeadings[index].selected;
+
+  //   // Optionally clear the highest_marks when unchecking
+  //   if (!updatedMarksHeadings[index].selected) {
+  //     updatedMarksHeadings[index].highest_marks = ""; // Clear marks when unchecked
+  //   }
+
+  //   setMarksHeadingsData(updatedMarksHeadings);
+  //   setMarksHeadingError("");
+  // };
   const handleMarksHeadingChange = (index) => {
     const updatedMarksHeadings = [...marksHeadingsData];
     updatedMarksHeadings[index].selected =
       !updatedMarksHeadings[index].selected;
 
-    // Optionally clear the highest_marks when unchecking
+    // Clear both highest marks and report card marks when unchecked
     if (!updatedMarksHeadings[index].selected) {
-      updatedMarksHeadings[index].highest_marks = ""; // Clear marks when unchecked
+      updatedMarksHeadings[index].highest_marks = ""; // already there
+      updatedMarksHeadings[index].reportcard_marks = ""; // NEW LINE 👈
     }
 
     setMarksHeadingsData(updatedMarksHeadings);
     setMarksHeadingError("");
   };
 
-  const handleHighestMarksChange = (index, newMarks, marks_headings_id) => {
-    const updatedMarksHeadings = [...marksHeadingsData];
-    updatedMarksHeadings[index].highest_marks = newMarks;
-    setMarksHeadingsData(updatedMarksHeadings);
+  // const handleHighestMarksChange = (index, newMarks, marks_headings_id) => {
+  //   const updatedMarksHeadings = [...marksHeadingsData];
+  //   updatedMarksHeadings[index].highest_marks = newMarks;
+  //   setMarksHeadingsData(updatedMarksHeadings);
 
-    // Clear error for the specific marks_headings_id when input is provided
-    const updatedMarksErrors = { ...highestMarksError };
-    updatedMarksErrors[marks_headings_id] = ""; // Clear error for this specific id
-    setHighestMarksError(updatedMarksErrors);
+  //   // Clear error for the specific marks_headings_id when input is provided
+  //   const updatedMarksErrors = { ...highestMarksError };
+  //   updatedMarksErrors[marks_headings_id] = ""; // Clear error for this specific id
+  //   setHighestMarksError(updatedMarksErrors);
+  // };
+  // new rule of highest marks change along with the report card marks
+  const handleHighestMarksChange = (index, newMarks, marks_headings_id) => {
+    const updated = [...marksHeadingsData];
+    const prevHighest = updated[index].highest_marks;
+    const prevReport = updated[index].reportcard_marks;
+
+    updated[index].highest_marks = newMarks;
+
+    // 🔥 Check if autoFillActive is not set yet AND both fields were empty
+    if (!autoFillActive[marks_headings_id]) {
+      if (
+        (!prevHighest || prevHighest === "") &&
+        (!prevReport || prevReport === "")
+      ) {
+        // Start auto-fill mode for this heading
+        setAutoFillActive({
+          ...autoFillActive,
+          [marks_headings_id]: true,
+        });
+
+        updated[index].reportcard_marks = newMarks; // full value always updates
+      }
+    } else {
+      // Autofill is ON → update full value every time
+      updated[index].reportcard_marks = newMarks;
+    }
+
+    setMarksHeadingsData(updated);
+
+    // Clear errors
+    // const updatedErrors = { ...highestMarksError };
+    // updatedErrors[marks_headings_id] = "";
+    // updatedErrors["rc_" + marks_headings_id] = "";
+    // setHighestMarksError(updatedErrors);
+    // Update validation error
+    const updatedErrors = { ...highestMarksError };
+
+    if (!newMarks) {
+      // If highest marks empty → show error
+      updatedErrors[marks_headings_id] = "Highest marks is required.";
+    } else {
+      // Clear error only when value exists
+      updatedErrors[marks_headings_id] = "";
+    }
+
+    if (!updated[index].reportcard_marks) {
+      updatedErrors["rc_" + marks_headings_id] =
+        "Report Card Marks is required.";
+    } else {
+      updatedErrors["rc_" + marks_headings_id] = "";
+    }
+
+    setHighestMarksError(updatedErrors);
   };
 
   const handleSave = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
-    setExamError("");
-    setClassError("");
-    setSubjectError("");
-    setMarksHeadingError("");
-    setHighestMarksError([]);
+
     let hasError = false;
 
     // Validate form fields
     if (!selectedClass) {
       setClassError("Please select a class.");
       hasError = true;
+    } else {
+      setClassError(""); // Clear only if valid
     }
+
     if (!selectedExam) {
       setExamError("Please select an exam.");
       hasError = true;
+    } else {
+      setExamError(""); // Clear only if valid
     }
+
     if (!selectedSubject) {
       setSubjectError("Please select a subject.");
       hasError = true;
+    } else {
+      setSubjectError(""); // Clear only if valid
     }
 
     // Validate marks headings
@@ -212,30 +342,94 @@ const AllotMarksHeadingTab = ({ onSaveSuccess }) => {
     if (selectedHeadings.length === 0) {
       setMarksHeadingError("Please select at least one marks heading.");
       hasError = true;
+    } else {
+      setMarksHeadingError("");
     }
 
     // Validate highest marks for selected headings
-    const marksErrors = { ...highestMarksError }; // Store errors by marks_headings_id
+    const marksErrors = { ...highestMarksError }; // Keep previous errors
     selectedHeadings.forEach((heading) => {
       if (!heading.highest_marks) {
         marksErrors[heading.marks_headings_id] = "Highest marks is required.";
         hasError = true;
       } else {
-        marksErrors[heading.marks_headings_id] = ""; // Clear error if valid
+        marksErrors[heading.marks_headings_id] = ""; // Clear only if valid
+      }
+
+      if (!heading.reportcard_marks) {
+        marksErrors["rc_" + heading.marks_headings_id] =
+          "Report Card Marks is required.";
+        hasError = true;
+      } else {
+        marksErrors["rc_" + heading.marks_headings_id] = "";
       }
     });
     setHighestMarksError(marksErrors);
 
     if (hasError) {
       setIsSubmitting(false);
-
-      return;
+      return; // Stop save if validation fails
     }
+    // if (isSubmitting) return; // Prevent re-submitting
+    // setIsSubmitting(true);
+    // setExamError("");
+    // setClassError("");
+    // setSubjectError("");
+    // setMarksHeadingError("");
+    // setHighestMarksError([]);
+    // let hasError = false;
 
-    // Prepare data to send to API
+    // // Validate form fields
+    // if (!selectedClass) {
+    //   setClassError("Please select a class.");
+    //   hasError = true;
+    // }
+    // if (!selectedExam) {
+    //   setExamError("Please select an exam.");
+    //   hasError = true;
+    // }
+    // if (!selectedSubject) {
+    //   setSubjectError("Please select a subject.");
+    //   hasError = true;
+    // }
+
+    // // Validate marks headings
+    // const selectedHeadings = marksHeadingsData.filter(
+    //   (heading) => heading.selected
+    // );
+    // if (selectedHeadings.length === 0) {
+    //   setMarksHeadingError("Please select at least one marks heading.");
+    //   hasError = true;
+    // }
+
+    // // Validate highest marks for selected headings
+    // const marksErrors = { ...highestMarksError }; // Store errors by marks_headings_id
+    // selectedHeadings.forEach((heading) => {
+    //   if (!heading.highest_marks) {
+    //     marksErrors[heading.marks_headings_id] = "Highest marks is required.";
+    //     hasError = true;
+    //   }
+    //   if (!heading.reportcard_marks) {
+    //     marksErrors["rc_" + heading.marks_headings_id] =
+    //       "Report Card Marks is required.";
+    //     hasError = true;
+    //   } else {
+    //     marksErrors[heading.marks_headings_id] = ""; // Clear error if valid
+    //   }
+    // });
+    // setHighestMarksError(marksErrors);
+
+    // if (hasError) {
+    //   setIsSubmitting(false);
+
+    //   return;
+    // }
+
+    // // Prepare data to send to API
     const marksData = selectedHeadings.map((heading) => ({
       marks_heading_id: heading.marks_headings_id,
       highest_marks: heading.highest_marks,
+      reportcard_highest_marks: heading.reportcard_marks,
     }));
 
     try {
@@ -433,88 +627,139 @@ const AllotMarksHeadingTab = ({ onSaveSuccess }) => {
                   </div>
                 </div>
                 {/* Marks Headings */}
-                <div className="mt-4 shadow-md  w-full md:w-[60%] ml-0 md:ml-4">
+                <div className="mt-4 shadow-md  w-full md:w-[84%] ml-0 md:ml-4">
                   <div className="w-full overflow-x-auto">
                     {/* Sticky Header */}
                     <div className="w-full sticky top-0 bg-white  ">
-                      <div className="grid grid-cols-2 text-start ">
-                        <h6 className="text-gray-700 font-semibold py-2  pl-2">
+                      <div className="grid grid-cols-3 text-start ">
+                        <h6 className="text-gray-700 font-semibold py-2 pl-2">
                           Marks Headings <span className="text-red-500">*</span>
                         </h6>
-                        <h6 className="text-gray-700 font-semibold py-2 text-center pr-4">
+                        <h6 className="text-gray-700 font-semibold py-2 text-center">
                           Highest Marks <span className="text-red-500">*</span>
+                        </h6>
+                        <h6 className="text-gray-700 font-semibold py-2 text-center">
+                          Highest Report Card Marks{" "}
+                          <span className="text-red-500">*</span>
                         </h6>
                       </div>
                     </div>
 
                     {/* Scrollable Content */}
-                    {marksHeadingsData.length > 0 ? (
-                      <div className="max-h-64 overflow-y-auto">
-                        {marksHeadingsData.map((heading, index) => (
-                          <div
-                            key={heading.marks_headings_id}
-                            className="grid grid-cols-2 w-full text-center py-2"
-                          >
-                            <div className="flex items-center justify-start px-2">
-                              {/* Checkbox with consistent alignment */}
-                              <input
-                                type="checkbox"
-                                checked={heading.selected}
-                                onChange={() => handleMarksHeadingChange(index)}
-                                className="mr-2"
-                              />
-                              {/* Toggle checkbox when clicking on the label */}
-                              <label
-                                onClick={() => handleMarksHeadingChange(index)}
-                                className="cursor-pointer"
-                              >
-                                {heading.name}
-                              </label>
-                            </div>
-
-                            <div>
-                              <input
-                                type="text"
-                                maxLength={3}
-                                value={heading.highest_marks}
-                                onChange={(e) => {
-                                  const value = e.target.value;
-                                  // Allow only positive integers
-                                  if (/^\d*$/.test(value)) {
-                                    handleHighestMarksChange(
-                                      index,
-                                      value,
-                                      heading.marks_headings_id
-                                    );
+                    <div className="max-h-64 overflow-y-auto">
+                      {isMarksLoading ? (
+                        <p className="text-center text-blue-600">
+                          <div className="  bg-gray-100 text-black py-8 inset-0 flex items-center justify-center  z-10">
+                            <LoadingSpinner />{" "}
+                            {/* Replace this with your loader component */}
+                          </div>{" "}
+                        </p>
+                      ) : marksHeadingsData.length > 0 ? (
+                        <div className="max-h-64 overflow-y-auto">
+                          {marksHeadingsData.map((heading, index) => (
+                            <div
+                              key={heading.marks_headings_id}
+                              className="grid grid-cols-3 w-full text-center py-2"
+                            >
+                              <div className="flex items-center justify-start px-2">
+                                <input
+                                  type="checkbox"
+                                  checked={heading.selected}
+                                  onChange={() =>
+                                    handleMarksHeadingChange(index)
                                   }
-                                }}
-                                disabled={!heading.selected}
-                                placeholder="Highest marks"
-                                className={`border p-1 bg-gray-100 shadow-md rounded w-full md:w-1/2 text-start ${
-                                  highestMarksError[heading.marks_headings_id]
-                                    ? "border-red-500"
-                                    : ""
-                                }`}
-                              />
-                              {/* Individual error message for each input based on marks_headings_id */}
-                              {highestMarksError[heading.marks_headings_id] && (
-                                <p className="h-1 text-red-500 text-xs">
-                                  {highestMarksError[heading.marks_headings_id]}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-center text-blue-600">
-                        <div className="  bg-gray-100 text-black py-8 inset-0 flex items-center justify-center  z-10">
-                          <LoadingSpinner />{" "}
-                          {/* Replace this with your loader component */}
-                        </div>{" "}
-                      </p>
-                    )}
+                                  className="mr-2"
+                                />
+                                <label
+                                  onClick={() =>
+                                    handleMarksHeadingChange(index)
+                                  }
+                                  className="cursor-pointer"
+                                >
+                                  {heading.name}
+                                </label>
+                              </div>
 
+                              {/* Highest Marks */}
+                              <div className="w-[70%] mx-auto">
+                                <input
+                                  type="text"
+                                  maxLength={3}
+                                  value={heading.highest_marks}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (/^\d*$/.test(value)) {
+                                      handleHighestMarksChange(
+                                        index,
+                                        value,
+                                        heading.marks_headings_id
+                                      );
+                                    }
+                                  }}
+                                  disabled={!heading.selected}
+                                  className={`border p-1 bg-gray-100 shadow-md rounded w-full 
+        ${
+          highestMarksError[heading.marks_headings_id] ? "border-red-500" : ""
+        }`}
+                                />
+                                {highestMarksError[
+                                  heading.marks_headings_id
+                                ] && (
+                                  <p className="text-red-500 text-xs">
+                                    {
+                                      highestMarksError[
+                                        heading.marks_headings_id
+                                      ]
+                                    }
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Report Card Marks */}
+                              <div className="w-[70%] mx-auto">
+                                <input
+                                  type="text"
+                                  maxLength={3}
+                                  value={heading.reportcard_marks}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (/^\d*$/.test(value)) {
+                                      handleReportCardMarksChange(
+                                        index,
+                                        value,
+                                        heading.marks_headings_id
+                                      );
+                                    }
+                                  }}
+                                  disabled={!heading.selected}
+                                  className={`border p-1 bg-gray-100 shadow-md rounded w-full 
+        ${
+          highestMarksError["rc_" + heading.marks_headings_id]
+            ? "border-red-500"
+            : ""
+        }`}
+                                />
+                                {highestMarksError[
+                                  "rc_" + heading.marks_headings_id
+                                ] && (
+                                  <p className="text-red-500 text-xs">
+                                    {
+                                      highestMarksError[
+                                        "rc_" + heading.marks_headings_id
+                                      ]
+                                    }
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-center text-blue-600 py-8">
+                          No marks headings found.
+                        </p>
+                      )}
+                    </div>
                     {marksHeadingError && (
                       <p className=" text-center text-red-500 text-xs">
                         {marksHeadingError}

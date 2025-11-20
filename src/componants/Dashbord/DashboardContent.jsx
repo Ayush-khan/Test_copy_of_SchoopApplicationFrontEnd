@@ -484,7 +484,7 @@ const DashboardContent = () => {
             </Link>
           ) : (
             // Ticketing Module card for all other roles
-            <Link to="/ticktinglist" className="no-underline">
+            <Link to="/ticketList" className="no-underline">
               <Card
                 title="Ticketing Module"
                 value={ticketCount}

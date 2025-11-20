@@ -59,14 +59,11 @@ function Form() {
     const fetchHouses = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        const response = await axios.get(
-          "https://sms.evolvu.in/arnolds_test/public/api/get_houses",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await axios.get(`${API_URL}/api/get_houses`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (response.data?.success && Array.isArray(response.data.data)) {
           setHouses(response.data.data);

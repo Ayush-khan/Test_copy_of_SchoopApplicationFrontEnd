@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
+import { RxCross1 } from "react-icons/rx";
 
 const TicketList = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -127,13 +128,24 @@ const TicketList = () => {
                       <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                         List of Tickets
                       </h3>
-                      <div className="w-1/2 md:w-[18%] mr-1 ">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search "
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                      <div className="w-1/2 md:w-[18%] relative left-4 flex flex-row justify-center items-center gap-x-4">
+                        {" "}
+                        <div>
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search "
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <RxCross1
+                            className="relative  right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                            onClick={() => {
+                              navigate("/dashboard");
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

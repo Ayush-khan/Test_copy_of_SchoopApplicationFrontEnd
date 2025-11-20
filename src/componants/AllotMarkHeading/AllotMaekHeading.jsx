@@ -40,6 +40,9 @@ function AllotMarksHeading() {
   const [newExamName, setNewExamName] = useState("");
   const [newMarksHeading, setNewMarksHeading] = useState("");
   const [highestMarks, setHighestMarks] = useState("");
+  const [highesRCtMarks, setHighestRCMarks] = useState("");
+  const [rCmarksError, setRCMarksError] = useState(""); // Error for validation
+
   const [marksError, setMarksError] = useState(""); // Error for validation
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -178,10 +181,10 @@ function AllotMarksHeading() {
     setNewSubjectName(section?.get_subject?.name);
     setNewExamName(section?.get_exam?.name); // Assuming exam details are available
     setNewMarksHeading(section?.get_marksheading?.name || ""); // Set marks heading if available
-
+    setHighestRCMarks(section?.reportcard_highest_marks || " ");
     setHighestMarks(section?.highest_marks || ""); // Set highest marks or empty
     setMarksError(""); // Reset the error message when opening the modal
-
+    setRCMarksError("");
     setShowEditModal(true);
   };
   // Handle the highest marks change with validation
@@ -200,7 +203,23 @@ function AllotMarksHeading() {
     }
     // Handle invalid input (non-numeric)
   };
+  //handle rc hihest marks
+  // Handle the highest marks change with validation
+  const handleRCMarksChange = (e) => {
+    const value = e.target.value;
 
+    // Check if the input is empty
+    if (value === "") {
+      setRCMarksError("Highest RC Marks is required."); // Set error for empty field
+      setHighestRCMarks(""); // Clear the value in the state
+    }
+    // Allow only numbers
+    else if (/^\d*$/.test(value)) {
+      setHighestRCMarks(value);
+      setRCMarksError(""); // Clear error if input is valid
+    }
+    // Handle invalid input (non-numeric)
+  };
   const handleSubmitEdit = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
@@ -214,6 +233,7 @@ function AllotMarksHeading() {
       // Ensure that the subject type is not empty
       // Clear previous errors
       setMarksError("");
+      setRCMarksError("");
       console.log(
         "class_name:",
         newClassName,
@@ -237,6 +257,12 @@ function AllotMarksHeading() {
 
         return;
       }
+      if (!highesRCtMarks) {
+        setRCMarksError("Highest Marks is required.");
+        setIsSubmitting(false);
+
+        return;
+      }
       // If there's still an error message, stop the submission
       if (marksError) {
         setIsSubmitting(false);
@@ -252,6 +278,7 @@ function AllotMarksHeading() {
           exam_name: newExamName,
           marks_heading: newMarksHeading,
           highest_marks: highestMarks,
+          reportcard_highest_marks: highesRCtMarks,
         }, // Send the selected subject type
         {
           headers: {
@@ -498,6 +525,9 @@ function AllotMarksHeading() {
                                 Highest Marks
                               </th>
                               <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Highest RC Marks
+                              </th>
+                              <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Edit
                               </th>
                               {/* <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -531,7 +561,9 @@ function AllotMarksHeading() {
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {subject?.highest_marks}
                                   </td>
-
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    {subject?.reportcard_highest_marks}
+                                  </td>
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     <button
                                       onClick={() => handleEdit(subject)}
@@ -671,6 +703,28 @@ function AllotMarksHeading() {
                   <div className="w-[60%] relative h-4 left-[40%]">
                     {marksError && (
                       <span className="text-red-500 text-xs">{marksError}</span>
+                    )}
+                  </div>
+                  {/* RC hihest marks */}
+                  {/* Highest Marks Input */}
+                  <div className="relative flex justify-start mt-2 mx-4 gap-x-7">
+                    <label htmlFor="highestMarks" className="w-1/2 mt-2">
+                      Highest RC Marks <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={3}
+                      className="rounded-md border-1 text-black w-full text-[1em] shadow-md p-2"
+                      value={highesRCtMarks}
+                      onChange={handleRCMarksChange}
+                      placeholder="Enter highest marks"
+                    />
+                  </div>
+                  <div className="w-[60%] relative h-4 left-[40%]">
+                    {rCmarksError && (
+                      <span className="text-red-500 text-xs">
+                        {rCmarksError}
+                      </span>
                     )}
                   </div>
                   {/* Display error message if any */}

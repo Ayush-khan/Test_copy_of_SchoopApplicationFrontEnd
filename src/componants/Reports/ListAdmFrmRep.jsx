@@ -51,11 +51,9 @@ const ListAdmFrmRep = () => {
       const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const shortname = sessionResponse?.data?.custom_claims?.short_name;
       setShortName(shortname);
-
-      console.log("short name:", shortname);
+      console.log("short name is final--->:", shortname);
 
       return { shortName };
     } catch (error) {

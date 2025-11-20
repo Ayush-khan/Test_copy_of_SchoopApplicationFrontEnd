@@ -10,7 +10,6 @@ import LandingPage from "../componants/LandingPage";
 import AdminDashboard from "../componants/Dashbord/AdminDashboard";
 import EventCard from "../componants/Dashbord/EventCard";
 import NoticeBord from "../componants/Dashbord/NoticeBord";
-
 import StudentsChart from "../componants/Dashbord/Charts/StudentsChart";
 import PrivateRoute from "../utils/PrivateRoute";
 import ClassList from "../componants/MastersModule/ClassList/ClassList.jsx";

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { ImCheckboxChecked, ImDownload } from "react-icons/im";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
-
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -10,7 +9,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
-// import AllotSubjectTab from "./AllotMarksHeadingTab";
 import Select from "react-select";
 import CreateCreateBonafide from "./CreateCreateBonafide";
 function BonafiedCertificates() {

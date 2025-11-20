@@ -656,6 +656,42 @@ const StudentReport = () => {
                     </button>
                   </div>
                 </div>
+              )}{" "}
+              {timetable.length > 0 && (
+                <div className="p-2 px-3  bg-gray-100 border-none flex justify-between items-center">
+                  <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
+                    <div className="w-1/2 md:w-[95%] mr-1 ">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search "
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                    <button
+                      type="button"
+                      onClick={handleDownloadEXL}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
+                    >
+                      <FaFileExcel />
+                      <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                        Export to Excel
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handleStudentPrint}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                    >
+                      <FiPrinter />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                        Print
+                      </div>
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
 

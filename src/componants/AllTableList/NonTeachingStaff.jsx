@@ -133,11 +133,14 @@ function NonTeachingStaff() {
     try {
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_teachercategory_nonteaching`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.data?.data) {
         setCategories(response.data.data);
