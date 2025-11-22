@@ -16,6 +16,7 @@ import AdminNavBar from "./AdminNavBar";
 import { toast } from "react-toastify";
 import "./styles.css";
 import Select from "react-select";
+import { RxCross1 } from "react-icons/rx";
 
 function NavBar() {
   const API_URL = import.meta.env.VITE_API_URL; //thsis is test url
@@ -39,6 +40,10 @@ function NavBar() {
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [isSidebar, setIsSidebar] = useState(false);
   const [sidebarRefreshTrigger, setSidebarRefreshTrigger] = useState(0);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [userIdset, setUserIdset] = useState("");
 
   function getCurrentDate() {
     const months = [
@@ -669,6 +674,70 @@ function NavBar() {
     );
   };
 
+  const handleResetPassword = () => {
+    setShowEditModal(true);
+  };
+
+  const handleUserIdChange = (e) => {
+    setErrorMessage("");
+    setUserIdset(e.target.value);
+  };
+  const handleSubmitResetPassword = async () => {
+    if (isSubmitting) return; // Prevent re-submitting
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        toast.error("Authentication token missing");
+        setErrorMessage("Authentication token missing");
+        return;
+      }
+
+      const response = await axios.put(
+        `${API_URL}/api/resetPasssword/${userIdset}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (response?.data?.status === 400) {
+        toast.error("You are not authorised to change password for this user");
+        return;
+      }
+      if (response?.data?.status === 404) {
+        setErrorMessage("Invalid User ID");
+        return;
+      }
+      toast.success(
+        response?.data?.Message || `Your password has been reset successfully.`
+      );
+      setShowEditModal(false);
+      setErrorMessage("");
+      handleCloseModal();
+    } catch (error) {
+      if (
+        error.response &&
+        error?.response?.data &&
+        error?.response?.data?.Message
+      ) {
+        setErrorMessage(error?.response?.data?.Message);
+        toast.error(error?.response?.data?.Message);
+      } else {
+        setErrorMessage("Failed to update password. Please try again.");
+        toast.error("Failed to update password. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowEditModal("");
+    setUserIdset("");
+    setErrorMessage("");
+  };
+
   return (
     <>
       <div
@@ -747,6 +816,15 @@ function NavBar() {
                 >
                   <LiaEdit style={{ fontSize: "1.5rem" }} />
                   <span style={{ fontSize: ".8em" }}>Change Password</span>
+                </div>
+              </NavDropdown.Item>
+              <NavDropdown.Item>
+                <div
+                  className="flex items-center gap-2"
+                  onClick={() => handleResetPassword()}
+                >
+                  <LiaEdit style={{ fontSize: "1.5rem" }} />
+                  <span style={{ fontSize: ".8em" }}>Reset Password</span>
                 </div>
               </NavDropdown.Item>
               <NavDropdown.Item onClick={handleLogout}>
@@ -934,11 +1012,69 @@ function NavBar() {
         refreshTrigger={sidebarRefreshTrigger} // ✅ pass refresh trigger
       />
       {/* <Sidebar isSidebar={isSidebar} setIsSidebar={setIsSidebar} /> */}
+
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="modal show" style={{ display: "block" }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">Reset Password</h5>
+                  <RxCross1
+                    className="float-end relative mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                    onClick={() => handleCloseModal()}
+                  />
+                </div>
+                <div
+                  className="relative mb-3 h-1 w-[97%] mx-auto bg-red-700"
+                  style={{ backgroundColor: "#C03078" }}
+                ></div>
+
+                <div className="modal-body">
+                  {/* User ID Input */}
+                  <div className="relative mb-3 flex justify-center mx-4">
+                    <label htmlFor="userId" className="w-1/2 mt-2">
+                      Enter User ID <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={30}
+                      className="form-control shadow-md w-full"
+                      id="userId"
+                      value={userIdset}
+                      onChange={handleUserIdChange}
+                    />
+                    <div className="absolute top-9 left-1/3">
+                      {errorMessage && (
+                        <span className="text-danger text-xs">
+                          {errorMessage}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pb-3 pr-3">
+                  <button
+                    type="button"
+                    className="btn btn-primary px-3 "
+                    onClick={handleSubmitResetPassword}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Reseting..." : "Reset"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
 
 export default NavBar;
+
 // work well onlick also ...
 // import { useEffect, useRef, useState } from "react";
 // import { Navbar, Nav, NavDropdown } from "react-bootstrap";

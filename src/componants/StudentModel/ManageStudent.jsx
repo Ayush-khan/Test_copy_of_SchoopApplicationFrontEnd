@@ -600,6 +600,61 @@ function ManageSubjectList() {
 
   const [errorMessage, setErrorMessage] = useState(""); // State to store error message
 
+  // const handleSubmitResetPassword = async () => {
+  //   if (isSubmitting) return; // Prevent re-submitting
+  //   setIsSubmitting(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     if (!token) {
+  //       toast.error("Authentication token missing");
+  //       setErrorMessage("Authentication token missing"); // Set error below the field
+  //       return;
+  //     }
+
+  //     // API call to reset the password with correct header placement
+  //     const response = await axios.put(
+  //       `${API_URL}/api/resetPasssword/${userIdset}`,
+  //       {}, // Pass empty body if there's no data to send
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+  //     if (response?.data?.Status === 404) {
+  //       // console.log("Response is fail");
+  //       // toast.error("User not found");
+  //       setErrorMessage("Invalid user ID");
+  //       return;
+  //     }
+  //     toast.success(
+  //       response?.data?.Message || `Your password has been reset successfully.`
+  //     );
+  //     setShowEditModal(false); // Close modal after success
+  //     setErrorMessage(""); // Clear error message on success
+  //   } catch (error) {
+  //     // console.error("Error resetting password:", error);
+
+  //     // Capture server error message and set it below the field
+  //     if (
+  //       error.response &&
+  //       error?.response?.data &&
+  //       error?.response?.data?.Message
+  //     ) {
+  //       setErrorMessage(error?.response?.data?.Message);
+  //       toast.error(error?.response?.data?.Message); // Show toast with the error
+  //     } else {
+  //       setErrorMessage("Failed to update password. Please try again.");
+  //       toast.error("Failed to update password. Please try again.");
+  //     }
+  //   } finally {
+  //     setIsSubmitting(false); // Re-enable the button after the operation
+  //   }
+  // };
+
+  // Handle input change for password
+
+  // Handle input change for User ID
+
   const handleSubmitResetPassword = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
@@ -608,53 +663,46 @@ function ManageSubjectList() {
 
       if (!token) {
         toast.error("Authentication token missing");
-        setErrorMessage("Authentication token missing"); // Set error below the field
+        setErrorMessage("Authentication token missing");
         return;
       }
 
-      // API call to reset the password with correct header placement
       const response = await axios.put(
         `${API_URL}/api/resetPasssword/${userIdset}`,
-        {}, // Pass empty body if there's no data to send
+        {},
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      if (response?.data?.Status === 404) {
-        // console.log("Response is fail");
-        // toast.error("User not found");
-        setErrorMessage("Invalid user ID");
+      if (response?.data?.status === 400) {
+        toast.error("You are not authorised to change password for this user");
+        return;
+      }
+      if (response?.data?.status === 404) {
+        setErrorMessage("Invalid User ID");
         return;
       }
       toast.success(
         response?.data?.Message || `Your password has been reset successfully.`
       );
-      setShowEditModal(false); // Close modal after success
-      setErrorMessage(""); // Clear error message on success
+      setShowEditModal(false);
+      setErrorMessage("");
     } catch (error) {
-      // console.error("Error resetting password:", error);
-
-      // Capture server error message and set it below the field
       if (
         error.response &&
         error?.response?.data &&
         error?.response?.data?.Message
       ) {
         setErrorMessage(error?.response?.data?.Message);
-        toast.error(error?.response?.data?.Message); // Show toast with the error
+        toast.error(error?.response?.data?.Message);
       } else {
         setErrorMessage("Failed to update password. Please try again.");
         toast.error("Failed to update password. Please try again.");
       }
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
     }
   };
-
-  // Handle input change for password
-
-  // Handle input change for User ID
-
   const handleUserIdChange = (e) => {
     setErrorMessage(""); // Clear previous error message
     setUserIdset(e.target.value);
@@ -1429,14 +1477,17 @@ function ManageSubjectList() {
                     <label htmlFor="userId" className="w-1/2 mt-2">
                       User ID <span className="text-red-500">*</span>
                     </label>
+
                     <input
                       type="text"
                       maxLength={30}
-                      className="form-control shadow-md mb-2"
                       id="userId"
-                      value={userIdset} // Prefill userId
+                      readOnly
+                      value={userIdset}
                       onChange={handleUserIdChange}
+                      className="shadow-md mb-2 bg-gray-200 border border-gray-300 rounded-md px-3 py-2 w-full cursor-not-allowed"
                     />
+
                     <div className="absolute top-9 left-1/3">
                       {errorMessage && (
                         <span className="text-danger text-xs">
@@ -1467,10 +1518,10 @@ function ManageSubjectList() {
                   </div> */}
                 </div>
 
-                <div className="flex justify-end p-3">
+                <div className="flex justify-end pr-3 pb-3">
                   <button
                     type="button"
-                    className="btn btn-primary px-3 mb-2"
+                    className="btn btn-primary px-3"
                     onClick={handleSubmitResetPassword}
                     disabled={isSubmitting}
                   >

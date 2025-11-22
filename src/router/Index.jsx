@@ -226,7 +226,7 @@ import PeerFeedbackMaster from "../componants/MastersModule/DomainModules/PeerFe
 import AllAboutMe from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMe.jsx";
 import AllAboutMeMaster from "../componants/MastersModule/DomainModules/AllAboutMe/AllAboutMeMaster.jsx";
 import ClassTeacherRemark from "../componants/MastersModule/DomainModules/ClassTeacherRemark/ClassTeacherRemark.jsx";
-import PublishreportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishreportCard.jsx";
+import PublishHPCReportCard from "../componants/MastersModule/DomainModules/PublishHPCReportCard/PublishHPCReportCard.jsx";
 import UploadMarks from "../componants/MastersModule/DomainModules/UploadMarks/UploadMarks.jsx";
 import HPCReportCard from "../componants/MastersModule/DomainModules/HPCReportCard/HPCReportCard.jsx";
 import ReportCardRemark from "../componants/MastersModule/DomainModules/ReportCardRemark/ReportCardRemark.jsx";
@@ -268,6 +268,8 @@ import EditLeaveApplicationForPrincipleTab from "../componants/AllTableList/Leav
 import ViewLeaveApplicationForPrincipleTab from "../componants/AllTableList/LeaveApproveForPrinciple/ViewLeaveApplicationForPrincipleTab.jsx";
 import PublishProficiencyCertificate from "../TeacherLoginModules/PublishProficiencyCertificate/PublishProficiencyCertificate.jsx";
 import StationeryRequisition from "../TeacherLoginModules/StationeryRequistion/StationeryRequistion.jsx";
+// import PublishReportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishreportCard.jsx";
+import PublishReportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishReportCard.jsx";
 
 // import Menus from "../c";
 function Index() {
@@ -704,10 +706,15 @@ function Index() {
           path="/hpcRemark"
           element={<PrivateRoute element={<ClassTeacherRemark />} />}
         />
-        {/* PublishreportCard modules */}
+        {/* PublishHPCReportCard modules */}
         <Route
-          path="/publishreportCard"
-          element={<PrivateRoute element={<PublishreportCard />} />}
+          path="/publishHPCReportCard"
+          element={<PrivateRoute element={<PublishHPCReportCard />} />}
+        />
+        {/* PublishReportCard modules */}
+        <Route
+          path="/publishReportCard"
+          element={<PrivateRoute element={<PublishReportCard />} />}
         />
         {/* Upload student marks modules */}
         <Route
