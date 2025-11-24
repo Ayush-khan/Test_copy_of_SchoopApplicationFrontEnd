@@ -1054,6 +1054,11 @@ function NavBar() {
                       id="userId"
                       value={userIdset}
                       onChange={handleUserIdChange}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleSubmitResetPassword();
+                        }
+                      }}
                     />
                     <div className="absolute top-9 left-1/3">
                       {errorMessage && (
