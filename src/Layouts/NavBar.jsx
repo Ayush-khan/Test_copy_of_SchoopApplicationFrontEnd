@@ -6,6 +6,7 @@ import axios from "axios";
 import { FaHome, FaUserCircle } from "react-icons/fa";
 import { CiLogout } from "react-icons/ci";
 import { LiaEdit } from "react-icons/lia";
+import { BiReset } from "react-icons/bi";
 import "./NabarstyleBootstrap.css";
 import styles from "../CSS/Navbar.module.css";
 import { LuSchool } from "react-icons/lu";
@@ -682,8 +683,14 @@ function NavBar() {
     setErrorMessage("");
     setUserIdset(e.target.value);
   };
+
   const handleSubmitResetPassword = async () => {
-    if (isSubmitting) return; // Prevent re-submitting
+    if (isSubmitting) return;
+    if (!userIdset || userIdset.trim() === "") {
+      setErrorMessage("Please enter User Id");
+      // toast.error("Please enter user ID");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
@@ -705,7 +712,7 @@ function NavBar() {
         toast.error("You are not authorised to change password for this user");
         return;
       }
-      if (response?.data?.status === 404) {
+      if (response?.data?.Status === 404) {
         setErrorMessage("Invalid User ID");
         return;
       }
@@ -746,7 +753,6 @@ function NavBar() {
           position: "fixed",
           top: "0px",
           zIndex: "10",
-          // backgroundColor: "#D61D5E",
         }}
       >
         <div
@@ -818,15 +824,20 @@ function NavBar() {
                   <span style={{ fontSize: ".8em" }}>Change Password</span>
                 </div>
               </NavDropdown.Item>
-              <NavDropdown.Item>
-                <div
-                  className="flex items-center gap-2"
-                  onClick={() => handleResetPassword()}
-                >
-                  <LiaEdit style={{ fontSize: "1.5rem" }} />
-                  <span style={{ fontSize: ".8em" }}>Reset Password</span>
-                </div>
-              </NavDropdown.Item>
+
+              {roleId === "A" || roleId === "M" ? (
+                <NavDropdown.Item>
+                  <div
+                    className="flex items-center gap-2"
+                    onClick={() => handleResetPassword()}
+                  >
+                    <BiReset style={{ fontSize: "1.5rem" }} />
+
+                    <span style={{ fontSize: ".8em" }}>Reset Password</span>
+                  </div>
+                </NavDropdown.Item>
+              ) : null}
+
               <NavDropdown.Item onClick={handleLogout}>
                 <div className="flex items-center gap-2">
                   <CiLogout style={{ fontSize: "1.5rem" }} />

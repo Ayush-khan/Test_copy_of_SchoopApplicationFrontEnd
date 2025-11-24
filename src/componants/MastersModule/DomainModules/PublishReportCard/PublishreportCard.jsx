@@ -770,19 +770,24 @@ const PublishReportCard = () => {
         <ToastContainer />
 
         {/* ---------- CARD HEADER ---------- */}
-        <div className="bg-white shadow-md rounded-xl p-4 border border-gray-200">
-          <div className="flex justify-between items-center">
-            <h1 className="text-lg font-semibold text-gray-800">
+        <div className="border rounded-lg md:mx-auto md:w-[90%] p-4 bg-white mt-4 ">
+          <div className=" card-header  flex justify-between items-center  ">
+            <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Publish Report Card
-            </h1>
-
+            </h3>
             <RxCross1
-              className="text-2xl text-red-500  rounded cursor-pointer hover:bg-red-100 transition"
-              onClick={() => navigate("/dashboard")}
+              className="float-end relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+              onClick={() => {
+                navigate("/dashboard");
+              }}
             />
           </div>
-
-          <div className="w-full h-1 bg-gradient-to-r from-pink-500 to-purple-600  rounded-sm"></div>
+          <div
+            className=" relative  mb-8   h-1  mx-auto bg-red-700"
+            style={{
+              backgroundColor: "#C03078",
+            }}
+          ></div>
 
           {/* ---------- CLASS SELECT ---------- */}
           <div className="mt-4">
