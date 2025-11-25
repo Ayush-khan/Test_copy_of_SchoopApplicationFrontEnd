@@ -269,8 +269,8 @@ import ViewLeaveApplicationForPrincipleTab from "../componants/AllTableList/Leav
 import PublishProficiencyCertificate from "../TeacherLoginModules/PublishProficiencyCertificate/PublishProficiencyCertificate.jsx";
 import StationeryRequisition from "../TeacherLoginModules/StationeryRequistion/StationeryRequistion.jsx";
 // import PublishReportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishreportCard.jsx";
-import PublishReportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishReportCard.jsx";
-
+// import PublishReportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishReportCard.jsx";
+import PublishReportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishreportCard.jsx";
 // import Menus from "../c";
 function Index() {
   return (
