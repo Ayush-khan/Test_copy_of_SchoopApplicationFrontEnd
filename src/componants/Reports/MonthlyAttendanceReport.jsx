@@ -5,7 +5,6 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
@@ -33,12 +32,57 @@ const MonthlyAttendenceReport = () => {
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [roleId, setRoleId] = useState("");
+  const [regId, setRegId] = useState("");
+  const [classes, setClasses] = useState([]);
 
   useEffect(() => {
-    fetchClasses();
     fetchSessionData();
-    // handleSearch();
   }, []);
+
+  useEffect(() => {
+    fetchDataRoleId();
+  }, []);
+
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const role_id = sessionResponse.data.user.role_id;
+      const reg_id = sessionResponse.data.user.reg_id;
+
+      setRoleId(role_id);
+      setRegId(reg_id);
+
+      console.log("roleIDis:", role_id); // use local variable
+      console.log("reg id:", reg_id);
+
+      return { roleId, regId };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const camelCase = (str) =>
+    str
+      ?.toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+
+  useEffect(() => {
+    if (!roleId || !regId) return; // guard against empty
+    fetchExams(roleId, regId);
+  }, [roleId, regId]);
 
   const fetchSessionData = async () => {
     try {
@@ -61,23 +105,57 @@ const MonthlyAttendenceReport = () => {
     }
   };
 
-  const fetchClasses = async () => {
+  const fetchExams = async (roleId, roleIdValue) => {
     try {
       setLoading(true);
+
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/get_class_section`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Class", response);
-      setClassNameWithClassId(response?.data || []);
+      const classApiUrl =
+        roleId === "T"
+          ? `${API_URL}/api/get_classes_of_classteacher?teacher_id=${roleIdValue}`
+          : `${API_URL}/api/getallClassWithStudentCount`;
+
+      const [classResponse, studentResponse] = await Promise.all([
+        axios.get(classApiUrl, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${API_URL}/api/getStudentListBySectionData`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const classData =
+        roleId === "T"
+          ? classResponse.data.data || []
+          : classResponse.data || [];
+
+      setClasses(classData);
+      setClassNameWithClassId(studentResponse?.data?.data || []);
     } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
+      toast.error("Error fetching data.");
     } finally {
       setLoading(false);
     }
   };
+
+  // const fetchClasses = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.get(`${API_URL}/api/get_class_section`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     console.log("Class", response);
+  //     setClassNameWithClassId(response?.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching Classes");
+  //     console.error("Error fetching Classes:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleClassSelect = (selectedOption) => {
     setClassError(""); // Reset error if student is select.
@@ -85,15 +163,34 @@ const MonthlyAttendenceReport = () => {
     setSelectedClassId(selectedOption?.value);
   };
 
-  const classOptions = useMemo(
-    () =>
-      classNameWithClassId.map((cls) => ({
-        value: cls?.section_id,
-        label: `${cls.get_class.name} ${cls.name}`,
-      })),
-    [classNameWithClassId]
-  );
+  // const classOptions = useMemo(
+  //   () =>
+  //     classNameWithClassId.map((cls) => ({
+  //       value: cls?.section_id,
+  //       label: `${cls.get_class.name} ${cls.name}`,
+  //     })),
+  //   [classNameWithClassId]
+  // );
 
+  const classOptions = useMemo(() => {
+    return classes.map((cls) => {
+      if (roleId === "T") {
+        return {
+          value: cls.section_id,
+          label: `${cls.classname} ${cls.sectionname}`,
+          class_id: cls.class_id,
+          section_id: cls.section_id,
+        };
+      } else {
+        return {
+          value: cls.section_id,
+          label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+          class_id: cls.class_id,
+          section_id: cls.section_id,
+        };
+      }
+    });
+  }, [classes, roleId]);
   const monthMap = [
     { value: 4, label: "April" },
     { value: 5, label: "May" },
@@ -417,32 +514,6 @@ const MonthlyAttendenceReport = () => {
 
   console.log("row", timetable);
 
-  // const filteredSections = Array.isArray(timetable?.students)
-  // ? timetable.students.filter((student) => {
-  //     const searchLower = (searchTerm || "").toLowerCase();
-
-  //     const rollNo = student?.roll_no ? String(student.roll_no) : "";
-  //     const studentName = [student?.first_name, student?.mid_name, student?.last_name]
-  //       .filter(Boolean)
-  //       .join(" ")
-  //       .toLowerCase();
-  //     const stream = student?.stream_name?.toLowerCase() || "";
-  //     const subject = student?.subjects?.map((sub) => sub.subject_name)?.join(", ")?.toLowerCase() || "";
-
-  //     return (
-  //       rollNo.includes(searchLower) ||
-  //       studentName.includes(searchLower) ||
-  //       stream.includes(searchLower) ||
-  //       subject.includes(searchLower)
-  //     );
-  //   })
-  // : [];
-
-  // console.log("filtered section",filteredSections)
-
-  // const displayedSections = filteredSections.slice(currentPage * pageSize);
-  // console.log("displayedsection",displayedSections)
-
   const filteredStudents = Array.isArray(timetable?.students)
     ? timetable.students.filter((student) => {
         const searchLower = (searchTerm || "").toLowerCase();
@@ -498,9 +569,16 @@ const MonthlyAttendenceReport = () => {
 
   return (
     <>
-      <div className="w-full md:w-[90%] mx-auto p-4 ">
+      {/* <div className="w-full md:w-[90%] mx-auto p-4 "> */}
+      <div
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
+          timetable.length > 0
+            ? "w-full md:w-[100%] scale-100"
+            : "w-full md:w-[100%] scale-[0.98]"
+        }`}
+      >
         <ToastContainer />
-        <div className="card p-2 rounded-md ">
+        <div className="card rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
               Monthly Attendence Report
@@ -520,9 +598,24 @@ const MonthlyAttendenceReport = () => {
           ></div>
 
           <>
-            <div className=" w-full md:w-[90%] flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+            {/* <div className=" w-full md:w-[90%] flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
               <div className="w-full md:w-[95%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full  md:w-[90%] gap-x-0  md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                <div className="w-full  md:w-[90%] gap-x-0  md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row"> */}
+            <div
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
+                timetable.length > 0
+                  ? "pb-0 w-full md:w-[99%]"
+                  : "pb-4 w-full md:w-[100%]"
+              }`}
+            >
+              <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4 mr-10">
+                <div
+                  className={` w-full gap-x-0 md:gap-x-8  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
+                    timetable.length > 0
+                      ? "w-full md:w-[90%]  wrelative left-0"
+                      : " w-full md:w-[95%] relative left-10"
+                  }`}
+                >
                   {/* Class Dropdown */}
                   <div className="w-full md:w-[full] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
@@ -654,13 +747,49 @@ const MonthlyAttendenceReport = () => {
                   </div>
                 </div>
               </div>
+              {timetable?.students?.length > 0 && (
+                <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                  <div className="w-full  flex flex-row justify-between mr-0 md:mr-4 ">
+                    <div className="w-1/2 md:w-[100%] mr-1 ">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search "
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                    <button
+                      type="button"
+                      onClick={handleDownloadEXL}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group"
+                    >
+                      <FaFileExcel />
+                      <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2">
+                        Export to Excel
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handlePrint}
+                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center"
+                    >
+                      <FiPrinter />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
+                        Print
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {timetable?.students?.length > 0 && (
               <>
-                <div className="w-[full]  mt-4 ">
+                <div className="w-[full] px-4 mb-4 mt-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                    {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                           List of Monthly Attendence Report
@@ -703,7 +832,7 @@ const MonthlyAttendenceReport = () => {
                       style={{
                         backgroundColor: "#C03078",
                       }}
-                    ></div>
+                    ></div> */}
 
                     <div className="card-body w-full">
                       <div
