@@ -271,6 +271,9 @@ import StationeryRequisition from "../TeacherLoginModules/StationeryRequistion/S
 // import PublishReportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishreportCard.jsx";
 // import PublishReportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishReportCard.jsx";
 import PublishReportCard from "../componants/MastersModule/DomainModules/PublishReportCard/PublishreportCard.jsx";
+import PullPreviousYearMarksAllotmentData from "../componants/PullData/PullPreviousYearMarksAllotmentData.jsx";
+import PullMarksAllotmentData from "../componants/PullData/PullMarksAllotmentData.jsx";
+import PullGradesData from "../componants/PullData/PullGradesData.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -1478,6 +1481,20 @@ function Index() {
         <Route
           path="/dailyAttendance"
           element={<PrivateRoute element={<DailyAttendance />} />}
+        />
+        <Route
+          path="/pull_from_prevyr_marks_allotment_data"
+          element={
+            <PrivateRoute element={<PullPreviousYearMarksAllotmentData />} />
+          }
+        />
+        <Route
+          path="/pull_marks_allotment_data"
+          element={<PrivateRoute element={<PullMarksAllotmentData />} />}
+        />
+        <Route
+          path="/pull_previous_acd_yr_grades_data"
+          element={<PrivateRoute element={<PullGradesData />} />}
         />
       </Route>
 
