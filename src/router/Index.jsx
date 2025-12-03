@@ -274,6 +274,18 @@ import PublishReportCard from "../componants/MastersModule/DomainModules/Publish
 import PullPreviousYearMarksAllotmentData from "../componants/PullData/PullPreviousYearMarksAllotmentData.jsx";
 import PullMarksAllotmentData from "../componants/PullData/PullMarksAllotmentData.jsx";
 import PullGradesData from "../componants/PullData/PullGradesData.jsx";
+import ReturnBook from "../componants/MasterModuleLibrarian/ReturnBook/ReturnBook.jsx";
+import IssueBook from "../componants/MasterModuleLibrarian/IssueBook/IssueBook.jsx";
+import ViewMember from "../componants/MasterModuleLibrarian/ViewMember/ViewMember.jsx";
+import GenerateBarcode from "../componants/MasterModuleLibrarian/GenerateBarcode/GenerateBarcode.jsx";
+import EditBookDetails from "../componants/MasterModuleLibrarian/BookDetails/EditBookDetails.jsx";
+import CreateBook from "../componants/MasterModuleLibrarian/BookDetails/CreateBook.jsx";
+import BookDetails from "../componants/MasterModuleLibrarian/BookDetails/BookDetails.jsx";
+import CallCategory from "../componants/MasterModuleLibrarian/CallCategory/CallCategory.jsx";
+import CreateCallCategory from "../componants/MasterModuleLibrarian/CallCategory/CreateCallCategory.jsx";
+import EditCallCategory from "../componants/MasterModuleLibrarian/CallCategory/EditCallCategory.jsx";
+import CreateMember from "../componants/MasterModuleLibrarian/CreateMember/CreateMember.jsx";
+import CategoryGroup from "../componants/MasterModuleLibrarian/CategoryGroup/CategoryGroup.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -1495,6 +1507,64 @@ function Index() {
         <Route
           path="/pull_previous_acd_yr_grades_data"
           element={<PrivateRoute element={<PullGradesData />} />}
+        />
+        {/* Librarian Login */}
+        {/* Master module */}
+        {/* Create Member */}
+        <Route
+          path="/createMember"
+          element={<PrivateRoute element={<CreateMember />} />}
+        />
+        {/* Category Group */}
+        <Route
+          path="/categoryGroup"
+          element={<PrivateRoute element={<CategoryGroup />} />}
+        />
+        {/* Call Category */}
+        <Route
+          path="/callCategory"
+          element={<PrivateRoute element={<CallCategory />} />}
+        />
+        <Route
+          path="/createCallCategory"
+          element={<PrivateRoute element={<CreateCallCategory />} />}
+        />
+        <Route
+          path="/editCallCategory/:id"
+          element={<PrivateRoute element={<EditCallCategory />} />}
+        />
+        {/* Book Details */}
+        <Route
+          path="/bookDetails"
+          element={<PrivateRoute element={<BookDetails />} />}
+        />
+        <Route
+          path="/createBook"
+          element={<PrivateRoute element={<CreateBook />} />}
+        />
+        <Route
+          path="/bookDetails/edit/:id"
+          element={<PrivateRoute element={<EditBookDetails />} />}
+        />
+        {/* Generate Barcode */}
+        <Route
+          path="/generateBarcode"
+          element={<PrivateRoute element={<GenerateBarcode />} />}
+        />
+        {/* Library */}
+        {/* View Members */}
+        <Route
+          path="/viewMembers"
+          element={<PrivateRoute element={<ViewMember />} />}
+        />
+        {/* Issue Book */}
+        <Route
+          path="/issueBook"
+          element={<PrivateRoute element={<IssueBook />} />}
+        />
+        <Route
+          path="/returnBook"
+          element={<PrivateRoute element={<ReturnBook />} />}
         />
       </Route>
 

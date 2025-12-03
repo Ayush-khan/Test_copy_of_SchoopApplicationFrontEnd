@@ -347,8 +347,8 @@ const EditLeaveApplication = () => {
           });
 
           // Set backend validation errors for specific fields
-          setBackendErrors(errors);
-          setEmployeeIdBackendError(errors?.leave_app_id_id?.[0] || ""); // Handle `employee_id` error
+          // setBackendErrors(errors);
+          // setEmployeeIdBackendError(errors?.leave_app_id_id?.[0] || ""); // Handle `employee_id` error
         } else if (message) {
           // Show generic backend error message
           // toast.error(message);
