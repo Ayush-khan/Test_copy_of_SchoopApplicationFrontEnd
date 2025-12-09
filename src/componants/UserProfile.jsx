@@ -863,6 +863,9 @@ function UserProfile() {
     section_id: "",
     isDelete: "N",
     role_id: "",
+    emergency_phone: "",
+    permanent_address: "",
+    sameAsCurrent: false,
   });
 
   const [errors, setErrors] = useState({});
@@ -874,6 +877,34 @@ function UserProfile() {
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
   const [loading, setLoading] = useState(false);
+
+  const [roleId, setRoleId] = useState("");
+
+  useEffect(() => {
+    fetchDataRoleId();
+  }, []);
+
+  const fetchDataRoleId = async () => {
+    console.log("inside fethc role");
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const role_id = sessionResponse.data.user.role_id;
+      setRoleId(role_id);
+      console.log("role id", role_id);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   // Fetch data from the API when the component mounts
   useEffect(() => {
@@ -919,6 +950,10 @@ function UserProfile() {
           section_id: staff.section_id || "",
           isDelete: staff.isDelete || "N",
           role_id: staff.role_id || "",
+          permanent_address: staff.permanent_address || "",
+          emergency_phone: staff.emergency_phone || "",
+          sameAsCurrent:
+            staff.address === staff.permanent_address && staff.address !== "",
         });
 
         if (staff.teacher_image_name) {
@@ -974,9 +1009,14 @@ function UserProfile() {
       newErrors.date_of_joining = "Date of Joining is required";
     if (!formData.sex) newErrors.sex = "Gender is required";
     if (!formData.address) newErrors.address = "Address is required";
+    if (!formData.permanent_address)
+      newErrors.permanent_address = "Address is required";
     // Validate phone number
     const phoneError = validatePhone(formData.phone);
     if (phoneError) newErrors.phone = phoneError;
+
+    const emergenyPhoneError = validatePhone(formData.emergency_phone);
+    if (emergenyPhoneError) newErrors.phone = emergenyPhoneError;
 
     // Validate email
     const emailError = validateEmail(formData.email);
@@ -1011,7 +1051,11 @@ function UserProfile() {
     } else if (name === "aadhar_card_no") {
       newValue = newValue.replace(/\s+/g, "");
     }
-    if (name === "phone" || name === "aadhar_card_no") {
+    if (
+      name === "phone" ||
+      name === "aadhar_card_no" ||
+      name === "emergency_phone"
+    ) {
       newValue = newValue.replace(/[^\d]/g, "");
     }
     if (name === "academic_qual") {
@@ -1031,8 +1075,8 @@ function UserProfile() {
     }
     // Validate field based on name
     let fieldErrors = {};
-    if (name === "phone") {
-      fieldErrors.phone = validatePhone(newValue);
+    if (name === "phone" || name === "emergency_phone") {
+      fieldErrors[name] = validatePhone(newValue);
     } else if (name === "aadhar_card_no") {
       fieldErrors.aadhar_card_no = validateAadhar(newValue);
     } else if (name === "email") {
@@ -1041,11 +1085,34 @@ function UserProfile() {
       fieldErrors.experience = validateExperience(newValue);
     }
 
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      ...fieldErrors,
-    }));
+    // setErrors((prevErrors) => ({
+    //   ...prevErrors,
+    //   ...fieldErrors,
+    // }));
+    setFormData((prevData) => {
+      const updatedData = {
+        ...prevData,
+        [name]: newValue,
+      };
+
+      // ONLY for Same As Permanent Address logic
+      if (prevData.sameAsCurrent && name === "permanent_address") {
+        updatedData.address = newValue;
+      }
+
+      return updatedData;
+    });
     // validate(); // Call validate on each change to show real-time errors
+  };
+
+  const handleSameAsCurrent = (e) => {
+    const checked = e.target.checked;
+
+    setFormData((prev) => ({
+      ...prev,
+      sameAsCurrent: checked,
+      permanent_address: checked ? prev.address : "",
+    }));
   };
 
   // Image Croping funtionlity
@@ -1133,11 +1200,11 @@ function UserProfile() {
   };
 
   return (
-    <div className="container mx-auto p-4 ">
+    <div className="container mx-auto mt-4 ">
       <ToastContainer />
-      <div className="card p-4 rounded-md ">
+      <div className="card  rounded-md ">
         <div className=" card-header mb-4 flex justify-between items-center ">
-          <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+          <h5 className="text-gray-700 mt-1 text-md lg:text-lg mx-2">
             Edit Staff information
           </h5>
 
@@ -1149,7 +1216,7 @@ function UserProfile() {
           />
         </div>
         <div
-          className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+          className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
           style={{
             backgroundColor: "#C03078",
           }}
@@ -1195,35 +1262,27 @@ function UserProfile() {
                 className="input-field text-xs box-border mt-2 bg-black text-white  "
               />
             </div> */}
-                <div className=" mx-auto      ">
-                  {/* {console.log("imagepreview",photoPreview)} */}
+                <div className="mx-auto">
+                  {roleId === "T" ? (
+                    <img
+                      src={photoPreview || "/default-user.png"}
+                      alt="Teacher"
+                      className="w-28 h-28 rounded-full object-cover border mt-4"
+                    />
+                  ) : (
+                    <ImageCropper
+                      photoPreview={photoPreview}
+                      onImageCropped={handleImageCropped}
+                    />
+                  )}
+                </div>
+                {/* <div className=" mx-auto      ">
+                  
                   <ImageCropper
                     photoPreview={photoPreview}
                     onImageCropped={handleImageCropped}
                   />
-
-                  {/* <label htmlFor="photo" className="block font-bold  text-xs mb-2">
-                Photo
-                {photoPreview ? (
-                  <img
-                    src={photoPreview}
-                    alt="Photo Preview"
-                    className="   h-20 w-20 rounded-[50%] mx-auto border-1  border-black object-cover"
-                  />
-                ) : (
-                  <FaUserCircle className="mt-2 h-20 w-20 object-cover mx-auto text-gray-300" />
-                )}
-                <ImageCropper onImageCropped={handleImageCropped} />
-              </label> */}
-                  {/* <input
-                type="file"
-                id="photo"
-                name="photo"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="input-field text-xs box-border mt-2 bg-black text-white  "
-              /> */}
-                </div>
+                </div> */}
                 <div className="col-span-1">
                   <label
                     htmlFor="academic_qual"
@@ -1280,27 +1339,54 @@ function UserProfile() {
                     </span>
                   )}
                 </div>
-                <div className="col-span-1">
-                  <label
-                    htmlFor="address"
-                    className="block font-bold  text-xs mb-2"
-                  >
-                    Address <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    type="text"
-                    maxLength={240}
-                    id="address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    required
-                    className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
-                  />
-                  {errors.address && (
-                    <div className="text-red-500 text-xs">{errors.address}</div>
-                  )}
+
+                <div className="grid grid-rows-2">
+                  {/* Present Address */}
+                  <div className="w-full">
+                    <label className="block font-bold text-xs mb-2">
+                      Address <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      className="w-full border rounded-md"
+                      type="text"
+                      maxLength={200}
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      required
+                    ></textarea>
+                  </div>
+                  {/* Permanent Address */}
+                  <div className="w-full">
+                    <label className="block font-bold text-xs mb-2">
+                      Permanent Address <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      className="w-full border rounded-md "
+                      type="text"
+                      maxLength={200}
+                      id="permanent_address"
+                      name="permanent_address"
+                      value={formData.permanent_address}
+                      onChange={handleChange}
+                      required
+                    ></textarea>
+                    <div className="flex items-center gap-2 mb-2">
+                      <input
+                        type="checkbox"
+                        id="sameAsCurrent"
+                        checked={formData.sameAsCurrent}
+                        className="w-3 h-3"
+                        onChange={handleSameAsCurrent}
+                      />
+                      <label htmlFor="sameAsCurrent" className="text-xs">
+                        Same as Current Address
+                      </label>
+                    </div>
+                  </div>
                 </div>
+
                 <div className="col-span-1">
                   <label
                     htmlFor="name"
@@ -1359,7 +1445,7 @@ function UserProfile() {
                     htmlFor="phone"
                     className="block font-bold  text-xs mb-2"
                   >
-                    Phone <span className="text-red-500">*</span>
+                    Contact no. <span className="text-red-500">*</span>
                   </label>
                   <div className="flex ">
                     <span className=" rounded-l-md pt-1 bg-gray-200 text-black font-bold px-2 pointer-events-none ml-1">
@@ -1383,6 +1469,43 @@ function UserProfile() {
                   )}
                   {errors.phone && (
                     <span className="text-red-500 text-xs">{errors.phone}</span>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="phone"
+                    className="block font-bold  text-xs mb-2"
+                  >
+                    Emergency Contact no.{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex ">
+                    <span className=" rounded-l-md pt-1 bg-gray-200 text-black font-bold px-2 pointer-events-none ml-1">
+                      +91
+                    </span>
+                    <input
+                      type="text"
+                      id="emergency_phone"
+                      name="emergency_phone"
+                      pattern="\d{10}"
+                      maxLength="10"
+                      title="Please enter only 10 digit number "
+                      value={formData.emergency_phone}
+                      onChange={handleChange}
+                      className="input-field block w-full border border-gray-300 outline-none  rounded-r-md py-1 px-3 bg-white shadow-inner "
+                      required
+                    />
+                  </div>
+                  {backendErrors.emergency_phone && (
+                    <span className="error">
+                      {backendErrors.emergency_phone[0]}
+                    </span>
+                  )}
+                  {errors.phone && (
+                    <span className="text-red-500 text-xs">
+                      {errors.emergency_phone}
+                    </span>
                   )}
                 </div>
                 <div className="col-span-1">

@@ -304,11 +304,11 @@ function CreateCareTacker() {
   };
 
   return (
-    <div className="container mx-auto p-4 ">
+    <div className="container mx-auto mt-4 ">
       <ToastContainer />
-      <div className="card p-2 rounded-md ">
+      <div className="card rounded-md ">
         <div className=" card-header mb-4 flex justify-between items-center ">
-          <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+          <h5 className="text-gray-700 mt-1 mx-2 text-md lg:text-lg">
             Create Caretaker
           </h5>
 
@@ -321,7 +321,7 @@ function CreateCareTacker() {
           />
         </div>
         <div
-          className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+          className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
           style={{
             backgroundColor: "#C03078",
           }}

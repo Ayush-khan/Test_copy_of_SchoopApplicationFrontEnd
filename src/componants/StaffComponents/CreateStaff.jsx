@@ -31,6 +31,9 @@ function CreateStaff() {
     teacher_image_name: null,
     special_sub: "",
     tc_id: "",
+    emergency_phone: "",
+    permanent_address: "",
+    sameAsCurrent: false,
   });
   const [errors, setErrors] = useState({});
   const [employeeIdBackendError, setEmployeeIdBackendError] = useState("");
@@ -43,6 +46,7 @@ function CreateStaff() {
   const today = new Date().toISOString().split("T")[0];
 
   const [teacherCategories, setTeacherCategories] = useState([]);
+  const [roles, setRoles] = useState([]);
 
   useEffect(() => {
     const fetchTeacherCategories = async () => {
@@ -64,6 +68,29 @@ function CreateStaff() {
     };
 
     fetchTeacherCategories();
+  }, [API_URL]);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(`${API_URL}/api/roles`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("response", response.data.data);
+
+        if (response.data?.success && Array.isArray(response.data.data)) {
+          setRoles(response.data.data);
+        } else {
+          toast.error("Failed to load teacher categories");
+        }
+      } catch (error) {
+        console.error("Error fetching teacher categories:", error);
+        toast.error("Error fetching teacher categories");
+      }
+    };
+
+    fetchRoles();
   }, [API_URL]);
 
   // Validation functions
@@ -114,9 +141,15 @@ function CreateStaff() {
     // Validate address
     if (!formData.address) newErrors.address = "Address is required";
 
+    if (!formData.permanent_address)
+      newErrors.permanent_address = "Address is required";
+
     // Validate phone number
     const phoneError = validatePhone(formData.phone);
     if (phoneError) newErrors.phone = phoneError;
+
+    const emergencyPhone = validatePhone(formData.emergency_phone);
+    if (emergencyPhone) newErrors.emergency_phone = emergencyPhone;
 
     // Validate email
     const emailError = validateEmail(formData.email);
@@ -150,7 +183,11 @@ function CreateStaff() {
     } else if (name === "aadhar_card_no") {
       newValue = newValue.replace(/\s+/g, "");
     }
-    if (name === "phone" || name === "aadhar_card_no") {
+    if (
+      name === "phone" ||
+      name === "aadhar_card_no" ||
+      name === "emergency_phone"
+    ) {
       newValue = newValue.replace(/[^\d]/g, "");
     }
 
@@ -164,16 +201,30 @@ function CreateStaff() {
         return { ...prevData, academic_qual: newAcademicQual };
       });
     } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: newValue,
-      }));
+      // setFormData((prevData) => ({
+      //   ...prevData,
+      //   [name]: newValue,
+      // }));
+      setFormData((prevData) => {
+        const updatedData = {
+          ...prevData,
+          [name]: newValue,
+        };
+
+        // ONLY for Same As Permanent Address logic
+        if (prevData.sameAsCurrent && name === "permanent_address") {
+          updatedData.address = newValue;
+        }
+
+        return updatedData;
+      });
     }
 
     // Validate field based on name
     let fieldErrors = {};
-    if (name === "phone") {
-      fieldErrors.phone = validatePhone(newValue);
+
+    if (name === "phone" || name === "emergency_phone") {
+      fieldErrors[name] = validatePhone(newValue);
     } else if (name === "aadhar_card_no") {
       fieldErrors.aadhar_card_no = validateAadhar(newValue);
     } else if (name === "email") {
@@ -185,6 +236,16 @@ function CreateStaff() {
     setErrors((prevErrors) => ({
       ...prevErrors,
       ...fieldErrors,
+    }));
+  };
+
+  const handleSameAsCurrent = (e) => {
+    const checked = e.target.checked;
+
+    setFormData((prev) => ({
+      ...prev,
+      sameAsCurrent: checked,
+      permanent_address: checked ? prev.address : "",
     }));
   };
 
@@ -255,7 +316,7 @@ function CreateStaff() {
       );
       if (response.data.status === 400 && response.data.success === false) {
         toast.error(
-          "❌ Userid is created using staff name, please use a different name to create user id"
+          " Userid is created using staff name, please use a different name to create user id"
         );
         return;
       }
@@ -297,11 +358,11 @@ function CreateStaff() {
   };
 
   return (
-    <div className="container mx-auto p-4 ">
+    <div className="container mx-auto mt-4 ">
       <ToastContainer />
-      <div className="card p-2 rounded-md ">
+      <div className="card  rounded-md ">
         <div className=" card-header mb-4 flex justify-between items-center ">
-          <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+          <h5 className="text-gray-700 mt-1 text-md lg:text-lg mx-2">
             Create a New Staff
           </h5>
 
@@ -314,12 +375,12 @@ function CreateStaff() {
           />
         </div>
         <div
-          className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+          className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
           style={{
             backgroundColor: "#C03078",
           }}
         ></div>
-        <p className="  md:absolute md:right-7  md:top-[9%]   text-gray-500 ">
+        <p className="  md:absolute md:right-7  md:top-[8%]   text-gray-500 ">
           <span className="text-red-500">*</span>indicates mandatory information
         </p>
         <form
@@ -329,11 +390,11 @@ function CreateStaff() {
           {" "}
           {loading ? (
             <div className=" inset-0  h-52 flex items-center justify-center bg-gray-50  z-10">
-              <Loader /> {/* Replace this with your loader component */}
+              <Loader />
             </div>
           ) : (
             <div className=" flex flex-col gap-4 md:grid  md:grid-cols-3 md:gap-x-14 md:mx-10 gap-y-1">
-              <div className=" mx-auto      ">
+              <div className=" mx-auto ">
                 <ImageCropper onImageCropped={handleImageCropped} />
 
                 {/* <label htmlFor="photo" className="block font-bold  text-xs mb-2">
@@ -365,7 +426,7 @@ function CreateStaff() {
                 >
                   Academic Qualification <span className="text-red-500">*</span>
                 </label>
-                <div className="flex flex-wrap ">
+                <div className="flex flex-wrap gap-2 ">
                   {[
                     "Hsc",
                     "DCE",
@@ -411,7 +472,7 @@ function CreateStaff() {
                 )}
               </div>
 
-              <div>
+              {/* <div>
                 <label
                   htmlFor="address"
                   className="block font-bold  text-xs mb-2"
@@ -429,9 +490,56 @@ function CreateStaff() {
                   rows="4"
                   required
                 />
+              </div> */}
+              <div className="grid grid-rows-2">
+                {/* Present Address */}
+                <div className="w-full">
+                  <label className="block font-bold text-xs mb-2">
+                    Address <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    className="w-full border rounded-md"
+                    type="text"
+                    maxLength={200}
+                    id="address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                  ></textarea>
+                </div>
+                {/* Permanent Address */}
+                <div className="w-full">
+                  <label className="block font-bold text-xs mb-2">
+                    Permanent Address <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    className="w-full border rounded-md "
+                    type="text"
+                    maxLength={200}
+                    id="permanent_address"
+                    name="permanent_address"
+                    value={formData.permanent_address}
+                    onChange={handleChange}
+                    required
+                    // rows="3"
+                  ></textarea>
+                  <div className="flex items-center gap-2 mb-2">
+                    <input
+                      type="checkbox"
+                      id="sameAsCurrent"
+                      checked={formData.sameAsCurrent}
+                      className="w-3 h-3"
+                      onChange={handleSameAsCurrent}
+                    />
+                    <label htmlFor="sameAsCurrent" className="text-xs">
+                      Same as Current Address
+                    </label>
+                  </div>
+                </div>
               </div>
 
-              <div className=" ">
+              <div className="">
                 <label
                   htmlFor="staffName"
                   className="block font-bold  text-xs mb-2"
@@ -487,7 +595,7 @@ function CreateStaff() {
                   htmlFor="phone"
                   className="block font-bold  text-xs mb-2"
                 >
-                  Phone <span className="text-red-500">*</span>
+                  Contact no.<span className="text-red-500">*</span>
                 </label>
                 <div className="flex ">
                   <span className=" rounded-l-md pt-1 bg-gray-200 text-black font-bold px-2 pointer-events-none ml-1">
@@ -511,6 +619,42 @@ function CreateStaff() {
                 )}
                 {errors.phone && (
                   <span className="text-red-500 text-xs">{errors.phone}</span>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="emergency_phone"
+                  className="block font-bold  text-xs mb-2"
+                >
+                  Emergency Contact no. <span className="text-red-500">*</span>
+                </label>
+                <div className="flex ">
+                  <span className=" rounded-l-md pt-1 bg-gray-200 text-black font-bold px-2 pointer-events-none ml-1">
+                    +91
+                  </span>
+                  <input
+                    type="text"
+                    id="emergency_phone"
+                    name="emergency_phone"
+                    pattern="\d{10}"
+                    maxLength="10"
+                    title="Please enter only 10 digit number "
+                    value={formData.emergency_phone}
+                    onChange={handleChange}
+                    className="input-field block w-full border border-gray-300 outline-none  rounded-r-md py-1 px-3 bg-white shadow-inner "
+                    required
+                  />
+                </div>
+                {backendErrors.emergency_phone && (
+                  <span className="error">
+                    {backendErrors.emergency_phone[0]}
+                  </span>
+                )}
+                {errors.emergency_phone && (
+                  <span className="text-red-500 text-xs">
+                    {errors.emergency_phone}
+                  </span>
                 )}
               </div>
 
@@ -719,7 +863,7 @@ function CreateStaff() {
                 <label htmlFor="role" className="block font-bold  text-xs mb-2">
                   Role <span className="text-red-500">*</span>
                 </label>
-                <select
+                {/* <select
                   id="role"
                   name="role"
                   value={formData.role}
@@ -742,6 +886,23 @@ function CreateStaff() {
                   <option value="T">Teacher</option>
                   <option value="X">Support Staff</option>
                   <option value="Y">Security</option>
+                </select> */}
+
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="input-field block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
+                >
+                  <option className="bg-gray-300" value="">
+                    Select
+                  </option>
+                  {roles.map((cat) => (
+                    <option key={cat.role_id} value={cat.role_id}>
+                      {cat.name}
+                    </option>
+                  ))}
                 </select>
                 {errors.role && (
                   <span className="text-red-500 text-xs">{errors.role}</span>

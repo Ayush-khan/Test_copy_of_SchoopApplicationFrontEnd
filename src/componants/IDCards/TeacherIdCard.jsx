@@ -50,14 +50,14 @@ const TeacherIdCard = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response?.data?.data || response?.data?.data.length === 0) {
-        toast.error("No student ID card data found for the selected class."); // Show warning toast
+        console.log("No Staff ID card data found."); // Show warning toast
         setTimetable([]); // Ensure timetable is set to an empty array
       } else {
         setTimetable(response?.data?.data);
       }
     } catch (error) {
-      console.error("Error fetching Student Id Card data:", error);
-      toast.error("An error occurred while fetching Student Id Carddata.");
+      console.error("Error fetching Staff Id Card data:", error);
+      toast.error("An error occurred while fetching Staff Id Carddata.");
     } finally {
       setLoadingForSearch(false);
     }
@@ -66,7 +66,7 @@ const TeacherIdCard = () => {
   const handleDownloadEXL = () => {
     if (!displayedSections || displayedSections.length === 0) {
       toast.error(
-        "No data available to download Excel sheet of Student ID Card."
+        "No data available to download Excel sheet of Staff ID Card."
       );
       return;
     }
@@ -74,17 +74,15 @@ const TeacherIdCard = () => {
     // Define headers
     const headers = [
       "Sr.No",
-
       "Photo URL",
       "Employee Id",
       "Name",
-
       "Phone No.",
-
+      "Emergency Phone No.",
       "Address",
+      "Permanent Address",
       "Gender",
       "Blood Group",
-
       "Profile Image Name",
     ];
 
@@ -94,10 +92,11 @@ const TeacherIdCard = () => {
 
       subject?.teacher_image_url || "  ",
       `${subject?.employee_id || ""} `,
-      `${subject?.name || ""} 
-      }`,
+      `${subject?.name || ""} `,
       subject?.phone || "  ",
+      subject?.emergency_phone || "  ",
       subject?.address || "  ",
+      subject?.permanent_address || "  ",
       subject?.sex || " ",
 
       subject?.blood_group || "  ",
@@ -109,10 +108,10 @@ const TeacherIdCard = () => {
 
     // Create a workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Teachers Data");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Staff Data");
 
     // Write and download the file
-    XLSX.writeFile(workbook, `Teachers idCard list .xlsx`);
+    XLSX.writeFile(workbook, `Staff idCard list .xlsx`);
   };
   const handleDownloadZip = () => {
     setShowDeleteModal(true);
@@ -151,7 +150,7 @@ const TeacherIdCard = () => {
       // Create a temporary link to trigger the download
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `Teacher idCard list zip`);
+      link.setAttribute("download", `Staff idCard list zip`);
       document.body.appendChild(link);
       link.click();
 
@@ -159,9 +158,9 @@ const TeacherIdCard = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      toast.success("ZIP file For Teacher Id Card downloaded successfully!");
+      toast.success("ZIP file For Staff Id Card downloaded successfully!");
     } catch (error) {
-      console.error("Error downloading ZIP file For Teacher Id Card:", error);
+      console.error("Error downloading ZIP file For Staff Id Card:", error);
 
       if (error.response && error.response.status === 400) {
         toast.error(error.response.data.message || "Download failed.");
@@ -180,9 +179,18 @@ const TeacherIdCard = () => {
     setShowDeleteModal(false);
   };
 
+  const toCamelCase = (name) => {
+    if (!name) return "";
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
   console.log("row", timetable);
+
   const handlePrint = () => {
-    const printTitle = `Teacher ID Card List`;
+    const printTitle = `Staff ID Card List`;
 
     const printContent = `
   <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
@@ -192,15 +200,14 @@ const TeacherIdCard = () => {
         <thead>
           <tr class="bg-gray-100">
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
-
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Photo</th>
-                        <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Employee Id</th>
-
-            
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Employee Id</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Name</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Phone No.</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Emergency Phone No.</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Address</th>
-                        <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Gender</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Permanent Address</th>
+            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Gender</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Blood Group</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Profile Image Name</th>
           </tr>
@@ -228,17 +235,21 @@ const TeacherIdCard = () => {
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.phone || " "
                 }</td>
-              
+                 <td class="px-2 text-center py-2 border border-black">${
+                   subject?.emergency_phone || " "
+                 }</td>
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.address || " "
-                }</td>  <td class="px-2 text-center py-2 border border-black">${
-                subject?.sex || " "
-              }</td>
+                }</td>  
+                 <td class="px-2 text-center py-2 border border-black">${
+                   subject?.permanent_address || " "
+                 }</td>
+                <td class="px-2 text-center py-2 border border-black">${
+                  subject?.sex || " "
+                }</td>
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.blood_group || " "
                 }</td>
-              
-                
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.teacher_image_name || " "
                 }</td>
@@ -270,17 +281,12 @@ const TeacherIdCard = () => {
   width: 100%; /* Ensures the table fills its container */
   margin:auto;
   padding:0 10em 0 10em;
-
-  
-
-
 }
 
 #tableContainer {
   display: flex;
   justify-content: center; /* Centers the table horizontally */
   width: 80%;
-  
 }
 
  
@@ -340,6 +346,8 @@ h5 + * { /* Targets the element after h5 */
     const studentBloodGroup = section?.blood_group?.toLowerCase() || "";
     const studentGrnNo = section?.sex?.toLowerCase() || "";
     const studentClass = `${section?.address}`.toLowerCase() || "";
+    const emergencyPhone = section?.emergency_phone?.toLowerCase() || "";
+    const permanentAdd = section?.permanent_address?.toLowerCase() || "";
 
     // Check if the search term is present in any of the specified fields
     return (
@@ -348,39 +356,19 @@ h5 + * { /* Targets the element after h5 */
       studentDOB.includes(searchLower) ||
       studentBloodGroup.includes(searchLower) ||
       studentGrnNo.includes(searchLower) ||
-      studentClass.includes(searchLower)
+      studentClass.includes(searchLower) ||
+      emergencyPhone.includes(searchLower) ||
+      permanentAdd.includes(searchLower)
     );
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
   return (
     <>
-      <div className="w-full md:w-[95%] mx-auto p-4 ">
+      <div className="w-full md:w-[100%] mx-auto p-4 ">
         <ToastContainer />
-        <div className="card p-4 rounded-md ">
-          <div className=" card-header mb-4 flex justify-between items-center ">
-            <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              Teacher ID Card
-            </h5>
-            <RxCross1
-              className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
-              onClick={() => {
-                navigate("/dashboard");
-              }}
-            />
-          </div>
-          <div
-            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
-            style={{
-              backgroundColor: "#C03078",
-            }}
-          ></div>
-
+        <div className="card rounded-md ">
           <>
-            <div className=" w-full md:w-[55%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
-              <div className="w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4"></div>
-            </div>
-            {/* // Render the table */}
             {loadingForSearch ? (
               <>
                 <div className="flex justify-center items-center h-64">
@@ -389,111 +377,82 @@ h5 + * { /* Targets the element after h5 */
               </>
             ) : (
               <>
-                {timetable.length > 0 && (
-                  <>
-                    <div className="w-full  mt-4">
-                      <div className="card mx-auto lg:w-full shadow-lg">
-                        <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                          <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
-                            <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                              Teachers ID Card List
-                            </h3>
-                            <div className="w-1/2 md:w-[18%] mr-1 ">
-                              <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Search "
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                              />
-                            </div>
-                          </div>
-                          <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
-                            <button
-                              type="button"
-                              onClick={handleDownloadEXL}
-                              className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
-                            >
-                              <FaFileExcel />
-
-                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                                Exports to excel
-                              </div>
-                            </button>
-
-                            <button
-                              onClick={handlePrint}
-                              className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
-                            >
-                              <FiPrinter />
-                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                                Print{" "}
-                              </div>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={handleDownloadZip}
-                              className={`relative bg-blue-400 text-white px-3 rounded hover:bg-blue-500 group ${
-                                isSubmitDisabled
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
-                              disabled={isSubmitDisabled}
-                            >
-                              <FaDownload />
-
-                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                                Download profile images
-                              </div>
-                            </button>
+                {/* {timetable.length > 0 && ( */}
+                <>
+                  <div className="w-full ">
+                    <div className="card mx-auto lg:w-full shadow-lg">
+                      <div className="py-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                        <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
+                          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                            Download Staff ID Card
+                          </h3>
+                          <div className="w-1/2 md:w-[18%] mr-1 ">
+                            <input
+                              type="text"
+                              className="form-control"
+                              placeholder="Search "
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                           </div>
                         </div>
-                        <div
-                          className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
-                          style={{
-                            backgroundColor: "#C03078",
-                          }}
-                        ></div>
+                        <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
+                          <button
+                            type="button"
+                            onClick={handleDownloadEXL}
+                            className="relative bg-blue-400 py-1 hover:bg-blue-500 text-white px-3 rounded group"
+                          >
+                            <FaFileExcel />
 
-                        <div className="card-body w-full">
-                          <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden ">
-                            {/* <table className="min-w-full leading-normal table-auto"> */}
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
+                              Exports to excel
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={handlePrint}
+                            className="relative flex flex-row justify-center align-middle items-center gap-x-1 bg-blue-400 hover:bg-blue-500 text-white px-3 rounded group"
+                          >
+                            <FiPrinter />
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
+                              Print{" "}
+                            </div>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleDownloadZip}
+                            className={`relative bg-blue-400 text-white px-3 rounded hover:bg-blue-500 group ${
+                              isSubmitDisabled
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                            }`}
+                            disabled={isSubmitDisabled}
+                          >
+                            <FaDownload />
+
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
+                              Download profile images
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => navigate("/dashboard")}
+                            className="text-[#C03078] hover:bg-red-100 transition-colors"
+                          >
+                            <RxCross1 />
+                          </button>
+                        </div>
+                      </div>
+                      <div
+                        className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+                        style={{
+                          backgroundColor: "#C03078",
+                        }}
+                      ></div>
+
+                      {timetable.length > 0 ? (
+                        <div className="card-body w-full p-2">
+                          <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
                             <table className="min-w-full leading-normal table-fixed">
-                              {/* <thead>
-                                <tr className="bg-gray-100">
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    Sr.No
-                                  </th>
-
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    Photo
-                                  </th>
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    Employee Id
-                                  </th>
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    Name
-                                  </th>
-
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    Phone No.
-                                  </th>
-
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    Address
-                                  </th>
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    Gender
-                                  </th>
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    Blood Group
-                                  </th>
-
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    Profile Image Name
-                                  </th>
-                                </tr>
-                              </thead> */}
                               <thead>
                                 <tr className="bg-gray-100">
                                   <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[50px]">
@@ -509,10 +468,16 @@ h5 + * { /* Targets the element after h5 */
                                     Name
                                   </th>
                                   <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[150px]">
-                                    Phone No.
+                                    Contact no.
+                                  </th>
+                                  <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[150px]">
+                                    Emergency Contact No.
                                   </th>
                                   <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[350px]">
-                                    Address
+                                    Current Address
+                                  </th>
+                                  <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[150px]">
+                                    Permanent Address
                                   </th>
                                   <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[100px]">
                                     Gender
@@ -526,75 +491,11 @@ h5 + * { /* Targets the element after h5 */
                                 </tr>
                               </thead>
 
-                              {/* <tbody>
-                                {displayedSections.length ? (
-                                  displayedSections.map((subject, index) => (
-                                    <tr
-                                      key={subject.student_id}
-                                      className="text-sm "
-                                    >
-                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                        {currentPage * pageSize + index + 1}
-                                      </td>
-
-                                      <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
-                                        {console.log(
-                                          "the teacher image",
-                                          `${subject?.teacher_image_url}`
-                                        )}
-
-                                        <img
-                                          src={
-                                            subject?.teacher_image_url
-                                              ? // ? `https://sms.evolvu.in/storage/app/public/student_images/${subject?.image_name}`
-                                                `${subject?.teacher_image_url}`
-                                              : "https://via.placeholder.com/50"
-                                          }
-                                          alt={subject?.name}
-                                          className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
-                                        />
-                                      </td>
-                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                        {subject?.employee_id}
-                                      </td>
-
-                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                        {`${subject?.name ?? ""}`.trim()}
-                                      </td>
-
-                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                        {subject?.phone}
-                                      </td>
-
-                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                        {subject?.address}
-                                      </td>
-                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                        {subject?.sex || " "}
-                                      </td>
-                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                        {subject?.blood_group}
-                                      </td>
-
-                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                        {subject?.teacher_image_name}
-                                      </td>
-                                    </tr>
-                                  ))
-                                ) : (
-                                  <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                    <div className=" text-center text-xl text-red-700">
-                                      Oops! No data found..
-                                    </div>
-                                  </div>
-                                )}
-                              </tbody> */}
-
                               <tbody>
                                 {displayedSections.length ? (
                                   displayedSections.map((subject, index) => (
                                     <tr
-                                      key={subject.student_id}
+                                      key={subject.teacher_id}
                                       className="text-sm"
                                     >
                                       <td className="px-2 text-center py-2 border border-gray-950 w-[50px]">
@@ -608,7 +509,7 @@ h5 + * { /* Targets the element after h5 */
                                                 ? `${subject?.teacher_image_url}`
                                                 : "https://via.placeholder.com/50"
                                             }
-                                            alt={subject?.name}
+                                            alt={toCamelCase(subject?.name)}
                                             className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
                                           />
                                         </div>
@@ -619,26 +520,34 @@ h5 + * { /* Targets the element after h5 */
                                       </td>
 
                                       <td className="px-2 text-center py-2 border border-gray-950 w-[250px]">
-                                        {`${subject?.name ?? ""}`.trim()}
+                                        {toCamelCase(subject?.name)}
                                       </td>
 
                                       <td className="px-2 text-center py-2 border border-gray-950 w-[150px]">
                                         {subject?.phone}
                                       </td>
 
+                                      <td className="px-2 text-center py-2 border border-gray-950 w-[200px]">
+                                        {subject?.emergency_phone}
+                                      </td>
+
                                       <td className="px-2 text-center py-2 border border-gray-950 w-[300px]">
                                         {subject?.address}
                                       </td>
 
+                                      <td className="px-2 text-center py-2 border border-gray-950 w-[300px]">
+                                        {subject?.permanent_address}
+                                      </td>
+
                                       <td className="px-2 text-center py-2 border border-gray-950 w-[100px]">
-                                        {subject?.sex || " "}
+                                        {toCamelCase(subject?.sex || " ")}
                                       </td>
 
                                       <td className="px-2 text-center py-2 border border-gray-950 w-[120px]">
                                         {subject?.blood_group}
                                       </td>
 
-                                      <td className="px-2 text-center py-2 border border-gray-950 w-[200px]">
+                                      <td className="px-2 text-center py-2 border border-gray-950 w-[100px]">
                                         {subject?.teacher_image_name}
                                       </td>
                                     </tr>
@@ -657,10 +566,18 @@ h5 + * { /* Targets the element after h5 */
                             </table>
                           </div>
                         </div>
-                      </div>
+                      ) : (
+                        /* ✅ THIS shows when timetable.length === 0 */
+                        <div className="w-full flex justify-center items-center py-20">
+                          <p className="text-red-700 text-xl font-semibold">
+                            Oops! No data found..
+                          </p>
+                        </div>
+                      )}
                     </div>
-                  </>
-                )}
+                  </div>
+                </>
+                {/* )} */}
               </>
             )}
           </>

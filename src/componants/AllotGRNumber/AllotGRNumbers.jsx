@@ -284,16 +284,7 @@ const AllotGRNumbers = () => {
           }); // Smooth scroll
         }
 
-        // Display toast messages for unique errors
-        // if (errorMessages.size > 0) {
-        //   toast.error(Array.from(errorMessages).join("\n"),
-        //   {
-        //     autoClose: 5000,
-        //     position: "top-right",
-        //     closeOnClick: true,
-        //     pauseOnHover: true,
-        //   });
-        // }
+       
 
         return; // Stop form submission
       }
@@ -369,162 +360,7 @@ const AllotGRNumbers = () => {
     }
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!studentInformation?.length) {
-  //       alert("No student data to update.");
-  //       toast.error("All fields are required.");
-  //       return;
-  //     }
-
-  //     let firstInvalidField = null;
-  //     const regNoCount = {};
-  //     const aadhaarCount = {};
-  //     const errors = {};
-  //     const errorMessages = new Set();
-
-  //     // Count occurrences of GR numbers and Aadhaar numbers
-  //     studentInformation.forEach((student) => {
-  //       if (student.reg_no) {
-  //         regNoCount[student.reg_no] = (regNoCount[student.reg_no] || 0) + 1;
-  //       }
-  //       if (student.stu_aadhaar_no) {
-  //         aadhaarCount[student.stu_aadhaar_no] =
-  //           (aadhaarCount[student.stu_aadhaar_no] || 0) + 1;
-  //       }
-  //     });
-
-  //     // Validate fields
-  //     const updatedStudentInformation = studentInformation.map((student) => {
-  //       let studentHasError = false;
-
-  //       // Validate required fields only if they are needed
-  //       ["reg_no", "stu_aadhaar_no", "admission_date"].forEach((field) => {
-  //         if (student[field] === undefined || student[field]?.trim() === "") {
-  //           studentHasError = true;
-  //           errors[`${student.student_id}-${field}`] = "This field cannot be empty";
-  //           errorMessages.add("All required fields must be filled.");
-  //         }
-  //       });
-
-  //       // Check for duplicate GR Number
-  //       if (student.reg_no && regNoCount[student.reg_no] > 1) {
-  //         studentHasError = true;
-  //         errors[`${student.student_id}-reg_no`] = "GR number must be unique";
-  //         errorMessages.add("Duplicate GR numbers found.");
-  //       }
-
-  //       // Check for duplicate Aadhaar Number
-  //       if (student.stu_aadhaar_no && aadhaarCount[student.stu_aadhaar_no] > 1) {
-  //         studentHasError = true;
-  //         errors[`${student.student_id}-stu_aadhaar_no`] = "Aadhaar number must be unique";
-  //         errorMessages.add("Duplicate Aadhaar numbers found.");
-  //       }
-
-  //       return { ...student, hasError: studentHasError };
-  //     });
-
-  //     // Highlight and scroll to the first invalid field
-  //     const firstInvalidStudent = updatedStudentInformation.find(
-  //       (student) => student.hasError
-  //     );
-
-  //     if (firstInvalidStudent) {
-  //       Object.keys(errors).forEach((key) => {
-  //         const fieldElement = studentRefs.current[key];
-  //         if (fieldElement) {
-  //           fieldElement.classList.add("border-red-500", "ring-red-300");
-  //           if (!firstInvalidField) {
-  //             firstInvalidField = fieldElement;
-  //           }
-  //         }
-  //       });
-
-  //       if (firstInvalidField) {
-  //         firstInvalidField.focus();
-  //         firstInvalidField.scrollIntoView({ behavior: "smooth", block: "center" });
-  //       }
-
-  //       toast.error(Array.from(errorMessages).join("\n"), {
-  //         autoClose: 5000,
-  //         position: "top-right",
-  //         closeOnClick: true,
-  //         pauseOnHover: true,
-  //       });
-
-  //       return;
-  //     }
-
-  //     // Proceed with API call if validation passes
-  //     const response = await axios.put(
-  //       `${API_URL}/api/update_studentallotgrno`,
-  //       { students: updatedStudentInformation },
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success("Student details updated successfully!");
-  //     } else {
-  //       toast.error(`Failed to update student details. Status: ${response.status}`);
-  //     }
-  //   } catch (error) {
-  //     console.log("Full API Error Response:", error.response);
-
-  //     if (error.response?.status === 422) {
-  //       const backendErrors = error.response.data;
-
-  //       if (backendErrors.errors) {
-  //         const formattedErrors = {};
-  //         const backendErrorMessages = new Set();
-
-  //         Object.entries(backendErrors.errors).forEach(([key, messages]) => {
-  //           const match = key.match(/^students\.(\d+)\.(.+)$/);
-  //           if (match) {
-  //             const studentIndex = Number(match[1]);
-  //             const fieldName = match[2];
-
-  //             const studentId = studentInformation[studentIndex]?.student_id;
-  //             if (studentId) {
-  //               if (!formattedErrors[studentId]) {
-  //                 formattedErrors[studentId] = {};
-  //               }
-  //               formattedErrors[studentId][fieldName] = messages[0];
-  //               backendErrorMessages.add(messages[0]);
-  //             }
-  //           }
-  //         });
-
-  //         if (Object.keys(formattedErrors).length > 0) {
-  //           setBackendErrors(formattedErrors);
-
-  //           // Scroll to first backend error
-  //           const firstErrorKey = Object.keys(formattedErrors)[0];
-  //           const firstErrorFieldKey = Object.keys(formattedErrors[firstErrorKey])[0];
-  //           const firstErrorField = studentRefs.current[`${firstErrorKey}-${firstErrorFieldKey}`];
-
-  //           if (firstErrorField) {
-  //             firstErrorField.classList.add("border-red-500", "ring-red-300");
-  //             firstErrorField.focus();
-  //             firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
-  //           }
-
-  //           toast.error(Array.from(backendErrorMessages).join("\n"), {
-  //             autoClose: 5000,
-  //             position: "top-right",
-  //             closeOnClick: true,
-  //             pauseOnHover: true,
-  //           });
-  //         }
-  //       }
-  //     } else {
-  //       toast.error(`An error occurred: ${error.response?.data?.message || error.message}`);
-  //     }
-  //   }
-  // };
-
+ 
   const handleInputChange = (e, studentId, fieldName) => {
     const { value } = e.target;
 
@@ -567,13 +403,7 @@ const AllotGRNumbers = () => {
       }
     }
 
-    // if (fieldName === "admission_date") {
-    //   if (!value) {
-    //     error = "Admission date is required.";
-    //   } else if (isNaN(new Date(value).getTime())) {
-    //     error = "Please enter a valid date.";
-    //   }
-    // }
+   
 
     // Update the frontend validation errors
     setErrors((prevErrors) => ({

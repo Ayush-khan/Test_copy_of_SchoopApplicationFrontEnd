@@ -286,6 +286,10 @@ import CreateCallCategory from "../componants/MasterModuleLibrarian/CallCategory
 import EditCallCategory from "../componants/MasterModuleLibrarian/CallCategory/EditCallCategory.jsx";
 import CreateMember from "../componants/MasterModuleLibrarian/CreateMember/CreateMember.jsx";
 import CategoryGroup from "../componants/MasterModuleLibrarian/CategoryGroup/CategoryGroup.jsx";
+import CreateTeacherIdCard from "../componants/IDCards/CreateTeacherIdCard.jsx";
+import UpdateTeacherIdCard from "../componants/IDCards/UpdateTeacherIdCard.jsx";
+import ImageCropperSaving from "../componants/IDCards/ImageCropperSaving.jsx";
+import TeacherPendingIdCardReport from "../componants/IDCards/TeacherPendingIdCardReport.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -900,6 +904,22 @@ function Index() {
         <Route
           path="/teacherIdCard"
           element={<PrivateRoute element={<TeacherIdCard />} />}
+        />
+        <Route
+          path="/createteacherIdCardDetails"
+          element={<PrivateRoute element={<CreateTeacherIdCard />} />}
+        />
+        <Route
+          path="/updateTeacherIdCard"
+          element={<PrivateRoute element={<UpdateTeacherIdCard />} />}
+        />
+        <Route
+          path="/imageCropperSaving"
+          element={<PrivateRoute element={<ImageCropperSaving />} />}
+        />
+        <Route
+          path="/teacherPendingIdCardReport"
+          element={<PrivateRoute element={<TeacherPendingIdCardReport />} />}
         />
         <Route
           path="/updateStudentIdCard"

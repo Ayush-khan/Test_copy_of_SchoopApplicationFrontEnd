@@ -34,6 +34,8 @@ function ViewStaff() {
     teacher_image_name: null,
     user_id: "",
     teacher_id: "",
+    permanent_address: "",
+    emergency_phone: "",
   });
   const [photoPreview, setPhotoPreview] = useState(null);
   // Role ID to Name Mapping
@@ -114,6 +116,8 @@ function ViewStaff() {
           user_id: user.user_id !== null ? user.user_id : "",
           teacher_id: staff.tc_id || "",
           role_name: role_name,
+          permanent_address: staff.permanent_address || "",
+          emergency_phone: staff.emergency_phone || "",
         });
         console.log("role_name", formData.role_name);
         if (teacher.teacher_image_name) {
@@ -168,10 +172,10 @@ function ViewStaff() {
   return (
     <>
       <ToastContainer />
-      <div className="container mx-auto p-4">
-        <div className="card p-4 rounded-md">
+      <div className="container mx-auto mt-4">
+        <div className="card  rounded-md">
           <div className="card-header mb-4 flex justify-between items-center">
-            <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
+            <h5 className="text-gray-700 mt-1 text-md lg:text-lg mx-2">
               View Staff Details
             </h5>
             <RxCross1
@@ -182,7 +186,7 @@ function ViewStaff() {
             />
           </div>
           <div
-            className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}
@@ -221,7 +225,7 @@ function ViewStaff() {
                   ))}
                 </div>
               </div>
-              <div>
+              {/* <div>
                 <label
                   htmlFor="address"
                   className="block font-bold text-xs mb-2"
@@ -231,10 +235,47 @@ function ViewStaff() {
                 <p className="input-field resize h-[70%]  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
                   {formData.address}
                 </p>
+              </div> */}
+              <div className="grid grid-rows-2 gap-1">
+                {/* Present Address */}
+                <div className="w-full">
+                  <label className="block font-bold text-xs mb-2">
+                    Address <span className="text-red-500">*</span>
+                  </label>
+                  {/* <textarea
+                    className="w-full border rounded-md"
+                    type="text"
+                    maxLength={200}
+                    id="address"
+                    name="address"
+                    value={formData.address}
+                  ></textarea> */}
+                  <p className="input-field resize h-[70%]  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
+                    {formData.address}
+                  </p>
+                </div>
+
+                {/* Permanent Address */}
+                <div className="w-full">
+                  <label className="block font-bold text-xs mb-2">
+                    Permanent Address <span className="text-red-500">*</span>
+                  </label>
+                  {/* <textarea
+                    className="w-full border rounded-md "
+                    type="text"
+                    maxLength={200}
+                    id="permanent_address"
+                    name="permanent_address"
+                    value={formData.permanent_address}
+                  ></textarea> */}
+                  <p className="input-field resize h-[70%]  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
+                    {formData.permanent_address}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 ">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 mt-1">
               {[
                 { label: "Employee ID", name: "employee_id" },
                 { label: "Name", name: "name" },
@@ -244,7 +285,8 @@ function ViewStaff() {
                 { label: "Gender", name: "sex" },
                 { label: "Religion", name: "religion" },
                 { label: "Blood Group", name: "blood_group" },
-                { label: "Phone", name: "phone" },
+                { label: "Contact no.", name: "phone" },
+                { label: "Emergency Contact no.", name: "emergency_phone" },
                 { label: "Email", name: "email" },
                 {
                   label: "Designation",
