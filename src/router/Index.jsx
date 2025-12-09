@@ -239,7 +239,7 @@ import EditChapter from "../TeacherLoginModules/ChapterModules/EditChapter.jsx";
 import LessonPlanTemplate from "../TeacherLoginModules/LessonPlane/LessonPlanTemplate.jsx";
 import LessonPlanHeading from "../TeacherLoginModules/LessonPlane/LessonPlanHeading.jsx";
 import CreateLessonPlanTemplate from "../TeacherLoginModules/LessonPlane/CreateLessonPlanTemplate.jsx";
-import EditLessonPlanTemplate from "../TeacherLoginModules/LessonPlane/EditLessonPlan.jsx";
+import EditLessonPlanTemplate from "../TeacherLoginModules/LessonPlane/EditLessonPlanTemplate.jsx";
 import LessonPlan from "../TeacherLoginModules/LessonPlane/LessonPlan.jsx";
 import CreateLessonPlan from "../TeacherLoginModules/LessonPlane/CreateLessonPlan.jsx";
 import DailyAttendance from "../TeacherLoginModules/DailyAttendance/DailyAttendance.jsx";
