@@ -72,7 +72,7 @@ function CreateTeacherIdCard() {
     }
 
     try {
-      const response = await axios.get(`${API_URL}/api/teachers/${regId}`, {
+      const response = await axios.get(`${API_URL}/api/teachersdata/${regId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -90,8 +90,39 @@ function CreateTeacherIdCard() {
     }
   };
 
+  // useEffect(() => {
+  //   if (teacherData) {
+  //     setFormData({
+  //       name: teacherData.name || teacherData.teacher_name || "",
+  //       phone: teacherData.phone || teacherData.mobile_no || "",
+  //       emergency_phone:
+  //         teacherData.emergency_phone || teacherData.alt_phone || "",
+  //       sex: teacherData.sex || teacherData.gender || "",
+  //       blood_group: teacherData.blood_group || teacherData.bloodgroup || "",
+  //       employee_id: teacherData.employee_id || teacherData.emp_id || "",
+  //       address: teacherData.address || teacherData.current_address || "",
+  //       permanent_address:
+  //         teacherData.permanent_address || teacherData.residence_address || "",
+  //       // sameAsCurrent: false,
+  //       sameAsCurrent: isSameAddress,
+  //       confirm_status: teacherData.confirm === "Y",
+  //     });
+  //   }
+  // }, [teacherData]);
+
   useEffect(() => {
     if (teacherData) {
+      const currentAddress =
+        teacherData.address || teacherData.current_address || "";
+
+      const permanentAddress =
+        teacherData.permanent_address || teacherData.residence_address || "";
+
+      // ✅ DEFINE IT HERE
+      const isSameAddress =
+        currentAddress.trim() !== "" &&
+        currentAddress.trim() === permanentAddress.trim();
+
       setFormData({
         name: teacherData.name || teacherData.teacher_name || "",
         phone: teacherData.phone || teacherData.mobile_no || "",
@@ -100,20 +131,29 @@ function CreateTeacherIdCard() {
         sex: teacherData.sex || teacherData.gender || "",
         blood_group: teacherData.blood_group || teacherData.bloodgroup || "",
         employee_id: teacherData.employee_id || teacherData.emp_id || "",
-        address: teacherData.address || teacherData.current_address || "",
-        permanent_address:
-          teacherData.permanent_address || teacherData.residence_address || "",
-        sameAsCurrent: false,
-        confirm_status: false,
+        address: currentAddress,
+        permanent_address: permanentAddress,
+        sameAsCurrent: isSameAddress, // ✅ USE IT HERE
+        confirm_status: teacherData.confirm === "Y",
       });
     }
   }, [teacherData]);
 
-  const handleSameAsCurrent = () => {
+  // const handleSameAsCurrent = () => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     sameAsCurrent: !prev.sameAsCurrent,
+  //     permanent_address: !prev.sameAsCurrent ? prev.address : "",
+  //   }));
+  // };
+
+  const handleSameAsCurrent = (e) => {
+    const checked = e.target.checked;
+
     setFormData((prev) => ({
       ...prev,
-      sameAsCurrent: !prev.sameAsCurrent,
-      permanent_address: !prev.sameAsCurrent ? prev.address : "",
+      sameAsCurrent: checked,
+      permanent_address: checked ? prev.address : "",
     }));
   };
 
@@ -185,8 +225,76 @@ function CreateTeacherIdCard() {
     setErrors((prev) => ({ ...prev, [name]: fieldError }));
   };
 
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   const validationErrors = validate();
+
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     Object.values(validationErrors).forEach((error) => toast.error(error));
+  //     return;
+  //   }
+
+  //   const formattedFormData = {
+  //     ...formData,
+  //     confirm_status: formData.confirm_status ? "Y" : "N",
+  //   };
+
+  //   try {
+  //     setLoading(true);
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) throw new Error("No authentication token found");
+
+  //     const response = await axios.put(
+  //       `${API_URL}/api/update_teacherdetails/${regId}`,
+  //       formattedFormData,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     if (response.data.status === 400 && response.data.success === false) {
+  //       toast.error(
+  //         "Userid is created using staff name, please use a different name"
+  //       );
+  //       return;
+  //     }
+
+  //     if (response.status === 200) {
+  //       toast.success(
+  //         response.data.message || "Teacher details updated successfully!"
+  //       );
+  //       // setTimeout(() => navigate("/dashboard"), 1000);
+  //     }
+  //   } catch (error) {
+  //     if (error.response?.data) {
+  //       const { errors, message } = error.response.data;
+  //       if (errors) {
+  //         setBackendErrors(errors);
+  //         Object.entries(errors).forEach(([field, messages]) =>
+  //           messages.forEach((msg) => toast.error(`${field}: ${msg}`))
+  //         );
+  //       } else if (message) {
+  //         toast.error(message);
+  //       }
+  //     } else {
+  //       toast.error(error.message);
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Confirm status mandatory check
+    if (!formData.confirm_status) {
+      toast.error(
+        "Please select the below checkbox. confirm all details before saving."
+      );
+      return;
+    }
+
     const validationErrors = validate();
 
     if (Object.keys(validationErrors).length > 0) {
@@ -220,8 +328,9 @@ function CreateTeacherIdCard() {
       }
 
       if (response.status === 200) {
-        toast.success(response.data.message || "Teacher updated successfully!");
-        setTimeout(() => navigate("/dashboard"), 1000);
+        toast.success(
+          response.data.message || "Teacher details updated successfully!"
+        );
       }
     } catch (error) {
       if (error.response?.data) {
@@ -251,13 +360,13 @@ function CreateTeacherIdCard() {
   };
 
   return (
-    <div className="container mx-auto mt-4 ">
+    <div className="container mx-auto p-4 ">
       <ToastContainer />
       <div className="card pb-2  rounded-md ">
         {" "}
         {/* p-2 */}
         <div className=" card-header mb-4 flex justify-between items-center ">
-          <h5 className="text-gray-700 mt-1 text-md lg:text-lg mx-2">
+          <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             Staff Id Card Details
           </h5>
 
@@ -270,7 +379,7 @@ function CreateTeacherIdCard() {
           />
         </div>
         <div
-          className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
+          className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
           style={{
             backgroundColor: "#C03078",
           }}
@@ -512,31 +621,6 @@ function CreateTeacherIdCard() {
                   </span>
                 )}
               </div>
-
-              {/* <div>
-                <div className="flex items-center gap-2 mt-10">
-                  <input
-                    type="checkbox"
-                    id="sameAsCurrent"
-                    // checked={formData.sameAsCurrent}
-                    // onChange={handleSameAsCurrent}
-                  />
-                  <label htmlFor="sameAsCurrent" className="text-xs">
-                    I hereby declare that the information provided is true and
-                    correct.
-                  </label>
-                </div>
-              </div>
-
-              <div className="col-span-3  text-right">
-                <button
-                  type="submit"
-                  style={{ backgroundColor: "#2196F3" }}
-                  className=" text-white font-bold py-1 border-1 border-blue-500 px-4 rounded"
-                >
-                  Save
-                </button>
-              </div> */}
 
               <div className="md:col-span-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">

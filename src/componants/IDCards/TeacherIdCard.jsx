@@ -214,48 +214,38 @@ const TeacherIdCard = () => {
         </thead>
         <tbody>
           ${displayedSections
-            .map(
-              (subject, index) => `
+        .map(
+          (subject, index) => `
               <tr class="text-sm">
-                <td class="px-2 text-center py-2 border border-black">${
-                  index + 1
-                }</td>
+                <td class="px-2 text-center py-2 border border-black">${index + 1
+            }</td>
                
                 <td class="px-2 text-center py-2 border border-black">
                   <img src="${subject?.teacher_image_url || ""}" 
                        alt="${subject?.url}" 
                        class="student-photo" />
                 </td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.employee_id || " "
-                } </td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.name || " "
-                } </td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.phone || " "
-                }</td>
-                 <td class="px-2 text-center py-2 border border-black">${
-                   subject?.emergency_phone || " "
-                 }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.address || " "
-                }</td>  
-                 <td class="px-2 text-center py-2 border border-black">${
-                   subject?.permanent_address || " "
-                 }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.sex || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.blood_group || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.teacher_image_name || " "
-                }</td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.employee_id || " "
+            } </td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.name || " "
+            } </td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.phone || " "
+            }</td>
+                 <td class="px-2 text-center py-2 border border-black">${subject?.emergency_phone || " "
+            }</td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.address || " "
+            }</td>  
+                 <td class="px-2 text-center py-2 border border-black">${subject?.permanent_address || " "
+            }</td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.sex || " "
+            }</td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.blood_group || " "
+            }</td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.teacher_image_name || " "
+            }</td>
               </tr>`
-            )
-            .join("")}
+        )
+        .join("")}
         </tbody>
       </table>
     </div>
@@ -421,11 +411,10 @@ h5 + * { /* Targets the element after h5 */
                           <button
                             type="button"
                             onClick={handleDownloadZip}
-                            className={`relative bg-blue-400 text-white px-3 rounded hover:bg-blue-500 group ${
-                              isSubmitDisabled
+                            className={`relative bg-blue-400 text-white px-3 rounded hover:bg-blue-500 group ${isSubmitDisabled
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""
-                            }`}
+                              }`}
                             disabled={isSubmitDisabled}
                           >
                             <FaDownload />

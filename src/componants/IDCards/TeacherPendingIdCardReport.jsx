@@ -96,56 +96,47 @@ const TeacherPendingIdCardReport = () => {
           </thead>
           <tbody>
             ${displayedSections
-              .map(
-                (subject, index) => `
+        .map(
+          (subject, index) => `
                 <tr>
                   <td class="border border-black">${index + 1}</td>
                   <td class="border border-black">${subject?.name || ""}</td>
-                  <td class="border border-black">${
-                    subject?.birthday
-                      ? new Date(subject.birthday).toLocaleDateString("en-GB")
-                      : ""
-                  }</td>
-                  <td class="border border-black">${
-                    subject?.date_of_joining
-                      ? new Date(subject.date_of_joining).toLocaleDateString(
-                          "en-GB"
-                        )
-                      : ""
-                  }</td>
+                  <td class="border border-black">${subject?.birthday
+              ? new Date(subject.birthday).toLocaleDateString("en-GB")
+              : ""
+            }</td>
+                  <td class="border border-black">${subject?.date_of_joining
+              ? new Date(subject.date_of_joining).toLocaleDateString(
+                "en-GB"
+              )
+              : ""
+            }</td>
                   <td class="border border-black"> ${subject.sex}</td>
-                  <td class="border border-black">${
-                    subject?.blood_group || ""
-                  }</td>
-                  <td class="border border-black">${
-                    subject?.designation || ""
-                  }</td>
+                  <td class="border border-black">${subject?.blood_group || ""
+            }</td>
+                  <td class="border border-black">${subject?.designation || ""
+            }</td>
                   <td class="border border-black">${subject?.phone || ""}</td>
-                   <td class="border border-black">${
-                     subject?.emergency_phone || ""
-                   }</td>
+                   <td class="border border-black">${subject?.emergency_phone || ""
+            }</td>
                   <td class="border border-black">${subject?.email || ""}</td>
                   <td class="border border-black">${subject?.address || ""}</td>
-                   <td class="border border-black">${
-                     subject?.permanent_address || ""
-                   }</td>
-                  <td class="border border-black">${
-                    subject?.aadhar_card_no || ""
-                  }</td>
-                  <td class="border border-black">${
-                    subject?.academic_qual || ""
-                  }</td>
+                   <td class="border border-black">${subject?.permanent_address || ""
+            }</td>
+                  <td class="border border-black">${subject?.aadhar_card_no || ""
+            }</td>
+                  <td class="border border-black">${subject?.academic_qual || ""
+            }</td>
                   <td class="border border-black">
                   ${subject?.professional_qual || ""}
                   ${subject?.special_sub || ""}
                    </td>
                   <td class="border border-black">${subject?.trained || ""}</td>
-                  <td class="border border-black">${
-                    subject?.experience || ""
-                  }</td>
+                  <td class="border border-black">${subject?.experience || ""
+            }</td>
                 </tr>`
-              )
-              .join("")}
+        )
+        .join("")}
           </tbody>
         </table>
       </div>
@@ -513,15 +504,15 @@ const TeacherPendingIdCardReport = () => {
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.birthday
                                       ? new Date(
-                                          student.birthday
-                                        ).toLocaleDateString("en-GB")
+                                        student.birthday
+                                      ).toLocaleDateString("en-GB")
                                       : " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.date_of_joining
                                       ? new Date(
-                                          student.date_of_joining
-                                        ).toLocaleDateString("en-GB")
+                                        student.date_of_joining
+                                      ).toLocaleDateString("en-GB")
                                       : " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
