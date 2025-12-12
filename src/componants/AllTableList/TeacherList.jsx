@@ -5,6 +5,8 @@ import { useState, useEffect, useMemo } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Select from "react-select";
+import { IoMdSend } from "react-icons/io";
+import { FaCheck, FaCheckDouble, FaTimesCircle } from "react-icons/fa";
 
 function TeacherList() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -35,7 +37,83 @@ function TeacherList() {
     fetchTeacherCategory();
     fetchAbsentTeacherList();
   }, []);
+  const renderWhatsAppStatus = (status) => {
+    if (!status) return <span className="text-gray-500">-</span>;
 
+    switch (status) {
+      case "sent":
+        return (
+          <span className="flex items-center justify-center gap-1 text-blue-600 font-medium">
+            <FaCheck className="text-blue-600" />
+            Sent
+          </span>
+        );
+
+      case "delivered":
+        return (
+          <span className="flex items-center justify-center gap-1 text-gray-800 font-semibold">
+            <FaCheckDouble className="text-gray-700" />
+            Delivered
+          </span>
+        );
+
+      case "read":
+        return (
+          <span className="flex items-center justify-center gap-1 text-blue-800 font-semibold">
+            <FaCheckDouble className="text-blue-600" />
+            Read
+          </span>
+        );
+
+      // case "failed":
+      //   return (
+      //     <span className="flex items-center justify-center gap-1 text-red-600 font-semibold">
+      //       <FaTimesCircle className="text-red-600" />
+      //       Failed
+      //     </span>
+      //   );
+
+      default:
+        return <span className="text-gray-500"></span>;
+    }
+  };
+  // const fetchAbsentTeacherList = async () => {
+  //   const today = new Date().toISOString().split("T")[0]; // e.g., "2025-06-17"
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token found");
+  //     }
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_absentteacherfortoday`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         params: {
+  //           date: today, // passing date as query param
+  //         },
+  //       }
+  //     );
+
+  //     const absentStaff = response.data?.data?.absent_staff || [];
+  //     console.log("Absent staff", absentStaff);
+
+  //     const presentStaff = response.data?.data?.present_late || [];
+  //     console.log("Present staff", presentStaff);
+
+  //     setAbsentTeachers(absentStaff);
+  //     setPresentTeachers(presentStaff);
+  //     setPrsentCount(presentStaff.length);
+  //     setLeaveCount(absentStaff.length);
+  //   } catch (error) {
+  //     setError(error.message || "Something went wrong while fetching data.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   useEffect(() => {
     if (presentTeachers.length > 0) {
       console.log("Updated present teachers:", presentTeachers);
@@ -68,6 +146,9 @@ function TeacherList() {
       const absentStaff = response.data?.data?.absent_staff || [];
       const presentStaff = response.data?.data?.present_late || [];
 
+      // console.log("Absent staff", absentStaff);
+      // console.log("Present staff", presentStaff);
+
       setAbsentTeachers(absentStaff);
       setPresentTeachers(presentStaff);
       setPrsentCount(presentStaff.length);
@@ -95,11 +176,14 @@ function TeacherList() {
     try {
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/get_teachercategory_teaching`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_teachercategory_teaching`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.data?.data) {
         setCategories(response.data.data);
@@ -207,7 +291,6 @@ function TeacherList() {
         teachers: filteredTeachers,
       };
     })
-
     .filter((group) => group.teachers.length > 0);
 
   const displayedAbsentTeachers = filteredAbsentTeachers.slice(
@@ -276,6 +359,7 @@ function TeacherList() {
         toast.success("Messages sent successfully!");
         setMessage("");
         setSelectedIds([]);
+        handleSearch();
       } else {
         toast.error("Failed to send messages.");
         console.error("Server response:", response.data);
@@ -291,7 +375,7 @@ function TeacherList() {
   return (
     <>
       <ToastContainer />
-      <div className="md:mx-auto md:w-[80%] p-3 bg-white mt-2">
+      <div className="md:mx-auto md:w-[90%] p-3 bg-white mt-2">
         <div className="card-header flex justify-between items-center">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Today's Attendance
@@ -315,9 +399,8 @@ function TeacherList() {
           ].map((tab) => (
             <li
               key={tab.label}
-              className={`md:-ml-7 shadow-md ${
-                activeTab === tab.label ? "text-blue-500 font-bold" : ""
-              }`}
+              className={`md:-ml-7 shadow-md ${activeTab === tab.label ? "text-blue-500 font-bold" : ""
+                }`}
             >
               <button
                 onClick={() => handleTabChange(tab.label)}
@@ -385,13 +468,13 @@ function TeacherList() {
                 <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                   {activeTab === "Teacher Attendance"
                     ? ` ${new Date().toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "long",
-                      })}`
+                      day: "2-digit",
+                      month: "long",
+                    })}`
                     : `${new Date().toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "long",
-                      })} `}
+                      day: "2-digit",
+                      month: "long",
+                    })} `}
                 </h3>
                 <div className="box-border flex md:gap-x-2 justify-end md:h-10 ml-2">
                   <div className=" w-1/2 md:w-fit mr-1">
@@ -412,7 +495,7 @@ function TeacherList() {
               }}
             ></div>
 
-            <div className="bg-white rounded-md mt-3 mb-3 w-[90%] md:ml-16">
+            <div className="bg-white rounded-md mt-3 mb-3 w-[96%] mx-auto ">
               {activeTab === "Teacher Attendance" ? (
                 <div
                   className="h-96 lg:h-96 overflow-y-scroll"
@@ -457,13 +540,20 @@ function TeacherList() {
                         <th className="px-0.5 text-center md:w-[20%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                           Class
                         </th>
+                        <th className="px-0.5 text-center md:w-[20%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          Message Status
+                        </th>
+                        <th className="px-0.5 text-center md:w-[20%] lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                          WhatsApp Status
+                        </th>
+
                       </tr>
                     </thead>
                     <tbody>
                       {loading ? (
                         <tr>
                           <td
-                            colSpan="9"
+                            colSpan="11"
                             className="text-center py-6 text-blue-600 text-xl"
                           >
                             Please wait while data is loading...
@@ -473,17 +563,15 @@ function TeacherList() {
                         filteredPresentTeachers.map((student, index) => (
                           <tr
                             key={student.student_id}
-                            className={`${
-                              index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                            } hover:bg-gray-50`}
+                            className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                              } hover:bg-gray-50`}
                           >
                             <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
                               <p
-                                className={`whitespace-no-wrap relative top-2 ${
-                                  student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
-                                }`}
+                                className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
+                                  }`}
                               >
                                 {index + 1}
                               </p>
@@ -503,38 +591,36 @@ function TeacherList() {
                             </td>
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
-                                className={`whitespace-no-wrap relative top-2 ${
-                                  student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
-                                }`}
+                                className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
+                                  }`}
                               >
                                 {student?.name
                                   ? student.name
-                                      .toLowerCase()
-                                      .split(" ")
-                                      .map((word) =>
-                                        word
-                                          .split("'")
-                                          .map(
-                                            (part) =>
-                                              part.charAt(0).toUpperCase() +
-                                              part.slice(1)
-                                          )
-                                          .join("'")
-                                      )
-                                      .join(" ")
+                                    .toLowerCase()
+                                    .split(" ")
+                                    .map((word) =>
+                                      word
+                                        .split("'")
+                                        .map(
+                                          (part) =>
+                                            part.charAt(0).toUpperCase() +
+                                            part.slice(1)
+                                        )
+                                        .join("'")
+                                    )
+                                    .join(" ")
                                   : " "}
                               </p>
                             </td>
 
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
-                                className={`whitespace-no-wrap relative top-2 ${
-                                  student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
-                                }`}
+                                className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
+                                  }`}
                               >
                                 {student.teachercategoryname}
                               </p>
@@ -542,86 +628,111 @@ function TeacherList() {
 
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
-                                className={`whitespace-no-wrap relative top-2 ${
-                                  student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
-                                }`}
+                                className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
+                                  }`}
                               >
                                 {student.punch_in || "-"}
                               </p>
                             </td>
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
-                                className={`whitespace-no-wrap relative top-2 ${
-                                  student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
-                                }`}
+                                className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
+                                  }`}
                               >
                                 {student.punch_out || "-"}
                               </p>
                             </td>
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
-                                className={`whitespace-no-wrap relative top-2 ${
-                                  student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
-                                }`}
+                                className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
+                                  }`}
                               >
                                 {student.late === "Y" &&
-                                student.punch_in &&
-                                student.late_time
+                                  student.punch_in &&
+                                  student.late_time
                                   ? (() => {
-                                      const punchIn = new Date(
-                                        `1970-01-01T${student.punch_in}`
-                                      );
-                                      const lateTime = new Date(
-                                        `1970-01-01T${student.late_time}`
-                                      );
-                                      const diffMinutes = Math.max(
-                                        Math.floor(
-                                          (punchIn - lateTime) / 60000
-                                        ),
-                                        0
-                                      );
-                                      return `${diffMinutes} mins late`;
-                                    })()
+                                    const punchIn = new Date(
+                                      `1970-01-01T${student.punch_in}`
+                                    );
+                                    const lateTime = new Date(
+                                      `1970-01-01T${student.late_time}`
+                                    );
+                                    const diffMinutes = Math.max(
+                                      Math.floor(
+                                        (punchIn - lateTime) / 60000
+                                      ),
+                                      0
+                                    );
+                                    return `${diffMinutes} mins late`;
+                                  })()
                                   : ""}
                               </p>
                             </td>
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
-                                className={`whitespace-no-wrap relative top-2 ${
-                                  student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
-                                }`}
+                                className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
+                                  }`}
                               >
                                 {student.phone || " "}
                               </p>
                             </td>
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
-                                className={`whitespace-no-wrap relative top-2 ${
-                                  student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
-                                }`}
+                                className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
+                                  }`}
                               >
                                 {student.class_section || "-"}
                               </p>
+                            </td>
+                            <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              {/* Show Send button if published and messages pending */}
+                              {student.sms_sent === "Y" &&
+                                student?.whatsappstatus === "failed" ? (
+                                <div className="flex flex-col items-center gap-1">
+                                  <span className="text-green-600 font-semibold text-sm">
+                                    Message sent
+                                  </span>
+
+
+
+                                </div>
+                              ) : student?.sms_sent === "Y" &&
+                                (student?.whatsappstatus === "sent" || student?.whatsappstatus === "read" || student?.whatsappstatus === "delivered") ? (
+                                // Show 'S' when published and no pending messages
+                                <div className="flex flex-col items-center">
+                                  <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
+                                    Whatsapp Sent{" "}
+
+                                    {/* Tooltip */}
+                                  </div>
+                                </div>
+                              ) : student.sms_sent === "N" ? (
+                                // Show Publish button when not published
+                                null
+                              ) : null}
+                            </td>
+                            <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              {renderWhatsAppStatus(student?.whatsappstatus)}
                             </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
                           <td
-                            colSpan="9"
+                            colSpan="11"
                             className="text-center py-6 text-red-700 text-xl"
                           >
-                            No staff is on leave today.
+                            No Teachers are Late Today..
                           </td>
                         </tr>
                       )}
@@ -674,9 +785,8 @@ function TeacherList() {
                               group.teachers.map((staff, index) => (
                                 <tr
                                   key={staff.teacher_id}
-                                  className={`${
-                                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                                  } hover:bg-gray-100`}
+                                  className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                    } hover:bg-gray-100`}
                                 >
                                   <td className="text-center border border-gray-950 text-sm">
                                     <p className="text-gray-900 relative top-2">
@@ -687,21 +797,21 @@ function TeacherList() {
                                     <p className="text-gray-900 relative top-2">
                                       {staff?.name
                                         ? staff.name
-                                            .toLowerCase()
-                                            .split(" ")
-                                            .map((word) =>
-                                              word
-                                                .split("'")
-                                                .map(
-                                                  (part) =>
-                                                    part
-                                                      .charAt(0)
-                                                      .toUpperCase() +
-                                                    part.slice(1)
-                                                )
-                                                .join("'")
-                                            )
-                                            .join(" ")
+                                          .toLowerCase()
+                                          .split(" ")
+                                          .map((word) =>
+                                            word
+                                              .split("'")
+                                              .map(
+                                                (part) =>
+                                                  part
+                                                    .charAt(0)
+                                                    .toUpperCase() +
+                                                  part.slice(1)
+                                              )
+                                              .join("'")
+                                          )
+                                          .join(" ")
                                         : " "}
                                     </p>
                                   </td>
@@ -739,7 +849,7 @@ function TeacherList() {
                     ))
                   ) : (
                     <div className="text-center py-6 text-red-700 text-xl">
-                      No staff is on leave today.
+                      No Teachers are Leave Today..
                     </div>
                   )}
                 </div>
@@ -774,11 +884,10 @@ function TeacherList() {
                     </div>
 
                     <button
-                      className={`text-white font-semibold py-2 px-6 rounded-md transition duration-200 ${
-                        loadingForSend
-                          ? "bg-blue-500 opacity-50 cursor-not-allowed"
-                          : "bg-blue-600 hover:bg-blue-700"
-                      }`}
+                      className={`text-white font-semibold py-2 px-6 rounded-md transition duration-200 ${loadingForSend
+                        ? "bg-blue-500 opacity-50 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700"
+                        }`}
                       onClick={handleSend}
                       disabled={loadingForSend}
                     >
