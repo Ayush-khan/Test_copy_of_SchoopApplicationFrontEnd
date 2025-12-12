@@ -67,13 +67,13 @@ function NonTeachingStaff() {
           </span>
         );
 
-      case "failed":
-        return (
-          <span className="flex items-center justify-center gap-1 text-red-600 font-semibold">
-            <FaTimesCircle className="text-red-600" />
-            Failed
-          </span>
-        );
+      // case "failed":
+      //   return (
+      //     <span className="flex items-center justify-center gap-1 text-red-600 font-semibold">
+      //       <FaTimesCircle className="text-red-600" />
+      //       Failed
+      //     </span>
+      //   );
 
       default:
         return <span className="text-gray-500"></span>;
@@ -668,7 +668,7 @@ function NonTeachingStaff() {
                                 student?.whatsappstatus === "failed" ? (
                                 <div className="flex flex-col items-center gap-1">
                                   <span className="text-green-600 font-semibold text-sm">
-                                    Message sent
+                                    Message Sent
                                   </span>
 
 
@@ -689,6 +689,7 @@ function NonTeachingStaff() {
                                 null
                               ) : null}
                             </td>
+                            {/* {student?.sms_sent === "Y" && student?.whatsapstatus === "failed" ? (null) : ( */}
                             <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                               {renderWhatsAppStatus(student?.whatsappstatus)}
                             </td>
@@ -722,10 +723,10 @@ function NonTeachingStaff() {
                           className="text-lg font-bold text-center"
                           style={{ color: "#C03178" }}
                         >
-                          {group.category_name}
+                          {group?.category_name}
                         </h2>
 
-                        <table className="min-w-full leading-normal table-auto border-collapse border border-gray-950">
+                        <table className="min-w-full leading-normal table-auto  border border-gray-950">
                           <thead>
                             <tr className="bg-gray-100">
                               <th className="px-1 w-[7%] mx-auto lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-center text-gray-900">

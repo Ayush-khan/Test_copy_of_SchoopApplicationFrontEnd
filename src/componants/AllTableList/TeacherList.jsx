@@ -65,13 +65,13 @@ function TeacherList() {
           </span>
         );
 
-      case "failed":
-        return (
-          <span className="flex items-center justify-center gap-1 text-red-600 font-semibold">
-            <FaTimesCircle className="text-red-600" />
-            Failed
-          </span>
-        );
+      // case "failed":
+      //   return (
+      //     <span className="flex items-center justify-center gap-1 text-red-600 font-semibold">
+      //       <FaTimesCircle className="text-red-600" />
+      //       Failed
+      //     </span>
+      //   );
 
       default:
         return <span className="text-gray-500"></span>;
@@ -724,7 +724,6 @@ function TeacherList() {
                             <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                               {renderWhatsAppStatus(student?.whatsappstatus)}
                             </td>
-
                           </tr>
                         ))
                       ) : (
