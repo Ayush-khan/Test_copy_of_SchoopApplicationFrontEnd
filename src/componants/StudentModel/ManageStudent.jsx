@@ -846,8 +846,7 @@ function ManageSubjectList() {
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error in Downloading Report Card: ${
-            error.response.data.error || error.message
+          `Error in Downloading Report Card: ${error.response.data.error || error.message
           }`
         );
       } else {
@@ -928,7 +927,7 @@ function ManageSubjectList() {
                     </label>
                     <div className="w-[60%] md:w-[85%] ">
                       {roleId !== "T" ||
-                      (roleId === "T" && classIdForManage) ? (
+                        (roleId === "T" && classIdForManage) ? (
                         <Select
                           value={selectedStudent}
                           onChange={handleStudentSelect}
@@ -1050,6 +1049,9 @@ function ManageSubjectList() {
                               Roll No
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              GR No.
+                            </th>
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Photo
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -1067,18 +1069,18 @@ function ManageSubjectList() {
                             {(roleId === "A" ||
                               roleId === "M" ||
                               roleId === "U") && (
-                              <>
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                  Edit
-                                </th>
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                  Delete
-                                </th>
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                  Inactive
-                                </th>
-                              </>
-                            )}
+                                <>
+                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                    Edit
+                                  </th>
+                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                    Delete
+                                  </th>
+                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                    Inactive
+                                  </th>
+                                </>
+                              )}
 
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               View
@@ -1126,10 +1128,10 @@ function ManageSubjectList() {
                             {(roleId === "A" ||
                               roleId === "M" ||
                               roleId === "U") && (
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Reset Password
-                              </th>
-                            )}
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Reset Password
+                                </th>
+                              )}
                           </tr>
                         </thead>
                         <tbody>
@@ -1142,15 +1144,16 @@ function ManageSubjectList() {
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.roll_no}
                                 </td>
-                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {subject?.photo}
-                              </td>{" "} */}
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject?.reg_no}
+                                </td>
+
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
                                   <img
                                     src={
                                       subject?.image_name
                                         ? // ? `https://sms.evolvu.in/storage/app/public/student_images/${subject?.image_name}`
-                                          `${subject?.image_name}`
+                                        `${subject?.image_name}`
                                         : "https://via.placeholder.com/50"
                                     }
                                     alt={subject?.name}
@@ -1158,17 +1161,15 @@ function ManageSubjectList() {
                                   />
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {`${subject?.first_name ?? ""} ${
-                                    subject?.mid_name
-                                      ? subject.mid_name + " "
-                                      : ""
-                                  }${subject?.last_name ?? ""}`.trim()}
+                                  {`${subject?.first_name ?? ""} ${subject?.mid_name
+                                    ? subject.mid_name + " "
+                                    : ""
+                                    }${subject?.last_name ?? ""}`.trim()}
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
-                                  {`${subject?.get_class?.name}${" "}${
-                                    subject?.get_division?.name
-                                  }`}
+                                  {`${subject?.get_class?.name}${" "}${subject?.get_division?.name
+                                    }`}
                                 </td>
                                 {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {subject?.get_division?.name}
@@ -1179,57 +1180,56 @@ function ManageSubjectList() {
                                 {(roleId === "A" ||
                                   roleId === "M" ||
                                   roleId === "U") && (
-                                  <>
-                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                      <button
-                                        onClick={() => handleEdit(subject)}
-                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                      >
-                                        <FontAwesomeIcon icon={faEdit} />
-                                      </button>
-                                    </td>
-                                    {subject.isPromoted !== "Y" ? (
+                                    <>
                                       <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                         <button
-                                          onClick={() => handleDelete(subject)}
-                                          className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                          onClick={() => handleEdit(subject)}
+                                          className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                                         >
-                                          <FontAwesomeIcon icon={faTrash} />
+                                          <FontAwesomeIcon icon={faEdit} />
                                         </button>
                                       </td>
-                                    ) : (
-                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {subject.isPromoted !== "Y" ? (
+                                        <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                          <button
+                                            onClick={() => handleDelete(subject)}
+                                            className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                          >
+                                            <FontAwesomeIcon icon={faTrash} />
+                                          </button>
+                                        </td>
+                                      ) : (
+                                        <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                          <button
+                                            // onClick={() => ()}
+                                            className="text-green-500-600 hover:text-green-800 hover:bg-transparent "
+                                          >
+                                            {/* <FontAwesomeIcon icon={faTrash} /> */}
+                                          </button>
+                                        </td>
+                                      )}
+                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
                                         <button
-                                          // onClick={() => ()}
-                                          className="text-green-500-600 hover:text-green-800 hover:bg-transparent "
-                                        >
-                                          {/* <FontAwesomeIcon icon={faTrash} /> */}
-                                        </button>
-                                      </td>
-                                    )}
-                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
-                                      <button
-                                        onClick={() =>
-                                          handleActiveAndInactive(subject)
-                                        }
-                                        className={`  font-bold hover:bg-none ${
-                                          subject.isActive === "Y"
+                                          onClick={() =>
+                                            handleActiveAndInactive(subject)
+                                          }
+                                          className={`  font-bold hover:bg-none ${subject.isActive === "Y"
                                             ? "text-green-600 hover:text-green-800 hover:bg-transparent"
                                             : "text-red-700 hover:text-red-900  hover:bg-transparent"
-                                        }`}
-                                      >
-                                        {subject.isActive === "Y" ? (
-                                          <FaCheck className="text-xl" />
-                                        ) : (
-                                          <FontAwesomeIcon
-                                            icon={faXmark}
-                                            className="text-xl"
-                                          />
-                                        )}
-                                      </button>
-                                    </td>
-                                  </>
-                                )}
+                                            }`}
+                                        >
+                                          {subject.isActive === "Y" ? (
+                                            <FaCheck className="text-xl" />
+                                          ) : (
+                                            <FontAwesomeIcon
+                                              icon={faXmark}
+                                              className="text-xl"
+                                            />
+                                          )}
+                                        </button>
+                                      </td>
+                                    </>
+                                  )}
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
@@ -1274,7 +1274,7 @@ function ManageSubjectList() {
                                         cls.is_class_teacher === 1 &&
                                         cls.class_id === selectedClassIdHPC &&
                                         cls.section_id ===
-                                          selectedSectionIdHPC &&
+                                        selectedSectionIdHPC &&
                                         hpcClassIds.includes(cls.class_id)
                                     )) ||
                                     (["A", "M", "U"].includes(roleId) &&
@@ -1306,17 +1306,17 @@ function ManageSubjectList() {
                                 {(roleId === "A" ||
                                   roleId === "M" ||
                                   roleId === "U") && (
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    <button
-                                      onClick={() =>
-                                        handleResetPassword(subject)
-                                      }
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                    >
-                                      <MdLockReset className="font-bold text-xl" />
-                                    </button>
-                                  </td>
-                                )}
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      <button
+                                        onClick={() =>
+                                          handleResetPassword(subject)
+                                        }
+                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                      >
+                                        <MdLockReset className="font-bold text-xl" />
+                                      </button>
+                                    </td>
+                                  )}
                               </tr>
                             ))
                           ) : (
@@ -1513,25 +1513,25 @@ function ManageSubjectList() {
                   {currentStudentDataForActivate?.studentToActiveOrDeactive
                     ?.isActive === "Y"
                     ? `Are you sure you want to deactivate this student ${[
-                        currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.first_name,
-                        currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.mid_name,
-                        currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.last_name,
-                      ]
-                        .filter(Boolean) // removes undefined/null/empty strings
-                        .join(" ")}?`
+                      currentStudentDataForActivate?.studentToActiveOrDeactive
+                        ?.first_name,
+                      currentStudentDataForActivate?.studentToActiveOrDeactive
+                        ?.mid_name,
+                      currentStudentDataForActivate?.studentToActiveOrDeactive
+                        ?.last_name,
+                    ]
+                      .filter(Boolean) // removes undefined/null/empty strings
+                      .join(" ")}?`
                     : `Are you sure you want to activate this student ${[
-                        currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.first_name,
-                        currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.mid_name,
-                        currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.last_name,
-                      ]
-                        .filter(Boolean) // removes undefined/null/empty strings
-                        .join(" ")}?`}
+                      currentStudentDataForActivate?.studentToActiveOrDeactive
+                        ?.first_name,
+                      currentStudentDataForActivate?.studentToActiveOrDeactive
+                        ?.mid_name,
+                      currentStudentDataForActivate?.studentToActiveOrDeactive
+                        ?.last_name,
+                    ]
+                      .filter(Boolean) // removes undefined/null/empty strings
+                      .join(" ")}?`}
                 </div>
 
                 <div className=" flex justify-end p-3">
@@ -1543,13 +1543,13 @@ function ManageSubjectList() {
                   >
                     {isSubmitting
                       ? currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.isActive === "Y"
+                        ?.isActive === "Y"
                         ? "Deactivating..."
                         : "Activating..."
                       : currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.isActive === "Y"
-                      ? "Deactivate"
-                      : "Activate"}
+                        ?.isActive === "Y"
+                        ? "Deactivate"
+                        : "Activate"}
                     {/* {isSubmitting ? "Activating..." : "Active"} */}
                   </button>
                 </div>
