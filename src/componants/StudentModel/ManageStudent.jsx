@@ -754,10 +754,12 @@ function ManageSubjectList() {
     const studentClass = section?.get_class?.name?.toLowerCase() || "";
     const studentUserId = section?.user_master?.user_id?.toLowerCase() || "";
     const studentRollNo = section?.roll_no?.toString().toLowerCase() || ""; // Convert roll number to string for comparison
+    const studentGrNo = section?.reg_no?.toString().toLowerCase() || ""; // Convert roll number to string for comparison
 
     // Check if the search term is present in Roll No, Name, Class, or UserId
     return (
       studentRollNo.includes(searchLower) ||
+      studentGrNo.includes(searchLower) ||
       studentName.includes(searchLower) ||
       studentClass.includes(searchLower) ||
       studentUserId.includes(searchLower)
