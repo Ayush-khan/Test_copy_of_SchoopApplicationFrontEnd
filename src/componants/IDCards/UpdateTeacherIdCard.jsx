@@ -150,8 +150,8 @@ const UpdateTeacherIdCard = () => {
       const finalData = Array.isArray(apiData)
         ? apiData
         : apiData
-        ? [apiData]
-        : [];
+          ? [apiData]
+          : [];
 
       if (finalData.length === 0) {
         toast.error("No Staff ID card data found.");
@@ -167,33 +167,29 @@ const UpdateTeacherIdCard = () => {
     }
   };
 
-  // const handleStaffImageCropped = async (croppedImageData, index) => {
-  //   const teacher_id = timetable[index]?.teacher_id;
-
+  // const handleStaffImageCropped = async (croppedImageData, teacher_id) => {
   //   if (!teacher_id) {
-  //     console.error("Teacher ID not found for this record");
+  //     console.error("Staff ID not found");
   //     return;
   //   }
 
-  //   //  Update frontend UI immediately
+  //   const pureBase64 = croppedImageData.split(",")[1];
+
   //   setTimetable((prev) =>
-  //     prev.map((teacher, i) =>
-  //       i === index ? { ...teacher, base64: croppedImageData || "" } : teacher
+  //     prev.map((teacher) =>
+  //       teacher.teacher_id === teacher_id
+  //         ? { ...teacher, base64: croppedImageData }
+  //         : teacher
   //     )
   //   );
 
-  //   setFormErrors((prevErrors) =>
-  //     prevErrors.filter((err) => err.field !== `teacher_image_name_${index}`)
-  //   );
-
-  //   // Call API to save cropped image
   //   try {
   //     const token = localStorage.getItem("authToken");
 
   //     const formData = new FormData();
   //     formData.append("teacher_id", teacher_id);
   //     formData.append("filename", `${teacher_id}.jpg`);
-  //     formData.append("base64", croppedImageData);
+  //     formData.append("base64", pureBase64);
 
   //     const response = await axios.post(
   //       `${API_URL}/api/update_teacher_profile_image`,
@@ -212,31 +208,43 @@ const UpdateTeacherIdCard = () => {
   //       toast.error("Failed to update profile image");
   //     }
   //   } catch (error) {
-  //     console.error("Error updating teacher image:", error);
-  //     toast.error("Error updating teacher image");
+  //     console.error("Error updating Staff image:", error);
+  //     toast.error("Error updating Staff image");
   //   }
   // };
 
-  const handleStaffImageCropped = async (croppedImageData, index) => {
-    const teacher_id = timetable[index]?.teacher_id;
+  const fetchTeacherImageById = async (teacher_id) => {
+    try {
+      const token = localStorage.getItem("authToken");
 
+      const res = await axios.get(
+        `${API_URL}/api/teacher/image/${teacher_id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      return res.data?.data || null;
+    } catch (err) {
+      console.error("Error fetching teacher image:", err);
+      return null;
+    }
+  };
+
+  const handleStaffImageCropped = async (croppedImageData, teacher_id) => {
     if (!teacher_id) {
-      console.error("Staff ID not found for this record");
+      console.error("Staff ID not found");
       return;
     }
 
-    // Extract ONLY base64 part (after comma)
     const pureBase64 = croppedImageData.split(",")[1];
 
-    // Update UI Preview (keep full data URL for image preview)
     setTimetable((prev) =>
-      prev.map((teacher, i) =>
-        i === index ? { ...teacher, base64: croppedImageData } : teacher
+      prev.map((teacher) =>
+        teacher.teacher_id === teacher_id
+          ? { ...teacher, base64: croppedImageData }
+          : teacher
       )
-    );
-
-    setFormErrors((prevErrors) =>
-      prevErrors.filter((err) => err.field !== `teacher_image_name_${index}`)
     );
 
     try {
@@ -260,6 +268,22 @@ const UpdateTeacherIdCard = () => {
 
       if (response.data.success) {
         toast.success("Profile image updated successfully");
+
+        const imageData = await fetchTeacherImageById(teacher_id);
+
+        if (imageData?.teacher_image_url) {
+          setTimetable((prev) =>
+            prev.map((teacher) =>
+              teacher.teacher_id === teacher_id
+                ? {
+                  ...teacher,
+                  teacher_image_url: imageData.teacher_image_url,
+                  base64: null,
+                }
+                : teacher
+            )
+          );
+        }
       } else {
         toast.error("Failed to update profile image");
       }
@@ -300,25 +324,25 @@ const UpdateTeacherIdCard = () => {
 
   const filteredSections = Array.isArray(timetable)
     ? timetable.filter((section) => {
-        const searchLower = searchTerm.toLowerCase();
+      const searchLower = searchTerm.toLowerCase();
 
-        const studentRollNo =
-          section?.employee_id?.toString().toLowerCase() || "";
-        const studentName = `${section?.name}`.toLowerCase() || "";
-        const studentDOB = section?.phone?.toLowerCase() || "";
-        const studentBloodGroup = section?.blood_group?.toLowerCase() || "";
-        const studentGrnNo = section?.sex?.toLowerCase() || "";
-        const studentClass = `${section?.address}`.toLowerCase() || "";
+      const studentRollNo =
+        section?.employee_id?.toString().toLowerCase() || "";
+      const studentName = `${section?.name}`.toLowerCase() || "";
+      const studentDOB = section?.phone?.toLowerCase() || "";
+      const studentBloodGroup = section?.blood_group?.toLowerCase() || "";
+      const studentGrnNo = section?.sex?.toLowerCase() || "";
+      const studentClass = `${section?.address}`.toLowerCase() || "";
 
-        return (
-          studentRollNo.includes(searchLower) ||
-          studentName.includes(searchLower) ||
-          studentDOB.includes(searchLower) ||
-          studentBloodGroup.includes(searchLower) ||
-          studentGrnNo.includes(searchLower) ||
-          studentClass.includes(searchLower)
-        );
-      })
+      return (
+        studentRollNo.includes(searchLower) ||
+        studentName.includes(searchLower) ||
+        studentDOB.includes(searchLower) ||
+        studentBloodGroup.includes(searchLower) ||
+        studentGrnNo.includes(searchLower) ||
+        studentClass.includes(searchLower)
+      );
+    })
     : [];
 
   useEffect(() => {
@@ -479,7 +503,7 @@ const UpdateTeacherIdCard = () => {
                                     </td>
                                     <td className="px-2 py-2 border border-gray-950 w-[80px]">
                                       <div className="rounded-full">
-                                        <ImageCropperSaving
+                                        {/* <ImageCropperSaving
                                           photoPreview={
                                             subject?.teacher_image_url || // NEW — always show latest saved image
                                             subject?.teacer_image_name ||
@@ -491,22 +515,36 @@ const UpdateTeacherIdCard = () => {
                                               index
                                             )
                                           }
-                                        />{" "}
+                                        />{" "} */}
+                                        <ImageCropperSaving
+                                          photoPreview={
+                                            subject?.teacher_image_url ||
+                                            subject?.teacer_image_name ||
+                                            subject?.image_base
+                                          }
+                                          onImageCropped={(croppedImage) =>
+                                            handleStaffImageCropped(
+                                              croppedImage,
+                                              subject.teacher_id
+                                            )
+                                          }
+                                        />
+
                                         {formErrors.some(
                                           (err) =>
                                             err.field ===
                                             `student_image_base_${index}`
                                         ) && (
-                                          <p className="text-red-500 text-xs ml-3">
-                                            {
-                                              formErrors.find(
-                                                (err) =>
-                                                  err.field ===
-                                                  `student_image_base_${index}`
-                                              )?.message
-                                            }
-                                          </p>
-                                        )}
+                                            <p className="text-red-500 text-xs ml-3">
+                                              {
+                                                formErrors.find(
+                                                  (err) =>
+                                                    err.field ===
+                                                    `student_image_base_${index}`
+                                                )?.message
+                                              }
+                                            </p>
+                                          )}
                                       </div>
                                     </td>
                                   </tr>
