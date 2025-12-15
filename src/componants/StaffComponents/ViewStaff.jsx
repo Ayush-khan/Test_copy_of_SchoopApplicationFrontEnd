@@ -173,9 +173,9 @@ function ViewStaff() {
     <>
       <ToastContainer />
       <div className="container mx-auto mt-4">
-        <div className="card rounded-md">
+        <div className="card  rounded-md">
           <div className="card-header mb-4 flex justify-between items-center">
-            <h5 className="text-gray-700 mt-1 text-md lg:text-lg px-2">
+            <h5 className="text-gray-700 mt-1 text-md lg:text-lg mx-2">
               View Staff Details
             </h5>
             <RxCross1
@@ -238,13 +238,13 @@ function ViewStaff() {
               </div>
               <div>
                 <label
-                  htmlFor="permenent_address"
+                  htmlFor="permanent_address"
                   className="block font-bold text-xs mb-2"
                 >
-                  Permenent Address
+                  Permanent Address
                 </label>
                 <p className="input-field resize h-[70%]  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
-                  {formData.permenent_address}
+                  {formData.permanent_address}
                 </p>
               </div>
               {/* <div className="grid grid-rows-2 gap-1">

@@ -509,7 +509,7 @@ function CreateTeacherIdCard() {
                   htmlFor="blood_group"
                   className="block font-bold  text-xs mb-2"
                 >
-                  Blood Group
+                  Blood Group <spna className="text-red-500">*</spna>
                 </label>
                 <select
                   id="blood_group"

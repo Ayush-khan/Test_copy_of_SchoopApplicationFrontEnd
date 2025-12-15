@@ -619,7 +619,7 @@ function Index() {
         />
         <Route
           path="/myprofile"
-          element={<PrivateRoute element={<UserProfile />} />}
+          element={<PrivateRoute element={<UserProfile key={Date.now()} />} />}
         />
         {/* Allot special Role */}
         <Route
@@ -903,7 +903,7 @@ function Index() {
         {/* Teacher ID Card Module */}
         <Route
           path="/teacherIdCard"
-          element={<PrivateRoute element={<TeacherIdCard />} />}
+          element={<PrivateRoute element={<TeacherIdCard key={Date.now()} />} />}
         />
         <Route
           path="/createteacherIdCardDetails"
