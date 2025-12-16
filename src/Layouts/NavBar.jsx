@@ -499,9 +499,8 @@ function NavBar() {
                           {subItem?.name}
                         </span>
                       }
-                      className={`nav-dropdown-sub-new dropend w-auto ${
-                        isSubOpen ? "show" : ""
-                      }`}
+                      className={`nav-dropdown-sub-new dropend w-auto ${isSubOpen ? "show" : ""
+                        }`}
                       show={isSubOpen}
                       onClick={(e) => {
                         e.preventDefault();
@@ -548,9 +547,8 @@ function NavBar() {
                               // className={`dropend custom-submenuIs ${
                               //   isChildOpen ? "show" : ""
                               // }`}
-                              className={`  nav-dropdown-sub-new dropend w-auto ${
-                                isSubOpen ? "show" : ""
-                              } `}
+                              className={`  nav-dropdown-sub-new dropend w-auto ${isSubOpen ? "show" : ""
+                                } `}
                               show={isChildOpen}
                               onClick={(e) => {
                                 e.preventDefault();
@@ -628,7 +626,7 @@ function NavBar() {
                         navigate(subItem.url);
                       }}
 
-                      // className="hover:bg-gray-100 hover:text-blue-600 text-sm"
+                    // className="hover:bg-gray-100 hover:text-blue-600 text-sm"
                     >
                       {subItem.name}
                     </NavDropdown.Item>
@@ -797,7 +795,7 @@ function NavBar() {
                 </span>
               }
               className="  w-18 border-2 rounded-full border-white px-2 lg:px-4 ml-2 hover:rounded-lg "
-              // menuAlign="left"
+            // menuAlign="left"
             >
               <NavDropdown.Item>
                 <div
@@ -976,7 +974,7 @@ function NavBar() {
                       paddingRight: "4px",
                     }}
                     className={`w-12 lg:w-20 mr-4 outline-none border-1 border-gray-400 rounded-md py-0.5 text-xs lg:text-sm`}
-                    // disabled={loading}
+                    disabled={loading}
                   />
                 </div>
               </div>{" "}

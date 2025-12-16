@@ -352,8 +352,8 @@ const PersonalProfile = () => {
                     student.gender === "M"
                       ? "Male"
                       : student.gender === "F"
-                      ? "Female"
-                      : "Other",
+                        ? "Female"
+                        : "Other",
                 },
                 { label: "Date of Birth", value: student.dob },
                 { label: "Birth Place", value: student.birth_place },

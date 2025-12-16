@@ -75,9 +75,8 @@ export default function StudentSearchUsingGRN() {
 
   return (
     <div
-      className={`transition-all duration-500 ${
-        closing ? "scale-95 opacity-0" : "scale-100 opacity-100"
-      } w-full md:W-[95%] mx-auto p-4`}
+      className={`transition-all duration-500 ${closing ? "scale-95 opacity-0" : "scale-100 opacity-100"
+        } w-full md:W-[95%] mx-auto p-4`}
     >
       <div className="card p-3 rounded-md">
         <div
@@ -104,11 +103,10 @@ export default function StudentSearchUsingGRN() {
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
-                    className={`w-full flex items-center gap-2 p-2 rounded-lg text-white transition-all duration-300 transform ${
-                      activeTab === tab.id
-                        ? "bg-blue-500 scale-105 shadow-lg"
-                        : tab.bgColor
-                    } hover:bg-blue-400`}
+                    className={`w-full flex items-center gap-2 p-2 rounded-lg text-white transition-all duration-300 transform ${activeTab === tab.id
+                      ? "bg-blue-500 scale-105 shadow-lg"
+                      : tab.bgColor
+                      } hover:bg-blue-400`}
                     onClick={() => handleTabClick(tab.id)}
                   >
                     {tab.icon}
@@ -122,9 +120,8 @@ export default function StudentSearchUsingGRN() {
           {/* Right Side - Content */}
           <div
             className={`w-[85%] bg-gray-50 
-               p-1 shadow-md rounded-lg max-h-[calc(100vh-150px)] overflow-y-auto relative transition-all duration-500 ${
-                 contentClosing ? "scale-90 opacity-0" : "scale-100 opacity-100"
-               }`}
+               p-1 shadow-md rounded-lg max-h-[calc(100vh-150px)] overflow-y-auto relative transition-all duration-500 ${contentClosing ? "scale-90 opacity-0" : "scale-100 opacity-100"
+              }`}
           >
             {/* <RxCross1
               className="absolute top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100 rounded-full p-1"
