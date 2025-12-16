@@ -196,8 +196,8 @@ function CreateStaff() {
         const newAcademicQual = checked
           ? [...prevData.academic_qual, value]
           : prevData.academic_qual.filter(
-              (qualification) => qualification !== value
-            );
+            (qualification) => qualification !== value
+          );
         return { ...prevData, academic_qual: newAcademicQual };
       });
     } else {
@@ -356,7 +356,7 @@ function CreateStaff() {
       setLoading(false);
     }
   };
-
+  // this  is  test
   return (
     <div className="container mx-auto mt-4 ">
       <ToastContainer />
@@ -522,7 +522,7 @@ function CreateStaff() {
                     value={formData.permanent_address}
                     onChange={handleChange}
                     required
-                    // rows="3"
+                  // rows="3"
                   ></textarea>
                   <div className="flex items-center gap-2 mb-2">
                     <input

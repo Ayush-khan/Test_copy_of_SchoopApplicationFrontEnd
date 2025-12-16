@@ -186,7 +186,7 @@ function ViewStaff() {
             />
           </div>
           <div
-            className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
+            className=" relative w-[98%] -top-6 h-1  mx-auto bg-red-700"
             style={{
               backgroundColor: "#C03078",
             }}

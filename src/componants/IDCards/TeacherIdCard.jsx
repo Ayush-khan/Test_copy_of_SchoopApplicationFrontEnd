@@ -111,11 +111,13 @@ const TeacherIdCard = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Staff Data");
 
     // Write and download the file
-    XLSX.writeFile(workbook, `Staff idCard list .xlsx`);
+    XLSX.writeFile(workbook, `Staff Id Card Profile Image List .xlsx`);
   };
+
   const handleDownloadZip = () => {
     setShowDeleteModal(true);
   };
+
   const handleSubmitDownloadZip = async () => {
     if (isSubmitting) return; // Prevent multiple submissions
     setIsSubmitting(true);
@@ -150,7 +152,7 @@ const TeacherIdCard = () => {
       // Create a temporary link to trigger the download
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `Staff idCard list zip`);
+      link.setAttribute("download", `Staff Id Card Profile Image List`);
       document.body.appendChild(link);
       link.click();
 
@@ -495,7 +497,8 @@ h5 + * { /* Targets the element after h5 */
                                           <img
                                             src={
                                               subject?.teacher_image_url
-                                                ? `${subject?.teacher_image_url}`
+                                                ? `${subject?.teacher_image_url
+                                                }?t=${Date.now()}`
                                                 : "https://via.placeholder.com/50"
                                             }
                                             alt={toCamelCase(subject?.name)}

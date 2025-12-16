@@ -273,8 +273,8 @@ function EditStaff() {
         const newAcademicQual = checked
           ? [...prevData.academic_qual, value]
           : prevData.academic_qual.filter(
-              (qualification) => qualification !== value
-            );
+            (qualification) => qualification !== value
+          );
         return { ...prevData, academic_qual: newAcademicQual };
       });
     } else {
@@ -586,7 +586,7 @@ function EditStaff() {
           />
         </div>
         <div
-          className=" relative w-[98%]  -top-6 h-1  mx-auto bg-red-700"
+          className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
           style={{
             backgroundColor: "#C03078",
           }}
