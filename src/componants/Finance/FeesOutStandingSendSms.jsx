@@ -166,8 +166,7 @@ const FeesOutStandingSendSms = () => {
       const token = localStorage.getItem("authToken");
       // console.log(`${API_URL}/api/get_sendsmsforfeespendingdata/${classIdForSearch}/${selectedInstallment?.value || "%"}`)
       const response = await axios.get(
-        `${API_URL}/api/get_sendsmsforfeespendingdata/${classIdForSearch}/${
-          selectedInstallment?.value || "%"
+        `${API_URL}/api/get_sendsmsforfeespendingdata/${classIdForSearch}/${selectedInstallment?.value || "%"
         }`,
         {
           headers: { Authorization: `Bearer ${token}` }, // Pass query parameters here
@@ -319,29 +318,31 @@ const FeesOutStandingSendSms = () => {
     ];
 
     // Add Installment 4 if class name is "10"
-    if (selectedClass?.label === "10") {
+    const classNum = Number(selectedClass?.label?.match(/^\d+/)?.[0] || 0);
+
+    if ([9, 10, 11, 12].includes(classNum)) {
       options.push({ value: "4", label: "CBSE Exam Fee" });
     }
+
 
     return options;
   };
   const filteredParents = parentInformation
     ? parentInformation.filter((student) => {
-        const searchLower = searchTerm.toLowerCase();
-        console.log(student);
+      const searchLower = searchTerm.toLowerCase();
+      console.log(student);
 
-        return (
-          // Filter by roll number
-          (student.roll_no !== null &&
-            student.roll_no.toString().toLowerCase().includes(searchLower)) ||
-          // Filter by full name
-          `${student.first_name || ""} ${student.mid_name || ""} ${
-            student.last_name || ""
+      return (
+        // Filter by roll number
+        (student.roll_no !== null &&
+          student.roll_no.toString().toLowerCase().includes(searchLower)) ||
+        // Filter by full name
+        `${student.first_name || ""} ${student.mid_name || ""} ${student.last_name || ""
           }`
-            .toLowerCase()
-            .includes(searchLower)
-        );
-      })
+          .toLowerCase()
+          .includes(searchLower)
+      );
+    })
     : [];
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -371,7 +372,7 @@ const FeesOutStandingSendSms = () => {
             backgroundColor: "#C03078",
           }}
         ></div>
-        <div className="     w-full md:container mt-4">
+        <div className="     w-full mx-auto mt-4">
           {/* Search Section */}
           <div className="pt-2 md:pt-4"></div>
           <div className="pt-8 w-full md:w-[80%]  relative ml-0 md:ml-[10%]  border-1 flex justify-start flex-col md:flex-row gap-x-1  bg-white rounded-lg    mt-2 md:mt-6 p-2 ">
@@ -447,9 +448,8 @@ const FeesOutStandingSendSms = () => {
                   type="search"
                   onClick={handleSearch}
                   style={{ backgroundColor: "#2196F3" }}
-                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                    loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   disabled={loadingForSearch}
                 >
                   {loadingForSearch ? (
@@ -485,7 +485,7 @@ const FeesOutStandingSendSms = () => {
           </div>
           {/* Form Section - Displayed when parentInformation is fetched */}
           {parentInformation && (
-            <div className="w-full md:container mx-auto py-4 px-4 ">
+            <div className="w-full  mx-auto py-4 px-4 ">
               <div className="card mx-auto w-full shadow-lg">
                 <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
                   <h6 className="text-gray-700 mt-1   text-nowrap">
@@ -563,9 +563,8 @@ const FeesOutStandingSendSms = () => {
                             filteredParents.map((student, index) => (
                               <tr
                                 key={student.student_id}
-                                className={`${
-                                  index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                                } hover:bg-gray-50`}
+                                className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                                  } hover:bg-gray-50`}
                               >
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   <p className="text-gray-900 whitespace-no-wrap relative top-2">
@@ -738,9 +737,8 @@ const FeesOutStandingSendSms = () => {
                       type="submit"
                       onClick={handleSubmit}
                       style={{ backgroundColor: "#2196F3" }}
-                      className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                        loading ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                      className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       disabled={loading}
                     >
                       {loading ? (
