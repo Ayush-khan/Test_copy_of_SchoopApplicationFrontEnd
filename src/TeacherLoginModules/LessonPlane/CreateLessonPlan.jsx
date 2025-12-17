@@ -134,7 +134,7 @@ const CreateLessonPlan = () => {
 
   useEffect(() => {
     if (!roleIdValue) return; // guard against empty
-    fetchExams(roleIdValue);
+    fetchClasses(roleIdValue);
   }, [roleIdValue]);
 
   const fetchDataRoleId = async () => {
@@ -163,7 +163,7 @@ const CreateLessonPlan = () => {
     }
   };
 
-  const fetchExams = async () => {
+  const fetchClasses = async () => {
     try {
       const token = localStorage.getItem("authToken");
 
@@ -181,34 +181,33 @@ const CreateLessonPlan = () => {
     }
   };
 
-  const fetchSubjectNames = async (classId) => {
-    if (!classId) return;
+  const fetchSubjectNames = async (classId, sectionIds = []) => {
+    if (!classId || sectionIds.length === 0) return;
+
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(
-        `${API_URL}/api/get_subjects_according_class?class_id=${classId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      // console.log("✅ Subjects fetched:", response.data.data);
+
+      // Build section_ids[]=...&section_ids[]=...
+      const sectionQuery = sectionIds
+        .map((id) => `section_ids[]=${id}`)
+        .join("&");
+
+      const url = `${API_URL}/api/get_subjects_according_class_multiple?class_id=${classId}&${sectionQuery}`;
+
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       setAllSubject(response.data.data || []);
     } catch (error) {
-      console.error("❌ Error fetching subject names:", error);
       toast.error("Error fetching subject names");
     } finally {
       setLoading(false);
     }
   };
-
   const fetchChaptersNames = async (classId, subjectId) => {
     if (!classId || !subjectId) return;
-
-    // console.log("📌 fetchChaptersNames called with:", {
-    //   classId,
-    //   subjectId,
-    // }); // log the values
 
     setLoading(true);
     try {
@@ -306,19 +305,10 @@ const CreateLessonPlan = () => {
   };
 
   useEffect(() => {
-    if (!selectedStudent || selectedStudent.length === 0 || !selectedSubject)
-      return;
+    if (!selectedSubjectId || !selectedStudentId) return;
 
-    const classId = selectedStudent[0].class_id; // pick the first one
-    const subjectId = selectedSubject.value;
-
-    // console.log("📌 useEffect trigger: classId & subjectId", {
-    //   classId,
-    //   subjectId,
-    // });
-
-    fetchChaptersNames(classId, subjectId);
-  }, [selectedStudent, selectedSubject]);
+    fetchChaptersNames(selectedStudentId, selectedSubjectId);
+  }, [selectedSubjectId, selectedStudentId]);
 
   useEffect(() => {
     if (!selectedStudent) return;
@@ -330,11 +320,6 @@ const CreateLessonPlan = () => {
 
     const classId = selectedStudent.value;
     const subjectId = selectedSubject.value;
-
-    // console.log("📌 useEffect trigger: classId & subjectId", {
-    //   classId,
-    //   subjectId,
-    // });
 
     fetchChaptersNames(classId, subjectId);
   }, [selectedStudent, selectedSubject]);
@@ -477,23 +462,23 @@ const CreateLessonPlan = () => {
       console.log("✅ present_data:", isPresent ? "true" : "false");
       console.log("📘 handleSearch API data:", apiData);
 
-      if (isPresent && unqId) {
-        console.log("Existing lesson plan found. Navigating to Edit:", unqId);
+      // if (isPresent && unqId) {
+      //   console.log("Existing lesson plan found. Navigating to Edit:", unqId);
 
-        navigate(`/lessonPlan/edit/${unqId}`, {
-          state: {
-            headings: heading,
-            selectedStudent,
-            selectedSubject,
-            selectedChapter,
-            selectedStudentId,
-            selectedSubjectId,
-            selectedChapterId,
-            unq_id: unqId,
-          },
-        });
-        return;
-      }
+      //   navigate(`/lessonPlan/edit/${unqId}`, {
+      //     state: {
+      //       headings: heading,
+      //       selectedStudent,
+      //       selectedSubject,
+      //       selectedChapter,
+      //       selectedStudentId,
+      //       selectedSubjectId,
+      //       selectedChapterId,
+      //       unq_id: unqId,
+      //     },
+      //   });
+      //   return;
+      // }
 
       if (lessonPlanData.length === 0) {
         setTimetable([{ unq_id: "new" }]);
@@ -624,7 +609,7 @@ const CreateLessonPlan = () => {
       // 🔸 Prepare description fields
       const descriptions = {};
 
-      // ✅ Loop headings (normal)
+      //  Loop headings (normal)
       (heading || []).forEach((item) => {
         const headingId = item.lesson_plan_headings_id;
         const descValue =
@@ -643,25 +628,48 @@ const CreateLessonPlan = () => {
         descriptions[`description_${headingId}_1`] = formattedValue;
       });
 
-      // ✅ Loop daily headings (from textarea)
-      (dailyHeading || []).forEach((item) => {
-        const headingId = item.lesson_plan_headings_id;
-        const descValue =
-          studentRemarks[`${headingId}_0`] ||
-          timetable?.[0]?.[`description_${headingId}_1`] ||
-          "";
+      // Loop daily headings (from textarea)
+      // (dailyHeading || []).forEach((item) => {
+      //   const headingId = item.lesson_plan_headings_id;
+      //   const descValue =
+      //     studentRemarks[`${headingId}_0`] ||
+      //     timetable?.[0]?.[`dc_description_${headingId}_1`] ||
+      //     "";
 
-        const formattedValue = descValue
-          .split("\n")
-          .map((line) => {
-            const trimmed = line.trim();
-            if (trimmed === "") return "";
-            return trimmed.startsWith("• ") ? trimmed : "• " + trimmed;
-          })
-          .join("\n")
-          .trim();
+      //   const formattedValue = descValue
+      //     .split("\n")
+      //     .map((line) => {
+      //       const trimmed = line.trim();
+      //       if (trimmed === "") return "";
+      //       return trimmed.startsWith("• ") ? trimmed : "• " + trimmed;
+      //     })
+      //     .join("\n")
+      //     .trim();
 
-        descriptions[`description_${headingId}_1`] = formattedValue;
+      //   descriptions[`dc_description_${headingId}_1`] = formattedValue;
+      // });
+      // ✅ CodeIgniter-style daily change logic
+      rows.forEach((row, rowIndex) => {
+        (dailyHeading || []).forEach((item) => {
+          const headingId = item.lesson_plan_headings_id;
+
+          const key = `${headingId}_${rowIndex}`;
+          const descValue = studentRemarks[key] || "";
+
+          const formattedValue = descValue
+            .split("\n")
+            .map((line) => {
+              const trimmed = line.trim();
+              if (trimmed === "") return "";
+              return trimmed.startsWith("• ") ? trimmed : "• " + trimmed;
+            })
+            .join("\n")
+            .trim();
+
+          // 🔥 IMPORTANT: rowIndex + 1 (PHP starts from 1)
+          descriptions[`dc_description_${headingId}_${rowIndex + 1}`] =
+            formattedValue;
+        });
       });
 
       // 🔸 Validate if at least one description is filled
@@ -675,18 +683,28 @@ const CreateLessonPlan = () => {
       }
 
       // 🔸 Validate teaching points (daily)
-      const hasTeachingPoints = (dailyHeading || []).some((item) => {
-        const val =
-          descriptions[`description_${item.lesson_plan_headings_id}_1`] || "";
-        return val.trim() !== "";
-      });
+      // const hasTeachingPoints = (dailyHeading || []).some((item) => {
+      //   const val =
+      //     descriptions[`dc_description_${item.lesson_plan_headings_id}_1`] ||
+      //     "";
+      //   return val.trim() !== "";
+      // });
+      const hasTeachingPoints = rows.some((_, rowIndex) =>
+        (dailyHeading || []).some((item) => {
+          const val =
+            descriptions[
+              `dc_description_${item.lesson_plan_headings_id}_${rowIndex + 1}`
+            ] || "";
+          return val.trim() !== "";
+        })
+      );
+
       if (!hasTeachingPoints) {
         toast.error("Please add teaching points before saving.");
         setIsSubmitting(false);
         return;
       }
 
-      // ✅ Build payload
       const payload = {
         class_id: classId,
         section_id: sectionIds,
@@ -694,11 +712,11 @@ const CreateLessonPlan = () => {
         chapter_id: selectedChapterId?.toString() || "0",
         class_id_array: classIdArray,
         no_of_periods: numPeriods?.toString() || "1",
-        weeklyDatePicker: new Date().toISOString().split("T")[0],
+        weeklyDatePicker: weekRange,
         les_pln_temp_id: timetable?.[0]?.les_pln_temp_id || "new",
-        approve: "Y",
-        lph_dc_row: "1",
-        start_date: [fromDate, toDate],
+        approve: "N",
+        lph_dc_row: rows.length.toString(),
+        start_date: rows.map((row) => row.startDate),
         ...descriptions,
       };
 
@@ -825,7 +843,7 @@ const CreateLessonPlan = () => {
               <div className=" w-full md:w-[100%]   flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2">
                 <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                   <div className="w-full md:w-[99%]  gap-x-0 md:gap-x-10 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                    {/* Teacher */}
+                    {/* Class */}
                     <div className="w-full  md:w-[50%] gap-x-3 justify-around my-1 md:my-4 flex md:flex-row">
                       <label
                         className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
@@ -834,7 +852,7 @@ const CreateLessonPlan = () => {
                         Class <span className="text-red-500">*</span>
                       </label>
                       <div className="w-full md:w-[50%]">
-                        <Select
+                        {/* <Select
                           menuPortalTarget={document.body}
                           menuPosition="fixed"
                           id="studentSelect"
@@ -865,6 +883,119 @@ const CreateLessonPlan = () => {
                               fontSize: ".9em",
                             }),
                           }}
+                        /> */}
+
+                        {/* <Select
+                          menuPortalTarget={document.body}
+                          menuPosition="fixed"
+                          id="studentSelect"
+                          options={studentOptions}
+                          isMulti
+                          // onChange={(selected) => {
+                          //   if (!selected || selected.length === 0) {
+                          //     setSelectedStudent(null);
+                          //     return;
+                          //   }
+
+                          //   const sectionIds = selected.map((item) =>
+                          //     Number(item.value.split("_")[1])
+                          //   );
+
+                          //   const classId = Number(
+                          //     selected[0].value.split("_")[0]
+                          //   );
+
+                          //   fetchSubjectNames(classId, sectionIds);
+                          // }}
+                          onChange={(selected) => {
+                            if (!selected || selected.length === 0) {
+                              setSelectedStudent(null);
+                              setSelectedStudentId(null);
+                              return;
+                            }
+
+                            const sectionIds = selected.map((item) =>
+                              Number(item.value.split("_")[1])
+                            );
+
+                            const classId = Number(
+                              selected[0].value.split("_")[0]
+                            );
+
+                            // Store only CLASS ID (needed for chapters API)
+                            setSelectedStudentId(classId);
+
+                            // Store full value (optional)
+                            setSelectedStudent(selected);
+
+                            fetchSubjectNames(classId, sectionIds);
+                          }}
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          styles={{
+                            control: (provided) => ({
+                              ...provided,
+                              fontSize: ".9em",
+                              minHeight: "30px",
+                            }),
+                            menu: (provided) => ({
+                              ...provided,
+                              fontSize: "1em",
+                            }),
+                            option: (provided) => ({
+                              ...provided,
+                              fontSize: ".9em",
+                            }),
+                          }}
+                        /> */}
+                        <Select
+                          menuPortalTarget={document.body}
+                          menuPosition="fixed"
+                          id="studentSelect"
+                          options={studentOptions}
+                          isMulti
+                          value={selectedStudent}
+                          onChange={(selected) => {
+                            if (!selected || selected.length === 0) {
+                              setSelectedStudent(null);
+                              setSelectedStudentId(null);
+                              return;
+                            }
+
+                            // Extract all section IDs
+                            const sectionIds = selected.map((item) =>
+                              Number(item.value.split("-")[1])
+                            );
+
+                            // Extract CLASS ID from the FIRST item
+                            const classId = Number(
+                              selected[0].value.split("-")[0]
+                            );
+
+                            setSelectedStudent(selected); // store full multi-selection
+                            setSelectedStudentId(classId); // store classId only
+
+                            fetchSubjectNames(classId, sectionIds);
+                          }}
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          styles={{
+                            control: (provided) => ({
+                              ...provided,
+                              fontSize: ".9em",
+                              minHeight: "30px",
+                            }),
+                            menu: (provided) => ({
+                              ...provided,
+                              fontSize: "1em",
+                            }),
+                            option: (provided) => ({
+                              ...provided,
+                              fontSize: ".9em",
+                            }),
+                          }}
                         />
 
                         {studentError && (
@@ -874,7 +1005,7 @@ const CreateLessonPlan = () => {
                         )}
                       </div>
                     </div>
-                    {/* Month */}
+                    {/* Subject */}
                     <div className="w-full  md:w-[50%] gap-x-3 justify-around my-1 md:my-4 flex md:flex-row">
                       <label
                         className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
@@ -883,7 +1014,7 @@ const CreateLessonPlan = () => {
                         Subject<span className="text-red-500">*</span>
                       </label>
                       <div className="w-full md:w-[65%]">
-                        <Select
+                        {/* <Select
                           menuPortalTarget={document.body}
                           menuPosition="fixed"
                           id="studentSelect"
@@ -921,7 +1052,42 @@ const CreateLessonPlan = () => {
                               fontSize: ".9em", // Adjust font size for each option
                             }),
                           }}
+                        /> */}
+                        <Select
+                          menuPortalTarget={document.body}
+                          menuPosition="fixed"
+                          id="studentSelect"
+                          options={subjectOptions}
+                          value={selectedSubject}
+                          onChange={(selected) => {
+                            setSelectedSubject(selected);
+                            setSelectedSubjectId(
+                              selected ? selected.value : null
+                            );
+
+                            if (selected) setSubjectError("");
+                            else setSubjectError("Please select subject.");
+                          }}
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          styles={{
+                            control: (provided) => ({
+                              ...provided,
+                              fontSize: ".9em",
+                              minHeight: "30px",
+                            }),
+                            menu: (provided) => ({
+                              ...provided,
+                              fontSize: "1em",
+                            }),
+                            option: (provided) => ({
+                              ...provided,
+                              fontSize: ".9em",
+                            }),
+                          }}
                         />
+
                         {subjectError && (
                           <div className="h-8 relative ml-1 text-danger text-xs">
                             {subjectError}
@@ -929,6 +1095,7 @@ const CreateLessonPlan = () => {
                         )}
                       </div>
                     </div>
+                    {/* Chapter */}
                     <div className="w-full  md:w-[60%] gap-x-3 justify-around my-1 md:my-4 flex md:flex-row">
                       <label
                         className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
@@ -937,7 +1104,7 @@ const CreateLessonPlan = () => {
                         Chapter<span className="text-red-500">*</span>
                       </label>
                       <div className="w-full md:w-[65%]">
-                        <Select
+                        {/* <Select
                           menuPortalTarget={document.body}
                           menuPosition="fixed"
                           id="studentSelect"
@@ -975,7 +1142,42 @@ const CreateLessonPlan = () => {
                               fontSize: ".9em",
                             }),
                           }}
+                        /> */}
+                        <Select
+                          menuPortalTarget={document.body}
+                          menuPosition="fixed"
+                          id="studentSelect"
+                          options={chapterOptions}
+                          value={selectedChapter}
+                          onChange={(selected) => {
+                            setSelectedChapter(selected);
+                            setSelectedChapterId(
+                              selected ? selected.value : null
+                            );
+
+                            if (selected) setChapterError("");
+                            else setChapterError("Please select chapter.");
+                          }}
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          styles={{
+                            control: (provided) => ({
+                              ...provided,
+                              fontSize: ".9em",
+                              minHeight: "30px",
+                            }),
+                            menu: (provided) => ({
+                              ...provided,
+                              fontSize: "1em",
+                            }),
+                            option: (provided) => ({
+                              ...provided,
+                              fontSize: ".9em",
+                            }),
+                          }}
                         />
+
                         {chapterError && (
                           <div className="h-8 relative ml-1 text-danger text-xs">
                             {chapterError}
@@ -1040,7 +1242,7 @@ const CreateLessonPlan = () => {
                       <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
                         <div className="w-full flex flex-row items-center justify-between mr-0 md:mr-4 gap-x-1">
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
-                            Lesson Plan
+                            Create Lesson Plan
                           </h3>
                           <div className="flex items-center w-full">
                             <div
@@ -1439,6 +1641,17 @@ const CreateLessonPlan = () => {
                                                           ] ||
                                                           ""
                                                         }
+                                                        // value={
+                                                        //   studentRemarks[
+                                                        //     `${item.lesson_plan_headings_id}_${rowIndex}`
+                                                        //   ] ||
+                                                        //   template?.[
+                                                        //     `description_${
+                                                        //       item.lesson_plan_headings_id
+                                                        //     }_${rowIndex + 1}`
+                                                        //   ] ||
+                                                        //   ""
+                                                        // }
                                                         onChange={(e) =>
                                                           setStudentRemarks(
                                                             (prev) => ({
@@ -1684,95 +1897,99 @@ const CreateLessonPlan = () => {
                                         </thead>
 
                                         <tbody>
-                                          <tr className="even:bg-white odd:bg-gray-50 border-2 border-gray-400">
-                                            {/* Start Date Cell */}
-                                            <td
-                                              className="border-2 border-gray-400 px-4 py-2 sticky left-0 bg-white"
-                                              style={{
-                                                width: "180px",
-                                                minWidth: "180px",
-                                              }}
+                                          {rows.map((row, rowIndex) => (
+                                            <tr
+                                              key={rowIndex}
+                                              className="even:bg-white odd:bg-gray-50 border-2 border-gray-400"
                                             >
-                                              <input
-                                                type="date"
-                                                value={rows[0]?.startDate || ""}
-                                                min={fromDate || ""}
-                                                max={toDate || ""}
-                                                onChange={(e) =>
-                                                  handleChange(
-                                                    0,
-                                                    "startDate",
-                                                    e.target.value
-                                                  )
-                                                }
-                                                className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-pink-400"
-                                              />
-                                            </td>
-
-                                            {/* Daily Headings (Textareas for each heading) */}
-                                            {(dailyHeading || []).map(
-                                              (item, colIndex) => (
-                                                <td
-                                                  key={
-                                                    item.lesson_plan_headings_id
-                                                  }
-                                                  className={`border-2 px-2 py-1 align-top ${
-                                                    colIndex === 0
-                                                      ? "sticky left-[180px] bg-white"
-                                                      : ""
-                                                  }`}
-                                                  style={{
-                                                    width: "220px",
-                                                    minWidth: "220px",
-                                                  }}
-                                                >
-                                                  <textarea
-                                                    value={
-                                                      studentRemarks[
-                                                        `${item.lesson_plan_headings_id}_0`
-                                                      ] ??
-                                                      timetable[0]?.[
-                                                        `description_${item.lesson_plan_headings_id}_1`
-                                                      ] ??
-                                                      ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      setStudentRemarks(
-                                                        (prev) => ({
-                                                          ...prev,
-                                                          [`${item.lesson_plan_headings_id}_0`]:
-                                                            e.target.value,
-                                                        })
-                                                      )
-                                                    }
-                                                    className="w-full resize-none p-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-pink-400 rounded"
-                                                    style={{
-                                                      minHeight: "100px",
-                                                      lineHeight: "1.5em",
-                                                      boxSizing: "border-box",
-                                                    }}
-                                                    rows={2}
-                                                  />
-                                                </td>
-                                              )
-                                            )}
-
-                                            {/* Delete Button */}
-                                            <td
-                                              className="border-2 px-2 py-2 text-center"
-                                              style={{ minWidth: "60px" }}
-                                            >
-                                              <button
-                                                type="button"
-                                                onClick={() =>
-                                                  handleRemoveRow(0)
-                                                }
-                                                className="text-red-500 hover:text-red-700"
+                                              {/* Start Date */}
+                                              <td
+                                                className="border-2 border-gray-400 px-4 py-2 sticky left-0 bg-white"
+                                                style={{
+                                                  width: "180px",
+                                                  minWidth: "180px",
+                                                }}
                                               >
-                                                ✕
-                                              </button>
-                                            </td>
-                                          </tr>
+                                                <input
+                                                  type="date"
+                                                  value={row.startDate}
+                                                  min={fromDate || ""}
+                                                  max={toDate || ""}
+                                                  onChange={(e) =>
+                                                    handleChange(
+                                                      rowIndex,
+                                                      "startDate",
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                  className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-pink-400"
+                                                />
+                                              </td>
+
+                                              {/* Daily Heading Textareas */}
+                                              {(dailyHeading || []).map(
+                                                (item) => (
+                                                  <td
+                                                    key={
+                                                      item.lesson_plan_headings_id
+                                                    }
+                                                    className="border-2 px-2 py-1 align-top"
+                                                    style={{
+                                                      width: "220px",
+                                                      minWidth: "220px",
+                                                    }}
+                                                  >
+                                                    <textarea
+                                                      value={
+                                                        studentRemarks[
+                                                          `${item.lesson_plan_headings_id}_${rowIndex}`
+                                                        ] ||
+                                                        timetable[rowIndex]?.[
+                                                          // `dc_description_${item.lesson_plan_headings_id}_1`
+                                                          `dc_description_${
+                                                            item.lesson_plan_headings_id
+                                                          }_${rowIndex + 1}`
+                                                        ] ||
+                                                        ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        setStudentRemarks(
+                                                          (prev) => ({
+                                                            ...prev,
+                                                            [`${item.lesson_plan_headings_id}_${rowIndex}`]:
+                                                              e.target.value,
+                                                          })
+                                                        )
+                                                      }
+                                                      className="w-full resize-none p-2 border border-gray-300 focus:ring-1 focus:ring-pink-400 rounded"
+                                                      style={{
+                                                        minHeight: "100px",
+                                                      }}
+                                                      rows={2}
+                                                    />
+                                                  </td>
+                                                )
+                                              )}
+
+                                              {/* Delete Button */}
+                                              <td
+                                                className="border-2 px-2 py-2 text-center"
+                                                style={{ minWidth: "60px" }}
+                                              >
+                                                {rows.length > 1 && (
+                                                  <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                      handleRemoveRow(rowIndex)
+                                                    }
+                                                    className="text-red-500 hover:text-red-700"
+                                                  >
+                                                    ✕
+                                                  </button>
+                                                )}
+                                              </td>
+                                            </tr>
+                                          ))}
                                         </tbody>
                                       </table>
                                     </div>

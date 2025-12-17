@@ -207,6 +207,102 @@ const CreateLessonPlanTemplate = () => {
     }
   };
 
+  // const handleSearch = async () => {
+  //   setStudentError("");
+  //   setSubjectError("");
+  //   setChapterError("");
+
+  //   let hasError = false;
+  //   if (!selectedStudentId) {
+  //     setStudentError("Please select class.");
+  //     hasError = true;
+  //   }
+  //   if (!selectedSubjectId) {
+  //     setSubjectError("Please select subject.");
+  //     hasError = true;
+  //   }
+  //   if (!selectedChapterId) {
+  //     setChapterError("Please select chapter.");
+  //     hasError = true;
+  //   }
+  //   if (hasError) return;
+
+  //   setLoadingForSearch(true);
+  //   setLoading(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       toast.error("Authentication token missing. Please login again.");
+  //       return;
+  //     }
+
+  //     const params = {
+  //       class_id: selectedStudentId,
+  //       subject_id: selectedSubjectId,
+  //       chapter_id: selectedChapterId,
+  //       reg_id: roleIdValue,
+  //     };
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_lesson_plan_template`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         params,
+  //       }
+  //     );
+
+  //     const data = response?.data?.data || [];
+
+  //     // Group by template ID
+  //     const groupedData = {};
+  //     if (data.length > 0) {
+  //       data.forEach((item) => {
+  //         const tempId = item.les_pln_temp_id;
+  //         if (!groupedData[tempId]) {
+  //           groupedData[tempId] = { les_pln_temp_id: tempId };
+  //         }
+  //         groupedData[tempId][item.lesson_plan_headings_id] = item.description;
+  //       });
+  //     }
+
+  //     const timetableForDisplay =
+  //       Object.values(groupedData).length > 0
+  //         ? Object.values(groupedData)
+  //         : [{ les_pln_temp_id: "new" }];
+
+  //     await fetchHeadings();
+
+  //     if (data.length > 0) {
+  //       const firstTemplateId = data[0].les_pln_temp_id; // <-- extract from response
+
+  //       navigate(`/lessonPlanTemplate/edit/${firstTemplateId}`, {
+  //         state: {
+  //           headings: heading,
+  //           timetable: timetableForDisplay,
+  //           selectedStudentId,
+  //           selectedSubjectId,
+  //           selectedChapterId,
+  //           selectedStudent,
+  //           selectedChapter,
+  //           selectedSubject,
+  //           les_pln_temp_id: firstTemplateId,
+  //         },
+  //       });
+  //     } else {
+  //       setStudentRemarks({});
+  //       setTimetable(timetableForDisplay);
+  //       setPageCount(Math.ceil(timetableForDisplay.length / pageSize));
+  //       setShowStudentReport(true);
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error fetching Lesson Plan. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //     setLoadingForSearch(false);
+  //   }
+  // };
+
   const handleSearch = async () => {
     setStudentError("");
     setSubjectError("");
@@ -241,6 +337,7 @@ const CreateLessonPlanTemplate = () => {
         class_id: selectedStudentId,
         subject_id: selectedSubjectId,
         chapter_id: selectedChapterId,
+        reg_id: roleIdValue,
       };
 
       const response = await axios.get(
@@ -250,6 +347,17 @@ const CreateLessonPlanTemplate = () => {
           params,
         }
       );
+
+      // ⭐⭐⭐ ADD THIS CHECK HERE ⭐⭐⭐
+      if (
+        response?.data?.status === 200 &&
+        response?.data?.isCreatedByRequestedUser === false
+      ) {
+        toast.error(response?.data?.message || "Template already created!");
+        setLoading(false);
+        setLoadingForSearch(false);
+        return; // stop further execution
+      }
 
       const data = response?.data?.data || [];
 
@@ -273,7 +381,7 @@ const CreateLessonPlanTemplate = () => {
       await fetchHeadings();
 
       if (data.length > 0) {
-        const firstTemplateId = data[0].les_pln_temp_id; // <-- extract from response
+        const firstTemplateId = data[0].les_pln_temp_id;
 
         navigate(`/lessonPlanTemplate/edit/${firstTemplateId}`, {
           state: {
@@ -355,7 +463,10 @@ const CreateLessonPlanTemplate = () => {
 
       if (response.data.status === 200) {
         toast.success("Lesson plan template created successfully!");
-        navigate("/lessonPlanTemplate");
+        setTimeout(() => {
+          navigate("/lessonPlanTemplate");
+        }, 1000);
+
         setStudentRemarks({});
         setTimetable([]);
       } else {
@@ -380,6 +491,24 @@ const CreateLessonPlanTemplate = () => {
     }
 
     // Prepare descriptions
+    // const descriptions = heading.map((item) => ({
+    //   lesson_plan_headings_id: item.lesson_plan_headings_id,
+    //   description:
+    //     studentRemarks[item.lesson_plan_headings_id]?.trim() ||
+    //     timetable[0]?.[item.lesson_plan_headings_id]?.trim() ||
+    //     "", // fallback to empty
+    // }));
+
+    // //  Check if all headings have a description
+    // const allFilled = descriptions.every((d) => d.description !== "");
+    // if (!allFilled) {
+    //   toast.error(
+    //     "Please fill description for all headings before publishing."
+    //   );
+    //   setIsPublishing(false);
+    //   return;
+    // }
+
     const descriptions = heading.map((item) => ({
       lesson_plan_headings_id: item.lesson_plan_headings_id,
       description:
@@ -388,12 +517,11 @@ const CreateLessonPlanTemplate = () => {
         "", // fallback to empty
     }));
 
-    // ✅ Check if all headings have a description
-    const allFilled = descriptions.every((d) => d.description !== "");
-    if (!allFilled) {
-      toast.error(
-        "Please fill description for all headings before publishing."
-      );
+    // Check if AT LEAST ONE description is filled
+    const atLeastOneFilled = descriptions.some((d) => d.description !== "");
+
+    if (!atLeastOneFilled) {
+      toast.error("Please fill at least one description before publishing.");
       setIsPublishing(false);
       return;
     }
@@ -414,7 +542,10 @@ const CreateLessonPlanTemplate = () => {
 
       if (response.data.status === 200) {
         toast.success("Lesson plan template saved & published successfully.");
-        setShowStudentReport(false);
+        setTimeout(() => {
+          setShowStudentReport(false);
+        }, 1000);
+
         setStudentRemarks({});
         setTimetable([]);
       } else {
@@ -610,7 +741,7 @@ const CreateLessonPlanTemplate = () => {
                             setSelectedSubjectId(
                               selected ? selected.value : null
                             );
-                            if (selected) setSubjectError(""); // ✅ Clear error
+                            if (selected) setSubjectError(""); //  Clear error
                             else setSubjectError("Please select subject.");
                           }}
                           placeholder={loadingExams ? "Loading..." : "Select"}
@@ -752,7 +883,7 @@ const CreateLessonPlanTemplate = () => {
                       <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
                         <div className="w-full flex flex-row items-center justify-between mr-0 md:mr-4 gap-x-1">
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
-                            Lesson Plan Template
+                            Create Lesson Plan Template
                           </h3>
                           <div className="flex items-center w-full">
                             <div

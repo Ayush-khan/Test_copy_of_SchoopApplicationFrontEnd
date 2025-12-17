@@ -14,7 +14,7 @@ import dayjs from "dayjs";
 import { useLocation, useParams } from "react-router-dom";
 import { FaRegCalendarAlt } from "react-icons/fa";
 
-const EditLessonPlanTemplate = () => {
+const EditLessonPlan = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   // const [selectedStudent, setSelectedStudent] = useState(null);
   const academicYrFrom = localStorage.getItem("academic_yr_from");
@@ -46,30 +46,54 @@ const EditLessonPlanTemplate = () => {
   const [numPeriods, setNumPeriods] = useState("");
   const datePickerRef = useRef(null);
 
+  // const handleDateChange = (date) => {
+  //   setFromDate(date);
+  //   setWeekError("");
+
+  //   if (date) {
+  //     const selectedDate = dayjs(date);
+
+  //     // Monday as start of week
+  //     const monday = selectedDate.startOf("week").add(1, "day");
+  //     const sunday = monday.add(6, "day");
+
+  //     // Readable week range
+  //     const startDateFormatted = monday.format("DD-MM-YYYY");
+  //     const endDateFormatted = sunday.format("DD-MM-YYYY");
+  //     setWeekRange(`${startDateFormatted} / ${endDateFormatted}`);
+
+  //     // Raw values for input[type="date"]
+  //     setFromDate(monday.format("YYYY-MM-DD"));
+  //     setToDate(sunday.format("YYYY-MM-DD"));
+  //   } else {
+  //     setWeekRange("");
+  //     setFromDate(null);
+  //     setToDate(null);
+  //   }
+  // };
+
   const handleDateChange = (date) => {
-    setFromDate(date);
     setWeekError("");
 
-    if (date) {
-      const selectedDate = dayjs(date);
-
-      // Monday as start of week
-      const monday = selectedDate.startOf("week").add(1, "day");
-      const sunday = monday.add(6, "day");
-
-      // Readable week range
-      const startDateFormatted = monday.format("DD-MM-YYYY");
-      const endDateFormatted = sunday.format("DD-MM-YYYY");
-      setWeekRange(`${startDateFormatted} / ${endDateFormatted}`);
-
-      // Raw values for input[type="date"]
-      setFromDate(monday.format("YYYY-MM-DD"));
-      setToDate(sunday.format("YYYY-MM-DD"));
-    } else {
+    if (!date) {
       setWeekRange("");
       setFromDate(null);
       setToDate(null);
+      return;
     }
+
+    const selectedDate = dayjs(date);
+
+    const monday = selectedDate.startOf("week").add(1, "day");
+    const sunday = monday.add(6, "day");
+
+    setWeekRange(
+      `${monday.format("DD-MM-YYYY")} / ${sunday.format("DD-MM-YYYY")}`
+    );
+
+    // store Date objects ONLY
+    setFromDate(monday.toDate());
+    setToDate(sunday.toDate());
   };
 
   const openDatePicker = () => {
@@ -163,6 +187,41 @@ const EditLessonPlanTemplate = () => {
     fetchDailyHeadings();
   }, []);
 
+  // useEffect(() => {
+  //   const fetchTemplate = async () => {
+  //     setLoading(true);
+
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+  //       const response = await axios.get(
+  //         `${API_URL}/api/get_lesson_plan_by_unq_id/${id}`,
+  //         { headers: { Authorization: `Bearer ${token}` } }
+  //       );
+
+  //       const details = response?.data?.data?.details || [];
+  //       const lessonPlan = response?.data?.data?.lesson_plan || {};
+
+  //       //  Create a mapping of heading_id → description
+  //       const remarks = {};
+  //       details.forEach((item, index) => {
+  //         remarks[item.lesson_plan_headings_id] = item.description || "";
+  //       });
+
+  //       setTimetable([lessonPlan]); // store one plan for display reference if needed
+  //       setStudentRemarks(remarks);
+
+  //       console.log("Lesson Plan Details:", details);
+  //       console.log(" Mapped Remarks:", remarks);
+  //     } catch (err) {
+  //       toast.error("Error fetching lesson plan template");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchTemplate();
+  // }, [id]);
+
   useEffect(() => {
     const fetchTemplate = async () => {
       setLoading(true);
@@ -177,17 +236,79 @@ const EditLessonPlanTemplate = () => {
         const details = response?.data?.data?.details || [];
         const lessonPlan = response?.data?.data?.lesson_plan || {};
 
-        // ✅ Create a mapping of heading_id → description
+        setNumPeriods(lessonPlan?.no_of_periods || "");
+        console.log("lesson no", lessonPlan?.no_of_periods);
+
+        // setWeekRange(lessonPlan?.week_date || "");
+        // console.log("week date", lessonPlan?.week_date);
+
+        if (lessonPlan?.week_date) {
+          setWeekRange(lessonPlan.week_date);
+
+          const [startStr, endStr] = lessonPlan.week_date.split("/");
+
+          const [sd, sm, sy] = startStr.trim().split("-");
+          const [ed, em, ey] = endStr.trim().split("-");
+
+          const startDate = new Date(sy, sm - 1, sd);
+          const endDate = new Date(ey, em - 1, ed);
+
+          setFromDate(startDate); // ✅ Date object
+          setToDate(endDate); // ✅ Date object
+        }
+
+        if (lessonPlan?.week_date) {
+          const startDateStr = lessonPlan.week_date.split("/")[0].trim(); // "08-12-2025"
+          const [dd, mm, yyyy] = startDateStr.split("-");
+          setFromDate(new Date(yyyy, mm - 1, dd));
+        }
+
+        const rowMap = {};
         const remarks = {};
-        details.forEach((item, index) => {
-          remarks[item.lesson_plan_headings_id] = item.description || "";
+
+        const dailyHeadingIds = new Set(
+          (dailyHeading || []).map((h) => h.lesson_plan_headings_id)
+        );
+        const nonDailyHeadingIds = new Set(
+          (heading || []).map((h) => h.lesson_plan_headings_id)
+        );
+
+        // 🔹 STEP 1: Build rows from daily start_date
+        details.forEach((item) => {
+          if (
+            dailyHeadingIds.has(item.lesson_plan_headings_id) &&
+            item.start_date
+          ) {
+            if (!rowMap[item.start_date]) {
+              rowMap[item.start_date] = { startDate: item.start_date };
+            }
+          }
         });
 
-        setTimetable([lessonPlan]); // store one plan for display reference if needed
-        setStudentRemarks(remarks);
+        const rowsArr = Object.values(rowMap);
 
-        console.log("✅ Lesson Plan Details:", details);
-        console.log("✅ Mapped Remarks:", remarks);
+        // 🔹 STEP 2: Map descriptions using rowIndex
+        details.forEach((item) => {
+          const headingId = item.lesson_plan_headings_id;
+
+          if (dailyHeadingIds.has(headingId) && item.start_date) {
+            const rowIndex = rowsArr.findIndex(
+              (r) => r.startDate === item.start_date
+            );
+
+            if (rowIndex !== -1) {
+              remarks[`${headingId}_${rowIndex}`] = item.description || "";
+            }
+          }
+
+          if (nonDailyHeadingIds.has(headingId)) {
+            remarks[headingId] = item.description || "";
+          }
+        });
+
+        setRows(rowsArr);
+        setStudentRemarks(remarks);
+        setTimetable([lessonPlan]);
       } catch (err) {
         toast.error("Error fetching lesson plan template");
       } finally {
@@ -196,14 +317,9 @@ const EditLessonPlanTemplate = () => {
     };
 
     fetchTemplate();
-  }, [id]);
+  }, [id, dailyHeading, heading]);
 
-  const [rows, setRows] = useState(
-    student.daily_changes?.map((item) => ({
-      startDate: item.startDate || "",
-      description: item.description || "",
-    })) || []
-  );
+  const [rows, setRows] = useState([]);
 
   const handleAddRow = () => {
     setRows([...rows, { startDate: "", description: "" }]);
@@ -406,29 +522,12 @@ const EditLessonPlanTemplate = () => {
       );
 
       const descriptions = {};
-
+      //  Non daily
       (heading || []).forEach((item) => {
         const headingId = item.lesson_plan_headings_id;
+
         const descValue =
-          studentRemarks[headingId] || timetable?.[0]?.[headingId] || "";
-
-        const formattedValue = descValue
-          .split("\n")
-          .map((line) => {
-            const trimmed = line.trim();
-            if (trimmed === "") return "";
-            return trimmed.startsWith("• ") ? trimmed : "• " + trimmed;
-          })
-          .join("\n")
-          .trim();
-
-        descriptions[`description_${headingId}_1`] = formattedValue;
-      });
-
-      (dailyHeading || []).forEach((item) => {
-        const headingId = item.lesson_plan_headings_id;
-        const descValue =
-          studentRemarks[`${headingId}_0`] ||
+          studentRemarks[headingId] ||
           timetable?.[0]?.[`description_${headingId}_1`] ||
           "";
 
@@ -445,20 +544,57 @@ const EditLessonPlanTemplate = () => {
         descriptions[`description_${headingId}_1`] = formattedValue;
       });
 
+      // Validation: check if any non-empty description exists
       const hasAnyDescription = Object.values(descriptions).some(
         (val) => val && val.trim() !== ""
       );
+
       if (!hasAnyDescription) {
         toast.error("Please enter at least one description before saving.");
         setIsSubmitting(false);
         return;
       }
 
-      const hasTeachingPoints = (dailyHeading || []).some((item) => {
-        const val =
-          descriptions[`description_${item.lesson_plan_headings_id}_1`] || "";
-        return val.trim() !== "";
+      // Daily
+
+      rows.forEach((row, rowIndex) => {
+        (dailyHeading || []).forEach((item) => {
+          const headingId = item.lesson_plan_headings_id;
+          const key = `${headingId}_${rowIndex}`;
+
+          // Use studentRemarks first, fallback to timetable saved value
+          const descValue =
+            studentRemarks[`${headingId}_${rowIndex}`] ||
+            timetable[0]?.[`dc_description_${headingId}_${rowIndex + 1}`] ||
+            "";
+
+          const formattedValue = descValue
+            .split("\n")
+            .map((line) => {
+              const trimmed = line.trim();
+              if (trimmed === "") return "";
+              return trimmed.startsWith("• ") ? trimmed : "• " + trimmed;
+            })
+            .join("\n")
+            .trim();
+
+          descriptions[`dc_description_${headingId}_${rowIndex + 1}`] =
+            formattedValue;
+        });
       });
+
+      const hasTeachingPoints = rows.some((_, rowIndex) =>
+        (dailyHeading || []).some((item) => {
+          const val =
+            studentRemarks[`${item.lesson_plan_headings_id}_${rowIndex}`] ||
+            timetable[0]?.[
+              `dc_description_${item.lesson_plan_headings_id}_${rowIndex + 1}`
+            ] ||
+            "";
+          return val.trim() !== "";
+        })
+      );
+
       if (!hasTeachingPoints) {
         toast.error("Please add teaching points before saving.");
         setIsSubmitting(false);
@@ -472,11 +608,11 @@ const EditLessonPlanTemplate = () => {
         chapter_id: selectedChapterId?.toString() || "0",
         class_id_array: classIdArray,
         no_of_periods: numPeriods?.toString() || "1",
-        weeklyDatePicker: new Date().toISOString().split("T")[0],
+        weeklyDatePicker: weekRange,
         les_pln_temp_id: timetable?.[0]?.les_pln_temp_id || "new",
-        approve: "Y",
-        lph_dc_row: "1",
-        start_date: [fromDate, toDate],
+        approve: "N",
+        lph_dc_row: rows.length.toString(),
+        start_date: rows.map((row) => row.startDate),
         ...descriptions,
       };
 
@@ -509,7 +645,7 @@ const EditLessonPlanTemplate = () => {
       setIsSubmitting(false);
     }
   };
-  
+
   const filteredSections = timetable.filter((student) => {
     if (!searchTerm) return true; // show all when no search
     const searchLower = searchTerm.replace(/\s+/g, "").toLowerCase();
@@ -684,9 +820,18 @@ const EditLessonPlanTemplate = () => {
                                       placeholder="Enter periods"
                                       className="w-32 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400"
                                       value={numPeriods}
-                                      onChange={(e) =>
-                                        setNumPeriods(e.target.value)
-                                      }
+                                      // onChange={(e) =>
+                                      //   setNumPeriods(e.target.value)
+                                      // }
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (
+                                          value === "" ||
+                                          Number(value) >= 1
+                                        ) {
+                                          setNumPeriods(value);
+                                        }
+                                      }}
                                       required
                                     />
                                   </div>
@@ -698,7 +843,6 @@ const EditLessonPlanTemplate = () => {
                                       <span className="text-red-500">*</span>
                                     </label>
 
-                                    {/* <div className="relative w-[230px] md:w-[280px]"> */}
                                     <div
                                       className="text-sm text-gray-700 border border-gray-300 p-2.5 rounded-lg 
                                                   flex items-center justify-between cursor-pointer bg-white 
@@ -812,6 +956,24 @@ const EditLessonPlanTemplate = () => {
                                                       })
                                                     )
                                                   }
+                                                  // value={
+                                                  //   studentRemarks[
+                                                  //     `${item.lesson_plan_headings_id}_single`
+                                                  //   ] ||
+                                                  //   timetable?.[0]?.[
+                                                  //     `description_${item.lesson_plan_headings_id}_1`
+                                                  //   ] ||
+                                                  //   ""
+                                                  // }
+                                                  // onChange={(e) =>
+                                                  //   setStudentRemarks(
+                                                  //     (prev) => ({
+                                                  //       ...prev,
+                                                  //       [`${item.lesson_plan_headings_id}_single`]:
+                                                  //         e.target.value,
+                                                  //     })
+                                                  //   )
+                                                  // }
                                                   onKeyDown={(e) => {
                                                     const {
                                                       value,
@@ -936,7 +1098,7 @@ const EditLessonPlanTemplate = () => {
                                                       "Updated value:",
                                                       e.target.value,
                                                       "at row",
-                                                      rowIndex,
+                                                      // rowIndex,
                                                       "col",
                                                       colIndex
                                                     );
@@ -973,6 +1135,7 @@ const EditLessonPlanTemplate = () => {
                                     `}
                                   </style>
                                 </div>
+
                                 {timetable?.length > 0 && (
                                   <div className="flex flex-row gap-4 mb-4">
                                     <div className="w-full border p-3 rounded bg-gray-50 overflow-x-auto">
@@ -1026,95 +1189,151 @@ const EditLessonPlanTemplate = () => {
                                         </thead>
 
                                         <tbody>
-                                          <tr className="even:bg-white odd:bg-gray-50 border-2 border-gray-400">
-                                            {/* Start Date Cell */}
-                                            <td
-                                              className="border-2 border-gray-400 px-4 py-2 sticky left-0 bg-white"
-                                              style={{
-                                                width: "180px",
-                                                minWidth: "180px",
-                                              }}
+                                          {rows.map((row, rowIndex) => (
+                                            <tr
+                                              key={rowIndex}
+                                              className="even:bg-white odd:bg-gray-50 border-2 border-gray-400"
                                             >
-                                              <input
-                                                type="date"
-                                                value={rows[0]?.startDate || ""}
-                                                min={fromDate || ""}
-                                                max={toDate || ""}
-                                                onChange={(e) =>
-                                                  handleChange(
-                                                    0,
-                                                    "startDate",
-                                                    e.target.value
-                                                  )
-                                                }
-                                                className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-pink-400"
-                                              />
-                                            </td>
-
-                                            {/* Daily Headings (Textareas for each heading) */}
-                                            {(dailyHeading || []).map(
-                                              (item, colIndex) => (
-                                                <td
-                                                  key={
-                                                    item.lesson_plan_headings_id
-                                                  }
-                                                  className={`border-2 px-2 py-1 align-top ${
-                                                    colIndex === 0
-                                                      ? "sticky left-[180px] bg-white"
-                                                      : ""
-                                                  }`}
-                                                  style={{
-                                                    width: "220px",
-                                                    minWidth: "220px",
-                                                  }}
-                                                >
-                                                  <textarea
-                                                    value={
-                                                      studentRemarks[
-                                                        `${item.lesson_plan_headings_id}_0`
-                                                      ] ??
-                                                      timetable[0]?.[
-                                                        `description_${item.lesson_plan_headings_id}_1`
-                                                      ] ??
-                                                      ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      setStudentRemarks(
-                                                        (prev) => ({
-                                                          ...prev,
-                                                          [`${item.lesson_plan_headings_id}_0`]:
-                                                            e.target.value,
-                                                        })
-                                                      )
-                                                    }
-                                                    className="w-full resize-none p-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-pink-400 rounded"
-                                                    style={{
-                                                      minHeight: "100px",
-                                                      lineHeight: "1.5em",
-                                                      boxSizing: "border-box",
-                                                    }}
-                                                    rows={2}
-                                                  />
-                                                </td>
-                                              )
-                                            )}
-
-                                            {/* Delete Button */}
-                                            <td
-                                              className="border-2 px-2 py-2 text-center"
-                                              style={{ minWidth: "60px" }}
-                                            >
-                                              <button
-                                                type="button"
-                                                onClick={() =>
-                                                  handleRemoveRow(0)
-                                                }
-                                                className="text-red-500 hover:text-red-700"
+                                              {/* Start Date */}
+                                              <td
+                                                className="border-2 border-gray-400 px-4 py-2 sticky left-0 bg-white"
+                                                style={{
+                                                  width: "180px",
+                                                  minWidth: "180px",
+                                                }}
                                               >
-                                                ✕
-                                              </button>
-                                            </td>
-                                          </tr>
+                                                <input
+                                                  type="date"
+                                                  value={row.startDate}
+                                                  min={fromDate || ""}
+                                                  max={toDate || ""}
+                                                  onChange={(e) =>
+                                                    handleChange(
+                                                      rowIndex,
+                                                      "startDate",
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                  className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-pink-400"
+                                                />
+                                              </td>
+
+                                              {/* Daily Heading Textareas */}
+                                              {(dailyHeading || []).map(
+                                                (item) => (
+                                                  <td
+                                                    key={
+                                                      item.lesson_plan_headings_id
+                                                    }
+                                                    className="border-2 px-2 py-1 align-top"
+                                                    style={{
+                                                      width: "220px",
+                                                      minWidth: "220px",
+                                                    }}
+                                                  >
+                                                    {/* <textarea
+                                                      value={
+                                                        studentRemarks[
+                                                          `${item.lesson_plan_headings_id}_${rowIndex}`
+                                                        ] ||
+                                                        timetable[rowIndex]?.[
+                                                          `dc_description_${
+                                                            item.lesson_plan_headings_id
+                                                          }_${rowIndex + 1}`
+                                                        ] ||
+                                                        ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        setStudentRemarks(
+                                                          (prev) => ({
+                                                            ...prev,
+                                                            [`${item.lesson_plan_headings_id}_${rowIndex}`]:
+                                                              e.target.value,
+                                                          })
+                                                        )
+                                                      }
+                                                      className="w-full resize-none p-2 border border-gray-300 focus:ring-1 focus:ring-pink-400 rounded"
+                                                      style={{
+                                                        minHeight: "100px",
+                                                      }}
+                                                      rows={2}
+                                                    /> */}
+                                                    {/* 15-12-2025 */}
+                                                    <textarea
+                                                      value={
+                                                        studentRemarks[
+                                                          `${item.lesson_plan_headings_id}_${rowIndex}`
+                                                        ] ||
+                                                        timetable?.[0]?.[
+                                                          `dc_description_${
+                                                            item.lesson_plan_headings_id
+                                                          }_${rowIndex + 1}`
+                                                        ] ||
+                                                        ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        setStudentRemarks(
+                                                          (prev) => ({
+                                                            ...prev,
+                                                            [`${item.lesson_plan_headings_id}_${rowIndex}`]:
+                                                              e.target.value,
+                                                          })
+                                                        )
+                                                      }
+                                                      className="w-full resize-none p-2 border border-gray-300 focus:ring-1 focus:ring-pink-400 rounded"
+                                                      style={{
+                                                        minHeight: "100px",
+                                                      }}
+                                                      rows={2}
+                                                      // onClick={(e) => {
+                                                      //   e.stopPropagation();
+                                                      //   setFromDate(null);
+                                                      //   setToDate(null);
+                                                      //   setWeekRange("");
+                                                      // }}
+                                                    />
+
+                                                    {/* <textarea
+                                                      value={
+                                                        studentRemarks[
+                                                          `${item.lesson_plan_headings_id}_${row.startDate}`
+                                                        ] || ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        setStudentRemarks(
+                                                          (prev) => ({
+                                                            ...prev,
+                                                            [`${item.lesson_plan_headings_id}_${row.startDate}`]:
+                                                              e.target.value,
+                                                          })
+                                                        )
+                                                      } 
+                                                      className="w-full resize-none p-2 border border-gray-300 rounded"
+                                                      rows={2} 
+                                                    /> */}
+                                                  </td>
+                                                )
+                                              )}
+
+                                              {/* Delete Button */}
+                                              <td
+                                                className="border-2 px-2 py-2 text-center"
+                                                style={{ minWidth: "60px" }}
+                                              >
+                                                {rows.length > 1 && (
+                                                  <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                      handleRemoveRow(rowIndex)
+                                                    }
+                                                    className="text-red-500 hover:text-red-700"
+                                                  >
+                                                    ✕
+                                                  </button>
+                                                )}
+                                              </td>
+                                            </tr>
+                                          ))}
                                         </tbody>
                                       </table>
                                     </div>
@@ -1157,4 +1376,4 @@ const EditLessonPlanTemplate = () => {
   );
 };
 
-export default EditLessonPlanTemplate;
+export default EditLessonPlan;

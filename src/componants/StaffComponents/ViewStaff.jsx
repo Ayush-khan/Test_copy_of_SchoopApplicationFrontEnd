@@ -173,7 +173,7 @@ function ViewStaff() {
     <>
       <ToastContainer />
       <div className="container mx-auto mt-4">
-        <div className="card  rounded-md">
+        <div className="card rounded-md">
           <div className="card-header mb-4 flex justify-between items-center">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg mx-2">
               View Staff Details
@@ -201,7 +201,7 @@ function ViewStaff() {
                   Photo
                   {photoPreview ? (
                     <img
-                      src={photoPreview}
+                      src={`${photoPreview}?t=${Date.now()}`}
                       alt="Photo Preview"
                       className="h-20 w-20 rounded-[50%] mx-auto border-1 border-black object-cover"
                     />

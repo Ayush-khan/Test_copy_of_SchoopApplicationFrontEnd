@@ -1235,7 +1235,7 @@ function UserProfile() {
   return (
     <div className="container mx-auto mt-4 ">
       <ToastContainer />
-      <div className="card rounded-md ">
+      <div className="card  rounded-md ">
         <div className=" card-header mb-4 flex justify-between items-center ">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg mx-2">
             Edit Staff information
@@ -1249,7 +1249,7 @@ function UserProfile() {
           />
         </div>
         <div
-          className=" relative w-[98%] -top-6 h-1  mx-auto bg-red-700"
+          className=" relative w-[98%]  -top-6 h-1  mx-auto bg-red-700"
           style={{
             backgroundColor: "#C03078",
           }}
@@ -1454,6 +1454,7 @@ function UserProfile() {
                       name="permanent_address"
                       value={formData.permanent_address}
                       onChange={handleChange}
+                      readOnly={formData.sameAsCurrent}
                       required
                     ></textarea>
                     <div className="flex items-center gap-2 mb-2">
@@ -1561,7 +1562,7 @@ function UserProfile() {
 
                 <div>
                   <label
-                    htmlFor="phone"
+                    htmlFor="emergency_phone"
                     className="block font-bold  text-xs mb-2"
                   >
                     Emergency Contact no.{" "}

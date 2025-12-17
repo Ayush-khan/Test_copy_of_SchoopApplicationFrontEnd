@@ -476,7 +476,7 @@ function LessonPlanTemplate() {
                                         type="button"
                                         onClick={() => {
                                           navigate(
-                                            `/lessonplantemplate/edit/${subject.les_pln_temp_id}`,
+                                            `/lessonPlanTemplate/edit/${subject.les_pln_temp_id}`,
                                             {
                                               state: {
                                                 // timetable: subject,
@@ -502,6 +502,7 @@ function LessonPlanTemplate() {
                                             }
                                           );
                                         }}
+                                        className="text-blue-500 hover:text-blue-500"
                                       >
                                         <FontAwesomeIcon icon={faEdit} />
                                       </button>

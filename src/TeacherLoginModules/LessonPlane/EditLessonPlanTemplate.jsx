@@ -215,16 +215,18 @@ const EditLessonPlanTemplate = () => {
         return;
       }
 
-      // Build descriptions array using only studentRemarks (empty string clears previous data)
       const descriptions = (heading || []).map((item) => {
         const key = item.lesson_plan_headings_id;
         return {
           lesson_plan_headings_id: key,
-          description: studentRemarks[key] ?? "",
+          description: studentRemarks[key]?.trim() || "",
         };
       });
 
-      if (descriptions.length === 0) {
+      // ⭐ CHECK IF ALL description fields are empty
+      const allEmpty = descriptions.every((d) => d.description === "");
+
+      if (allEmpty) {
         toast.error("Please enter at least one description before saving.");
         setIsSubmitting(false);
         return;
@@ -245,7 +247,10 @@ const EditLessonPlanTemplate = () => {
 
       if (response.data.status === 200) {
         toast.success("Lesson plan template updated successfully!");
-        navigate("/lessonPlanTemplate");
+        setTimeout(() => {
+          navigate("/lessonPlanTemplate");
+        }, 1000);
+
         setStudentRemarks({}); // clear the local state
       } else {
         toast.error(
@@ -261,15 +266,19 @@ const EditLessonPlanTemplate = () => {
   };
 
   const handleUpdatePublish = async () => {
+    console.log("mahima");
     if (isPublishing) return;
     setIsPublishing(true);
+    console.log("mahima");
 
     const token = localStorage.getItem("authToken");
     if (!token) {
+      console.log("mahima");
       toast.error("Authentication token missing. Please login again.");
       setIsPublishing(false);
       return;
     }
+    console.log("mahima");
 
     // Prepare descriptions
     const descriptions = heading.map((item) => ({
@@ -277,19 +286,21 @@ const EditLessonPlanTemplate = () => {
       description:
         studentRemarks[item.lesson_plan_headings_id]?.trim() ||
         timetable[0]?.[item.lesson_plan_headings_id]?.trim() ||
-        "",
+        "", // fallback to empty
     }));
 
-    const allFilled = descriptions.every((d) => d.description !== "");
-    if (!allFilled) {
-      toast.error(
-        "Please fill description for all headings before publishing."
-      );
+    // Check if AT LEAST ONE description is filled
+    const atLeastOneFilled = descriptions.some((d) => d.description !== "");
+
+    if (!atLeastOneFilled) {
+      toast.error("Please fill at least one description before publishing.");
       setIsPublishing(false);
       return;
     }
+    console.log("mahima");
 
     try {
+      console.log("mahima");
       const response = await axios.put(
         `${API_URL}/api/updatepublish_lessonplan_template/${id}`,
         {
@@ -303,6 +314,8 @@ const EditLessonPlanTemplate = () => {
         }
       );
 
+      console.log("mahima");
+
       if (response.data.status === 200) {
         toast.success("Lesson plan template update & published successfully.");
         navigate("/lessonPlanTemplate");
@@ -312,9 +325,11 @@ const EditLessonPlanTemplate = () => {
         toast.error("Failed to publish lesson plan template.");
       }
     } catch (error) {
+      console.log("mahima");
       console.error(error);
       toast.error("An error occurred while submitting the data.");
     } finally {
+      console.log("mahima");
       setIsPublishing(false);
     }
   };
@@ -445,8 +460,9 @@ const EditLessonPlanTemplate = () => {
   return (
     <>
       <div
-        className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${showStudentReport ? "w-full " : "w-[90%] "
-          }`}
+        className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${
+          showStudentReport ? "w-full " : "w-[90%] "
+        }`}
       >
         <ToastContainer />
         <div className="card pb-4  rounded-md ">
@@ -595,10 +611,11 @@ const EditLessonPlanTemplate = () => {
                                           {(heading || []).map((item, i) => (
                                             <th
                                               key={item.lesson_plan_headings_id}
-                                              className={`px-6 py-2 border-2 text-sm font-semibold text-center text-gray-800 ${i === 0
-                                                ? "sticky left-0 bg-gray-200"
-                                                : ""
-                                                }`}
+                                              className={`px-6 py-2 border-2 text-sm font-semibold text-center text-gray-800 ${
+                                                i === 0
+                                                  ? "sticky left-0 bg-gray-200"
+                                                  : ""
+                                              }`}
                                               style={{ width: "210px" }}
                                             >
                                               {item.name}
@@ -624,7 +641,7 @@ const EditLessonPlanTemplate = () => {
                                               // Get all details for this heading
                                               const descArray =
                                                 template.groupedDetails?.[
-                                                headingId
+                                                  headingId
                                                 ] || [];
 
                                               // Show first detail for simplicity
@@ -633,10 +650,11 @@ const EditLessonPlanTemplate = () => {
                                               return (
                                                 <td
                                                   key={headingId}
-                                                  className={`border-2 px-2 py-1 ${colIndex === 0
-                                                    ? "sticky left-0 bg-white"
-                                                    : ""
-                                                    }`}
+                                                  className={`border-2 px-2 py-1 ${
+                                                    colIndex === 0
+                                                      ? "sticky left-0 bg-white"
+                                                      : ""
+                                                  }`}
                                                   style={{
                                                     width: "210px",
                                                     minHeight: "250px",
@@ -645,12 +663,25 @@ const EditLessonPlanTemplate = () => {
                                                   <textarea
                                                     value={
                                                       studentRemarks[
-                                                      headingId
+                                                        headingId
                                                       ] ??
                                                       descObj?.description ??
                                                       ""
                                                     }
+                                                    // onChange={(e) => {
+                                                    //   const value =
+                                                    //     e.target.value;
+                                                    //   setStudentRemarks(
+                                                    //     (prev) => ({
+                                                    //       ...prev,
+                                                    //       [headingId]: value,
+                                                    //     })
+                                                    //   );
+                                                    // }}
+                                                    readOnly={publish === "Y"} // ⬅️ MAKE TEXTAREA READONLY
                                                     onChange={(e) => {
+                                                      if (publish === "Y")
+                                                        return; // ⬅️ PREVENT UPDATING STATE
                                                       const value =
                                                         e.target.value;
                                                       setStudentRemarks(
@@ -660,7 +691,146 @@ const EditLessonPlanTemplate = () => {
                                                         })
                                                       );
                                                     }}
-                                                    className="w-full h-full resize-none p-2 border border-gray-300 focus:outline-none"
+                                                    className={`w-full h-full resize-none p-2 border border-gray-300 focus:outline-none ${
+                                                      publish === "Y"
+                                                        ? "bg-gray-50"
+                                                        : ""
+                                                    }`}
+                                                    onKeyDown={(e) => {
+                                                      const {
+                                                        value,
+                                                        selectionStart,
+                                                        selectionEnd,
+                                                      } = e.target;
+
+                                                      // Handle Enter key for new bullets
+                                                      if (e.key === "Enter") {
+                                                        e.preventDefault();
+
+                                                        const lineStart =
+                                                          value.lastIndexOf(
+                                                            "\n",
+                                                            selectionStart - 1
+                                                          ) + 1;
+                                                        const currentLine =
+                                                          value.substring(
+                                                            lineStart,
+                                                            selectionStart
+                                                          );
+
+                                                        const before =
+                                                          value.substring(
+                                                            0,
+                                                            selectionStart
+                                                          );
+                                                        const after =
+                                                          value.substring(
+                                                            selectionEnd
+                                                          );
+
+                                                        const newBullet =
+                                                          currentLine.startsWith(
+                                                            "• "
+                                                          )
+                                                            ? "• "
+                                                            : "";
+
+                                                        const newValue =
+                                                          before +
+                                                          "\n" +
+                                                          newBullet +
+                                                          after;
+                                                        e.target.value =
+                                                          newValue;
+
+                                                        const cursorPos =
+                                                          selectionStart +
+                                                          1 +
+                                                          newBullet.length;
+                                                        setTimeout(() => {
+                                                          e.target.selectionStart =
+                                                            e.target.selectionEnd =
+                                                              cursorPos;
+                                                        }, 0);
+                                                      }
+
+                                                      if (
+                                                        e.key === "Backspace"
+                                                      ) {
+                                                        const lineStart =
+                                                          value.lastIndexOf(
+                                                            "\n",
+                                                            selectionStart - 1
+                                                          ) + 1;
+                                                        const currentLine =
+                                                          value.substring(
+                                                            lineStart,
+                                                            selectionStart
+                                                          );
+
+                                                        if (
+                                                          currentLine.startsWith(
+                                                            "• "
+                                                          ) &&
+                                                          selectionStart ===
+                                                            lineStart + 2
+                                                        ) {
+                                                          e.preventDefault();
+                                                          const newValue =
+                                                            value.substring(
+                                                              0,
+                                                              lineStart
+                                                            ) +
+                                                            value.substring(
+                                                              lineStart + 2
+                                                            );
+                                                          e.target.value =
+                                                            newValue;
+
+                                                          setTimeout(() => {
+                                                            e.target.selectionStart =
+                                                              e.target.selectionEnd =
+                                                                lineStart;
+                                                          }, 0);
+                                                        }
+                                                      }
+                                                    }}
+                                                    onInput={(e) => {
+                                                      const lines =
+                                                        e.target.value.split(
+                                                          "\n"
+                                                        );
+                                                      const updatedLines =
+                                                        lines.map((line) =>
+                                                          line.trim() === "" ||
+                                                          line.startsWith("• ")
+                                                            ? line
+                                                            : "• " + line
+                                                        );
+                                                      const newValue =
+                                                        updatedLines.join("\n");
+                                                      if (
+                                                        newValue !==
+                                                        e.target.value
+                                                      ) {
+                                                        e.target.value =
+                                                          newValue;
+                                                        e.target.selectionStart =
+                                                          e.target.selectionEnd =
+                                                            newValue.length;
+                                                      }
+                                                    }}
+                                                    onBlur={(e) => {
+                                                      console.log(
+                                                        "Updated value:",
+                                                        e.target.value,
+                                                        "at row",
+                                                        rowIndex,
+                                                        "col",
+                                                        colIndex
+                                                      );
+                                                    }}
+                                                    // className="w-full h-full resize-none p-2 border border-gray-300 focus:outline-none"
                                                     style={{
                                                       minHeight: "250px",
                                                       height: "100%",
@@ -739,204 +909,3 @@ const EditLessonPlanTemplate = () => {
 };
 
 export default EditLessonPlanTemplate;
-
-//  onKeyDown={(e) => {
-//                                                       const {
-//                                                         value,
-//                                                         selectionStart,
-//                                                         selectionEnd,
-//                                                       } = e.target;
-
-//                                                       // Handle Enter key for new bullets
-//                                                       if (e.key === "Enter") {
-//                                                         e.preventDefault();
-
-//                                                         const lineStart =
-//                                                           value.lastIndexOf(
-//                                                             "\n",
-//                                                             selectionStart - 1
-//                                                           ) + 1;
-//                                                         const currentLine =
-//                                                           value.substring(
-//                                                             lineStart,
-//                                                             selectionStart
-//                                                           );
-
-//                                                         const before =
-//                                                           value.substring(
-//                                                             0,
-//                                                             selectionStart
-//                                                           );
-//                                                         const after =
-//                                                           value.substring(
-//                                                             selectionEnd
-//                                                           );
-
-//                                                         const newBullet =
-//                                                           currentLine.startsWith(
-//                                                             "• "
-//                                                           )
-//                                                             ? "• "
-//                                                             : "";
-
-//                                                         const newValue =
-//                                                           before +
-//                                                           "\n" +
-//                                                           newBullet +
-//                                                           after;
-//                                                         e.target.value =
-//                                                           newValue;
-
-//                                                         const cursorPos =
-//                                                           selectionStart +
-//                                                           1 +
-//                                                           newBullet.length;
-//                                                         setTimeout(() => {
-//                                                           e.target.selectionStart =
-//                                                             e.target.selectionEnd =
-//                                                               cursorPos;
-//                                                         }, 0);
-//                                                       }
-
-//                                                       if (
-//                                                         e.key === "Backspace"
-//                                                       ) {
-//                                                         const lineStart =
-//                                                           value.lastIndexOf(
-//                                                             "\n",
-//                                                             selectionStart - 1
-//                                                           ) + 1;
-//                                                         const currentLine =
-//                                                           value.substring(
-//                                                             lineStart,
-//                                                             selectionStart
-//                                                           );
-
-//                                                         if (
-//                                                           currentLine.startsWith(
-//                                                             "• "
-//                                                           ) &&
-//                                                           selectionStart ===
-//                                                             lineStart + 2
-//                                                         ) {
-//                                                           e.preventDefault();
-//                                                           const newValue =
-//                                                             value.substring(
-//                                                               0,
-//                                                               lineStart
-//                                                             ) +
-//                                                             value.substring(
-//                                                               lineStart + 2
-//                                                             );
-//                                                           e.target.value =
-//                                                             newValue;
-
-//                                                           setTimeout(() => {
-//                                                             e.target.selectionStart =
-//                                                               e.target.selectionEnd =
-//                                                                 lineStart;
-//                                                           }, 0);
-//                                                         }
-//                                                       }
-//                                                     }}
-//                                                     onInput={(e) => {
-//                                                       const lines =
-//                                                         e.target.value.split(
-//                                                           "\n"
-//                                                         );
-//                                                       const updatedLines =
-//                                                         lines.map((line) =>
-//                                                           line.trim() === "" ||
-//                                                           line.startsWith("• ")
-//                                                             ? line
-//                                                             : "• " + line
-//                                                         );
-//                                                       const newValue =
-//                                                         updatedLines.join("\n");
-//                                                       if (
-//                                                         newValue !==
-//                                                         e.target.value
-//                                                       ) {
-//                                                         e.target.value =
-//                                                           newValue;
-//                                                         e.target.selectionStart =
-//                                                           e.target.selectionEnd =
-//                                                             newValue.length;
-//                                                       }
-//                                                     }}
-//                                                     onBlur={(e) => {
-//                                                       console.log(
-//                                                         "Updated value:",
-//                                                         e.target.value,
-//                                                         "at row",
-//                                                         rowIndex,
-//                                                         "col",
-//                                                         colIndex
-//                                                       );
-//                                                     }}
-
-{
-  /* <tbody>
-                                        {timetable.map((template, rowIndex) => (
-                                          <tr
-                                            key={
-                                              template.les_pln_temp_id ||
-                                              rowIndex
-                                            }
-                                            className="text-left text-sm text-gray-700"
-                                            style={{ height: "250px" }}
-                                          >
-                                            {(heading || []).map(
-                                              (item, colIndex) => (
-                                                <td
-                                                  key={
-                                                    item.lesson_plan_headings_id
-                                                  }
-                                                  className={`border-2 px-2 py-1 ${
-                                                    colIndex === 0
-                                                      ? "sticky left-0 bg-white"
-                                                      : ""
-                                                  }`}
-                                                  style={{
-                                                    width: "210px",
-                                                    minHeight: "250px",
-                                                  }}
-                                                >
-                                                  <textarea
-                                                    value={
-                                                      studentRemarks[
-                                                        item
-                                                          .lesson_plan_headings_id
-                                                      ] ??
-                                                      template[
-                                                        item
-                                                          .lesson_plan_headings_id
-                                                      ] ??
-                                                      ""
-                                                    }
-                                                    onChange={(e) => {
-                                                      const value =
-                                                        e.target.value;
-                                                      setStudentRemarks(
-                                                        (prev) => ({
-                                                          ...prev,
-                                                          [item.lesson_plan_headings_id]:
-                                                            value,
-                                                        })
-                                                      );
-                                                    }}
-                                                    className="w-full h-full resize-none p-2 border border-gray-300 focus:outline-none"
-                                                    style={{
-                                                      minHeight: "250px",
-                                                      height: "100%",
-                                                      boxSizing: "border-box",
-                                                      lineHeight: "1.5em",
-                                                    }}
-                                                  />
-                                                </td>
-                                              )
-                                            )}
-                                          </tr>
-                                        ))}
-                                      </tbody> */
-}

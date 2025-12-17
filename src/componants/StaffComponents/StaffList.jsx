@@ -395,7 +395,9 @@ function StaffList() {
                               src={
                                 staffItem?.teacher_image_name
                                   ? // ? `https://sms.evolvu.in/storage/app/public/teacher_images/${staffItem?.teacher_image_name}`
-                                    `${staffItem?.teacher_image_name}`
+                                    `${
+                                      staffItem?.teacher_image_name
+                                    }?t=${Date.now()}`
                                   : ""
                               }
                               // alt={staffItem?.name}

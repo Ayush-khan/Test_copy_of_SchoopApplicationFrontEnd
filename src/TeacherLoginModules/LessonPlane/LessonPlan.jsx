@@ -87,7 +87,7 @@ function LessonPlan() {
 
   useEffect(() => {
     if (!roleIdValue) return; // guard against empty
-    fetchExams(roleIdValue);
+    fetchClasses(roleIdValue);
   }, [roleIdValue]);
 
   const handleStatusChange = async (lessonPlanId, newStatus) => {
@@ -149,7 +149,7 @@ function LessonPlan() {
     }
   };
 
-  const fetchExams = async () => {
+  const fetchClasses = async () => {
     try {
       const token = localStorage.getItem("authToken");
 
@@ -159,7 +159,7 @@ function LessonPlan() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      // console.log("Classes", response.data.data);
+
       setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching Classes");
@@ -167,18 +167,45 @@ function LessonPlan() {
     }
   };
 
-  const fetchSubjectNames = async (classId) => {
-    if (!classId) return;
+  // const fetchSubjectNames = async (classId) => {
+  //   if (!classId) return;
+  //   setLoading(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_subjects_according_class_multiple?class_id=${classId}`,
+
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     setAllSubject(response.data.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching subject names");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const fetchSubjectNames = async (classId, sectionIds = []) => {
+    if (!classId || sectionIds.length === 0) return;
+
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(
-        `${API_URL}/api/get_subjects_according_class?class_id=${classId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      // console.log("fetch subjects", response.data.data);
+
+      // Build section_ids[]=...&section_ids[]=...
+      const sectionQuery = sectionIds
+        .map((id) => `section_ids[]=${id}`)
+        .join("&");
+
+      const url = `${API_URL}/api/get_subjects_according_class_multiple?class_id=${classId}&${sectionQuery}`;
+
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       setAllSubject(response.data.data || []);
     } catch (error) {
       toast.error("Error fetching subject names");
@@ -187,36 +214,48 @@ function LessonPlan() {
     }
   };
 
-  const fetchChaptersNames = async (classId, SubjectId) => {
-    if (!classId) return;
+  // const fetchChaptersNames = async (classId, SubjectId) => {
+  //   if (!classId) return;
+  //   setLoading(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_subsubject_by_class_sub?class_id=${classId}&subject_id=${SubjectId}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+  //     console.log("fetch chapters", response.data.data);
+  //     setAllChapter(response.data.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching chapters names");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const fetchChaptersNames = async (classId, subjectId) => {
+    if (!classId || !subjectId) return; // ✅ correct guard
+
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
+
       const response = await axios.get(
-        `${API_URL}/api/get_subsubject_by_class_sub?class_id=${classId}&subject_id=${SubjectId}`,
+        `${API_URL}/api/get_subsubject_by_class_sub?class_id=${classId}&subject_id=${subjectId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("fetch chapters", response.data.data);
-      setAllChapter(response.data.data || []);
+
+      console.log("fetch chapters", response?.data?.data);
+      setAllChapter(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching chapters names");
     } finally {
       setLoading(false);
     }
   };
-
-  const subjectOptions = useMemo(
-    () =>
-      Array.isArray(allSubject)
-        ? allSubject.map((cls) => ({
-            value: cls?.sm_id,
-            label: `${cls.name}`,
-          }))
-        : [],
-    [allSubject]
-  );
 
   const studentOptions = useMemo(
     () =>
@@ -227,6 +266,17 @@ function LessonPlan() {
           }))
         : [],
     [studentNameWithClassId]
+  );
+
+  const subjectOptions = useMemo(
+    () =>
+      Array.isArray(allSubject)
+        ? allSubject.map((cls) => ({
+            value: cls?.sm_id,
+            label: `${cls.name}`,
+          }))
+        : [],
+    [allSubject]
   );
 
   const chapterOptions = useMemo(
@@ -241,46 +291,41 @@ function LessonPlan() {
   );
 
   useEffect(() => {
-    if (!selectedStudent) return;
-    fetchSubjectNames(selectedStudent.value);
+    if (!selectedStudent?.value) return;
+
+    const [classId, sectionId] = selectedStudent.value.split("_");
+
+    fetchSubjectNames(classId, [sectionId]);
   }, [selectedStudent]);
 
   useEffect(() => {
-    if (!selectedStudent || !selectedSubject) return;
-    fetchChaptersNames(selectedStudent.value, selectedSubject.value);
-  }, [selectedStudent, selectedSubject]);
+    if (!selectedSubjectId || !selectedStudentId) return;
 
-  // const fetchLessonPlanUniId = async (ids) => {
-  //   const token = localStorage.getItem("authToken");
-  //   if (!token || !ids?.length) return;
+    const [classId] = selectedStudentId.split("_"); // ✅ extract classId
 
-  //   try {
-  //     const results = {};
+    console.log("Fetching chapters:", {
+      classId,
+      subjectId: selectedSubjectId,
+    });
 
-  //     for (const id of ids) {
-  //       const response = await axios.get(
-  //         `${API_URL}/api/get_lp_classes_by_unq_id?unq_id=${id}`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
+    fetchChaptersNames(classId, selectedSubjectId);
+  }, [selectedSubjectId, selectedStudentId]);
 
-  //       const apiData = response?.data?.data || [];
+  // useEffect(() => {
+  //   if (!selectedSubjectId || !selectedStudentId) return;
 
-  //       apiData.forEach((item) => {
-  //         results[item.lesson_plan_id] = {
-  //           class_name: item.class_name,
-  //           sec_name: item.sec_name,
-  //         };
-  //       });
-  //     }
+  //   console.log("Fetching chapters:", {
+  //     classId: selectedStudentId,
+  //     subjectId: selectedSubjectId,
+  //   });
 
-  //     console.log("Fetched class/section data:", results);
-  //     setUnqIdDetails(results);
-  //   } catch (error) {
-  //     console.error("Error fetching class/section by unq_id:", error);
-  //   }
-  // };
+  //   fetchChaptersNames(selectedStudentId, selectedSubjectId);
+  // }, [selectedSubjectId, selectedStudentId]);
+
+  // useEffect(() => {
+  //   if (!selectedStudent || !selectedSubject) return;
+  //   fetchChaptersNames(selectedStudent.value, selectedSubject.value);
+  // }, [selectedStudent, selectedSubject]);
 
   const fetchLessonPlanUniId = async (ids) => {
     const token = localStorage.getItem("authToken");
@@ -319,6 +364,71 @@ function LessonPlan() {
     fetchLessonPlanUniId(unqId);
   }, [unqId]);
 
+  // const handleSearch = async () => {
+  //   if (isSubmitting) return;
+  //   setIsSubmitting(true);
+  //   setSearchTerm("");
+  //   setLoadingForSearch(true);
+
+  //   try {
+  //     setLoading(true);
+  //     const token = localStorage.getItem("authToken");
+
+  //     let classId = null;
+  //     let sectionId = null;
+
+  //     if (selectedStudent?.value) {
+  //       [classId, sectionId] = selectedStudent.value.split("_");
+  //     }
+
+  //     const subjectId = selectedSubject?.value;
+  //     const chapterId = selectedChapter?.value;
+
+  //     const params = {};
+  //     if (classId) params.class_id = classId;
+  //     if (sectionId) params.section_id = sectionId;
+  //     if (subjectId) params.subject_id = subjectId;
+  //     if (chapterId) params.chapter_id = chapterId;
+
+  //     console.log("Searching lesson plan with:", params);
+
+  //     const response = await axios.get(`${API_URL}/api/get_lesson_plan`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //       params: Object.keys(params).length > 0 ? params : {},
+  //     });
+
+  //     console.log("response lesson plan", response.data);
+
+  //     const apiData = response?.data?.data || [];
+
+  //     if (apiData.length > 0) {
+  //       const updatedNotices = apiData.map((notice) => ({
+  //         ...notice,
+  //       }));
+
+  //       const uniqueIds = apiData.map((item) => item.unq_id);
+  //       console.log("All unq_ids:", uniqueIds);
+
+  //       setUnqId(uniqueIds);
+
+  //       fetchLessonPlanUniId(uniqueIds);
+
+  //       setNotices(updatedNotices);
+  //       setPageCount(Math.ceil(updatedNotices.length / pageSize));
+  //     } else {
+  //       setNotices([]);
+  //       toast.error("No lesson plan found for the selected criteria.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching lesson plan:", error);
+  //     toast.error("Error fetching lesson plan. Please try again.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //     setLoading(false);
+  //     setLoadingForSearch(false);
+  //   }
+  // };
+
   const handleSearch = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -349,12 +459,23 @@ function LessonPlan() {
 
       const response = await axios.get(`${API_URL}/api/get_lesson_plan`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: Object.keys(params).length > 0 ? params : {},
+        params,
       });
 
-      console.log("response lesson plan", response);
+      console.log("response lesson plan", response.data);
 
-      const apiData = response?.data?.data || [];
+      /* 🔥 FIX STARTS HERE */
+      const rawData = response?.data;
+
+      const apiData = Array.isArray(rawData)
+        ? rawData
+        : rawData?.data
+        ? Array.isArray(rawData.data)
+          ? rawData.data
+          : [rawData.data]
+        : rawData
+        ? [rawData]
+        : [];
 
       if (apiData.length > 0) {
         const updatedNotices = apiData.map((notice) => ({
@@ -365,7 +486,6 @@ function LessonPlan() {
         console.log("All unq_ids:", uniqueIds);
 
         setUnqId(uniqueIds);
-
         fetchLessonPlanUniId(uniqueIds);
 
         setNotices(updatedNotices);
@@ -447,83 +567,6 @@ function LessonPlan() {
 
     setShowEditModal(true);
   };
-
-  // const handleSubmitEdit = async () => {
-  //   if (isSubmitting) return; // Prevent re-submitting
-  //   setIsSubmitting(true);
-  //   let hasError = false;
-
-  //   if (!subject.trim()) {
-  //     setSubjectError("Subject is required.");
-  //     hasError = true;
-  //   } else {
-  //     setSubjectError("");
-  //   }
-
-  //   if (!noticeDesc.trim()) {
-  //     setNoticeDescError("Notice description is required.");
-  //     hasError = true;
-  //   } else {
-  //     setNoticeDescError("");
-  //   }
-  //   if (hasError) {
-  //     setIsSubmitting(false);
-  //     return;
-  //   }
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) throw new Error("Authentication token is missing");
-
-  //     const formData = new FormData();
-  //     formData.append("subject", subject);
-  //     formData.append("notice_desc", noticeDesc);
-
-  //     uploadedFiles.forEach((file) => formData.append("userfile[]", file));
-  //     console.log("filenottobedeleted[]", preselectedFiles);
-
-  //     preselectedFiles.forEach((fileUrl) => {
-  //       const fileName = fileUrl.split("/").pop(); // Extracts only the file name
-  //       formData.append("filenottobedeleted[]", fileName);
-  //     });
-
-  //     console.log("Formatted data of the edit SMS part", formData);
-  //     console.log("Selected files", uploadedFiles);
-
-  //     console.log("formated data of the edit sms part", formData);
-  //     console.log("seletd files", uploadedFiles);
-  //     const response = await axios.post(
-  //       `${API_URL}/api/update_smsnotice/${currentSection?.unq_id}`,
-  //       formData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "multipart/form-data",
-  //         },
-  //         withCredentials: true,
-  //       }
-  //     );
-
-  //     toast.success(response.data.message || "Notice updated successfully!");
-  //     handleSearch();
-  //     handleCloseModal();
-  //   } catch (error) {
-  //     // toast.error("Error updating notice. Please try again.");
-  //     console.error(error);
-  //   } finally {
-  //     setIsSubmitting(false); // Re-enable the button after the operation
-  //   }
-  // };
-
-  // const handlePublish = (section) => {
-  //   setCurrentSection(section);
-  //   // console.log("the currecne t section", currentSection);
-
-  //   console.log("fdsfsdsd handleEdit", section);
-
-  //   // It's used for the dropdown of the tachers
-  //   setShowPublishModal(true);
-  // };
 
   const handleSubmitPublish = async () => {
     if (isSubmitting) return; // Prevent re-submitting
@@ -660,11 +703,8 @@ function LessonPlan() {
     const subjectName = section?.subject?.toLowerCase() || "";
     const noticeDesc = section?.notice_type?.toLowerCase() || "";
     const teacher = section?.name?.toLowerCase() || "";
+    const noticeDate = section?.week_date.toLowerCase() || ""; // e.g. "2025-05-29"
 
-    // Format `notice_date` to a readable string (optional: you can also use raw date)
-    const noticeDate = section?.notice_date || ""; // e.g. "2025-05-29"
-
-    // Check if the search term is in any of the fields (assumes `searchLower` is already .toLowerCase())
     return (
       teacherName.includes(searchLower) ||
       subjectName.includes(searchLower) ||
@@ -732,7 +772,7 @@ function LessonPlan() {
                 <div className="w-full md:w-[100%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2 border border-gray-300 rounded-md shadow-sm mb-2">
                   <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                     <div className="w-full md:w-[99%] gap-x-0 md:gap-x-10 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                      {/* Teacher */}
+                      {/* Class */}
                       <div className="w-full  md:w-[50%] gap-x-3 justify-around my-1 md:my-4 flex md:flex-row">
                         <label
                           className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
@@ -756,8 +796,23 @@ function LessonPlan() {
                               setSelectedStudentId(
                                 selected ? selected.value : null
                               );
-                              if (selected) setStudentError("");
-                              else setStudentError("Please select class.");
+                              if (!selected) {
+                                // 🔥 CLEAR SUBJECT
+                                setSelectedSubject(null);
+                                setSelectedSubjectId(null);
+                                setAllSubject([]);
+                                setSubjectError("");
+
+                                // 🔥 CLEAR CHAPTER
+                                setSelectedChapter(null);
+                                setSelectedChapterId(null);
+                                setAllChapter([]);
+                                setChapterError("");
+
+                                setStudentError("Please select class.");
+                              } else {
+                                setStudentError("");
+                              }
                             }}
                             isSearchable
                             isClearable
@@ -795,19 +850,29 @@ function LessonPlan() {
                             menuPosition="fixed"
                             id="studentSelect"
                             options={subjectOptions}
-                            value={
-                              subjectOptions.find(
-                                (opt) => opt.value === selectedSubject?.value
-                              ) || selectedSubject
-                            }
+                            // value={
+                            //   subjectOptions.find(
+                            //     (opt) => opt.value === selectedSubject?.value
+                            //   ) || selectedSubject
+                            // }
+                            value={selectedSubject}
                             onChange={(selected) => {
                               setSelectedSubject(selected);
                               setSelectedSubjectId(
                                 selected ? selected.value : null
                               );
-                              if (selected)
-                                setSubjectError(""); // ✅ Clear error
-                              else setSubjectError("Please select subject.");
+
+                              if (!selected) {
+                                // 🔥 CLEAR CHAPTER WHEN SUBJECT CLEARED
+                                setSelectedChapter(null);
+                                setSelectedChapterId(null);
+                                setAllChapter([]);
+                                setChapterError("");
+
+                                setSubjectError("Please select subject.");
+                              } else {
+                                setSubjectError("");
+                              }
                             }}
                             isSearchable
                             isClearable

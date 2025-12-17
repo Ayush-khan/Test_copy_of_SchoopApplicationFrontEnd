@@ -27,8 +27,6 @@ const ViewTicket = () => {
 
   const { id } = useParams();
 
-  // console.log("id", id);
-
   useEffect(() => {
     fetchTicketDetails();
   }, [id]);
@@ -86,18 +84,48 @@ const ViewTicket = () => {
         }
       );
 
-      if (response.data?.data) {
+      if (Array.isArray(response.data?.data)) {
         setAppointmentTimes(response.data.data);
+      } else {
+        setAppointmentTimes([]); // fallback safety
       }
     } catch (error) {
       console.error("Failed to fetch appointment times:", error);
     }
   };
 
+  // useEffect(() => {
+  //   const fetchStatusOptions = async () => {
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+  //       const response = await axios.get(
+  //         `${API_URL}/api/get_statusesforticketlist`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+
+  //       if (response.data?.data) {
+  //         const transformedOptions = response.data.data.map((item) => ({
+  //           value: item.status,
+  //           label: item.status,
+  //         }));
+  //         setStatusOptions(transformedOptions);
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to fetch status options", error);
+  //     }
+  //   };
+
+  //   fetchStatusOptions();
+  // }, []);
+
+  // Changes 08-12-2025
   useEffect(() => {
     const fetchStatusOptions = async () => {
       try {
         const token = localStorage.getItem("authToken");
+
         const response = await axios.get(
           `${API_URL}/api/get_statusesforticketlist`,
           {
@@ -105,20 +133,57 @@ const ViewTicket = () => {
           }
         );
 
-        if (response.data?.data) {
-          const transformedOptions = response.data.data.map((item) => ({
+        const data = response.data?.data;
+
+        if (Array.isArray(data)) {
+          const transformedOptions = data.map((item) => ({
             value: item.status,
             label: item.status,
           }));
           setStatusOptions(transformedOptions);
+        } else {
+          console.warn("Status list is not an array:", data);
+          setStatusOptions([]); // prevent crash
         }
       } catch (error) {
         console.error("Failed to fetch status options", error);
+        setStatusOptions([]);
       }
     };
 
     fetchStatusOptions();
   }, []);
+
+  const handleViewComments = async () => {
+    console.log("inside handleview comment");
+    setIsModalOpen(true);
+    setLoadingComments(true);
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${API_URL}/api/get_commentticketlist/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const data = response?.data?.data;
+
+      if (Array.isArray(data)) {
+        setCommentList(data);
+      } else {
+        console.warn("Comments API did not return array:", data);
+        setCommentList([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch comments:", error);
+      toast.error("Failed to load comments.");
+      setCommentList([]);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
 
   // const handleViewComments = async () => {
   //   console.log("inside handleview comment");
@@ -147,42 +212,6 @@ const ViewTicket = () => {
   //     setLoadingComments(false);
   //   }
   // };
-
-  // 🟩 Define function OUTSIDE useEffect
-  const handleViewComments = async () => {
-    console.log("inside handleview comment");
-    setIsModalOpen(true);
-    setLoadingComments(true);
-
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(
-        `${API_URL}/api/get_commentticketlist/${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response?.data?.data) {
-        console.log("comment api", response.data.data);
-        setCommentList(response.data.data);
-      } else {
-        setCommentList([]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch comments:", error);
-      toast.error("Failed to load comments.");
-    } finally {
-      setLoadingComments(false);
-    }
-  };
-
-  // // 🟩 Optional useEffect if you want to load comments automatically on mount
-  // useEffect(() => {
-  //   if (id) {
-  //     handleViewComments();
-  //   }
-  // }, [id]);
 
   const camelCase = (str) =>
     str
@@ -217,7 +246,7 @@ const ViewTicket = () => {
       status === initialData.status &&
       comments === initialData.comment &&
       (selectedAppointment || "") ===
-        (initialData.appointment_date_time || "") &&
+      (initialData.appointment_date_time || "") &&
       selectedFiles.length === 0;
 
     if (isUnchanged) {
@@ -362,23 +391,23 @@ const ViewTicket = () => {
 
   const filteredSections = Array.isArray(ticket)
     ? ticket.filter((t) => {
-        if (!searchTerm.trim()) return true;
+      if (!searchTerm.trim()) return true;
 
-        const searchLower = searchTerm.toLowerCase();
-        const studentName = t?.first_name?.toLowerCase() || "";
-        const serviceName = t?.service_name?.toLowerCase() || "";
-        const ticketId = t?.ticket_id?.toString().toLowerCase() || "";
-        const title = t?.title?.toLowerCase() || "";
-        const status = t?.status?.toLowerCase() || "";
+      const searchLower = searchTerm.toLowerCase();
+      const studentName = t?.first_name?.toLowerCase() || "";
+      const serviceName = t?.service_name?.toLowerCase() || "";
+      const ticketId = t?.ticket_id?.toString().toLowerCase() || "";
+      const title = t?.title?.toLowerCase() || "";
+      const status = t?.status?.toLowerCase() || "";
 
-        return (
-          studentName.includes(searchLower) ||
-          serviceName.includes(searchLower) ||
-          ticketId.includes(searchLower) ||
-          title.includes(searchLower) ||
-          status.includes(searchLower)
-        );
-      })
+      return (
+        studentName.includes(searchLower) ||
+        serviceName.includes(searchLower) ||
+        ticketId.includes(searchLower) ||
+        title.includes(searchLower) ||
+        status.includes(searchLower)
+      );
+    })
     : [];
 
   // console.log("Filtered Sections", filteredSections);
@@ -437,8 +466,7 @@ const ViewTicket = () => {
                   <span className="text-gray-800 font-semibold">
                     {/* {ticket.first_name} {ticket.mid_name} {ticket.last_name} */}
                     {camelCase(
-                      `${ticket?.first_name || ""} ${ticket?.mid_name || ""} ${
-                        ticket?.last_name || ""
+                      `${ticket?.first_name || ""} ${ticket?.mid_name || ""} ${ticket?.last_name || ""
                       }`
                     )}
                   </span>
@@ -578,7 +606,7 @@ const ViewTicket = () => {
                     </div>
 
                     {/* Selected appointment time OR radio buttons */}
-                    <div className="text-right">
+                    {/* <div className="text-right">
                       {appointmentTimes.length > 0 ? (
                         <div className="space-y-2">
                           {appointmentTimes.map((timeSlot, index) => (
@@ -589,6 +617,37 @@ const ViewTicket = () => {
                               <input
                                 type="radio"
                                 name={`appointment-time-${ticket.ticket_id}`} // to make it unique per ticket
+                                value={timeSlot.value}
+                                checked={selectedAppointment === timeSlot.value}
+                                onChange={() =>
+                                  handleRadioChange(timeSlot.value)
+                                }
+                                className="text-blue-800 focus:ring-blue-800"
+                              />
+                              <span className="text-gray-800 text-sm">
+                                {timeSlot.display}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-800 font-semibold">
+                          Not Available
+                        </span>
+                      )}
+                    </div> */}
+                    <div className="text-right">
+                      {Array.isArray(appointmentTimes) &&
+                        appointmentTimes.length > 0 ? (
+                        <div className="space-y-2">
+                          {appointmentTimes.map((timeSlot, index) => (
+                            <label
+                              key={index}
+                              className="flex items-center space-x-2 justify-end"
+                            >
+                              <input
+                                type="radio"
+                                name={`appointment-time-${ticket.ticket_id}`}
                                 value={timeSlot.value}
                                 checked={selectedAppointment === timeSlot.value}
                                 onChange={() =>
@@ -689,9 +748,8 @@ const ViewTicket = () => {
             type="button"
             onClick={handleSubmit}
             disabled={isSaving}
-            className={`bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl ${
-              isSaving ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl ${isSaving ? "opacity-50 cursor-not-allowed" : ""
+              }`}
           >
             <span className="font-semibold">
               {isSaving ? "Saving..." : "Save"}
@@ -778,10 +836,10 @@ const ViewTicket = () => {
                             <td className="p-2 text-sm text-gray-700 border border-gray-300">
                               {comment.date
                                 ? comment.date
-                                    .split(" ")[0]
-                                    .split("-")
-                                    .reverse()
-                                    .join("/")
+                                  .split(" ")[0]
+                                  .split("-")
+                                  .reverse()
+                                  .join("/")
                                 : ""}
                             </td>
 
