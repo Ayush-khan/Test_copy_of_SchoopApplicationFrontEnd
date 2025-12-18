@@ -501,7 +501,7 @@ h5 + * { /* Targets the element after h5 */
                                                 }?t=${Date.now()}`
                                                 : "https://via.placeholder.com/50"
                                             }
-                                            alt={toCamelCase(subject?.name)}
+                                            // alt={toCamelCase(subject?.name)}
                                             className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
                                           />
                                         </div>
