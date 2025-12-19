@@ -414,8 +414,8 @@ h5 + * { /* Targets the element after h5 */
                             type="button"
                             onClick={handleDownloadZip}
                             className={`relative bg-blue-400 text-white px-3 rounded hover:bg-blue-500 group ${isSubmitDisabled
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
                               }`}
                             disabled={isSubmitDisabled}
                           >

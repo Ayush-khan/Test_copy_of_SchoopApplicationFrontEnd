@@ -372,9 +372,8 @@ function StaffList() {
                       displayedStaffs.map((staffItem, index) => (
                         <tr
                           key={staffItem.user_id}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
+                          className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-50`}
                         >
                           {console.log(
                             "this is inside the staflist component in the table",
@@ -395,10 +394,11 @@ function StaffList() {
                               src={
                                 staffItem?.teacher_image_name
                                   ? // ? `https://sms.evolvu.in/storage/app/public/teacher_images/${staffItem?.teacher_image_name}`
-                                    `${staffItem?.teacher_image_name}`
-                                  : "https://via.placeholder.com/50"
+                                  `${staffItem?.teacher_image_name
+                                  }?t=${Date.now()}`
+                                  : ""
                               }
-                              alt={staffItem?.name}
+                              // alt={staffItem?.name}
                               className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
                             />
                           </td>

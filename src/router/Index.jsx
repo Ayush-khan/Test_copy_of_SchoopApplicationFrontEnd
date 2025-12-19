@@ -356,7 +356,10 @@ import EditLeaveApplicationForPrincipleTab from "../componants/AllTableList/Leav
 import ViewLeaveApplicationForPrincipleTab from "../componants/AllTableList/LeaveApproveForPrinciple/ViewLeaveApplicationForPrincipleTab.jsx";
 import PublishProficiencyCertificate from "../TeacherLoginModules/PublishProficiencyCertificate/PublishProficiencyCertificate.jsx";
 import StationeryRequisition from "../TeacherLoginModules/StationeryRequistion/StationeryRequistion.jsx";
-
+import CreateTeacherIdCard from "../componants/IDCards/CreateTeacherIdCard.jsx";
+import UpdateTeacherIdCard from "../componants/IDCards/UpdateTeacherIdCard.jsx";
+import ImageCropperSaving from "../componants/IDCards/ImageCropperSaving.jsx";
+import TeacherPendingIdCardReport from "../componants/Reports/StaffReport/TeacherPendingIdCardReport.jsx"
 // import Menus from "../c";
 function Index() {
   return (
@@ -1543,6 +1546,29 @@ function Index() {
         <Route
           path="/dailyAttendance"
           element={<PrivateRoute element={<DailyAttendance />} />}
+        />
+        {/* Teacher Login */}
+        <Route
+          path="/createteacherIdCardDetails"
+          element={<PrivateRoute element={<CreateTeacherIdCard />} />}
+        />
+        <Route
+          path="/updateTeacherIdCard"
+          element={<PrivateRoute element={<UpdateTeacherIdCard />} />}
+        />
+        <Route
+          path="/teacherPendingIdCardReport"
+          element={<PrivateRoute element={<TeacherPendingIdCardReport />} />}
+        />
+        <Route
+          path="/teacherIdCard"
+          element={
+            <PrivateRoute element={<TeacherIdCard key={Date.now()} />} />
+          }
+        />
+        <Route
+          path="/imageCropperSaving"
+          element={<PrivateRoute element={<ImageCropperSaving />} />}
         />
       </Route>
 

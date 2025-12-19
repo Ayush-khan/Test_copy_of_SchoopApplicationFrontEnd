@@ -34,6 +34,8 @@ function ViewStaff() {
     teacher_image_name: null,
     user_id: "",
     teacher_id: "",
+    permanent_address: "",
+    emergency_phone: "",
   });
   const [photoPreview, setPhotoPreview] = useState(null);
   // Role ID to Name Mapping
@@ -114,6 +116,8 @@ function ViewStaff() {
           user_id: user.user_id !== null ? user.user_id : "",
           teacher_id: staff.tc_id || "",
           role_name: role_name,
+          permanent_address: staff.permanent_address || "",
+          emergency_phone: staff.emergency_phone || "",
         });
         console.log("role_name", formData.role_name);
         if (teacher.teacher_image_name) {
@@ -197,7 +201,7 @@ function ViewStaff() {
                   Photo
                   {photoPreview ? (
                     <img
-                      src={photoPreview}
+                      src={`${photoPreview}?t=${Date.now()}`}
                       alt="Photo Preview"
                       className="h-20 w-20 rounded-[50%] mx-auto border-1 border-black object-cover"
                     />
@@ -206,7 +210,7 @@ function ViewStaff() {
                   )}
                 </label>
               </div>
-              <div className="col-span-1">
+              {/* <div className="col-span-1">
                 <label
                   htmlFor="academic_qual"
                   className="block font-bold text-xs mb-2"
@@ -220,22 +224,54 @@ function ViewStaff() {
                     </span>
                   ))}
                 </div>
-              </div>
+              </div> */}
               <div>
                 <label
                   htmlFor="address"
                   className="block font-bold text-xs mb-2"
                 >
-                  Address
+                  Current Address
                 </label>
                 <p className="input-field resize h-[70%]  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
                   {formData.address}
                 </p>
               </div>
+              <div>
+                <label
+                  htmlFor="permanent_address"
+                  className="block font-bold text-xs mb-2"
+                >
+                  Permanent Address
+                </label>
+                <p className="input-field resize h-[70%]  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
+                  {formData.permanent_address}
+                </p>
+              </div>
+              {/* <div className="grid grid-rows-2 gap-1">
+                <div className="w-full">
+                  <label className="block font-bold text-xs mb-2">
+                    Address <span className="text-red-500">*</span>
+                  </label>
+
+                  <p className="input-field resize h-[70%]  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
+                    {formData.address}
+                  </p>
+                </div>
+
+                <div className="w-full">
+                  <label className="block font-bold text-xs mb-2">
+                    Permanent Address <span className="text-red-500">*</span>
+                  </label>
+
+                  <p className="input-field resize h-[70%]  block w-full  border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
+                    {formData.permanent_address}
+                  </p>
+                </div>
+              </div> */}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 ">
-              {[
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 mt-1">
+              {/* {[
                 { label: "Employee ID", name: "employee_id" },
                 { label: "Name", name: "name" },
                 { label: "Father/Spouse Name", name: "father_spouse_name" },
@@ -244,11 +280,16 @@ function ViewStaff() {
                 { label: "Gender", name: "sex" },
                 { label: "Religion", name: "religion" },
                 { label: "Blood Group", name: "blood_group" },
-                { label: "Phone", name: "phone" },
+                { label: "Contact no.", name: "phone" },
+                { label: "Emergency Contact no.", name: "emergency_phone" },
                 { label: "Email", name: "email" },
                 {
                   label: "Designation",
                   name: "designation",
+                },
+                {
+                  label: "Academic Qualification",
+                  name: "academic_qual",
                 },
                 {
                   label: "Professional Qualification",
@@ -262,7 +303,6 @@ function ViewStaff() {
 
                 { label: "Aadhar Card Number", name: "aadhar_card_no" },
 
-                // { label: "Role", name: "role_id" },
                 {
                   label: "Role",
                   name: "role_name",
@@ -287,7 +327,61 @@ function ViewStaff() {
                     </p>
                   )}
                 </div>
+              ))} */}
+              {[
+                { label: "Employee ID", name: "employee_id" },
+                { label: "Name", name: "name" },
+                { label: "Father/Spouse Name", name: "father_spouse_name" },
+                { label: "Date of Birth", name: "birthday" },
+                { label: "Date of Joining", name: "date_of_joining" },
+                { label: "Gender", name: "sex" },
+                { label: "Religion", name: "religion" },
+                { label: "Blood Group", name: "blood_group" },
+                { label: "Contact no.", name: "phone" },
+                { label: "Emergency Contact no.", name: "emergency_phone" },
+                { label: "Email", name: "email" },
+                { label: "Designation", name: "designation" },
+                { label: "Academic Qualification", name: "academic_qual" },
+                {
+                  label: "Professional Qualification",
+                  name: "professional_qual",
+                },
+                { label: "Special Subject", name: "special_sub" },
+                { label: "Trained", name: "trained" },
+                { label: "Experience", name: "experience" },
+                { label: "Aadhar Card Number", name: "aadhar_card_no" },
+                { label: "Role", name: "role_name" },
+              ].map((field) => (
+                <div key={field.name}>
+                  <label
+                    htmlFor={field.name}
+                    className="block font-bold text-xs py-1 px-3"
+                  >
+                    {field.label}
+                  </label>
+
+                  {/* Array fields (Academic & Professional Qualification) */}
+                  {Array.isArray(formData[field.name]) ? (
+                    <div className="flex flex-wrap border border-gray-300 rounded-md bg-gray-300 py-1 px-3">
+                      {formData[field.name].length > 0 ? (
+                        formData[field.name].map((item, index) => (
+                          <span key={index} className="mr-2">
+                            {item}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-600">N/A</span>
+                      )}
+                    </div>
+                  ) : (
+                    /* Normal text fields */
+                    <p className="input-field w-full border border-gray-300 rounded-md py-1 px-3 bg-gray-300">
+                      {field.value || formData[field.name] || "N/A"}
+                    </p>
+                  )}
+                </div>
               ))}
+
               <div>
                 <label
                   htmlFor="teacher_category"
