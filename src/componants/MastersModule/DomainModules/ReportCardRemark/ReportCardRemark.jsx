@@ -744,9 +744,8 @@ const ReportCardRemark = () => {
   return (
     <>
       <div
-        className={` transition-all duration-500 w-[100%]  mx-auto p-4 ${
-          showStudentReport ? "w-full " : "w-[100%] "
-        }`}
+        className={` transition-all duration-500 w-[80%]  mx-auto p-4 ${showStudentReport ? "w-[80%] " : "w-[80%] "
+          }`}
       >
         <ToastContainer />
         <div className="card rounded-md">
@@ -774,7 +773,7 @@ const ReportCardRemark = () => {
 
           <>
             {!showStudentReport && (
-              <div className=" w-full md:w-[70%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2">
+              <div className=" w-full md:w-[90%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2">
                 <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                   <div className="w-full md:w-[99%]  gap-x-0 md:gap-x-4 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                     <div className="w-full md:w-[45%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
@@ -858,11 +857,10 @@ const ReportCardRemark = () => {
                         type="search"
                         onClick={handleSearch}
                         style={{ backgroundColor: "#2196F3" }}
-                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                          loadingForSearch
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
+                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                          }`}
                         disabled={loadingForSearch}
                       >
                         {loadingForSearch ? (
@@ -1000,11 +998,10 @@ const ReportCardRemark = () => {
                                   type="button"
                                   onClick={handleSearch}
                                   style={{ backgroundColor: "#2196F3" }}
-                                  className={`btn h-9 w-full btn-primary text-white font-bold px-3 rounded ${
-                                    loadingForSearch
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
+                                  className={`btn h-9 w-full btn-primary text-white font-bold px-3 rounded ${loadingForSearch
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                    }`}
                                   disabled={loadingForSearch}
                                 >
                                   {loadingForSearch ? "Browsing..." : "Browse"}
@@ -1030,7 +1027,7 @@ const ReportCardRemark = () => {
                         ></div>
                       </div>
 
-                      <div className="card-body w-full">
+                      <div className="card-body w-[90%] ml-14">
                         <div
                           className="h-[550px] lg:h-[550px] overflow-y-scroll overflow-x-scroll"
                           style={{
@@ -1041,10 +1038,27 @@ const ReportCardRemark = () => {
                         >
                           <table className="min-w-full leading-normal table-auto ">
                             <thead
-                              className="sticky top-0 bg-gray-200"
-                              style={{ zIndex: 10, position: "sticky" }}
+                            // className="sticky top-0 bg-gray-200"
+                            // style={{ zIndex: 10, position: "sticky" }}
                             >
                               <tr className="bg-gray-200">
+                                <th className="w-[10%] px-2 py-2 text-center border border-gray-400 text-sm font-semibold text-gray-900">
+                                  Sr No.
+                                </th>
+
+                                <th className="w-[10%] px-2 py-2 text-center border border-gray-400 text-sm font-semibold text-gray-900">
+                                  Roll No.
+                                </th>
+
+                                <th className="w-[40%] px-3 py-2 text-center border border-gray-400 text-sm font-semibold text-gray-900">
+                                  Student Name
+                                </th>
+
+                                <th className="w-[40%] px-3 py-2 text-center border border-gray-400 text-sm font-semibold text-gray-900">
+                                  Remark
+                                </th>
+
+                                {/* <tr className="bg-gray-200">
                                 {[
                                   "Sr No.",
                                   "Roll No.",
@@ -1057,7 +1071,7 @@ const ReportCardRemark = () => {
                                   >
                                     {header}
                                   </th>
-                                ))}
+                                ))} */}
 
                                 {/* {showPromotedColumn && (
                                   <th className="px-2 text-center lg:px-3 py-2 border border-gray-400 text-sm font-semibold text-gray-900 tracking-wider">
@@ -1121,10 +1135,10 @@ const ReportCardRemark = () => {
                                         {publishErrors?.[
                                           student.student_id
                                         ] && (
-                                          <span className="text-red-500 text-xs mt-1 block">
-                                            {publishErrors[student.student_id]}
-                                          </span>
-                                        )}
+                                            <span className="text-red-500 text-xs mt-1 block">
+                                              {publishErrors[student.student_id]}
+                                            </span>
+                                          )}
                                       </td>
 
                                       {/* {showPromotedColumn && (

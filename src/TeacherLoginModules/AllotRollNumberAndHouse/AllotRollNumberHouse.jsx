@@ -172,21 +172,368 @@ const AllotRollNumberHouse = () => {
   };
 
   // 🔹 Submit updated student data
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setSubmitTeacherNote(true);
+
+  //   try {
+  //     // 🔹 Step 1: Basic Validation
+  //     const newErrors = {};
+  //     studentInformation.forEach((stu) => {
+  //       if (!stu.roll_no || stu.roll_no === "") {
+  //         newErrors[stu.student_id] = {
+  //           ...(newErrors[stu.student_id] || {}),
+  //           roll_no: "Please enter Roll Number",
+  //         };
+  //       }
+  //       if (!stu.house || stu.house === "") {
+  //         newErrors[stu.student_id] = {
+  //           ...(newErrors[stu.student_id] || {}),
+  //           house: "Please select House",
+  //         };
+  //       }
+  //     });
+
+  //     // 🔹 Step 2: Unique Roll Number Validation
+  //     const rollNumbers = studentInformation
+  //       .map((s) => s.roll_no)
+  //       .filter((r) => r !== "" && r !== null);
+
+  //     const duplicateRolls = rollNumbers.filter(
+  //       (num, index) => rollNumbers.indexOf(num) !== index
+  //     );
+
+  //     if (duplicateRolls.length > 0) {
+  //       toast.error(
+  //         `Duplicate Roll Numbers found: ${[...new Set(duplicateRolls)].join(
+  //           ", "
+  //         )}`
+  //       );
+
+  //       // Highlight duplicate students
+  //       const duplicateErrors = {};
+  //       studentInformation.forEach((stu) => {
+  //         if (duplicateRolls.includes(stu.roll_no)) {
+  //           duplicateErrors[stu.student_id] = {
+  //             ...(duplicateErrors[stu.student_id] || {}),
+  //             roll_no: "Roll Number must be unique",
+  //           };
+  //         }
+  //       });
+  //       setErrors({ ...newErrors, ...duplicateErrors });
+  //       setSubmitTeacherNote(false);
+  //       return;
+  //     }
+
+  //     // 🔹 Step 3: Stop submission if there are any validation errors
+  //     if (Object.keys(newErrors).length > 0) {
+  //       setErrors(newErrors);
+  //       toast.error("Please fix validation errors before submitting.");
+  //       setSubmitTeacherNote(false);
+  //       return;
+  //     }
+
+  //     // 🔹 Step 4: Clear old errors if validation passed
+  //     setErrors({});
+
+  //     // 🔹 Step 5: API Payload
+  //     const payload = {
+  //       students: studentInformation.map((s) => ({
+  //         student_id: s.student_id,
+  //         reg_no: s.reg_no,
+  //         admission_date: s.admission_date,
+  //         stu_aadhaar_no: s.stu_aadhaar_no,
+  //         house: s.house,
+  //         roll_no: s.roll_no,
+  //       })),
+  //     };
+
+  //     // 🔹 Step 6: API Call
+  //     const res = await axios.put(
+  //       `${API_URL}/api/update_studentallotrollnohouse`,
+  //       payload,
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
+
+  //     if (res.status === 200) {
+  //       toast.success("Student details updated successfully!");
+  //     }
+  //   } catch (err) {
+  //     console.error("Error saving students:", err.response);
+  //     toast.error("Failed to update student details.");
+  //   } finally {
+  //     // 🔹 Step 7: Stop Loader
+  //     setSubmitTeacherNote(false);
+  //   }
+  // };
+
+  // working correct with sroll but issue  - Mahima 18-12-2025
+  const scrollToFirstError = (errorObj) => {
+    const firstStudentId = Object.keys(errorObj)[0];
+
+    if (firstStudentId && studentRefs.current[firstStudentId]) {
+      studentRefs.current[firstStudentId].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setSubmitTeacherNote(true);
+
+  //   try {
+  //     /* 🔹 Step 1: Basic Validation */
+  //     const newErrors = {};
+
+  //     studentInformation.forEach((stu) => {
+  //       if (!stu.roll_no) {
+  //         newErrors[stu.student_id] = {
+  //           ...(newErrors[stu.student_id] || {}),
+  //           roll_no: "Please enter Roll Number",
+  //         };
+  //       }
+
+  //       if (!stu.house) {
+  //         newErrors[stu.student_id] = {
+  //           ...(newErrors[stu.student_id] || {}),
+  //           house: "Please select House",
+  //         };
+  //       }
+  //     });
+
+  //     /* 🔹 Step 2: Frontend Duplicate Roll Number Check */
+  //     const rollNumbers = studentInformation
+  //       .map((s) => s.roll_no)
+  //       .filter(Boolean);
+
+  //     const duplicateRolls = [
+  //       ...new Set(
+  //         rollNumbers.filter((num, index) => rollNumbers.indexOf(num) !== index)
+  //       ),
+  //     ];
+
+  //     if (duplicateRolls.length > 0) {
+  //       const duplicateErrors = {};
+
+  //       studentInformation.forEach((stu) => {
+  //         if (duplicateRolls.includes(stu.roll_no)) {
+  //           duplicateErrors[stu.student_id] = {
+  //             ...(duplicateErrors[stu.student_id] || {}),
+  //             roll_no: "Roll Number must be unique",
+  //           };
+  //         }
+  //       });
+
+  //       setErrors({ ...newErrors, ...duplicateErrors });
+  //       toast.error(
+  //         `Duplicate Roll Numbers found: ${duplicateRolls.join(", ")}`
+  //       );
+
+  //       scrollToFirstError(duplicateErrors);
+  //       setSubmitTeacherNote(false);
+  //       return;
+  //     }
+
+  //     /* 🔹 Step 3: Stop if basic validation failed */
+  //     if (Object.keys(newErrors).length > 0) {
+  //       setErrors(newErrors);
+  //       toast.error("Please fix validation errors before submitting.");
+
+  //       scrollToFirstError(newErrors);
+  //       setSubmitTeacherNote(false);
+  //       return;
+  //     }
+
+  //     /* 🔹 Step 4: Clear old errors */
+  //     setErrors({});
+
+  //     /* 🔹 Step 5: Prepare API Payload */
+  //     const payload = {
+  //       students: studentInformation.map((s) => ({
+  //         student_id: s.student_id,
+  //         reg_no: s.reg_no,
+  //         admission_date: s.admission_date,
+  //         stu_aadhaar_no: s.stu_aadhaar_no,
+  //         house: s.house,
+  //         roll_no: s.roll_no,
+  //       })),
+  //     };
+
+  //     /* 🔹 Step 6: API Call */
+  //     const res = await axios.put(
+  //       `${API_URL}/api/update_studentallotrollnohouse`,
+  //       payload,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     if (res.status === 200) {
+  //       toast.success("Student details updated successfully!");
+  //     }
+  //   } catch (err) {
+  //     console.error("Error saving students:", err.response);
+
+  //     /* 🔴 Backend Roll Number Duplicate (422) */
+  //     if (err.response?.status === 422) {
+  //       const data = err.response.data;
+
+  //       toast.error(data?.message || "Roll number already exists");
+
+  //       if (data?.student_id) {
+  //         const backendError = {
+  //           [data.student_id]: {
+  //             roll_no: data.message,
+  //           },
+  //         };
+
+  //         setErrors(backendError);
+  //         scrollToFirstError(backendError);
+  //       }
+  //     } else {
+  //       toast.error("Failed to update student details.");
+  //     }
+  //   } finally {
+  //     setSubmitTeacherNote(false);
+  //   }
+  // };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setSubmitTeacherNote(true);
+
+  //   try {
+  //     /* 🔹 Step 1: Basic Validation */
+  //     const newErrors = {};
+
+  //     studentInformation.forEach((stu) => {
+  //       if (!stu.roll_no) {
+  //         newErrors[stu.student_id] = {
+  //           ...(newErrors[stu.student_id] || {}),
+  //           roll_no: "Please enter Roll Number",
+  //         };
+  //       }
+
+  //       if (!stu.house) {
+  //         newErrors[stu.student_id] = {
+  //           ...(newErrors[stu.student_id] || {}),
+  //           house: "Please select House",
+  //         };
+  //       }
+  //     });
+
+  //     /* 🔹 Step 2: Frontend Duplicate Roll Number Check */
+  //     const rollNumbers = studentInformation
+  //       .map((s) => s.roll_no)
+  //       .filter(Boolean);
+
+  //     const duplicateRolls = [
+  //       ...new Set(
+  //         rollNumbers.filter((num, index) => rollNumbers.indexOf(num) !== index)
+  //       ),
+  //     ];
+
+  //     if (duplicateRolls.length > 0) {
+  //       toast.error(
+  //         `Duplicate Roll Numbers found: ${duplicateRolls.join(", ")}`
+  //       );
+
+  //       const duplicateErrors = {};
+  //       studentInformation.forEach((stu) => {
+  //         if (duplicateRolls.includes(stu.roll_no)) {
+  //           duplicateErrors[stu.student_id] = {
+  //             ...(duplicateErrors[stu.student_id] || {}),
+  //             roll_no: "Roll Number must be unique",
+  //           };
+  //         }
+  //       });
+
+  //       setErrors({ ...newErrors, ...duplicateErrors });
+  //       setSubmitTeacherNote(false);
+  //       return;
+  //     }
+
+  //     /* 🔹 Step 3: Stop if basic validation failed */
+  //     if (Object.keys(newErrors).length > 0) {
+  //       setErrors(newErrors);
+  //       toast.error("Please fix validation errors before submitting.");
+  //       setSubmitTeacherNote(false);
+  //       return;
+  //     }
+
+  //     /* 🔹 Step 4: Clear old errors */
+  //     setErrors({});
+
+  //     /* 🔹 Step 5: Prepare API Payload */
+  //     const payload = {
+  //       students: studentInformation.map((s) => ({
+  //         student_id: s.student_id,
+  //         reg_no: s.reg_no,
+  //         admission_date: s.admission_date,
+  //         stu_aadhaar_no: s.stu_aadhaar_no,
+  //         house: s.house,
+  //         roll_no: s.roll_no,
+  //       })),
+  //     };
+
+  //     /* 🔹 Step 6: API Call */
+  //     const res = await axios.put(
+  //       `${API_URL}/api/update_studentallotrollnohouse`,
+  //       payload,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     if (res.status === 200) {
+  //       toast.success("Student details updated successfully!");
+  //     }
+  //   } catch (err) {
+  //     console.error("Error saving students:", err.response);
+
+  //     /* Backend Roll Number Duplicate (422) */
+  //     if (err.response?.status === 422) {
+  //       const data = err.response.data;
+
+  //       toast.error(data?.message || "Roll number already exists");
+
+  //       console.log("....".data.student_id);
+
+  //       // Optional: highlight specific student row if backend sends it
+  //       if (data?.student_id) {
+  //         setErrors({
+  //           [data.student_id]: {
+  //             roll_no: data.message,
+  //           },
+  //         });
+  //       }
+  //     } else {
+  //       toast.error("Failed to update student details.");
+  //     }
+  //   } finally {
+  //     setSubmitTeacherNote(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitTeacherNote(true);
 
     try {
-      // 🔹 Step 1: Basic Validation
+      /* 🔹 Step 1: Basic Validation */
       const newErrors = {};
+
       studentInformation.forEach((stu) => {
-        if (!stu.roll_no || stu.roll_no === "") {
+        if (!stu.roll_no) {
           newErrors[stu.student_id] = {
             ...(newErrors[stu.student_id] || {}),
             roll_no: "Please enter Roll Number",
           };
         }
-        if (!stu.house || stu.house === "") {
+
+        if (!stu.house) {
           newErrors[stu.student_id] = {
             ...(newErrors[stu.student_id] || {}),
             house: "Please select House",
@@ -194,38 +541,45 @@ const AllotRollNumberHouse = () => {
         }
       });
 
-      // 🔹 Step 2: Unique Roll Number Validation
-      const rollNumbers = studentInformation
-        .map((s) => s.roll_no)
-        .filter((r) => r !== "" && r !== null);
+      /* 🔹 Step 2: Frontend Duplicate Roll Number Check */
+      const duplicateErrors = {};
+      const seen = {}; // roll_no -> student_id
+      const duplicateRollsSet = new Set(); // to collect duplicate numbers for toast
 
-      const duplicateRolls = rollNumbers.filter(
-        (num, index) => rollNumbers.indexOf(num) !== index
-      );
+      studentInformation.forEach((stu) => {
+        if (!stu.roll_no) return;
 
-      if (duplicateRolls.length > 0) {
+        if (seen[stu.roll_no]) {
+          // current student
+          duplicateErrors[stu.student_id] = {
+            roll_no: "Roll Number must be unique",
+          };
+
+          // previously seen student
+          duplicateErrors[seen[stu.roll_no]] = {
+            roll_no: "Roll Number must be unique",
+          };
+
+          // add to toast list
+          duplicateRollsSet.add(stu.roll_no);
+        } else {
+          seen[stu.roll_no] = stu.student_id;
+        }
+      });
+
+      if (Object.keys(duplicateErrors).length > 0) {
+        const duplicateRolls = Array.from(duplicateRollsSet);
+
         toast.error(
-          `Duplicate Roll Numbers found: ${[...new Set(duplicateRolls)].join(
-            ", "
-          )}`
+          `Duplicate Roll Numbers found: ${duplicateRolls.join(", ")}`
         );
 
-        // Highlight duplicate students
-        const duplicateErrors = {};
-        studentInformation.forEach((stu) => {
-          if (duplicateRolls.includes(stu.roll_no)) {
-            duplicateErrors[stu.student_id] = {
-              ...(duplicateErrors[stu.student_id] || {}),
-              roll_no: "Roll Number must be unique",
-            };
-          }
-        });
         setErrors({ ...newErrors, ...duplicateErrors });
         setSubmitTeacherNote(false);
         return;
       }
 
-      // 🔹 Step 3: Stop submission if there are any validation errors
+      /* 🔹 Step 3: Stop if basic validation failed */
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
         toast.error("Please fix validation errors before submitting.");
@@ -233,10 +587,10 @@ const AllotRollNumberHouse = () => {
         return;
       }
 
-      // 🔹 Step 4: Clear old errors if validation passed
+      /* 🔹 Step 4: Clear old errors */
       setErrors({});
 
-      // 🔹 Step 5: API Payload
+      /* 🔹 Step 5: Prepare API Payload */
       const payload = {
         students: studentInformation.map((s) => ({
           student_id: s.student_id,
@@ -248,11 +602,13 @@ const AllotRollNumberHouse = () => {
         })),
       };
 
-      // 🔹 Step 6: API Call
+      /* 🔹 Step 6: API Call */
       const res = await axios.put(
         `${API_URL}/api/update_studentallotrollnohouse`,
         payload,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       if (res.status === 200) {
@@ -260,9 +616,14 @@ const AllotRollNumberHouse = () => {
       }
     } catch (err) {
       console.error("Error saving students:", err.response);
-      toast.error("Failed to update student details.");
+
+      // Backend fallback only
+      if (err.response?.status === 422) {
+        toast.error("Duplicate roll numbers detected. Please correct them.");
+      } else {
+        toast.error("Failed to update student details.");
+      }
     } finally {
-      // 🔹 Step 7: Stop Loader
       setSubmitTeacherNote(false);
     }
   };
@@ -364,9 +725,8 @@ const AllotRollNumberHouse = () => {
                   type="search"
                   onClick={handleSearch}
                   style={{ backgroundColor: "#2196F3" }}
-                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                    loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   disabled={loadingForSearch}
                 >
                   {loadingForSearch ? (
@@ -453,6 +813,9 @@ const AllotRollNumberHouse = () => {
                                 className={
                                   index % 2 === 0 ? "bg-white" : "bg-gray-100"
                                 }
+                                ref={(el) =>
+                                  (studentRefs.current[stu.student_id] = el)
+                                }
                               >
                                 <td className="border border-gray-950 text-center p-2">
                                   {stu.reg_no}
@@ -528,11 +891,10 @@ const AllotRollNumberHouse = () => {
                       type="submit"
                       onClick={handleSubmit}
                       disabled={submitTeacherNote}
-                      className={`text-white font-bold py-1 px-4 rounded ${
-                        submitTeacherNote
+                      className={`text-white font-bold py-1 px-4 rounded ${submitTeacherNote
                           ? "opacity-50 cursor-not-allowed bg-blue-400"
                           : "bg-blue-600 hover:bg-blue-700"
-                      }`}
+                        }`}
                     >
                       {submitTeacherNote ? (
                         <span className="flex items-center">

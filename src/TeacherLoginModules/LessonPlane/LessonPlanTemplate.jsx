@@ -376,9 +376,8 @@ function LessonPlanTemplate() {
             {tabs.map(({ id, label }) => (
               <li
                 key={id}
-                className={`md:-ml-7 shadow-md ${
-                  activeTab === id ? "text-blue-500 font-bold" : ""
-                }`}
+                className={`md:-ml-7 shadow-md ${activeTab === id ? "text-blue-500 font-bold" : ""
+                  }`}
               >
                 <button
                   onClick={() => handleTabChange(id)}

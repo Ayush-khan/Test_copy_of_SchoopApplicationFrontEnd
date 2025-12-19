@@ -460,9 +460,8 @@ const EditLessonPlanTemplate = () => {
   return (
     <>
       <div
-        className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${
-          showStudentReport ? "w-full " : "w-[90%] "
-        }`}
+        className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${showStudentReport ? "w-full " : "w-[90%] "
+          }`}
       >
         <ToastContainer />
         <div className="card pb-4  rounded-md ">
@@ -611,11 +610,10 @@ const EditLessonPlanTemplate = () => {
                                           {(heading || []).map((item, i) => (
                                             <th
                                               key={item.lesson_plan_headings_id}
-                                              className={`px-6 py-2 border-2 text-sm font-semibold text-center text-gray-800 ${
-                                                i === 0
-                                                  ? "sticky left-0 bg-gray-200"
-                                                  : ""
-                                              }`}
+                                              className={`px-6 py-2 border-2 text-sm font-semibold text-center text-gray-800 ${i === 0
+                                                ? "sticky left-0 bg-gray-200"
+                                                : ""
+                                                }`}
                                               style={{ width: "210px" }}
                                             >
                                               {item.name}
@@ -641,7 +639,7 @@ const EditLessonPlanTemplate = () => {
                                               // Get all details for this heading
                                               const descArray =
                                                 template.groupedDetails?.[
-                                                  headingId
+                                                headingId
                                                 ] || [];
 
                                               // Show first detail for simplicity
@@ -650,11 +648,10 @@ const EditLessonPlanTemplate = () => {
                                               return (
                                                 <td
                                                   key={headingId}
-                                                  className={`border-2 px-2 py-1 ${
-                                                    colIndex === 0
-                                                      ? "sticky left-0 bg-white"
-                                                      : ""
-                                                  }`}
+                                                  className={`border-2 px-2 py-1 ${colIndex === 0
+                                                    ? "sticky left-0 bg-white"
+                                                    : ""
+                                                    }`}
                                                   style={{
                                                     width: "210px",
                                                     minHeight: "250px",
@@ -663,7 +660,7 @@ const EditLessonPlanTemplate = () => {
                                                   <textarea
                                                     value={
                                                       studentRemarks[
-                                                        headingId
+                                                      headingId
                                                       ] ??
                                                       descObj?.description ??
                                                       ""
@@ -691,11 +688,10 @@ const EditLessonPlanTemplate = () => {
                                                         })
                                                       );
                                                     }}
-                                                    className={`w-full h-full resize-none p-2 border border-gray-300 focus:outline-none ${
-                                                      publish === "Y"
-                                                        ? "bg-gray-50"
-                                                        : ""
-                                                    }`}
+                                                    className={`w-full h-full resize-none p-2 border border-gray-300 focus:outline-none ${publish === "Y"
+                                                      ? "bg-gray-50"
+                                                      : ""
+                                                      }`}
                                                     onKeyDown={(e) => {
                                                       const {
                                                         value,
@@ -750,7 +746,7 @@ const EditLessonPlanTemplate = () => {
                                                         setTimeout(() => {
                                                           e.target.selectionStart =
                                                             e.target.selectionEnd =
-                                                              cursorPos;
+                                                            cursorPos;
                                                         }, 0);
                                                       }
 
@@ -773,7 +769,7 @@ const EditLessonPlanTemplate = () => {
                                                             "• "
                                                           ) &&
                                                           selectionStart ===
-                                                            lineStart + 2
+                                                          lineStart + 2
                                                         ) {
                                                           e.preventDefault();
                                                           const newValue =
@@ -790,7 +786,7 @@ const EditLessonPlanTemplate = () => {
                                                           setTimeout(() => {
                                                             e.target.selectionStart =
                                                               e.target.selectionEnd =
-                                                                lineStart;
+                                                              lineStart;
                                                           }, 0);
                                                         }
                                                       }
@@ -803,7 +799,7 @@ const EditLessonPlanTemplate = () => {
                                                       const updatedLines =
                                                         lines.map((line) =>
                                                           line.trim() === "" ||
-                                                          line.startsWith("• ")
+                                                            line.startsWith("• ")
                                                             ? line
                                                             : "• " + line
                                                         );
@@ -817,7 +813,7 @@ const EditLessonPlanTemplate = () => {
                                                           newValue;
                                                         e.target.selectionStart =
                                                           e.target.selectionEnd =
-                                                            newValue.length;
+                                                          newValue.length;
                                                       }
                                                     }}
                                                     onBlur={(e) => {

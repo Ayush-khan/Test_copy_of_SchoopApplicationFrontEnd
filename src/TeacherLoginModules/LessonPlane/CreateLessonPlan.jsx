@@ -233,9 +233,9 @@ const CreateLessonPlan = () => {
     () =>
       Array.isArray(allChapter)
         ? allChapter.map((chapter) => ({
-            value: chapter.chapter_id,
-            label: chapter.name,
-          }))
+          value: chapter.chapter_id,
+          label: chapter.name,
+        }))
         : [],
     [allChapter]
   );
@@ -244,9 +244,9 @@ const CreateLessonPlan = () => {
     () =>
       Array.isArray(allSubject)
         ? allSubject.map((cls) => ({
-            value: cls?.sm_id,
-            label: `${cls.name}`,
-          }))
+          value: cls?.sm_id,
+          label: `${cls.name}`,
+        }))
         : [],
     [allSubject]
   );
@@ -255,11 +255,11 @@ const CreateLessonPlan = () => {
     () =>
       Array.isArray(studentNameWithClassId)
         ? studentNameWithClassId.map((cls) => ({
-            value: `${cls.class_id}-${cls.section_id}`,
-            label: `${cls.classname} ${cls.sectionname}`,
-            class_id: cls.class_id,
-            section_id: cls.section_id,
-          }))
+          value: `${cls.class_id}-${cls.section_id}`,
+          label: `${cls.classname} ${cls.sectionname}`,
+          class_id: cls.class_id,
+          section_id: cls.section_id,
+        }))
         : [],
     [studentNameWithClassId]
   );
@@ -435,8 +435,8 @@ const CreateLessonPlan = () => {
               .map(([key, value]) =>
                 Array.isArray(value)
                   ? value
-                      .map((v) => `${key}=${encodeURIComponent(v)}`)
-                      .join("&")
+                    .map((v) => `${key}=${encodeURIComponent(v)}`)
+                    .join("&")
                   : `${key}=${encodeURIComponent(value)}`
               )
               .join("&"),
@@ -570,17 +570,17 @@ const CreateLessonPlan = () => {
       // 🔸 Validate class/section selection
       const studentsArray = Array.isArray(selectedStudent)
         ? selectedStudent.map((s) => ({
-            class_id: s.class_id,
-            section_id: s.section_id || "0",
-          }))
+          class_id: s.class_id,
+          section_id: s.section_id || "0",
+        }))
         : selectedStudent
-        ? [
+          ? [
             {
               class_id: selectedStudent.class_id,
               section_id: selectedStudent.section_id || "0",
             },
           ]
-        : [];
+          : [];
 
       if (!studentsArray.length) {
         toast.error("Please select at least one class before saving.");
@@ -693,7 +693,7 @@ const CreateLessonPlan = () => {
         (dailyHeading || []).some((item) => {
           const val =
             descriptions[
-              `dc_description_${item.lesson_plan_headings_id}_${rowIndex + 1}`
+            `dc_description_${item.lesson_plan_headings_id}_${rowIndex + 1}`
             ] || "";
           return val.trim() !== "";
         })
@@ -799,8 +799,8 @@ const CreateLessonPlan = () => {
     filteredSections.length > 0
       ? filteredSections
       : timetable.length === 0
-      ? [{}]
-      : [];
+        ? [{}]
+        : [];
 
   const existingData = {};
   displayedSections.forEach((student) => {
@@ -812,9 +812,8 @@ const CreateLessonPlan = () => {
   return (
     <>
       <div
-        className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${
-          showStudentReport ? "w-full " : "w-[90%] "
-        }`}
+        className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${showStudentReport ? "w-full " : "w-[90%] "
+          }`}
       >
         <ToastContainer />
         <div className="card pb-4  rounded-md ">
@@ -1192,11 +1191,10 @@ const CreateLessonPlan = () => {
                         type="search"
                         onClick={handleSearch}
                         style={{ backgroundColor: "#2196F3" }}
-                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                          loadingForSearch
+                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch
                             ? "opacity-50 cursor-not-allowed"
                             : ""
-                        }`}
+                          }`}
                         disabled={loadingForSearch}
                       >
                         {loadingForSearch ? (
@@ -1418,11 +1416,10 @@ const CreateLessonPlan = () => {
                                     type="search"
                                     onClick={handleSearch}
                                     style={{ backgroundColor: "#2196F3" }}
-                                    className={`btn h-8 w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-2 rounded ${
-                                      loadingForSearch
+                                    className={`btn h-8 w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-2 rounded ${loadingForSearch
                                         ? "opacity-50 cursor-not-allowed"
                                         : ""
-                                    }`}
+                                      }`}
                                     disabled={loadingForSearch}
                                   >
                                     {loadingForSearch ? (
@@ -1588,11 +1585,10 @@ const CreateLessonPlan = () => {
                                           {(heading || []).map((item, i) => (
                                             <th
                                               key={item.lesson_plan_headings_id}
-                                              className={`px-6 py-2 border-2 text-sm font-semibold text-center text-gray-800 ${
-                                                i === 0
+                                              className={`px-6 py-2 border-2 text-sm font-semibold text-center text-gray-800 ${i === 0
                                                   ? "sticky left-0 bg-gray-200"
                                                   : ""
-                                              }`}
+                                                }`}
                                               style={{ width: "210px" }}
                                             >
                                               {item.name}
@@ -1619,11 +1615,10 @@ const CreateLessonPlan = () => {
                                                       key={
                                                         item.lesson_plan_headings_id
                                                       }
-                                                      className={`border-2 px-2 py-1 ${
-                                                        colIndex === 0
+                                                      className={`border-2 px-2 py-1 ${colIndex === 0
                                                           ? "sticky left-0 bg-white"
                                                           : ""
-                                                      }`}
+                                                        }`}
                                                       style={{
                                                         width: "210px",
                                                         minHeight: "250px",
@@ -1632,12 +1627,12 @@ const CreateLessonPlan = () => {
                                                       <textarea
                                                         value={
                                                           studentRemarks[
-                                                            item
-                                                              .lesson_plan_headings_id
+                                                          item
+                                                            .lesson_plan_headings_id
                                                           ] ||
                                                           template[
-                                                            item
-                                                              .lesson_plan_headings_id
+                                                          item
+                                                            .lesson_plan_headings_id
                                                           ] ||
                                                           ""
                                                         }
@@ -1678,7 +1673,7 @@ const CreateLessonPlan = () => {
                                                               value.lastIndexOf(
                                                                 "\n",
                                                                 selectionStart -
-                                                                  1
+                                                                1
                                                               ) + 1;
                                                             const currentLine =
                                                               value.substring(
@@ -1718,7 +1713,7 @@ const CreateLessonPlan = () => {
                                                             setTimeout(() => {
                                                               e.target.selectionStart =
                                                                 e.target.selectionEnd =
-                                                                  cursorPos;
+                                                                cursorPos;
                                                             }, 0);
                                                           }
 
@@ -1730,7 +1725,7 @@ const CreateLessonPlan = () => {
                                                               value.lastIndexOf(
                                                                 "\n",
                                                                 selectionStart -
-                                                                  1
+                                                                1
                                                               ) + 1;
                                                             const currentLine =
                                                               value.substring(
@@ -1743,7 +1738,7 @@ const CreateLessonPlan = () => {
                                                                 "• "
                                                               ) &&
                                                               selectionStart ===
-                                                                lineStart + 2
+                                                              lineStart + 2
                                                             ) {
                                                               e.preventDefault();
                                                               const newValue =
@@ -1760,7 +1755,7 @@ const CreateLessonPlan = () => {
                                                               setTimeout(() => {
                                                                 e.target.selectionStart =
                                                                   e.target.selectionEnd =
-                                                                    lineStart;
+                                                                  lineStart;
                                                               }, 0);
                                                             }
                                                           }
@@ -1774,9 +1769,9 @@ const CreateLessonPlan = () => {
                                                             lines.map((line) =>
                                                               line.trim() ===
                                                                 "" ||
-                                                              line.startsWith(
-                                                                "• "
-                                                              )
+                                                                line.startsWith(
+                                                                  "• "
+                                                                )
                                                                 ? line
                                                                 : "• " + line
                                                             );
@@ -1792,7 +1787,7 @@ const CreateLessonPlan = () => {
                                                               newValue;
                                                             e.target.selectionStart =
                                                               e.target.selectionEnd =
-                                                                newValue.length;
+                                                              newValue.length;
                                                           }
                                                         }}
                                                         onBlur={(e) => {
@@ -1942,13 +1937,12 @@ const CreateLessonPlan = () => {
                                                     <textarea
                                                       value={
                                                         studentRemarks[
-                                                          `${item.lesson_plan_headings_id}_${rowIndex}`
+                                                        `${item.lesson_plan_headings_id}_${rowIndex}`
                                                         ] ||
                                                         timetable[rowIndex]?.[
-                                                          // `dc_description_${item.lesson_plan_headings_id}_1`
-                                                          `dc_description_${
-                                                            item.lesson_plan_headings_id
-                                                          }_${rowIndex + 1}`
+                                                        // `dc_description_${item.lesson_plan_headings_id}_1`
+                                                        `dc_description_${item.lesson_plan_headings_id
+                                                        }_${rowIndex + 1}`
                                                         ] ||
                                                         ""
                                                       }

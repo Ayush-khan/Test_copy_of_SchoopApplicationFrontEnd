@@ -261,9 +261,9 @@ function LessonPlan() {
     () =>
       Array.isArray(studentNameWithClassId)
         ? studentNameWithClassId.map((cls) => ({
-            value: `${cls.class_id}_${cls.section_id}`, // combined value
-            label: `${cls.classname} ${cls.sectionname}`,
-          }))
+          value: `${cls.class_id}_${cls.section_id}`, // combined value
+          label: `${cls.classname} ${cls.sectionname}`,
+        }))
         : [],
     [studentNameWithClassId]
   );
@@ -272,9 +272,9 @@ function LessonPlan() {
     () =>
       Array.isArray(allSubject)
         ? allSubject.map((cls) => ({
-            value: cls?.sm_id,
-            label: `${cls.name}`,
-          }))
+          value: cls?.sm_id,
+          label: `${cls.name}`,
+        }))
         : [],
     [allSubject]
   );
@@ -283,9 +283,9 @@ function LessonPlan() {
     () =>
       Array.isArray(allChapter)
         ? allChapter.map((cls) => ({
-            value: cls?.sub_subject,
-            label: `${cls.sub_subject}`,
-          }))
+          value: cls?.sub_subject,
+          label: `${cls.sub_subject}`,
+        }))
         : [],
     [allChapter]
   );
@@ -470,12 +470,12 @@ function LessonPlan() {
       const apiData = Array.isArray(rawData)
         ? rawData
         : rawData?.data
-        ? Array.isArray(rawData.data)
-          ? rawData.data
-          : [rawData.data]
-        : rawData
-        ? [rawData]
-        : [];
+          ? Array.isArray(rawData.data)
+            ? rawData.data
+            : [rawData.data]
+          : rawData
+            ? [rawData]
+            : [];
 
       if (apiData.length > 0) {
         const updatedNotices = apiData.map((notice) => ({
@@ -605,7 +605,7 @@ function LessonPlan() {
       // setSubjects([]);
       toast.success(
         response.data.message ||
-          `${currestSubjectNameForDelete} Publish successfully!`
+        `${currestSubjectNameForDelete} Publish successfully!`
       );
     } catch (error) {
       if (error.response && error.response.data) {
@@ -653,7 +653,7 @@ function LessonPlan() {
       // setSubjects([]);
       toast.success(
         response.data.message ||
-          `${currestSubjectNameForDelete} Deleted successfully!`
+        `${currestSubjectNameForDelete} Deleted successfully!`
       );
     } catch (error) {
       if (error.response && error.response.data) {
@@ -749,9 +749,8 @@ function LessonPlan() {
           {tabs.map(({ id, label }) => (
             <li
               key={id}
-              className={`md:-ml-7 shadow-md ${
-                activeTab === id ? "text-blue-500 font-bold" : ""
-              }`}
+              className={`md:-ml-7 shadow-md ${activeTab === id ? "text-blue-500 font-bold" : ""
+                }`}
             >
               <button
                 onClick={() => handleTabChange(id)}
@@ -952,11 +951,10 @@ function LessonPlan() {
                           type="search"
                           onClick={handleSearch}
                           style={{ backgroundColor: "#2196F3" }}
-                          className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                            loadingForSearch
+                          className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch
                               ? "opacity-50 cursor-not-allowed"
                               : ""
-                          }`}
+                            }`}
                           disabled={loadingForSearch}
                         >
                           {loadingForSearch ? (
@@ -1056,10 +1054,9 @@ function LessonPlan() {
                                   {unqIdDetails[subject.unq_id]?.length
                                     ? unqIdDetails[subject.unq_id].join(", ")
                                     : subject?.c_name
-                                    ? `${subject.c_name} ${
-                                        subject.sec_name || ""
+                                      ? `${subject.c_name} ${subject.sec_name || ""
                                       }`
-                                    : "-"}
+                                      : "-"}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.sub_name}

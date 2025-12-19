@@ -230,8 +230,7 @@ const TicketList = () => {
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {camelCase(
-                                    `${student?.first_name || ""} ${
-                                      student?.mid_name || ""
+                                    `${student?.first_name || ""} ${student?.mid_name || ""
                                     } ${student?.last_name || ""}`
                                   )}
                                 </td>

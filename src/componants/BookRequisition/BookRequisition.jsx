@@ -563,9 +563,8 @@ function BookRequisition() {
                       displayedSections.map((section, index) => (
                         <tr
                           key={section.book_req_id}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
+                          className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-50`}
                         >
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
@@ -592,12 +591,12 @@ function BookRequisition() {
                               {section?.status === "A"
                                 ? "Apply"
                                 : section?.status === "H"
-                                ? "Hold"
-                                : section?.status === "R"
-                                ? "Reject"
-                                : section?.status === "P"
-                                ? "Approve"
-                                : section?.status}
+                                  ? "Hold"
+                                  : section?.status === "R"
+                                    ? "Reject"
+                                    : section?.status === "P"
+                                      ? "Approve"
+                                      : section?.status}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
