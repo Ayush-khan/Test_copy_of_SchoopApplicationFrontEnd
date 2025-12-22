@@ -974,7 +974,7 @@ function NavBar() {
                       paddingRight: "4px",
                     }}
                     className={`w-12 lg:w-20 mr-4 outline-none border-1 border-gray-400 rounded-md py-0.5 text-xs lg:text-sm`}
-                    disabled={loading}
+                  // disabled={loading}
                   />
                 </div>
               </div>{" "}
