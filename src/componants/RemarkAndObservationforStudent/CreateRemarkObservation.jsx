@@ -40,13 +40,51 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState([]);
+  const [roleId, setRoleId] = useState("");
+  const [roleIdValue, setRoleIdValue] = useState("");
 
   const handleObservationToggle = (e) => {
     setIsObservation(e.target.checked);
   };
 
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      // console.error("No authentication token found");
+      return {};
+    }
+
+    try {
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const roleId = sessionResponse?.data?.user?.role_id;
+      const regId = sessionResponse?.data?.user?.reg_id;
+
+      setRoleId(roleId); // optional for global use
+      setRoleIdValue(regId); // optional for global use
+
+      return { roleId, roleIdValue: regId }; // ✅ return both
+    } catch (error) {
+      // console.error("Error fetching role data:", error);
+      return {};
+    }
+  };
+  // useEffect(() => {
+  //   fetchClasses();
+  // }, []);
+
   useEffect(() => {
-    fetchClasses();
+    const fetchData = async () => {
+      const { roleId, roleIdValue } = await fetchDataRoleId(); // 🔁 returns both values
+      await fetchClasses(roleId, roleIdValue); // ✅ pass them as args
+    };
+
+    fetchData();
   }, []);
 
   // useEffect(() => {
@@ -55,6 +93,7 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
   //   }
   // }, [classIdForSubjectAPI]);
 
+  // working before the  19-12- 2025
   useEffect(() => {
     if (classIdForSubjectAPI && sectionIdForStudentList) {
       fetchSubjects(classIdForSubjectAPI, sectionIdForStudentList);
@@ -110,22 +149,30 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
     }
   };
 
-  const fetchClasses = async () => {
+  const fetchClasses = async (roleId, roleIdValue) => {
     try {
       setLoadingClasses(true);
       setLoadingStudents(true);
 
       const token = localStorage.getItem("authToken");
 
-      const classResponse = await axios.get(
-        `${API_URL}/api/getallClassWithStudentCount`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const classApiUrl =
+        roleId === "T"
+          ? `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${roleIdValue}`
+          : `${API_URL}/api/getallClassWithStudentCount`;
 
-      console.log("Class Data", classResponse.data);
-      setAllClasses(classResponse.data || []);
+      const [classResponse] = await Promise.all([
+        axios.get(classApiUrl, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const classData =
+        roleId === "T"
+          ? classResponse.data.data || []
+          : classResponse.data || [];
+
+      setAllClasses(classData);
     } catch (error) {
       toast.error("Error fetching data.");
     } finally {
@@ -135,11 +182,55 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
   };
 
   const classOptions = useMemo(() => {
-    return allClasses.map((cls) => ({
-      value: cls.section_id,
-      label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
-    }));
-  }, [allClasses]);
+    return allClasses.map((cls) => {
+      if (roleId === "T") {
+        return {
+          value: cls.section_id,
+          label: `${cls.classname} ${cls.sectionname}`,
+          class_id: cls.class_id,
+          section_id: cls.section_id,
+        };
+      } else {
+        return {
+          value: cls.section_id,
+          label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+          class_id: cls.class_id,
+          section_id: cls.section_id,
+        };
+      }
+    });
+  }, [allClasses, roleId]);
+
+  // const fetchClasses = async () => {
+  //   try {
+  //     setLoadingClasses(true);
+  //     setLoadingStudents(true);
+
+  //     const token = localStorage.getItem("authToken");
+
+  //     const classResponse = await axios.get(
+  //       `${API_URL}/api/getallClassWithStudentCount`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     console.log("Class Data", classResponse.data);
+  //     setAllClasses(classResponse.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching data.");
+  //   } finally {
+  //     setLoadingClasses(false);
+  //     setLoadingStudents(false);
+  //   }
+  // };
+
+  // const classOptions = useMemo(() => {
+  //   return allClasses.map((cls) => ({
+  //     value: cls.section_id,
+  //     label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+  //   }));
+  // }, [allClasses]);
 
   const subjectOptions = useMemo(() => {
     return (subjects || []).map((subj) => ({
@@ -157,6 +248,30 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
     }
   };
 
+  // const handleClassSelect = (selectedOption) => {
+  //   setSelectedClass(selectedOption);
+  //   setSelectedStudent(null);
+  //   setSelectedStudentId(null);
+
+  //   if (errors.classError) {
+  //     setErrors((prev) => ({ ...prev, classError: "" }));
+  //   }
+
+  //   const sectionId = selectedOption?.value;
+  //   if (!sectionId) return;
+
+  //   setSectionIdForStudentList(sectionId);
+
+  //   const fullClassObj = allClasses.find((cls) => cls.section_id === sectionId);
+  //   const classId = fullClassObj?.get_class?.class_id;
+
+  //   if (classId) {
+  //     setClassIdForSubjectAPI(classId);
+  //     // Fetch subjects directly here after both values are available
+  //     fetchSubjects(classId, sectionId);
+  //   }
+  // };
+
   const handleClassSelect = (selectedOption) => {
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
@@ -166,19 +281,10 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
       setErrors((prev) => ({ ...prev, classError: "" }));
     }
 
-    const sectionId = selectedOption?.value;
-    if (!sectionId) return;
+    if (!selectedOption) return;
 
-    setSectionIdForStudentList(sectionId);
-
-    const fullClassObj = allClasses.find((cls) => cls.section_id === sectionId);
-    const classId = fullClassObj?.get_class?.class_id;
-
-    if (classId) {
-      setClassIdForSubjectAPI(classId);
-      // Fetch subjects directly here after both values are available
-      fetchSubjects(classId, sectionId);
-    }
+    setSectionIdForStudentList(selectedOption.section_id);
+    setClassIdForSubjectAPI(selectedOption.class_id);
   };
 
   const handleStudentToggle = (studentId) => {

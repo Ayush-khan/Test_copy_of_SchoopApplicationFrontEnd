@@ -167,9 +167,14 @@ const CreateChapter = () => {
 
   const handleLessonChange = (e) => {
     const value = e.target.value;
-    setLessonNo(value);
-    if (value.trim() !== "") {
-      setErrors((prev) => ({ ...prev, lessonNo: "" }));
+
+    // Allow only numbers
+    if (/^\d*$/.test(value)) {
+      setLessonNo(value);
+
+      if (value.trim() !== "") {
+        setErrors((prev) => ({ ...prev, lessonNo: "" }));
+      }
     }
   };
 
@@ -193,7 +198,7 @@ const CreateChapter = () => {
     }
   };
 
-  const handleSubmitAdd = async (shouldPublish = false) => {
+  const handleSubmitAdd = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
@@ -211,7 +216,11 @@ const CreateChapter = () => {
     if (!lessonNo.trim()) {
       newErrors.lessonNo = "Lesson number is required.";
       formHasErrors = true;
+    } else if (!/^\d+$/.test(lessonNo)) {
+      newErrors.lessonNo = "Only numbers are allowed.";
+      formHasErrors = true;
     }
+
     if (!name.trim()) {
       newErrors.name = "Lesson name is required.";
       formHasErrors = true;
@@ -258,15 +267,24 @@ const CreateChapter = () => {
       }
     } catch (err) {
       console.error("Error saving chapter:", err);
-      toast.error("Server error. Please try again.");
+
+      if (err.response && err.response.status === 409) {
+        setErrors((prev) => ({
+          ...prev,
+          lessonNo:
+            "Lesson number is already created,please enter unique number..",
+        }));
+      } else {
+        toast.error("Server error. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleSubmitAddPublish = async (shouldPublish = true) => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
+  const handleSubmitAddPublish = async () => {
+    if (isPublishing) return;
+    setIsPublishing(true);
 
     const newErrors = {};
     let formHasErrors = false;
@@ -290,7 +308,7 @@ const CreateChapter = () => {
 
     if (formHasErrors) {
       setErrors(newErrors);
-      setIsSubmitting(false);
+      setIsPublishing(false);
       toast.error("Please fill all required fields correctly.");
       return;
     }
@@ -328,115 +346,21 @@ const CreateChapter = () => {
         toast.error(data.message || "Failed to save and publish chapter.");
       }
     } catch (err) {
-      console.error("Error saving and publishing chapter:", err);
-      toast.error("Server error. Please try again.");
+      console.error("Error saving chapter:", err);
+
+      if (err.response && err.response.status === 409) {
+        setErrors((prev) => ({
+          ...prev,
+          lessonNo:
+            "Lesson number is already created,please enter unique number..",
+        }));
+      } else {
+        toast.error("Server error. Please try again.");
+      }
     } finally {
-      setIsSubmitting(false);
+      setIsPublishing(false);
     }
   };
-
-  // const handleSubmitAddPublish = async (shouldPublish = true) => {
-  //   if (isPublishing) return;
-  //   setIsPublishing(true);
-
-  //   const title = subject?.trim();
-  //   const classList = selectedClasses;
-  //   const subjectList = selectedSubject;
-
-  //   let formHasErrors = false;
-  //   let errorMessages = {};
-
-  //   // Validations
-  //   if (!title) {
-  //     formHasErrors = true;
-  //     errorMessages.title = "Event title is required.";
-  //     console.log("⚠️ Missing title");
-  //   }
-
-  //   if (!description?.trim()) {
-  //     formHasErrors = true;
-  //     errorMessages.description = "Description is required.";
-  //     console.log("⚠️ Missing description");
-  //   }
-
-  //   if (!startDate) {
-  //     formHasErrors = true;
-  //     errorMessages.startDate = "Start date is required.";
-  //     console.log("⚠️ Missing start date");
-  //   }
-
-  //   if (!classList || classList.length === 0) {
-  //     formHasErrors = true;
-  //     errorMessages.classError = "Please select class.";
-  //   }
-
-  //   if (!subjectList || subjectList.length === 0) {
-  //     formHasErrors = true;
-  //     errorMessages.roleError = "Please select subject.";
-  //   }
-
-  //   if (formHasErrors) {
-  //     setErrors(errorMessages);
-  //     setIsPublishing(false);
-  //     toast.dismiss();
-
-  //     return;
-  //   }
-
-  //   // Proceed with form submission...
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       toast.error("No authentication token found. Please log in again.");
-  //       setIsPublishing(false);
-  //       return;
-  //     }
-
-  //     const formDataToSend = new FormData();
-  //     formDataToSend.append("title", title);
-  //     formDataToSend.append("description", description);
-  //     formDataToSend.append("start_date", startDate);
-  //     formDataToSend.append("end_date", endDate || "");
-  //     formDataToSend.append("start_time", startTime || "00:00:00");
-  //     formDataToSend.append("end_time", endTime || "00:00:00");
-  //     formDataToSend.append("competition", competition ? "Y" : "N");
-  //     formDataToSend.append("notify", notify ? "Y" : "N");
-  //     formDataToSend.append("publish", shouldPublish ? "true" : "false");
-
-  //     classList.forEach((cls) => formDataToSend.append("checkbxclass[]", cls));
-  //     subjectList.forEach((role) =>
-  //       formDataToSend.append("checkbxlogintype[]", role)
-  //     );
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/save_savepublishevent`,
-  //       formDataToSend,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "multipart/form-data",
-  //         },
-  //       }
-  //     );
-
-  //     const { data } = response;
-  //     if (data.success) {
-  //       toast.success("Chapter saved & Publish successfully!");
-  //       resetForm();
-  //       setErrors({});
-  //       navigate("/chapters");
-  //     } else {
-  //       toast.error(
-  //         data.message || "Chapter already exists or failed to save & publish."
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("Error saving & publishing chapter:", error);
-  //     toast.error("Server error. Please try again.");
-  //   } finally {
-  //     setIsPublishing(false);
-  //   }
-  // };
 
   return (
     <div>
@@ -557,7 +481,9 @@ const CreateChapter = () => {
                               value={lessonNo}
                               // onChange={(e) => setLessonNo(e.target.value)}
                               onChange={handleLessonChange}
-                              maxLength={2}
+                              maxLength={3}
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                             />
 
                             {errors.lessonNo && (
@@ -657,7 +583,7 @@ const CreateChapter = () => {
                     <button
                       onClick={resetForm}
                       className="btn btn-danger bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                      disabled={isSubmitting}
+                    // disabled={isSubmitting}
                     >
                       Reset
                     </button>

@@ -1636,26 +1636,26 @@ function EditStaff() {
         return { ...prevData, academic_qual: newAcademicQual };
       });
     } else {
-      // setFormData((prevData) => ({
-      //   ...prevData,
-      //   [name]: newValue,
-      // }));
-      setFormData((prevData) => {
-        const updatedData = {
-          ...prevData,
-          [name]: newValue,
-        };
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: newValue,
+      }));
+      // setFormData((prevData) => {
+      //   const updatedData = {
+      //     ...prevData,
+      //     [name]: newValue,
+      //   };
 
-        // ONLY for Same As Permanent Address logic
-        if (prevData.sameAsCurrent && name === "permanent_address") {
-          updatedData.address = newValue;
-        }
-        // if (prevData.sameAsCurrent && name === "permanent_address") {
-        //   updatedData.address = newValue;
-        // }
+      //   // ONLY for Same As Permanent Address logic
+      //   if (prevData.sameAsCurrent && name === "permanent_address") {
+      //     updatedData.address = newValue;
+      //   }
+      //   // if (prevData.sameAsCurrent && name === "permanent_address") {
+      //   //   updatedData.address = newValue;
+      //   // }
 
-        return updatedData;
-      });
+      //   return updatedData;
+      // });
     }
 
     // Validate field based on name
@@ -1952,11 +1952,11 @@ function EditStaff() {
   // };
 
   return (
-    <div className="container mx-auto mt-4 ">
+    <div className="container mx-auto p-4 ">
       <ToastContainer />
-      <div className="card rounded-md ">
+      <div className="card p-2 rounded-md ">
         <div className=" card-header mb-4 flex justify-between items-center ">
-          <h5 className="text-gray-700 mt-1 text-md lg:text-lg mx-2">
+          <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             Edit Staff information
           </h5>
 
@@ -1968,7 +1968,7 @@ function EditStaff() {
           />
         </div>
         <div
-          className="relative w-[98%] -top-6 h-1  mx-auto bg-red-700"
+          className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
           style={{
             backgroundColor: "#C03078",
           }}
@@ -2143,7 +2143,7 @@ function EditStaff() {
                       name="permanent_address"
                       value={formData.permanent_address}
                       onChange={handleChange}
-                      readOnly={formData.sameAsCurrent}
+                      // readOnly={formData.sameAsCurrent}
                       required
                     ></textarea>
                     <div className="flex items-center gap-2 mb-2">

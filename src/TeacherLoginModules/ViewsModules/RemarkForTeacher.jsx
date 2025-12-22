@@ -10,7 +10,6 @@ import { ImDownload } from "react-icons/im";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import Loader from "../../componants/common/LoaderFinal/LoaderStyle";
-import { FaThumbsUp } from "react-icons/fa";
 import { faThumbsUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -98,7 +97,25 @@ function RemarkForTeacher() {
 
         setStudentNameWithClassId(classOptions);
 
-        // 3️⃣ Finally, fetch teacher remarks
+        // // 3️⃣ Finally, fetch teacher remarks
+        // const remarkRes = await axios.get(
+        //   `${API_URL}/api/get_remark_of_teacher`,
+        //   {
+        //     headers: { Authorization: `Bearer ${token}` },
+        //   }
+        // );
+
+        // const data = remarkRes.data?.data || [];
+
+        // if (data.length > 0) {
+        //   setNotices(data);
+        //   setPageCount(Math.ceil(data.length / pageSize));
+        //   setShowTable(true);
+        // } else {
+        //   setNotices([]);
+        //   setShowTable(false);
+        //   toast.info("No remarks found for this teacher.");
+        // }
         const remarkRes = await axios.get(
           `${API_URL}/api/get_remark_of_teacher`,
           {
@@ -108,14 +125,17 @@ function RemarkForTeacher() {
 
         const data = remarkRes.data?.data || [];
 
-        if (data.length > 0) {
-          setNotices(data);
-          setPageCount(Math.ceil(data.length / pageSize));
+        // ✅ filter published only
+        const publishedData = data.filter((item) => item.publish === "Y");
+
+        if (publishedData.length > 0) {
+          setNotices(publishedData);
+          setPageCount(Math.ceil(publishedData.length / pageSize));
           setShowTable(true);
         } else {
           setNotices([]);
           setShowTable(false);
-          toast.info("No remarks found for this teacher.");
+          toast.info("No published remarks found for this teacher.");
         }
       } catch (error) {
         console.error("Initialization error:", error);
@@ -231,6 +251,14 @@ function RemarkForTeacher() {
     setShowViewModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
+  };
+
+  const handleAcknowledge = (id) => {
+    setNotices((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, acknowledge: "Y" } : item
+      )
+    );
   };
 
   useEffect(() => {
@@ -394,16 +422,31 @@ function RemarkForTeacher() {
                             {item.remark_subject}
                           </td>
 
-                          {/* ✅ FIXED CELL (Thumbs column) */}
                           <td className="px-3 py-2 border border-gray-300 text-center align-middle">
-                            {item.acknowledge === "Y" ? (
+                            {/* {item.acknowledge === "Y" ? (
                               <FontAwesomeIcon
                                 icon={faThumbsUp}
                                 className="text-black text-base"
                               />
                             ) : (
                               <span className="text-gray-400 text-sm">—</span>
-                            )}
+                            )} */}
+                            <FontAwesomeIcon
+                              icon={faThumbsUp}
+                              title={
+                                item.acknowledge === "Y"
+                                  ? "Acknowledged"
+                                  : "Click to acknowledge"
+                              }
+                              className={`text-base cursor-pointer transition ${item.acknowledge === "Y"
+                                  ? "text-black"
+                                  : "text-black opacity-30 hover:opacity-70"
+                                }`}
+                              onClick={() =>
+                                item.acknowledge === "N" &&
+                                handleAcknowledge(item.id)
+                              }
+                            />
                           </td>
 
                           <td className="px-3 py-2 border border-gray-300 text-center align-middle">

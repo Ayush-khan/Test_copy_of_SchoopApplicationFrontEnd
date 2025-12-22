@@ -461,12 +461,10 @@ function Chapter() {
   };
 
   const handleCloseModal = () => {
-    setFieldErrors({ message: "" });
     setShowAddModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
     setShowDActiveModal(false);
-    setShowViewModal(false);
   };
 
   const handleDownloadTemplate = async () => {
@@ -626,7 +624,7 @@ function Chapter() {
       return;
     }
 
-    // 4️⃣ Check if class and subject are selected
+    //Check if class and subject are selected
     if (!selectedClasses || !selectedSubject) {
       toast.warning("Please select Class and Subject before uploading.");
       return;
@@ -638,7 +636,7 @@ function Chapter() {
 
     const fileName = selectedFile.name.trim();
 
-    // 5️⃣ Prepare class and subject names
+    // Prepare class and subject names
     const selectedClassArray = Array.isArray(selectedClasses)
       ? selectedClasses
       : [selectedClasses];
@@ -1216,7 +1214,7 @@ function Chapter() {
                                 {currentPage * pageSize + index + 1}
                               </td>
 
-                              <td className="px-2 text-center lg:px-3 border border-gray-950 text-sm">
+                              {/* <td className="px-2 text-center lg:px-3 border border-gray-950 text-sm">
                                 <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                   {holiday.publish === "N" && (
                                     <input
@@ -1232,6 +1230,25 @@ function Chapter() {
                                       }}
                                     />
                                   )}
+                                </p>
+                              </td> */}
+                              <td className="px-2 text-center lg:px-3 border border-gray-950 text-sm">
+                                <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                  {holiday.publish === "N" &&
+                                    roleIdValue === holiday.created_by && (
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedHolidays.includes(
+                                          holiday.chapter_id
+                                        )}
+                                        onChange={(e) => {
+                                          e.stopPropagation();
+                                          handleCheckboxChange(
+                                            holiday.chapter_id
+                                          );
+                                        }}
+                                      />
+                                    )}
                                 </p>
                               </td>
 
@@ -1259,7 +1276,7 @@ function Chapter() {
                                 {capitalizeWords(holiday.tec_name)}
                               </td>
 
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                              {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {holiday.publish === "N" && (
                                   <button
                                     className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
@@ -1268,26 +1285,20 @@ function Chapter() {
                                     <FontAwesomeIcon icon={faEdit} />
                                   </button>
                                 )}
+                              </td> */}
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {holiday.publish === "N" &&
+                                  roleIdValue === holiday.created_by && (
+                                    <button
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                      onClick={() => handleEdit(holiday)}
+                                    >
+                                      <FontAwesomeIcon icon={faEdit} />
+                                    </button>
+                                  )}
                               </td>
 
                               {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {deletedHolidays.includes(
-                                  holiday.chapter_id
-                                ) ? (
-                                  <span className="text-red-600 font-semibold">
-                                    Deleted
-                                  </span>
-                                ) : (
-                                  <button
-                                    onClick={() => handleDelete(holiday)}
-                                    className="text-red-600 hover:text-red-800 hover:bg-transparent"
-                                  >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                  </button>
-                                ) }
-                              </td> */}
-
-                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {holiday.isDelete === "Y" ||
                                 deletedHolidays.includes(holiday.chapter_id) ? (
                                   <span className="text-red-600 font-semibold">
@@ -1301,6 +1312,25 @@ function Chapter() {
                                     <FontAwesomeIcon icon={faTrash} />
                                   </button>
                                 )}
+                              </td> */}
+
+                              <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {roleIdValue === holiday.created_by &&
+                                  (holiday.isDelete === "Y" ||
+                                    deletedHolidays.includes(
+                                      holiday.chapter_id
+                                    ) ? (
+                                    <span className="text-red-600 font-semibold">
+                                      Deleted
+                                    </span>
+                                  ) : (
+                                    <button
+                                      onClick={() => handleDelete(holiday)}
+                                      className="text-red-600 hover:text-red-800 hover:bg-transparent"
+                                    >
+                                      <FontAwesomeIcon icon={faTrash} />
+                                    </button>
+                                  ))}
                               </td>
                             </tr>
                           ))

@@ -4,6 +4,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
+// import LoaderStyle from "../../../../common/LoaderFinal/LoaderStyle";
+// import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle.jsx";
 import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
@@ -47,39 +49,6 @@ const EditChapter = () => {
   const [selectedClasses, setSelectedClasses] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [allSubject, setAllSubject] = useState([]);
-
-  // useEffect(() => {
-  //   const fetchEvent = async () => {
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-
-  //       const response = await axios.get(
-  //         `${API_URL}/api/get_chapter?chapter_id=${id}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       const data = response.data.data[0];
-  //       console.log("response", response.data.data[0]);
-
-  //       setSelectedClasses(data.class_id);
-  //       setSelectedSubject(data.sm_id || "");
-  //       console.log("sm_id", data.sm_id);
-  //       setSubject(data.sub_name || "");
-  //       setLessonNo(data.chapter_no || "");
-  //       setName(data.name || "");
-  //       setDescription(data.description || "");
-  //       setSubSubject(data.sub_subject);
-  //     } catch (error) {
-  //       console.error("Error fetching chapter:", error);
-  //     }
-  //   };
-
-  //   fetchEvent();
-  // }, [id]);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -149,42 +118,6 @@ const EditChapter = () => {
     }
   };
 
-  // const fetchSubjectNames = async (classId) => {
-  //   if (!classId) return; // no class selected, skip API
-  //   setLoading(true);
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_subjects_according_class?class_id=${classId}`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-  //     setAllSubject(response.data.data || []);
-  //   } catch (error) {
-  //     toast.error("Error fetching subject names");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   // If multiple classes can be selected, pick the first one or handle as needed
-  //   const classId = Array.isArray(selectedClasses)
-  //     ? selectedClasses[0]
-  //     : selectedClasses;
-
-  //   fetchSubjectNames(classId);
-  // }, [selectedClasses]);
-
-  // useEffect(() => {
-  //   const classId = Array.isArray(selectedClasses)
-  //     ? selectedClasses[0]
-  //     : selectedClasses;
-
-  //   fetchSubjectNames(classId);
-  // }, [selectedClasses]);
-
   const getClassName = (id) => {
     if (!allClasses || allClasses.length === 0) return "";
     const cls = allClasses.find((c) => c.class_id === id);
@@ -201,10 +134,24 @@ const EditChapter = () => {
     return sub.name; // make sure field name matches API
   };
 
+  // const handleLessonChange = (e) => {
+  //   const value = e.target.value;
+
+  //   // Allow only numbers
+  //   if (/^\d*$/.test(value)) {
+  //     setLessonNo(value);
+
+  //     if (value.trim() !== "") {
+  //       setErrors((prev) => ({ ...prev, lessonNo: "" }));
+  //     }
+  //   }
+  // };
+
   const handleLessonChange = (e) => {
     const value = e.target.value;
-    setLessonNo(value);
-    if (value.trim() !== "") {
+
+    if (/^\d*$/.test(value)) {
+      setLessonNo(value); // keep string
       setErrors((prev) => ({ ...prev, lessonNo: "" }));
     }
   };
@@ -228,6 +175,7 @@ const EditChapter = () => {
       setErrors((prev) => ({ ...prev, description: "" }));
     }
   };
+
   const resetForm = () => {
     setLessonNo("");
     setName("");
@@ -239,8 +187,15 @@ const EditChapter = () => {
     const newErrors = {};
     let formHasErrors = false;
 
-    if (!lessonNo) {
+    // if (!lessonNo.trim()) {
+    //   newErrors.lessonNo = "Lesson number is required.";
+    //   formHasErrors = true;
+    // }
+    if (!String(lessonNo).trim()) {
       newErrors.lessonNo = "Lesson number is required.";
+      formHasErrors = true;
+    } else if (!/^\d+$/.test(lessonNo)) {
+      newErrors.lessonNo = "Only numbers are allowed.";
       formHasErrors = true;
     }
 
@@ -290,8 +245,17 @@ const EditChapter = () => {
         toast.error(data.message || "Failed to update chapter.");
       }
     } catch (err) {
-      console.error("Error update chapter:", err);
-      toast.error("Server error. Please try again.");
+      console.error("Error saving chapter:", err);
+
+      if (err.response && err.response.status === 409) {
+        setErrors((prev) => ({
+          ...prev,
+          lessonNo:
+            "Lesson number is already created,please enter unique number..",
+        }));
+      } else {
+        toast.error("Server error. Please try again.");
+      }
     }
   };
 
@@ -383,7 +347,9 @@ const EditChapter = () => {
                               value={lessonNo}
                               // onChange={(e) => setLessonNo(e.target.value)}
                               onChange={handleLessonChange}
-                              maxLength={2}
+                              maxLength={3}
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                             />
 
                             {errors.lessonNo && (

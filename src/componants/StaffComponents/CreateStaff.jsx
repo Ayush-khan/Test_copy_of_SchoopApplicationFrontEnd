@@ -201,23 +201,23 @@ function CreateStaff() {
         return { ...prevData, academic_qual: newAcademicQual };
       });
     } else {
-      // setFormData((prevData) => ({
-      //   ...prevData,
-      //   [name]: newValue,
-      // }));
-      setFormData((prevData) => {
-        const updatedData = {
-          ...prevData,
-          [name]: newValue,
-        };
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: newValue,
+      }));
+      // setFormData((prevData) => {
+      //   const updatedData = {
+      //     ...prevData,
+      //     [name]: newValue,
+      //   };
 
-        // ONLY for Same As Permanent Address logic
-        if (prevData.sameAsCurrent && name === "permanent_address") {
-          updatedData.address = newValue;
-        }
+      //   // ONLY for Same As Permanent Address logic
+      //   if (prevData.sameAsCurrent && name === "permanent_address") {
+      //     updatedData.address = newValue;
+      //   }
 
-        return updatedData;
-      });
+      //   return updatedData;
+      // });
     }
 
     // Validate field based on name
@@ -356,13 +356,13 @@ function CreateStaff() {
       setLoading(false);
     }
   };
-  // this  is  test
+
   return (
-    <div className="container mx-auto mt-4 ">
+    <div className="container mx-auto p-4 ">
       <ToastContainer />
-      <div className="card  rounded-md ">
+      <div className="card p-2 rounded-md ">
         <div className=" card-header mb-4 flex justify-between items-center ">
-          <h5 className="text-gray-700 mt-1 text-md lg:text-lg mx-2">
+          <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             Create a New Staff
           </h5>
 
@@ -375,7 +375,7 @@ function CreateStaff() {
           />
         </div>
         <div
-          className=" relative w-[98%]   -top-6 h-1  mx-auto bg-red-700"
+          className=" relative w-full   -top-6 h-1  mx-auto bg-red-700"
           style={{
             backgroundColor: "#C03078",
           }}

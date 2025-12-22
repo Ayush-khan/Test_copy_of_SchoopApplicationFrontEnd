@@ -79,6 +79,45 @@ function RemarkObservationStudent() {
     attachments: [],
   });
 
+  const [roleId, setRoleId] = useState("");
+  const [roleIdValue, setRoleIdValue] = useState("");
+
+  const fetchDataRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      // console.error("No authentication token found");
+      return {};
+    }
+
+    try {
+      const sessionResponse = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const roleId = sessionResponse?.data?.user?.role_id;
+      const regId = sessionResponse?.data?.user?.reg_id;
+
+      setRoleId(roleId); // optional for global use
+      setRoleIdValue(regId); // optional for global use
+
+      return { roleId, roleIdValue: regId }; // ✅ return both
+    } catch (error) {
+      // console.error("Error fetching role data:", error);
+      return {};
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { roleId, roleIdValue } = await fetchDataRoleId(); // 🔁 returns both values
+    };
+
+    fetchData();
+  }, []);
+
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
   const handleSearch = useCallback(async () => {
@@ -150,9 +189,8 @@ function RemarkObservationStudent() {
           (name) => name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
         ) // optional: capitalize
         .join(" "),
-      classDivision: `${subject?.classname || ""} - ${
-        subject?.sectionname || ""
-      }`,
+      classDivision: `${subject?.classname || ""} - ${subject?.sectionname || ""
+        }`,
       attachments: subject.files || [],
     });
     setShowViewModal(true);
@@ -214,9 +252,8 @@ function RemarkObservationStudent() {
 
     // Set teacher name immediately from classToDelete
     setCurrestSubjectNameForDelete(
-      `${classToDelete?.first_name || ""} ${classToDelete?.mid_name || ""} ${
-        classToDelete?.last_name || ""
-      }`.trim()
+      `${classToDelete?.first_name || ""} ${classToDelete?.mid_name || ""} ${classToDelete?.last_name || ""
+        }`.trim()
     );
     setShowDeleteModal(true);
   };
@@ -428,7 +465,7 @@ function RemarkObservationStudent() {
       if (response.status === 200 && response.data.success) {
         toast.success(
           response?.data?.message ||
-            `Message sent successfully for Unique ID: ${uniqueId}`
+          `Message sent successfully for Unique ID: ${uniqueId}`
         );
         handleSearch();
       } else {
@@ -475,9 +512,8 @@ function RemarkObservationStudent() {
   const filteredSections = notices.filter((section) => {
     const remarkType = section?.remark_type?.toLowerCase() || "";
     const noticeDesc = section?.remark_subject?.toLowerCase() || "";
-    const fullName = `${section?.first_name || ""} ${section?.mid_name || ""} ${
-      section?.last_name || ""
-    }`
+    const fullName = `${section?.first_name || ""} ${section?.mid_name || ""} ${section?.last_name || ""
+      }`
       .toLowerCase()
       .trim();
     const publishDate = section?.publish_date?.toLowerCase().trim() || "";
@@ -545,11 +581,21 @@ function RemarkObservationStudent() {
   };
 
   // This is tab
+  // const tabs = [
+  //   { id: "Manage", label: "Manage" },
+  //   { id: "CreateRemarkObservation", label: "Create" },
+
+  //   { id: "CreateRemarkObservationStudent", label: "Create for Student" },
+  // ];
+
   const tabs = [
     { id: "Manage", label: "Manage" },
     { id: "CreateRemarkObservation", label: "Create" },
-    { id: "CreateRemarkObservationStudent", label: "Create for Student" },
-  ];
+    roleId !== "T" && {
+      id: "CreateRemarkObservationStudent",
+      label: "Create for Student",
+    },
+  ].filter(Boolean);
 
   return (
     <>
@@ -578,9 +624,8 @@ function RemarkObservationStudent() {
           {tabs.map(({ id, label }) => (
             <li
               key={id}
-              className={`md:-ml-7 shadow-md ${
-                activeTab === id ? "text-blue-500 font-bold" : ""
-              }`}
+              className={`md:-ml-7 shadow-md ${activeTab === id ? "text-blue-500 font-bold" : ""
+                }`}
             >
               <button
                 onClick={() => handleTabChange(id)}
@@ -674,14 +719,13 @@ function RemarkObservationStudent() {
                                   {currentPage * pageSize + index + 1}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {`${subject?.first_name || ""} ${
-                                    subject?.mid_name || ""
-                                  } ${subject?.last_name || ""}`
+                                  {`${subject?.first_name || ""} ${subject?.mid_name || ""
+                                    } ${subject?.last_name || ""}`
                                     .split(" ")
                                     .map((word) =>
                                       word
                                         ? word.charAt(0).toUpperCase() +
-                                          word.slice(1).toLowerCase()
+                                        word.slice(1).toLowerCase()
                                         : ""
                                     )
                                     .join(" ")
@@ -694,10 +738,10 @@ function RemarkObservationStudent() {
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.publish_date &&
-                                  subject.publish_date !== "0000-00-00"
+                                    subject.publish_date !== "0000-00-00"
                                     ? new Date(
-                                        subject.publish_date
-                                      ).toLocaleDateString("en-GB")
+                                      subject.publish_date
+                                    ).toLocaleDateString("en-GB")
                                     : ""}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
@@ -806,8 +850,8 @@ function RemarkObservationStudent() {
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {/* Show Send button if published and failed_sms_count > 0 */}
                                   {subject.remark_type === "Remark" &&
-                                  subject.publish === "Y" &&
-                                  subject.failed_sms_count > 0 ? (
+                                    subject.publish === "Y" &&
+                                    subject.failed_sms_count > 0 ? (
                                     <div className="flex flex-col items-center gap-1">
                                       <span className="text-red-600 font-semibold text-sm">
                                         {subject.failed_sms_count}
@@ -820,11 +864,10 @@ function RemarkObservationStudent() {
                                         disabled={
                                           sendingSMS[subject?.remark_id]
                                         }
-                                        className={`flex items-center justify-center px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition duration-200 ${
-                                          sendingSMS[subject?.remark_id]
+                                        className={`flex items-center justify-center px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition duration-200 ${sendingSMS[subject?.remark_id]
                                             ? "bg-blue-300 cursor-not-allowed"
                                             : "bg-blue-500 hover:bg-blue-600 text-white"
-                                        }`}
+                                          }`}
                                         onClick={() =>
                                           handleSend(subject?.remark_id)
                                         }
@@ -954,11 +997,12 @@ function RemarkObservationStudent() {
               }
             </div>
           )}
-          {activeTab === "CreateRemarkObservationStudent" && (
+
+          {roleId !== "T" && activeTab === "CreateRemarkObservationStudent" && (
             <div>
               <CreateRemarkObservationStudent
                 onSaveSuccess={() => setActiveTab("Manage")}
-              />{" "}
+              />
             </div>
           )}
         </div>
@@ -1326,7 +1370,7 @@ function RemarkObservationStudent() {
 
                     <div className="flex-1 space-y-2">
                       {remarkData.attachments &&
-                      remarkData.attachments.length > 0 ? (
+                        remarkData.attachments.length > 0 ? (
                         remarkData.attachments.map((file, index) => {
                           const fileUrl = file.file_url;
                           const fileName =

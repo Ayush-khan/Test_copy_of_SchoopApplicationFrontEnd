@@ -156,8 +156,54 @@ function StationeryRequisition() {
     R: "Reject",
   };
 
+  // const filteredSections = (sections || []).filter((section) => {
+  //   const searchLower = searchTerm.toLowerCase(); // assuming this is defined
+
+  //   const serviceMatch = section?.title
+  //     ?.trim()
+  //     .toLowerCase()
+  //     .includes(searchLower);
+
+  //   const roleLabel = statusMap[section?.status] || "";
+  //   const roleMatch = roleLabel.toLowerCase().includes(searchLower);
+  //   const startdate = section?.date
+  //     ?.toString()
+  //     .toLowerCase()
+  //     .includes(searchLower);
+
+  //   const quantity = section?.quantity
+  //     ?.toString()
+  //     .toLowerCase()
+  //     .includes(searchLower);
+
+  //   const author = section?.author?.trim().toLowerCase().includes(searchLower);
+  //   const publisher = section?.publisher
+  //     ?.trim()
+  //     .toLowerCase()
+  //     .includes(searchLower);
+
+  //   return (
+  //     serviceMatch || roleMatch || author || publisher || startdate || quantity
+  //   );
+  // });
+
+  // Update page count based on filtered results
+
+  const stationeryMatchesSearch = (stationeryId, searchLower) => {
+    const item = stationeryType.find(
+      (s) => s.stationery_id?.toString() === stationeryId?.toString()
+    );
+
+    if (!item) return false;
+
+    return (
+      item.stationery_id?.toString().toLowerCase().includes(searchLower) ||
+      item.name?.toString().toLowerCase().includes(searchLower)
+    );
+  };
+
   const filteredSections = (sections || []).filter((section) => {
-    const searchLower = searchTerm.toLowerCase(); // assuming this is defined
+    const searchLower = searchTerm.toLowerCase();
 
     const serviceMatch = section?.title
       ?.trim()
@@ -167,16 +213,42 @@ function StationeryRequisition() {
     const roleLabel = statusMap[section?.status] || "";
     const roleMatch = roleLabel.toLowerCase().includes(searchLower);
 
-    const author = section?.author?.trim().toLowerCase().includes(searchLower);
+    const startdate = section?.date
+      ?.toString()
+      .toLowerCase()
+      .includes(searchLower);
+
+    const quantity = section?.quantity
+      ?.toString()
+      .toLowerCase()
+      .includes(searchLower);
+
+    const author = section?.description
+      ?.trim()
+      .toLowerCase()
+      .includes(searchLower);
+
     const publisher = section?.publisher
       ?.trim()
       .toLowerCase()
       .includes(searchLower);
 
-    return serviceMatch || roleMatch || author || publisher;
+    const stationeryMatch = stationeryMatchesSearch(
+      section?.stationery_id,
+      searchLower
+    );
+
+    return (
+      serviceMatch ||
+      roleMatch ||
+      author ||
+      publisher ||
+      startdate ||
+      quantity ||
+      stationeryMatch
+    );
   });
 
-  // Update page count based on filtered results
   useEffect(() => {
     setPageCount(Math.ceil(filteredSections.length / pageSize));
   }, [filteredSections, pageSize]);
@@ -497,9 +569,8 @@ function StationeryRequisition() {
                       displayedSections.map((section, index) => (
                         <tr
                           key={section.requisition_id}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
+                          className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-50`}
                         >
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
@@ -525,8 +596,8 @@ function StationeryRequisition() {
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section?.date
                                 ? new Date(section.date)
-                                    .toLocaleDateString("en-GB")
-                                    .replace(/\//g, "-")
+                                  .toLocaleDateString("en-GB")
+                                  .replace(/\//g, "-")
                                 : ""}
                             </p>
                           </td>
@@ -535,17 +606,18 @@ function StationeryRequisition() {
                               {section?.status === "A"
                                 ? "Apply"
                                 : section?.status === "H"
-                                ? "Hold"
-                                : section?.status === "R"
-                                ? "Reject"
-                                : section?.status === "P"
-                                ? "Approve"
-                                : section?.status}
+                                  ? "Hold"
+                                  : section?.status === "R"
+                                    ? "Reject"
+                                    : section?.status === "P"
+                                      ? "Approve"
+                                      : section?.status}
                             </p>
                           </td>
 
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            {section.status === "A" ? (
+                            {section.status === "A" ||
+                              section.status === "H" ? (
                               <button
                                 className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
                                 onClick={() => handleEdit(section)}
@@ -558,7 +630,8 @@ function StationeryRequisition() {
                           </td>
 
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            {section.status === "A" ? (
+                            {section.status === "A" ||
+                              section.status === "H" ? (
                               <button
                                 className="text-red-600 hover:text-red-800 hover:bg-transparent"
                                 onClick={() =>

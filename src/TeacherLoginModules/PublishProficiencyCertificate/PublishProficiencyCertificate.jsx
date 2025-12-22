@@ -406,9 +406,8 @@ const PublishProficiencyCertificate = () => {
       const blob = new Blob([response.data], { type: "application/pdf" });
       const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
-      link.download = `${
-        student.first_name || "student"
-      }_${type}_Certificate.pdf`;
+      link.download = `${student.first_name || "student"}_${student.mid_name || "student"
+        }_${student.last_name || "student"}_${type}_Certificate.pdf`;
       link.click();
 
       toast.success(`${type} Certificate downloaded successfully!`);
@@ -526,9 +525,8 @@ const PublishProficiencyCertificate = () => {
                                   {index + 1}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
-                                  {`${student.first_name || ""} ${
-                                    student.mid_name || ""
-                                  } ${student.last_name || ""}`}
+                                  {`${student.first_name || ""} ${student.mid_name || ""
+                                    } ${student.last_name || ""}`}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student.term_id || ""}
@@ -554,21 +552,20 @@ const PublishProficiencyCertificate = () => {
                                       onClick={() =>
                                         handlePublish(student, "g")
                                       }
-                                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                                     >
-                                      Publish
+                                      Unpublish
                                     </button>
                                   )}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student.publish_value === "Y" ? (
                                     <button
-                                      onClick={() =>
-                                        handlePublish(student, "s")
-                                      }
-                                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                                      onClick={() => handleDownload(student)}
+                                      className="text-blue-600 hover:text-blue-800"
+                                      title="Download Certificate"
                                     >
-                                      Publish
+                                      <i className="fas fa-download"></i>
                                     </button>
                                   ) : (
                                     <span className="text-gray-400"></span>
@@ -641,9 +638,8 @@ const PublishProficiencyCertificate = () => {
                                   {index + 1}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
-                                  {`${student.first_name || ""} ${
-                                    student.mid_name || ""
-                                  } ${student.last_name || ""}`}
+                                  {`${student.first_name || ""} ${student.mid_name || ""
+                                    } ${student.last_name || ""}`}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student.term_id || ""}
@@ -669,9 +665,9 @@ const PublishProficiencyCertificate = () => {
                                       onClick={() =>
                                         handlePublish(student, "b")
                                       }
-                                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                                     >
-                                      Publish
+                                      Unpublish
                                     </button>
                                   )}
                                 </td>
@@ -755,9 +751,8 @@ const PublishProficiencyCertificate = () => {
                                   {index + 1}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
-                                  {`${student.first_name || ""} ${
-                                    student.mid_name || ""
-                                  } ${student.last_name || ""}`}
+                                  {`${student.first_name || ""} ${student.mid_name || ""
+                                    } ${student.last_name || ""}`}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student.term_id || ""}

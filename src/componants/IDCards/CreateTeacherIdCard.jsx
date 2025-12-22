@@ -601,7 +601,7 @@ function CreateTeacherIdCard() {
                   className="input-field resize block w-full border border-gray-300 rounded-md py-1 px-3 bg-white shadow-inner"
                   rows="3"
                   required
-                  disabled={formData.sameAsCurrent}
+                // disabled={formData.sameAsCurrent}
                 />
                 {/* Checkbox */}
                 <div className="flex items-center gap-2 mb-2">
