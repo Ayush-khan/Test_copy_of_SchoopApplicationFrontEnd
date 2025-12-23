@@ -220,22 +220,44 @@ function TeacherNoteForClass() {
     setShowEditModal(false);
     setShowDeleteModal(false);
   };
-  const downloadFile = (fileUrl, fileName) => {
-    const baseUrl = "https://sms.evolvu.in/"; // Base URL
-    const fullUrl = `${fileUrl}`; // Construct the full file URL
-    // Create an anchor element
-    const link = document.createElement("a");
-    link.href = fullUrl; // Set the file URL
-    link.target = "none"; // Open in a new tab (optional)
-    link.download = fileName || "downloaded_file.pdf"; // Use the provided file name or a default name
-    document.body.appendChild(link); // Append the link to the DOM
+  // const downloadFile = (fileUrl, fileName) => {
+  //   const baseUrl = "https://sms.evolvu.in/"; // Base URL
+  //   const fullUrl = `${fileUrl}`; // Construct the full file URL
+  //   // Create an anchor element
+  //   const link = document.createElement("a");
+  //   link.href = fullUrl; // Set the file URL
+  //   link.target = "none"; // Open in a new tab (optional)
+  //   link.download = fileName || "downloaded_file.pdf"; // Use the provided file name or a default name
+  //   document.body.appendChild(link); // Append the link to the DOM
 
-    // Trigger the click to download the file
-    link.click();
+  //   // Trigger the click to download the file
+  //   link.click();
 
-    // Clean up the DOM
-    document.body.removeChild(link); // Remove the link after the click
+  //   // Clean up the DOM
+  //   document.body.removeChild(link); // Remove the link after the click
+  // };
+
+  const downloadFile = async (fileUrl, fileName) => {
+    try {
+      const response = await fetch(fileUrl);
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = fileName || "download";
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
   };
+
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
 
@@ -511,7 +533,7 @@ function TeacherNoteForClass() {
 
                   {imageUrls && imageUrls.length > 0 && (
                     <div className="w-full  flex flex-row">
-                      <label className=" px-4 mb-2 ">Attachments:</label>
+                      <label className=" px-4 mb-2 mr-4">Attachments:</label>
 
                       <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
                         {imageUrls.map((url, index) => {

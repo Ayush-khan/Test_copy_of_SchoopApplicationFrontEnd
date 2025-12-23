@@ -217,6 +217,26 @@ const CheckHomework = () => {
 
   console.log("row", timetable);
 
+  const forceDownload = async (url, filename) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
+
   const filteredSections = timetable.filter((student) => {
     const searchLower = searchTerm.toLowerCase();
 
@@ -330,16 +350,29 @@ const CheckHomework = () => {
                                       </span>
 
                                       {/* Download icon */}
-                                      <a
+                                      {/* <a
                                         href={downloadUrl}
                                         download={img.image_name}
-                                        target="_blank"
+                                        // target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-[#C03178] hover:text-pink-600"
                                         title={`Download ${img.image_name}`}
                                       >
                                         <i className="fa-solid fa-download text-sm"></i>
-                                      </a>
+                                      </a> */}
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          forceDownload(
+                                            downloadUrl,
+                                            img.image_name
+                                          )
+                                        }
+                                        className="text-[#C03178] hover:text-pink-600"
+                                        title={`Download ${img.image_name}`}
+                                      >
+                                        <i className="fa-solid fa-download text-sm"></i>
+                                      </button>
                                     </div>
                                   );
                                 })}
@@ -401,8 +434,7 @@ const CheckHomework = () => {
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {camelCase(
-                                    `${student?.first_name || ""} ${
-                                      student?.mid_name || ""
+                                    `${student?.first_name || ""} ${student?.mid_name || ""
                                     } ${student?.last_name || ""}`
                                   )}
                                 </td>

@@ -368,9 +368,8 @@ function Homework() {
   const filteredSections = notices.filter((section) => {
     const remarkType = section?.remark_type?.toLowerCase() || "";
     const noticeDesc = section?.remark_subject?.toLowerCase() || "";
-    const fullName = `${section?.first_name || ""} ${section?.mid_name || ""} ${
-      section?.last_name || ""
-    }`
+    const fullName = `${section?.first_name || ""} ${section?.mid_name || ""} ${section?.last_name || ""
+      }`
       .toLowerCase()
       .trim();
     const publishDate = section?.publish_date?.toLowerCase().trim() || "";
@@ -459,9 +458,8 @@ function Homework() {
           {tabs.map(({ id, label }) => (
             <li
               key={id}
-              className={`md:-ml-7 shadow-md ${
-                activeTab === id ? "text-blue-500 font-bold" : ""
-              }`}
+              className={`md:-ml-7 shadow-md ${activeTab === id ? "text-blue-500 font-bold" : ""
+                }`}
             >
               <button
                 onClick={() => handleTabChange(id)}
@@ -560,26 +558,26 @@ function Homework() {
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.start_date &&
-                                  subject.start_date !== "0000-00-00"
+                                    subject.start_date !== "0000-00-00"
                                     ? new Date(
-                                        subject.start_date
-                                      ).toLocaleDateString("en-GB")
+                                      subject.start_date
+                                    ).toLocaleDateString("en-GB")
                                     : ""}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.end_date &&
-                                  subject.end_date !== "0000-00-00"
+                                    subject.end_date !== "0000-00-00"
                                     ? new Date(
-                                        subject.end_date
-                                      ).toLocaleDateString("en-GB")
+                                      subject.end_date
+                                    ).toLocaleDateString("en-GB")
                                     : ""}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.publish_date &&
-                                  subject.publish_date !== "0000-00-00"
+                                    subject.publish_date !== "0000-00-00"
                                     ? new Date(
-                                        subject.publish_date
-                                      ).toLocaleDateString("en-GB")
+                                      subject.publish_date
+                                    ).toLocaleDateString("en-GB")
                                     : ""}
                                 </td>
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
@@ -615,12 +613,12 @@ function Homework() {
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.publish === "N" &&
-                                  subject.remark_type !== "Observation" ? (
+                                    subject.remark_type !== "Observation" ? (
                                     <button
                                       onClick={() => handlePublish(subject)}
                                       className="text-green-500 hover:text-green-700 hover:bg-transparent"
                                     >
-                                      <FaCheck />
+                                      <FaCheck className="text-base md:text-base" />
                                     </button>
                                   ) : (
                                     ""
@@ -690,7 +688,14 @@ function Homework() {
             </div>
           )}
 
-          {activeTab === "CreateHomework" && <div>{<CreateHomework />}</div>}
+          {activeTab === "CreateHomework" && (
+            <div>
+              <CreateHomework
+                handleSearch={handleSearch}
+                onSaveSuccess={() => setActiveTab("Manage")}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -875,7 +880,7 @@ function Homework() {
 
                     <div className="flex-1 space-y-2">
                       {remarkData.attachments &&
-                      remarkData.attachments.length > 0 ? (
+                        remarkData.attachments.length > 0 ? (
                         remarkData.attachments.map((file, index) => {
                           const fileUrl = file.file_url;
                           const fileName =

@@ -22,6 +22,7 @@ function NoticeAndSmsForTheClass() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
 
+  const [newClass, setNewClass] = useState("");
   const [newSection, setnewSectionName] = useState("");
   const [newSubject, setnewSubjectnName] = useState("");
   const [newStaffNames, setNewStaffNames] = useState("");
@@ -156,7 +157,7 @@ function NoticeAndSmsForTheClass() {
 
     try {
       const response = await axios.get(
-        `${API_URL}/api/get_staffnoticedata/${currentSection?.unq_id}`,
+        `${API_URL}/api/get_smsnoticedata/${currentSection?.unq_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -174,6 +175,7 @@ function NoticeAndSmsForTheClass() {
   const handleView = (section) => {
     console.log("view data", section);
     setCurrentSection(section);
+    setNewClass(section?.classname);
     setNewStaffNames(section?.teacher_names);
     setnewSectionName(section?.notice_date);
     setnewSubjectnName(section?.subject);
@@ -191,7 +193,7 @@ function NoticeAndSmsForTheClass() {
   {
     imageUrls && imageUrls.length > 0 && (
       <div className="relative mb-3 flex flex-col mx-4 gap-y-2">
-        <label className="mb-2 font-bold">Attachments:</label>
+        <label className="mb-2 font-bold mr-4">Attachments:</label>
         {imageUrls.map((url, index) => {
           // Extract file name from the URL
           const fileName = url.substring(url.lastIndexOf("/") + 1);
@@ -217,21 +219,42 @@ function NoticeAndSmsForTheClass() {
     );
   }
 
-  const downloadFile = (fileUrl, fileName) => {
-    const baseUrl = "https://sms.evolvu.in/"; // Base URL
-    const fullUrl = `${fileUrl}`; // Construct the full file URL
-    // Create an anchor element
-    const link = document.createElement("a");
-    link.href = fullUrl; // Set the file URL
-    link.target = "none"; // Open in a new tab (optional)
-    link.download = fileName || "downloaded_file.pdf"; // Use the provided file name or a default name
-    document.body.appendChild(link); // Append the link to the DOM
+  // const downloadFile = (fileUrl, fileName) => {
+  //   const baseUrl = "https://sms.evolvu.in/"; // Base URL
+  //   const fullUrl = `${fileUrl}`; // Construct the full file URL
+  //   // Create an anchor element
+  //   const link = document.createElement("a");
+  //   link.href = fullUrl; // Set the file URL
+  //   link.target = "none"; // Open in a new tab (optional)
+  //   link.download = fileName || "downloaded_file.pdf"; // Use the provided file name or a default name
+  //   document.body.appendChild(link); // Append the link to the DOM
 
-    // Trigger the click to download the file
-    link.click();
+  //   // Trigger the click to download the file
+  //   link.click();
 
-    // Clean up the DOM
-    document.body.removeChild(link); // Remove the link after the click
+  //   // Clean up the DOM
+  //   document.body.removeChild(link); // Remove the link after the click
+  // };
+
+  const downloadFile = async (fileUrl, fileName) => {
+    try {
+      const response = await fetch(fileUrl);
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = fileName || "download";
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
   };
 
   const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
@@ -514,6 +537,14 @@ function NoticeAndSmsForTheClass() {
                 ></div>
                 <div className="modal-body">
                   {/* Class */}
+                  <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
+                    <label htmlFor="newSectionName" className="w-1/2 mt-2">
+                      Class:{" "}
+                    </label>
+                    <span className="input-field block border w-full border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner">
+                      {newClass}
+                    </span>
+                  </div>
 
                   {/* Notice Date */}
                   <div className="relative mb-3 flex justify-center mx-4 gap-x-7">
@@ -555,7 +586,7 @@ function NoticeAndSmsForTheClass() {
                     <div className="w-full  flex flex-row">
                       <label className=" px-4 mb-2 ">Attachments:</label>
 
-                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
+                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2 ">
                         {imageUrls.map((url, index) => {
                           // Extracting file name from the URL
                           const fileName = url.substring(
@@ -564,7 +595,7 @@ function NoticeAndSmsForTheClass() {
                           return (
                             <div
                               key={index}
-                              className=" font-semibold flex flex-row text-[.58em]  items-center gap-x-2"
+                              className=" font-semibold flex flex-row text-[.58em]  items-center gap-x-2 mr-5"
                             >
                               {/* Display file name */}
                               <span className=" ">{fileName}</span>

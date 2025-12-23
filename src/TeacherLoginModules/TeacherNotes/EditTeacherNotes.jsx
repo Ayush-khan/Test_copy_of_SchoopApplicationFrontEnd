@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -23,6 +23,7 @@ const EditTeacherNotes = () => {
   });
   const [attachedFiles, setAttachedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { id } = useParams();
@@ -164,14 +165,70 @@ const EditTeacherNotes = () => {
     event.target.value = "";
   };
 
+  const editRandomNoRef = useRef(Math.floor(Math.random() * 100000));
+  // const uploadFile = async (file) => {
+  //   setUploading(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const random_no = Math.floor(Math.random() * 1000) + 1;
+
+  //     // Date in DD-MM-YYYY
+  //     const today = new Date();
+  //     const formattedDate =
+  //       String(today.getDate()).padStart(2, "0") +
+  //       "-" +
+  //       String(today.getMonth() + 1).padStart(2, "0") +
+  //       "-" +
+  //       today.getFullYear();
+
+  //     // Convert file → base64
+  //     const base64Data = await getBase64(file);
+
+  //     // Create FormData for upload_files API
+  //     const formData = new FormData();
+  //     formData.append("random_no", random_no);
+  //     formData.append("doc_type_folder", "daily_notes");
+  //     formData.append("filename", file.name);
+  //     formData.append("datafile", base64Data);
+  //     formData.append("upload_date", formattedDate);
+
+  //     // Send to API
+  //     await axios.post(`${API_URL}/api/upload_files`, formData, {
+  //       headers: {
+  //         "Content-Type": "multipart/form-data",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+
+  //     // ✅ Save file info + base64 in state
+  //     setAttachedFiles((prev) => [
+  //       ...prev,
+  //       {
+  //         name: file.name,
+  //         size: file.size,
+  //         random_no,
+  //         upload_date: formattedDate,
+  //         datafile: base64Data, // ✅ important: store Base64 string
+  //       },
+  //     ]);
+
+  //     toast.success(`${file.name} uploaded successfully`);
+  //   } catch (error) {
+  //     console.error("Upload failed:", error);
+  //     toast.error(`Upload failed for ${file.name}`);
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
+
   const uploadFile = async (file) => {
     setUploading(true);
 
     try {
       const token = localStorage.getItem("authToken");
-      const random_no = Math.floor(Math.random() * 1000) + 1;
+      const random_no = editRandomNoRef.current;
 
-      // Date in DD-MM-YYYY
       const today = new Date();
       const formattedDate =
         String(today.getDate()).padStart(2, "0") +
@@ -180,10 +237,8 @@ const EditTeacherNotes = () => {
         "-" +
         today.getFullYear();
 
-      // Convert file → base64
       const base64Data = await getBase64(file);
 
-      // Create FormData for upload_files API
       const formData = new FormData();
       formData.append("random_no", random_no);
       formData.append("doc_type_folder", "daily_notes");
@@ -191,29 +246,26 @@ const EditTeacherNotes = () => {
       formData.append("datafile", base64Data);
       formData.append("upload_date", formattedDate);
 
-      // Send to API
       await axios.post(`${API_URL}/api/upload_files`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
 
-      // ✅ Save file info + base64 in state
       setAttachedFiles((prev) => [
         ...prev,
         {
           name: file.name,
           size: file.size,
-          random_no,
+          random_no, // ✅ SAME stored
           upload_date: formattedDate,
-          datafile: base64Data, // ✅ important: store Base64 string
+          datafile: base64Data,
         },
       ]);
 
       toast.success(`${file.name} uploaded successfully`);
     } catch (error) {
-      console.error("Upload failed:", error);
       toast.error(`Upload failed for ${file.name}`);
     } finally {
       setUploading(false);
@@ -247,6 +299,7 @@ const EditTeacherNotes = () => {
       toast.error(`Failed to delete ${fileToRemove.name}`);
     }
   };
+
   // const handleRemoveExistingImage = async (index) => {
   //   const fileUrl = imageUrls[index];
   //   const fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
@@ -343,6 +396,7 @@ const EditTeacherNotes = () => {
       setImageUrls([]);
     } finally {
       setIsImageLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -393,20 +447,128 @@ const EditTeacherNotes = () => {
     // Clean up the DOM
     document.body.removeChild(link); // Remove the link after the click
   };
+
+  // const handleSubmitEdit = async () => {
+  //   try {
+  //     setIsSubmitting(true);
+
+  //     const token = localStorage.getItem("authToken");
+
+  //     //  Build form data
+  //     const data = new FormData();
+  //     // --- Deleted files (images or PDFs) ---
+  //     if (removedFiles.length > 0) {
+  //       const deleteList = [];
+
+  //       removedFiles.forEach((file, index) => {
+  //         // Get filename (from object or URL)
+  //         const filename =
+  //           file.image_name ||
+  //           file.name ||
+  //           (typeof file === "string"
+  //             ? file.substring(file.lastIndexOf("/") + 1)
+  //             : `deleted_file_${index}`);
+
+  //         deleteList.push(filename);
+
+  //         // ✅ If it's a File object (like from input), append it too
+  //         if (file instanceof File) {
+  //           data.append("deletefile_" + index, file);
+  //         } else if (file.image_url) {
+  //           // Optionally append the image URL if your backend handles URLs
+  //           data.append("deletefileurl_" + index, file.image_url);
+  //         }
+  //       });
+
+  //       // Attach delete list as JSON
+  //       data.append("deleteimagelist", JSON.stringify(deleteList));
+  //     } else {
+  //       data.append("deleteimagelist", "[]");
+  //     }
+
+  //     // --- Basic required fields ---
+  //     data.append("login_type", teacherRoleName); // e.g., "T"
+  //     data.append("teacher_id", regId || ""); // Logged-in teacher id
+  //     data.append("academic_yr", academicYr || "2025-2026");
+  //     data.append("operation", "edit"); // always edit
+  //     data.append("notes_id", formData.remark_id || "");
+  //     data.append("subject_id", formData.subject_id || "");
+  //     data.append("description", formData.remark_desc || "");
+  //     data.append("dailynote_date", formData.date || "");
+  //     data.append("class_id", formData?.class_id || "");
+  //     data.append("section_id", formData?.section_id || "");
+
+  //     // --- Class-section string array like ["135^535"] ---
+  //     // ✅ Build class-section array based on formData values
+  //     const strArray = [`${formData?.class_id}^${formData?.section_id}`];
+  //     data.append("str_array", JSON.stringify(strArray));
+
+  //     // --- Random number for file uniqueness ---
+  //     const randomNo = Math.floor(Math.random() * 1000);
+  //     data.append("random_no", randomNo);
+  //     attachedFiles.forEach((file) => {
+  //       data.append("filename", file.name);
+  //       data.append("datafile", file.datafile); // ✅ already base64
+  //     });
+  //     // --- File upload (only one file allowed) ---
+  //     // if (attachedFiles.length > 0) {
+  //     //   const file = attachedFiles[0];
+  //     //   data.append("filename", file.name);
+  //     //   data.append("datafile", file); // direct file object
+  //     // } else {
+  //     //   data.append("filename", "");
+  //     //   data.append("datafile", "");
+  //     // }
+
+  //     // --- Deleted files (images or PDFs) ---
+  //     if (removedFiles.length > 0) {
+  //       const deleteList = removedFiles.map(
+  //         (file) => file.image_name || file.name
+  //       );
+  //       data.append("deleteimagelist", JSON.stringify(deleteList));
+  //     } else {
+  //       data.append("deleteimagelist", "[]");
+  //     }
+
+  //     console.log("Submitting FormData ->");
+  //     for (const pair of data.entries()) {
+  //       console.log(`${pair[0]}:`, pair[1]);
+  //     }
+
+  //     // 🚀 API call
+  //     const response = await axios.post(`${API_URL}/api/daily_notes`, data, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         "Content-Type": "multipart/form-data",
+  //       },
+  //     });
+
+  //     if (response.data.status === true) {
+  //       toast.success("Note updated successfully!");
+  //       navigate("/TeacherNotes");
+  //     } else {
+  //       toast.error(response.data.message || "Failed to update note!");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating note:", error);
+  //     toast.error("Something went wrong!");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const handleSubmitEdit = async () => {
     try {
       setIsSubmitting(true);
 
       const token = localStorage.getItem("authToken");
-
-      // 🧾 Build form data
       const data = new FormData();
-      // --- Deleted files (images or PDFs) ---
+
+      /* ---------------- Deleted files ---------------- */
       if (removedFiles.length > 0) {
         const deleteList = [];
 
         removedFiles.forEach((file, index) => {
-          // Get filename (from object or URL)
           const filename =
             file.image_name ||
             file.name ||
@@ -415,27 +577,18 @@ const EditTeacherNotes = () => {
               : `deleted_file_${index}`);
 
           deleteList.push(filename);
-
-          // ✅ If it's a File object (like from input), append it too
-          if (file instanceof File) {
-            data.append("deletefile_" + index, file);
-          } else if (file.image_url) {
-            // Optionally append the image URL if your backend handles URLs
-            data.append("deletefileurl_" + index, file.image_url);
-          }
         });
 
-        // Attach delete list as JSON
         data.append("deleteimagelist", JSON.stringify(deleteList));
       } else {
-        data.append("deleteimagelist", "[]");
+        data.append("deleteimagelist", "");
       }
 
-      // --- Basic required fields ---
-      data.append("login_type", teacherRoleName); // e.g., "T"
-      data.append("teacher_id", regId || ""); // Logged-in teacher id
+      /* ---------------- Required fields ---------------- */
+      data.append("login_type", teacherRoleName);
+      data.append("teacher_id", regId || "");
       data.append("academic_yr", academicYr || "2025-2026");
-      data.append("operation", "edit"); // always edit
+      data.append("operation", "edit");
       data.append("notes_id", formData.remark_id || "");
       data.append("subject_id", formData.subject_id || "");
       data.append("description", formData.remark_desc || "");
@@ -443,44 +596,35 @@ const EditTeacherNotes = () => {
       data.append("class_id", formData?.class_id || "");
       data.append("section_id", formData?.section_id || "");
 
-      // --- Class-section string array like ["135^535"] ---
-      // ✅ Build class-section array based on formData values
       const strArray = [`${formData?.class_id}^${formData?.section_id}`];
       data.append("str_array", JSON.stringify(strArray));
 
-      // --- Random number for file uniqueness ---
-      const randomNo = Math.floor(Math.random() * 1000);
+      /* ---------------- SAME random number ---------------- */
+      const randomNo = editRandomNoRef.current;
       data.append("random_no", randomNo);
-      attachedFiles.forEach((file) => {
-        data.append("filename", file.name);
-        data.append("datafile", file.datafile); // ✅ already base64
-      });
-      // --- File upload (only one file allowed) ---
-      // if (attachedFiles.length > 0) {
-      //   const file = attachedFiles[0];
-      //   data.append("filename", file.name);
-      //   data.append("datafile", file); // direct file object
-      // } else {
-      //   data.append("filename", "");
-      //   data.append("datafile", "");
-      // }
 
-      // --- Deleted files (images or PDFs) ---
-      if (removedFiles.length > 0) {
-        const deleteList = removedFiles.map(
-          (file) => file.image_name || file.name
-        );
-        data.append("deleteimagelist", JSON.stringify(deleteList));
-      } else {
-        data.append("deleteimagelist", "[]");
-      }
+      /* ---------------- Files ---------------- */
+      // const filenames = attachedFiles.map((file) => file.name);
+      // data.append("filename", JSON.stringify(filenames));
+      // data.append("datafile", JSON.stringify(filenames));
+      const filenames = attachedFiles.map((file) => file.name);
 
-      console.log("Submitting FormData ->");
+      data.append(
+        "filename",
+        filenames.length > 0 ? JSON.stringify(filenames) : ""
+      );
+
+      data.append(
+        "datafile",
+        filenames.length > 0 ? JSON.stringify(filenames) : ""
+      );
+
+      /* ---------------- Debug log ---------------- */
       for (const pair of data.entries()) {
         console.log(`${pair[0]}:`, pair[1]);
       }
 
-      // 🚀 API call
+      /* ---------------- API call ---------------- */
       const response = await axios.post(`${API_URL}/api/daily_notes`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -490,6 +634,10 @@ const EditTeacherNotes = () => {
 
       if (response.data.status === true) {
         toast.success("Note updated successfully!");
+
+        // 🔁 Reset random number for next edit
+        editRandomNoRef.current = Math.floor(Math.random() * 100000);
+
         navigate("/TeacherNotes");
       } else {
         toast.error(response.data.message || "Failed to update note!");
@@ -668,8 +816,8 @@ const EditTeacherNotes = () => {
                       {/* Attachments Section */}
                       {isImageLoading ? (
                         <div className="flex justify-center items-center py-4">
-                          <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                          <span className="text-sm ml-2 text-gray-600">
+                          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                          <span className="text-sm ml-2 text-blue-500">
                             Loading attachments...
                           </span>
                         </div>
@@ -677,7 +825,7 @@ const EditTeacherNotes = () => {
                         <div className="w-full flex flex-row">
                           <label className="mb-2">Attachments:</label>
 
-                          <div className="relative mt-2 left-[15%] flex flex-col mx-4 gap-y-2">
+                          {/* <div className="relative mt-2 left-[15%] flex flex-col mx-4 gap-y-2">
                             {imageUrls.map((url, index) => {
                               const fileName =
                                 typeof url === "string"
@@ -697,7 +845,6 @@ const EditTeacherNotes = () => {
                                     {fileName}
                                   </span>
 
-                                  {/* 👁 View or Download */}
                                   {isImage ? (
                                     <button
                                       className="text-blue-600 hover:text-blue-800"
@@ -718,7 +865,6 @@ const EditTeacherNotes = () => {
                                     </button>
                                   )}
 
-                                  {/* ❌ Remove for both images & files */}
                                   <button
                                     className="text-red-500 hover:text-red-700"
                                     title="Remove File"
@@ -731,6 +877,79 @@ const EditTeacherNotes = () => {
                                 </div>
                               );
                             })}
+                          </div> */}
+                          <div className="relative mt-2 left-[15%] flex flex-col mx-4 gap-y-2">
+                            {/* 🔄 Loader */}
+                            {isLoading && (
+                              <div className="flex justify-center items-center py-4">
+                                <span className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></span>
+                              </div>
+                            )}
+
+                            {/* 📂 File list */}
+                            {!isLoading &&
+                              imageUrls?.length > 0 &&
+                              imageUrls.map((url, index) => {
+                                const fileName =
+                                  typeof url === "string"
+                                    ? url.substring(url.lastIndexOf("/") + 1)
+                                    : url?.image_name || url?.name;
+
+                                const isImage = /\.(jpg|jpeg|png|gif)$/i.test(
+                                  fileName
+                                );
+
+                                return (
+                                  <div
+                                    key={index}
+                                    className="font-semibold flex flex-row text-[.7em] items-center gap-x-3"
+                                  >
+                                    <span className="truncate w-40">
+                                      {fileName}
+                                    </span>
+
+                                    {/* 👁 View or Download */}
+                                    {isImage ? (
+                                      <button
+                                        className="text-blue-600 hover:text-blue-800"
+                                        title="View Image"
+                                        onClick={() => setPreviewImage(url)}
+                                      >
+                                        <FaEye className="w-3 h-3" />
+                                      </button>
+                                    ) : (
+                                      <button
+                                        className="text-green-600 hover:text-green-800"
+                                        title="Download File"
+                                        onClick={() =>
+                                          downloadFile(url, fileName)
+                                        }
+                                      >
+                                        <ImDownload className="w-3 h-3" />
+                                      </button>
+                                    )}
+
+                                    {/* ❌ Remove */}
+                                    <button
+                                      className="text-red-500 hover:text-red-700"
+                                      title="Remove File"
+                                      onClick={() =>
+                                        handleRemoveExistingFile(index)
+                                      }
+                                    >
+                                      <RxCross1 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                );
+                              })}
+
+                            {/* 🚫 No data found */}
+                            {!isLoading &&
+                              (!imageUrls || imageUrls.length === 0) && (
+                                <div className="text-center text-gray-500 text-sm py-4">
+                                  No data found
+                                </div>
+                              )}
                           </div>
                         </div>
                       ) : (

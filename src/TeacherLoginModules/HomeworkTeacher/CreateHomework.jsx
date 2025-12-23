@@ -1,18 +1,22 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-
 import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 import Select from "react-select";
 
-const CreateHomework = () => {
+const CreateHomework = ({ handleSearch, onSaveSuccess }) => {
   const API_URL = import.meta.env.VITE_API_URL;
 
   const [allClasses, setAllClasses] = useState([]);
 
   const [loading, setLoading] = useState(false); // Loader state
+
+  const today = new Date();
+  const formattedDate = today.toISOString().split("T")[0];
+
+  const fileInputRef = useRef(null);
 
   const [errors, setErrors] = useState({
     subjectError: "",
@@ -231,10 +235,14 @@ const CreateHomework = () => {
     setAttachedFiles([]);
     setIsObservation(false);
     setErrors({});
+    setSubmissionDate("");
 
     // Optional: reset classId and sectionId derived from selectedClass
     setClassIdForSubjectAPI("");
     setSectionIdForStudentList("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null; // resets the input
+    }
   };
 
   const validateForm = () => {
@@ -265,224 +273,30 @@ const CreateHomework = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // work for single attechment
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   if (!validateForm()) return;
-
-  //   setIsSubmitting(true);
-  //   const token = localStorage.getItem("authToken");
-  //   const randomNo = Math.floor(Math.random() * 100000);
-  //   const uploadDate = submissionDate;
-  //   let uploadedFileNames = [];
-
-  //   try {
-  //     // 🔹 Loop through files and convert each to Base64
-  //     for (const file of attachedFiles) {
-  //       const base64 = await new Promise((resolve, reject) => {
-  //         const reader = new FileReader();
-  //         reader.readAsDataURL(file);
-  //         reader.onload = () => resolve(reader.result.split(",")[1]); // remove prefix
-  //         reader.onerror = reject;
-  //       });
-
-  //       const uploadForm = new FormData();
-  //       uploadForm.append("random_no", randomNo);
-  //       uploadForm.append("doc_type_folder", "homework");
-  //       uploadForm.append("filename", file.name);
-  //       uploadForm.append("datafile", base64);
-  //       uploadForm.append("upload_date", uploadDate);
-
-  //       console.log("📤 Uploading (Base64) file:", file.name);
-
-  //       const uploadResponse = await axios.post(
-  //         `${API_URL}/api/upload_files`,
-  //         uploadForm,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       console.log("🔍 Upload API response:", uploadResponse.data);
-
-  //       if (uploadResponse?.data?.status === true) {
-  //         uploadedFileNames.push(file.name);
-  //         console.log(`✅ Uploaded successfully: ${file.name}`);
-  //       } else {
-  //         console.warn(`⚠️ Upload failed for: ${file.name}`);
-  //       }
-  //     }
-
-  //     console.log("✅ Uploaded file names:", uploadedFileNames);
-
-  //     // 🔹 Homework Form Data
-  //     const homeworkForm = new FormData();
-  //     homeworkForm.append("login_type", "T");
-  //     homeworkForm.append("operation", "create");
-  //     homeworkForm.append("random_no", randomNo);
-  //     homeworkForm.append("class_id", selectedClass?.class_id);
-  //     homeworkForm.append("section_id", selectedClass?.section_id);
-  //     homeworkForm.append("teacher_id", regId);
-  //     homeworkForm.append("sm_id", selectedSubject?.value);
-  //     homeworkForm.append("academic_yr", academicYr);
-  //     homeworkForm.append("start_date", submissionDate);
-  //     homeworkForm.append("end_date", submissionDate);
-  //     homeworkForm.append("description", remarkDescription);
-  //     homeworkForm.append("filename", uploadedFileNames.join(","));
-
-  //     console.log("📦 Final Homework FormData:");
-  //     for (const [key, value] of homeworkForm.entries()) {
-  //       console.log(`${key}: ${value}`);
-  //     }
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/homework`,
-  //       homeworkForm,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success("Homework created successfully!");
-  //       resetForm();
-  //     } else {
-  //       toast.error("Failed to create homework.");
-  //     }
-  //   } catch (error) {
-  //     console.error("❌ Error creating homework:", error);
-  //     toast.error("Something went wrong while saving homework.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
-  // try for multiple but error occur check
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   if (!validateForm()) return;
-
-  //   setIsSubmitting(true);
-  //   const token = localStorage.getItem("authToken");
-  //   const randomNo = Math.floor(Math.random() * 100000);
-  //   const uploadDate = submissionDate;
-  //   let uploadedFileNames = [];
-
-  //   try {
-  //     // 🔹 Prepare the upload form once
-  //     const uploadForm = new FormData();
-  //     uploadForm.append("random_no", randomNo);
-  //     uploadForm.append("doc_type_folder", "homework");
-  //     uploadForm.append("upload_date", uploadDate);
-
-  //     // 🔹 Convert each file to Base64 and append as array fields
-  //     for (const file of attachedFiles) {
-  //       const base64 = await new Promise((resolve, reject) => {
-  //         const reader = new FileReader();
-  //         reader.readAsDataURL(file);
-  //         reader.onload = () => resolve(reader.result.split(",")[1]); // remove prefix
-  //         reader.onerror = reject;
-  //       });
-
-  //       uploadForm.append("filename", file.name);
-  //       uploadForm.append("datafile", base64);
-  //       uploadedFileNames.push(file.name);
-  //     }
-
-  //     console.log("📤 Uploading Base64 files:", uploadedFileNames);
-
-  //     // 🔹 Upload all files in one request
-  //     const uploadResponse = await axios.post(
-  //       `${API_URL}/api/upload_files`,
-  //       uploadForm,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     console.log("🔍 Upload API response:", uploadResponse.data);
-
-  //     if (uploadResponse?.data?.status === true) {
-  //       console.log("✅ All files uploaded successfully!");
-  //     } else {
-  //       console.warn("⚠️ Upload failed for some files");
-  //     }
-
-  //     // 🔹 Homework Form Data
-  //     const homeworkForm = new FormData();
-  //     homeworkForm.append("login_type", "T");
-  //     homeworkForm.append("operation", "create");
-  //     homeworkForm.append("random_no", randomNo);
-  //     homeworkForm.append("class_id", selectedClass?.class_id);
-  //     homeworkForm.append("section_id", selectedClass?.section_id);
-  //     homeworkForm.append("teacher_id", regId);
-  //     homeworkForm.append("sm_id", selectedSubject?.value);
-  //     homeworkForm.append("academic_yr", academicYr);
-  //     homeworkForm.append("start_date", submissionDate);
-  //     homeworkForm.append("end_date", submissionDate);
-  //     homeworkForm.append("description", remarkDescription);
-
-  //     // 🔹 Pass all filenames as array
-  //     uploadedFileNames.forEach((name) => {
-  //       homeworkForm.append("filename", name);
-  //     });
-
-  //     console.log("📦 Final Homework FormData:");
-  //     for (const [key, value] of homeworkForm.entries()) {
-  //       console.log(`${key}: ${value}`);
-  //     }
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/homework`,
-  //       homeworkForm,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success("Homework created successfully!");
-  //       resetForm();
-  //     } else {
-  //       toast.error("Failed to create homework.");
-  //     }
-  //   } catch (error) {
-  //     console.error("❌ Error creating homework:", error);
-  //     toast.error("Something went wrong while saving homework.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
     if (!validateForm()) return;
 
     setIsSubmitting(true);
+
     const token = localStorage.getItem("authToken");
     const randomNo = Math.floor(Math.random() * 100000);
     const uploadDate = submissionDate;
-    const savedFilenames = []; // filenames returned by server
+
+    // MUST be array (even for one file)
+    const savedFilenames = [];
 
     try {
-      // 1) Upload each file individually (sequentially)
+      /* 🔹 STEP 1: Upload files ONE BY ONE */
       for (const file of attachedFiles) {
-        // convert file -> base64 (string without data:* prefix)
+        // convert file -> base64
         const base64 = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.readAsDataURL(file);
           reader.onload = () => {
             const result = reader.result;
-            const idx = result.indexOf(",");
-            resolve(idx > -1 ? result.slice(idx + 1) : result);
+            resolve(result.split(",")[1]);
           };
           reader.onerror = reject;
         });
@@ -490,40 +304,35 @@ const CreateHomework = () => {
         const uploadForm = new FormData();
         uploadForm.append("random_no", randomNo);
         uploadForm.append("doc_type_folder", "homework");
-        uploadForm.append("filename", file.name); // original name (optional)
-        uploadForm.append("datafile", base64); // base64 string
+        uploadForm.append("filename", file.name); // original filename
+        uploadForm.append("datafile", base64);
         uploadForm.append("upload_date", uploadDate);
 
-        // call upload_files once PER file
         const uploadResp = await axios.post(
           `${API_URL}/api/upload_files`,
           uploadForm,
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              // NO special content-type required; browser will set multipart/form-data
             },
           }
         );
 
-        // Expect server to return final saved filename (or at least status)
         if (uploadResp?.data?.status === true) {
-          // Use server-provided filename if available (recommended)
+          // Use filename returned by backend (important)
           const savedName =
             uploadResp.data.saved_filename ||
             uploadResp.data.filename ||
             file.name;
+
           savedFilenames.push(savedName);
         } else {
-          // upload failed for this file — decide: abort or continue?
-          console.error("Upload failed for", file.name, uploadResp.data);
           toast.error(`Upload failed for ${file.name}`);
-          // Option: throw here to abort overall process:
-          // throw new Error(`Upload failed for ${file.name}`);
+          throw new Error("File upload failed");
         }
       }
 
-      // 2) After all uploads done, call homework create once
+      /* 🔹 STEP 2: Create homework (send filename as JSON array string) */
       const homeworkForm = new FormData();
       homeworkForm.append("login_type", "T");
       homeworkForm.append("operation", "create");
@@ -533,13 +342,13 @@ const CreateHomework = () => {
       homeworkForm.append("teacher_id", regId);
       homeworkForm.append("sm_id", selectedSubject?.value);
       homeworkForm.append("academic_yr", academicYr);
-      homeworkForm.append("start_date", submissionDate);
+      homeworkForm.append("start_date", formattedDate);
       homeworkForm.append("end_date", submissionDate);
       homeworkForm.append("description", remarkDescription);
 
-      // add filenames returned by server (join or append as array depending backend)
-      // Many backends accept filename[] repeated — do that:
-      savedFilenames.forEach((fn) => homeworkForm.append("filename", fn));
+      // ✅ ONLY ONE filename field
+      // ✅ Always JSON array string
+      homeworkForm.append("filename", JSON.stringify(savedFilenames));
 
       const hwResp = await axios.post(`${API_URL}/api/homework`, homeworkForm, {
         headers: {
@@ -550,17 +359,129 @@ const CreateHomework = () => {
       if (hwResp?.data?.status === true) {
         toast.success("Homework created successfully!");
         resetForm();
+
+        setTimeout(() => {
+          onSaveSuccess && onSaveSuccess();
+          handleSearch();
+        }, 500);
       } else {
-        console.error("Homework create failed:", hwResp.data);
-        toast.error(hwResp.data.message || "Failed to create homework.");
+        toast.error(hwResp.data.message || "Failed to create homework");
       }
-    } catch (err) {
-      console.error("Error in handleSubmit:", err);
+    } catch (error) {
+      console.error("handleSubmit error:", error);
       toast.error("Something went wrong while saving homework.");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (isSubmitting) return;
+  //   if (!validateForm()) return;
+
+  //   setIsSubmitting(true);
+  //   const token = localStorage.getItem("authToken");
+  //   const randomNo = Math.floor(Math.random() * 100000);
+  //   const uploadDate = submissionDate;
+  //   const savedFilenames = []; // filenames returned by server
+
+  //   try {
+  //     // 1) Upload each file individually (sequentially)
+  //     for (const file of attachedFiles) {
+  //       // convert file -> base64 (string without data:* prefix)
+  //       const base64 = await new Promise((resolve, reject) => {
+  //         const reader = new FileReader();
+  //         reader.readAsDataURL(file);
+  //         reader.onload = () => {
+  //           const result = reader.result;
+  //           const idx = result.indexOf(",");
+  //           resolve(idx > -1 ? result.slice(idx + 1) : result);
+  //         };
+  //         reader.onerror = reject;
+  //       });
+
+  //       const uploadForm = new FormData();
+  //       uploadForm.append("random_no", randomNo);
+  //       uploadForm.append("doc_type_folder", "homework");
+  //       uploadForm.append("filename", file.name); // original name (optional)
+  //       uploadForm.append("datafile", base64); // base64 string
+  //       uploadForm.append("upload_date", uploadDate);
+
+  //       // call upload_files once PER file
+  //       const uploadResp = await axios.post(
+  //         `${API_URL}/api/upload_files`,
+  //         uploadForm,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //             // NO special content-type required; browser will set multipart/form-data
+  //           },
+  //         }
+  //       );
+
+  //       // Expect server to return final saved filename (or at least status)
+  //       if (uploadResp?.data?.status === true) {
+  //         // Use server-provided filename if available (recommended)
+  //         const savedName =
+  //           uploadResp.data.saved_filename ||
+  //           uploadResp.data.filename ||
+  //           file.name;
+  //         savedFilenames.push(savedName);
+  //       } else {
+  //         // upload failed for this file — decide: abort or continue?
+  //         console.error("Upload failed for", file.name, uploadResp.data);
+  //         toast.error(`Upload failed for ${file.name}`);
+  //         // Option: throw here to abort overall process:
+  //         // throw new Error(`Upload failed for ${file.name}`);
+  //       }
+  //     }
+
+  //     // 2) After all uploads done, call homework create once
+  //     const homeworkForm = new FormData();
+  //     homeworkForm.append("login_type", "T");
+  //     homeworkForm.append("operation", "create");
+  //     homeworkForm.append("random_no", randomNo);
+  //     homeworkForm.append("class_id", selectedClass?.class_id);
+  //     homeworkForm.append("section_id", selectedClass?.section_id);
+  //     homeworkForm.append("teacher_id", regId);
+  //     homeworkForm.append("sm_id", selectedSubject?.value);
+  //     homeworkForm.append("academic_yr", academicYr);
+  //     homeworkForm.append("start_date", formattedDate);
+  //     homeworkForm.append("end_date", submissionDate);
+  //     homeworkForm.append("description", remarkDescription);
+
+  //     savedFilenames.forEach((fn) => homeworkForm.append("filename", fn));
+
+  //     // savedFilenames.forEach((file) => {
+  //     //   homeworkForm.append("filename[]", file);
+  //     // });
+
+  //     const hwResp = await axios.post(`${API_URL}/api/homework`, homeworkForm, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+
+  //     if (hwResp?.data?.status === true) {
+  //       toast.success("Homework created successfully!");
+  //       resetForm();
+  //       setTimeout(() => {
+  //         if (onSaveSuccess) {
+  //           onSaveSuccess();
+  //         }
+  //       }, 500);
+  //     } else {
+  //       console.error("Homework create failed:", hwResp.data);
+  //       toast.error(hwResp.data.message || "Failed to create homework.");
+  //     }
+  //   } catch (err) {
+  //     console.error("Error in handleSubmit:", err);
+  //     toast.error("Something went wrong while saving homework.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
   return (
     <div>
@@ -693,6 +614,7 @@ const CreateHomework = () => {
                               multiple
                               onChange={handleFileUpload}
                               className="text-sm"
+                              ref={fileInputRef}
                             />
                             <p className="text-pink-500 text-xs">
                               (Each file must not exceed a maximum size of 2MB)

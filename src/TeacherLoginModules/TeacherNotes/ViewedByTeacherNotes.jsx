@@ -10,6 +10,8 @@ import { ImDownload } from "react-icons/im";
 import { FaEye, FaUserAltSlash, FaUserCheck } from "react-icons/fa";
 import ReactPaginate from "react-paginate";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser, faUserSlash } from "@fortawesome/free-solid-svg-icons";
 
 const ViewedByTeacherNotes = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -253,10 +255,10 @@ const ViewedByTeacherNotes = () => {
                     {/* </div> */}
                   </div>
                 ) : (
-                  <div className="card-body w-full md:w-[90%] mx-auto ml-2">
+                  <div className="card-body w-full md:w-[95%] mx-auto ml-2">
                     <div className="space-y-5 mr-14">
                       {/* Class Selection */}
-                      <div className="flex flex-col md:flex-row items-start md:items-center">
+                      {/* <div className="flex flex-col md:flex-row items-start md:items-center">
                         <div className="flex-1">
                           <textarea
                             value={formData?.remark_desc || ""}
@@ -265,6 +267,48 @@ const ViewedByTeacherNotes = () => {
                             className="w-full bg-gray-100 text-center  text-gray-700 p-3 rounded resize-none border border-gray-300 focus:outline-none"
                             placeholder="No description available"
                           />
+                        </div>
+                      </div> */}
+
+                      <div className="flex flex-col md:flex-row items-center space-x-3">
+                        {/* Textarea */}
+                        <div className="flex-1">
+                          <textarea
+                            value={formData?.remark_desc || ""}
+                            readOnly
+                            rows={1} // adjust height
+                            className="w-full bg-gray-100 text-center text-gray-700 p-3 rounded resize-none border border-gray-300 focus:outline-none"
+                            placeholder="No description available"
+                          />
+                        </div>
+                        <div className="flex space-x-2">
+                          {/* Not Viewed */}
+                          <div className="flex flex-col items-center text-center">
+                            <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center">
+                              <FontAwesomeIcon
+                                icon={faUserSlash}
+                                className="text-red-600 text-xs"
+                                title="Not Viewed"
+                              />
+                            </div>
+                            <span className="text-[10px] text-gray-700 mt-1">
+                              Not Viewed
+                            </span>
+                          </div>
+
+                          {/* Viewed */}
+                          <div className="flex flex-col items-center text-center">
+                            <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
+                              <FontAwesomeIcon
+                                icon={faUser}
+                                className="text-green-600 text-xs"
+                                title="Viewed"
+                              />
+                            </div>
+                            <span className="text-[10px] text-gray-700 mt-1">
+                              Viewed
+                            </span>
+                          </div>
                         </div>
                       </div>
 
@@ -305,11 +349,10 @@ const ViewedByTeacherNotes = () => {
                                     displayedSections.map((student, index) => (
                                       <tr
                                         key={student.student_id}
-                                        className={`${
-                                          index % 2 === 0
+                                        className={`${index % 2 === 0
                                             ? "bg-white"
                                             : "bg-gray-100"
-                                        } hover:bg-gray-50 transition-all`}
+                                          } hover:bg-gray-50 transition-all`}
                                       >
                                         <td className="text-center px-2 lg:px-3 border border-gray-300 text-sm">
                                           {currentPage * pageSize + index + 1}
@@ -330,12 +373,12 @@ const ViewedByTeacherNotes = () => {
                                           {student.read_status === 1 ? (
                                             <span className="inline-flex items-center text-green-600 font-semibold">
                                               <FaUserCheck className="text-lg mr-1" />{" "}
-                                              Viewed
+                                              {/* Viewed */}
                                             </span>
                                           ) : (
                                             <span className="inline-flex items-center text-red-500 font-semibold">
                                               <FaUserAltSlash className="text-lg mr-1" />{" "}
-                                              Not Viewed
+                                              {/* Not Viewed */}
                                             </span>
                                           )}
                                         </td>

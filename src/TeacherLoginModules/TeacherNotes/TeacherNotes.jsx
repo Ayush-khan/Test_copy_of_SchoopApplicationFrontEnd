@@ -457,8 +457,7 @@ function TeacherNotes() {
 
       if (response.data?.status) {
         toast.success(
-          `Teacher's note for "${
-            currentSection.name || "this note"
+          `Teacher's note for "${currentSection.name || "this note"
           }" published successfully!`
         );
 
@@ -469,8 +468,7 @@ function TeacherNotes() {
       }
     } catch (error) {
       toast.error(
-        `Error publishing ${currentSection.name || "note"}: ${
-          error.response?.data?.message || error.message
+        `Error publishing ${currentSection.name || "note"}: ${error.response?.data?.message || error.message
         }`
       );
     } finally {
@@ -524,19 +522,19 @@ function TeacherNotes() {
 
       if (response.data?.status) {
         toast.success(
-          `Teacher's note for "${
-            currentSection.name || "this note"
+          `Teacher's note for "${currentSection.name || "this note"
           }" deleted successfully!`
         );
 
-        handleSearch();
+        setTimeout(() => {
+          handleSearch();
+        }, 500);
       } else {
         toast.error(response.data?.message || "Failed to delete note.");
       }
     } catch (error) {
       toast.error(
-        `Error deleting ${currestSubjectNameForDelete}: ${
-          error.response?.data?.message || error.message
+        `Error deleting ${currestSubjectNameForDelete}: ${error.response?.data?.message || error.message
         }`
       );
     } finally {
@@ -575,7 +573,7 @@ function TeacherNotes() {
       if (response.status === 200 && response.data.success) {
         toast.success(
           response?.data?.message ||
-            `Message sent successfully for Unique ID: ${uniqueId}`
+          `Message sent successfully for Unique ID: ${uniqueId}`
         );
         handleSearch();
       } else {
@@ -689,9 +687,8 @@ function TeacherNotes() {
           {tabs.map(({ id, label }) => (
             <li
               key={id}
-              className={`md:-ml-7 shadow-md ${
-                activeTab === id ? "text-blue-500 font-bold" : ""
-              }`}
+              className={`md:-ml-7 shadow-md ${activeTab === id ? "text-blue-500 font-bold" : ""
+                }`}
             >
               <button
                 onClick={() => handleTabChange(id)}
@@ -787,21 +784,21 @@ function TeacherNotes() {
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.date &&
-                                  subject.date !== "0000-00-00"
+                                    subject.date !== "0000-00-00"
                                     ? subject.date
-                                        .split("-")
-                                        .reverse()
-                                        .join("-") // → 29-10-2025
+                                      .split("-")
+                                      .reverse()
+                                      .join("-") // → 29-10-2025
                                     : ""}
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.publish_date &&
-                                  subject.publish_date !== "0000-00-00"
+                                    subject.publish_date !== "0000-00-00"
                                     ? subject.publish_date
-                                        .split("-")
-                                        .reverse()
-                                        .join("-") // 👉 "2025-10-29" → "29/10/2025"
+                                      .split("-")
+                                      .reverse()
+                                      .join("-") // 👉 "2025-10-29" → "29/10/2025"
                                     : ""}
                                 </td>
 
@@ -851,7 +848,7 @@ function TeacherNotes() {
                                       className="text-green-600 hover:text-green-800 font-bold transition-colors duration-200 hover:bg-transparent"
                                       title="Publish"
                                     >
-                                      <FaCheck className="text-lg md:text-xl" />
+                                      <FaCheck className="text-base md:text-base" />
                                     </button>
                                   ) : null}
                                 </td>
@@ -861,6 +858,7 @@ function TeacherNotes() {
                                     <FontAwesomeIcon
                                       icon={faBookReader}
                                       className="text-base hover:cursor-pointer  font-bold transition-colors duration-200 hover:bg-transparent"
+                                      style={{ color: "#C03078" }}
                                       onClick={() => handleViewedBy(subject)}
                                     />
                                   )}
@@ -911,7 +909,10 @@ function TeacherNotes() {
 
           {activeTab === "CreateTeachersnote" && (
             <div>
-              <CreateTeacherNotes />
+              <CreateTeacherNotes
+                handleSearch={handleSearch}
+                onSaveSuccess={() => setActiveTab("Manage")}
+              />
             </div>
           )}
         </div>
@@ -1116,8 +1117,8 @@ function TeacherNotes() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to delete this teacher's note for{" "}
-                  {currestSubjectNameForDelete}?
+                  Are you sure you want to delete this daily notes for class{" "}
+                  {currestSubjectNameForDelete} ?
                 </div>
 
                 <div className=" flex justify-end p-3">

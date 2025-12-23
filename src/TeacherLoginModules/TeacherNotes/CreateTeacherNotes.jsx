@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 import Select from "react-select";
 
-const CreateTeacherNotes = () => {
+const CreateTeacherNotes = ({ handleSearch, onSaveSuccess }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [loading, setLoading] = useState(false); // Loader state
   const [errors, setErrors] = useState({
@@ -245,14 +245,72 @@ const CreateTeacherNotes = () => {
     event.target.value = "";
   };
 
+  const uploadRandomNoRef = useRef(Math.floor(Math.random() * 100000));
+
+  // const uploadFile = async (file) => {
+  //   setUploading(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const random_no = Math.floor(Math.random() * 1000) + 1;
+
+  //     // Date in DD-MM-YYYY
+  //     const today = new Date();
+  //     const formattedDate =
+  //       String(today.getDate()).padStart(2, "0") +
+  //       "-" +
+  //       String(today.getMonth() + 1).padStart(2, "0") +
+  //       "-" +
+  //       today.getFullYear();
+
+  //     // Convert file → base64
+  //     const base64Data = await getBase64(file);
+
+  //     // Create FormData for upload_files API
+  //     const formData = new FormData();
+  //     formData.append("random_no", random_no);
+  //     formData.append("doc_type_folder", "daily_notes");
+  //     formData.append("filename", file.name);
+  //     formData.append("datafile", base64Data);
+  //     formData.append("upload_date", formattedDate);
+
+  //     // Send to API
+  //     await axios.post(`${API_URL}/api/upload_files`, formData, {
+  //       headers: {
+  //         "Content-Type": "multipart/form-data",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+
+  //     // ✅ Save file info + base64 in state
+  //     setAttachedFiles((prev) => [
+  //       ...prev,
+  //       {
+  //         name: file.name,
+  //         size: file.size,
+  //         random_no,
+  //         upload_date: formattedDate,
+  //         datafile: base64Data, // ✅ important: store Base64 string
+  //       },
+  //     ]);
+
+  //     toast.success(`${file.name} uploaded successfully`);
+  //   } catch (error) {
+  //     console.error("Upload failed:", error);
+  //     toast.error(`Upload failed for ${file.name}`);
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
+
+  // Remove file → call delete API and remove from list
   const uploadFile = async (file) => {
     setUploading(true);
 
     try {
       const token = localStorage.getItem("authToken");
-      const random_no = Math.floor(Math.random() * 1000) + 1;
+      const random_no = uploadRandomNoRef.current; // ✅ SAME for all
 
-      // Date in DD-MM-YYYY
       const today = new Date();
       const formattedDate =
         String(today.getDate()).padStart(2, "0") +
@@ -261,10 +319,8 @@ const CreateTeacherNotes = () => {
         "-" +
         today.getFullYear();
 
-      // Convert file → base64
       const base64Data = await getBase64(file);
 
-      // Create FormData for upload_files API
       const formData = new FormData();
       formData.append("random_no", random_no);
       formData.append("doc_type_folder", "daily_notes");
@@ -272,36 +328,32 @@ const CreateTeacherNotes = () => {
       formData.append("datafile", base64Data);
       formData.append("upload_date", formattedDate);
 
-      // Send to API
       await axios.post(`${API_URL}/api/upload_files`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
 
-      // ✅ Save file info + base64 in state
       setAttachedFiles((prev) => [
         ...prev,
         {
           name: file.name,
           size: file.size,
-          random_no,
+          random_no, // ✅ SAME stored
           upload_date: formattedDate,
-          datafile: base64Data, // ✅ important: store Base64 string
+          datafile: base64Data,
         },
       ]);
 
       toast.success(`${file.name} uploaded successfully`);
     } catch (error) {
-      console.error("Upload failed:", error);
       toast.error(`Upload failed for ${file.name}`);
     } finally {
       setUploading(false);
     }
   };
 
-  // Remove file → call delete API and remove from list
   const handleRemoveFile = async (index) => {
     const fileToRemove = attachedFiles[index];
     if (!fileToRemove) return;
@@ -381,8 +433,11 @@ const CreateTeacherNotes = () => {
       const token = localStorage.getItem("authToken");
       const today = new Date();
       const dailynote_date = today.toISOString().split("T")[0]; // YYYY-MM-DD
+      // const randomNo = Math.floor(Math.random() * 100000);
+      const randomNo = uploadRandomNoRef.current;
 
       const formData = new FormData();
+      formData.append("random_no", randomNo);
       formData.append("login_type", teacherRoleName);
       formData.append("teacher_id", regId);
       formData.append("academic_yr", academicYr);
@@ -397,11 +452,13 @@ const CreateTeacherNotes = () => {
       );
       formData.append("str_array", JSON.stringify(strArray));
 
-      // 👇 attach all uploaded base64 files
+      const filenames = attachedFiles.map((file) => file.name);
+
+      formData.append("filename", JSON.stringify(filenames));
+
+      // Send other fields per file
       attachedFiles.forEach((file) => {
-        formData.append("filename", file.name);
-        formData.append("random_no", file.random_no);
-        formData.append("datafile", file.datafile); // ✅ already base64
+        formData.append("datafile", file.datafile); // base64
       });
 
       const response = await axios.post(
@@ -416,10 +473,16 @@ const CreateTeacherNotes = () => {
       );
 
       if (response.data.status) {
-        toast.success("Daily Note saved successfully!");
+        toast.success("New teacher's note created.");
         resetForm();
+        setTimeout(() => {
+          if (onSaveSuccess) {
+            onSaveSuccess();
+            handleSearch();
+          }
+        }, 500);
       } else {
-        toast.error("Failed to save Daily Note.");
+        toast.error("Failed to create new teacher note.");
       }
     } catch (error) {
       console.error("Error submitting:", error);
@@ -468,7 +531,7 @@ const CreateTeacherNotes = () => {
                             </div>
                           ) : (
                             <>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 ">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 ">
                                 {classes.map((cls) => {
                                   const isChecked = selectedClasses.some(
                                     (selected) =>
@@ -487,7 +550,8 @@ const CreateTeacherNotes = () => {
                                         onChange={() =>
                                           handleClassCheckboxChange(cls)
                                         }
-                                        className="accent-pink-600 w-4 h-4"
+                                        // className="accent-pink-600 w-4 h-4"
+                                        className="accent-blue-500 w-3 h-3"
                                       />
                                       <span className="text-sm font-medium">
                                         {cls.classname} - {cls.sectionname}
@@ -511,7 +575,8 @@ const CreateTeacherNotes = () => {
                                         classes.length
                                       }
                                       onChange={handleSelectAll}
-                                      className="accent-pink-600 w-4 h-4"
+                                      // className="accent-pink-600 w-4 h-4"
+                                      className="accent-blue-500 w-3 h-3"
                                     />
                                     <span className="text-sm font-medium">
                                       Select All
@@ -554,28 +619,42 @@ const CreateTeacherNotes = () => {
                               label: s.name,
                             }))}
                             placeholder={
-                              loadingSubjects
-                                ? "⏳ Loading subjects..."
-                                : "Select"
+                              loadingSubjects ? "Loading subjects..." : "Select"
                             }
+                            // ⏳
                             isDisabled={loadingSubjects}
                             isLoading={loadingSubjects}
                             isClearable
                             className="w-[60%]"
                             classNamePrefix="react-select"
+                            // styles={{
+                            //   control: (base) => ({
+                            //     ...base,
+                            //     borderColor: "#d1d5db",
+                            //     boxShadow: "none",
+                            //     "&:hover": { borderColor: "#c03078" },
+                            //   }),
+                            //   option: (base, state) => ({
+                            //     ...base,
+                            //     backgroundColor: state.isFocused
+                            //       ? "#fbeaf3"
+                            //       : "white",
+                            //     color: state.isFocused ? "#c03078" : "black",
+                            //   }),
+                            // }}
                             styles={{
-                              control: (base) => ({
-                                ...base,
-                                borderColor: "#d1d5db",
-                                boxShadow: "none",
-                                "&:hover": { borderColor: "#c03078" },
+                              control: (provided) => ({
+                                ...provided,
+                                fontSize: "1em",
+                                minHeight: "30px",
                               }),
-                              option: (base, state) => ({
-                                ...base,
-                                backgroundColor: state.isFocused
-                                  ? "#fbeaf3"
-                                  : "white",
-                                color: state.isFocused ? "#c03078" : "black",
+                              menu: (provided) => ({
+                                ...provided,
+                                fontSize: "1em",
+                              }),
+                              option: (provided) => ({
+                                ...provided,
+                                fontSize: ".9em",
                               }),
                             }}
                           />

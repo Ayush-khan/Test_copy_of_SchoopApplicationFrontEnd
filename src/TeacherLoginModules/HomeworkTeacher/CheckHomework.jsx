@@ -5,7 +5,6 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1, RxPadding } from "react-icons/rx";
-
 import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 import { useLocation, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -123,7 +122,7 @@ const CheckHomework = () => {
                     <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full flex flex-row justify-between">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                          Viewed By
+                          Viewed By Homework
                         </h3>
 
                         <div className="flex items-center w-full">
@@ -162,10 +161,48 @@ const CheckHomework = () => {
                     </div>
 
                     {/* Divider */}
-                    <div
+                    {/* <div
                       className="relative w-[97%] mb-3 h-1 mx-auto bg-red-700"
                       style={{ backgroundColor: "#C03078" }}
-                    ></div>
+                    ></div> */}
+                    <div className="w-[97%] mx-auto">
+                      {/* Colored line */}
+                      <div
+                        className="relative h-1 mb-2"
+                        style={{ backgroundColor: "#C03078" }}
+                      ></div>
+
+                      {/* Icons with labels */}
+                      <div className="flex justify-end space-x-4 items-center mr-5">
+                        {/* Not Viewed */}
+                        <div className="flex flex-col items-center text-center">
+                          <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center">
+                            <FontAwesomeIcon
+                              icon={faUserSlash}
+                              className="text-red-600 text-xs"
+                              title="Not Viewed"
+                            />
+                          </div>
+                          <span className="text-[10px] text-gray-700 mt-1">
+                            Not Viewed
+                          </span>
+                        </div>
+
+                        {/* Viewed */}
+                        <div className="flex flex-col items-center text-center">
+                          <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                            <FontAwesomeIcon
+                              icon={faUser}
+                              className="text-green-600 text-xs"
+                              title="Viewed"
+                            />
+                          </div>
+                          <span className="text-[10px] text-gray-700 mt-1">
+                            Viewed
+                          </span>
+                        </div>
+                      </div>
+                    </div>
 
                     {/* Table */}
                     <div className="card-body w-full">
@@ -209,8 +246,7 @@ const CheckHomework = () => {
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {camelCase(
-                                      `${student?.first_name || ""} ${
-                                        student?.mid_name || ""
+                                      `${student?.first_name || ""} ${student?.mid_name || ""
                                       } ${student?.last_name || ""}`
                                     )}
                                   </td>
@@ -218,13 +254,13 @@ const CheckHomework = () => {
                                     {student?.read_status === 0 ? (
                                       <FontAwesomeIcon
                                         icon={faUserSlash}
-                                        className="text-red-600 text-xl"
+                                        className="text-red-600 text-lg"
                                         title="Not Viewed"
                                       />
                                     ) : (
                                       <FontAwesomeIcon
                                         icon={faUser}
-                                        className="text-blue-600 text-xl"
+                                        className="text-green-600 text-lg"
                                         title="Viewed"
                                       />
                                     )}

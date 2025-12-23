@@ -40,7 +40,9 @@ function TimeTableViewForTeacher() {
 
         const teacherId = sessionRes?.data?.user?.reg_id;
         const teacherName = sessionRes?.data?.user?.name;
-        const acdYr = sessionRes?.data?.custom_claims?.settings?.academic_yr;
+        const acdYr = sessionRes?.data?.custom_claims?.academic_year;
+
+        console.log("academic year", acdYr);
 
         setTeacherName(teacherName);
         setRegId(teacherId);
