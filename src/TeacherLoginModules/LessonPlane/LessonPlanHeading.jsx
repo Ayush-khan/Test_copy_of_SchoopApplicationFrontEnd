@@ -199,8 +199,9 @@ function ServiceType() {
 
       const formData = new FormData();
       formData.append("name", newSectionName);
-      formData.append("sequence", newSequenceName); // check backend spelling if 'squence'
-      formData.append("change_daily", requiresAppointment);
+      formData.append("sequence", newSequenceName);
+      // formData.append("change_daily", requiresAppointment);
+      formData.append("change_daily", requiresAppointment === "Y" ? "Y" : "");
 
       const response = await axios.post(
         `${API_URL}/api/save_lessonplanheading`,
@@ -217,7 +218,7 @@ function ServiceType() {
       if (response.data?.status === 400) {
         toast.error(response.data.message || "Something went wrong!");
         setIsSubmitting(false);
-        return; // stop further execution
+        return;
       }
 
       fetchSections();
@@ -256,7 +257,8 @@ function ServiceType() {
         {
           name: newSectionName,
           sequence: newSequenceName,
-          change_daily: requiresAppointment, // match backend field
+          // change_daily: requiresAppointment, // match backend field
+          change_daily: requiresAppointment === "Y" ? "Y" : "",
         },
         {
           headers: {
@@ -348,6 +350,7 @@ function ServiceType() {
         setShowDeleteModal(false);
         setCurrentSection(null);
         toast.success("Lesson Plan Heading deleted!");
+        handleCloseModal();
       } else {
         toast.error(
           response.data.message || "Failed to delete lesson plan heading!"
@@ -469,8 +472,9 @@ function ServiceType() {
                       displayedSections.map((section, index) => (
                         <tr
                           key={section.lesson_plan_headings_id}
-                          className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                            } hover:bg-gray-50`}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50`}
                         >
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">

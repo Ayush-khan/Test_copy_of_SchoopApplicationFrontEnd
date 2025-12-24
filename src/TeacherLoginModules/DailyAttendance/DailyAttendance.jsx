@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
@@ -14,7 +14,19 @@ const DailyAttendance = () => {
   const [fromDate, setFromDate] = useState(null);
   const [formattedFromDate, setFormattedFromDate] = useState("");
 
+  const [students, setStudents] = useState([]);
+  const [attendanceMap, setAttendanceMap] = useState({});
+
+  const [attendanceExists, setAttendanceExists] = useState(false);
+
+  // const firstLoadRef = useRef(true);
+  // const userTouchedRef = useRef(false);
+  const hasAttendanceRef = useRef(false);
+  // const restoreAfterSubmitRef = useRef(false);
+  // const originalTimetableRef = useRef([]);
+
   const [showStudentReport, setShowStudentReport] = useState(false);
+  const [hasUserChangedSelection, setHasUserChangedSelection] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -67,16 +79,58 @@ const DailyAttendance = () => {
   }, [roleId, regId]);
 
   useEffect(() => {
-    if (timetable.length > 0) {
-      const initialAttendance = {};
-      timetable.forEach((student) => {
-        initialAttendance[student.student_id] = true; // true = present
-      });
-      setAttendanceStatus(initialAttendance);
+    fetchData();
+  }, []);
 
-      setSelectedStudentIds(timetable.map((student) => student.student_id));
-    }
-  }, [timetable]);
+  const fetchData = async () => {
+    const token = localStorage.getItem("authToken");
+
+    // Attendance
+    const resAttendance = await axios.get(
+      `${API_URL}/api/get_att_class_section_day`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          class_id: selectedStudentId,
+          section_id: selectedSectionId,
+          dateatt: fromDate,
+        },
+      }
+    );
+
+    const attendanceArray = Array.isArray(resAttendance.data)
+      ? resAttendance.data
+      : resAttendance.data?.data || [];
+
+    // PHP array_key_exists equivalent
+    const attendanceMap = {};
+    attendanceArray.forEach((row) => {
+      attendanceMap[row.student_id] = true;
+    });
+
+    // Students
+    const resStudents = await axios.get(
+      `${API_URL}/api/get_students_by_class_section`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          class_id: selectedStudentId,
+          section_id: selectedSectionId,
+        },
+      }
+    );
+
+    const studentsArray = Array.isArray(resStudents.data)
+      ? resStudents.data
+      : resStudents.data?.data || [];
+
+    const merged = studentsArray.map((s) => ({
+      ...s,
+      isAbsent: attendanceMap.hasOwnProperty(s.student_id),
+    }));
+
+    setStudents(merged);
+  };
 
   const fetchDataRoleId = async () => {
     const token = localStorage.getItem("authToken");
@@ -182,107 +236,7 @@ const DailyAttendance = () => {
     // setSelectdSection(selectedOption?.sectionname);
   };
 
-  // const handleSearch = async () => {
-  //   setLoadingForSearch(false);
-  //   let hasError = false;
-
-  //   if (!selectedStudentId) {
-  //     setStudentError("Please select Class.");
-  //     hasError = true;
-  //   }
-  //   if (!fromDate) {
-  //     setDateError("Please select a date.");
-  //     hasError = true;
-  //   }
-  //   if (hasError) return;
-
-  //   // Reset states
-  //   setSearchTerm("");
-  //   setLoadingForSearch(true);
-  //   setTimetable([]);
-  //   setSelectedStudentIds([]);
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     // Fetch students by class & section
-  //     const studentsResponse = await axios.get(
-  //       `${API_URL}/api/get_students_by_class_section`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params: {
-  //           class_id: selectedStudentId,
-  //           section_id: selectedSectionId,
-  //         },
-  //       }
-  //     );
-
-  //     const studentsData = studentsResponse?.data?.data ?? [];
-  //     if (studentsData.length === 0) {
-  //       toast.error("No Student data found.");
-  //       return;
-  //     }
-
-  //     // Fetch attendance for class/section/date
-  //     const attendanceResponse = await axios.get(
-  //       `${API_URL}/api/get_att_class_section_day`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params: {
-  //           class_id: selectedStudentId,
-  //           section_id: selectedSectionId,
-  //           dateatt: fromDate,
-  //         },
-  //       }
-  //     );
-
-  //     const attendanceData = attendanceResponse?.data?.data ?? [];
-
-  //     const hasData = attendanceData.length > 0;
-  //     setHasAttendanceData(hasData);
-
-  //     // Merge student and attendance data
-  //     const mergedData = studentsData.map((student) => {
-  //       const attendanceRecord = attendanceData.find(
-  //         (att) => att.student_id === student.student_id
-  //       );
-  //       return {
-  //         ...student,
-  //         absent:
-  //           hasData && attendanceRecord
-  //             ? Number(attendanceRecord.attendance_status)
-  //             : 0,
-  //         isChecked: hasData ? !!attendanceRecord : true,
-  //       };
-  //     });
-
-  //     setTimetable(mergedData);
-  //     setPageCount(Math.ceil(mergedData.length / pageSize));
-  //     setShowStudentReport(true);
-
-  //     if (!hasData) {
-  //       const allIds = mergedData.map((s) => s.student_id);
-  //       setSelectedStudentIds(allIds);
-  //       setHideSelectAll(true);
-  //     } else {
-  //       // Attendance exists → select only those with records
-  //       const attendedIds = mergedData
-  //         .filter((s) => s.isChecked)
-  //         .map((s) => s.student_id);
-  //       setSelectedStudentIds(attendedIds);
-  //       setHideSelectAll(false);
-  //     }
-  //   } catch (error) {
-  //     console.error("API Error:", error?.response?.data || error.message);
-  //     toast.error("Failed to fetch attendance data. Please try again.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //     setLoadingForSearch(false);
-  //   }
-  // };
-
   const handleSearch = async () => {
-    // Reset errors and UI states
     setStudentError("");
     setDateError("");
     setSearchTerm("");
@@ -290,6 +244,7 @@ const DailyAttendance = () => {
     setSelectedStudentIds([]);
     setShowStudentReport(false);
     setLoadingForSearch(true);
+    setHasUserChangedSelection(false);
 
     let hasError = false;
     if (!selectedStudentId) {
@@ -308,7 +263,7 @@ const DailyAttendance = () => {
     try {
       const token = localStorage.getItem("authToken");
 
-      // 1️⃣ Fetch students by class & section
+      /* FETCH ALL STUDENTS */
       const studentsResponse = await axios.get(
         `${API_URL}/api/get_students_by_class_section`,
         {
@@ -319,14 +274,14 @@ const DailyAttendance = () => {
           },
         }
       );
+
       const studentsData = studentsResponse?.data?.data ?? [];
-      if (studentsData.length === 0) {
+      if (!studentsData.length) {
         toast.error("No student data found.");
-        setLoadingForSearch(false);
         return;
       }
 
-      // 2️⃣ Fetch attendance for class/section/date
+      /* FETCH ATTENDANCE FOR DAY */
       const attendanceResponse = await axios.get(
         `${API_URL}/api/get_att_class_section_day`,
         {
@@ -338,157 +293,108 @@ const DailyAttendance = () => {
           },
         }
       );
+
       const attendanceData = attendanceResponse?.data?.data ?? [];
-      const hasAttendance = attendanceData.length > 0;
-      setHasAttendanceData(hasAttendance);
 
-      // 3️⃣ Merge student and attendance data
-      const mergedData = studentsData.map((student) => {
-        const attendanceRecord = attendanceData.find(
-          (att) => Number(att.student_id) === Number(student.student_id)
-        );
+      // 🔴 CI: $count = count($stu_attn_details)
+      const hasAttendanceForDay = attendanceData.length > 0;
+      hasAttendanceRef.current = hasAttendanceForDay;
+      setHasAttendanceData(hasAttendanceForDay);
 
-        const isAbsent = attendanceRecord
-          ? Number(attendanceRecord.attendance_status)
-          : 0;
+      /* 🔴 CI behavior:
+       IF attendance exists → show select-all checkbox
+       ELSE → show only text
+    */
+      setHideSelectAll(!hasAttendanceForDay); // 🔴 CHANGED
 
-        return {
-          ...student,
-          absent: isAbsent,
-          isChecked: hasAttendance ? !!attendanceRecord : true, // ✅ tick all if no attendance
-          attendance_id: attendanceRecord?.attendance_id || null, // ✅ for delete
+      if (hasAttendanceForDay) {
+        toast.warning("Attendance is already marked for this date.");
+      }
+
+      /* --------------------------------------------------
+       3️⃣ BUILD ATTENDANCE MAP (CI array)
+    -------------------------------------------------- */
+      const attendanceMap = {};
+      attendanceData.forEach((att) => {
+        attendanceMap[Number(att.student_id)] = {
+          status: Number(att.attendance_status),
+          attendance_id: att.attendance_id,
         };
       });
 
-      console.log("Merged Data:", mergedData); // debug
+      /* --------------------------------------------------
+       4️⃣ MERGE DATA (CI IF / ELSE)
+    -------------------------------------------------- */
 
+      // const mergedData = studentsData.map((student) => {
+      //   const studentId = Number(student.student_id);
+      //   const attendance = attendanceMap[studentId];
+
+      //   // 🔹 ELSE (first time attendance)
+      //   if (!hasAttendanceForDay) {
+      //     return {
+      //       ...student,
+      //       isChecked: true, // CI default
+      //       isAbsent: false,
+      //       attendance_id: null,
+      //     };
+      //   }
+
+      //   // 🔹 IF attendance exists (CI count != 0)
+      //   return {
+      //     ...student,
+      //     isChecked: !!attendance, // ✔ selected only if exists
+      //     isAbsent: attendance
+      //       ? attendance.status === 1 // ✔ ABSENT = 1
+      //       : false,
+      //     attendance_id: attendance?.attendance_id || null,
+      //   };
+      // });
+
+      const mergedData = studentsData.map((student) => {
+        const studentId = Number(student.student_id);
+        const attendance = attendanceMap[studentId];
+
+        // If no attendance exists, default select all
+        if (!hasAttendanceForDay) {
+          return {
+            ...student,
+            isChecked: true,
+            isAbsent: false,
+            attendance_id: null,
+          };
+        }
+
+        // If attendance exists, respect previous selection if possible
+        const existingTimetableStudent = timetable.find(
+          (s) => s.student_id === studentId
+        );
+
+        return {
+          ...student,
+          isChecked: existingTimetableStudent?.isChecked ?? !!attendance, // ✔ preserve local selection
+          isAbsent:
+            existingTimetableStudent?.isAbsent ??
+            (attendance ? attendance.status === 1 : false), // ✔ preserve local absent mark
+          attendance_id: attendance?.attendance_id || null,
+        };
+      });
+
+      /* --------------------------------------------------
+       5️⃣ FINAL STATE UPDATES
+    -------------------------------------------------- */
       setTimetable(mergedData);
+      // originalTimetableRef.current = mergedData;
       setPageCount(Math.ceil(mergedData.length / pageSize));
       setShowStudentReport(true);
-
-      // 4️⃣ Set selectedStudentIds for "Select All" checkbox logic
-      if (!hasAttendance) {
-        const allIds = mergedData.map((s) => s.student_id);
-        setSelectedStudentIds(allIds);
-        setHideSelectAll(true);
-      } else {
-        const attendedIds = mergedData
-          .filter((s) => s.isChecked)
-          .map((s) => s.student_id);
-        setSelectedStudentIds(attendedIds);
-        setHideSelectAll(false);
-      }
     } catch (error) {
-      console.error("API Error:", error?.response?.data || error.message);
-      toast.error("Failed to fetch attendance data. Please try again.");
+      console.error("Search error:", error);
+      toast.error("Failed to fetch attendance data.");
     } finally {
       setLoadingForSearch(false);
       setIsSubmitting(false);
     }
   };
-
-  // const handleSearch = async () => {
-  //   setStudentError("");
-  //   setDateError("");
-  //   setSearchTerm("");
-  //   setTimetable([]);
-  //   setSelectedStudentIds([]);
-  //   setShowStudentReport(false);
-  //   setLoadingForSearch(true);
-
-  //   let hasError = false;
-  //   if (!selectedStudentId) {
-  //     setStudentError("Please select Class.");
-  //     hasError = true;
-  //   }
-  //   if (!fromDate) {
-  //     setDateError("Please select a date.");
-  //     hasError = true;
-  //   }
-  //   if (hasError) {
-  //     setLoadingForSearch(false);
-  //     return;
-  //   }
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     // 1️⃣ Fetch students by class & section
-  //     const studentsResponse = await axios.get(
-  //       `${API_URL}/api/get_students_by_class_section`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params: {
-  //           class_id: selectedStudentId,
-  //           section_id: selectedSectionId,
-  //         },
-  //       }
-  //     );
-  //     const studentsData = studentsResponse?.data?.data ?? [];
-  //     if (studentsData.length === 0) {
-  //       toast.error("No student data found.");
-  //       setLoadingForSearch(false);
-  //       return;
-  //     }
-
-  //     const attendanceResponse = await axios.get(
-  //       `${API_URL}/api/get_att_class_section_day`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params: {
-  //           class_id: selectedStudentId,
-  //           section_id: selectedSectionId,
-  //           dateatt: fromDate,
-  //         },
-  //       }
-  //     );
-  //     const attendanceData = attendanceResponse?.data?.data ?? [];
-  //     const hasData = attendanceData.length > 0;
-  //     setHasAttendanceData(hasData);
-
-  //     const mergedData = studentsData.map((student) => {
-  //       const attendanceRecord = attendanceData.find(
-  //         (att) => Number(att.student_id) === Number(student.student_id)
-  //       );
-
-  //       return {
-  //         ...student,
-  //         absent: attendanceRecord
-  //           ? Number(attendanceRecord.attendance_status)
-  //           : 0,
-  //         isChecked: attendanceRecord ? true : false,
-  //         attendance_id: attendanceRecord?.attendance_id || null,
-  //       };
-  //     });
-
-  //     console.log("Merged Data:", mergedData); // check what is actually merged
-  //     setTimetable(mergedData);
-  //     setHasAttendanceData(attendanceData.length > 0);
-
-  //     setTimetable(mergedData);
-  //     setPageCount(Math.ceil(mergedData.length / pageSize));
-  //     setShowStudentReport(true);
-
-  //     // 4️⃣ Handle selectedStudentIds for "Select All"
-  //     if (!hasData) {
-  //       const allIds = mergedData.map((s) => s.student_id);
-  //       setSelectedStudentIds(allIds);
-  //       setHideSelectAll(true);
-  //     } else {
-  //       const attendedIds = mergedData
-  //         .filter((s) => s.isChecked)
-  //         .map((s) => s.student_id);
-  //       setSelectedStudentIds(attendedIds);
-  //       setHideSelectAll(false);
-  //     }
-  //   } catch (error) {
-  //     console.error("API Error:", error?.response?.data || error.message);
-  //     toast.error("Failed to fetch attendance data. Please try again.");
-  //   } finally {
-  //     setLoadingForSearch(false);
-  //     setIsSubmitting(false);
-  //   }
-  // };
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
@@ -497,52 +403,57 @@ const DailyAttendance = () => {
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
-        toast.error("Authentication token missing. Please login again.");
-        setIsSubmitting(false);
+        toast.error("Authentication token missing.");
         return;
       }
 
       if (!selectedStudentId || !selectedSectionId || !fromDate) {
         toast.error("Class, Section, and Date are required.");
-        setIsSubmitting(false);
         return;
       }
 
-      // Filter only students whose checkbox is ticked
-      const selectedStudents = timetable.filter((student) => student.isChecked);
+      /* ----------------------------------------
+       ONLY SELECTED STUDENTS (checkbox[])
+    ---------------------------------------- */
+      const checkedStudents = timetable.filter((student) => student.isChecked);
 
-      if (selectedStudents.length === 0) {
+      if (!checkedStudents.length) {
         toast.error("Please select at least one student.");
-        setIsSubmitting(false);
         return;
       }
 
-      // Convert date from yyyy-mm-dd → dd-mm-yyyy
+      /* ----------------------------------------
+       FORMAT DATE (d-m-Y) – CI FORMAT
+    ---------------------------------------- */
       const [year, month, day] = fromDate.split("-");
       const formattedDate = `${day}-${month}-${year}`;
 
-      // Prepare checkbox (only ticked students)
-      const checkbox = selectedStudents.map((s) => s.student_id.toString());
-
-      // Prepare attendance status for ticked students (all 1)
-      const presentData = {};
-      selectedStudents.forEach((student) => {
-        const isAbsent = student.absent === 1;
-        presentData[`present_${student.student_id}`] = isAbsent ? "1" : "0";
-      });
-
-      // Final payload
+      /* ----------------------------------------
+        BUILD PAYLOAD (EXACT CI STRUCTURE)
+    ---------------------------------------- */
       const payload = {
-        countOfStudents: checkbox.length.toString(),
+        countOfStudents: checkedStudents.length.toString(),
         class_id: selectedStudentId.toString(),
         section_id: selectedSectionId.toString(),
         dateatt: formattedDate,
-        checkbox,
-        ...presentData,
+
+        // checkbox[]
+        checkbox: checkedStudents.map((s) => s.student_id.toString()),
       };
 
-      console.log("Final Attendance Payload:", payload);
+      // present_<student_id>
+      // checkedStudents.forEach((s) => {
+      //   payload[`present_${s.student_id}`] = s.isAbsent ? "1" : "0";
+      // });
+      checkedStudents.forEach((s) => {
+        if (s.isAbsent) {
+          payload[`present_${s.student_id}`] = "1"; // only mark absent students
+        }
+      });
 
+      /* ----------------------------------------
+        API CALL
+    ---------------------------------------- */
       const response = await axios.post(
         `${API_URL}/api/save_markattendance`,
         payload,
@@ -555,14 +466,15 @@ const DailyAttendance = () => {
       );
 
       if (response.data.status === true || response.status === 200) {
-        toast.success("Attendance updated successfully!");
-        setHasAttendanceData(true);
+        toast.success("Attendance saved successfully!");
+
         setShowStudentReport(false);
+        setHasAttendanceData(true);
       } else {
         toast.error(response.data.message || "Failed to save attendance.");
       }
     } catch (error) {
-      console.error("Error saving attendance:", error);
+      console.error("Submit error:", error);
       toast.error("Something went wrong while saving attendance.");
     } finally {
       setIsSubmitting(false);
@@ -598,6 +510,7 @@ const DailyAttendance = () => {
 
       if (response.data.status) {
         toast.success("Attendance deleted successfully!");
+        handleSearch();
         setShowDeleteModal(false);
         setShowStudentReport(false);
       } else {
@@ -621,43 +534,79 @@ const DailyAttendance = () => {
     setShowDeletePModal(true);
   };
 
-  const handleConfirmDelete = async () => {
-    console.log("Confirm Delete button clicked ✅");
+  // const handleConfirmDelete = async () => {
+  //   if (!deleteAttendanceId) return;
 
-    if (!deleteAttendanceId) {
-      console.error("No attendance ID found ❌");
-      return;
-    }
+  //   setIsDeleting(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.delete(
+  //       `${API_URL}/api/delete_studentmarkattendance?attendance_id=${deleteAttendanceId}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     if (response.data.status === 200) {
+  //       toast.success("Student attendance deleted successfully.");
+
+  //       // // 🔥 RESET user-selection intent
+  //       // setHasUserChangedSelection(false);
+
+  //       // 🔁 Refetch fresh data
+  //       // await handleSearch();
+
+  //       setShowDeletePModal(false);
+  //       setShowStudentReport(false);
+  //     } else {
+  //       toast.error(response.data.message || "Failed to delete attendance.");
+  //     }
+  //   } catch (error) {
+  //     toast.error("An error occurred while deleting attendance.");
+  //   } finally {
+  //     setIsDeleting(false);
+  //     setDeleteAttendanceId(null);
+  //   }
+  // };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteAttendanceId) return;
 
     setIsDeleting(true);
+
     try {
       const token = localStorage.getItem("authToken");
+
       const response = await axios.delete(
-        `https://sms.evolvu.in/arnolds_test/public/api/delete_studentmarkattendance?attendance_id=${deleteAttendanceId}`,
+        `${API_URL}/api/delete_studentmarkattendance?attendance_id=${deleteAttendanceId}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      console.log("API Response:", response.data);
-
-      if (response.data.status === true) {
+      if (response.data.status === 200) {
         toast.success("Student attendance deleted successfully.");
-        // Filter out deleted student
+
+        // 🔹 Only update the timetable: uncheck the isAbsent checkbox for this student
         setTimetable((prev) =>
-          prev.filter((s) => s.attendance_id !== deleteAttendanceId)
+          prev.map((s) =>
+            s.attendance_id === deleteAttendanceId
+              ? { ...s, isAbsent: false, attendance_id: null } // keep isChecked intact
+              : s
+          )
         );
+
+        // 🔹 Close modal but keep table open
+        setShowDeletePModal(false);
       } else {
-        toast.success(response.data.message || "Failed to delete attendance.");
+        toast.error(response.data.message || "Failed to delete attendance.");
       }
     } catch (error) {
-      console.error("Delete error:", error);
       toast.error("An error occurred while deleting attendance.");
     } finally {
       setIsDeleting(false);
-      setShowDeletePModal(false);
       setDeleteAttendanceId(null);
     }
   };
@@ -694,7 +643,7 @@ const DailyAttendance = () => {
       {/* <div className="w-full md:w-[85%]  mx-auto p-4 "> */}
       <div
         className={` transition-all duration-500 w-[85%]  mx-auto p-4 ${
-          showStudentReport ? "w-full " : "w-[85%] "
+          showStudentReport ? "w-[80%] " : "w-[85%] "
         }`}
       >
         <ToastContainer />
@@ -703,7 +652,7 @@ const DailyAttendance = () => {
             <>
               <div className=" card-header mb-4 flex justify-between items-center ">
                 <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-                  Student Attendance
+                  Daily Attendance
                 </h5>
                 <RxCross1
                   className="  relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -725,7 +674,7 @@ const DailyAttendance = () => {
             {!showStudentReport && (
               <div className=" w-full md:w-[100%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2">
                 <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                  <div className="w-full md:w-[99%]  gap-x-0 md:gap-x-4 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                  <div className="w-full md:w-[80%]  gap-x-0 md:gap-x-4 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                     <div className="w-full md:w-[45%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                       <label
                         className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
@@ -770,14 +719,14 @@ const DailyAttendance = () => {
                       </div>
                     </div>
 
-                    <div className="w-full md:w-[58%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
+                    <div className="w-full md:w-[40%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                       <label
-                        className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
+                        className="ml-0 md:ml-4 w-full md:w-[40%] text-md mt-1.5"
                         htmlFor="fromDate"
                       >
                         Select Date <span className="text-red-500">*</span>
                       </label>
-                      <div className="w-full md:w-[85%]">
+                      <div className="w-full md:w-[60%]">
                         <input
                           type="date"
                           id="fromDate"
@@ -860,7 +809,7 @@ const DailyAttendance = () => {
                       <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
                         <div className="w-full flex flex-row items-center justify-between ">
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
-                            Student Attendance
+                            Daily Attendance
                           </h3>
                           <div className="flex items-center w-full">
                             <div className="flex flex-row flex-nowrap items-center gap-4 w-full overflow-x-auto bg-blue-50 border-l-2 border-r-2 border-pink-500 rounded-md shadow-md px-4 py-2">
@@ -966,7 +915,7 @@ const DailyAttendance = () => {
                         }}
                       ></div>
 
-                      <div className="card-body w-full">
+                      <div className="card-body w-[85%] ml-20">
                         <div
                           className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
                           style={{
@@ -982,34 +931,65 @@ const DailyAttendance = () => {
                                 </th>
 
                                 {!hideSelectAll ? (
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                     <div className="flex items-center justify-center space-x-1">
+                                      {/* <input
+                                        type="checkbox"
+                                        checked={
+                                          timetable.length > 0 &&
+                                          timetable.every((s) => s.isChecked)
+                                        }
+                                        onChange={(e) => {
+                                          const checked = e.target.checked;
+
+                                          if (checked) {
+                                            // Check all only
+                                            setTimetable((prev) =>
+                                              prev.map((s) => ({
+                                                ...s,
+                                                isChecked: true,
+                                              }))
+                                            );
+                                          } else {
+                                            // 🔥 CI reload behavior
+                                            setTimetable(
+                                              originalTimetableRef.current
+                                            );
+                                          }
+                                        }}
+                                      /> */}
                                       <input
                                         type="checkbox"
                                         checked={
                                           timetable.length > 0 &&
-                                          timetable.every((student) =>
-                                            selectedStudentIds.includes(
-                                              student.student_id
-                                            )
-                                          )
+                                          timetable.every((s) => s.isChecked)
                                         }
                                         onChange={(e) => {
-                                          if (e.target.checked) {
-                                            const allIds = timetable.map(
-                                              (s) => s.student_id
+                                          const checked = e.target.checked;
+
+                                          if (checked) {
+                                            // CI: select all students
+                                            setTimetable((prev) =>
+                                              prev.map((s) => ({
+                                                ...s,
+                                                isChecked: true,
+                                              }))
                                             );
-                                            setSelectedStudentIds(allIds);
                                           } else {
-                                            setSelectedStudentIds([]);
+                                            // CI: restore original DB state
+                                            // setTimetable(
+                                            //   originalTimetableRef.current
+                                            // );
+                                            (" ");
                                           }
                                         }}
                                       />
+
                                       <span>Select Students</span>
                                     </div>
                                   </th>
                                 ) : (
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                     Select Students
                                   </th>
                                 )}
@@ -1034,180 +1014,48 @@ const DailyAttendance = () => {
                               </tr>
                             </thead>
 
-                            {/* <tbody>
-                              {displayedSections.length > 0 ? (
-                                displayedSections.map((student, index) => (
-                                  <tr
-                                    key={student.student_id}
-                                    className="border border-gray-300"
-                                  >
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      {index + 1}
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      <input
-                                        type="checkbox"
-                                        checked={student.isChecked}
-                                        onChange={(e) => {
-                                          setTimetable((prev) =>
-                                            prev.map((s) =>
-                                              s.student_id ===
-                                              student.student_id
-                                                ? {
-                                                    ...s,
-                                                    isChecked: e.target.checked,
-                                                  }
-                                                : s
-                                            )
-                                          );
-
-                                          if (e.target.checked) {
-                                            setSelectedStudentIds((prev) => [
-                                              ...prev,
-                                              student.student_id,
-                                            ]);
-                                          } else {
-                                            setSelectedStudentIds((prev) =>
-                                              prev.filter(
-                                                (id) =>
-                                                  id !== student.student_id
-                                              )
-                                            );
-                                          }
-                                        }}
-                                      />
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      {student?.roll_no || "-"}
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      {camelCase(
-                                        `${student?.first_name} ${student?.mid_name} ${student?.last_name}`
-                                      )}
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      <input
-                                        type="checkbox"
-                                        checked={student.absent === 1}
-                                        onChange={(e) => {
-                                          const newStatus = e.target.checked
-                                            ? 1
-                                            : 0;
-
-                                          setTimetable((prev) =>
-                                            prev.map((s) =>
-                                              s.student_id ===
-                                              student.student_id
-                                                ? { ...s, absent: newStatus }
-                                                : s
-                                            )
-                                          );
-
-                                          setAttendanceStatus((prev) => ({
-                                            ...prev,
-                                            [student.student_id]: newStatus,
-                                          }));
-                                        }}
-                                      />
-                                    </td>
-
-                                    {hasAttendanceData && (
-                                      <td className="px-2 py-2 text-center border border-gray-300">
-                                        {student.absent === 1 ? (
-                                          <button
-                                            onClick={() =>
-                                              handleDeleteSingle(
-                                                student.attendance_id
-                                              )
-                                            }
-                                            className="text-red-600 hover:text-red-800 hover:bg-transparent"
-                                          >
-                                            <FontAwesomeIcon icon={faTrash} />
-                                          </button>
-                                        ) : (
-                                          " "
-                                        )}
-                                      </td>
-                                    )}
-                                  </tr>
-                                ))
-                              ) : (
-                                <tr>
-                                  <td colSpan={6} className="text-center py-14">
-                                    {loadingForSearch ? (
-                                      <span className="text-blue-600 text-xl font-normal">
-                                        Please wait while data is loading...
-                                      </span>
-                                    ) : (
-                                      <span className="text-red-600 text-xl font-normal">
-                                        Oops! No data found.
-                                      </span>
-                                    )}
-                                  </td>
-                                </tr>
-                              )}
-                            </tbody> */}
                             <tbody>
                               {displayedSections.length > 0 ? (
                                 displayedSections.map((student, index) => {
-                                  console.log("Student Row:", student); // 🧩 check data structure
-
                                   return (
                                     <tr
                                       key={student.student_id}
                                       className="border border-gray-300"
                                     >
-                                      {/* Serial No. */}
                                       <td className="px-2 py-2 text-center border border-gray-300">
                                         {index + 1}
                                       </td>
 
-                                      {/* Checkbox */}
                                       <td className="px-2 py-2 text-center border border-gray-300">
                                         <input
                                           type="checkbox"
                                           checked={student.isChecked}
                                           onChange={(e) => {
+                                            const checked = e.target.checked;
+
                                             setTimetable((prev) =>
                                               prev.map((s) =>
                                                 s.student_id ===
                                                 student.student_id
                                                   ? {
                                                       ...s,
-                                                      isChecked:
-                                                        e.target.checked,
+                                                      isChecked: checked,
+                                                      // CI rule: unchecked student = no attendance
+                                                      isAbsent: checked
+                                                        ? s.isAbsent
+                                                        : false,
                                                     }
                                                   : s
                                               )
                                             );
-
-                                            if (e.target.checked) {
-                                              setSelectedStudentIds((prev) => [
-                                                ...prev,
-                                                student.student_id,
-                                              ]);
-                                            } else {
-                                              setSelectedStudentIds((prev) =>
-                                                prev.filter(
-                                                  (id) =>
-                                                    id !== student.student_id
-                                                )
-                                              );
-                                            }
                                           }}
                                         />
                                       </td>
 
-                                      {/* Roll No */}
                                       <td className="px-2 py-2 text-center border border-gray-300">
                                         {student?.roll_no || "-"}
                                       </td>
 
-                                      {/* Student Name */}
                                       <td className="px-2 py-2 text-center border border-gray-300">
                                         {camelCase(
                                           `${student?.first_name || ""} ${
@@ -1216,63 +1064,68 @@ const DailyAttendance = () => {
                                         )}
                                       </td>
 
-                                      {/* Absent Checkbox */}
                                       <td className="px-2 py-2 text-center border border-gray-300">
                                         <input
                                           type="checkbox"
-                                          checked={student.absent === 1}
+                                          checked={student.isAbsent}
+                                          disabled={!student.isChecked} // CI behavior
                                           onChange={(e) => {
-                                            const newStatus = e.target.checked
-                                              ? 1
-                                              : 0;
+                                            const checked = e.target.checked;
+
                                             setTimetable((prev) =>
                                               prev.map((s) =>
                                                 s.student_id ===
                                                 student.student_id
-                                                  ? { ...s, absent: newStatus }
+                                                  ? {
+                                                      ...s,
+                                                      // 🔥 CI rule: absent ONLY if student selected
+                                                      isAbsent:
+                                                        checked && s.isChecked,
+                                                    }
                                                   : s
                                               )
                                             );
-                                            setAttendanceStatus((prev) => ({
-                                              ...prev,
-                                              [student.student_id]: newStatus,
-                                            }));
                                           }}
                                         />
                                       </td>
 
-                                      {/* Delete Button */}
-                                      {hasAttendanceData && (
+                                      {/* {hasAttendanceData && (
                                         <td className="px-2 py-2 text-center border border-gray-300">
-                                          {student.absent === 1 ? (
-                                            <button
-                                              onClick={() => {
-                                                console.log(
-                                                  "Delete button clicked ",
-                                                  student.attendance_id
-                                                );
-
-                                                if (student.attendance_id) {
+                                          {student.attendance_id &&
+                                            student.isAbsent && (
+                                              <button
+                                                onClick={() =>
                                                   handleDeleteSingle(
                                                     student.attendance_id
-                                                  );
-                                                } else {
-                                                  console.error(
-                                                    " No attendance_id found in:",
-                                                    student
-                                                  );
-                                                  toast.error(
-                                                    "No attendance ID found for this student."
-                                                  );
+                                                  )
                                                 }
-                                              }}
-                                              className="text-red-600 hover:text-red-800 hover:bg-transparent"
-                                            >
-                                              <FontAwesomeIcon icon={faTrash} />
-                                            </button>
-                                          ) : (
-                                            " "
-                                          )}
+                                                className="text-red-600 hover:text-red-800"
+                                              >
+                                                <FontAwesomeIcon
+                                                  icon={faTrash}
+                                                />
+                                              </button>
+                                            )}
+                                        </td>
+                                      )} */}
+                                      {hasAttendanceData && (
+                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                          {/* Show delete only if student is marked absent in backend */}
+                                          {student.attendance_id &&
+                                            student.isAbsent && (
+                                              <button
+                                                onClick={() =>
+                                                  handleDeleteSingle(
+                                                    student.attendance_id
+                                                  )
+                                                }
+                                                className="text-red-600 hover:text-red-800"
+                                              >
+                                                <FontAwesomeIcon
+                                                  icon={faTrash}
+                                                />
+                                              </button>
+                                            )}
                                         </td>
                                       )}
                                     </tr>
