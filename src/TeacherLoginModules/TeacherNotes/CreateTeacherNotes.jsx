@@ -480,7 +480,7 @@ const CreateTeacherNotes = ({ handleSearch, onSaveSuccess }) => {
             onSaveSuccess();
             handleSearch();
           }
-        }, 500);
+        }, 3000);
       } else {
         toast.error("Failed to create new teacher note.");
       }

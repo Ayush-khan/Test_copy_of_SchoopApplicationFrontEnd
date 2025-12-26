@@ -851,104 +851,8 @@ const CreateLessonPlan = () => {
                         Class <span className="text-red-500">*</span>
                       </label>
                       <div className="w-full md:w-[50%]">
+                        {/* with leo */}
                         {/* <Select
-                          menuPortalTarget={document.body}
-                          menuPosition="fixed"
-                          id="studentSelect"
-                          isMulti
-                          closeMenuOnSelect={false}
-                          hideSelectedOptions={false}
-                          options={studentOptions}
-                          value={selectedStudent}
-                          onChange={handleSelectChange}
-                          placeholder={loadingExams ? "Loading..." : "Select"}
-                          isSearchable
-                          isClearable
-                          isDisabled={loadingExams}
-                          className="text-sm"
-                          components={{ Option }}
-                          styles={{
-                            control: (provided) => ({
-                              ...provided,
-                              fontSize: ".9em",
-                              minHeight: "30px",
-                            }),
-                            menu: (provided) => ({
-                              ...provided,
-                              fontSize: "1em",
-                            }),
-                            option: (provided) => ({
-                              ...provided,
-                              fontSize: ".9em",
-                            }),
-                          }}
-                        /> */}
-
-                        {/* <Select
-                          menuPortalTarget={document.body}
-                          menuPosition="fixed"
-                          id="studentSelect"
-                          options={studentOptions}
-                          isMulti
-                          // onChange={(selected) => {
-                          //   if (!selected || selected.length === 0) {
-                          //     setSelectedStudent(null);
-                          //     return;
-                          //   }
-
-                          //   const sectionIds = selected.map((item) =>
-                          //     Number(item.value.split("_")[1])
-                          //   );
-
-                          //   const classId = Number(
-                          //     selected[0].value.split("_")[0]
-                          //   );
-
-                          //   fetchSubjectNames(classId, sectionIds);
-                          // }}
-                          onChange={(selected) => {
-                            if (!selected || selected.length === 0) {
-                              setSelectedStudent(null);
-                              setSelectedStudentId(null);
-                              return;
-                            }
-
-                            const sectionIds = selected.map((item) =>
-                              Number(item.value.split("_")[1])
-                            );
-
-                            const classId = Number(
-                              selected[0].value.split("_")[0]
-                            );
-
-                            // Store only CLASS ID (needed for chapters API)
-                            setSelectedStudentId(classId);
-
-                            // Store full value (optional)
-                            setSelectedStudent(selected);
-
-                            fetchSubjectNames(classId, sectionIds);
-                          }}
-                          isSearchable
-                          isClearable
-                          className="text-sm"
-                          styles={{
-                            control: (provided) => ({
-                              ...provided,
-                              fontSize: ".9em",
-                              minHeight: "30px",
-                            }),
-                            menu: (provided) => ({
-                              ...provided,
-                              fontSize: "1em",
-                            }),
-                            option: (provided) => ({
-                              ...provided,
-                              fontSize: ".9em",
-                            }),
-                          }}
-                        /> */}
-                        <Select
                           menuPortalTarget={document.body}
                           menuPosition="fixed"
                           id="studentSelect"
@@ -995,6 +899,68 @@ const CreateLessonPlan = () => {
                               fontSize: ".9em",
                             }),
                           }}
+                        /> */}
+                        <Select
+                          menuPortalTarget={document.body}
+                          menuPosition="fixed"
+                          id="studentSelect"
+                          options={studentOptions}
+                          isMulti
+                          value={selectedStudent}
+                          onChange={(selected) => {
+                            if (!selected || selected.length === 0) {
+                              setSelectedStudent([]);
+                              setSelectedStudentId(null);
+                              return;
+                            }
+
+                            // Extract CLASS IDs from all selected items
+                            const classIds = selected.map((item) =>
+                              Number(item.value.split("-")[0])
+                            );
+                            const uniqueClassIds = [...new Set(classIds)];
+
+                            // Check if more than one class is selected
+                            if (uniqueClassIds.length > 1) {
+                              toast.warn(
+                                "Please select sections from the same class only!",
+                                {
+                                  position: "top-center",
+                                  autoClose: 2000,
+                                }
+                              );
+                              return; // stop here
+                            }
+
+                            // ✅ Valid selection (all students from the same class)
+                            const classId = uniqueClassIds[0];
+                            const sectionIds = selected.map((item) =>
+                              Number(item.value.split("-")[1])
+                            );
+
+                            setSelectedStudent(selected); // store full selection
+                            setSelectedStudentId(classId); // store the single classId
+
+                            fetchSubjectNames(classId, sectionIds); // fetch subjects for this class & sections
+                          }}
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          styles={{
+                            control: (provided) => ({
+                              ...provided,
+                              fontSize: ".9em",
+                              minHeight: "30px",
+                            }),
+                            menu: (provided) => ({
+                              ...provided,
+                              fontSize: "1em",
+                            }),
+                            option: (provided) => ({
+                              ...provided,
+                              fontSize: ".9em",
+                            }),
+                          }}
                         />
 
                         {studentError && (
@@ -1013,45 +979,6 @@ const CreateLessonPlan = () => {
                         Subject<span className="text-red-500">*</span>
                       </label>
                       <div className="w-full md:w-[65%]">
-                        {/* <Select
-                          menuPortalTarget={document.body}
-                          menuPosition="fixed"
-                          id="studentSelect"
-                          options={subjectOptions}
-                          value={
-                            subjectOptions.find(
-                              (opt) => opt.value === selectedSubject?.value
-                            ) || selectedSubject
-                          }
-                          onChange={(selected) => {
-                            setSelectedSubject(selected);
-                            setSelectedSubjectId(
-                              selected ? selected.value : null
-                            );
-                            if (selected) setSubjectError(""); // ✅ Clear error
-                            else setSubjectError("Please select subject.");
-                          }}
-                          placeholder={loadingExams ? "Loading..." : "Select"}
-                          isSearchable
-                          isClearable
-                          className="text-sm"
-                          isDisabled={loadingExams}
-                          styles={{
-                            control: (provided) => ({
-                              ...provided,
-                              fontSize: ".9em", // Adjust font size for selected value
-                              minHeight: "30px", // Reduce height
-                            }),
-                            menu: (provided) => ({
-                              ...provided,
-                              fontSize: "1em", // Adjust font size for dropdown options
-                            }),
-                            option: (provided) => ({
-                              ...provided,
-                              fontSize: ".9em", // Adjust font size for each option
-                            }),
-                          }}
-                        /> */}
                         <Select
                           menuPortalTarget={document.body}
                           menuPosition="fixed"
@@ -1103,45 +1030,6 @@ const CreateLessonPlan = () => {
                         Chapter<span className="text-red-500">*</span>
                       </label>
                       <div className="w-full md:w-[65%]">
-                        {/* <Select
-                          menuPortalTarget={document.body}
-                          menuPosition="fixed"
-                          id="studentSelect"
-                          options={chapterOptions}
-                          value={
-                            chapterOptions.find(
-                              (opt) => opt.value === selectedChapter?.value
-                            ) || selectedChapter
-                          }
-                          onChange={(selected) => {
-                            setSelectedChapter(selected);
-                            setSelectedChapterId(
-                              selected ? selected.value : null
-                            );
-                            if (selected) setChapterError("");
-                            else setChapterError("Please select chapter.");
-                          }}
-                          placeholder={loadingExams ? "Loading..." : "Select"}
-                          isSearchable
-                          isClearable
-                          className="text-sm"
-                          isDisabled={loadingExams}
-                          styles={{
-                            control: (provided) => ({
-                              ...provided,
-                              fontSize: ".9em",
-                              minHeight: "30px",
-                            }),
-                            menu: (provided) => ({
-                              ...provided,
-                              fontSize: "1em",
-                            }),
-                            option: (provided) => ({
-                              ...provided,
-                              fontSize: ".9em",
-                            }),
-                          }}
-                        /> */}
                         <Select
                           menuPortalTarget={document.body}
                           menuPosition="fixed"
@@ -1192,8 +1080,8 @@ const CreateLessonPlan = () => {
                         onClick={handleSearch}
                         style={{ backgroundColor: "#2196F3" }}
                         className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
                           }`}
                         disabled={loadingForSearch}
                       >
@@ -1417,8 +1305,8 @@ const CreateLessonPlan = () => {
                                     onClick={handleSearch}
                                     style={{ backgroundColor: "#2196F3" }}
                                     className={`btn h-8 w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-2 rounded ${loadingForSearch
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : ""
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
                                       }`}
                                     disabled={loadingForSearch}
                                   >
@@ -1586,8 +1474,8 @@ const CreateLessonPlan = () => {
                                             <th
                                               key={item.lesson_plan_headings_id}
                                               className={`px-6 py-2 border-2 text-sm font-semibold text-center text-gray-800 ${i === 0
-                                                  ? "sticky left-0 bg-gray-200"
-                                                  : ""
+                                                ? "sticky left-0 bg-gray-200"
+                                                : ""
                                                 }`}
                                               style={{ width: "210px" }}
                                             >
@@ -1616,8 +1504,8 @@ const CreateLessonPlan = () => {
                                                         item.lesson_plan_headings_id
                                                       }
                                                       className={`border-2 px-2 py-1 ${colIndex === 0
-                                                          ? "sticky left-0 bg-white"
-                                                          : ""
+                                                        ? "sticky left-0 bg-white"
+                                                        : ""
                                                         }`}
                                                       style={{
                                                         width: "210px",
@@ -1946,6 +1834,156 @@ const CreateLessonPlan = () => {
                                                         ] ||
                                                         ""
                                                       }
+                                                      onKeyDown={(e) => {
+                                                        const {
+                                                          value,
+                                                          selectionStart,
+                                                          selectionEnd,
+                                                        } = e.target;
+
+                                                        // Handle Enter key for new bullets
+                                                        if (e.key === "Enter") {
+                                                          e.preventDefault();
+
+                                                          const lineStart =
+                                                            value.lastIndexOf(
+                                                              "\n",
+                                                              selectionStart - 1
+                                                            ) + 1;
+                                                          const currentLine =
+                                                            value.substring(
+                                                              lineStart,
+                                                              selectionStart
+                                                            );
+
+                                                          const before =
+                                                            value.substring(
+                                                              0,
+                                                              selectionStart
+                                                            );
+                                                          const after =
+                                                            value.substring(
+                                                              selectionEnd
+                                                            );
+
+                                                          const newBullet =
+                                                            currentLine.startsWith(
+                                                              "• "
+                                                            )
+                                                              ? "• "
+                                                              : "";
+
+                                                          const newValue =
+                                                            before +
+                                                            "\n" +
+                                                            newBullet +
+                                                            after;
+
+                                                          e.target.value =
+                                                            newValue;
+
+                                                          // ✅ ADD THIS (CRITICAL)
+                                                          setStudentRemarks(
+                                                            (prev) => ({
+                                                              ...prev,
+                                                              [`${item.lesson_plan_headings_id}_${rowIndex}`]:
+                                                                newValue,
+                                                            })
+                                                          );
+
+                                                          const cursorPos =
+                                                            selectionStart +
+                                                            1 +
+                                                            newBullet.length;
+                                                          setTimeout(() => {
+                                                            e.target.selectionStart =
+                                                              e.target.selectionEnd =
+                                                              cursorPos;
+                                                          }, 0);
+                                                        }
+
+                                                        if (
+                                                          e.key === "Backspace"
+                                                        ) {
+                                                          const lineStart =
+                                                            value.lastIndexOf(
+                                                              "\n",
+                                                              selectionStart - 1
+                                                            ) + 1;
+                                                          const currentLine =
+                                                            value.substring(
+                                                              lineStart,
+                                                              selectionStart
+                                                            );
+
+                                                          if (
+                                                            currentLine.startsWith(
+                                                              "• "
+                                                            ) &&
+                                                            selectionStart ===
+                                                            lineStart + 2
+                                                          ) {
+                                                            e.preventDefault();
+
+                                                            const newValue =
+                                                              value.substring(
+                                                                0,
+                                                                lineStart
+                                                              ) +
+                                                              value.substring(
+                                                                lineStart + 2
+                                                              );
+
+                                                            e.target.value =
+                                                              newValue;
+
+                                                            // ✅ ADD THIS (CRITICAL)
+                                                            setStudentRemarks(
+                                                              (prev) => ({
+                                                                ...prev,
+                                                                [`${item.lesson_plan_headings_id}_${rowIndex}`]:
+                                                                  newValue,
+                                                              })
+                                                            );
+
+                                                            setTimeout(() => {
+                                                              e.target.selectionStart =
+                                                                e.target.selectionEnd =
+                                                                lineStart;
+                                                            }, 0);
+                                                          }
+                                                        }
+                                                      }}
+                                                      onInput={(e) => {
+                                                        const lines =
+                                                          e.target.value.split(
+                                                            "\n"
+                                                          );
+                                                        const updatedLines =
+                                                          lines.map((line) =>
+                                                            line.trim() ===
+                                                              "" ||
+                                                              line.startsWith(
+                                                                "• "
+                                                              )
+                                                              ? line
+                                                              : "• " + line
+                                                          );
+                                                        const newValue =
+                                                          updatedLines.join(
+                                                            "\n"
+                                                          );
+                                                        if (
+                                                          newValue !==
+                                                          e.target.value
+                                                        ) {
+                                                          e.target.value =
+                                                            newValue;
+                                                          e.target.selectionStart =
+                                                            e.target.selectionEnd =
+                                                            newValue.length;
+                                                        }
+                                                      }}
                                                       onChange={(e) =>
                                                         setStudentRemarks(
                                                           (prev) => ({

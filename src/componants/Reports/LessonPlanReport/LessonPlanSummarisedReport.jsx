@@ -45,39 +45,111 @@ const LessonPlanSummarisedReport = () => {
   const [weekRange, setWeekRange] = useState("");
   const [fromDate, setFromDate] = useState(null);
   const datePickerRef = useRef(null);
+
+  const [roleId, setRoleId] = useState([]);
+  const [regId, setRegId] = useState("");
+
   useEffect(() => {
-    fetchExams();
+    const init = async () => {
+      const sessionData = await fetchRoleId();
+
+      if (sessionData) {
+        await fetchExams(sessionData.roleId, sessionData.regId);
+      }
+    };
+
+    init();
   }, []);
 
-  const fetchExams = async () => {
+  const fetchRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      toast.error("Authentication token not found. Please login again.");
+      navigate("/");
+      return null;
+    }
+
+    try {
+      const response = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const roleId = response?.data?.user?.role_id;
+      const regId = response?.data?.user?.reg_id;
+
+      if (roleId) {
+        setRoleId(roleId); // Optional: still store in state
+        setRegId(regId);
+        return { roleId, regId };
+      } else {
+        console.warn("role_id not found in sessionData response");
+        return null;
+      }
+    } catch (error) {
+      console.error("Failed to fetch session data:", error);
+      return null;
+    }
+  };
+
+  const fetchExams = async (roleId, regId) => {
     try {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/get_allstaff`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Staff", response);
-      // setStudentNameWithClassId(response?.data || []);
-      setStudentNameWithClassId(response?.data?.data || []);
+      let apiUrl = "";
+      let normalizedData = [];
+
+      if (roleId === "T") {
+        apiUrl = `${API_URL}/api/teachers/${regId}`;
+
+        const response = await axios.get(apiUrl, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // Normalize SINGLE teacher → ARRAY
+        const teacher = response?.data?.data || response?.data?.teacher;
+
+        normalizedData = teacher ? [teacher] : [];
+      } else {
+        apiUrl = `${API_URL}/api/get_allstaff`;
+
+        const response = await axios.get(apiUrl, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // Already an array
+        normalizedData = response?.data?.data || [];
+      }
+
+      console.log("Normalized Staff:", normalizedData);
+      setStudentNameWithClassId(normalizedData);
     } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
+      toast.error("Error fetching data");
+      console.error("Error fetching data:", error);
     } finally {
       setLoadingExams(false);
     }
   };
 
-  // const handleDateChange = (date) => {
-  //   setFromDate(date);
-  //   setWeekError("");
+  // const fetchExams = async () => {
+  //   try {
+  //     setLoadingExams(true);
+  //     const token = localStorage.getItem("authToken");
 
-  //   if (date) {
-  //     const startDate = dayjs(date).format("DD-MM-YYYY");
-  //     const endDate = dayjs(date).add(6, "day").format("DD-MM-YYYY"); // 7 days including selected date
-  //     setWeekRange(`${startDate} / ${endDate}`);
-  //   } else {
-  //     setWeekRange("");
+  //     const response = await axios.get(`${API_URL}/api/get_allstaff`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     console.log("Staff", response);
+  //     // setStudentNameWithClassId(response?.data || []);
+  //     setStudentNameWithClassId(response?.data?.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching Classes");
+  //     console.error("Error fetching Classes:", error);
+  //   } finally {
+  //     setLoadingExams(false);
   //   }
   // };
 
@@ -244,11 +316,10 @@ const LessonPlanSummarisedReport = () => {
       .join(" ");
 
   const handlePrint = () => {
-    const printTitle = `Lesson Plan Summarised Report  ${
-      selectedStudent?.label
+    const printTitle = `Lesson Plan Summarised Report  ${selectedStudent?.label
         ? `List of ${camelCase(selectedStudent.label)}`
         : ": Complete List of All Staff "
-    }`;
+      }`;
     const printContent = `
     <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
          <h5 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
@@ -271,42 +342,33 @@ const LessonPlanSummarisedReport = () => {
         </thead>
         <tbody>
           ${displayedSections
-            .map(
-              (subject, index) => `
+        .map(
+          (subject, index) => `
               <tr class="text-sm">
-                <td class="px-2 text-center py-2 border border-black">${
-                  index + 1
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.classname || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.subname || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.sub_subject || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.no_of_periods || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.chapter_no || " "
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.chaptername || " "
-                }</td>
+                <td class="px-2 text-center py-2 border border-black">${index + 1
+            }</td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.classname || " "
+            }</td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.subname || " "
+            }</td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.sub_subject || " "
+            }</td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.no_of_periods || " "
+            }</td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.chapter_no || " "
+            }</td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.chaptername || " "
+            }</td>
                 <td class="px-2 text-center py-2 border border-black">
                 ${statusMap[subject?.status || " "]}</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  statusMap[subject?.approve || " "]
-                }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.remark || " "
-                }</td>
+                <td class="px-2 text-center py-2 border border-black">${statusMap[subject?.approve || " "]
+            }</td>
+                <td class="px-2 text-center py-2 border border-black">${subject?.remark || " "
+            }</td>
                
               </tr>`
-            )
-            .join("")}
+        )
+        .join("")}
         </tbody>
       </table>
     </div>
@@ -502,11 +564,10 @@ const LessonPlanSummarisedReport = () => {
     <>
       {/* <div className="w-full md:w-[85%] mx-auto p-4 "> */}
       <div
-        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
-          timetable.length > 0
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${timetable.length > 0
             ? "w-full md:w-[100%] scale-100"
             : "w-full md:w-[95%] scale-[0.98]"
-        }`}
+          }`}
       >
         <ToastContainer />
         <div className="card rounded-md ">
@@ -530,19 +591,17 @@ const LessonPlanSummarisedReport = () => {
 
           <>
             <div
-              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
-                timetable.length > 0
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${timetable.length > 0
                   ? "pb-0 w-full md:w-[99%]"
                   : "pb-4 w-full md:w-[85%]"
-              }`}
+                }`}
             >
               <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                 <div
-                  className={`  w-full gap-x-0 md:gap-x-3  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
-                    timetable.length > 0
+                  className={`  w-full gap-x-0 md:gap-x-3  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${timetable.length > 0
                       ? "w-full md:w-[100%]  wrelative left-0"
                       : " w-full md:w-[100%] relative left-10"
-                  }`}
+                    }`}
                 >
                   {/* Staff Dropdown */}
                   <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
@@ -685,9 +744,8 @@ const LessonPlanSummarisedReport = () => {
                       type="search"
                       onClick={handleSearch}
                       style={{ backgroundColor: "#2196F3" }}
-                      className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                        loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                      className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       disabled={loadingForSearch}
                     >
                       {loadingForSearch ? (

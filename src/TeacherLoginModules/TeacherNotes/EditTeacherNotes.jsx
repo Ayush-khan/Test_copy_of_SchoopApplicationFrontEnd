@@ -638,7 +638,9 @@ const EditTeacherNotes = () => {
         // 🔁 Reset random number for next edit
         editRandomNoRef.current = Math.floor(Math.random() * 100000);
 
-        navigate("/TeacherNotes");
+        setTimeout(() => {
+          navigate("/TeacherNotes");
+        }, 3000);
       } else {
         toast.error(response.data.message || "Failed to update note!");
       }

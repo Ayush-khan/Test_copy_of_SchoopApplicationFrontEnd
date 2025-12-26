@@ -1228,34 +1228,6 @@ const EditLessonPlan = () => {
                                                       minWidth: "220px",
                                                     }}
                                                   >
-                                                    {/* <textarea
-                                                      value={
-                                                        studentRemarks[
-                                                          `${item.lesson_plan_headings_id}_${rowIndex}`
-                                                        ] ||
-                                                        timetable[rowIndex]?.[
-                                                          `dc_description_${
-                                                            item.lesson_plan_headings_id
-                                                          }_${rowIndex + 1}`
-                                                        ] ||
-                                                        ""
-                                                      }
-                                                      onChange={(e) =>
-                                                        setStudentRemarks(
-                                                          (prev) => ({
-                                                            ...prev,
-                                                            [`${item.lesson_plan_headings_id}_${rowIndex}`]:
-                                                              e.target.value,
-                                                          })
-                                                        )
-                                                      }
-                                                      className="w-full resize-none p-2 border border-gray-300 focus:ring-1 focus:ring-pink-400 rounded"
-                                                      style={{
-                                                        minHeight: "100px",
-                                                      }}
-                                                      rows={2}
-                                                    /> */}
-                                                    {/* 15-12-2025 */}
                                                     <textarea
                                                       value={
                                                         studentRemarks[
@@ -1267,6 +1239,155 @@ const EditLessonPlan = () => {
                                                         ] ||
                                                         ""
                                                       }
+                                                      onKeyDown={(e) => {
+                                                        const {
+                                                          value,
+                                                          selectionStart,
+                                                          selectionEnd,
+                                                        } = e.target;
+
+                                                        if (e.key === "Enter") {
+                                                          e.preventDefault();
+
+                                                          const lineStart =
+                                                            value.lastIndexOf(
+                                                              "\n",
+                                                              selectionStart - 1
+                                                            ) + 1;
+                                                          const currentLine =
+                                                            value.substring(
+                                                              lineStart,
+                                                              selectionStart
+                                                            );
+
+                                                          const before =
+                                                            value.substring(
+                                                              0,
+                                                              selectionStart
+                                                            );
+                                                          const after =
+                                                            value.substring(
+                                                              selectionEnd
+                                                            );
+
+                                                          const newBullet =
+                                                            currentLine.startsWith(
+                                                              "• "
+                                                            )
+                                                              ? "• "
+                                                              : "";
+
+                                                          const newValue =
+                                                            before +
+                                                            "\n" +
+                                                            newBullet +
+                                                            after;
+
+                                                          e.target.value =
+                                                            newValue;
+
+                                                          // ✅ ADD THIS (CRITICAL)
+                                                          setStudentRemarks(
+                                                            (prev) => ({
+                                                              ...prev,
+                                                              [`${item.lesson_plan_headings_id}_${rowIndex}`]:
+                                                                newValue,
+                                                            })
+                                                          );
+
+                                                          const cursorPos =
+                                                            selectionStart +
+                                                            1 +
+                                                            newBullet.length;
+                                                          setTimeout(() => {
+                                                            e.target.selectionStart =
+                                                              e.target.selectionEnd =
+                                                              cursorPos;
+                                                          }, 0);
+                                                        }
+
+                                                        if (
+                                                          e.key === "Backspace"
+                                                        ) {
+                                                          const lineStart =
+                                                            value.lastIndexOf(
+                                                              "\n",
+                                                              selectionStart - 1
+                                                            ) + 1;
+                                                          const currentLine =
+                                                            value.substring(
+                                                              lineStart,
+                                                              selectionStart
+                                                            );
+
+                                                          if (
+                                                            currentLine.startsWith(
+                                                              "• "
+                                                            ) &&
+                                                            selectionStart ===
+                                                            lineStart + 2
+                                                          ) {
+                                                            e.preventDefault();
+
+                                                            const newValue =
+                                                              value.substring(
+                                                                0,
+                                                                lineStart
+                                                              ) +
+                                                              value.substring(
+                                                                lineStart + 2
+                                                              );
+
+                                                            e.target.value =
+                                                              newValue;
+
+                                                            // ✅ ADD THIS (CRITICAL)
+                                                            setStudentRemarks(
+                                                              (prev) => ({
+                                                                ...prev,
+                                                                [`${item.lesson_plan_headings_id}_${rowIndex}`]:
+                                                                  newValue,
+                                                              })
+                                                            );
+
+                                                            setTimeout(() => {
+                                                              e.target.selectionStart =
+                                                                e.target.selectionEnd =
+                                                                lineStart;
+                                                            }, 0);
+                                                          }
+                                                        }
+                                                      }}
+                                                      onInput={(e) => {
+                                                        const lines =
+                                                          e.target.value.split(
+                                                            "\n"
+                                                          );
+                                                        const updatedLines =
+                                                          lines.map((line) =>
+                                                            line.trim() ===
+                                                              "" ||
+                                                              line.startsWith(
+                                                                "• "
+                                                              )
+                                                              ? line
+                                                              : "• " + line
+                                                          );
+                                                        const newValue =
+                                                          updatedLines.join(
+                                                            "\n"
+                                                          );
+                                                        if (
+                                                          newValue !==
+                                                          e.target.value
+                                                        ) {
+                                                          e.target.value =
+                                                            newValue;
+                                                          e.target.selectionStart =
+                                                            e.target.selectionEnd =
+                                                            newValue.length;
+                                                        }
+                                                      }}
                                                       onChange={(e) =>
                                                         setStudentRemarks(
                                                           (prev) => ({
@@ -1281,32 +1402,7 @@ const EditLessonPlan = () => {
                                                         minHeight: "100px",
                                                       }}
                                                       rows={2}
-                                                    // onClick={(e) => {
-                                                    //   e.stopPropagation();
-                                                    //   setFromDate(null);
-                                                    //   setToDate(null);
-                                                    //   setWeekRange("");
-                                                    // }}
                                                     />
-
-                                                    {/* <textarea
-                                                      value={
-                                                        studentRemarks[
-                                                          `${item.lesson_plan_headings_id}_${row.startDate}`
-                                                        ] || ""
-                                                      }
-                                                      onChange={(e) =>
-                                                        setStudentRemarks(
-                                                          (prev) => ({
-                                                            ...prev,
-                                                            [`${item.lesson_plan_headings_id}_${row.startDate}`]:
-                                                              e.target.value,
-                                                          })
-                                                        )
-                                                      } 
-                                                      className="w-full resize-none p-2 border border-gray-300 rounded"
-                                                      rows={2} 
-                                                    /> */}
                                                   </td>
                                                 )
                                               )}

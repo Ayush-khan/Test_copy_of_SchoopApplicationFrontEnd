@@ -472,9 +472,8 @@ function ServiceType() {
                       displayedSections.map((section, index) => (
                         <tr
                           key={section.lesson_plan_headings_id}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
+                          className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-50`}
                         >
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">

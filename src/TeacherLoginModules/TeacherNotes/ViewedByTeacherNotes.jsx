@@ -161,7 +161,7 @@ const ViewedByTeacherNotes = () => {
       );
 
       if (response.data.status === true) {
-        toast.success("Teacher's note data successfully!");
+        // toast.success("Teacher's note data successfully!");
         setTeacherNotesData(response?.data?.student_list || []);
       } else {
         toast.error(response.data.message || "Failed to teacher's note data!");
@@ -350,8 +350,8 @@ const ViewedByTeacherNotes = () => {
                                       <tr
                                         key={student.student_id}
                                         className={`${index % 2 === 0
-                                            ? "bg-white"
-                                            : "bg-gray-100"
+                                          ? "bg-white"
+                                          : "bg-gray-100"
                                           } hover:bg-gray-50 transition-all`}
                                       >
                                         <td className="text-center px-2 lg:px-3 border border-gray-300 text-sm">

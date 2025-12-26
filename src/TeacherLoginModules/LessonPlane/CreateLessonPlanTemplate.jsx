@@ -834,8 +834,8 @@ const CreateLessonPlanTemplate = () => {
                         onClick={handleSearch}
                         style={{ backgroundColor: "#2196F3" }}
                         className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
                           }`}
                         disabled={loadingForSearch}
                       >
@@ -904,44 +904,6 @@ const CreateLessonPlanTemplate = () => {
                                     Class :{" "}
                                   </label>
                                   <span>{selectedStudent.label}</span>
-                                  {/* <Select
-                                    menuPortalTarget={document.body}
-                                    menuPosition="fixed"
-                                    id="studentSelect"
-                                    // options={studentOptions}
-                                    // value={
-                                    //   studentOptions.find(
-                                    //     (opt) =>
-                                    //       opt.value === selectedStudent?.value
-                                    //   ) || selectedStudent
-                                    // }
-                                    // onChange={(selected) => {
-                                    //   setSelectedStudent(selected);
-                                    // }}
-                                    value={selectedStudent}
-                                    placeholder={
-                                      loadingExams ? "Loading..." : "Select"
-                                    }
-                                    // isSearchable
-                                    // isClearable
-                                    className="text-sm min-w-[160px]"
-                                    isDisabled={loadingExams}
-                                    styles={{
-                                      control: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                        minHeight: "30px",
-                                      }),
-                                      menu: (provided) => ({
-                                        ...provided,
-                                        fontSize: "1em",
-                                      }),
-                                      option: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                      }),
-                                    }}
-                                  /> */}
                                 </div>
 
                                 <div className="flex items-center gap-3">
@@ -954,44 +916,6 @@ const CreateLessonPlanTemplate = () => {
                                     {/* <span className="text-red-500">*</span> */}
                                   </label>
                                   <span>{selectedSubject.label}</span>
-                                  {/* <Select
-                                    menuPortalTarget={document.body}
-                                    menuPosition="fixed"
-                                    id="monthSelect"
-                                    // options={subjectOptions}
-                                    // value={
-                                    //   subjectOptions.find(
-                                    //     (opt) =>
-                                    //       opt.value === selectedSubject?.value
-                                    //   ) || selectedSubject
-                                    // }
-                                    // onChange={(selected) => {
-                                    //   setSelectedSubject(selected);
-                                    // }}
-                                    value={selectedSubject}
-                                    placeholder={
-                                      loadingExams ? "Loading..." : "Select"
-                                    }
-                                    // isSearchable
-                                    // isClearable
-                                    className="text-sm min-w-[160px]"
-                                    isDisabled={loadingExams}
-                                    styles={{
-                                      control: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                        minHeight: "30px",
-                                      }),
-                                      menu: (provided) => ({
-                                        ...provided,
-                                        fontSize: "1em",
-                                      }),
-                                      option: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                      }),
-                                    }}
-                                  /> */}
                                 </div>
 
                                 <div className="flex items-center gap-3">
@@ -1004,87 +928,7 @@ const CreateLessonPlanTemplate = () => {
                                     {/* <span className="text-red-500">*</span> */}
                                   </label>
                                   <span>{selectedChapter.label}</span>
-                                  {/* <Select
-                                    menuPortalTarget={document.body}
-                                    menuPosition="fixed"
-                                    id="monthSelect"
-                                    // options={chapterOptions}
-                                    // value={
-                                    //   chapterOptions.find(
-                                    //     (opt) =>
-                                    //       opt.value === selectedChapter?.value
-                                    //   ) || selectedChapter
-                                    // }
-                                    // onChange={(selected) => {
-                                    //   setSelectedChapter(selected);
-                                    // }}
-                                    value={selectedChapter}
-                                    // placeholder={
-                                    //   loadingExams ? "Loading..." : "Select"
-                                    // }
-                                    // isSearchable
-                                    // isClearable
-                                    className="text-sm min-w-[160px]"
-                                    isDisabled={loadingExams}
-                                    styles={{
-                                      control: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                        minHeight: "30px",
-                                      }),
-                                      menu: (provided) => ({
-                                        ...provided,
-                                        fontSize: "1em",
-                                      }),
-                                      option: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                      }),
-                                    }}
-                                  /> */}
                                 </div>
-
-                                {/* <div>
-                                  <button
-                                    type="search"
-                                    onClick={handleSearch}
-                                    style={{ backgroundColor: "#2196F3" }}
-                                    className={`btn h-8 w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-2 rounded ${
-                                      loadingForSearch
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : ""
-                                    }`}
-                                    disabled={loadingForSearch}
-                                  >
-                                    {loadingForSearch ? (
-                                      <span className="flex items-center">
-                                        <svg
-                                          className="animate-spin h-4 w-4 mr-2 text-white"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          fill="none"
-                                          viewBox="0 0 24 24"
-                                        >
-                                          <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                          ></circle>
-                                          <path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                          ></path>
-                                        </svg>
-                                        Browsing...
-                                      </span>
-                                    ) : (
-                                      "Browse"
-                                    )}
-                                  </button>
-                                </div> */}
                               </div>
                             </div>
                           </div>
@@ -1104,7 +948,8 @@ const CreateLessonPlanTemplate = () => {
 
                       <div className="card-body w-full">
                         <div
-                          className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
+                          className="h-96 lg:h-96 overflow-y-scroll "
+                          // overflow-x-scroll
                           style={{
                             scrollbarWidth: "thin",
                             scrollbarColor: "#C03178 transparent",
@@ -1146,8 +991,8 @@ const CreateLessonPlanTemplate = () => {
                                             <th
                                               key={item.lesson_plan_headings_id}
                                               className={`px-6 py-2 border-2 text-sm font-semibold text-center text-gray-800 ${i === 0
-                                                ? "sticky left-0 bg-gray-200"
-                                                : ""
+                                                  ? "sticky left-0 bg-gray-200"
+                                                  : ""
                                                 }`}
                                               style={{ width: "210px" }}
                                             >
@@ -1173,8 +1018,8 @@ const CreateLessonPlanTemplate = () => {
                                                     item.lesson_plan_headings_id
                                                   }
                                                   className={`border-2 px-2 py-1 ${colIndex === 0
-                                                    ? "sticky left-0 bg-white"
-                                                    : ""
+                                                      ? "sticky left-0 bg-white"
+                                                      : ""
                                                     }`}
                                                   style={{
                                                     width: "210px",
@@ -1352,6 +1197,36 @@ const CreateLessonPlanTemplate = () => {
                                       </tbody>
                                     </table>
                                   </div>
+                                  <div className="flex justify-end gap-2 pr-3 mt-4 mr-2 ">
+                                    <button
+                                      onClick={handleSubmit}
+                                      className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
+                                    >
+                                      {isSubmitting ? "Saving" : "Save"}
+                                    </button>
+                                    <button
+                                      onClick={handleSubmitPublish}
+                                      className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
+                                    >
+                                      {isPublishing
+                                        ? "Publishing"
+                                        : "Save & Publish"}
+                                    </button>
+                                    <button
+                                      onClick={() => reset()}
+                                      className="btn btn-danger text-white font-semibold px-4 py-2 rounded"
+                                    >
+                                      Reset
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        setShowStudentReport(false)
+                                      }
+                                      className="bg-yellow-300 hover:bg-yellow-400 text-white font-semibold px-4 py-2 rounded"
+                                    >
+                                      Back
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             ))
@@ -1364,7 +1239,7 @@ const CreateLessonPlanTemplate = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex justify-end gap-2 pr-3 mb-4 mr-10">
+                      {/* <div className="flex justify-end gap-2 pr-3 mb-4 mr-10">
                         <button
                           onClick={handleSubmit}
                           className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
@@ -1389,7 +1264,7 @@ const CreateLessonPlanTemplate = () => {
                         >
                           Back
                         </button>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </>

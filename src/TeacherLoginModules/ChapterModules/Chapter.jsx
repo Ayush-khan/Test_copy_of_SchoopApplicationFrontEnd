@@ -1397,8 +1397,8 @@ function Chapter() {
                   }}
                 ></div>
                 <div className="modal-body">
-                  Are you sure you want to delete this chapter for this subject
-                  ?{` ${currentHolidayNameForDelete} `}
+                  Are you sure you want to delete this chapter for the subject{" "}
+                  {` ${currentHolidayNameForDelete} `} ?
                 </div>
                 <div className=" flex justify-end p-3">
                   <button

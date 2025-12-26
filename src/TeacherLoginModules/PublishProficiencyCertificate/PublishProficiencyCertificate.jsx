@@ -536,7 +536,7 @@ const PublishProficiencyCertificate = () => {
                                 </td>
 
                                 {/* Publish / Unpublish */}
-                                <td className="px-2 py-2 text-center border border-gray-300">
+                                {/* <td className="px-2 py-2 text-center border border-gray-300">
                                   {student.publish_value === "N" && (
                                     <button
                                       onClick={() => handlePublish(student)}
@@ -551,6 +551,30 @@ const PublishProficiencyCertificate = () => {
                                     <button
                                       onClick={() =>
                                         handlePublish(student, "g")
+                                      }
+                                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                                    >
+                                      Unpublish
+                                    </button>
+                                  )}
+                                </td> */}
+                                <td className="px-2 py-2 text-center border border-gray-300">
+                                  {student.publish_value === "N" && (
+                                    <button
+                                      onClick={() =>
+                                        handlePublish(student, "g")
+                                      }
+                                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                                    >
+                                      Publish
+                                    </button>
+                                  )}
+                                </td>
+                                <td className="px-2 py-2 text-center border border-gray-300">
+                                  {student.publish_value === "Y" && (
+                                    <button
+                                      onClick={() =>
+                                        handleUnPublish(student, "g")
                                       }
                                       className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                                     >
@@ -649,7 +673,7 @@ const PublishProficiencyCertificate = () => {
                                 </td>
 
                                 {/* Publish / Unpublish */}
-                                <td className="px-2 py-2 text-center border border-gray-300">
+                                {/* <td className="px-2 py-2 text-center border border-gray-300">
                                   {student.publish_value === "N" && (
                                     <button
                                       onClick={() => handlePublish(student)}
@@ -664,6 +688,30 @@ const PublishProficiencyCertificate = () => {
                                     <button
                                       onClick={() =>
                                         handlePublish(student, "b")
+                                      }
+                                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                                    >
+                                      Unpublish
+                                    </button>
+                                  )}
+                                </td> */}
+                                <td className="px-2 py-2 text-center border border-gray-300">
+                                  {student.publish_value === "N" && (
+                                    <button
+                                      onClick={() =>
+                                        handlePublish(student, "s")
+                                      }
+                                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                                    >
+                                      Publish
+                                    </button>
+                                  )}
+                                </td>
+                                <td className="px-2 py-2 text-center border border-gray-300">
+                                  {student.publish_value === "Y" && (
+                                    <button
+                                      onClick={() =>
+                                        handleUnPublish(student, "s")
                                       }
                                       className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                                     >

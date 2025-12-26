@@ -75,7 +75,7 @@ const EditChapter = () => {
         // setSelectedClasses(data.class_name);
         // setSelectedSubject(data.sub_name);
 
-        setLessonNo(data.chapter_no || "");
+        setLessonNo(data.chapter_no);
         setName(data.name || "");
         setDescription(data.description || "");
         setSubSubject(data.sub_subject);
@@ -187,10 +187,6 @@ const EditChapter = () => {
     const newErrors = {};
     let formHasErrors = false;
 
-    // if (!lessonNo.trim()) {
-    //   newErrors.lessonNo = "Lesson number is required.";
-    //   formHasErrors = true;
-    // }
     if (!String(lessonNo).trim()) {
       newErrors.lessonNo = "Lesson number is required.";
       formHasErrors = true;
@@ -452,7 +448,7 @@ const EditChapter = () => {
         </div>
       </div>
 
-      {}
+      { }
     </div>
   );
 };
