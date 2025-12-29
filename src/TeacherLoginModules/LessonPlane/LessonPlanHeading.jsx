@@ -177,6 +177,60 @@ function ServiceType() {
     setNewSequenceName("");
   };
 
+  // const handleSubmitAdd = async () => {
+  //   if (isSubmitting) return;
+  //   setIsSubmitting(true);
+
+  //   const validationErrors = validateSectionName(
+  //     newSectionName,
+  //     newSequenceName
+  //   );
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setFieldErrors(validationErrors);
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token or academic year found");
+  //     }
+
+  //     const formData = new FormData();
+  //     formData.append("name", newSectionName);
+  //     formData.append("sequence", newSequenceName);
+  //     formData.append("change_daily", requiresAppointment === "Y" ? "Y" : "");
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/save_lessonplanheading`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "multipart/form-data",
+  //         },
+  //         withCredentials: true,
+  //       }
+  //     );
+
+  //     if (response.data?.status === 400) {
+  //       toast.error(response.data.message || "Something went wrong!");
+  //       setIsSubmitting(false);
+  //       return;
+  //     }
+
+  //     fetchSections();
+  //     handleCloseModal();
+  //     toast.success("Lesson Plan Heading created successfully!");
+  //   } catch (error) {
+  //     console.error("Error adding lesson plan heading:", error);
+  //     toast.error("Server error. Please try again later.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const handleSubmitAdd = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -185,8 +239,24 @@ function ServiceType() {
       newSectionName,
       newSequenceName
     );
+
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
+      setIsSubmitting(false);
+      return;
+    }
+
+    // 🔴 DUPLICATE SEQUENCE CHECK
+    const isDuplicateSequence = sections?.some(
+      (section) =>
+        String(section.sequence).trim() === String(newSequenceName).trim()
+    );
+
+    if (isDuplicateSequence) {
+      setFieldErrors({
+        sequence: "This sequence number already exists",
+      });
+      toast.error("Sequence number already exists");
       setIsSubmitting(false);
       return;
     }
@@ -194,13 +264,12 @@ function ServiceType() {
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error("No authentication token or academic year found");
+        throw new Error("No authentication token found");
       }
 
       const formData = new FormData();
       formData.append("name", newSectionName);
       formData.append("sequence", newSequenceName);
-      // formData.append("change_daily", requiresAppointment);
       formData.append("change_daily", requiresAppointment === "Y" ? "Y" : "");
 
       const response = await axios.post(
@@ -232,8 +301,85 @@ function ServiceType() {
     }
   };
 
+  // const handleSubmitEdit = async () => {
+  //   if (isSubmitting) return; // Prevent re-submitting
+  //   setIsSubmitting(true);
+
+  //   // Validate before submitting
+  //   const validationErrors = validateSectionName(
+  //     newSectionName,
+  //     newSequenceName
+  //   );
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setFieldErrors(validationErrors);
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) throw new Error("No authentication token found");
+
+  //     // Send JSON body
+  //     const response = await axios.put(
+  //       `${API_URL}/api/update_lesson_plan_heading/${currentSection.lesson_plan_headings_id}`,
+  //       {
+  //         name: newSectionName,
+  //         sequence: newSequenceName,
+  //         // change_daily: requiresAppointment, // match backend field
+  //         change_daily: requiresAppointment === "Y" ? "Y" : "",
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //         withCredentials: true,
+  //       }
+  //     );
+
+  //     // Check for custom 400 in response body
+  //     if (response.data?.status === 400) {
+  //       toast.error(
+  //         response.data.message || "Lesson plan heading already exists!"
+  //       );
+  //       setIsSubmitting(false);
+  //       return;
+  //     }
+
+  //     // Success
+  //     toast.success("Lesson Plan Heading updated successfully!");
+  //     fetchSections();
+  //     handleCloseModal();
+  //   } catch (error) {
+  //     console.error("Error updating lesson plan heading:", error);
+
+  //     // Handle 422 validation errors
+  //     if (error.response?.status === 422 && error.response.data.errors) {
+  //       const errors = error.response.data.errors;
+  //       Object.values(errors).forEach((err) => toast.error(err));
+  //       if (errors.name) {
+  //         setFieldErrors((prev) => ({ ...prev, name: errors.name }));
+  //       }
+  //       if (errors.sequence) {
+  //         setFieldErrors((prev) => ({ ...prev, sequence: errors.sequence }));
+  //       }
+  //     }
+  //     // Handle backend 400 inside response body
+  //     else if (error.response?.data?.status === 400) {
+  //       toast.error(
+  //         error.response.data.message || "Lesson plan heading already exists!"
+  //       );
+  //     } else {
+  //       toast.error("Server error. Please try again later.");
+  //     }
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const handleSubmitEdit = async () => {
-    if (isSubmitting) return; // Prevent re-submitting
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     // Validate before submitting
@@ -241,8 +387,26 @@ function ServiceType() {
       newSectionName,
       newSequenceName
     );
+
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
+      setIsSubmitting(false);
+      return;
+    }
+
+    // 🔴 DUPLICATE SEQUENCE CHECK (IGNORE CURRENT RECORD)
+    const isDuplicateSequence = sections?.some(
+      (section) =>
+        String(section.sequence).trim() === String(newSequenceName).trim() &&
+        section.lesson_plan_headings_id !==
+        currentSection.lesson_plan_headings_id
+    );
+
+    if (isDuplicateSequence) {
+      setFieldErrors({
+        sequence: "This sequence number already exists",
+      });
+      toast.error("Sequence number already exists");
       setIsSubmitting(false);
       return;
     }
@@ -251,13 +415,11 @@ function ServiceType() {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
 
-      // Send JSON body
       const response = await axios.put(
         `${API_URL}/api/update_lesson_plan_heading/${currentSection.lesson_plan_headings_id}`,
         {
           name: newSectionName,
           sequence: newSequenceName,
-          // change_daily: requiresAppointment, // match backend field
           change_daily: requiresAppointment === "Y" ? "Y" : "",
         },
         {
@@ -269,7 +431,7 @@ function ServiceType() {
         }
       );
 
-      // Check for custom 400 in response body
+      // Custom backend 400
       if (response.data?.status === 400) {
         toast.error(
           response.data.message || "Lesson plan heading already exists!"
@@ -278,7 +440,6 @@ function ServiceType() {
         return;
       }
 
-      // Success
       toast.success("Lesson Plan Heading updated successfully!");
       fetchSections();
       handleCloseModal();
@@ -288,7 +449,9 @@ function ServiceType() {
       // Handle 422 validation errors
       if (error.response?.status === 422 && error.response.data.errors) {
         const errors = error.response.data.errors;
+
         Object.values(errors).forEach((err) => toast.error(err));
+
         if (errors.name) {
           setFieldErrors((prev) => ({ ...prev, name: errors.name }));
         }
@@ -296,7 +459,7 @@ function ServiceType() {
           setFieldErrors((prev) => ({ ...prev, sequence: errors.sequence }));
         }
       }
-      // Handle backend 400 inside response body
+      // Backend 400
       else if (error.response?.data?.status === 400) {
         toast.error(
           error.response.data.message || "Lesson plan heading already exists!"

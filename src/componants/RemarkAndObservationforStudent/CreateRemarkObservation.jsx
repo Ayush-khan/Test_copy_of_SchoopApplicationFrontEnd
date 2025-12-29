@@ -283,8 +283,11 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
 
     if (!selectedOption) return;
 
+    console.log("class inside handleClass select", selectedOption.class_id);
+
     setSectionIdForStudentList(selectedOption.section_id);
     setClassIdForSubjectAPI(selectedOption.class_id);
+    console.log("clas if after statae handl", classIdForSubjectAPI);
   };
 
   const handleStudentToggle = (studentId) => {
@@ -406,8 +409,10 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
     const sectionId = selectedClass?.value || "";
     formData.append("section_id", sectionId);
 
-    const fullClassObj = allClasses.find((cls) => cls.section_id === sectionId);
-    const classId = fullClassObj?.get_class?.class_id || "";
+    // const fullClassObj = allClasses.find((cls) => cls.section_id === sectionId);
+    // const classId = fullClassObj?.get_class?.class_id || "";
+    // console.log("class_id on console", classId);
+    const classId = selectedClass.class_id || "";
     formData.append("class_id", classId);
 
     formData.append("subject_id", selectedSubject?.value || "0");
@@ -441,9 +446,12 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
             : "Remark saved successfully!"
         );
         resetForm();
-        if (onSaveSuccess) {
-          onSaveSuccess();
-        }
+
+        setTimeout(() => {
+          if (onSaveSuccess) {
+            onSaveSuccess();
+          }
+        }, 2000);
       } else {
         toast.error("Failed to save remark.");
       }

@@ -232,7 +232,11 @@ const PublishReportCard = () => {
       });
 
       setPublishStatus((prev) => ({ ...prev, [examId]: newStatus }));
-      toast.success(newStatus === "Y" ? "Published" : "Unpublished");
+      toast.success(
+        newStatus === "Y"
+          ? "Report card published successfully."
+          : "Report card unpublished successfully."
+      );
     } finally {
       // Stop Loader
       setLoadingPublish((prev) => ({ ...prev, [examId]: false }));
@@ -332,9 +336,8 @@ const PublishReportCard = () => {
                     return (
                       <tr
                         key={exam.exam_id}
-                        className={`transition-all duration-200 hover:bg-indigo-50 ${
-                          index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                        }`}
+                        className={`transition-all duration-200 hover:bg-indigo-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                          }`}
                       >
                         {/* Exam Name */}
                         <td className="p-3 font-medium text-gray-800">
@@ -352,11 +355,10 @@ const PublishReportCard = () => {
                             className={`
     px-4 py-1 rounded-md text-sm font-medium text-white
     transition-all shadow 
-    ${
-      publishStatus[exam.exam_id] === "Y"
-        ? "bg-red-500 hover:bg-red-600"
-        : "bg-green-600 hover:bg-green-700"
-    }
+    ${publishStatus[exam.exam_id] === "Y"
+                                ? "bg-red-500 hover:bg-red-600"
+                                : "bg-green-600 hover:bg-green-700"
+                              }
     ${loadingPublish[exam.exam_id] ? "opacity-50 cursor-not-allowed" : ""}
   `}
                           >
@@ -489,9 +491,8 @@ const PublishReportCard = () => {
                     return (
                       <tr
                         key={term.term_id}
-                        className={`transition-all duration-200 hover:bg-indigo-50 ${
-                          index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                        }`}
+                        className={`transition-all duration-200 hover:bg-indigo-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                          }`}
                       >
                         {/* Exam Name */}
                         <td className="p-3 font-medium text-gray-800">
@@ -509,11 +510,10 @@ const PublishReportCard = () => {
                             className={`
     px-4 py-1 rounded-md text-sm font-medium text-white
     transition-all shadow 
-    ${
-      publishStatus[term.term_id] === "Y"
-        ? "bg-red-500 hover:bg-red-600"
-        : "bg-green-600 hover:bg-green-700"
-    }
+    ${publishStatus[term.term_id] === "Y"
+                                ? "bg-red-500 hover:bg-red-600"
+                                : "bg-green-600 hover:bg-green-700"
+                              }
     ${loadingPublish[term.term_id] ? "opacity-50 cursor-not-allowed" : ""}
   `}
                           >

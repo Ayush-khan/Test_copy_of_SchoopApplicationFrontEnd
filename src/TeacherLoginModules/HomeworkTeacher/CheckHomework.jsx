@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1, RxPadding } from "react-icons/rx";
+import ReactPaginate from "react-paginate";
 import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
 import { useLocation, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -16,6 +17,9 @@ const CheckHomework = () => {
   const [currentPage, setCurrentPage] = useState(0);
 
   const [loadingForSearch, setLoadingForSearch] = useState(false);
+
+  const previousPageRef = useRef(0);
+  const prevSearchTermRef = useRef("");
 
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +36,8 @@ const CheckHomework = () => {
   const location = useLocation();
   const selectedHomework = location.state;
   console.log("selectedHomework", selectedHomework);
+
+  const classDescrption = selectedHomework.description;
 
   useEffect(() => {
     handleSearch();
@@ -89,18 +95,37 @@ const CheckHomework = () => {
 
   console.log("row", timetable);
 
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
+  };
+
+  useEffect(() => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
+      previousPageRef.current = currentPage; // save page before search
+      setCurrentPage(0); // jump to first page for search
+    }
+
+    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
+      setCurrentPage(previousPageRef.current); // restore page after clearing search
+    }
+
+    prevSearchTermRef.current = trimmedSearch;
+  }, [searchTerm]);
+  const searchLower = searchTerm.trim().toLowerCase();
   const filteredSections = timetable.filter((student) => {
-    const searchLower = searchTerm.toLowerCase();
-
-    const studentName =
-      `${student?.first_name} ${student.mid_name} ${student.last_name}`
-        ?.toLowerCase()
-        .trim() || "";
-
-    const rollNo = student?.roll_no ? String(student.roll_no) : "";
-
-    return studentName.includes(searchLower) || rollNo.includes(searchLower);
+    const fullName =
+      `${student.first_name} ${student.mid_name} ${student.last_name}`.toLowerCase();
+    return (
+      fullName.includes(searchLower) ||
+      (student.roll_no && student.roll_no.toString().includes(searchLower))
+    );
   });
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
 
@@ -160,131 +185,289 @@ const CheckHomework = () => {
                       </div>
                     </div>
 
-                    {/* Divider */}
-                    {/* <div
-                      className="relative w-[97%] mb-3 h-1 mx-auto bg-red-700"
-                      style={{ backgroundColor: "#C03078" }}
-                    ></div> */}
                     <div className="w-[97%] mx-auto">
                       {/* Colored line */}
                       <div
                         className="relative h-1 mb-2"
                         style={{ backgroundColor: "#C03078" }}
                       ></div>
-
-                      {/* Icons with labels */}
-                      <div className="flex justify-end space-x-4 items-center mr-5">
-                        {/* Not Viewed */}
-                        <div className="flex flex-col items-center text-center">
-                          <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center">
-                            <FontAwesomeIcon
-                              icon={faUserSlash}
-                              className="text-red-600 text-xs"
-                              title="Not Viewed"
-                            />
-                          </div>
-                          <span className="text-[10px] text-gray-700 mt-1">
-                            Not Viewed
-                          </span>
-                        </div>
-
-                        {/* Viewed */}
-                        <div className="flex flex-col items-center text-center">
-                          <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                            <FontAwesomeIcon
-                              icon={faUser}
-                              className="text-green-600 text-xs"
-                              title="Viewed"
-                            />
-                          </div>
-                          <span className="text-[10px] text-gray-700 mt-1">
-                            Viewed
-                          </span>
-                        </div>
-                      </div>
                     </div>
 
-                    {/* Table */}
-                    <div className="card-body w-full">
-                      <div
-                        className="h-[550px] lg:h-[550px] overflow-y-scroll overflow-x-scroll"
-                        style={{
-                          scrollbarWidth: "thin",
-                          scrollbarColor: "#C03178 transparent",
-                        }}
-                      >
-                        <table className="min-w-full leading-normal table-auto">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              <th className="w-12 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Sr No.
-                              </th>
-                              <th className="w-12 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Roll No.
-                              </th>
-                              <th className="w-40 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Student Name
-                              </th>
-                              <th className="w-28 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Viewed
-                              </th>
-                            </tr>
-                          </thead>
+                    {/* <div className="card-body w-full md:w-full mx-auto ml-2">
+                      <div className="space-y-5 mr-14">
+                        <div className="flex flex-col md:flex-row items-center space-x-3">
+                          <div className="flex-1">
+                            <textarea
+                             
+                              value={classDescrption}
+                              readOnly
+                              rows={1} // adjust height
+                              className="w-full bg-gray-100 text-center text-gray-700 p-3 rounded resize-none border border-gray-300 focus:outline-none"
+                              placeholder="No description available"
+                            />
+                          </div>
+                          <div className="flex space-x-2">
+                           
+                            <div className="flex flex-col items-center text-center">
+                              <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center">
+                                <FontAwesomeIcon
+                                  icon={faUserSlash}
+                                  className="text-red-600 text-xs"
+                                  title="Not Viewed"
+                                />
+                              </div>
+                              <span className="text-[10px] text-gray-700 mt-1">
+                                Not Viewed
+                              </span>
+                            </div>
 
-                          <tbody>
-                            {displayedSections?.length > 0 ? (
-                              displayedSections.map((student, index) => (
-                                <tr
-                                  key={student.adm_form_pk}
-                                  className="border border-gray-300"
-                                >
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {index + 1}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.roll_no || " "}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {camelCase(
-                                      `${student?.first_name || ""} ${student?.mid_name || ""
-                                      } ${student?.last_name || ""}`
-                                    )}
-                                  </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.read_status === 0 ? (
-                                      <FontAwesomeIcon
-                                        icon={faUserSlash}
-                                        className="text-red-600 text-lg"
-                                        title="Not Viewed"
-                                      />
-                                    ) : (
-                                      <FontAwesomeIcon
-                                        icon={faUser}
-                                        className="text-green-600 text-lg"
-                                        title="Viewed"
-                                      />
-                                    )}
-                                  </td>
+                         
+                            <div className="flex flex-col items-center text-center">
+                              <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
+                                <FontAwesomeIcon
+                                  icon={faUser}
+                                  className="text-green-600 text-xs"
+                                  title="Viewed"
+                                />
+                              </div>
+                              <span className="text-[10px] text-gray-700 mt-1">
+                                Viewed
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                     
+                        <div className="card-body w-full mt-2">
+                          <div
+                            className="h-[550px] lg:h-[550px] overflow-y-scroll overflow-x-scroll"
+                            style={{
+                              scrollbarWidth: "thin",
+                              scrollbarColor: "#C03178 transparent",
+                            }}
+                          >
+                            <table className="min-w-full leading-normal table-auto">
+                              <thead>
+                                <tr className="bg-gray-100">
+                                  <th className="w-12 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                    Sr No.
+                                  </th>
+                                  <th className="w-12 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                    Roll No.
+                                  </th>
+                                  <th className="w-40 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                    Student Name
+                                  </th>
+                                  <th className="w-28 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                    Viewed
+                                  </th>
                                 </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td
-                                  colSpan="4"
-                                  className="text-center py-8 text-red-700 text-lg font-medium"
-                                >
-                                  Oops! No data found..
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
+                              </thead>
+
+                              <tbody>
+                                {displayedSections?.length > 0 ? (
+                                  displayedSections.map((student, index) => (
+                                    <tr
+                                      key={student.adm_form_pk}
+                                      className="border border-gray-300"
+                                    >
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {index + 1}
+                                      </td>
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {student?.roll_no || " "}
+                                      </td>
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {camelCase(
+                                          `${student?.first_name || ""} ${
+                                            student?.mid_name || ""
+                                          } ${student?.last_name || ""}`
+                                        )}
+                                      </td>
+                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                        {student?.read_status === 0 ? (
+                                          <FontAwesomeIcon
+                                            icon={faUserSlash}
+                                            className="text-red-600 text-lg"
+                                            title="Not Viewed"
+                                          />
+                                        ) : (
+                                          <FontAwesomeIcon
+                                            icon={faUser}
+                                            className="text-green-600 text-lg"
+                                            title="Viewed"
+                                          />
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))
+                                ) : (
+                                  <tr>
+                                    <td
+                                      colSpan="4"
+                                      className="text-center py-8 text-red-700 text-lg font-medium"
+                                    >
+                                      Oops! No data found..
+                                    </td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div> */}
+
+                    <div className="card-body w-full md:w-[95%] mx-auto ml-2">
+                      <div className="space-y-5">
+                        <div className="flex flex-col md:flex-row items-center space-x-3">
+                          <div className="flex-1">
+                            <textarea
+                              value={classDescrption}
+                              readOnly
+                              rows={1} // adjust height
+                              className="w-full bg-gray-100 text-center text-gray-700 p-3 rounded resize-none border border-gray-300 focus:outline-none"
+                              placeholder="No description available"
+                            />
+                          </div>
+                          <div className="flex space-x-2">
+                            {/* Not Viewed */}
+                            <div className="flex flex-col items-center text-center">
+                              <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center">
+                                <FontAwesomeIcon
+                                  icon={faUserSlash}
+                                  className="text-red-600 text-xs"
+                                  title="Not Viewed"
+                                />
+                              </div>
+                              <span className="text-[10px] text-gray-700 mt-1">
+                                Not Viewed
+                              </span>
+                            </div>
+
+                            {/* Viewed */}
+                            <div className="flex flex-col items-center text-center">
+                              <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
+                                <FontAwesomeIcon
+                                  icon={faUser}
+                                  className="text-green-600 text-xs"
+                                  title="Viewed"
+                                />
+                              </div>
+                              <span className="text-[10px] text-gray-700 mt-1">
+                                Viewed
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="card mx-auto lg:w-[100%] shadow-lg">
+                          <div className="card-body w-full">
+                            <div
+                              className={`h-96 w-full md:w-[99%] lg:h-96 overflow-y-scroll lg:overflow-x-hidden mx-auto `}
+                            >
+                              <div className="bg-white  rounded-lg shadow-xs ">
+                                <table className="min-w-full leading-normal table-auto">
+                                  <thead>
+                                    <tr className="bg-gray-100">
+                                      <th className="w-12 px-2 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                        Sr No.
+                                      </th>
+                                      <th className="w-12 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                        Roll No.
+                                      </th>
+                                      <th className="w-40 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                        Student Name
+                                      </th>
+                                      <th className="w-28 px-3 py-2 text-center border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                        Viewed
+                                      </th>
+                                    </tr>
+                                  </thead>
+
+                                  <tbody>
+                                    {displayedSections?.length > 0 ? (
+                                      displayedSections.map(
+                                        (student, index) => (
+                                          <tr
+                                            key={student.student_id}
+                                            className="border border-gray-300"
+                                          >
+                                            <td className="px-2 py-2 text-center border border-gray-300">
+                                              {currentPage * pageSize +
+                                                index +
+                                                1}
+                                            </td>
+                                            <td className="px-2 py-2 text-center border border-gray-300">
+                                              {student?.roll_no || " "}
+                                            </td>
+                                            <td className="px-2 py-2 text-center border border-gray-300">
+                                              {camelCase(
+                                                `${student?.first_name || ""} ${student?.mid_name || ""
+                                                } ${student?.last_name || ""}`
+                                              )}
+                                            </td>
+                                            <td className="px-2 py-2 text-center border border-gray-300">
+                                              {student?.read_status === 0 ? (
+                                                <FontAwesomeIcon
+                                                  icon={faUserSlash}
+                                                  className="text-red-600 text-lg"
+                                                  title="Not Viewed"
+                                                />
+                                              ) : (
+                                                <FontAwesomeIcon
+                                                  icon={faUser}
+                                                  className="text-green-600 text-lg"
+                                                  title="Viewed"
+                                                />
+                                              )}
+                                            </td>
+                                          </tr>
+                                        )
+                                      )
+                                    ) : (
+                                      <tr>
+                                        <td
+                                          colSpan="4"
+                                          className="text-center py-8 text-red-700 text-lg font-medium"
+                                        >
+                                          Oops! No data found..
+                                        </td>
+                                      </tr>
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+
+                            <div className=" flex justify-center  pt-2 -mb-3">
+                              <ReactPaginate
+                                previousLabel={"Previous"}
+                                nextLabel={"Next"}
+                                breakLabel={"..."}
+                                breakClassName={"page-item"}
+                                breakLinkClassName={"page-link"}
+                                pageCount={pageCount}
+                                marginPagesDisplayed={1}
+                                pageRangeDisplayed={1}
+                                onPageChange={handlePageClick}
+                                containerClassName={"pagination"}
+                                pageClassName={"page-item"}
+                                pageLinkClassName={"page-link"}
+                                previousClassName={"page-item"}
+                                previousLinkClassName={"page-link"}
+                                nextClassName={"page-item"}
+                                nextLinkClassName={"page-link"}
+                                activeClassName={"active"}
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               ) : (
-                // ✅ When timetable is empty
                 <div className="flex justify-center items-center h-64">
                   <p className="text-xl text-red-700 font-medium">
                     Oops! No data found..

@@ -46,7 +46,7 @@ const FeePendingForClass = () => {
   const [selectedClassName, setSelectedClassName] = useState("");
 
   useEffect(() => {
-    fetchExams();
+    // fetchExams();
     fetchLeaveType();
   }, []);
 
@@ -113,8 +113,10 @@ const FeePendingForClass = () => {
 
       const classApiUrl =
         roleId === "T"
-          ? `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${roleIdValue}`
+          ? `${API_URL}/api/get_classes_of_classteacher?teacher_id=${roleIdValue}`
           : `${API_URL}/api/getallClassWithStudentCount`;
+
+      //  get_teacherclasseswithclassteacher
 
       const [classResponse, studentResponse] = await Promise.all([
         axios.get(classApiUrl, {
@@ -353,20 +355,20 @@ const FeePendingForClass = () => {
     setLeaveTypes([]);
     setPageCount(0);
     setIsSubmitting(true);
-    setLoadingForSearch(false);
+    setLoadingForSearch(true);
 
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
         toast.error("Authentication token missing!");
-        setLoadingForSearch(false);
+        setLoadingForSearch(true);
         setIsSubmitting(false);
         return;
       }
 
       if (!selectedStudent) {
-        setStudentError("Please select a class/section.");
-        setLoadingForSearch(false);
+        setStudentError("Please select a class.");
+        setLoadingForSearch(true);
         setIsSubmitting(false);
         return;
       }
@@ -378,7 +380,7 @@ const FeePendingForClass = () => {
 
       if (!class_id || !section_id) {
         toast.error("Missing class or section ID.");
-        setLoadingForSearch(false);
+        setLoadingForSearch(true);
         setIsSubmitting(false);
         return;
       }
@@ -420,7 +422,7 @@ const FeePendingForClass = () => {
       console.error("Error fetching Fee Pending for class:", error);
       toast.error(
         error?.response?.data?.message ||
-          "Error fetching fee pending data. Please try again."
+        "Error fetching fee pending data. Please try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -429,11 +431,10 @@ const FeePendingForClass = () => {
   };
 
   const handlePrint = () => {
-    const printTitle = `Fee Pending for class  ${
-      selectedStudent?.label
+    const printTitle = `Fee Pending for class  ${selectedStudent?.label
         ? `List of ${camelCase(selectedStudent.label)}`
         : ": Complete List of All Teacher "
-    }`;
+      }`;
     const printContent = `
     <div id="tableMain" class="flex items-center justify-center min-h-screen bg-white">
          <h5 id="tableHeading5"  class="text-lg font-semibold border-1 border-black">${printTitle}</h5>
@@ -453,12 +454,11 @@ const FeePendingForClass = () => {
         </thead>
         <tbody>
           ${displayedSections
-            .map(
-              (subject, index) => `
+        .map(
+          (subject, index) => `
               <tr class="text-sm">
-                <td class="px-2 text-center py-2 border border-black">${
-                  index + 1
-                }</td>
+                <td class="px-2 text-center py-2 border border-black">${index + 1
+            }</td>
                  <td class="px-2 text-center py-2 border border-black">
                 ${subject?.roll_no}
                 </td>
@@ -468,21 +468,17 @@ const FeePendingForClass = () => {
                 <td class="px-2 text-center py-2 border border-black">
                 ${subject?.class_section}
                 </td>
-                 <td class="px-2 text-center py-2 border border-black">${
-                   subject?.phone_no
-                 }</td>
-                  <td class="px-2 text-center py-2 border border-black">${
-                    subject?.installment
-                  }</td>
-                   <td class="px-2 text-center py-2 border border-black">${
-                     subject?.installment_fees
-                   }</td>
-                    <td class="px-2 text-center py-2 border border-black">${
-                      subject?.paid_amount
-                    }</td>
+                 <td class="px-2 text-center py-2 border border-black">${subject?.phone_no
+            }</td>
+                  <td class="px-2 text-center py-2 border border-black">${subject?.installment
+            }</td>
+                   <td class="px-2 text-center py-2 border border-black">${subject?.installment_fees
+            }</td>
+                    <td class="px-2 text-center py-2 border border-black">${subject?.paid_amount
+            }</td>
               </tr>`
-            )
-            .join("")}
+        )
+        .join("")}
         </tbody>
       </table>
     </div>
@@ -617,21 +613,12 @@ const FeePendingForClass = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Fee Pending for class");
 
     // Generate file name and trigger download
-    const fileName = `Fees_Pending_For_Class_${
-      camelCase(selectedStudent?.label) || "All_Teacher"
-    }.xlsx`;
+    const fileName = `Fees_Pending_For_Class_${camelCase(selectedStudent?.label) || "All_Teacher"
+      }.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
   console.log("row", timetable);
-
-  const statusMap = {
-    I: "Incomplete",
-    C: "Complete",
-  };
-
-  const capitalizeFirst = (str) =>
-    str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
 
   const filteredSections = timetable.filter((student) => {
     const searchLower = searchTerm.toLowerCase();
@@ -661,11 +648,10 @@ const FeePendingForClass = () => {
     <>
       {/* <div className="w-full md:w-[85%] mx-auto p-4 "> */}
       <div
-        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
-          timetable.length > 0
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${timetable.length > 0
             ? "w-full md:w-[100%] scale-100"
             : "w-full md:w-[100%] scale-[0.98]"
-        }`}
+          }`}
       >
         <ToastContainer />
         <div className="card rounded-md ">
@@ -690,20 +676,18 @@ const FeePendingForClass = () => {
           <>
             {/* <div className=" w-full md:w-[95%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2"> */}
             <div
-              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
-                timetable.length > 0
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${timetable.length > 0
                   ? "pb-0 w-full md:w-[99%]"
                   : "pb-4 w-full md:w-[99%]"
-              }`}
+                }`}
             >
-              <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
+              <div className="w-full md:w-[80%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                 {/* <div className="w-full  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row"> */}
                 <div
-                  className={`  w-full gap-x-0 md:gap-x-6  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
-                    timetable.length > 0
+                  className={`  w-full gap-x-0 md:gap-x-6  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${timetable.length > 0
                       ? "w-full md:w-[90%]  wrelative left-0"
                       : " w-full md:w-[70%] relative left-10"
-                  }`}
+                    }`}
                 >
                   {/* Staff Dropdown */}
                   <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
@@ -797,6 +781,7 @@ const FeePendingForClass = () => {
                       htmlFor="status"
                     >
                       Status
+                      {/* <span className="text-sm text-red-500">*</span> */}
                     </label>
                     <div className="w-full md:w-[70%]">
                       <Select
@@ -832,9 +817,8 @@ const FeePendingForClass = () => {
                       type="search"
                       onClick={handleSearch}
                       style={{ backgroundColor: "#2196F3" }}
-                      className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                        loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                      className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       disabled={loadingForSearch}
                     >
                       {loadingForSearch ? (
@@ -927,22 +911,22 @@ const FeePendingForClass = () => {
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
                                 Roll No.
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[20%]">
                                 Student Name
                               </th>
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
                                 Class
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[14%]">
                                 Phone No.
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[25%]">
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[12%]">
                                 Installment No.
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[20%]">
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[15%]">
                                 Installment Amount
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[15%]">
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[13%]">
                                 Amount Paid
                               </th>
                             </tr>
@@ -993,13 +977,13 @@ const FeePendingForClass = () => {
                             )}
                           </tbody>
                         </table>
+
+                        <div className="text-center font-semibold px-6 mt-2 text-pink-600">
+                          Total Records : {timetable.length}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="text-right font-semibold px-6">
-                  Total Records: {timetable.length}
                 </div>
               </>
             )}

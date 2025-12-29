@@ -8,6 +8,7 @@ import { RxCross1 } from "react-icons/rx";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { ImDownload } from "react-icons/im";
 import { useNavigate } from "react-router-dom";
+import { FaEye } from "react-icons/fa";
 
 function NoticeAndSmsForStaff() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -44,6 +45,7 @@ function NoticeAndSmsForStaff() {
   const today = new Date().toISOString().split("T")[0];
 
   const [imageUrls, setImageUrls] = useState([]);
+  const [previewImage, setPreviewImage] = useState(null);
 
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
@@ -189,21 +191,42 @@ function NoticeAndSmsForStaff() {
     );
   }
 
-  const downloadFile = (fileUrl, fileName) => {
-    const baseUrl = "https://sms.evolvu.in/"; // Base URL
-    const fullUrl = `${fileUrl}`; // Construct the full file URL
-    // Create an anchor element
-    const link = document.createElement("a");
-    link.href = fullUrl; // Set the file URL
-    link.target = "none"; // Open in a new tab (optional)
-    link.download = fileName || "downloaded_file.pdf"; // Use the provided file name or a default name
-    document.body.appendChild(link); // Append the link to the DOM
+  // const downloadFile = (fileUrl, fileName) => {
+  //   const baseUrl = "https://sms.evolvu.in/"; // Base URL
+  //   const fullUrl = `${fileUrl}`; // Construct the full file URL
+  //   // Create an anchor element
+  //   const link = document.createElement("a");
+  //   link.href = fullUrl; // Set the file URL
+  //   link.target = "none"; // Open in a new tab (optional)
+  //   link.download = fileName || "downloaded_file.pdf"; // Use the provided file name or a default name
+  //   document.body.appendChild(link); // Append the link to the DOM
 
-    // Trigger the click to download the file
-    link.click();
+  //   // Trigger the click to download the file
+  //   link.click();
 
-    // Clean up the DOM
-    document.body.removeChild(link); // Remove the link after the click
+  //   // Clean up the DOM
+  //   document.body.removeChild(link); // Remove the link after the click
+  // };
+
+  const downloadFile = async (fileUrl, fileName) => {
+    try {
+      const response = await fetch(fileUrl);
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = fileName || "download";
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
   };
 
   const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
@@ -503,15 +526,13 @@ function NoticeAndSmsForStaff() {
                   </div>
 
                   {/* Download Links */}
-                  {/* Download Links */}
 
-                  {imageUrls && imageUrls.length > 0 && (
+                  {/* {imageUrls && imageUrls.length > 0 && (
                     <div className="w-full  flex flex-row">
                       <label className=" px-4 mb-2 ">Attachments:</label>
 
                       <div className="relative  left-3 mt-2 flex flex-col mx-4 gap-y-2">
                         {imageUrls.map((url, index) => {
-                          // Extracting file name from the URL
                           const fileName = url.substring(
                             url.lastIndexOf("/") + 1
                           );
@@ -520,7 +541,6 @@ function NoticeAndSmsForStaff() {
                               key={index}
                               className=" font-semibold flex flex-row text-[.58em]  items-center gap-x-2"
                             >
-                              {/* Display file name */}
                               <span className=" ">{fileName}</span>
                               <button
                                 className=" text-blue-600 hover:text-blue-800 hover:bg-transparent"
@@ -528,6 +548,78 @@ function NoticeAndSmsForStaff() {
                               >
                                 <ImDownload className="font-2xl w-3 h-3" />
                               </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )} */}
+
+                  {imageUrls && imageUrls.length > 0 && (
+                    <div className="w-full flex flex-row">
+                      <label className="px-4 mb-2 mr-4">Attachments:</label>
+
+                      {previewImage && (
+                        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-50">
+                          <div className="bg-white border border-gray-300 shadow-2xl rounded-lg p-3 w-[260px] flex flex-col items-center animate-fadeIn">
+                            {/* 🖼 Image */}
+                            <img
+                              src={previewImage}
+                              alt="Preview"
+                              className="rounded-md w-[240px] h-[180px] object-contain mb-3 border border-gray-200"
+                            />
+
+                            {/* ✨ Subtle divider */}
+                            <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-3" />
+
+                            {/* 🔘 Close Button */}
+                            <button
+                              onClick={() => setPreviewImage(null)}
+                              className="px-4 py-1 bg-gradient-to-r from-pink-500 to-red-600 text-white text-sm rounded-md shadow hover:scale-105 transition-transform duration-200"
+                            >
+                              Close
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
+                        {imageUrls.map((url, index) => {
+                          const fileName =
+                            typeof url === "string"
+                              ? url.substring(url.lastIndexOf("/") + 1)
+                              : url?.image_name || url?.name;
+
+                          const isImage = /\.(jpg|jpeg|png|gif)$/i.test(
+                            fileName
+                          );
+
+                          return (
+                            <div
+                              key={index}
+                              className="font-semibold flex flex-row text-[.58em] items-center gap-x-2"
+                            >
+                              {/* File name */}
+                              <span className="truncate w-40">{fileName}</span>
+
+                              {/* 👁 View Image OR ⬇ Download */}
+                              {isImage ? (
+                                <button
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                  title="View Image"
+                                  onClick={() => setPreviewImage(url)}
+                                >
+                                  <FaEye className="w-3 h-3" />
+                                </button>
+                              ) : (
+                                <button
+                                  className="text-green-600 hover:text-green-800 hover:bg-transparent"
+                                  title="Download File"
+                                  onClick={() => downloadFile(url, fileName)}
+                                >
+                                  <ImDownload className="w-3 h-3" />
+                                </button>
+                              )}
                             </div>
                           );
                         })}

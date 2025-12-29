@@ -11,7 +11,11 @@ import Select from "react-select";
 
 function UploadMarks() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const [showPublishModal, setShowPublishModal] = useState(false);
+  const [showDeleteMarksModal, setShowDeleteMarksModal] = useState(false);
+  const [showSaveMarksModal, setShowSaveMarksModal] = useState(false);
+
   const [isDownloading, setIsDownloading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
@@ -19,11 +23,12 @@ function UploadMarks() {
   //   variable to store the respone of the allot subject tab
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [isDeleting, setIsDeleteting] = useState(false);
+  const [isDeleteting, setIsDeleteting] = useState(false);
   const [openDay, setOpenDay] = useState(null);
   const [isEditLocked, setIsEditLocked] = useState(false);
   const [showPublish, setShowPublish] = useState(true);
   const [showDelete, setShowDelete] = useState(true);
+  const [showSave, setShowSave] = useState(true);
   const [editLockDateFormatted, setEditLockDateFormatted] = useState(" ");
 
   const [isSubmittingandPublishing, setIsSubmittingandPublishing] =
@@ -661,6 +666,7 @@ function UploadMarks() {
       setActionInProgress(false); // ✅ Disable all buttons
     }
   };
+
   // const handlePublishMarks = async () => {
   //   if (!selectedStudent || !selectedSubject || !selectedExam) {
   //     toast.warning("Please select Class, Subject, and Exam.");
@@ -708,6 +714,7 @@ function UploadMarks() {
   //     setIsPublishing(false);
   //   }
   // };
+
   const handlePublishMarks = async () => {
     if (!selectedStudent || !selectedSubject || !selectedExam) {
       toast.warning("Please select Class, Subject, and Exam.");
@@ -780,6 +787,45 @@ function UploadMarks() {
     }
   };
 
+  // const handleDeleteMarks = async () => {
+  //   if (!selectedStudent || !selectedSubject || !selectedExam) {
+  //     toast.warning("Please select Class, Subject, and Exam.");
+  //     return;
+  //   }
+
+  //   setIsDeleteting(true);
+
+  //   const token = localStorage.getItem("authToken");
+  //   if (!token) {
+  //     toast.error("Authentication required. Please log in.");
+  //     setIsDeleteting(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const url = `${API_URL}/api/delete_studentmarks?exam_id=${selectedExam.value}&class_id=${selectedStudent.valueclass}&section_id=${selectedStudent.value}&subject_id=${selectedSubject.value}`;
+
+  //     const response = await axios.delete(url, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+
+  //     if (response?.data?.success) {
+  //       toast.success(response?.data?.message || "Marks deleted successfully.");
+  //       setDataUploaded(false);
+  //       setTableDataReady(false);
+  //     } else {
+  //       toast.error(response?.data?.message || "Failed to delete marks.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error deleting marks:", error);
+  //     toast.error("Something went wrong while deleting marks.");
+  //   } finally {
+  //     setIsDeleteting(false);
+  //   }
+  // };
+
   const handleDeleteMarks = async () => {
     if (!selectedStudent || !selectedSubject || !selectedExam) {
       toast.warning("Please select Class, Subject, and Exam.");
@@ -799,9 +845,7 @@ function UploadMarks() {
       const url = `${API_URL}/api/delete_studentmarks?exam_id=${selectedExam.value}&class_id=${selectedStudent.valueclass}&section_id=${selectedStudent.value}&subject_id=${selectedSubject.value}`;
 
       const response = await axios.delete(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response?.data?.success) {
@@ -1534,7 +1578,8 @@ function UploadMarks() {
                         {[
                           {
                             Icon: FaSave,
-                            onClick: handleSaveMarks,
+                            // onClick: handleSaveMarks,
+                            onClick: () => setShowSaveMarksModal(true),
                             disabled:
                               isSubmitting || hasAnyError || actionInProgress,
                             color: "blue",
@@ -1543,7 +1588,9 @@ function UploadMarks() {
                           },
                           {
                             Icon: FaUpload,
-                            onClick: handlePublishMarks,
+                            // onClick: handlePublishMarks,
+                            onClick: () => setShowPublishModal(true),
+
                             disabled:
                               isPublishing || hasAnyError || actionInProgress,
                             color: "green",
@@ -1552,9 +1599,10 @@ function UploadMarks() {
                           },
                           {
                             Icon: FaTrash,
-                            onClick: handleDeleteMarks,
+                            // onClick: handleDeleteMarks,
+                            onClick: () => setShowDeleteMarksModal(true),
                             disabled:
-                              isDeleting || hasAnyError || actionInProgress,
+                              isDeleteting || hasAnyError || actionInProgress,
                             color: "red",
                             title: "Delete",
                             show: showDelete, // controlled by API
@@ -1821,7 +1869,8 @@ function UploadMarks() {
                             {[
                               {
                                 Icon: FaSave,
-                                onClick: handleSaveMarks,
+                                // onClick: handleSaveMarks,
+                                onClick: () => setShowSaveMarksModal(true),
                                 disabled:
                                   isSubmitting ||
                                   hasAnyError ||
@@ -1832,7 +1881,8 @@ function UploadMarks() {
                               },
                               {
                                 Icon: FaUpload,
-                                onClick: handlePublishMarks,
+                                // onClick: handlePublishMarks,
+                                onClick: () => setShowPublishModal(true),
                                 disabled:
                                   isPublishing ||
                                   hasAnyError ||
@@ -1843,9 +1893,12 @@ function UploadMarks() {
                               },
                               {
                                 Icon: FaTrash,
-                                onClick: handleDeleteMarks,
+                                // onClick: handleDeleteMarks,
+                                onClick: () => setShowDeleteMarksModal(true),
                                 disabled:
-                                  isDeleting || hasAnyError || actionInProgress,
+                                  isDeleteting ||
+                                  hasAnyError ||
+                                  actionInProgress,
                                 color: "red",
                                 title: "Delete",
                                 show: showDelete, // controlled by API
@@ -1908,6 +1961,177 @@ function UploadMarks() {
               </div>
             </div>
           </>
+        )}
+
+        {showSaveMarksModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="modal show" style={{ display: "block" }}>
+              <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content">
+                  {/* Header */}
+                  <div className="flex justify-between p-3">
+                    <h5 className="modal-title">Save Marks</h5>
+                    <RxCross1
+                      className="mt-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                      onClick={() => setShowSaveMarksModal(false)}
+                    />
+                  </div>
+
+                  {/* Divider */}
+                  <div
+                    className=" relative  mb-3 h-1 w-[98%] mx-auto bg-red-700"
+                    style={{
+                      backgroundColor: "#C03078",
+                    }}
+                  ></div>
+
+                  {/* Body */}
+                  <div className="modal-body">
+                    <p>
+                      Are you sure you want to save student marks?
+                      <br />
+                    </p>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex justify-end p-3 gap-2">
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => setShowSaveMarksModal(false)}
+                      disabled={isSubmitting}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      className="btn btn-primary px-3"
+                      disabled={isSubmitting}
+                      onClick={async () => {
+                        setShowSaveMarksModal(false);
+                        await handleSaveMarks(); // ✅ API called ONLY here
+                      }}
+                    >
+                      {isSubmitting ? "Saving..." : "Save"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showPublishModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="modal show" style={{ display: "block" }}>
+              <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content">
+                  {/* Header */}
+                  <div className="flex justify-between p-3">
+                    <h5 className="modal-title">Publish Marks</h5>
+                    <RxCross1
+                      className="mt-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                      onClick={() => setShowPublishModal(false)}
+                    />
+                  </div>
+
+                  {/* Divider */}
+                  <div
+                    className=" relative  mb-3 h-1 w-[98%] mx-auto bg-red-700"
+                    style={{
+                      backgroundColor: "#C03078",
+                    }}
+                  ></div>
+
+                  {/* Body */}
+                  <div className="modal-body">
+                    <p>
+                      Are you sure you want to publish the marks?
+                      <br />
+                    </p>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex justify-end p-3 gap-2">
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => setShowPublishModal(false)}
+                      disabled={isPublishing}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      className="bg-green-500 text-white px-3 rounded-md"
+                      disabled={isPublishing}
+                      onClick={async () => {
+                        setShowPublishModal(false);
+                        await handlePublishMarks(); // ✅ API call ONLY after confirm
+                      }}
+                    >
+                      {isPublishing ? "Publishing..." : "Publish"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showDeleteMarksModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="modal show" style={{ display: "block" }}>
+              <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content">
+                  {/* Header */}
+                  <div className="flex justify-between p-3">
+                    <h5 className="modal-title">Delete Marks</h5>
+                    <RxCross1
+                      className="mt-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                      onClick={() => setShowDeleteMarksModal(false)}
+                    />
+                  </div>
+
+                  {/* Divider */}
+                  <div
+                    className=" relative  mb-3 h-1 w-[98%] mx-auto bg-red-700"
+                    style={{
+                      backgroundColor: "#C03078",
+                    }}
+                  ></div>
+
+                  {/* Body */}
+                  <div className="modal-body">
+                    <p>
+                      Are you sure you want to delete the marks?
+                      <br />
+                    </p>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex justify-end p-3 gap-2">
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => setShowDeleteMarksModal(false)}
+                      disabled={isDeleteting}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      className="btn btn-danger px-3"
+                      disabled={isDeleteting}
+                      onClick={async () => {
+                        setShowDeleteMarksModal(false);
+                        await handleDeleteMarks(); // ✅ API call ONLY here
+                      }}
+                    >
+                      {isDeleteting ? "Deleting..." : "Delete"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </>

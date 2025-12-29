@@ -53,27 +53,115 @@ const LessonPlanDetailedView = () => {
   const [fromDate, setFromDate] = useState(null);
   const datePickerRef = useRef(null);
 
+  const [roleId, setRoleId] = useState([]);
+  const [regId, setRegId] = useState("");
+
   useEffect(() => {
-    fetchExams();
+    const init = async () => {
+      const sessionData = await fetchRoleId();
+
+      if (sessionData) {
+        await fetchExams(sessionData.roleId, sessionData.regId);
+      }
+    };
+
+    init();
   }, []);
 
-  const fetchExams = async () => {
+  const fetchRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      toast.error("Authentication token not found. Please login again.");
+      navigate("/");
+      return null;
+    }
+
+    try {
+      const response = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const roleId = response?.data?.user?.role_id;
+      const regId = response?.data?.user?.reg_id;
+
+      if (roleId) {
+        setRoleId(roleId); // Optional: still store in state
+        setRegId(regId);
+        return { roleId, regId };
+      } else {
+        console.warn("role_id not found in sessionData response");
+        return null;
+      }
+    } catch (error) {
+      console.error("Failed to fetch session data:", error);
+      return null;
+    }
+  };
+
+  const fetchExams = async (roleId, regId) => {
     try {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/get_allstaff`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Staff", response);
-      setStudentNameWithClassId(response?.data?.data || []);
+      let apiUrl = "";
+      let normalizedData = [];
+
+      if (roleId === "T") {
+        apiUrl = `${API_URL}/api/teachers/${regId}`;
+
+        const response = await axios.get(apiUrl, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // Normalize SINGLE teacher → ARRAY
+        const teacher = response?.data?.data || response?.data?.teacher;
+
+        normalizedData = teacher ? [teacher] : [];
+      } else {
+        apiUrl = `${API_URL}/api/get_allstaff`;
+
+        const response = await axios.get(apiUrl, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // Already an array
+        normalizedData = response?.data?.data || [];
+      }
+
+      console.log("Normalized Staff:", normalizedData);
+      setStudentNameWithClassId(normalizedData);
     } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
+      toast.error("Error fetching data");
+      console.error("Error fetching data:", error);
     } finally {
       setLoadingExams(false);
     }
   };
+
+  // useEffect(() => {
+  //   fetchExams();
+  // }, []);
+
+  // const fetchExams = async () => {
+  //   try {
+  //     setLoadingExams(true);
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.get(`${API_URL}/api/get_allstaff`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     console.log("Staff", response);
+  //     setStudentNameWithClassId(response?.data?.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching Classes");
+  //     console.error("Error fetching Classes:", error);
+  //   } finally {
+  //     setLoadingExams(false);
+  //   }
+  // };
 
   const handleDateChange = (date) => {
     setFromDate(date);
@@ -663,6 +751,59 @@ const LessonPlanDetailedView = () => {
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
 
+  // const groupByDateAndHeading = (daily_changes = []) => {
+  //   const result = {};
+
+  //   daily_changes.forEach((item) => {
+  //     item.entries?.forEach((entry) => {
+  //       if (!result[entry.start_date]) {
+  //         result[entry.start_date] = {};
+  //       }
+
+  //       if (!result[entry.start_date][item.heading]) {
+  //         result[entry.start_date][item.heading] = [];
+  //       }
+
+  //       result[entry.start_date][item.heading].push(
+  //         ...(entry.description || [])
+  //       );
+  //     });
+  //   });
+
+  //   return result;
+  // };
+
+  const groupByDateAndHeading = (daily_changes = []) => {
+    const result = {};
+
+    daily_changes.forEach((item) => {
+      if (!item?.entries || !Array.isArray(item.entries)) return;
+
+      item.entries.forEach((entry) => {
+        if (!entry?.start_date) return;
+
+        const date = entry.start_date;
+        const heading = item.heading || "Others";
+
+        if (!result[date]) {
+          result[date] = {};
+        }
+
+        if (!result[date][heading]) {
+          result[date][heading] = [];
+        }
+
+        if (Array.isArray(entry.description)) {
+          result[date][heading].push(...entry.description);
+        } else if (entry.description) {
+          result[date][heading].push(entry.description);
+        }
+      });
+    });
+
+    return result;
+  };
+
   return (
     <>
       <div
@@ -825,7 +966,7 @@ const LessonPlanDetailedView = () => {
                             </button>
                           )}
                         </div>
-                        {/* 
+                        {/*
                         {weekError && (
                           <div className="relative ml-1 text-danger text-xs">
                             {weekError}
@@ -1101,7 +1242,7 @@ const LessonPlanDetailedView = () => {
                           }}
                         >
                           <div
-                            className="flex flex-col md:flex-row justify-between items-center px-2 py-1 gap-2 
+                            className="flex flex-col md:flex-row justify-between items-center px-2 py-1 gap-2
                                 sticky top-0 bg-white shadow"
                           >
                             <label className="flex items-center gap-2 text-sm font-semibold text-indigo-600">
@@ -1164,7 +1305,6 @@ const LessonPlanDetailedView = () => {
                                     {student.secname}
                                   </h2>
                                 </div>
-
                                 {/* Table 1: General Info */}
                                 <table className="w-full table-auto border border-gray-500 mb-4">
                                   <thead className="bg-gray-200">
@@ -1209,9 +1349,7 @@ const LessonPlanDetailedView = () => {
                                     </tr>
                                   </tbody>
                                 </table>
-
                                 {/* Table 2: Non Daily Sections */}
-
                                 <div
                                   className="overflow-x-auto mb-4"
                                   style={{
@@ -1293,51 +1431,60 @@ const LessonPlanDetailedView = () => {
                                       `}
                                   </style>
                                 </div>
-
                                 {/* Table 3: Daily Teaching Points */}
-                                {student.daily_changes?.length > 0 && (
+                                {/* {student.daily_changes?.length > 0 && (
                                   <div className="flex flex-row gap-4 mb-4">
-                                    <div className="w-2/3 border p-3 rounded bg-gray-50">
-                                      <table className="w-full table-auto border-collapse text-sm">
-                                        <thead>
-                                          <tr className="bg-gray-200">
-                                            <th className="border px-4 py-2 text-left w-[19%] text-sm font-semibold text-gray-800">
-                                              Start Date
-                                            </th>
-                                            <th className="border px-4 py-2 text-left text-sm font-semibold text-gray-800">
-                                              {student.daily_changes[0]
-                                                ?.heading || "Teaching Points"}
-                                            </th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          {student.daily_changes[0]?.entries.map(
-                                            (entry, idx) => (
-                                              <tr
-                                                key={idx}
-                                                className="even:bg-white odd:bg-gray-50"
-                                              >
-                                                <td className="border px-4 py-2">
-                                                  {entry.start_date}
-                                                </td>
-                                                <td className="border py-2">
-                                                  <ul className=" space-y-1 ">
-                                                    {entry.description.map(
-                                                      (point, i) => (
-                                                        <li key={i}>{point}</li>
-                                                      )
-                                                    )}
-                                                  </ul>
-                                                </td>
+                                    {student.daily_changes.map(
+                                      (change, changeIndex) => (
+                                        <div
+                                          key={changeIndex}
+                                          className="w-2/3 border p-3 rounded bg-gray-50"
+                                        >
+                                          <table className="w-full table-auto border-collapse text-sm">
+                                            <thead>
+                                              <tr className="bg-gray-200">
+                                                <th className="border px-4 py-2 text-left w-[19%] font-semibold text-gray-800">
+                                                  Start Date
+                                                </th>
+                                                <th className="border px-4 py-2 text-left font-semibold text-gray-800">
+                                                  {change.heading ||
+                                                    "Teaching Points"}
+                                                </th>
                                               </tr>
-                                            )
-                                          )}
-                                        </tbody>
-                                      </table>
-                                    </div>
+                                            </thead>
 
-                                    {/* Table 4: Status Section */}
-                                    {displayedSections.length > 0 && (
+                                            <tbody>
+                                              {change.entries?.map(
+                                                (entry, entryIndex) => (
+                                                  <tr
+                                                    key={entryIndex}
+                                                    className="even:bg-white odd:bg-gray-50"
+                                                  >
+                                                    <td className="border px-4 py-2">
+                                                      {entry.start_date}
+                                                    </td>
+
+                                                    <td className="border px-4 py-2">
+                                                      <ul className="space-y-1 list-disc pl-4">
+                                                        {entry.description?.map(
+                                                          (point, i) => (
+                                                            <li key={i}>
+                                                              {point}
+                                                            </li>
+                                                          )
+                                                        )}
+                                                      </ul>
+                                                    </td>
+                                                  </tr>
+                                                )
+                                              )}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      )
+                                    )}
+
+                                    {displayedSections.length > 0 && ( // Table 4: Status Section
                                       <div className="w-1/3 border p-3 rounded bg-gray-50">
                                         <table className="w-full table-auto border-collapse text-sm">
                                           <thead>
@@ -1351,14 +1498,11 @@ const LessonPlanDetailedView = () => {
                                             </tr>
                                           </thead>
                                           <tbody>
-                                            {/* Status + Approval Row */}
                                             <tr className="even:bg-white odd:bg-gray-50 text-center">
-                                              {/* Status */}
                                               <td className="border px-2 py-3">
                                                 {statusMap[student.status]}
                                               </td>
 
-                                              {/* Principal's Approval */}
                                               <td className="border px-2 py-3">
                                                 <div className="flex justify-center items-center gap-2">
                                                   {statusMap[student.approve]}
@@ -1366,7 +1510,6 @@ const LessonPlanDetailedView = () => {
                                               </td>
                                             </tr>
 
-                                            {/* Remark Label Row */}
                                             <tr className="bg-gray-200">
                                               <th
                                                 colSpan={2}
@@ -1376,7 +1519,6 @@ const LessonPlanDetailedView = () => {
                                               </th>
                                             </tr>
 
-                                            {/* Remark Input Row */}
                                             <tr>
                                               <td
                                                 colSpan={2}
@@ -1396,7 +1538,131 @@ const LessonPlanDetailedView = () => {
                                       </div>
                                     )}
                                   </div>
-                                )}
+                                )} */}
+
+                                {(() => {
+                                  const grouped = groupByDateAndHeading(
+                                    student.daily_changes || []
+                                  );
+
+                                  const headings = [
+                                    ...new Set(
+                                      (student.daily_changes || []).map(
+                                        (d) => d.heading
+                                      )
+                                    ),
+                                  ];
+
+                                  if (Object.keys(grouped).length === 0)
+                                    return null;
+
+                                  return (
+                                    <div className="border rounded-md mb-6 p-4 shadow">
+                                      <div className="flex flex-row gap-4 items-start">
+                                        {/* ---------- DAILY CHANGES TABLE ---------- */}
+                                        <div className="w-2/3 overflow-x-auto">
+                                          <table className="w-full border-collapse border text-sm">
+                                            <thead className="bg-gray-200">
+                                              <tr>
+                                                <th className="border p-2 w-[20%]">
+                                                  Start Date
+                                                </th>
+                                                {headings.map((h, i) => (
+                                                  <th
+                                                    key={i}
+                                                    className="border p-2"
+                                                  >
+                                                    {h}
+                                                  </th>
+                                                ))}
+                                              </tr>
+                                            </thead>
+
+                                            <tbody>
+                                              {Object.keys(grouped).map(
+                                                (date) => (
+                                                  <tr key={date}>
+                                                    <td className="border p-2 font-medium">
+                                                      {date}
+                                                    </td>
+
+                                                    {headings.map((heading) => (
+                                                      <td
+                                                        key={heading}
+                                                        className="border p-2"
+                                                      >
+                                                        {(
+                                                          grouped[date]?.[
+                                                            heading
+                                                          ] || []
+                                                        ).map((text, i) => (
+                                                          <div key={i}>
+                                                            {text}
+                                                          </div>
+                                                        ))}
+                                                      </td>
+                                                    ))}
+                                                  </tr>
+                                                )
+                                              )}
+                                            </tbody>
+                                          </table>
+                                        </div>
+
+                                        {/* ---------- STATUS & REMARK ---------- */}
+                                        <div className="w-1/3 ">
+                                          {/* border p-3 rounded bg-gray-50 */}
+                                          <table className="w-full table-auto border-collapse text-sm">
+                                            <thead>
+                                              <tr className="bg-gray-200">
+                                                <th className="px-4 py-2 border text-center">
+                                                  Status
+                                                </th>
+                                                <th className="px-4 py-2 border text-center">
+                                                  Principal&apos;s Approval
+                                                </th>
+                                              </tr>
+                                            </thead>
+
+                                            <tbody>
+                                              <tr className="text-center">
+                                                <td className="border px-2 py-3">
+                                                  {statusMap[student.status]}
+                                                </td>
+                                                <td className="border px-2 py-3">
+                                                  {statusMap[student.approve]}
+                                                </td>
+                                              </tr>
+
+                                              <tr className="bg-gray-200">
+                                                <th
+                                                  colSpan={2}
+                                                  className="px-4 py-2 border text-left"
+                                                >
+                                                  Remark
+                                                </th>
+                                              </tr>
+
+                                              <tr>
+                                                <td
+                                                  colSpan={2}
+                                                  className="border px-2 py-2"
+                                                >
+                                                  <textarea
+                                                    rows={4}
+                                                    className="border rounded px-2 py-3 w-full text-sm resize-y"
+                                                    value={student.remark || ""}
+                                                    readOnly
+                                                  />
+                                                </td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
                               </div>
                             ))
                           ) : (

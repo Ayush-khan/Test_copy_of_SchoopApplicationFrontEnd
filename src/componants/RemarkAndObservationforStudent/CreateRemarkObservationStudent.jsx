@@ -80,11 +80,11 @@ const CreateRemarkObservationStudent = ({ onSaveSuccess }) => {
   const studentOptions = useMemo(() => {
     return Array.isArray(allClasses)
       ? allClasses.map((cls) => ({
-          value: cls.student_id,
-          label: `${cls?.first_name} ${cls.last_name} (${cls.classname}-${cls.sectionname})`,
-          class_id: cls.class_id,
-          section_id: cls.section_id,
-        }))
+        value: cls.student_id,
+        label: `${cls?.first_name} ${cls.last_name} (${cls.classname}-${cls.sectionname})`,
+        class_id: cls.class_id,
+        section_id: cls.section_id,
+      }))
       : [];
   }, [allClasses]);
 
@@ -269,9 +269,11 @@ const CreateRemarkObservationStudent = ({ onSaveSuccess }) => {
             : "Remark saved successfully!"
         );
         resetForm();
-        if (onSaveSuccess) {
-          onSaveSuccess();
-        }
+        setTimeout(() => {
+          if (onSaveSuccess) {
+            onSaveSuccess();
+          }
+        }, 2000);
       } else {
         toast.error("Failed to save remark.");
       }
