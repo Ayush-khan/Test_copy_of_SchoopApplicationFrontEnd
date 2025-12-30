@@ -55,97 +55,165 @@ function RemarkForTeacher() {
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        setLoading(true);
+  // useEffect(() => {
+  //   const init = async () => {
+  //     try {
+  //       setLoading(true);
 
-        // 1️⃣ Get session data
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-          toast.error("Authentication token not found. Please login again.");
-          navigate("/");
-          return;
-        }
+  //       // 1️⃣ Get session data
+  //       const token = localStorage.getItem("authToken");
+  //       if (!token) {
+  //         toast.error("Authentication token not found. Please login again.");
+  //         navigate("/");
+  //         return;
+  //       }
 
-        const sessionRes = await axios.get(`${API_URL}/api/sessionData`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  //       const sessionRes = await axios.get(`${API_URL}/api/sessionData`, {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       });
 
-        const roleId = sessionRes?.data?.user?.name;
-        const regId = sessionRes?.data?.user?.reg_id;
+  //       const roleId = sessionRes?.data?.user?.name;
+  //       const regId = sessionRes?.data?.user?.reg_id;
 
-        if (!roleId || !regId) {
-          toast.error("Invalid session data received");
-          return;
-        }
+  //       if (!roleId || !regId) {
+  //         toast.error("Invalid session data received");
+  //         return;
+  //       }
 
-        setRoleId(roleId);
-        setRegId(regId);
+  //       setRoleId(roleId);
+  //       setRegId(regId);
 
-        // 2️⃣ Fetch classes for that teacher
-        const classRes = await axios.get(
-          `${API_URL}/api/get_only_classes_allotted_to_teacher`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+  //       // 2️⃣ Fetch classes for that teacher
+  //       const classRes = await axios.get(
+  //         `${API_URL}/api/get_only_classes_allotted_to_teacher`,
+  //         { headers: { Authorization: `Bearer ${token}` } }
+  //       );
 
-        const classOptions =
-          classRes.data?.data?.map((cls) => ({
-            value: cls.class_id,
-            label: cls.class_name,
-          })) || [];
+  //       const classOptions =
+  //         classRes.data?.data?.map((cls) => ({
+  //           value: cls.class_id,
+  //           label: cls.class_name,
+  //         })) || [];
 
-        setStudentNameWithClassId(classOptions);
+  //       setStudentNameWithClassId(classOptions);
 
-        // // 3️⃣ Finally, fetch teacher remarks
-        // const remarkRes = await axios.get(
-        //   `${API_URL}/api/get_remark_of_teacher`,
-        //   {
-        //     headers: { Authorization: `Bearer ${token}` },
-        //   }
-        // );
+  //       // // 3️⃣ Finally, fetch teacher remarks
+  //       // const remarkRes = await axios.get(
+  //       //   `${API_URL}/api/get_remark_of_teacher`,
+  //       //   {
+  //       //     headers: { Authorization: `Bearer ${token}` },
+  //       //   }
+  //       // );
 
-        // const data = remarkRes.data?.data || [];
+  //       // const data = remarkRes.data?.data || [];
 
-        // if (data.length > 0) {
-        //   setNotices(data);
-        //   setPageCount(Math.ceil(data.length / pageSize));
-        //   setShowTable(true);
-        // } else {
-        //   setNotices([]);
-        //   setShowTable(false);
-        //   toast.info("No remarks found for this teacher.");
-        // }
-        const remarkRes = await axios.get(
-          `${API_URL}/api/get_remark_of_teacher`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+  //       // if (data.length > 0) {
+  //       //   setNotices(data);
+  //       //   setPageCount(Math.ceil(data.length / pageSize));
+  //       //   setShowTable(true);
+  //       // } else {
+  //       //   setNotices([]);
+  //       //   setShowTable(false);
+  //       //   toast.info("No remarks found for this teacher.");
+  //       // }
+  //       const remarkRes = await axios.get(
+  //         `${API_URL}/api/get_remark_of_teacher`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
 
-        const data = remarkRes.data?.data || [];
+  //       const data = remarkRes.data?.data || [];
 
-        // ✅ filter published only
-        const publishedData = data.filter((item) => item.publish === "Y");
+  //       // ✅ filter published only
+  //       const publishedData = data.filter((item) => item.publish === "Y");
 
-        if (publishedData.length > 0) {
-          setNotices(publishedData);
-          setPageCount(Math.ceil(publishedData.length / pageSize));
-          setShowTable(true);
-        } else {
-          setNotices([]);
-          setShowTable(false);
-          toast.info("No published remarks found for this teacher.");
-        }
-      } catch (error) {
-        console.error("Initialization error:", error);
-        toast.error("Failed to load teacher data. Please try again.");
-      } finally {
-        setLoading(false);
+  //       if (publishedData.length > 0) {
+  //         setNotices(publishedData);
+  //         setPageCount(Math.ceil(publishedData.length / pageSize));
+  //         setShowTable(true);
+  //       } else {
+  //         setNotices([]);
+  //         setShowTable(false);
+  //         toast.info("No published remarks found for this teacher.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Initialization error:", error);
+  //       toast.error("Failed to load teacher data. Please try again.");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   init();
+  // }, []);
+
+  const fetchTeacherData = async () => {
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        toast.error("Authentication token not found. Please login again.");
+        navigate("/");
+        return;
       }
-    };
 
-    init();
+      // Session data
+      const sessionRes = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const roleId = sessionRes?.data?.user?.name;
+      const regId = sessionRes?.data?.user?.reg_id;
+
+      setRoleId(roleId);
+      setRegId(regId);
+
+      // Classes
+      const classRes = await axios.get(
+        `${API_URL}/api/get_only_classes_allotted_to_teacher`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const classOptions =
+        classRes.data?.data?.map((cls) => ({
+          value: cls.class_id,
+          label: cls.class_name,
+        })) || [];
+
+      setStudentNameWithClassId(classOptions);
+
+      // Remarks
+      const remarkRes = await axios.get(
+        `${API_URL}/api/get_remark_of_teacher`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const data = remarkRes.data?.data || [];
+      const publishedData = data.filter((item) => item.publish === "Y");
+
+      if (publishedData.length > 0) {
+        setNotices(publishedData);
+        setPageCount(Math.ceil(publishedData.length / pageSize));
+        setShowTable(true);
+      } else {
+        setNotices([]);
+        setShowTable(false);
+        toast.info("No published remarks found for this teacher.");
+      }
+    } catch (error) {
+      console.error("Initialization error:", error);
+      toast.error("Failed to load teacher data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTeacherData();
   }, []);
 
   const handlePageClick = (data) => {
@@ -253,13 +321,70 @@ function RemarkForTeacher() {
     setShowDeleteModal(false);
   };
 
-  const handleAcknowledge = (id) => {
-    setNotices((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, acknowledge: "Y" } : item
-      )
-    );
+  const handleAcknowledge = async (id) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+
+      const response = await axios.post(
+        `${API_URL}/api/save_acknowledgeteacher/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Remark acknowledged successfully");
+
+        // 🔁 RE-FETCH DATA
+        fetchTeacherData();
+      }
+    } catch (error) {
+      console.error(
+        "Error acknowledging remark:",
+        error.response?.data || error.message
+      );
+      toast.error("Failed to acknowledge remark");
+    }
   };
+
+  // const handleAcknowledge = async (id) => {
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) throw new Error("No authentication token found");
+
+  //     console.log("remark id", id);
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/save_acknowledgeteacher/${id}`, // ✅ use id
+  //       {}, // ✅ empty body
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       // Update UI only after success
+  //       setNotices((prev) =>
+  //         prev.map((item) =>
+  //           item.id === id ? { ...item, acknowledge: "Y" } : item
+  //         )
+  //       );
+  //     } else {
+  //       console.error("Failed to acknowledge:", response.data?.message);
+  //     }
+  //   } catch (error) {
+  //     console.error(
+  //       "Error acknowledging remark:",
+  //       error.response?.data || error.message
+  //     );
+  //   }
+  // };
 
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
@@ -423,14 +548,6 @@ function RemarkForTeacher() {
                           </td>
 
                           <td className="px-3 py-2 border border-gray-300 text-center align-middle">
-                            {/* {item.acknowledge === "Y" ? (
-                              <FontAwesomeIcon
-                                icon={faThumbsUp}
-                                className="text-black text-base"
-                              />
-                            ) : (
-                              <span className="text-gray-400 text-sm">—</span>
-                            )} */}
                             <FontAwesomeIcon
                               icon={faThumbsUp}
                               title={
@@ -444,7 +561,7 @@ function RemarkForTeacher() {
                                 }`}
                               onClick={() =>
                                 item.acknowledge === "N" &&
-                                handleAcknowledge(item.id)
+                                handleAcknowledge(item.t_remark_id)
                               }
                             />
                           </td>

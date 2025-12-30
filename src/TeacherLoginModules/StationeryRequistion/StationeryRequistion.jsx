@@ -541,8 +541,11 @@ function StationeryRequisition() {
                       <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Quantity
                       </th>
-                      <th className="px-2 w-full md:w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 w-full md:w-[25%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Description
+                      </th>
+                      <th className="px-2 w-full md:w-[15%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Comment
                       </th>
                       <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Date
@@ -590,6 +593,11 @@ function StationeryRequisition() {
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
                               {section?.description}
+                            </p>
+                          </td>
+                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                              {section?.comments}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
@@ -709,71 +717,7 @@ function StationeryRequisition() {
                       backgroundColor: "#C03078",
                     }}
                   ></div>
-                  {/* <div className="modal-body">
-                    <div className="relative mb-3 flex justify-center mx-4">
-                      <label htmlFor="stationeryType" className="w-1/2 mt-2">
-                        Stationery Type <span className="text-red-500">*</span>
-                      </label>
 
-                      <select
-                        id="stationeryType"
-                        className="form-control shadow-md mb-2"
-                        value={newSectionName}
-                        onChange={handleChangeSectionName}
-                      >
-                        <option value="">Select</option>
-                        {Array.isArray(stationeryType) &&
-                          stationeryType.map((item) => (
-                            <option
-                              key={item.stationery_id}
-                              value={item.stationery_id}
-                            >
-                              {item.name}
-                            </option>
-                          ))}
-                      </select>
-
-                      <div className="absolute top-9 left-1/3">
-                        {!nameAvailable && (
-                          <span className="block text-danger text-xs">
-                            {nameError}
-                          </span>
-                        )}
-                        {fieldErrors.title && (
-                          <small className="text-danger text-xs">
-                            {fieldErrors.title}
-                          </small>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className=" relative mb-3 flex justify-center  mx-4">
-                      <label htmlFor="quantity" className="w-1/2 mt-2">
-                        Quantity <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={4}
-                        className="form-control shadow-md mb-2"
-                        id="quantity"
-                        value={newDepartmentId}
-                        onChange={handleChangeDepartmentId}
-                      />{" "}
-                    </div>
-                    <div className=" relative mb-3 flex justify-center  mx-4">
-                      <label htmlFor="description" className="w-1/2 mt-2">
-                        Description
-                      </label>
-                      <textarea
-                        type="text"
-                        maxLength={500}
-                        className="form-control shadow-md mb-2"
-                        id="description"
-                        value={description}
-                        onChange={handleChangeDescription}
-                      />{" "}
-                    </div>
-                  </div> */}
                   <div className="modal-body">
                     {/* Stationery Type */}
                     <div className="relative mb-3 flex justify-center mx-4">
