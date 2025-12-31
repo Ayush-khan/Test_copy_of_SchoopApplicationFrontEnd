@@ -9,6 +9,7 @@ import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import { ImDownload } from "react-icons/im";
+import { FaEye } from "react-icons/fa";
 
 function HomeWorkForClass() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -41,7 +42,11 @@ function HomeWorkForClass() {
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
   const [imageUrls, setImageUrls] = useState([]);
-  const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
+  const [preselectedFiles, setPreselectedFiles] = useState([]);
+  const [previewImage, setPreviewImage] = useState(null);
+
+  const [selectedClassId, setSelectedClassId] = useState("");
+  const [selectedSectionId, setSelectedSectionId] = useState("");
 
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
@@ -84,17 +89,24 @@ function HomeWorkForClass() {
         setLoadingExams(true);
 
         const responseForClass = await axios.get(
-          `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`,
+          `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
+        // const mappedData =
+        //   responseForClass.data?.data?.map((item) => ({
+        //     value: item.class_id,
+        //     sectionId: item?.section_id,
+        //     label: `${item?.classname} ${item?.sectionname}`,
+        //   })) || [];
         const mappedData =
           responseForClass.data?.data?.map((item) => ({
-            value: item.class_id,
-            sectionId: item?.section_id,
-            label: `${item?.classname} ${item?.sectionname}`,
+            value: `${item.class_id}-${item.section_id}`,
+            classId: item.class_id,
+            sectionId: item.section_id,
+            label: `${item.classname} ${item.sectionname}`,
           })) || [];
 
         setStudentNameWithClassId(mappedData);
@@ -109,9 +121,20 @@ function HomeWorkForClass() {
 
     init();
   }, []);
+
+  // const handleClassSelect = (selectedOption) => {
+  //   setSelectedStudent(selectedOption);
+  //   setStudentError(""); // clear error when selected
+  // };
+
   const handleClassSelect = (selectedOption) => {
     setSelectedStudent(selectedOption);
-    setStudentError(""); // clear error when selected
+
+    // if you need them separately
+    setSelectedClassId(selectedOption.classId);
+    setSelectedSectionId(selectedOption.sectionId);
+
+    setStudentError("");
   };
 
   const handleSearch = async () => {
@@ -140,10 +163,9 @@ function HomeWorkForClass() {
 
       // Build params for API call
       const params = {
-        class_id: selectedStudent?.value,
-        section_id: selectedStudent?.sectionId,
+        class_id: selectedClassId,
+        section_id: selectedSectionId,
       };
-
       const response = await axios.get(
         `${API_URL}/api/get_homework_class_teacherwise`,
         {
@@ -162,7 +184,7 @@ function HomeWorkForClass() {
       } else {
         setNotices([]);
         setShowTable(false);
-        toast.info("No homework found for the selected class.");
+        toast.error("No homework found for the selected class.");
       }
     } catch (error) {
       console.error("Error fetching  homework:", error);
@@ -510,8 +532,7 @@ function HomeWorkForClass() {
                     ></textarea>
                   </div>
                   {/* Download Links */}
-                  {/* Download Links */}
-                  {imageUrls && imageUrls.length > 0 && (
+                  {/* {imageUrls && imageUrls.length > 0 && (
                     <div className="w-full  flex flex-row">
                       <label className=" px-4 mb-2 mr-4">Attachments:</label>
 
@@ -526,7 +547,7 @@ function HomeWorkForClass() {
                               key={index}
                               className=" font-semibold flex flex-row text-[.58em]  items-center gap-x-2"
                             >
-                              {/* Display file name */}
+                              
                               <span className=" ">{fileName}</span>
                               <button
                                 className=" text-blue-600 hover:text-blue-800 hover:bg-transparent"
@@ -534,6 +555,77 @@ function HomeWorkForClass() {
                               >
                                 <ImDownload className="font-2xl w-3 h-3" />
                               </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )} */}
+                  {imageUrls && imageUrls.length > 0 && (
+                    <div className="w-full flex flex-row">
+                      <label className="px-4 mb-2 mr-4">Attachments:</label>
+
+                      {previewImage && (
+                        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-50">
+                          <div className="bg-white border border-gray-300 shadow-2xl rounded-lg p-3 w-[260px] flex flex-col items-center animate-fadeIn">
+                            {/* 🖼 Image */}
+                            <img
+                              src={previewImage}
+                              alt="Preview"
+                              className="rounded-md w-[240px] h-[180px] object-contain mb-3 border border-gray-200"
+                            />
+
+                            {/* ✨ Subtle divider */}
+                            <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-3" />
+
+                            {/* 🔘 Close Button */}
+                            <button
+                              onClick={() => setPreviewImage(null)}
+                              className="px-4 py-1 bg-gradient-to-r from-pink-500 to-red-600 text-white text-sm rounded-md shadow hover:scale-105 transition-transform duration-200"
+                            >
+                              Close
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="relative mt-2 flex flex-col mx-4 gap-y-2">
+                        {imageUrls.map((url, index) => {
+                          const fileName =
+                            typeof url === "string"
+                              ? url.substring(url.lastIndexOf("/") + 1)
+                              : url?.image_name || url?.name;
+
+                          const isImage = /\.(jpg|jpeg|png|gif)$/i.test(
+                            fileName
+                          );
+
+                          return (
+                            <div
+                              key={index}
+                              className="font-semibold flex flex-row text-[.58em] items-center gap-x-2"
+                            >
+                              {/* File name */}
+                              <span className="truncate w-40">{fileName}</span>
+
+                              {/* 👁 View Image OR ⬇ Download */}
+                              {isImage ? (
+                                <button
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-transparent"
+                                  title="View Image"
+                                  onClick={() => setPreviewImage(url)}
+                                >
+                                  <FaEye className="w-3 h-3" />
+                                </button>
+                              ) : (
+                                <button
+                                  className="text-green-600 hover:text-green-800 hover:bg-transparent"
+                                  title="Download File"
+                                  onClick={() => downloadFile(url, fileName)}
+                                >
+                                  <ImDownload className="w-3 h-3" />
+                                </button>
+                              )}
                             </div>
                           );
                         })}

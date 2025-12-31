@@ -350,35 +350,63 @@ const DailyAttendance = () => {
       //     attendance_id: attendance?.attendance_id || null,
       //   };
       // });
-
       const mergedData = studentsData.map((student) => {
         const studentId = Number(student.student_id);
         const attendance = attendanceMap[studentId];
 
-        // If no attendance exists, default select all
         if (!hasAttendanceForDay) {
           return {
             ...student,
             isChecked: true,
-            isAbsent: false,
+            isAbsent: false, // UI checkbox
+            backendAbsent: false, // 🔥 NEW
             attendance_id: null,
           };
         }
 
-        // If attendance exists, respect previous selection if possible
         const existingTimetableStudent = timetable.find(
           (s) => s.student_id === studentId
         );
 
         return {
           ...student,
-          isChecked: existingTimetableStudent?.isChecked ?? !!attendance, // ✔ preserve local selection
+          isChecked: existingTimetableStudent?.isChecked ?? !!attendance,
           isAbsent:
             existingTimetableStudent?.isAbsent ??
-            (attendance ? attendance.status === 1 : false), // ✔ preserve local absent mark
+            (attendance ? attendance.status === 1 : false),
+          backendAbsent: attendance ? attendance.status === 1 : false, // 🔥 SOURCE OF TRUTH
           attendance_id: attendance?.attendance_id || null,
         };
       });
+
+      // const mergedData = studentsData.map((student) => {
+      //   const studentId = Number(student.student_id);
+      //   const attendance = attendanceMap[studentId];
+
+      //   // If no attendance exists, default select all
+      //   if (!hasAttendanceForDay) {
+      //     return {
+      //       ...student,
+      //       isChecked: true,
+      //       isAbsent: false,
+      //       attendance_id: null,
+      //     };
+      //   }
+
+      //   // If attendance exists, respect previous selection if possible
+      //   const existingTimetableStudent = timetable.find(
+      //     (s) => s.student_id === studentId
+      //   );
+
+      //   return {
+      //     ...student,
+      //     isChecked: existingTimetableStudent?.isChecked ?? !!attendance, // ✔ preserve local selection
+      //     isAbsent:
+      //       existingTimetableStudent?.isAbsent ??
+      //       (attendance ? attendance.status === 1 : false), // ✔ preserve local absent mark
+      //     attendance_id: attendance?.attendance_id || null,
+      //   };
+      // });
 
       /* --------------------------------------------------
        5️⃣ FINAL STATE UPDATES
@@ -394,6 +422,20 @@ const DailyAttendance = () => {
       setLoadingForSearch(false);
       setIsSubmitting(false);
     }
+  };
+
+  const resetState = () => {
+    setSelectedStudentIds([]);
+    setSearchTerm("");
+    setTimetable([]);
+    setShowStudentReport(false);
+    setStudentError("");
+    setDateError("");
+    setHasUserChangedSelection(false);
+  };
+
+  const handleCloseBack = () => {
+    resetState();
   };
 
   const handleSubmit = async () => {
@@ -465,11 +507,17 @@ const DailyAttendance = () => {
         }
       );
 
+      // if (response.data.status === true || response.status === 200) {
+      //   toast.success("Attendance saved successfully!");
+
+      //   setShowStudentReport(false);
+      //   setHasAttendanceData(true);
+      // }
       if (response.data.status === true || response.status === 200) {
         toast.success("Attendance saved successfully!");
-
         setShowStudentReport(false);
         setHasAttendanceData(true);
+        // handleSearch(); // 🔥 REFRESH FROM BACKEND
       } else {
         toast.error(response.data.message || "Failed to save attendance.");
       }
@@ -642,9 +690,8 @@ const DailyAttendance = () => {
     <>
       {/* <div className="w-full md:w-[85%]  mx-auto p-4 "> */}
       <div
-        className={` transition-all duration-500 w-[85%]  mx-auto p-4 ${
-          showStudentReport ? "w-[80%] " : "w-[85%] "
-        }`}
+        className={` transition-all duration-500 w-[85%]  mx-auto p-4 ${showStudentReport ? "w-[80%] " : "w-[85%] "
+          }`}
       >
         <ToastContainer />
         <div className="card  rounded-md ">
@@ -759,11 +806,10 @@ const DailyAttendance = () => {
                         type="search"
                         onClick={handleSearch}
                         style={{ backgroundColor: "#2196F3" }}
-                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                          loadingForSearch
+                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch
                             ? "opacity-50 cursor-not-allowed"
                             : ""
-                        }`}
+                          }`}
                         disabled={loadingForSearch}
                       >
                         {loadingForSearch ? (
@@ -886,11 +932,10 @@ const DailyAttendance = () => {
                                   type="button"
                                   onClick={handleSearch}
                                   style={{ backgroundColor: "#2196F3" }}
-                                  className={`btn h-9 w-full btn-primary text-white font-bold px-3 rounded ${
-                                    loadingForSearch
+                                  className={`btn h-9 w-full btn-primary text-white font-bold px-3 rounded ${loadingForSearch
                                       ? "opacity-50 cursor-not-allowed"
                                       : ""
-                                  }`}
+                                    }`}
                                   disabled={loadingForSearch}
                                 >
                                   {loadingForSearch ? "Browsing..." : "Browse"}
@@ -1036,20 +1081,41 @@ const DailyAttendance = () => {
                                             setTimetable((prev) =>
                                               prev.map((s) =>
                                                 s.student_id ===
-                                                student.student_id
+                                                  student.student_id
                                                   ? {
-                                                      ...s,
-                                                      isChecked: checked,
-                                                      // CI rule: unchecked student = no attendance
-                                                      isAbsent: checked
-                                                        ? s.isAbsent
-                                                        : false,
-                                                    }
+                                                    ...s,
+                                                    isChecked: checked,
+                                                    // CI rule: unchecked student = no attendance
+                                                    isAbsent: checked
+                                                      ? s.isAbsent
+                                                      : false,
+                                                  }
                                                   : s
                                               )
                                             );
                                           }}
                                         />
+                                        {/* <input
+                                          type="checkbox"
+                                          checked={student.isAbsent}
+                                          disabled={!student.isChecked}
+                                          onChange={(e) => {
+                                            const checked = e.target.checked;
+
+                                            setTimetable((prev) =>
+                                              prev.map((s) =>
+                                                s.student_id ===
+                                                student.student_id
+                                                  ? {
+                                                      ...s,
+                                                      isAbsent:
+                                                        checked && s.isChecked, // UI only
+                                                    }
+                                                  : s
+                                              )
+                                            );
+                                          }}
+                                        /> */}
                                       </td>
 
                                       <td className="px-2 py-2 text-center border border-gray-300">
@@ -1058,8 +1124,7 @@ const DailyAttendance = () => {
 
                                       <td className="px-2 py-2 text-center border border-gray-300">
                                         {camelCase(
-                                          `${student?.first_name || ""} ${
-                                            student?.mid_name || ""
+                                          `${student?.first_name || ""} ${student?.mid_name || ""
                                           } ${student?.last_name || ""}`
                                         )}
                                       </td>
@@ -1075,13 +1140,13 @@ const DailyAttendance = () => {
                                             setTimetable((prev) =>
                                               prev.map((s) =>
                                                 s.student_id ===
-                                                student.student_id
+                                                  student.student_id
                                                   ? {
-                                                      ...s,
-                                                      // 🔥 CI rule: absent ONLY if student selected
-                                                      isAbsent:
-                                                        checked && s.isChecked,
-                                                    }
+                                                    ...s,
+                                                    // 🔥 CI rule: absent ONLY if student selected
+                                                    isAbsent:
+                                                      checked && s.isChecked,
+                                                  }
                                                   : s
                                               )
                                             );
@@ -1108,9 +1173,30 @@ const DailyAttendance = () => {
                                             )}
                                         </td>
                                       )} */}
+
                                       {hasAttendanceData && (
                                         <td className="px-2 py-2 text-center border border-gray-300">
-                                          {/* Show delete only if student is marked absent in backend */}
+                                          {student.attendance_id &&
+                                            student.backendAbsent && (
+                                              <button
+                                                onClick={() =>
+                                                  handleDeleteSingle(
+                                                    student.attendance_id
+                                                  )
+                                                }
+                                                className="text-red-600 hover:text-red-800"
+                                              >
+                                                <FontAwesomeIcon
+                                                  icon={faTrash}
+                                                />
+                                              </button>
+                                            )}
+                                        </td>
+                                      )}
+
+                                      {/* {hasAttendanceData && (
+                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                          
                                           {student.attendance_id &&
                                             student.isAbsent && (
                                               <button
@@ -1127,7 +1213,7 @@ const DailyAttendance = () => {
                                               </button>
                                             )}
                                         </td>
-                                      )}
+                                      )} */}
                                     </tr>
                                   );
                                 })
@@ -1174,7 +1260,7 @@ const DailyAttendance = () => {
                           <button
                             type="button"
                             className="bg-yellow-300 hover:bg-yellow-400 text-white font-medium px-4 py-2 rounded-lg shadow-md"
-                            onClick={() => setShowStudentReport(false)}
+                            onClick={() => handleCloseBack()}
                           >
                             Back
                           </button>

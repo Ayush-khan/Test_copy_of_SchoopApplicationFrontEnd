@@ -221,6 +221,7 @@ function Homework() {
         acd_yr: academicYr,
         cls_name: section.cls_name,
         sec_name: section.sec_name,
+        description: section.description,
       },
     });
   };

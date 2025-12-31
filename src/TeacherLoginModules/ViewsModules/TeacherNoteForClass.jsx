@@ -44,6 +44,8 @@ function TeacherNoteForClass() {
   const [imageUrls, setImageUrls] = useState([]);
   const [preselectedFiles, setPreselectedFiles] = useState([]); // Files fetched from API
   const [previewImage, setPreviewImage] = useState(null);
+  const [selectedClassId, setSelectedClassId] = useState("");
+  const [selectedSectionId, setSelectedSectionId] = useState("");
 
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
@@ -85,18 +87,28 @@ function TeacherNoteForClass() {
         setLoadingExams(true);
 
         const responseForClass = await axios.get(
-          `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`,
+          `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
+        // const mappedData =
+        //   responseForClass.data?.data?.map((item) => ({
+        //     value: item.class_id,
+        //     sectionId: item?.section_id,
+        //     label: `${item?.classname} ${item?.sectionname}`,
+        //   })) || [];
+
         const mappedData =
           responseForClass.data?.data?.map((item) => ({
-            value: item.class_id,
-            sectionId: item?.section_id,
-            label: `${item?.classname} ${item?.sectionname}`,
+            value: `${item.class_id}-${item.section_id}`, // ✅ unique
+            classId: item.class_id,
+            sectionId: item.section_id,
+            label: `${item.classname} ${item.sectionname}`,
           })) || [];
+
+        setStudentNameWithClassId(mappedData);
 
         setStudentNameWithClassId(mappedData);
       } catch (error) {
@@ -110,9 +122,20 @@ function TeacherNoteForClass() {
 
     init();
   }, []);
+
+  // const handleClassSelect = (selectedOption) => {
+  //   setSelectedStudent(selectedOption);
+  //   setStudentError("");
+  // };
+
   const handleClassSelect = (selectedOption) => {
     setSelectedStudent(selectedOption);
-    setStudentError(""); // clear error when selected
+
+    // if you need them separately
+    setSelectedClassId(selectedOption.classId);
+    setSelectedSectionId(selectedOption.sectionId);
+
+    setStudentError("");
   };
 
   const handleSearch = async () => {
@@ -141,8 +164,10 @@ function TeacherNoteForClass() {
 
       // Build params for API call
       const params = {
-        class_id: selectedStudent?.value,
-        section_id: selectedStudent?.sectionId,
+        class_id: selectedClassId,
+        // selectedStudent?.value,
+        section_id: selectedSectionId,
+        // selectedStudent?.sectionId,
       };
 
       const response = await axios.get(
@@ -163,7 +188,7 @@ function TeacherNoteForClass() {
       } else {
         setNotices([]);
         setShowTable(false);
-        toast.info("No daily notes found for the selected class.");
+        toast.error("No daily notes found for the selected class.");
       }
     } catch (error) {
       console.error("Error fetching daily notes:", error);

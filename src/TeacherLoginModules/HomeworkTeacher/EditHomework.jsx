@@ -5,7 +5,6 @@ import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
-// import Select from "react-select";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const EditHomework = () => {
