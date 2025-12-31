@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
+import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
@@ -71,6 +72,7 @@ const StudentContactDetailsReport = () => {
       console.error("Error fetching data:", error);
     }
   };
+
   useEffect(() => {
     if (!roleId || !regId) return; // guard against empty
     fetchExams(roleId, regId);
@@ -146,6 +148,7 @@ const StudentContactDetailsReport = () => {
       }
     });
   }, [classes, roleId]);
+
   const handleSearch = async () => {
     setLoadingForSearch(false);
     if (!selectedStudentId) {
@@ -203,7 +206,6 @@ const StudentContactDetailsReport = () => {
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No.</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">GRN No.</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Full Name</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Name</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Mobile No.</th>
@@ -227,9 +229,7 @@ const StudentContactDetailsReport = () => {
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.reg_no || " "
                 }</td>
-                <td class="px-2 text-center py-2 border border-black">${
-                  subject?.classname || " "
-                } ${subject?.sectionname || " "}</td>
+              
                 <td class="px-2 text-center py-2 border border-black">${camelCase(
                   subject?.first_name || " "
                 )}${camelCase(subject?.mid_name || " ")} ${camelCase(
@@ -354,7 +354,7 @@ const StudentContactDetailsReport = () => {
       "Sr No.",
       "Roll No.",
       "GRN No.",
-      "Class",
+      // "Class",
       "Student Full Name",
       "Father Name",
       "Father Mobile No.",
@@ -370,7 +370,7 @@ const StudentContactDetailsReport = () => {
       student?.roll_no || " ",
 
       student?.reg_no || " ",
-      `${student?.classname || " "} ${student?.sectionname || ""}}`,
+      // `${student?.classname || " "} ${student?.sectionname || ""}}`,
       camelCase(
         `${student?.first_name || ""} ${student?.mid_name || ""} ${
           student?.last_name || ""
@@ -657,7 +657,7 @@ const StudentContactDetailsReport = () => {
                                 "Sr No.",
                                 "Roll No.",
                                 "GRN No.",
-                                "Class",
+                                // "Class",
                                 "Student Full Name",
                                 "Father Name",
                                 "Father Mobile No.",
@@ -692,10 +692,10 @@ const StudentContactDetailsReport = () => {
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.reg_no || " "}
                                   </td>
-                                  <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
+                                  {/* <td className="px-2 py-2 text-nowrap text-center border border-gray-300">
                                     {student.classname || " "}{" "}
                                     {student.sectionname || " "}
-                                  </td>
+                                  </td> */}
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {camelCase(
                                       `${student?.first_name || ""} ${

@@ -5,11 +5,14 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
+import Loader from "../common/LoaderFinal/LoaderStyle";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
+import zIndex from "@mui/material/styles/zIndex";
 
 const StudentReport = () => {
+  const pdfRef = useRef();
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -206,17 +209,17 @@ const StudentReport = () => {
     const formatDate = (dateStr) =>
       dateStr
         ? new Date(dateStr).toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
-          })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
         : "";
 
     const headers = [
       "Sr No.",
       "Roll No.",
       "GRN No.",
-      "Class",
+      // "Class",
       "Student Full Name",
       "DOB",
       "DOA",
@@ -250,10 +253,10 @@ const StudentReport = () => {
     <thead style="background-color: #e5e7eb; font-weight: bold;">
       <tr>
         ${headers
-          .map(
-            (h) => `<th style="border: 1px solid #ccc; padding: 6px;">${h}</th>`
-          )
-          .join("")}
+        .map(
+          (h) => `<th style="border: 1px solid #ccc; padding: 6px;">${h}</th>`
+        )
+        .join("")}
       </tr>
     </thead>
   `;
@@ -262,30 +265,24 @@ const StudentReport = () => {
     <tbody>
       ${timetable
         .map((student, index) => {
-          const fullName = `${capitalize(student.first_name)} ${
-            student.mid_name ? capitalize(student.mid_name) : ""
-          } ${capitalize(student.last_name)}`;
+          const fullName = `${capitalize(student.first_name)} ${student.mid_name ? capitalize(student.mid_name) : ""
+            } ${capitalize(student.last_name)}`;
           const gender =
             student.gender === "M"
               ? "Male"
               : student.gender === "F"
-              ? "Female"
-              : student.gender;
+                ? "Female"
+                : student.gender;
 
           return `
-          <tr style="background-color: ${
-            index % 2 === 0 ? "#fff" : "#f9fafb"
-          };">
+          <tr style="background-color: ${index % 2 === 0 ? "#fff" : "#f9fafb"
+            };">
             <td style="border: 1px solid #ccc; padding: 6px;">${index + 1}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.roll_no || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.roll_no || ""
             }</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.reg_no || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.reg_no || ""
             }</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.classname || ""
-            } ${student.sectionname || ""}</td>
+           
             <td style="border: 1px solid #ccc; padding: 6px;">${fullName}</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
               student.dob
@@ -302,8 +299,7 @@ const StudentReport = () => {
             <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
               student.state
             )}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.pincode || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.pincode || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
               student.nationality
@@ -312,8 +308,7 @@ const StudentReport = () => {
               student.mother_tongue
             )}</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${gender}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.blood_group || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.blood_group || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
               student.religion
@@ -321,8 +316,7 @@ const StudentReport = () => {
             <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
               student.caste
             )}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.category || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.category || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
               student.emergency_name
@@ -330,38 +324,29 @@ const StudentReport = () => {
             <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
               student.emergency_add
             )}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.emergency_contact || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.emergency_contact || ""
             }</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.stu_aadhaar_no || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.stu_aadhaar_no || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
               student.father_name
             )}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.f_mobile || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.f_mobile || ""
             }</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.f_email || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.f_email || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
               student.mother_name
             )}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.m_mobile || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.m_mobile || ""
             }</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.m_emailid || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.m_emailid || ""
             }</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.parent_adhar_no || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.parent_adhar_no || ""
             }</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.total_percent || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.total_percent || ""
             }</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.total_attendance || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.total_attendance || ""
             }</td>
           </tr>
         `;
@@ -415,7 +400,7 @@ const StudentReport = () => {
       "Sr No.",
       "Roll No.",
       "GRN No.",
-      "Class",
+      // "Class",
       "Student Full Name",
       "DOB",
       "DOA",
@@ -450,25 +435,24 @@ const StudentReport = () => {
       index + 1,
       student?.roll_no || " ",
       student?.reg_no || " ",
-      student?.admission_class || " ",
+      // student?.admission_class || " ",
 
-      `${capitalizeFirst(student.first_name)} ${
-        student.mid_name?.trim() ? toLowerCaseAll(student.mid_name) : ""
+      `${capitalizeFirst(student.first_name)} ${student.mid_name?.trim() ? toLowerCaseAll(student.mid_name) : ""
       } ${toLowerCaseAll(student.last_name)}`,
       student?.dob
         ? new Date(student.dob).toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
-          })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
         : " ",
 
       student?.admission_date
         ? new Date(student.admission_date).toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
-          })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
         : "",
 
       capitalizeFirst(student?.permant_add) || " ",
@@ -480,8 +464,8 @@ const StudentReport = () => {
       student?.gender === "M"
         ? "Male"
         : student?.gender === "F"
-        ? "Female"
-        : student?.gender || " ",
+          ? "Female"
+          : student?.gender || " ",
       student?.blood_group || " ",
       capitalizeFirst(student?.religion) || " ",
       capitalizeFirst(student?.caste) || " ",
@@ -523,9 +507,8 @@ const StudentReport = () => {
 
     const regNo = section?.reg_no?.toLowerCase() || "";
     const admissionClass = section?.admission_class?.toLowerCase() || "";
-    const studentName = `${section?.first_name || ""} ${
-      section?.mid_name?.trim() || ""
-    } ${section?.last_name || ""}`
+    const studentName = `${section?.first_name || ""} ${section?.mid_name?.trim() || ""
+      } ${section?.last_name || ""}`
       .toLowerCase()
       .trim();
     const studentDOB = section?.dob?.toLowerCase() || "";
@@ -540,8 +523,8 @@ const StudentReport = () => {
       section?.gender === "M"
         ? "male"
         : section?.gender === "F"
-        ? "female"
-        : section?.gender?.toLowerCase() || "";
+          ? "female"
+          : section?.gender?.toLowerCase() || "";
     const studentBloodGroup = section?.blood_group?.toLowerCase() || "";
     const studentReligion = section?.religion?.toLowerCase() || "";
     const studentCaste = section?.caste?.toLowerCase() || "";
@@ -598,11 +581,10 @@ const StudentReport = () => {
   return (
     <>
       <div
-        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
-          timetable.length > 0
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${timetable.length > 0
             ? "w-full md:w-[100%] scale-100"
             : "w-full md:w-[90%] scale-[0.98]"
-        }`}
+          }`}
       >
         <ToastContainer />
         <div className="card  rounded-md ">
@@ -626,19 +608,17 @@ const StudentReport = () => {
 
           <>
             <div
-              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${
-                timetable.length > 0
+              className={`  flex justify-between flex-col md:flex-row gap-x-1 ml-0 p-2  ${timetable.length > 0
                   ? "pb-0 w-full md:w-[99%]"
                   : "pb-4 w-full md:w-[90%]"
-              }`}
+                }`}
             >
               <div className="w-full md:w-[70%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                 <div
-                  className={`  w-full gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
-                    timetable.length > 0
+                  className={`  w-full gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${timetable.length > 0
                       ? "w-full md:w-[75%]  wrelative left-0"
                       : " w-full md:w-[95%] relative left-10"
-                  }`}
+                    }`}
                 >
                   <div className="w-full md:w-[50%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                     <label
@@ -673,9 +653,8 @@ const StudentReport = () => {
                       type="search"
                       onClick={handleSearch}
                       style={{ backgroundColor: "#2196F3" }}
-                      className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                        loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                      className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       disabled={loadingForSearch}
                     >
                       {loadingForSearch ? (
@@ -769,10 +748,10 @@ const StudentReport = () => {
                                 "Sr No.",
                                 "Roll No.",
                                 "GRN No.",
-                                "Class",
+                                // "Class",
                                 "Student Full Name",
-                                "DOB",
-                                "DOA",
+                                "DOB (DD/MM/YY)",
+                                "DOA (DD/MM/YY)",
                                 "Address",
                                 "City",
                                 "State",
@@ -824,37 +803,36 @@ const StudentReport = () => {
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.reg_no || " "}
                                   </td>
-                                  <td className="px-2 py-2 text-center text-nowrap border border-gray-300">
+                                  {/* <td className="px-2 py-2 text-center text-nowrap border border-gray-300">
                                     {student.classname || " "}{" "}
                                     {student.sectionname}
-                                  </td>
+                                  </td> */}
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {`${capitalizeFirst(student.first_name)} ${
-                                      student.mid_name?.trim()
+                                    {`${capitalizeFirst(student.first_name)} ${student.mid_name?.trim()
                                         ? toLowerCaseAll(student.mid_name)
                                         : ""
-                                    } ${toLowerCaseAll(student.last_name)}`}
+                                      } ${toLowerCaseAll(student.last_name)}`}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.dob
                                       ? new Date(
-                                          student.dob
-                                        ).toLocaleDateString("en-GB", {
-                                          day: "2-digit",
-                                          month: "2-digit",
-                                          year: "2-digit",
-                                        })
+                                        student.dob
+                                      ).toLocaleDateString("en-GB", {
+                                        day: "2-digit",
+                                        month: "2-digit",
+                                        year: "2-digit",
+                                      })
                                       : ""}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.admission_date
                                       ? new Date(
-                                          student.admission_date
-                                        ).toLocaleDateString("en-GB", {
-                                          day: "2-digit",
-                                          month: "2-digit",
-                                          year: "2-digit",
-                                        })
+                                        student.admission_date
+                                      ).toLocaleDateString("en-GB", {
+                                        day: "2-digit",
+                                        month: "2-digit",
+                                        year: "2-digit",
+                                      })
                                       : ""}
                                   </td>
                                   <td className="px-2 w-[20%] py-2 text-center border border-gray-300">
@@ -882,8 +860,8 @@ const StudentReport = () => {
                                     {student.gender === "M"
                                       ? "Male"
                                       : student.gender === "F"
-                                      ? "Female"
-                                      : student.gender}
+                                        ? "Female"
+                                        : student.gender}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.blood_group || " "}

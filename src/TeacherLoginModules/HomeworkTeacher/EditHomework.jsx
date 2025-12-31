@@ -5,6 +5,8 @@ import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 import LoaderStyle from "../../componants/common/LoaderFinal/LoaderStyle";
+
+// import Select from "react-select";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const EditHomework = () => {
@@ -56,8 +58,9 @@ const EditHomework = () => {
     if (selectedHomework) {
       setFormData({
         homework_id: selectedHomework.homework_id || "",
-        classname: `${selectedHomework.cls_name || ""} ${selectedHomework.sec_name || ""
-          }`,
+        classname: `${selectedHomework.cls_name || ""} ${
+          selectedHomework.sec_name || ""
+        }`,
         subjectname: selectedHomework.sub_name || "",
         start_date: selectedHomework.start_date?.split(" ")[0] || "",
         end_date: selectedHomework.end_date?.split(" ")[0] || "",
@@ -449,7 +452,7 @@ const EditHomework = () => {
           uploadForm.append("doc_type_folder", "homework");
           uploadForm.append("filename", file.name);
           uploadForm.append("datafile", base64String);
-          uploadForm.append("upload_date", uploadDate);
+          uploadForm.append("upload_date", formattedDate);
 
           const uploadResp = await axios.post(
             `${API_URL}/api/upload_files`,

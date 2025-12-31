@@ -7,12 +7,15 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FaCalendarAlt } from "react-icons/fa";
 
 const DailyAttendance = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [fromDate, setFromDate] = useState(null);
   const [formattedFromDate, setFormattedFromDate] = useState("");
+
+  const today = new Date().toISOString().split("T")[0];
 
   const [students, setStudents] = useState([]);
   const [attendanceMap, setAttendanceMap] = useState({});
@@ -61,6 +64,7 @@ const DailyAttendance = () => {
   const [deleteAttendanceId, setDeleteAttendanceId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeletePModal, setShowDeletePModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const camelCase = (str) =>
     str
@@ -778,7 +782,8 @@ const DailyAttendance = () => {
                           type="date"
                           id="fromDate"
                           min={academicYrFrom}
-                          max={academicYrTo}
+                          // max={academicYrTo}
+                          max={today}
                           value={fromDate}
                           onChange={(e) => {
                             setDateError("");
@@ -857,7 +862,7 @@ const DailyAttendance = () => {
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
                             Daily Attendance
                           </h3>
-                          <div className="flex items-center w-full">
+                          {/* <div className="flex items-center w-full">
                             <div className="flex flex-row flex-nowrap items-center gap-4 w-full overflow-x-auto bg-blue-50 border-l-2 border-r-2 border-pink-500 rounded-md shadow-md px-4 py-2">
                               <div className="flex items-center gap-2 flex-1 min-w-[100px]">
                                 <label
@@ -904,7 +909,8 @@ const DailyAttendance = () => {
                                     type="date"
                                     id="fromDate"
                                     min={academicYrFrom}
-                                    max={academicYrTo}
+                                    // max={academicYrTo}
+                                    max={today}
                                     value={fromDate}
                                     onChange={(e) => {
                                       setDateError("");
@@ -932,14 +938,50 @@ const DailyAttendance = () => {
                                   type="button"
                                   onClick={handleSearch}
                                   style={{ backgroundColor: "#2196F3" }}
-                                  className={`btn h-9 w-full btn-primary text-white font-bold px-3 rounded ${loadingForSearch
+                                  className={`btn h-9 w-full btn-primary text-white font-bold px-3 rounded ${
+                                    loadingForSearch
                                       ? "opacity-50 cursor-not-allowed"
                                       : ""
-                                    }`}
+                                  }`}
                                   disabled={loadingForSearch}
                                 >
                                   {loadingForSearch ? "Browsing..." : "Browse"}
                                 </button>
+                              </div>
+                            </div>
+                          </div> */}
+                          <div className="flex items-center w-full">
+                            <div
+                              className="bg-blue-50 border-l-2 border-r-2 text-[1em] border-pink-500 rounded-md shadow-md mx-auto px-6 py-2"
+                              style={{
+                                overflowX: "auto",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              <div
+                                className="flex items-center gap-x-4 text-blue-800 font-medium"
+                                style={{ flexWrap: "nowrap" }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <label
+                                    className="text-md whitespace-nowrap"
+                                    htmlFor="studentSelect"
+                                  >
+                                    <span className="text-lg">🏫</span> Class :{" "}
+                                  </label>
+                                  <span>{selectedStudent.label}</span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <label
+                                    className="text-md whitespace-nowrap"
+                                    htmlFor="studentSelect"
+                                  >
+                                    <span className="text-lg">📆</span> Select
+                                    Date :{" "}
+                                  </label>
+                                  <span>{formattedFromDate || "-"}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -948,7 +990,7 @@ const DailyAttendance = () => {
                         <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ml-2">
                           <RxCross1
                             className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
-                            onClick={() => setShowStudentReport(false)}
+                            onClick={() => handleCloseBack()}
                           />
                         </div>
                       </div>

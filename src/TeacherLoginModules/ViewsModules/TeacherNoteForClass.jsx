@@ -184,15 +184,15 @@ function TeacherNoteForClass() {
         setNotices(data);
         setPageCount(Math.ceil(data.length / pageSize));
         setShowTable(true);
-        toast.success("Daily notes fetched successfully!");
+        toast.success("Teacher notes fetched successfully!");
       } else {
         setNotices([]);
         setShowTable(false);
-        toast.error("No daily notes found for the selected class.");
+        toast.error("No teacher notes found for the selected class.");
       }
     } catch (error) {
-      console.error("Error fetching daily notes:", error);
-      toast.error("Failed to fetch daily notes. Please try again.");
+      console.error("Error fetching teacher notes:", error);
+      toast.error("Failed to fetch teacher notes. Please try again.");
     } finally {
       setLoading(false);
       setIsSubmitting(false);
@@ -246,6 +246,8 @@ function TeacherNoteForClass() {
     setShowViewModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
+    setImageUrls("");
+    setPreviewImage(null);
   };
   // const downloadFile = (fileUrl, fileName) => {
   //   const baseUrl = "https://sms.evolvu.in/"; // Base URL

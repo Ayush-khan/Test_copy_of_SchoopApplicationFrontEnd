@@ -445,7 +445,7 @@ const FeePendingForClass = () => {
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No.</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Name</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
+            
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Phone No.</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Installment No.</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Installment Amount</th>
@@ -465,9 +465,7 @@ const FeePendingForClass = () => {
                  <td class="px-2 text-center py-2 border border-black">
                 ${camelCase(subject?.student_name)}
                 </td>
-                <td class="px-2 text-center py-2 border border-black">
-                ${subject?.class_section}
-                </td>
+               
                  <td class="px-2 text-center py-2 border border-black">${subject?.phone_no
             }</td>
                   <td class="px-2 text-center py-2 border border-black">${subject?.installment
@@ -584,7 +582,7 @@ const FeePendingForClass = () => {
       "Sr No.",
       "Roll No.",
       "Student Name",
-      "Class",
+      // "Class",
       "Phone No.",
       "Installment No.",
       "Installment Amount",
@@ -595,7 +593,7 @@ const FeePendingForClass = () => {
       index + 1,
       student?.roll_no,
       `  ${camelCase(student?.student_name)}`,
-      ` ${student?.class_section}`,
+      // ` ${student?.class_section}`,
       student?.phone_no,
       student?.installment,
       student?.installment_fees,
@@ -914,9 +912,9 @@ const FeePendingForClass = () => {
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[20%]">
                                 Student Name
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
+                              {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[10%]">
                                 Class
-                              </th>
+                              </th> */}
                               <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider w-[14%]">
                                 Phone No.
                               </th>
@@ -948,9 +946,9 @@ const FeePendingForClass = () => {
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {camelCase(student?.student_name || "")}
                                   </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                  {/* <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.class_section || "-"}
-                                  </td>
+                                  </td> */}
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.phone_no || "-"}
                                   </td>

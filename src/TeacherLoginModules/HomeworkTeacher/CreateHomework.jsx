@@ -307,7 +307,7 @@ const CreateHomework = ({ handleSearch, onSaveSuccess }) => {
         uploadForm.append("doc_type_folder", "homework");
         uploadForm.append("filename", file.name); // original filename
         uploadForm.append("datafile", base64);
-        uploadForm.append("upload_date", uploadDate);
+        uploadForm.append("upload_date", formattedDate);
 
         const uploadResp = await axios.post(
           `${API_URL}/api/upload_files`,
