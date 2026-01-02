@@ -252,7 +252,7 @@ const StudentIdCardDetailedReport = () => {
       "Sr No.",
       "Photo",
       "Roll No.",
-      "Class",
+      // "Class",
       "Student Name",
       "DOB",
       "Father Mobile No.",
@@ -269,7 +269,7 @@ const StudentIdCardDetailedReport = () => {
       index + 1,
       student?.image_url || "",
       student?.roll_no || " ",
-      `${student?.class_name || ""} ${student?.sec_name || ""}`,
+      // `${student?.class_name || ""} ${student?.sec_name || ""}`,
       `${student?.first_name || ""} ${student?.mid_name?.trim() || ""} ${
         student?.last_name || ""
       }`,
@@ -321,7 +321,7 @@ const StudentIdCardDetailedReport = () => {
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Sr.No</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Photo</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Roll No.</th>
-            <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Class</th>
+            
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Student Name</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">DOB</th>
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Father Mobile No.</th>
@@ -349,9 +349,7 @@ const StudentIdCardDetailedReport = () => {
                 <td class="px-2 text-center py-2 border border-black">
                 ${subject?.roll_no || " "}
                 </td>
-                <td class="px-2 text-center py-2 border border-black">
-                 ${subject?.class_name || ""} ${subject?.sec_name || ""}
-                </td>
+              
                  <td class="px-2 text-center py-2 border border-black">
                  ${subject?.first_name || ""} ${subject?.mid_name || ""} ${
                 subject?.last_name || ""
@@ -766,12 +764,12 @@ const StudentIdCardDetailedReport = () => {
                               >
                                 Roll No.
                               </th>
-                              <th
+                              {/* <th
                                 style={{ width: "100px" }}
                                 className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900"
                               >
                                 Class
-                              </th>
+                              </th> */}
                               <th
                                 style={{ width: "230px" }}
                                 className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900"
@@ -853,11 +851,11 @@ const StudentIdCardDetailedReport = () => {
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.roll_no}
                                   </td>
-                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                  {/* <td className="px-2 py-2 text-center border border-gray-300">
                                     {`${student?.class_name}${" "}${
                                       student?.sec_name
                                     }`}
-                                  </td>
+                                  </td> */}
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {camelCase(
                                       `${student?.first_name || ""} ${

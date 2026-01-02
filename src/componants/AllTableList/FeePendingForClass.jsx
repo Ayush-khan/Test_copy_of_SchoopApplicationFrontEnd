@@ -684,7 +684,7 @@ const FeePendingForClass = () => {
                 <div
                   className={`  w-full gap-x-0 md:gap-x-6  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${timetable.length > 0
                       ? "w-full md:w-[90%]  wrelative left-0"
-                      : " w-full md:w-[70%] relative left-10"
+                      : " w-full md:w-[80%] relative left-10"
                     }`}
                 >
                   {/* Staff Dropdown */}
@@ -775,10 +775,10 @@ const FeePendingForClass = () => {
                   {/* Status */}
                   <div className="w-full  md:w-[50%] gap-x-2 justify-between my-1 md:my-4 flex md:flex-row">
                     <label
-                      className="ml-0 md:ml-4 w-full md:w-[20%] text-md mt-1.5"
+                      className="ml-0 md:ml-4 w-full md:w-[40%] text-md mt-1.5"
                       htmlFor="status"
                     >
-                      Status
+                      Installment
                       {/* <span className="text-sm text-red-500">*</span> */}
                     </label>
                     <div className="w-full md:w-[70%]">
