@@ -290,6 +290,9 @@ import CreateTeacherIdCard from "../componants/IDCards/CreateTeacherIdCard.jsx";
 import UpdateTeacherIdCard from "../componants/IDCards/UpdateTeacherIdCard.jsx";
 import ImageCropperSaving from "../componants/IDCards/ImageCropperSaving.jsx";
 import TeacherPendingIdCardReport from "../componants/IDCards/TeacherPendingIdCardReport.jsx";
+import TodayBirthdayTeacherDashboard from "../componants/Dashbord/TodayBirthdayTeacherDashboard.jsx";
+import DefaulterStudentList from "../componants/Dashbord/DefaulterStudentList.jsx";
+import HomeworkNotSubmittedStudent from "../componants/Dashbord/HomeworkNotSubmittedStudent.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -616,6 +619,19 @@ function Index() {
         <Route
           path="/dashboard"
           element={<PrivateRoute element={<AdminDashboard />} />}
+        />
+        {/* Teacher login  dashboard*/}
+        <Route
+          path="/todayStudentBirthday"
+          element={<PrivateRoute element={<TodayBirthdayTeacherDashboard />} />}
+        />
+        <Route
+          path="/defaulterStudentList"
+          element={<PrivateRoute element={<DefaulterStudentList />} />}
+        />
+        <Route
+          path="/homeworkNotSubmitedStudent"
+          element={<PrivateRoute element={<HomeworkNotSubmittedStudent />} />}
         />
         <Route
           path="/myprofile"

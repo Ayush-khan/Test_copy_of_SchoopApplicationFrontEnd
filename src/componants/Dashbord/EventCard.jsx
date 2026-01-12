@@ -15,6 +15,9 @@ const EventCard = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const [roleId, setRoleId] = useState(null);
+  const [regId, setRegId] = useState(null);
+
   const months = [
     { value: 0, label: "January" },
     { value: 1, label: "February" },
@@ -29,24 +32,97 @@ const EventCard = () => {
     { value: 10, label: "November" },
     { value: 11, label: "December" },
   ];
+
+  useEffect(() => {
+    fetchRoleId();
+  });
+
+  const fetchRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    try {
+      const response = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const roleId = response?.data?.user?.role_id;
+      console.log("role id", response?.data?.user?.role_id);
+
+      const regId = response?.data?.user?.reg_id;
+      console.log("reg id", response?.data?.user?.reg_id);
+      setRegId(regId);
+
+      if (roleId) {
+        setRoleId(roleId);
+      } else {
+        console.warn("role_id not found in sessionData response");
+      }
+    } catch (error) {
+      console.error("Failed to fetch session data:", error);
+    }
+  };
+
+  // const fetchData = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     console.log("token is", token);
+
+  //     if (!token) {
+  //       navigate("/");
+  //     }
+
+  //     const response = await axios.get(`${API_URL}/api/events`, {
+  //       params: {
+  //         month: selectedMonth + 1,
+  //         year: currentYear,
+  //       },
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+
+  //     setEvents(response?.data);
+  //     console.log("responseData of Events", response?.data);
+  //   } catch (error) {
+  //     setError(error.message);
+  //     // working well code
+  //     const errorMsg = error.response?.data?.message;
+  //     // Handle expired token
+  //     if (errorMsg === "Token has expired") {
+  //       localStorage.removeItem("authToken"); // Optional: clear old token
+  //       navigate("/"); // Redirect to login
+  //       return;
+  //     }
+
+  //     // Other error handling
+
+  //     console.error("Error fetching events:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchData = async () => {
     setLoading(true);
+
     try {
       const token = localStorage.getItem("authToken");
-      // const academicYr = localStorage.getItem("academicYear");
-      // console.log("academic year", academicYr);
-      console.log("token is", token);
-
       if (!token) {
-        // toast.error("Authentication token not found Please login again");
-        navigate("/"); // 👈 Redirect to login
-        return; // 👈
-        // throw new Error("No authentication token found");
+        navigate("/");
+        return;
       }
 
-      const response = await axios.get(`${API_URL}/api/events`, {
+      const apiUrl =
+        roleId === "T"
+          ? `${API_URL}/api/teachers/${regId}/dashboard/events`
+          : `${API_URL}/api/events`;
+
+      const response = await axios.get(apiUrl, {
         params: {
-          month: selectedMonth + 1, // API expects 1-based month index
+          month: Number(selectedMonth) + 1,
           year: currentYear,
         },
         headers: {
@@ -54,42 +130,52 @@ const EventCard = () => {
         },
       });
 
-      setEvents(response?.data);
-      console.log("responseData of Events", response?.data);
-    } catch (error) {
-      setError(error.message);
-      // working well code
-      const errorMsg = error.response?.data?.message;
-      // Handle expired token
-      if (errorMsg === "Token has expired") {
-        localStorage.removeItem("authToken"); // Optional: clear old token
-        navigate("/"); // Redirect to login
-        return;
+      const rawData = Array.isArray(response?.data)
+        ? response.data
+        : response?.data?.data;
+
+      console.log("rwa data", rawData);
+
+      let normalizedEvents = [];
+
+      if (Array.isArray(rawData)) {
+        normalizedEvents = rawData;
       }
 
-      // Other error handling
-
-      console.error("Error fetching events:", error);
+      setEvents(normalizedEvents);
+    } catch (error) {
+      setError(error.message);
+      if (error.response?.data?.message === "Token has expired") {
+        localStorage.removeItem("authToken");
+        navigate("/");
+      }
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
+    if (!roleId) return;
+
     fetchData();
-  }, [selectedMonth]); // Fetch when selectedMonth changes
-  useEffect(() => {
-    // Fetch data on initial load
-    fetchData();
-  }, []); // Empty dependency array ensures this runs only once on initial render
+  }, [roleId, selectedMonth]);
 
   const handleMonthChange = (e) => {
     setSelectedMonth(parseInt(e.target.value, 10));
   };
 
-  const filteredEvents = events.filter(
-    (event) => new Date(event.start_date).getMonth() === selectedMonth
-  );
-  console.log("filteredEvents", filteredEvents);
+  const filteredEvents = events.filter((event) => {
+    if (!event.start_date) return false;
+
+    const date = new Date(event.start_date);
+
+    return (
+      date.getMonth() === Number(selectedMonth) &&
+      date.getFullYear() === currentYear
+    );
+  });
+
+  console.log("filtered event list", filteredEvents);
 
   return (
     <div className={`  border-2 border-solid h-64 bg-slate-100`}>
@@ -106,7 +192,7 @@ const EventCard = () => {
           value={selectedMonth}
           onChange={handleMonthChange}
           className="   text-sm text-gray-700 font-semibold hover:cursor-pointer bg-gray-50 mb-1 border border-gray-400"
-          // className={`  hover:cursor-pointer gap-x-2`}
+        // className={`  hover:cursor-pointer gap-x-2`}
         >
           {months.map((month) => (
             <option key={month.value} value={month.value}>
@@ -124,9 +210,9 @@ const EventCard = () => {
         <div
           className={`${Styles.eventsList} rounded-lg pb-20 sm:pb-20  bg-gray-100 px-2`}
         >
-          {filteredEvents.length ? (
+          {filteredEvents.length > 0 ? (
             filteredEvents.map((event, index) => (
-              <div key={index} className={`${Styles.eventCard}  rounded-lg `}>
+              <div key={index} className={`${Styles.eventCard} rounded-lg`}>
                 <div
                   className={` h-full box-border  max-w-3/4 px-2  bg-gray-500   text-cyan-900 text-lg rounded-l-lg      `}
                   style={{ background: "#00FFFF", color: "#C3347D" }}
@@ -138,7 +224,6 @@ const EventCard = () => {
                     <span className="    flex flex-col justify-start max-h-10px">
                       <p className=" relative top-4 text-2.5em w-8 mx-auto font-medium text-center h-8 bg-gray-600 text-white rounded-lg">
                         {event.start_date.split("-")[2] || ""}
-                        {/* {new Date(event.start_date).getDate() + 1}{" "} */}
                       </p>
                       <p>
                         {new Date(event.start_date).toLocaleString("default", {
@@ -230,11 +315,10 @@ const EventCard = () => {
             ))
           ) : (
             <div className="relative left-[1%] w-[100%] text-center flex justify-center items-center mt-10">
-              <div className="flex flex-col items-center justify-center text-center ">
+              <div className="flex flex-col items-center justify-center text-center">
                 <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
-                  Oops!{" "}
+                  Oops!
                 </p>
-
                 <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
                   No data available.
                 </p>

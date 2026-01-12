@@ -266,12 +266,13 @@ function NoticeBord() {
   };
 
   return (
-    <div className={`  px-2 rounded-lg `}>
-      <div
+    // <div className={`  px-2 rounded-lg `}>
+    <div className="px-2 rounded-lg h-full flex flex-col">
+      {/* <div
         className={` flex justify-between sm:mb-2  w-full  sm:flex flex-row mb-2`}
-      >
-        <button
-          // style={{ width: "100%", height: "3em", fontSize: ".8em" }}
+      > */}
+      <div className="flex mb-2 rounded-md overflow-hidden bg-gray-100">
+        {/* <button
           className={`${Styles.tab} w-full h-1/4 text-sm font-bold  ${
             activeTab === "noticeForParents" ? Styles.active : ""
           } sm:mr-1 mx-0 sm:mb-0  p-2  text-sm sm:w-1/2`}
@@ -280,31 +281,34 @@ function NoticeBord() {
           Notice for Parents
         </button>
         <button
-          // style={{ width: "100%", height: "3em", fontSize: ".8em" }}
           className={`${Styles.tab} w-full h-1/4 text-sm font-bold  ${
             activeTab === "noticeForStaff" ? Styles.active : ""
           } sm:mr-1 mx-0 sm:mb-0  p-2 text-sm sm:w-1/2`}
           onClick={() => handleTabChange("noticeForStaff")}
         >
           Notice for Staff
+        </button> */}
+        <button
+          className={`${Styles.tab
+            } flex-1 px-3 py-2 text-sm font-bold transition-all ${activeTab === "noticeForParents" ? Styles.active : ""
+            }`}
+          onClick={() => handleTabChange("noticeForParents")}
+        >
+          Notice for Parents
+        </button>
+
+        <button
+          className={`${Styles.tab
+            } flex-1 px-3 py-2 text-sm font-bold transition-all ${activeTab === "noticeForStaff" ? Styles.active : ""
+            }`}
+          onClick={() => handleTabChange("noticeForStaff")}
+        >
+          Notice for Staff
         </button>
       </div>
 
-      <div className="overflow-y-auto max-h-64">
-        {/* For Parent Notices */}
-        {/* {activeTab === "noticeForParents" && parentNotices.length === 0 && (
-          <div className="relative left-[1%] w-[95%] text-center flex justify-center items-center mt-8 md:mt-14">
-            <div className="flex flex-col items-center justify-center text-center ">
-              <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
-                Oops!{" "}
-              </p>
-
-              <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-                No data available.
-              </p>
-            </div>
-          </div>
-        )} */}
+      {/* <div className="overflow-y-auto max-h-64"> */}
+      <div className="flex-1 overflow-y-auto pr-1">
         {activeTab === "noticeForParents" && loading && (
           <div className="text-center mt-10">
             <div className="loader animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full mx-auto" />
@@ -358,20 +362,6 @@ function NoticeBord() {
           </div>
         )}
 
-        {/* For Staff Notices */}
-        {/* {activeTab === "noticeForStaff" && staffNotices.length === 0 && (
-          <div className="relative  left-[1%] w-[95%] text-center flex justify-center items-center mt-8 md:mt-14">
-            <div className="flex flex-col items-center justify-center text-center ">
-              <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
-                Oops!{" "}
-              </p>
-
-              <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-                No data available.
-              </p>
-            </div>
-          </div>
-        )} */}
         {activeTab === "noticeForStaff" && loading && (
           <div className="text-center mt-10">
             <div className="loader animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full mx-auto" />
