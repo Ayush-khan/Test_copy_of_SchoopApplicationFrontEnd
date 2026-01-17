@@ -301,6 +301,7 @@ import StudentListForVerification from "../componants/AdmissionAdminModule/Stude
 import StudentListForApproval from "../componants/AdmissionAdminModule/StudentListForApproval/StudentListForApproval.jsx";
 import ApplicationFromManagement from "../componants/AdmissionAdminModule/ApplicationFromManagement/ApplicationFromManagement.jsx"
 import DynamicMailer from "../componants/AdmissionAdminModule/DynamicMailer/DynamicMailer.jsx";
+import LessonPlanData from "../componants/PrinciplalDashboardSACS/LessonPlanData.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -1649,6 +1650,11 @@ function Index() {
         <Route
           path="/dynamicMailer"
           element={<PrivateRoute element={<DynamicMailer />} />}
+        />
+        {/* Principal Dashboard SACS */}
+        <Route
+          path="/lessonPlanData"
+          element={<PrivateRoute element={<LessonPlanData />} />}
         />
       </Route>
 
