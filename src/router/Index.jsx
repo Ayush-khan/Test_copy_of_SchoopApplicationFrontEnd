@@ -301,8 +301,8 @@ import StudentListForVerification from "../componants/AdmissionAdminModule/Stude
 import StudentListForApproval from "../componants/AdmissionAdminModule/StudentListForApproval/StudentListForApproval.jsx";
 import ApplicationFromManagement from "../componants/AdmissionAdminModule/ApplicationFromManagement/ApplicationFromManagement.jsx"
 import DynamicMailer from "../componants/AdmissionAdminModule/DynamicMailer/DynamicMailer.jsx";
-import LessonPlanData from "../componants/PrinciplalDashboardSACS/LessonPlanData.jsx";
-// import Menus from "../c";
+import LessonPlanData from "../componants/Dashbord/PrinciplalDashboardSACS/LessonPlanData.jsx";
+// import Menus from "../c";../componants/Dashbord/PrinciplalDashboardSACS/LessonPlanData.jsx
 function Index() {
   return (
     <Routes>

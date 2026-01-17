@@ -470,8 +470,8 @@ function LessonPlanData() {
                             <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {currentPage * pageSize + index + 1}
@@ -481,8 +481,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student?.name
@@ -507,8 +507,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.phone || " "}
@@ -517,8 +517,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student?.category_name
@@ -601,8 +601,8 @@ function LessonPlanData() {
                             <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {currentPage * pageSize + index + 1}
@@ -612,8 +612,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student?.name
@@ -638,8 +638,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.phone || " "}
@@ -648,14 +648,14 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 <p
                                   className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                      ? "text-red-600"
-                                      : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                     }`}
                                 >
                                   {student.pending_classes || "-"}
@@ -724,8 +724,8 @@ function LessonPlanData() {
                             <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {currentPage * pageSize + index + 1}
@@ -735,8 +735,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student?.name
@@ -761,8 +761,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.phone || " "}
@@ -771,14 +771,14 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 <p
                                   className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                      ? "text-red-600"
-                                      : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                     }`}
                                 >
                                   {student.pending_classes || "-"}
@@ -847,8 +847,8 @@ function LessonPlanData() {
                             <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {currentPage * pageSize + index + 1}
@@ -858,8 +858,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student?.name
@@ -884,8 +884,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.phone || " "}
@@ -894,14 +894,14 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 <p
                                   className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                      ? "text-red-600"
-                                      : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                     }`}
                                 >
                                   {student.pending_classes || "-"}
